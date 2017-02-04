@@ -1,0 +1,386 @@
+AWSTATS DATA FILE 7.0 (build 1.971)
+# If you remove this file, all statistics for date 201609 will be lost/reset.
+# Last config file used to build this data file was /etc/awstats/awstats.sakha.pfdo.ru.conf.
+
+# Position (offset in bytes) in this file for beginning of each section for
+# direct I/O access. If you made changes somewhere in this file, you should
+# also remove completely the MAP section (AWStats will rewrite it at next
+# update).
+BEGIN_MAP 27
+POS_GENERAL 1993                
+POS_TIME 2673                
+POS_VISITOR 7139                
+POS_DAY 8048                
+POS_DOMAIN 3364                
+POS_LOGIN 3597                
+POS_ROBOT 3752                
+POS_WORMS 3922                
+POS_EMAILSENDER 4053                
+POS_EMAILRECEIVER 4196                
+POS_SESSION 8189                
+POS_SIDER 8394                
+POS_FILETYPES 4331                
+POS_DOWNLOADS 4570                
+POS_OS 4618                
+POS_BROWSER 4715                
+POS_SCREENSIZE 4903                
+POS_UNKNOWNREFERER 4977                
+POS_UNKNOWNREFERERBROWSER 5064                
+POS_ORIGIN 5146                
+POS_SEREFERRALS 5287                
+POS_PAGEREFS 5431                
+POS_SEARCHWORDS 6397                
+POS_KEYWORDS 6549                
+POS_MISC 2336                
+POS_ERRORS 6608                
+POS_CLUSTER 3453                
+POS_SIDER_404 6746                
+END_MAP
+
+# LastLine    = Date of last record processed - Last record line number in last log - Last record offset in last log - Last record signature value
+# FirstTime   = Date of first visit for history file
+# LastTime    = Date of last visit for history file
+# LastUpdate  = Date of last update - Nb of parsed records - Nb of parsed old records - Nb of parsed new records - Nb of parsed corrupted - Nb of parsed dropped
+# TotalVisits = Number of visits
+# TotalUnique = Number of unique visitors
+# MonthHostsKnown   = Number of hosts known
+# MonthHostsUnKnown = Number of hosts unknown
+BEGIN_GENERAL 8
+LastLine 20160922193249 937 221596 20447827006554
+FirstTime 20160920181648
+LastTime 20160922193249
+LastUpdate 20160922230102 0 0 0 0 0
+TotalVisits 32                  
+TotalUnique 19                  
+MonthHostsKnown 0                   
+MonthHostsUnknown 19                  
+END_GENERAL
+
+# Misc ID - Pages - Hits - Bandwidth
+BEGIN_MISC 10
+QuickTimeSupport 0 0 0
+JavaEnabled 0 0 0
+JavascriptDisabled 0 0 0
+PDFSupport 0 0 0
+WindowsMediaPlayerSupport 0 0 0
+AddToFavourites 0 26 0
+RealPlayerSupport 0 0 0
+TotalMisc 0 0 0
+DirectorSupport 0 0 0
+FlashSupport 0 0 0
+END_MISC
+
+# Hour - Pages - Hits - Bandwidth - Not viewed Pages - Not viewed Hits - Not viewed Bandwidth
+BEGIN_TIME 24
+0 0 0 0 0 0 0
+1 0 0 0 0 0 0
+2 49 102 1476588 14 14 4519
+3 18 37 513029 6 20 458528
+4 1 1 52780 1 1 0
+5 8 23 753207 3 4 318
+6 6 22 299475 4 4 3780
+7 0 0 0 0 0 0
+8 1 1 5992 0 0 0
+9 0 0 0 0 0 0
+10 58 137 3077818 16 19 64287
+11 187 494 16480310 54 55 62951
+12 38 117 2032009 12 13 318
+13 14 23 327822 4 4 0
+14 0 0 0 0 0 0
+15 25 69 337187 4 4 0
+16 4 13 34460 4 4 0
+17 95 238 3520178 20 22 636
+18 162 313 4897270 40 44 440979
+19 133 291 4102332 42 51 361140
+20 152 301 3608756 44 46 682997
+21 189 329 4155933 44 47 233457
+22 42 109 820624 19 19 0
+23 1 10 567577 0 1 318
+END_TIME
+
+# Domain - Pages - Hits - Bandwidth
+# The 10 first Pages must be first (order not required for others)
+BEGIN_DOMAIN 1
+ip 1183 2630 47063347
+END_DOMAIN
+
+# Cluster ID - Pages - Hits - Bandwidth
+BEGIN_CLUSTER 0
+END_CLUSTER
+
+# Login - Pages - Hits - Bandwidth - Last visit
+# The 10 first Pages must be first (order not required for others)
+BEGIN_LOGIN 0
+END_LOGIN
+
+# Robot ID - Hits - Bandwidth - Last visit - Hits on robots.txt
+# The 10 first Hits must be first (order not required for others)
+BEGIN_ROBOT 1
+no_user_agent 1 8238 20160922035809 0
+END_ROBOT
+
+# Worm ID - Hits - Bandwidth - Last visit
+# The 5 first Hits must be first (order not required for others)
+BEGIN_WORMS 0
+END_WORMS
+
+# EMail - Hits - Bandwidth - Last visit
+# The 20 first Hits must be first (order not required for others)
+BEGIN_EMAILSENDER 0
+END_EMAILSENDER
+
+# EMail - Hits - Bandwidth - Last visit
+# The 20 first hits must be first (order not required for others)
+BEGIN_EMAILRECEIVER 0
+END_EMAILRECEIVER
+
+# Files type - Hits - Bandwidth - Bandwidth without compression - Bandwidth after compression
+BEGIN_FILETYPES 9
+css 445 7169398 0 0
+eot 26 462921 0 0
+png 85 519776 0 0
+woff2 24 144224 0 0
+woff 4 70272 0 0
+html 56 301958 0 0
+js 895 20048540 0 0
+Unknown 1073 18282581 0 0
+gif 22 63677 0 0
+END_FILETYPES
+
+# Downloads - Hits - Bandwidth
+BEGIN_DOWNLOADS 0
+END_DOWNLOADS
+
+# OS ID - Hits
+BEGIN_OS 5
+macosx 11
+linuxandroid 19
+winnt 89
+winvista 2208
+win7 303
+END_OS
+
+# Browser ID - Hits
+BEGIN_BROWSER 7
+chrome35.0.1916.114 129
+chrome52.0.2743.116 89
+mozilla 813
+chrome53.0.2785.124 19
+firefox24.0 272
+safari9.1.1 11
+chrome53.0.2785.116 1297
+END_BROWSER
+
+# Screen size - Hits
+BEGIN_SCREENSIZE 0
+END_SCREENSIZE
+
+# Unknown referer OS - Last visit date
+BEGIN_UNKNOWNREFERER 0
+END_UNKNOWNREFERER
+
+# Unknown referer Browser - Last visit date
+BEGIN_UNKNOWNREFERERBROWSER 0
+END_UNKNOWNREFERERBROWSER
+
+# Origin - Pages - Hits 
+BEGIN_ORIGIN 6
+From0 42 42
+From1 0 0
+From2 0 0
+From3 18 109
+From4 1123 2479
+From5 0 0
+END_ORIGIN
+
+# Search engine referers ID - Pages - Hits
+BEGIN_SEREFERRALS 0
+END_SEREFERRALS
+
+# External page referers - Pages - Hits
+# The 10 first Pages must be first (order not required for others)
+BEGIN_PAGEREFS 14
+http://xn--80aa3cr.xn--d1aubu.xn--p1ai 5 36
+http://xn--80aa3cr.xn--d1aubu.xn--p1ai/personal/operator-statistic 2 3
+http://xn--80aa3cr.xn--d1aubu.xn--p1ai/personal/operator-payers 2 16
+http://xn--80aa3cr.xn--d1aubu.xn--p1ai/personal/operator-certificates 2 2
+http://xn--80aa3cr.xn--d1aubu.xn--p1ai/personal/operator-organizations 1 14
+http://xn--80aa3cr.xn--d1aubu.xn--p1ai/personal/operator-programs 1 1
+http://xn--80aa3cr.xn--d1aubu.xn--p1ai/personal/payer-statistic 1 2
+http://xn--80aa3cr.xn--d1aubu.xn--p1ai/personal/operator-contracts 1 1
+http://xn--80aa3cr.xn--d1aubu.xn--p1ai/certificates/create 1 3
+http://xn--80aa3cr.xn--d1aubu.xn--p1ai/payers/create 1 1
+http://14.xn--d1aubu.xn--p1ai 0 6
+http://www.14.pfdo.ru 0 18
+http://14.pfdo.ru 0 5
+http://xn--80aa3cr.xn--d1aubu.xn--p1ai/personal/payer-certificates 1 1
+END_PAGEREFS
+
+# Search keyphrases - Number of search
+# The 10 first number of search must be first (order not required for others)
+BEGIN_SEARCHWORDS 0
+END_SEARCHWORDS
+
+# Search keywords - Number of search
+# The 10 first number of search must be first (order not required for others)
+BEGIN_KEYWORDS 0
+END_KEYWORDS
+
+# Errors - Hits - Bandwidth
+BEGIN_ERRORS 5
+403 5 23140
+302 298 0
+206 13 553156
+500 22 1697875
+404 6 23551
+END_ERRORS
+
+# URL with 404 errors - Hits - Last URL referer
+BEGIN_SIDER_404 2
+/browserconfig.xml 5 -
+/personal/certificate 1 http://sakha.pfdo.ru/disputes/create
+END_SIDER_404
+
+# Host - Pages - Hits - Bandwidth - Last visit date - [Start date of last visit] - [Last page of last visit]
+# [Start date of last visit] and [Last page of last visit] are saved only if session is not finished
+# The 10 first Hits must be first (order not required for others)
+BEGIN_VISITOR 19
+89.169.15.215 717 1403 17565107 20160922155818
+80.83.238.29 239 627 19587702 20160922115237
+79.134.72.200 32 109 1953452 20160922105425
+93.184.66.227 30 68 525328 20160921204514
+46.105.100.149 26 44 257331 20160921212248
+178.20.55.16 24 55 286256 20160921210320
+81.170.184.90 21 37 193541 20160921181603
+79.134.69.41 15 73 2035265 20160921171410
+5.45.255.99 15 26 372262 20160922040039
+151.80.158.97 14 36 868860 20160921175327
+80.83.239.1 8 27 169664 20160922175802
+188.244.188.118 2 2 13060 20160922035844
+80.83.238.8 10 19 641319 20160921191508
+37.48.80.101 5 6 75414 20160921182127
+79.134.75.100 6 17 778559 20160920185039
+95.108.225.204 3 24 138428 20160922193249 20160922193239 /personal/operator-certificates
+31.173.80.74 9 31 876364 20160922182744
+77.109.139.87 4 5 68122 20160921183731
+193.107.85.61 3 21 657313 20160921195334
+END_VISITOR
+
+# Date - Pages - Hits - Bandwidth - Visits
+BEGIN_DAY 3
+20160920 43 193 3863364 4
+20160921 837 1616 20782408 17
+20160922 303 821 22417575 11
+END_DAY
+
+# Session range - Number of visits
+BEGIN_SESSION 7
+1h+ 3
+5mn-15mn 5
+0s-30s 9
+30s-2mn 4
+2mn-5mn 6
+15mn-30mn 3
+30mn-1h 1
+END_SESSION
+
+# URL - Pages - Bandwidth - Entry - Exit
+# The 10 first Pages must be first (order not required for others)
+BEGIN_SIDER 96
+/ 56 301958 16 7
+/personal/organization-programs 49 2932646 1 0
+/programs/search 46 727075 2 0
+/personal/certificate-statistic 45 509293 1 2
+/personal/operator-statistic 41 289246 4 4
+/personal/operator-organizations 40 897679 0 1
+/programs/view 38 293832 1 0
+/contracts/view 34 275189 0 1
+/organization/view 33 265156 0 0
+/personal/operator-programs 32 1171954 0 1
+/personal/operator-certificates 12 247148 0 0
+/groups/invoice 7 43884 0 0
+/contracts/new 9 72714 0 0
+/personal/certificate-info 6 34565 0 0
+/contracts/mpdf 9 272071 0 0
+/contracts/verificate 29 176638 0 1
+/contracts/ocenka 4 53695 0 0
+/personal/payer-programs 5 64971 0 0
+/groups/delete 2 13212 0 0
+/groups/contracts 7 44546 0 0
+/groups/create 5 76926 0 0
+/personal/organization-groups 17 117331 0 0
+/coefficient/update 13 686889 1 2
+/cooperate/index 2 13543 0 0
+/contracts/complete 9 51636 0 0
+/contracts/preview 7 36155 0 0
+/programs/update 2 104186 0 0
+/programs/decertificate 4 23077 0 0
+/cert-group/index 12 77983 1 1
+/cert-group/view 3 14244 0 0
+/contracts/generate 8 135414 0 0
+/mun/delete 2 13060 1 1
+/programs/verificate 16 145256 0 0
+/personal/certificate-archive 2 37877 0 0
+/certificates/view 1 5427 0 0
+/personal/organization-contracts 32 1354744 1 0
+/personal/payer-certificates 14 173371 0 0
+/assets/d850e5f9/fonts/glyphicons-halflings-regular.eot 26 462921 0 1
+/personal/certificate-wait-contract 5 62476 0 0
+/groups/update 2 26869 0 0
+/personal/organization-statistic 15 87691 0 1
+/cooperate/create 9 57599 0 0
+/years/update 13 83115 0 0
+/organization/create 9 105028 0 0
+/invoices/preinvoice 3 18494 0 0
+/programs/delete 2 13246 0 0
+/years/start 9 125012 0 0
+/programs/certificate 12 197757 0 0
+/contracts/preinvoice 15 126276 0 0
+/invoices/view 5 33236 0 0
+/personal/payer-contracts 8 243012 0 0
+/payers/update 4 41264 0 0
+/programs/create 24 1202534 0 0
+/completeness/preinvoice 4 26616 0 0
+/personal/operator-payers 17 376413 0 0
+/organization/edit 3 65686 0 0
+/mun/update 5 191241 0 0
+/personal/certificate-contracts 12 88900 0 0
+/personal/organization-invoices 22 147862 0 0
+/contracts/terminate 3 18800 0 0
+/groups/preinvoice 13 81828 0 0
+/invoices/invoice 1 18577 0 0
+/personal/payer-statistic 9 61992 1 1
+/payers/index 5 37787 0 0
+/personal/payer-organizations 19 385890 2 2
+/mun/index 14 182418 0 1
+/assets/d850e5f9/fonts/glyphicons-halflings-regular.woff2 24 144224 0 0
+/assets/d850e5f9/fonts/glyphicons-halflings-regular.woff 4 70272 0 1
+/personal/payer-invoices 7 42663 0 0
+/programs/index 1 20918 0 0
+/personal/certificate-favorites 4 47051 0 0
+/personal/certificate-organizations 8 136589 0 0
+/site/login 4 26438 0 0
+/favorites/new 1 0 0 0
+/payers/create 17 192769 0 0
+/personal/organization-payers 19 171152 0 0
+/operators/update 6 90519 0 0
+/disputes/create 5 28378 0 0
+/personal/organization-favorites 4 23276 0 0
+/certificates/edit 1 11326 0 0
+/certificates/create 26 142783 0 2
+/organization/newlimit 2 12549 0 0
+/personal/certificate-wait-request 2 24757 0 0
+/payers/view 17 127140 0 0
+/groups/year 3 147 0 0
+/personal/organization-info 10 197406 0 0
+/mun/view 13 140749 0 0
+/cert-group/update 3 21489 0 0
+/contracts/save 7 62619 0 0
+/completeness/update 1 6971 0 0
+/personal/operator-contracts 17 784893 0 0
+/personal/certificate-programs 9 61044 0 1
+/payers/edit 1 31638 0 0
+/organization/update 17 250094 0 0
+/contracts/invoice 7 42639 0 0
+/personal/certificate-previus 2 24332 0 0
+END_SIDER
