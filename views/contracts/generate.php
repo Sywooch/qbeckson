@@ -55,7 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
             $form->field($model, 'change2')->textInput(['style' => 'width:4em'])->label(false)
             .' в дальнейшем "Исполнитель", в лице '.$model->org_position.' '.
             $form->field($model, 'change_org_fio')->textInput(['style' => 'width:20em'])->label(false)
-            .', действующе'.
+            .', действующ'.
             $form->field($model, 'change10')->textInput(['style' => 'width:4em'])->label(false)
             .' на основании '.
             $form->field($model, 'change_doctype')->textInput(['style' => 'width:20em'])->label(false)
