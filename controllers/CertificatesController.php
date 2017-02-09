@@ -71,10 +71,13 @@ class CertificatesController extends Controller
         $model = new Certificates();
         $user = new User();
         
+        $payers = new Payers();           
+        $payer = $payers->getPayer();
+        
         $region = Yii::$app->params['region'];
 
         if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {
-            $user->username = $region.$user->username;
+            $user->username = $region.$payer->code.$user->username;
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($user);
         }
@@ -91,11 +94,11 @@ class CertificatesController extends Controller
            }
 
             if (!$user->username) {
-               $username = Yii::$app->getSecurity()->generateRandomString($length = 8);
-               $user->username = $region.$username;
+               $username = Yii::$app->getSecurity()->generateRandomString($length = 6);
+               $user->username = $region.$payer->code.$username;
            }
             else {
-                $user->username = $region.$user->username;
+                $user->username = $region.$payer->code.$user->username;
                 $username = $user->username;
             }
 
@@ -104,9 +107,9 @@ class CertificatesController extends Controller
                Yii::$app->authManager->assign($userRole, $user->id);
 
                $model->user_id = $user->id;
-               $payers = new Payers();           
-               $payer = $payers->getPayer();
-               $model->payer_id = $payer['id'];
+               //$payers = new Payers();           
+               //$payer = $payers->getPayer();
+               $model->payer_id = $payer->id;
                $model->number = $username;
                $model->actual = 1;
                $model->balance = $model->nominal;
@@ -127,6 +130,9 @@ class CertificatesController extends Controller
                         'model' => $user,
                     ]);
                 }
+               else {
+                   $user->delete();
+               }
            }
 
         }
@@ -139,6 +145,7 @@ class CertificatesController extends Controller
             'model' => $model,
             'user' => $user,
             'region' => $region,
+            'payer' => $payer,
         ]);
     }
 

@@ -21,8 +21,8 @@ use app\models\Payers;
         echo '<div class="well">';
 
         if ($user->isNewRecord) {
-            echo $form->field($user, 'username', ['enableAjaxValidation' => true, 'addon' => ['prepend' => ['content'=> $region]]])->textInput(['id' => 'login', 'maxlength' => true])->label('Номер сертификата');
-            echo Html::button('Сгенерировать номер сертификата', ['class' => 'btn btn-success', 'onclick' => '(function () { $("#login").val(Math.ceil(Math.random() * 100000000)); })();']);
+            echo $form->field($user, 'username', ['enableAjaxValidation' => true, 'addon' => ['prepend' => ['content'=> $region.$payer->code]]])->textInput(['id' => 'login', 'maxlength' => true])->label('Номер сертификата');
+            echo Html::button('Сгенерировать номер сертификата', ['class' => 'btn btn-success', 'onclick' => '(function () { $("#login").val( Math.round(0 - 0.5 + Math.random() * (9 - 0 + 1)).toString()+Math.round(0 - 0.5 + Math.random() * (9 - 0 + 1)).toString()+Math.round(0 - 0.5 + Math.random() * (9 - 0 + 1)).toString()+Math.round(0 - 0.5 + Math.random() * (9 - 0 + 1)).toString()+Math.round(0 - 0.5 + Math.random() * (9 - 0 + 1)).toString()+Math.round(0 - 0.5 + Math.random() * (9 - 0 + 1)).toString() ); })();']);
             echo '<br><br>';
             echo $form->field($user, 'password')->textInput(['id' => 'pass']);
             echo Html::button('Сгенерировать пароль', ['class' => 'btn btn-success', 'onclick' => '(function () { $("#pass").val(Math.random().toString(36).slice(-8)); })();']);
@@ -32,7 +32,7 @@ use app\models\Payers;
             echo $form->field($user, 'newlogin')->checkbox(['value' => 1, 'ng-model' => 'newlogin', 'label' => 'Изменить номер сертификата']);
             echo '<div ng-show="newlogin">';
                 echo $form->field($user, 'username', ['enableAjaxValidation' => true])->textInput(['id' => 'login', 'maxlength' => true])->label('Номер сертификата');
-                echo Html::button('Сгенерировать номер сертификата', ['class' => 'btn btn-success', 'onclick' => '(function () { $("#login").val(Math.random().toString(36).slice(-8)); })();']);
+                /* echo Html::button('Сгенерировать номер сертификата', ['class' => 'btn btn-success', 'onclick' => '(function () { $("#login").val(Math.random().toString(36).slice(-8)); })();']); */
             echo '</div>';
 
             echo $form->field($user, 'newpass')->checkbox(['value' => 1, 'ng-model' => 'newpass']);
