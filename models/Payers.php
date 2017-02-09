@@ -56,8 +56,9 @@ class Payers extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'name_dat', 'INN', 'OGRN', 'KPP', 'OKPO', 'address_legal', 'address_actual', 'email', 'phone', 'position', 'fio'], 'required'],
+            [['name', 'name_dat', 'INN', 'OGRN', 'KPP', 'OKPO', 'address_legal', 'address_actual', 'email', 'phone', 'position', 'fio', 'code'], 'required'],
             [['user_id', 'INN', 'OGRN', 'KPP', 'OKPO', 'directionality_1rob_count', 'directionality_1_count', 'directionality_2_count', 'directionality_3_count', 'directionality_4_count', 'directionality_5_count', 'directionality_6_count', 'mun'], 'integer'],
+            [['code'], 'string', 'length' => [2, 2]],
             [['directionality'], 'safe'],
              [['directionality_1rob', 'directionality_1', 'directionality_2', 'directionality_3', 'directionality_4', 'directionality_5', 'directionality_6'], 'string'],
             [['email'], 'email'],
@@ -76,6 +77,7 @@ class Payers extends \yii\db\ActiveRecord
             'user_id' => 'ID Пользователя',
             'name' => 'Наименование',
             'name_dat' => 'Наименование в творительном падеже',
+            'code' => 'Код плательщика',
             'OGRN' => 'ОГРН',
             'INN' => 'ИНН',
             'KPP' => 'КПП',

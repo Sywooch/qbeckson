@@ -43,6 +43,8 @@ use yii\helpers\ArrayHelper;
         echo '</div>';
     } ?>
 
+    <?= $form->field($model, 'code')->textInput(!isset($roles['operators']) ? ['readOnly'=>true] : ['maxlength' => true]) ?>
+    
     <?= $form->field($model, 'name')->textInput(!isset($roles['operators']) ? ['readOnly'=>true] : ['maxlength' => true]) ?>
     
     <?= $form->field($model, 'name_dat')->textInput(['maxlength' => true]) ?>

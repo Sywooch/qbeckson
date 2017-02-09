@@ -133,7 +133,7 @@ class PersonalController extends \yii\web\Controller
         $PayersProvider = $searchPayers->search(Yii::$app->request->queryParams);
 
         return $this->render('operator-payers', [
-            'InformsProvider' => $InformsProvider,
+           // 'InformsProvider' => $InformsProvider,
             'searchPayers' => $searchPayers,
             'PayersProvider' => $PayersProvider,
         ]);
