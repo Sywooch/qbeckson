@@ -1178,57 +1178,13 @@ class ContractsController extends Controller
                 $model->terminator_user = 2;
             }
  
-            $model->wait_termnate = 0;
+            $model->wait_termnate = 1;
             $model->status_comment = $informs->dop;
             
-    
-            $certificates = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('certificates')
-                ->andWhere(['id' => $model->certificate_id])
-                ->column();
-                
-            foreach ($certificates as $certificate) {
-                $cert = Certificates::findOne($certificate);
-                $cert->balance = $cert->balance + $model->rezerv;
-                $cert->save();
-            }
-               
-
-            $program = Programs::findOne($model->program_id);
-
-            //return var_dump($cont->terminator_user);
-
-            if ($model->terminator_user == 1) {
-                $program->last_s_contracts_rod = $program->last_s_contracts_rod+1;
-                $program->last_s_contracts = $program->last_s_contracts+1;
-            }
-            if ($model->terminator_user == 2) {
-                $program->last_s_contracts = $program->last_s_contracts+1;
-            }            
-           
-            //$program->last_contracts = $program->last_contracts+1;
-            $org = Organization::findOne($model->organization_id);
-            $org->amount_child = $org->amount_child - 1;
-            $org->save();
-
-             $certificate = Certificates::findOne($model->certificate_id);
+            $cert = Certificates::findOne($model->certificate_id);
+            $cert->balance = $cert->balance + $model->rezerv;
             $certificate->rezerv = $certificate->rezerv - $model->rezerv;
-
-            $certificate->save();
-            $program->save();
-   
-            $model->rezerv = 0;
-            $model->status = 4;
-            
-            if (date("m") == 1) {
-                $cal_days_in_month = cal_days_in_month(CAL_GREGORIAN, 12, date('Y')-1);
-                $model->date_termnate = (date("Y")-1).'-12-'.$cal_days_in_month;
-            } 
-            else {
-                 $cal_days_in_month = cal_days_in_month(CAL_GREGORIAN, date('m')-1, date('Y'));
-                $model->date_termnate = date("Y").'-'.(date('m')-1).'-'.$cal_days_in_month;
-            }
+            $cert->save();
             
             if ($model->save()) {
                 if (isset($roles['certificate'])) {    
