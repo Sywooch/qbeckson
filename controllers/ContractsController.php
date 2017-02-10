@@ -1179,6 +1179,7 @@ class ContractsController extends Controller
             }
  
             $model->wait_termnate = 1;
+            $model->rezerv = 0;
             $model->status_comment = $informs->dop;
             
             $cert = Certificates::findOne($model->certificate_id);

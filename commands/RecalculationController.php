@@ -169,7 +169,7 @@ class RecalculationController extends Controller
             
             $program->save();
    
-            $cont->rezerv = 0;
+            //$cont->rezerv = 0;
             $cont->status = 4;
             $cont->wait_termnate = 0;
             if (date("m") == 1) {
