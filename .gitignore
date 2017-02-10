@@ -27,4 +27,5 @@ phpunit.phar
 /phpunit.xml
 
 /config/db.php
+/config/params.php
 /web/programs

@@ -1,6 +1,6 @@
 <?php
 return [
-    'adminEmail' => 'support@vologda.pfdo.ru',
+    'adminEmail' => 'support@dev.pfdo.ru',
     
     'region' => '14',
    
