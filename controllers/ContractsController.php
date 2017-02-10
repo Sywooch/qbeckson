@@ -1183,7 +1183,7 @@ class ContractsController extends Controller
             
             $cert = Certificates::findOne($model->certificate_id);
             $cert->balance = $cert->balance + $model->rezerv;
-            $certificate->rezerv = $certificate->rezerv - $model->rezerv;
+            $cert->rezerv = $cert->rezerv - $model->rezerv;
             $cert->save();
             
             if ($model->save()) {
