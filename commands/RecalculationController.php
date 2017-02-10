@@ -133,7 +133,7 @@ class RecalculationController extends Controller
          
             $cont = Contracts::findOne($contract);
     
-            $certificates = (new \yii\db\Query())
+          /*  $certificates = (new \yii\db\Query())
                 ->select(['id'])
                 ->from('certificates')
                 ->andWhere(['id' => $cont->certificate_id])
@@ -143,7 +143,7 @@ class RecalculationController extends Controller
                 $cert = Certificates::findOne($certificate);
                 $cert->balance = $cert->balance + $cont->rezerv;
                 $cert->save();
-            }
+            } */
                
 
             $program = Programs::findOne($cont->program_id);
@@ -163,10 +163,10 @@ class RecalculationController extends Controller
             $org->amount_child = $org->amount_child - 1;
             $org->save();
 
-             $certificate = Certificates::findOne($cont->certificate_id);
-            $certificate->rezerv = $certificate->rezerv - $cont->rezerv;
-
-            $certificate->save();
+             /* $certificate = Certificates::findOne($cont->certificate_id);
+            $certificate->rezerv = $certificate->rezerv - $cont->rezerv; 
+            $certificate->save(); */
+            
             $program->save();
    
             $cont->rezerv = 0;
