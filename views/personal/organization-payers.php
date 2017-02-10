@@ -72,7 +72,7 @@ $this->title = 'Плательщики';
     $organization = $organizations->getOrganization();
     if ($roles['organizations'] and $organization['actual'] != 0) {
         echo "<p>";
-        echo Html::a('Выбрать плательщиков', ['payers/index'], ['class' => 'btn btn-success']); 
+        echo Html::a('Зарегистрировать новое соглашение', ['payers/index'], ['class' => 'btn btn-success']); 
         echo "</p>";
     }
     ?>
