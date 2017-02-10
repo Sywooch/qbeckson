@@ -108,7 +108,7 @@ class Payer0ContractsSearch extends Contracts
             ->from('cooperate')
             ->where(['status' => 1])
             ->andwhere(['payer_id'=> $payer['id']])
-            ->all();
+            ->column();
         
         if (empty($cooperate)) {
             $cooperate = 0;
@@ -123,7 +123,7 @@ class Payer0ContractsSearch extends Contracts
             'contracts.organization_id' => $cooperate,
             'program_id' => $this->program_id,
             'contracts.payer_id' => $payer['id'],
-            'status' => [0],
+            'status' => '0',
             'status_termination' => $this->status_termination,
             'status_year' => $this->status_year,
             'start_edu_programm' => $this->start_edu_programm,
