@@ -133,7 +133,7 @@ AppAsset::register($this);
                                         'options' => ['class' => 'navbar-nav'],
                                         'items' => [
                                             ['label' => 'Информация', 'items' => [
-                                                ['label' => 'Статическая информация', 'url' => ['/personal/organization-statistic']],
+                                                ['label' => 'Статистическая информация', 'url' => ['/personal/organization-statistic']],
                                                 ['label' => 'Сведения об организации', 'url' => ['/personal/organization-info']],
                                                 ['label' => 'Предварительные записи', 'url' => ['/personal/organization-favorites']],
                                             ]],
