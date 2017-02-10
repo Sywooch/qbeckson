@@ -370,7 +370,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ?> <!-- + 1 месяц !!! -->
     
     <?php
-    if ($model->wait_termnate != 1 && isset($roles['organizations'])) {
+    if ($model->wait_termnate != 1 && isset($roles['organizations']) && $model->status == 1) {
         
         if (date("m") == 12) {
             $month = 1;
