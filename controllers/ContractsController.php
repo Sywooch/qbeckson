@@ -2876,6 +2876,54 @@ EOD;
     }     
    */  
     
+    public function actionUpdatescert()
+    {
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);
+        
+        $inputFile = "uploads/contracts-4.xlsx";
+        
+            $inputFileType = \PHPExcel_IOFactory::identify($inputFile);
+            $objReader = \PHPExcel_IOFactory::createReader($inputFileType);
+            $objPHPExcel = $objReader->load($inputFile);
+
+        
+        $sheet = $objPHPExcel->getSheet(0);
+        $highestRow = $sheet->getHighestRow(); 
+        $highestColumn = $sheet->getHighestColumn();
+        
+        
+        
+        for ($row = 1; $row <= $highestRow; $row++) {
+            $rowDada = $sheet->rangeToArray('A'.$row.':'.$highestColumn.$row,NULL,TRUE,FALSE);
+            
+            if($row == 1) {
+                continue;
+            }
+            
+            $certificates = Certificates::findOne($rowDada[0][0]);
+            $certificates->soname = $rowDada[0][1];
+            $certificates->name = $rowDada[0][2];
+            $certificates->phname = $rowDada[0][3];
+            $certificates->save();
+            
+            print_r($certificates->getErrors());
+            
+            $model = Contracts::findOne($rowDada[0][5]);
+            $model->certfio = $rowDada[0][4]; 
+            $model->save();
+            
+            print_r($model->getErrors());
+            
+            
+            
+            
+        }
+        echo "OK!";
+        
+    }
+    
+    
         
     /**
      * Finds the Contracts model based on its primary key value.
