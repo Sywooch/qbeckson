@@ -2910,7 +2910,7 @@ EOD;
             print_r($certificates->getErrors());
             
             $model = Contracts::findOne($rowDada[0][5]);
-            $model->certfio = $rowDada[0][4]; 
+            $model->change_fiochild = $rowDada[0][4]; 
             $model->save();
             
             print_r($model->getErrors());
@@ -2923,7 +2923,50 @@ EOD;
         
     }
     
-    
+    public function actionUpdatesparent()
+    {
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);
+        
+        $inputFile = "uploads/contracts-5.xlsx";
+        
+            $inputFileType = \PHPExcel_IOFactory::identify($inputFile);
+            $objReader = \PHPExcel_IOFactory::createReader($inputFileType);
+            $objPHPExcel = $objReader->load($inputFile);
+
+        
+        $sheet = $objPHPExcel->getSheet(0);
+        $highestRow = $sheet->getHighestRow(); 
+        $highestColumn = $sheet->getHighestColumn();
+        
+        
+        
+        for ($row = 1; $row <= $highestRow; $row++) {
+            $rowDada = $sheet->rangeToArray('A'.$row.':'.$highestColumn.$row,NULL,TRUE,FALSE);
+            
+            if($row == 1) {
+                continue;
+            }
+            
+            $certificates = Certificates::findOne($rowDada[0][0]);
+            $certificates->fio_parent = $rowDada[0][1];
+            $certificates->save();
+            
+            print_r($certificates->getErrors());
+            
+            $model = Contracts::findOne($rowDada[0][3]);
+            $model->change_fioparent = $rowDada[0][2]; 
+            $model->save();
+            
+            print_r($model->getErrors());
+            
+            
+            
+            
+        }
+        echo "OK!";
+        
+    }
         
     /**
      * Finds the Contracts model based on its primary key value.
