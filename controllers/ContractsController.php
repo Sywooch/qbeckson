@@ -2900,6 +2900,9 @@ EOD;
             if($row == 1) {
                 continue;
             }
+            if(empty($rowDada[0][0]) {
+                break;
+            }
             
             $certificates = Certificates::findOne($rowDada[0][0]);
             $certificates->soname = $rowDada[0][1];
@@ -2946,6 +2949,10 @@ EOD;
             
             if($row == 1) {
                 continue;
+            }
+            
+            if(empty($rowDada[0][0]) {
+                break;
             }
             
             $certificates = Certificates::findOne($rowDada[0][0]);
