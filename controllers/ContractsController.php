@@ -2900,7 +2900,7 @@ EOD;
             if($row == 1) {
                 continue;
             }
-            if(empty($rowDada[0][0]) {
+            if(empty($rowDada[0][0])) {
                 break;
             }
             
@@ -2951,7 +2951,7 @@ EOD;
                 continue;
             }
             
-            if(empty($rowDada[0][0]) {
+            if(empty($rowDada[0][0])) {
                 break;
             }
             
