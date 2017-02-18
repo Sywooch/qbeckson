@@ -2908,6 +2908,7 @@ EOD;
             $certificates->soname = $rowDada[0][1];
             $certificates->name = $rowDada[0][2];
             $certificates->phname = $rowDada[0][3];
+            $certificates->fio_child = $rowDada[0][1].' '.$rowDada[0][2].' '.$rowDada[0][3];
             $certificates->save();
             
             print_r($certificates->getErrors());
