@@ -166,11 +166,26 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'start_edu_contract:date',
             'stop_edu_contract:date',
-            'all_funds',
-            'funds_cert',
-            'all_parents_funds',
-            'rezerv',
-            'paid',
+            [
+                'attribute' => 'all_funds',
+                'value'=> round($model->all_funds, 2),
+            ],
+            [
+                'attribute' => 'funds_cert',
+                'value'=> round($model->funds_cert, 2),
+            ],
+                        [
+                'attribute' => 'all_parents_funds',
+                'value'=> round($model->all_parents_funds),
+            ],
+            [
+                'attribute' => 'rezerv',
+                'value'=> round($model->rezerv, 2),
+            ],
+            [
+                'attribute' => 'paid',
+                'value'=> round($model->paid, 2),
+            ],
         ];
        
     }
