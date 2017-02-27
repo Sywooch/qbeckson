@@ -9,7 +9,6 @@ use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use app\assets\AppAsset;
-use yii\bootstrap\Alert;
 use yii\data\ActiveDataProvider;
 use app\models\Informs;
 use app\models\Organization;
@@ -296,36 +295,11 @@ AppAsset::register($this);
                                     Yii::$app->session->setFlash('warning', 'Необходимо выставить корректные коэффициенты');
                                 }
                             }
-
-                            if (Yii::$app->session->hasFlash('error')) {
-                                echo Alert::widget([
-                                    'options' => [
-                                        'class' => 'alert-danger'
-                                    ],
-                                    'body' => '<b>Ошибка! </b>'.Yii::$app->session->getFlash('error')
-                                ]);
-                            } 
-
-                            if (Yii::$app->session->hasFlash('warning')) {
-                                echo Alert::widget([
-                                    'options' => [
-                                        'class' => 'alert-warning'
-                                    ],
-                                    'body' => '<b>Внимание! </b>'.Yii::$app->session->getFlash('warning')
-                                ]);
-                            } 
-                       
-                            if (Yii::$app->session->hasFlash('info')) {
-                                echo Alert::widget([
-                                    'options' => [
-                                        'class' => 'alert-info'
-                                    ],
-                                    'body' => Yii::$app->session->getFlash('info')
-                                ]);
-                            } 
                          ?>
-                    </div> 
-                    <div class="col-xs-12">                           
+
+                         <?= app\widgets\Alert::widget() ?>
+                    </div>
+                    <div class="col-xs-12">
                         <?= $content ?>
                     </div>    
                 </div>

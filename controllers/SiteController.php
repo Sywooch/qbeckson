@@ -50,8 +50,6 @@ class SiteController extends Controller
 
     public function actionIndex()
     {
-        // $this->layout = '@app/views/layouts/index.php';
-
         if (!Yii::$app->user->isGuest) {
             $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
             if (isset($roles['admins'])) {
@@ -95,6 +93,7 @@ class SiteController extends Controller
                 return $this->redirect('/personal/certificate-statistic');
             }
         }
+        
         $model = new LoginForm();
 
         if ($model->load(Yii::$app->request->post()) && $model->login()) {

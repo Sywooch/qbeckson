@@ -20,7 +20,7 @@ $this->title = 'Портал сопровождения персонифицир
             <div class="col-md-4 col-md-offset-4">
                 <?php $form = ActiveForm::begin([
                     'id' => 'login-form',
-                ]); ?>
+                ]); ?>                    
 
                     <?= $form->field($model, 'username')->textInput(['autofocus' => true]) ?>
 

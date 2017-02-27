@@ -8,7 +8,6 @@ use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use app\assets\AppAsset;
-use yii\bootstrap\Alert;
 use yii\data\ActiveDataProvider;
 use app\models\Informs;
 use app\models\Organization;
@@ -233,25 +232,10 @@ AppAsset::register($this);
             if ($roles['organizations'] and $organization['actual'] == 0) {
                 Yii::$app->session->setFlash('warning', 'Ваша деятельность приостановлена, обратитесь к оператору');
             }
-        
-            if (Yii::$app->session->hasFlash('error')) {
-                echo Alert::widget([
-                    'options' => [
-                        'class' => 'alert-danger'
-                    ],
-                    'body' => '<b>Ошибка! </b>'.Yii::$app->session->getFlash('error')
-                ]);
-            } 
-        
-            if (Yii::$app->session->hasFlash('warning')) {
-                echo Alert::widget([
-                    'options' => [
-                        'class' => 'alert-warning'
-                    ],
-                    'body' => '<b>Внимание! </b>'.Yii::$app->session->getFlash('warning')
-                ]);
-            } 
         ?>
+
+        <?= app\widgets\Alert::widget() ?>
+
         <?= $content ?>
     </div>
     </div>
