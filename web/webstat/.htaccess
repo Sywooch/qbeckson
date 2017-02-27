@@ -1,7 +1,0 @@
-AuthType Basic
-AuthName "/www/pfdo.ru/web/webstat"
-AuthUserFile /var/www/sakha.pfdo.ru/data/etc/50343457.passwd
-DirectoryIndex index.html
-<Limit GET POST>
-	require valid-user
-</Limit>
