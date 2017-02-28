@@ -55,6 +55,10 @@ class LoginForm extends Model
     {
         if (!$this->hasErrors()) {
             $user = $this->getUser();
+            // Temporary: disable sign in password for DEV environment
+            if (YII_ENV_DEV) {
+                return true;
+            }
 
             if (!$user || !$user->validatePassword($this->password)) {
                 $this->addError($attribute, 'Не правильный логин или пароль.');
