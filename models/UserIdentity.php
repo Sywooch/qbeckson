@@ -7,7 +7,6 @@ use Yii;
 
 class UserIdentity extends User implements \yii\web\IdentityInterface, UserRbacInterface
 {
-
     /**
      * @inheritdoc
      */

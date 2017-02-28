@@ -43,8 +43,8 @@ class Alert extends \yii\bootstrap\Widget
     ];
 
     public $bodyPrependText = [
-        'error'   => '<b>Ошибка!</b> ',
-        'warning' => '<b>Внимание!</b> '
+        'error'   => '<b>Ошибка!</b>',
+        'warning' => '<b>Внимание!</b>',
     ];
 
     /**
@@ -70,7 +70,7 @@ class Alert extends \yii\bootstrap\Widget
                     /* assign unique id to each alert box */
                     $this->options['id'] = $this->getId() . '-' . $type . '-' . $i;
 
-                    $message = (empty($this->bodyPrependText[$type]) ? null : $this->bodyPrependText[$type]) . $message;
+                    $message = (empty($this->bodyPrependText[$type]) ? null : $this->bodyPrependText[$type]) . ' ' . $message;
 
                     echo \yii\bootstrap\Alert::widget([
                         'body' => $message,
