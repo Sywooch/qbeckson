@@ -1,10 +1,11 @@
 <?php
+
 use yii\helpers\Html;
-use yii\grid\GridView;
-use app\models\Informs;
 use yii\helpers\Url;
+use yii\grid\GridView;
 use kartik\export\ExportMenu;
-//use kartik\grid\GridView;
+use app\models\Informs;
+use app\models\Contracts;
 
 /* @var $this yii\web\View */
 
@@ -79,15 +80,18 @@ $this->title = 'Информация';
               <?= Html::a('Редактировать', ['/operators/update', 'id' => $operator['id']], ['class' => 'btn btn-success']) ?>
             </p>
         </div>
+        <?php if ($this->beginCache('operator-statistic', ['duration' => 3600])): ?>
         <div class="col-md-5  col-md-offset-1 well">
             <p>Общее число детей в системе - <?= $count_certificates ?></p>
-            <p>Общее число детей, использующих свой сертификат - <?= $count_certificates_use ?></p>
-            <p>Детей, использующих сертификат для освоения одной программы - <?= $count_certificates_one ?></p>
-            <p>Детей, использующих сертификат для освоения двух программ - <?= $count_certificates_two ?></p>
-            <p>Детей, использующих сертификат для освоения трех и более программ  - <?= $count_certificates_more ?></p>
-            <p>Общее число договоров - <?= $count_contracts ?></p>
+            <p>Общее число детей, использующих свой сертификат - <?= Contracts::getCountUsedCertificates() ?></p>
+            <p>Детей, использующих сертификат для освоения одной программы - <?= Contracts::getCountUsedCertificates(1) ?></p>
+            <p>Детей, использующих сертификат для освоения двух программ - <?= Contracts::getCountUsedCertificates(2) ?></p>
+            <p>Детей, использующих сертификат для освоения трех и более программ  - <?= Contracts::getCountUsedCertificates('>2') ?></p>
+            <p>Общее число договоров - <?= Contracts::getCountContracts() ?></p>
             <p>Организаций в системе персонифицированного финансирования - <?= $count_organizations ?></p>
             <p>Программ, доступных в рамках системы - <?= $count_programs ?></p>
         </div>
+        <?php $this->endCache(); ?>
+        <?php endif; ?>
     </div>
 </div>

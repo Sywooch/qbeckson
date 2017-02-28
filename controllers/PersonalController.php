@@ -69,22 +69,12 @@ class PersonalController extends \yii\web\Controller
 
     public function actionOperatorStatistic()
     {
-        ini_set('memory_limit', '-1');
-        set_time_limit(0);
-        
         $InformsProvider = new ActiveDataProvider([
             'query' => Informs::find()->where(['read'=> 0])->andwhere(['from'=> 1]),
         ]);
 
         $certificates = new Certificates();
         $count_certificates = $certificates->getCountCert('all');
-
-        $contracts = new Contracts();
-        $count_certificates_use = $contracts->getCountUseCert();
-        $count_certificates_one = $contracts->getCountUseOneCert();
-        $count_certificates_two = $contracts->getCountUseTwoCert();
-        $count_certificates_more = $contracts->getCountUseMoreCert();
-        $count_contracts = $contracts->getCountContracts();
 
         $organizations = new Organization();
         $count_organizations = $organizations->getCountOrganization();
@@ -93,17 +83,12 @@ class PersonalController extends \yii\web\Controller
         $count_programs = $programs->getCountProgram();
         
         $operators = new Operators();
-        $operator= $operators->getOperators();
+        $operator = $operators->getOperators();
 
 
         return $this->render('operator-statistic', [
             'InformsProvider' => $InformsProvider,
             'count_certificates' => $count_certificates,
-            'count_certificates_use' => $count_certificates_use,
-            'count_certificates_one' => $count_certificates_one,
-            'count_certificates_two' => $count_certificates_two,
-            'count_certificates_more' => $count_certificates_more,
-            'count_contracts' => $count_contracts,
             'count_organizations' => $count_organizations,
             'count_programs' => $count_programs,
             'operator' => $operator,
