@@ -215,7 +215,12 @@ AppAsset::register($this);
             </div>
         </div>
 
-        <?= app\widgets\MainFooter::widget() ?>
+        <?php
+            if ($this->beginCache('main-footer', ['duration' => 3600])) {
+                echo app\widgets\MainFooter::widget();
+                $this->endCache();
+            }
+        ?>
 
 <?php $this->endBody() ?>
 </body>
