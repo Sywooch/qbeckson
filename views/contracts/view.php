@@ -8,7 +8,6 @@ use app\models\Certificates;
 use app\models\Groups;
 use app\models\Organization;
 
- //return var_dump($model);
 /* @var $this yii\web\View */
 /* @var $model app\models\Contracts */
 
@@ -96,13 +95,13 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $program,
         'attributes' => [
             [
-                    'attribute' => 'name',
-                    'format' => 'raw',
-                    'value' => Html::a($program->name, Url::to(['/programs/view', 'id' => $program->id]), ['class' => 'blue', 'target' => '_blank']),
+                'attribute' => 'name',
+                'format' => 'raw',
+                'value' => Html::a($program->name, Url::to(['/programs/view', 'id' => $program->id]), ['class' => 'blue', 'target' => '_blank']),
             ],
             [
-                    'label' => 'Год обучения',
-                    'value' => $model->yearName($model->year),
+                'label' => 'Год обучения',
+                'value' => app\helpers\FormattingHelper::asSpelloutOrdinal($model->year->year),
             ],
         ],
     ]) ?>

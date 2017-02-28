@@ -222,7 +222,7 @@ class Contracts extends \yii\db\ActiveRecord
     }
     
     
-     public function getYear()
+    public function getYear()
     {
         return $this->hasOne(Years::className(), ['id' => 'year_id']);
     }
@@ -333,14 +333,18 @@ class Contracts extends \yii\db\ActiveRecord
         if ($id == 4) { return 'Прекратил действие'; }
     }
     
-      public function yearName($data) {
-     if ($data == '1') { return 'Первый';}
-    if ($data == '2') { return 'Второй';}
-    if ($data == '3') { return 'Третий';}
-    if ($data == '4') { return 'Четвертый';}
-    if ($data == '5') { return 'Пятый';}
-    if ($data == '6') { return 'Шестой';}
-    if ($data == '7') { return 'Седьмой';}
+    /**
+     * DEPRECATED
+     * Use app\helpers\FormattingHelper::asSpelloutOrdinal() instead
+     */
+    public function yearName($data) {
+        if ($data == '1') { return 'Первый';}
+        if ($data == '2') { return 'Второй';}
+        if ($data == '3') { return 'Третий';}
+        if ($data == '4') { return 'Четвертый';}
+        if ($data == '5') { return 'Пятый';}
+        if ($data == '6') { return 'Шестой';}
+        if ($data == '7') { return 'Седьмой';}
     }
 
     public static function getCountUsedCertificates($amountPerCertificate = null) {
@@ -454,7 +458,7 @@ class Contracts extends \yii\db\ActiveRecord
                         ->where(['status' => 1])
                         ->andWhere(['certificate_id' => $value])
                         ->count();
-           
+
             if ($res > 2) { $result++; }
         }
         
