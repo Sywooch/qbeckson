@@ -6,7 +6,8 @@ $params = require(__DIR__ . '/params.php');
 
 $config = [
     'id' => 'basic',
-    'language' => 'ru',
+    'language' => 'ru-RU',
+    'sourceLanguage' => 'ru-RU',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'layout' => 'gos',
