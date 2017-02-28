@@ -12,7 +12,6 @@ use app\assets\AppAsset;
 use yii\data\ActiveDataProvider;
 use app\models\Informs;
 use app\models\Organization;
-use app\models\Operators;
 use app\models\Certificates;
 
 AppAsset::register($this);
@@ -42,9 +41,7 @@ AppAsset::register($this);
                         <?php
                             echo Nav::widget([
                                 'options' => ['class' => 'navbar-nav navbar-right'],
-                                'items' => [/*
-                                     $count > 0 ? ('<li><a role="button" data-container="body" data-toggle="popover" data-placement="bottom" data-html="true" title="Оповещения" data-content="'.$text.'"><span class="badge">'.$count.'</span> <span class="glyphicon glyphicon-flag"></span> ('.$label.')</a></li>') : ('<li><a role="button" data-container="body" data-toggle="popover" data-placement="bottom" data-html="true" title="Оповещения" data-content="Нет оповещений"><span class="badge">'.$count.'</span> <span class="glyphicon glyphicon-flag"></span></a></li>'),
-                                    */
+                                'items' => [
                                     Yii::$app->user->isGuest ? (
                                         ['label' => '']
                                     ) : (
@@ -56,7 +53,7 @@ AppAsset::register($this);
                                                 )
                                             . Html::endForm()
                                         . '</li>'
-                                    ),               
+                                    ),
                                 ],
                             ]);
                         ?>
@@ -64,14 +61,9 @@ AppAsset::register($this);
                 </div>
 
                 <div class="row">
-                   <!-- <div class="col-xs-6 col-lg-2">
-                        <a href="<?php // Yii::$app->homeUrl ?>">
-                            <div class="logo"></div>
-                        </a>
-                    </div> -->
-                    <div class="col-xs-12">    
+                    <div class="col-xs-12">
                         <?php
-                        
+
                             NavBar::begin([
                                 'brandLabel' => '<div class="logo"></div>',
                                 'brandUrl' => Yii::$app->homeUrl,
@@ -82,7 +74,7 @@ AppAsset::register($this);
                                     'class' => 'container-fluid',
                                 ],
                             ]);
-                        
+
                                 $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
 
                                if (isset($roles['admins'])) {
@@ -104,7 +96,7 @@ AppAsset::register($this);
                                             ['label' => 'Коэффициенты', 'items' => [
                                                 ['label' => 'Муниципалитеты', 'url' => ['/mun/index']],
                                                 ['label' => 'Общие параметры', 'url' => ['/coefficient/update']],
-                                            ]],    
+                                            ]],
                                             ['label' => 'Плательщики', 'url' => ['/personal/operator-payers']],
                                             ['label' => 'Организации', 'url' => ['/personal/operator-organizations']],
                                             ['label' => 'Сертификаты', 'url' => ['/personal/operator-certificates']],
@@ -150,22 +142,15 @@ AppAsset::register($this);
                                     echo Nav::widget([
                                         'options' => ['class' => 'navbar-nav'],
                                         'items' => [
-                                            /*['label' => 'Информация', 'url' => ['/personal/certificate-statistic']],
-                                            ['label' => 'Программы', 'items' => [
-                                                ['label' => 'Обучение в текущем году', 'url' => ['/personal/certificate-programs']],
-                                                ['label' => 'Предварительная запись', 'url' => ['/personal/certificate-previus']],
-                                            ]],
-                                            ['label' => 'Договоры', 'url' => ['/personal/certificate-contracts']],
-                                            ['label' => 'Избранное', 'url' => ['/personal/certificate-favorites']], */
                                             ['label' => 'Программы', 'url' => ['/programs/search']],
                                             ['label' => 'Организации', 'url' => ['/personal/certificate-organizations']],
                                         ],
                                     ]);
                                     echo "</div>";
-                                    
+
                                      $certificates = new Certificates();
                                     $certificate = $certificates->getCertificates();
-                                    
+
                                     if ($certificate->actual == 0) {
                                     echo Nav::widget([
                                         'options' => ['class' => 'navbar-nav navbar-right balancefield'],
@@ -184,113 +169,37 @@ AppAsset::register($this);
                                     ]); }
                                      echo "</div>";
                                 }
-                              /*  if ($roles['admins']) { 
-                                    $label = 'Админ';
-                                }
-                                if ($roles['operators']) { 
-                                    $label = 'Оператор';
-                                    $informs = (new \yii\db\Query())
-                                        ->select(['text', 'program_id'])
-                                        ->from('informs')
-                                        ->where(['read' => 0])
-                                        ->andwhere(['from'=> 1])
-                                        ->all();
-                                    $count = count($informs);
-                                    $text = '<table class=\'table\'>';
-                                    foreach ($informs as $value) {
-                                        $text = $text.'<tr><td><a href=\'/programs/view?id='.$value['program_id'].'\'>'.$value['text'].'</a></td></tr>';
-                                    }
-                                    $text = $text.'</table>';
-
-                                    $informsold = (new \yii\db\Query())
-                                        ->select(['text', 'program_id'])
-                                        ->from('informs')
-                                        ->where(['read' => 1])
-                                        ->andwhere(['from'=> 1])
-                                        ->all();
-                                    $count = count($informs);
-                                    $old = '<table class=\'table\'>';
-                                    foreach ($informsold  as $value) {
-                                        $old = $old.'<tr><td><a href=\'/programs/view?id='.$value['program_id'].'\'>'.$value['text'].'</a></td></tr>';
-                                    }
-                                    $old = $old.'</table>';
-                                }
-                                if ($roles['payer']) { 
-                                    $label = 'Плательщик';
-                                    $informs = (new \yii\db\Query())
-                                            ->select(['text', 'program_id'])
-                                            ->from('informs')
-                                            ->where(['read' => 0])
-                                            ->andwhere(['from'=> 2])
-                                            ->all();
-                                    $count = count($informs);
-                                    $text = '<table class=\'table\'>';
-                                    foreach ($informs as $value) {
-                                        $text = $text.'<tr><td><a href=\'/programs/view?id='.$value['program_id'].'\'>'.$value['text'].'</a></td></tr>';
-                                    }
-                                    $text = $text.'</table>';
-                                }
-                                if ($roles['organizations']) { 
-                                    $label = 'Организация';
-                                    $informs = (new \yii\db\Query())
-                                            ->select(['text', 'program_id'])
-                                            ->from('informs')
-                                            ->where(['read' => 0])
-                                            ->andwhere(['from'=> 3])
-                                            ->all();
-                                    $count = count($informs);
-                                    $text = '<table class=\'table\'>';
-                                    foreach ($informs as $value) {
-                                        $text = $text.'<tr><td><a href=\'/programs/view?id='.$value['program_id'].'\'>'.$value['text'].'</a></td></tr>';
-                                    }
-                                    $text = $text.'</table>';
-                                }
-                                if ($roles['certificate']) { 
-                                    $label = 'Ребенок';
-                                    $informs = (new \yii\db\Query())
-                                            ->select(['text', 'program_id'])
-                                            ->from('informs')
-                                            ->where(['read' => 0])
-                                            ->andwhere(['from'=> 4])
-                                            ->all();
-                                    $count = count($informs);
-                                    $text = '<table class=\'table\'>';
-                                    foreach ($informs as $value) {
-                                        $text = $text.'<tr><td><a href=\'/programs/view?id='.$value['program_id'].'\'>'.$value['text'].'</a></td></tr>';
-                                    }
-                                    $text = $text.'</table>';
-                                } */
-                            NavBar::end();
+                                NavBar::end();
                         ?>
                     </div>
                 </div>
-            
-                <div class="row"> 
+
+                <div class="row">
                    <div class="col-xs-12">
                        <?= Breadcrumbs::widget([
                         'homeLink' => ['label' => 'Главная', 'url' => '/', 'template' => '<span class="glyphicon glyphicon-home"></span> <li>{link}</li>'],
                         'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
                     ]) ?>
-                   </div>                  
+                   </div>
                     <div class="col-xs-12 col-md-8 col-md-offset-2">
-                         <?php 
+                         <?php
                             $organizations = new Organization();
                             $organization = $organizations->getOrganization();
-                            
+
                             if (isset($roles['organizations']) and $organization['actual'] == 0) {
                                 Yii::$app->session->setFlash('warning', 'Ваша деятельность приостановлена, обратитесь к оператору');
                             }
-                       
+
                             if (isset($roles['operators'])) {
                                 $coef = (new \yii\db\Query())
                                     ->select(['p21v', 'p21s', 'p21o', 'p22v', 'p22s', 'p22o', 'p3v', 'p3s', 'p3n', 'blimrob', 'blimtex', 'blimest', 'blimfiz', 'blimxud', 'blimtur', 'blimsoc', 'minraiting', 'weekyear', 'weekmonth', 'pk', 'norm', 'potenc', 'ngr', 'sgr', 'vgr', 'chr1', 'zmr1', 'chr2', 'zmr2', 'ngrp', 'sgrp', 'vgrp', 'ppchr1', 'ppzm1', 'ppchr2', 'ppzm2', 'ocsootv', 'ocku', 'ocmt', 'obsh', 'ktob', 'vgs', 'sgs', 'pchsrd', 'pzmsrd'])
                                     ->from('coefficient')
                                     ->one();
-                                
-                                
+
+
                                 $res = array_search(0, $coef);
-                                
-                                
+
+
                                 if ($res == true) {
                                     Yii::$app->session->setFlash('warning', 'Необходимо выставить корректные коэффициенты');
                                 }
@@ -301,34 +210,12 @@ AppAsset::register($this);
                     </div>
                     <div class="col-xs-12">
                         <?= $content ?>
-                    </div>    
+                    </div>
                 </div>
             </div>
-        </div>             
-    
+        </div>
 
-<footer>
- <?php 
-           // $operators = new Operators();
-            //$operator = $operators->getOperators();
-    
-            $operator = (new \yii\db\Query())
-                ->select(['id', 'name', 'phone', 'email', 'address_actual'])
-                ->from('operators')
-                ->one();
-                        
-    ?>
-  <div class="container-fluid footers">
-     <div class="row">
-         <div class="col-md-2 col-md-offset-2 text-center">Сопровождение Портала:<br>
-             <?= Html::a($operator['name'], Url::to(['operators/view', 'id' => $operator['id']])) ?></div>
-         <div class="col-md-2 text-center">Контактный телефон:<br><div class="phone"><?= $operator['phone'] ?></div></div>
-         <div class="col-md-2 text-center">E-mail:<br><a href="mailto:<?= $operator['email'] ?>"><?= $operator['email'] ?></a>
-                                                 <br><a href="mailto:<?= Yii::$app->params['adminEmail']; ?>"><?= Yii::$app->params['adminEmail']; ?></a></div>
-         <div class="col-md-2 text-center">Адрес:<br><?= $operator['address_actual'] ?></div>
-     </div>
-  </div>
-</footer>
+        <?= app\widgets\MainFooter::widget() ?>
 
 <?php $this->endBody() ?>
 </body>
