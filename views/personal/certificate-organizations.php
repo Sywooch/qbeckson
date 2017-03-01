@@ -65,16 +65,16 @@ $this->title = 'Организации';
         //'type',
         ['attribute'=>'type',
             'value' => function($data){
-                if ($data->type == 1) { 
+                if ($data->type == 1) {
                     return 'Образовательная организация';
                 }
-                if ($data->type == 2) { 
+                if ($data->type == 2) {
                     return 'Организация, осуществляющая обучение';
                 }
-                if ($data->type == 3) { 
+                if ($data->type == 3) {
                     return 'Индивидуальный предприниматель (с наймом)';
                 }
-                if ($data->type == 4) { 
+                if ($data->type == 4) {
                     return 'Индивидуальный предприниматель (без найма)';
                 }
             }

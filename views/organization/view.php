@@ -75,7 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'full_name',
                 [
                     'attribute'=>'type',
-                    'value'=>$model->getOrgtype(),
+                    'value' => $model->typeLabel,
                 ],
                 'address_actual',
                 [

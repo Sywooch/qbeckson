@@ -7,7 +7,7 @@ use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
-use app\models\Organization;
+use app\helpers\PermissionHelper;
 
 class SiteController extends Controller
 {
@@ -46,51 +46,10 @@ class SiteController extends Controller
     public function actionIndex()
     {
         if (!Yii::$app->user->isGuest) {
-            $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-            if (isset($roles['admins'])) {
-                return $this->redirect('/personal/index');
-            }
-            if (isset($roles['operators'])) {
-                return $this->redirect('/personal/operator-statistic');
-            }
-            if (isset($roles['payer'])) {
-                return $this->redirect('/personal/payer-statistic');
-            }
-            if (isset($roles['organizations'])) {
-                
-                $organizations = new Organization();
-                $organization = $organizations->getOrganization();
-                
-                if ($organization->type != 4) {
-                    if (empty($organization['license_issued_dat']) or empty($organization['fio']) or empty($organization['position']) or empty($organization['doc_type'])) {
-                        Yii::$app->session->setFlash('warning', 'Заполните информацию "Для договора"');
-                        return $this->redirect('/personal/organization-info');
-                    }
-                    if ($organization['doc_type'] == 1) {
-                        if (empty($organization['date_proxy']) or empty($organization['number_proxy'])) {
-                            Yii::$app->session->setFlash('warning', 'Заполните информацию "Для договора"');
-                            return $this->redirect('/personal/organization-info');
-                        }
-                    }
-                } /*else {
-                   
-                    if ($organization['doc_type'] == 1) {
-                        if (empty($organization['date_proxy']) or empty($organization['number_proxy'])) {
-                            Yii::$app->session->setFlash('warning', 'Заполните информацию "Для договора"');
-                            return $this->redirect('/personal/organization-info');
-                        }
-                    }
-                } */
-                
-                return $this->redirect('/personal/organization-statistic');
-            }
-            if (isset($roles['certificate'])) {
-                return $this->redirect('/personal/certificate-statistic');
-            }
+            return $this->redirect(PermissionHelper::redirectUrlByRole());
         }
 
         $model = new LoginForm();
-
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
             return $this->goBack();
         }
@@ -108,26 +67,9 @@ class SiteController extends Controller
 
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
-
-            $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-            if ($roles['admins']) {
-                return $this->redirect('/personal/index');
-            }
-            if ($roles['operators']) {
-                return $this->redirect('/personal/operator-statistic');
-            }
-            if ($roles['payer']) {
-                return $this->redirect('/personal/payer-statistic');
-            }
-            if ($roles['organizations']) {
-                return $this->redirect('/personal/organization-statistic');
-            }
-            if ($roles['certificate']) {
-                return $this->redirect('/personal/certificate-statistic');
-            }
-
-            return $this->goBack();
+            return $this->redirect(PermissionHelper::redirectUrlByRole());
         }
+
         return $this->render('login', [
             'model' => $model,
         ]);
