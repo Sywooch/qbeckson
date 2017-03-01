@@ -207,6 +207,10 @@ class Organization extends \yii\db\ActiveRecord
     }
     
     
+    /**
+     * DEPRECATED
+     * Use relation in app\models\User instead
+     */
     public function getOrganization() {
 
         $query = Organization::find();
@@ -251,10 +255,7 @@ class Organization extends \yii\db\ActiveRecord
         
         return $rows;
     }
-    
-   
-    
-    
+
     public function munName($data) {
          $rows = (new \yii\db\Query())
                 ->select(['name'])

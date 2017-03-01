@@ -179,6 +179,10 @@ class Certificates extends \yii\db\ActiveRecord
         return $query->sum('contracts');
     }
 
+    /**
+     * DEPRECATED
+     * Use relation in app\models\User instead
+     */
     public function getCertificates() {
 
         $query = Certificates::find();
