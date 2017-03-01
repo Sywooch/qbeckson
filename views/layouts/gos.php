@@ -33,27 +33,22 @@ AppAsset::register($this);
            <div class="container-fluid">
                <div class="top-line row">
                    <div class="col-md-10 col-md-offset-1 text-center">
-                       <a href="#">Портал персонифицированного финансирования дополнительного образования детей</a>
+                       <a href="<?= Url::home() ?>">Портал персонифицированного финансирования дополнительного образования детей</a>
                    </div>
                    <div class="col-md-1">
                         <?php
+                        if (!Yii::$app->user->isGuest) {
                             echo Nav::widget([
                                 'options' => ['class' => 'navbar-nav navbar-right'],
                                 'items' => [
-                                    Yii::$app->user->isGuest ? (
-                                        ['label' => '']
-                                    ) : (
-                                        '<li>'
-                                            . Html::beginForm(['/site/logout'], 'post', ['class' => 'navbar-form'])
-                                                . Html::submitButton(
-                                                    'Выйти (' . Yii::$app->user->identity->username . ')',
-                                                    ['class' => 'btn btn-link']
-                                                )
-                                            . Html::endForm()
-                                        . '</li>'
-                                    ),
+                                    '<li>'
+                                        . Html::beginForm(['/site/logout'], 'post', ['class' => 'navbar-form'])
+                                        . Html::submitButton('Выйти (' . Yii::$app->user->identity->username . ')', ['class' => 'btn btn-link'])
+                                        . Html::endForm() .
+                                    '</li>'
                                 ],
                             ]);
+                        }
                         ?>
                     </div>
                 </div>
@@ -61,113 +56,113 @@ AppAsset::register($this);
                 <div class="row">
                     <div class="col-xs-12">
                         <?php
-
                             NavBar::begin([
                                 'brandLabel' => '<div class="logo"></div>',
                                 'brandUrl' => Yii::$app->homeUrl,
                                 'options' => [
-                                    'class' => 'navbar navbar-default  main-menu',
+                                    'class' => 'navbar navbar-default main-menu',
                                 ],
                                 'innerContainerOptions' => [
                                     'class' => 'container-fluid',
                                 ],
                             ]);
 
-                                $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
+                            if (Yii::$app->user->can('admins')) {
+                                echo Nav::widget([
+                                    'options' => ['class' => 'navbar-nav'],
+                                    'items' => [
+                                        ['label' => 'Главная', 'url' => ['/site/index']],
+                                        ['label' => 'Справочный раздел', 'url' => ['/site/about']],
+                                        ['label' => 'Обратная связь', 'url' => ['/site/contact']],
+                                        ['label' => 'Поиск программ', 'url' => ['/programs/index']],
+                                    ],
+                                ]);
+                            }
 
-                               if (isset($roles['admins'])) {
-                                    echo Nav::widget([
-                                        'options' => ['class' => 'navbar-nav'],
-                                        'items' => [
-                                            ['label' => 'Главная', 'url' => ['/site/index']],
-                                            ['label' => 'Справочный раздел', 'url' => ['/site/about']],
-                                            ['label' => 'Обратная связь', 'url' => ['/site/contact']],
-                                            ['label' => 'Поиск программ', 'url' => ['/programs/index']],
-                                        ],
-                                    ]);
-                                }
-                                if (isset($roles['operators'])) {
-                                    echo Nav::widget([
-                                        'options' => ['class' => 'navbar-nav inner-nav'],
-                                        'items' => [
-                                            ['label' => 'Информация', 'url' => ['/personal/operator-statistic']],
-                                            ['label' => 'Коэффициенты', 'items' => [
-                                                ['label' => 'Муниципалитеты', 'url' => ['/mun/index']],
-                                                ['label' => 'Общие параметры', 'url' => ['/coefficient/update']],
-                                            ]],
-                                            ['label' => 'Плательщики', 'url' => ['/personal/operator-payers']],
-                                            ['label' => 'Организации', 'url' => ['/personal/operator-organizations']],
-                                            ['label' => 'Сертификаты', 'url' => ['/personal/operator-certificates']],
-                                            ['label' => 'Договоры', 'url' => ['/personal/operator-contracts']],
-                                            ['label' => 'Программы', 'url' => ['/personal/operator-programs']],
-                                        ],
-                                    ]);
-                                }
-                                if (isset($roles['payer'])) {
-                                    echo Nav::widget([
-                                        'options' => ['class' => 'navbar-nav'],
-                                        'items' => [
-                                            ['label' => 'Информация', 'url' => ['/personal/payer-statistic']],
-                                            ['label' => 'Номиналы групп', 'url' => ['/cert-group/index']],
-                                            ['label' => 'Сертификаты', 'url' => ['/personal/payer-certificates']],
-                                            ['label' => 'Договоры', 'url' => ['/personal/payer-contracts']],
-                                            ['label' => 'Счета', 'url' => ['/personal/payer-invoices']],
-                                            ['label' => 'Организации', 'url' => ['/personal/payer-organizations']],
-                                            ['label' => 'Программы', 'url' => ['/personal/payer-programs']],
-                                        ],
-                                    ]);
-                                }
-                                if (isset($roles['organizations'])) {
-                                    echo Nav::widget([
-                                        'options' => ['class' => 'navbar-nav'],
-                                        'items' => [
-                                            ['label' => 'Информация', 'items' => [
-                                                ['label' => 'Статистическая информация', 'url' => ['/personal/organization-statistic']],
-                                                ['label' => 'Сведения об организации', 'url' => ['/personal/organization-info']],
-                                                ['label' => 'Предварительные записи', 'url' => ['/personal/organization-favorites']],
-                                            ]],
-                                            ['label' => 'Программы', 'url' => ['/personal/organization-programs']],
-                                            ['label' => 'Договоры', 'url' => ['/personal/organization-contracts']],
-                                            ['label' => 'Счета', 'url' => ['/personal/organization-invoices']],
-                                            ['label' => 'Плательщики', 'url' => ['/personal/organization-payers']],
-                                            ['label' => 'Группы', 'url' => ['/personal/organization-groups']],
-                                        ],
-                                    ]);
-                                }
-                                if (isset($roles['certificate'])) {
-                                    echo "<div class='row cert-menu'>";
-                                    echo "<div class='col-sm-6 col-md-4 col-sm-offset-1 col-md-offset-2 big-nav'>";
-                                    echo Nav::widget([
-                                        'options' => ['class' => 'navbar-nav'],
-                                        'items' => [
-                                            ['label' => 'Программы', 'url' => ['/programs/search']],
-                                            ['label' => 'Организации', 'url' => ['/personal/certificate-organizations']],
-                                        ],
-                                    ]);
-                                    echo "</div>";
+                            if (Yii::$app->user->can('operators')) {
+                                echo Nav::widget([
+                                    'options' => ['class' => 'navbar-nav inner-nav'],
+                                    'items' => [
+                                        ['label' => 'Информация', 'url' => ['/personal/operator-statistic']],
+                                        ['label' => 'Коэффициенты', 'items' => [
+                                            ['label' => 'Муниципалитеты', 'url' => ['/mun/index']],
+                                            ['label' => 'Общие параметры', 'url' => ['/coefficient/update']],
+                                        ]],
+                                        ['label' => 'Плательщики', 'url' => ['/personal/operator-payers']],
+                                        ['label' => 'Организации', 'url' => ['/personal/operator-organizations']],
+                                        ['label' => 'Сертификаты', 'url' => ['/personal/operator-certificates']],
+                                        ['label' => 'Договоры', 'url' => ['/personal/operator-contracts']],
+                                        ['label' => 'Программы', 'url' => ['/personal/operator-programs']],
+                                    ],
+                                ]);
+                            }
 
-                                     $certificates = new Certificates();
-                                    $certificate = $certificates->getCertificates();
+                            if (Yii::$app->user->can('payer')) {
+                                echo Nav::widget([
+                                    'options' => ['class' => 'navbar-nav'],
+                                    'items' => [
+                                        ['label' => 'Информация', 'url' => ['/personal/payer-statistic']],
+                                        ['label' => 'Номиналы групп', 'url' => ['/cert-group/index']],
+                                        ['label' => 'Сертификаты', 'url' => ['/personal/payer-certificates']],
+                                        ['label' => 'Договоры', 'url' => ['/personal/payer-contracts']],
+                                        ['label' => 'Счета', 'url' => ['/personal/payer-invoices']],
+                                        ['label' => 'Организации', 'url' => ['/personal/payer-organizations']],
+                                        ['label' => 'Программы', 'url' => ['/personal/payer-programs']],
+                                    ],
+                                ]);
+                            }
 
-                                    if ($certificate->actual == 0) {
+                            if (Yii::$app->user->can('organizations')) {
+                                echo Nav::widget([
+                                    'options' => ['class' => 'navbar-nav'],
+                                    'items' => [
+                                        ['label' => 'Информация', 'items' => [
+                                            ['label' => 'Статистическая информация', 'url' => ['/personal/organization-statistic']],
+                                            ['label' => 'Сведения об организации', 'url' => ['/personal/organization-info']],
+                                            ['label' => 'Предварительные записи', 'url' => ['/personal/organization-favorites']],
+                                        ]],
+                                        ['label' => 'Программы', 'url' => ['/personal/organization-programs']],
+                                        ['label' => 'Договоры', 'url' => ['/personal/organization-contracts']],
+                                        ['label' => 'Счета', 'url' => ['/personal/organization-invoices']],
+                                        ['label' => 'Плательщики', 'url' => ['/personal/organization-payers']],
+                                        ['label' => 'Группы', 'url' => ['/personal/organization-groups']],
+                                    ],
+                                ]);
+                            }
+
+                            if (Yii::$app->user->can('certificate')) {
+                                echo "<div class='row cert-menu'>";
+                                echo "<div class='col-sm-6 col-md-4 col-sm-offset-1 col-md-offset-2 big-nav'>";
+                                echo Nav::widget([
+                                    'options' => ['class' => 'navbar-nav'],
+                                    'items' => [
+                                        ['label' => 'Программы', 'url' => ['/programs/search']],
+                                        ['label' => 'Организации', 'url' => ['/personal/certificate-organizations']],
+                                    ],
+                                ]);
+                                echo "</div>";
+
+                                $certificate = Yii::$app->user->identity->certificate;
+                                if ($certificate->actual == 0) {
                                     echo Nav::widget([
                                         'options' => ['class' => 'navbar-nav navbar-right balancefield'],
                                         'encodeLabels' => false,
                                         'items' => [
                                             ['label' => 'Заморожен <span class="glyphicon glyphicon-user"></span>', 'url' => ['/personal/certificate-info']],
                                         ],
-                                    ]); }
-                                    else {
+                                    ]);
+                                } else {
                                     echo Nav::widget([
                                         'options' => ['class' => 'navbar-nav navbar-right balancefield'],
                                         'encodeLabels' => false,
                                         'items' => [
                                             ['label' => $certificate['balance'].' руб. <span class="glyphicon glyphicon-user"></span>', 'url' => ['/personal/certificate-info']],
                                         ],
-                                    ]); }
-                                     echo "</div>";
+                                    ]);
                                 }
-                                NavBar::end();
+                                echo "</div>";
+                            }
+                            NavBar::end();
                         ?>
                     </div>
                 </div>
@@ -181,6 +176,7 @@ AppAsset::register($this);
                    </div>
                     <div class="col-xs-12 col-md-8 col-md-offset-2">
                          <?php
+                            // TODO: Убрать всё это говно
                             $organizations = new Organization();
                             $organization = $organizations->getOrganization();
 
@@ -193,11 +189,7 @@ AppAsset::register($this);
                                     ->select(['p21v', 'p21s', 'p21o', 'p22v', 'p22s', 'p22o', 'p3v', 'p3s', 'p3n', 'blimrob', 'blimtex', 'blimest', 'blimfiz', 'blimxud', 'blimtur', 'blimsoc', 'minraiting', 'weekyear', 'weekmonth', 'pk', 'norm', 'potenc', 'ngr', 'sgr', 'vgr', 'chr1', 'zmr1', 'chr2', 'zmr2', 'ngrp', 'sgrp', 'vgrp', 'ppchr1', 'ppzm1', 'ppchr2', 'ppzm2', 'ocsootv', 'ocku', 'ocmt', 'obsh', 'ktob', 'vgs', 'sgs', 'pchsrd', 'pzmsrd'])
                                     ->from('coefficient')
                                     ->one();
-
-
                                 $res = array_search(0, $coef);
-
-
                                 if ($res == true) {
                                     Yii::$app->session->setFlash('warning', 'Необходимо выставить корректные коэффициенты');
                                 }
