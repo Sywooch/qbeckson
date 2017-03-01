@@ -74,4 +74,44 @@ class UserIdentity extends User implements \yii\web\IdentityInterface, UserRbacI
         //return $this->password === md5($password);
         return Yii::$app->getSecurity()->validatePassword($password, $this->password);
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCertificate()
+    {
+        return $this->hasOne(Certificates::className(), ['user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDispute()
+    {
+        return $this->hasOne(Disputes::className(), ['user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOperator()
+    {
+        return $this->hasOne(Operators::className(), ['user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrganization()
+    {
+        return $this->hasOne(Organization::className(), ['user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPayer()
+    {
+        return $this->hasOne(Payers::className(), ['user_id' => 'id']);
+    }
 }
