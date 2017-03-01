@@ -25,8 +25,6 @@ AppAsset::register($this);
         <?= Html::csrfMetaTags() ?>
         <title><?= Html::encode($this->title) ?></title>
         <?php $this->head() ?>
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
-        <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     </head>
     <body>
         <?php $this->beginBody() ?>
