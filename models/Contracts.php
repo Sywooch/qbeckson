@@ -35,7 +35,6 @@ use yii\helpers\Url;
  */
 class Contracts extends \yii\db\ActiveRecord
 {
-    //public $test1;
     public $certnumber;
     public $certfio;
     public $month_start_edu_contract;
@@ -349,12 +348,12 @@ class Contracts extends \yii\db\ActiveRecord
 
     public static function getCountUsedCertificates($amountPerCertificate = null) {
         $query = "SELECT count(*) FROM `contracts` WHERE status=:status GROUP BY certificate_id";
-        if (!empty($amountPerCertificate) && is_int($amountPerCertificate)) {
-            $query .= " HAVING count(certificate_id) = " . $amountPerCertificate;
-        } elseif (!empty($amountPerCertificate) && $operation = substr($amountPerCertificate, 0, 1)) {
+
+        if (!empty($amountPerCertificate) && $operation = substr($amountPerCertificate, 0, 1)) {
             $query .= " HAVING count(certificate_id) " . $operation . " " . substr($amountPerCertificate, 1);
         }
         $query = "SELECT count(*) as cnt FROM (" . $query . ") as t";
+
         $command = Yii::$app->db->createCommand($query, [':status'=> 1]);
         $result = $command->queryOne();
 

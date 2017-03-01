@@ -84,8 +84,8 @@ $this->title = 'Информация';
         <div class="col-md-5  col-md-offset-1 well">
             <p>Общее число детей в системе - <?= $count_certificates ?></p>
             <p>Общее число детей, использующих свой сертификат - <?= Contracts::getCountUsedCertificates() ?></p>
-            <p>Детей, использующих сертификат для освоения одной программы - <?= Contracts::getCountUsedCertificates(1) ?></p>
-            <p>Детей, использующих сертификат для освоения двух программ - <?= Contracts::getCountUsedCertificates(2) ?></p>
+            <p>Детей, использующих сертификат для освоения одной программы - <?= Contracts::getCountUsedCertificates('=1') ?></p>
+            <p>Детей, использующих сертификат для освоения двух программ - <?= Contracts::getCountUsedCertificates('=2') ?></p>
             <p>Детей, использующих сертификат для освоения трех и более программ  - <?= Contracts::getCountUsedCertificates('>2') ?></p>
             <p>Общее число договоров - <?= Contracts::getCountContracts() ?></p>
             <p>Организаций в системе персонифицированного финансирования - <?= $count_organizations ?></p>
