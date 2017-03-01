@@ -46,10 +46,16 @@ use Yii;
  */
 class Organization extends \yii\db\ActiveRecord
 {
-    
+    const TYPE_EDUCATION = 1;
+
+    const TYPE_TRAINING = 2;
+
+    const TYPE_IP_WITH_WORKERS = 3;
+
+    const TYPE_IP_WITHOUT_WORKERS = 4;
+
     public $cooperate;
-    //public $certprogram;
-    
+
     /**
      * @inheritdoc
      */
@@ -237,14 +243,26 @@ class Organization extends \yii\db\ActiveRecord
 
         return $query->column();
     }
-    
-    public function getOrgtype() {  
-        if ($this->type == 1) { return 'Образовательная организация'; }
-        if ($this->type == 2) { return 'Организация, осуществляющая обучение'; }
-        if ($this->type == 3) { return 'Индивидуальный предприниматель, оказывающий услуги с наймом работников'; }
-        if ($this->type == 4) { return 'Индивидуальный предприниматель, оказывающий услуги без найма работников'; }   
+
+    public function getTypeLabel() {
+        $title = '';
+        switch ($this->type) {
+            case self::TYPE_EDUCATION:
+                $title = 'Образовательная организация';
+                break;
+            case self::TYPE_TRAINING:
+                $title = 'Организация, осуществляющая обучение';
+                break;
+            case self::TYPE_IP_WITH_WORKERS:
+                $title = 'Индивидуальный предприниматель, оказывающий услуги с наймом работников';
+                break;
+            case self::TYPE_IP_WITHOUT_WORKERS:
+                $title = 'Индивидуальный предприниматель, оказывающий услуги без найма работников';
+        }
+
+        return $title;
     }
-    
+
     public function getCertprogram() {
          $rows = (new \yii\db\Query())
                 ->select(['id'])
