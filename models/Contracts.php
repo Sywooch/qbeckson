@@ -354,7 +354,7 @@ class Contracts extends \yii\db\ActiveRecord
         }
         $query = "SELECT count(*) as cnt FROM (" . $query . ") as t";
 
-        $command = Yii::$app->db->createCommand($query, [':status'=> 1]);
+        $command = Yii::$app->db->createCommand($query, [':status' => 1]);
         $result = $command->queryOne();
 
         return $result['cnt'];
