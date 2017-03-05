@@ -2,7 +2,10 @@
 use developeruz\db_rbac\behaviors\AccessBehavior;
 use \kartik\datecontrol\Module;
 
-$params = require(__DIR__ . '/params.php');
+$params = array_merge(
+    require(__DIR__ . '/params.php'),
+    require(__DIR__ . '/params-local.php')
+);
 
 $config = [
     'id' => 'basic',

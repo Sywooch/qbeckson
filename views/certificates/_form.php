@@ -21,7 +21,7 @@ use app\models\Payers;
         echo '<div class="well">';
 
         if ($user->isNewRecord) {
-            echo $form->field($user, 'username', ['enableAjaxValidation' => true, 'addon' => ['prepend' => ['content'=> $region.$payer->code]]])->textInput(['id' => 'login', 'maxlength' => true])->label('Номер сертификата');
+            echo $form->field($user, 'username', ['enableAjaxValidation' => true, 'addon' => ['prepend' => ['content'=> $region . $payer->code]]])->textInput(['id' => 'login', 'maxlength' => true])->label('Номер сертификата');
             echo Html::button('Сгенерировать номер сертификата', ['class' => 'btn btn-success', 'onclick' => '(function () { $("#login").val( Math.round(0 - 0.5 + Math.random() * (9 - 0 + 1)).toString()+Math.round(0 - 0.5 + Math.random() * (9 - 0 + 1)).toString()+Math.round(0 - 0.5 + Math.random() * (9 - 0 + 1)).toString()+Math.round(0 - 0.5 + Math.random() * (9 - 0 + 1)).toString()+Math.round(0 - 0.5 + Math.random() * (9 - 0 + 1)).toString()+Math.round(0 - 0.5 + Math.random() * (9 - 0 + 1)).toString() ); })();']);
             echo '<br><br>';
             echo $form->field($user, 'password')->textInput(['id' => 'pass']);
