@@ -72,7 +72,7 @@ $this->params['breadcrumbs'][] = $this->title;
              $link = '/personal/operator-contracts';
          }
          
-         if ($roles['payer']) {
+         if (isset($roles['payer'])) {
              $link = '/personal/payer-contracts';
          }
     echo DetailView::widget([
