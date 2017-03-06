@@ -173,7 +173,7 @@ class Payers extends \yii\db\ActiveRecord
         return $display;
     }
     
-    public function directionality3($data) {     
+    public function directionality3($data) {
         $rows = (new \yii\db\Query())
                 ->select(['directionality', 'directionality_3_count'])
                 ->from('payers')
@@ -280,8 +280,11 @@ class Payers extends \yii\db\ActiveRecord
     {
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
-    
-        
+
+    /**
+     * DEPRECATED
+     * Use UserIdentity::payer instead
+     */
     public function getPayer() {
 
         $query = Payers::find();

@@ -76,6 +76,10 @@ class Operators extends \yii\db\ActiveRecord
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 
+    /**
+     * DEPRECATED
+     * Use UserIdentity::operator instead
+     */
     public function getOperators()
     {
         $query = Operators::find();
