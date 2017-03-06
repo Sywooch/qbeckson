@@ -1,25 +1,26 @@
 <?php
 
-namespace app\models;
+namespace app\models\search;
 
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\CertGroup;
-use app\models\Payers;
 
 /**
  * CertGroupSearch represents the model behind the search form about `app\models\CertGroup`.
  */
 class CertGroupSearch extends CertGroup
 {
+    public $payerId;
+
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['id', 'payer_id', 'nominal'], 'integer'],
+            [['id', 'payer_id', 'payerId', 'nominal'], 'integer'],
             [['group'], 'safe'],
         ];
     }
@@ -44,7 +45,7 @@ class CertGroupSearch extends CertGroup
     {
         $query = CertGroup::find();
 
-        // add conditions that should always apply here
+        $query->andFilterWhere(['payer_id' => $this->payerId]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -57,14 +58,11 @@ class CertGroupSearch extends CertGroup
             // $query->where('0=1');
             return $dataProvider;
         }
-        
-        $payers = new Payers();
-        $payer = $payers->getPayer();
-        
+
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'payer_id' => $payer['id'],
+            'payer_id' => $this->payer_id,
             'nominal' => $this->nominal,
         ]);
 

@@ -12,14 +12,13 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'group')->textInput(['maxlength' => true, 'readOnly'=>true]) ?>
+    <?= $form->field($model, 'group')->textInput(['maxlength' => true, 'readOnly' => true]) ?>
 
     <?= $form->field($model, 'nominal')->textInput() ?>
 
     <div class="form-group">
-      <?php 
-        $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-       if ($roles['payer']) {
+        <?php
+        if (Yii::$app->user->can('payer')) {
             echo Html::a('Отменить', '/cert-group/index', ['class' => 'btn btn-danger']);
         }
         ?>

@@ -3,11 +3,10 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\CertGroup;
-use app\models\CertGroupSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
+use app\models\CertGroup;
+use app\models\search\CertGroupSearch;
 
 /**
  * CertGroupController implements the CRUD actions for CertGroup model.
@@ -15,27 +14,12 @@ use yii\filters\VerbFilter;
 class CertGroupController extends Controller
 {
     /**
-     * @inheritdoc
-     */
-    public function behaviors()
-    {
-        return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
-    }
-
-    /**
      * Lists all CertGroup models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new CertGroupSearch();
+        $searchModel = new CertGroupSearch(['payerId' => Yii::$app->user->identity->payer->id]);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -57,24 +41,6 @@ class CertGroupController extends Controller
     }
 
     /**
-     * Creates a new CertGroup model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
-    public function actionCreate()
-    {
-        $model = new CertGroup();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        } else {
-            return $this->render('create', [
-                'model' => $model,
-            ]);
-        }
-    }
-
-    /**
      * Updates an existing CertGroup model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
@@ -91,19 +57,6 @@ class CertGroupController extends Controller
                 'model' => $model,
             ]);
         }
-    }
-
-    /**
-     * Deletes an existing CertGroup model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     */
-    public function actionDelete($id)
-    {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
     }
 
     /**
