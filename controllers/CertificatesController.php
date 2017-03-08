@@ -3,16 +3,15 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\Certificates;
-use app\models\Organization;
-use app\models\CertificatesSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use app\models\User;
-use app\models\Payers;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
+use app\models\Certificates;
+use app\models\Organization;
+use app\models\User;
+use app\models\Payers;
 
 /**
  * CertificatesController implements the CRUD actions for Certificates model.
@@ -32,21 +31,6 @@ class CertificatesController extends Controller
                 ],
             ],
         ];
-    }
-
-    /**
-     * Lists all Certificates models.
-     * @return mixed
-     */
-    public function actionIndex()
-    {
-        $searchModel = new CertificatesSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
     }
 
     /**

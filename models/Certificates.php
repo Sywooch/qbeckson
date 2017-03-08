@@ -31,10 +31,15 @@ use Yii;
 class Certificates extends \yii\db\ActiveRecord
 {
     public $birthday;
+
     public $address;
+
     public $pasport_s;
+
     public $pasport_n;
+
     public $pasport_v;
+
     public $phone;
     
     /**
@@ -181,7 +186,7 @@ class Certificates extends \yii\db\ActiveRecord
 
     /**
      * DEPRECATED
-     * Use relation in app\models\User instead
+     * Use relation in app\models\UserIdentity instead
      */
     public function getCertificates() {
 
