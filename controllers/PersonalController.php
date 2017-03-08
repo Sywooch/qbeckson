@@ -38,7 +38,7 @@ use app\models\ContractsclearSearch;
 use app\models\ContractsOrgclearSearch;
 use app\models\ContractsPayerclearSearch;
 use app\models\Certificates;
-use app\models\CertificatesSearch;
+use app\models\search\CertificatesSearch;
 use app\models\CertificatesExportSearch;
 use app\models\CertificatesPayersSearch;
 use app\models\Operators;
@@ -142,7 +142,7 @@ class PersonalController extends \yii\web\Controller
     }
 
 
-        public function actionOperatorCertificates()
+    public function actionOperatorCertificates()
     {
         $InformsProvider = new ActiveDataProvider([
             'query' => Informs::find()->where(['read'=> 0])->andwhere(['from'=> 1]),
