@@ -69,9 +69,6 @@ class PersonalController extends \yii\web\Controller
 
     public function actionOperatorStatistic()
     {
-        $certificates = new Certificates();
-        $count_certificates = $certificates->getCountCert('all');
-
         $organizations = new Organization();
         $count_organizations = $organizations->getCountOrganization();
 
@@ -79,7 +76,6 @@ class PersonalController extends \yii\web\Controller
         $count_programs = $programs->getCountProgram();
 
         return $this->render('operator-statistic', [
-            'count_certificates' => $count_certificates,
             'count_organizations' => $count_organizations,
             'count_programs' => $count_programs,
             'operator' => Yii::$app->user->identity->operator,
@@ -227,8 +223,7 @@ class PersonalController extends \yii\web\Controller
             'query' => Cooperate::find()->where(['status'=> 0])->andWhere(['reade'=> 0])->andwhere(['payer_id' => $payer['id']]),
         ]);
 
-        $certificates = new Certificates();
-        $count_certificates = $certificates->getCountCertificates($payer['id'], false);
+        $count_certificates = Certificates::getCountCertificates($payer->id);
         $sum_certificates = $certificates->getSumCertificates($payer['id']) ? $certificates->getSumCertificates($payer['id']) : 0;
 
         $contracts = new Contracts();
@@ -256,15 +251,6 @@ class PersonalController extends \yii\web\Controller
     {
         $payers = new Payers();
         $payer = $payers->getPayer();
-
-        $certificates = new Certificates();
-        $count_certificates = $certificates->getCountCertificates($payer['id']);
-        $count_certificates_contracts = $certificates->getCountCertificates($payer['id'], 'true');
-        $count_certificates_contracts_one = $certificates->getCountCertificates($payer['id'], 1);
-        $count_certificates_contracts_two = $certificates->getCountCertificates($payer['id'], 2);
-        $count_certificates_contracts_more = $certificates->getCountCertificates($payer['id'], 'more');
-        $sum_certificates = $certificates->getSumCertificates($payer['id']) ? $certificates->getSumCertificates($payer['id']) : 0;
-        $sum_contracts = $certificates->getSumContractes($payer['id']) ? $certificates->getSumContractes($payer['id']) : 0;
 
         $searchCertificates = new CertificatesPayersSearch();
         $CertificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);

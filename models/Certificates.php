@@ -124,47 +124,43 @@ class Certificates extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getContracts()
+    public function getContracts0()
     {
         return $this->hasMany(Contracts::className(), ['certificate_id' => 'id']);
     }
 
-    public function getCountCertificates($payer_id) {
-        $query = Certificates::find();
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCertGroup()
+    {
+        return $this->hasOne(CertGroup::className(), ['id' => 'cert_group']);
+    }
 
-        if($payer_id) {
-            $query->where(['payer_id' => $payer_id]);
-        }
-        
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFavorites()
+    {
+        return $this->hasMany(Favorites::className(), ['certificate_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPreviuses()
+    {
+        return $this->hasMany(Previus::className(), ['certificate_id' => 'id']);
+    }
+
+    public static function getCountCertificates($payerId = null) {
+        $query = static::find();
+
         $query->andWhere(['actual' => 1]);
+        $query->andFilterWhere(['payer_id' => $payerId]);
 
         return $query->count();
     }
-
-    public function getCountCert($type) {
-        $query = Certificates::find();
-
-        if ($type == 'use') {
-            $query->Where(['>', 'contracts', 0]);
-        }
-
-        if($type == 1) {
-            $query->Where(['=', 'contracts', 1]);
-        }
-
-        if($type == 2) {
-            $query->Where(['=', 'contracts', 2]);
-        }
-
-        if($type == 3) {
-            $query->Where(['>', 'contracts', 2]);
-        }
-
-        $query->andWhere(['actual' => 1]);
-        
-        return $query->count();
-    }
-    
 
     public function getSumCertificates($payer_id) {
         $query = Certificates::find();
@@ -198,17 +194,25 @@ class Certificates extends \yii\db\ActiveRecord
 
         return $query->one();
     }
-    
+
+    /**
+     * DEPRECATED
+     * Use relation Payer instead
+     */
     public function payerName($data) {
          $rows = (new \yii\db\Query())
                 ->select(['name'])
                 ->from('payers')
                 ->where(['id'=> $data])
                 ->one();
-        
+
         return $rows['name'];
     }
-    
+
+    /**
+     * DEPRECATED
+     * Use relation CertGroup instead
+     */
     public function certGroupName($data) {
          
         $rows = (new \yii\db\Query())

@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use app\models\Contracts;
+use app\models\Certificates;
 
 /* @var $this yii\web\View */
 
@@ -27,9 +28,9 @@ $this->params['breadcrumbs'][] = $this->title;
               <?= Html::a('Редактировать', ['/operators/update', 'id' => $operator['id']], ['class' => 'btn btn-success']) ?>
             </p>
         </div>
-        <?php if ($this->beginCache('operator-statistic', ['duration' => 3600])): ?>
+        <?php if (/*$this->beginCache('operator-statistic', ['duration' => 3600])*/1): ?>
         <div class="col-md-5  col-md-offset-1 well">
-            <p>Общее число детей в системе - <?= $count_certificates ?></p>
+            <p>Общее число детей в системе - <?= Certificates::getCountCertificates() ?></p>
             <p>Общее число детей, использующих свой сертификат - <?= Contracts::getCountUsedCertificates() ?></p>
             <p>Детей, использующих сертификат для освоения одной программы - <?= Contracts::getCountUsedCertificates('=1') ?></p>
             <p>Детей, использующих сертификат для освоения двух программ - <?= Contracts::getCountUsedCertificates('=2') ?></p>
@@ -38,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <p>Организаций в системе персонифицированного финансирования - <?= $count_organizations ?></p>
             <p>Программ, доступных в рамках системы - <?= $count_programs ?></p>
         </div>
-        <?php $this->endCache(); ?>
+        <?php //$this->endCache(); ?>
         <?php endif; ?>
     </div>
 </div>
