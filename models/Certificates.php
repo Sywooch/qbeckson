@@ -154,9 +154,9 @@ class Certificates extends \yii\db\ActiveRecord
     }
 
     public static function getCountCertificates($payerId = null) {
-        $query = static::find();
+        $query = static::find()
+            ->where(['actual' => 1]);
 
-        $query->andWhere(['actual' => 1]);
         $query->andFilterWhere(['payer_id' => $payerId]);
 
         return $query->count();

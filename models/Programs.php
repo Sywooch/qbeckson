@@ -51,6 +51,12 @@ use app\models\Cooperate;
 
 class Programs extends \yii\db\ActiveRecord
 {
+    public $file;
+
+    public $edit;
+
+    public $search;
+
     /**
      * @inheritdoc
      */
@@ -58,16 +64,12 @@ class Programs extends \yii\db\ActiveRecord
     {
         return 'programs';
     }
-    public $file;
-    public $edit;
-    public $search;
-    
-    
+
     /**
      * @inheritdoc
      */
 
-      public function rules()
+    public function rules()
     {
       return [
             [['directivity', 'name', 'task', 'annotation', 'ovz', 'norm_providing', 'age_group_min', 'age_group_max', 'ground'], 'required'],
@@ -177,17 +179,17 @@ class Programs extends \yii\db\ActiveRecord
     {
         return $this->hasMany(Years::className(), ['program_id' => 'id']);
     }
-    
 
-    public function getCountPrograms($organization_id, $verification) {
+
+    public function getCountPrograms($organization_id = null, $verification = null) {
 
         $query = Programs::find();
 
-        if($organization_id) {
-            $query->where(['organization_id' => $organization_id]);
+        if (!empty($organization_id)) {
+            $query->andWhere(['organization_id' => $organization_id]);
         }
-        
-        if(isset($verification)) {
+
+        if(!empty($verification)) {
             $query->andWhere(['verification' => $verification]);
         }
 
@@ -205,14 +207,6 @@ class Programs extends \yii\db\ActiveRecord
         return $query->one();
     }
 
-    public function getCountProgram() {
-        $query = Programs::find();
-
-        $query->Where(['verification' => 2]);
-
-        return $query->count();
-    }
-    
     public function getOrganizationProgram() {
 
         if(!Yii::$app->user->isGuest) {

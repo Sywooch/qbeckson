@@ -211,8 +211,7 @@ class Organization extends \yii\db\ActiveRecord
     {
         return $this->hasMany(Programs::className(), ['organization_id' => 'id']);
     }
-    
-    
+
     /**
      * DEPRECATED
      * Use relation in app\models\User instead
@@ -228,14 +227,13 @@ class Organization extends \yii\db\ActiveRecord
         return $query->one();
     }
 
-      public function getCountOrganization() {
-        $query = Organization::find();
-
-        $query->Where(['actual' => 1]);
+    public static function getCountOrganization() {
+        $query = static::find()
+            ->where(['actual' => 1]);
 
         return $query->count();
     }
-    
+
     public function getActualOrganization() {
         $query = Organization::find();
 
