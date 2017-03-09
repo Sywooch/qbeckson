@@ -1,14 +1,10 @@
 <?php
 use yii\helpers\Html;
-use yii\grid\GridView;
-use yii\helpers\Url;
-use PhpOffice\PhpWord\PhpWord;
-use PhpOffice\PhpWord\IOFactory;
+
+/* @var $this yii\web\View */
 
 $this->title = 'Информация';
 $this->params['breadcrumbs'][] = $this->title;
-
-/* @var $this yii\web\View */
 ?>
 <div class="container-fluid">
     <div class="row">
