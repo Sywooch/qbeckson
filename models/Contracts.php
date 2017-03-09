@@ -189,6 +189,7 @@ class Contracts extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Organization::className(), ['id' => 'organization_id']);
     }
+
     public function getOrganizationname()
     {
           $organization = (new \yii\db\Query())
@@ -196,8 +197,8 @@ class Contracts extends \yii\db\ActiveRecord
                             ->from('organization')
                             ->where(['id' => $this->organization_id])
                             ->one();
-                        
-                        
+
+
                     return Html::a($organization['name'], Url::to(['/organization/view', 'id' => $organization['id']]), ['class' => 'blue', 'target' => '_blank']);
     }
 
@@ -304,10 +305,8 @@ class Contracts extends \yii\db\ActiveRecord
         }
     }
     
-        public function getContractsYear($id) {
-
+    public function getContractsYear($id) {
         if(!Yii::$app->user->isGuest) {
-
             $certificates = new Certificates();
             $certificate = $certificates->getCertificates();
 
@@ -387,7 +386,7 @@ class Contracts extends \yii\db\ActiveRecord
     }
     
     public function getCountUseOnePayerCert($id) {
-       
+
          $cert = (new \yii\db\Query())
                         ->select(['certificate_id'])
                         ->from('contracts')
@@ -396,7 +395,7 @@ class Contracts extends \yii\db\ActiveRecord
                         ->column();
                 $cert = array_unique($cert);
                 //$cert = count($cert);
-        
+
         $result = 0;
         foreach ($cert as $value) {
             $res = (new \yii\db\Query())
@@ -405,15 +404,15 @@ class Contracts extends \yii\db\ActiveRecord
                         ->where(['status' => 1])
                         ->andWhere(['certificate_id' => $value])
                         ->count();
-           
+
             if ($res == 1) { $result++; }
         }
-        
+
         return $result;
     }
-    
+
     public function getCountUseTwoPayerCert($id) {
-       
+
          $cert = (new \yii\db\Query())
                         ->select(['certificate_id'])
                         ->from('contracts')

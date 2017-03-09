@@ -206,8 +206,7 @@ class PersonalController extends \yii\web\Controller
 
     public function actionPayerStatistic()
     {
-        $payers = new Payers();
-        $payer = $payers->getPayer();
+        $payer = Yii::$app->user->identity->payer;
 
         $InformsProvider = new ActiveDataProvider([
             'query' => Informs::find()->where(['read'=> 0])->andwhere(['from'=> 2]),
@@ -218,6 +217,7 @@ class PersonalController extends \yii\web\Controller
         ]);
 
         $count_certificates = Certificates::getCountCertificates($payer->id);
+        $certificates = new Certificates();
         $sum_certificates = $certificates->getSumCertificates($payer['id']) ? $certificates->getSumCertificates($payer['id']) : 0;
 
         $contracts = new Contracts();
@@ -237,7 +237,7 @@ class PersonalController extends \yii\web\Controller
             'count_certificates_contracts_more' => $count_certificates_contracts_more,
             'sum_certificates' => $sum_certificates,
             'sum_contracts' => $sum_contracts,
-            'payer' => $payer,
+            'payer' => Yii::$app->user->identity->payer,
         ]);
     }
 

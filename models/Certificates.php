@@ -116,7 +116,7 @@ class Certificates extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getPayer()
+    public function getPayers()
     {
         return $this->hasOne(Payers::className(), ['id' => 'payer_id']);
     }

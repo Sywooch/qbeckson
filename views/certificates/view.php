@@ -54,7 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label'=>'Плательщик',
                         'format' => 'raw',
-                        'value'=> Html::a($model->payer->name, Url::to(['/payers/view', 'id' => $model->payer_id]), ['class' => 'blue']),
+                        'value'=> Html::a($model->payers->name, Url::to(['/payers/view', 'id' => $model->payer_id]), ['class' => 'blue']),
                     ],
                     [
                         'attribute'=>'actual',
