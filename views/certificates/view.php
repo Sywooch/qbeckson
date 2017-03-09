@@ -54,7 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label'=>'Плательщик',
                         'format' => 'raw',
-                        'value'=> Html::a($model->payerName($model->payer_id), Url::to(['/payers/view', 'id' => $model->payer_id]), ['class' => 'blue']),
+                        'value'=> Html::a($model->payer->name, Url::to(['/payers/view', 'id' => $model->payer_id]), ['class' => 'blue']),
                     ],
                     [
                         'attribute'=>'actual',
@@ -79,10 +79,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'nominal',
-            [
-                'attribute'=>'cert_group',
-                'value' => $model->certGroupName($model->cert_group),
-            ],
+            'certGroup.group',
             'rezerv',
             'balance',
             [

@@ -94,7 +94,7 @@ class Certificates extends \yii\db\ActiveRecord
             'directivity4' => 'Программ в "Художественная" направленность',
             'directivity5' => 'Программ в "Туристско-краеведческая" направленность',
             'directivity6' => 'Программ в "Социально-педагогическая" направленность',
-            'cert_group' => 'Группа сертификата',
+            'certGroup.group' => 'Группа сертификата',
             'birthday' => 'Дата рождения',
             'address' => 'Адрес места жительства',
             'pasport_s' => 'серия',
@@ -116,7 +116,7 @@ class Certificates extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getPayers()
+    public function getPayer()
     {
         return $this->hasOne(Payers::className(), ['id' => 'payer_id']);
     }
@@ -193,34 +193,5 @@ class Certificates extends \yii\db\ActiveRecord
         }
 
         return $query->one();
-    }
-
-    /**
-     * DEPRECATED
-     * Use relation Payer instead
-     */
-    public function payerName($data) {
-         $rows = (new \yii\db\Query())
-                ->select(['name'])
-                ->from('payers')
-                ->where(['id'=> $data])
-                ->one();
-
-        return $rows['name'];
-    }
-
-    /**
-     * DEPRECATED
-     * Use relation CertGroup instead
-     */
-    public function certGroupName($data) {
-         
-        $rows = (new \yii\db\Query())
-                ->select(['group'])
-                ->from('cert_group')
-                ->where(['id'=> $data])
-                ->one();
-        
-        return $rows['group'];
     }
 }
