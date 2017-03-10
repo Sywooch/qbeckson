@@ -360,8 +360,6 @@ class ContractsController extends Controller
             if ($model->save()) {
                 Yii::$app->session->setFlash('param1', $model->id);
                 return $this->redirect(['/contracts/complete']);
-            } else {
-                print_r($model->errors);exit;
             }
         }
          return $this->render('/contracts/new', [
