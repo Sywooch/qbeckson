@@ -3,7 +3,6 @@
 namespace app\models;
 
 use Yii;
-use app\models\Certificates;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -36,7 +35,9 @@ use yii\helpers\Url;
 class Contracts extends \yii\db\ActiveRecord
 {
     public $certnumber;
+
     public $certfio;
+
     public $month_start_edu_contract;
     
     /**
@@ -345,14 +346,18 @@ class Contracts extends \yii\db\ActiveRecord
         if ($data == '7') { return 'Седьмой';}
     }
 
-    public static function getCountUsedCertificates($amountPerCertificate = null) {
-        $query = "SELECT count(*) FROM `contracts` WHERE status=:status GROUP BY certificate_id";
+    public static function getCountUsedCertificates($amountPerCertificate = null, $params = []) {
+        $query = "SELECT count(*) FROM `contracts` WHERE status=:status";
+        $groupBy = "GROUP BY certificate_id";
 
         if (!empty($amountPerCertificate) && $operation = substr($amountPerCertificate, 0, 1)) {
-            $query .= " HAVING count(certificate_id) " . $operation . " " . substr($amountPerCertificate, 1);
+            $groupBy .= " HAVING count(certificate_id) " . $operation . " " . substr($amountPerCertificate, 1);
         }
-        $query = "SELECT count(*) as cnt FROM (" . $query . ") as t";
+        if (!empty($params['payerId'])) {
+            $query .= " AND payer_id = " . $params['payerId'];
+        }
 
+        $query = "SELECT count(*) as cnt FROM (" . $query . " " . $groupBy . ") as t";
         $command = Yii::$app->db->createCommand($query, [':status' => 1]);
         $result = $command->queryOne();
 
@@ -370,99 +375,6 @@ class Contracts extends \yii\db\ActiveRecord
 
         return $cert;
     }
-
-    public function getCountUsePayerCert($id) {
-       
-         $cert = (new \yii\db\Query())
-                        ->select(['certificate_id'])
-                        ->from('contracts')
-                        ->where(['status' => 1])
-                        ->andWhere(['payer_id' => $id])
-                        ->column();
-                $cert = array_unique($cert);
-                $cert = count($cert);
-        
-        return $cert;
-    }
-    
-    public function getCountUseOnePayerCert($id) {
-
-         $cert = (new \yii\db\Query())
-                        ->select(['certificate_id'])
-                        ->from('contracts')
-                        ->where(['status' => 1])
-                        ->andWhere(['payer_id' => $id])
-                        ->column();
-                $cert = array_unique($cert);
-                //$cert = count($cert);
-
-        $result = 0;
-        foreach ($cert as $value) {
-            $res = (new \yii\db\Query())
-                        ->select(['id'])
-                        ->from('contracts')
-                        ->where(['status' => 1])
-                        ->andWhere(['certificate_id' => $value])
-                        ->count();
-
-            if ($res == 1) { $result++; }
-        }
-
-        return $result;
-    }
-
-    public function getCountUseTwoPayerCert($id) {
-
-         $cert = (new \yii\db\Query())
-                        ->select(['certificate_id'])
-                        ->from('contracts')
-                        ->where(['status' => 1])
-                      ->andWhere(['payer_id' => $id])
-                        ->column();
-                $cert = array_unique($cert);
-                //$cert = count($cert);
-        
-        $result = 0;
-        foreach ($cert as $value) {
-            $res = (new \yii\db\Query())
-                        ->select(['id'])
-                        ->from('contracts')
-                        ->where(['status' => 1])
-                        ->andWhere(['certificate_id' => $value])
-                        ->count();
-           
-            if ($res == 2) { $result++; }
-        }
-        
-        return $result;
-    }
-    
-    public function getCountUseMorePayerCert($id) {
-       
-         $cert = (new \yii\db\Query())
-                        ->select(['certificate_id'])
-                        ->from('contracts')
-                        ->where(['status' => 1])
-                      ->andWhere(['payer_id' => $id])
-                        ->column();
-                $cert = array_unique($cert);
-                //$cert = count($cert);
-        
-        $result = 0;
-        foreach ($cert as $value) {
-            $res = (new \yii\db\Query())
-                        ->select(['id'])
-                        ->from('contracts')
-                        ->where(['status' => 1])
-                        ->andWhere(['certificate_id' => $value])
-                        ->count();
-
-            if ($res > 2) { $result++; }
-        }
-        
-        return $result;
-    }
-    
 
     public function getCountWaitContracts($organization_id) {
         $query = Contracts::find();
