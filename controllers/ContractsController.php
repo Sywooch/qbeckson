@@ -217,7 +217,7 @@ class ContractsController extends Controller
             //$model->date = date("Y-m-d");
 
             if ($model->save()) {
-                Yii::$app->session->setFlash('param1', $model->id);
+                Yii::$app->session->set('param1', $model->id);
                 return $this->redirect(['/contracts/complete']);
             }
 
@@ -349,7 +349,7 @@ class ContractsController extends Controller
                 $model->payer_id = $certificate->payer_id;
             } else {
 
-                $certificate = Certificates::findOne(Yii::$app->session->getFlash('param2'));
+                $certificate = Certificates::findOne(Yii::$app->session->get('param2'));
 
                 $model->certificate_id = $certificate->id;
                 $model->payer_id = $certificate->payer_id;
@@ -358,7 +358,7 @@ class ContractsController extends Controller
             //$model->date = date("Y-m-d");
 
             if ($model->save()) {
-                Yii::$app->session->setFlash('param1', $model->id);
+                Yii::$app->session->set('param1', $model->id);
                 return $this->redirect(['/contracts/complete']);
             }
         }
@@ -372,7 +372,7 @@ class ContractsController extends Controller
     public function actionComplete()
     {
         
-        $model = Contracts::findOne(Yii::$app->session->getFlash('param1'));
+        $model = Contracts::findOne(Yii::$app->session->get('param1'));
         
         $duble = (new \yii\db\Query())
                 ->select(['id'])
@@ -592,7 +592,7 @@ class ContractsController extends Controller
         $group = $model->group_id;
         $cert = $model->certificate_id;
         $model->delete();
-        Yii::$app->session->setFlash('param2', $cert);
+        Yii::$app->session->set('param2', $cert);
         return $this->redirect(['/contracts/new', 'id' => $group]);
         
     }
