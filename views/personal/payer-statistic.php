@@ -1,5 +1,7 @@
 <?php
 use yii\helpers\Html;
+use app\models\Contracts;
+use app\models\Certificates;
 
 /* @var $this yii\web\View */
 
@@ -23,14 +25,17 @@ $this->params['breadcrumbs'][] = $this->title;
               <?= Html::a('Редактировать', ['/payers/edit', 'id' => $payer['id']], ['class' => 'btn btn-success']) ?>
             </p>
         </div>
+        <?php if ($this->beginCache('payer-statistic', ['duration' => 3600])): ?>
         <div class="col-md-5  col-md-offset-1 well">
-            <p>Количество выданных сертификатов - <?= $count_certificates ?></p>
-            <p>Общая сумма выданных сертификатов - <?= $sum_certificates ?></p>
-            <p>Количество выданных сертификатов по которым заключены договора на обучение - <?= $count_certificates_contracts ?></p>
-            <p>Количество детей обучающихся по одной образовательной программе с использованием выданных сертификатов - <?= $count_certificates_contracts_one ?></p>
-            <p>Количество детей обучающихся по двум образовательным программам с использованием выданных сертификатов - <?= $count_certificates_contracts_two ?></p>
-            <p>Количество детей обучающихся по трем и более образовательным программам с использованием выданных сертификатов - <?= $count_certificates_contracts_more ?></p>
-            <p>Общее количество договоров обучающения заключенных с использованием выданных сертификатов - <?= $sum_contracts ?></p>
+            <p>Количество выданных сертификатов - <?= Certificates::getCountCertificates($payer->id) ?></p>
+            <p>Общая сумма выданных сертификатов - <?= Certificates::getSumCertificates($payer->id) ?></p>
+            <p>Количество выданных сертификатов по которым заключены договора на обучение - <?= Contracts::getCountUsedCertificates(null, ['payerId' => $payer->id]) ?></p>
+            <p>Количество детей обучающихся по одной образовательной программе с использованием выданных сертификатов - <?= Contracts::getCountUsedCertificates('=1', ['payerId' => $payer->id]) ?></p>
+            <p>Количество детей обучающихся по двум образовательным программам с использованием выданных сертификатов - <?= Contracts::getCountUsedCertificates('=2', ['payerId' => $payer->id]) ?></p>
+            <p>Количество детей обучающихся по трем и более образовательным программам с использованием выданных сертификатов - <?= Contracts::getCountUsedCertificates('>2', ['payerId' => $payer->id]) ?></p>
+            <p>Общее количество договоров обучения заключенных с использованием выданных сертификатов - <?= Contracts::getCountContracts($payer->id) ?></p>
         </div>
+        <?php $this->endCache(); ?>
+        <?php endif; ?>
     </div>
 </div>

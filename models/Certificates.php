@@ -162,12 +162,13 @@ class Certificates extends \yii\db\ActiveRecord
         return $query->count();
     }
 
-    public function getSumCertificates($payer_id) {
-        $query = Certificates::find();
+    public static function getSumCertificates($payerId = null) {
+        $query = static::find()
+            ->where(['actual' => 1]);
 
-        $query->where(['payer_id' => $payer_id]);
-        
-        $query->andWhere(['actual' => 1]);
+        if (!empty($payerId)) {
+            $query->andWhere(['payer_id' => $payerId]);
+        }
 
         return $query->sum('nominal');
     }

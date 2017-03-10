@@ -208,35 +208,7 @@ class PersonalController extends \yii\web\Controller
     {
         $payer = Yii::$app->user->identity->payer;
 
-        $InformsProvider = new ActiveDataProvider([
-            'query' => Informs::find()->where(['read'=> 0])->andwhere(['from'=> 2]),
-        ]);
-
-        $CooperateProvider = new ActiveDataProvider([
-            'query' => Cooperate::find()->where(['status'=> 0])->andWhere(['reade'=> 0])->andwhere(['payer_id' => $payer['id']]),
-        ]);
-
-        $count_certificates = Certificates::getCountCertificates($payer->id);
-        $certificates = new Certificates();
-        $sum_certificates = $certificates->getSumCertificates($payer['id']) ? $certificates->getSumCertificates($payer['id']) : 0;
-
-        $contracts = new Contracts();
-        $count_certificates_contracts = $contracts->getCountUsePayerCert($payer['id']);
-        $count_certificates_contracts_one = $contracts->getCountUseOnePayerCert($payer['id']);
-        $count_certificates_contracts_two = $contracts->getCountUseTwoPayerCert($payer['id']);
-        $count_certificates_contracts_more = $contracts->getCountUseMorePayerCert($payer['id']);
-        $sum_contracts = $contracts->getCountContractsPayer($payer['id']) ? $contracts->getCountContractsPayer($payer['id']) : 0;
-
         return $this->render('payer-statistic', [
-            'InformsProvider' => $InformsProvider,
-            'CooperateProvider' => $CooperateProvider,
-            'count_certificates' => $count_certificates,
-            'count_certificates_contracts' => $count_certificates_contracts,
-            'count_certificates_contracts_one' => $count_certificates_contracts_one,
-            'count_certificates_contracts_two' => $count_certificates_contracts_two,
-            'count_certificates_contracts_more' => $count_certificates_contracts_more,
-            'sum_certificates' => $sum_certificates,
-            'sum_contracts' => $sum_contracts,
             'payer' => Yii::$app->user->identity->payer,
         ]);
     }
