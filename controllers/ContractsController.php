@@ -112,7 +112,7 @@ class ContractsController extends Controller
          
             $date_elements_start  = explode("-", $group['datestart']);
         $date_elements_stop  = explode("-", $group['datestop']);
-        $date_elements_user  = explode("-", $model->start_edu_contract); 
+        $date_elements_user  = explode("-", $model->start_edu_contract);
         
         $prodolj_d = (intval(abs(strtotime($group['datestart']) - strtotime($group['datestop']))) / (3600 * 24)) + 1;  // поменять на кол-во дней
         
@@ -139,7 +139,7 @@ class ContractsController extends Controller
         $first_m_day = cal_days_in_month(CAL_GREGORIAN, $date_elements_start[1], $date_elements_start[0]);
         
         //$teach_day = $first_m_day - $date_elements_user[2] + 1;
-        
+
         $teach_day = $first_m_day - $date_elements_start[2] + 1;
         
             $year = Years::findOne($group['year_id']);
@@ -305,60 +305,52 @@ class ContractsController extends Controller
 
     }
     
-     public function actionNew($id)
+    public function actionNew($id)
     {
         $model = new Contracts();
-         
-         
-         //$certificate = Certificates::findOne($cert);
-         
+
         $groups = new Groups();
         $group = $groups->getGroup($id);
-         
-        //$model->start_edu_contract = $group['datestart'];
-         $start_edu_contract = explode('-', $group['datestart']);
-         
+
+        $start_edu_contract = explode('-', $group['datestart']);
+
         $model->month_start_edu_contract = $start_edu_contract[1].'-'.$start_edu_contract[0];
-         
         $model->program_id = $group['program_id'];
-        
-         
+
         if ($model->load(Yii::$app->request->post())) {
-            
             $month_start_edu_contract = explode('-', $model->month_start_edu_contract);
-            
+
             if ($start_edu_contract[1] == $month_start_edu_contract[0]) {
                 $model->start_edu_contract = $group['datestart'];
             } else {
-            $model->start_edu_contract = $month_start_edu_contract[1].'-'.$month_start_edu_contract[0].'-01';
+                $model->start_edu_contract = $month_start_edu_contract[1].'-'.$month_start_edu_contract[0].'-01';
             }
-            //return $model->start_edu_contract;
 
-            if ($model->start_edu_contract < $group['datestart'] or $model->start_edu_contract > $group['datestop']) {
+            if ($model->start_edu_contract < $group['datestart'] || $model->start_edu_contract > $group['datestop']) {
                 return $this->render('/contracts/new', [
                 'model' => $model,
                 'error' => 'Неправильная дата. Дата начала - '. $group['datestart'].', дата окончания - '.$group['datestop'],
                 ]);
             }
 
-            
+
             $model->group_id = $id;
-            
+
             $model->organization_id = $group['organization_id'];
             $model->year_id = $group['year_id'];
-            
+
             $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
             if (isset($roles['certificate'])) {
-            
+
                 $certificates = new Certificates();
                 $certificate = $certificates->getCertificates();
-            
+
                 $model->certificate_id = $certificate->id;
                 $model->payer_id = $certificate->payer_id;
             } else {
-                
+
                 $certificate = Certificates::findOne(Yii::$app->session->getFlash('param2'));
-                
+
                 $model->certificate_id = $certificate->id;
                 $model->payer_id = $certificate->payer_id;
             }
@@ -368,14 +360,16 @@ class ContractsController extends Controller
             if ($model->save()) {
                 Yii::$app->session->setFlash('param1', $model->id);
                 return $this->redirect(['/contracts/complete']);
-            } 
+            } else {
+                print_r($model->errors);exit;
+            }
         }
          return $this->render('/contracts/new', [
             'model' => $model,
         ]);
     }
     
-    
+
     
     public function actionComplete()
     {
@@ -525,7 +519,7 @@ class ContractsController extends Controller
         
         
         if ($prodolj_m == $prodolj_m_user) {
-            if ($date_elements_start[0] == $date_elements_stop[0]) {
+            if ($date_elements_start[1] == $date_elements_stop[1]) {
                  $model->first_m_price = round($userprice, 2);
             }
             else {
@@ -759,7 +753,7 @@ class ContractsController extends Controller
         
         
         if ($prodolj_m == $prodolj_m_user) {
-            if ($date_elements_start[0] == $date_elements_stop[0]) {
+            if ($date_elements_start[1] == $date_elements_stop[1]) {
                  $model->first_m_price = round($userprice, 2);
             }
             else {

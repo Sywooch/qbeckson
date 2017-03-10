@@ -69,8 +69,6 @@ class PersonalController extends \yii\web\Controller
 
     public function actionOperatorStatistic()
     {
-        $programs = new Programs();
-
         return $this->render('operator-statistic', [
             'operator' => Yii::$app->user->identity->operator,
         ]);
@@ -206,8 +204,6 @@ class PersonalController extends \yii\web\Controller
 
     public function actionPayerStatistic()
     {
-        $payer = Yii::$app->user->identity->payer;
-
         return $this->render('payer-statistic', [
             'payer' => Yii::$app->user->identity->payer,
         ]);
