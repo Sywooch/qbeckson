@@ -364,18 +364,6 @@ class Contracts extends \yii\db\ActiveRecord
         return $result['cnt'];
     }
 
-    public function getCountContractsPayer($id) {
-         $cert = (new \yii\db\Query())
-                        ->select(['id'])
-                        ->from('contracts')
-                        ->where(['status' => 1])
-                        ->andWhere(['payer_id' => $id])
-                        ->count();
-
-
-        return $cert;
-    }
-
     public function getCountWaitContracts($organization_id) {
         $query = Contracts::find();
 
@@ -385,9 +373,13 @@ class Contracts extends \yii\db\ActiveRecord
         return $query->count();
     }
 
-    public static function getCountContracts() {
+    public static function getCountContracts($payerId = null) {
         $query = static::find()
             ->where(['status' => 1]);
+
+        if (!empty($payerId)) {
+            $query->andWhere(['payer_id' => $payerId]);
+        }
 
         return $query->count();
     }
