@@ -25,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
               <?= Html::a('Редактировать', ['/payers/edit', 'id' => $payer['id']], ['class' => 'btn btn-success']) ?>
             </p>
         </div>
-        <?php if ($this->beginCache('payer-statistic', ['duration' => 3600])): ?>
+        <?php //if ($this->beginCache('payer-statistic', ['duration' => 1])): ?>
         <div class="col-md-5  col-md-offset-1 well">
             <p>Количество выданных сертификатов - <?= Certificates::getCountCertificates($payer->id) ?></p>
             <p>Общая сумма выданных сертификатов - <?= Certificates::getSumCertificates($payer->id) ?></p>
@@ -33,9 +33,9 @@ $this->params['breadcrumbs'][] = $this->title;
             <p>Количество детей обучающихся по одной образовательной программе с использованием выданных сертификатов - <?= Contracts::getCountUsedCertificates('=1', ['payerId' => $payer->id]) ?></p>
             <p>Количество детей обучающихся по двум образовательным программам с использованием выданных сертификатов - <?= Contracts::getCountUsedCertificates('=2', ['payerId' => $payer->id]) ?></p>
             <p>Количество детей обучающихся по трем и более образовательным программам с использованием выданных сертификатов - <?= Contracts::getCountUsedCertificates('>2', ['payerId' => $payer->id]) ?></p>
-            <p>Общее количество договоров обучения заключенных с использованием выданных сертификатов - <?= Contracts::getCountContracts($payer->id) ?></p>
+            <p>Общее количество договоров обучения заключенных с использованием выданных сертификатов - <?= Contracts::getCountContracts(['payerId' => $payer->id]) ?></p>
         </div>
-        <?php $this->endCache(); ?>
-        <?php endif; ?>
+        <?php //$this->endCache(); ?>
+        <?php //endif; ?>
     </div>
 </div>

@@ -373,12 +373,15 @@ class Contracts extends \yii\db\ActiveRecord
         return $query->count();
     }
 
-    public static function getCountContracts($payerId = null) {
+    public static function getCountContracts($params = []) {
         $query = static::find()
             ->where(['status' => 1]);
 
-        if (!empty($payerId)) {
-            $query->andWhere(['payer_id' => $payerId]);
+        if (!empty($params['payerId'])) {
+            $query->andWhere(['payer_id' => $params['payerId']]);
+        }
+        if (!empty($params['certificateId'])) {
+            $query->andWhere(['certificate_id' => $params['certificateId']]);
         }
 
         return $query->count();

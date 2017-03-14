@@ -173,6 +173,9 @@ class Certificates extends \yii\db\ActiveRecord
         return $query->sum('nominal');
     }
 
+    /**
+     * DEPRECATED
+     */
     public function getSumContractes($payer_id) {
         $query = Certificates::find();
 

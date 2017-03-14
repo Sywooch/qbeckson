@@ -240,7 +240,7 @@ class CertificatesController extends Controller
     {
         $certificates = new Certificates();
         $certificate = $certificates->getCertificates();
-        
+
         $user = User::findOne($certificate['user_id']);
 
         if($user->load(Yii::$app->request->post()) && $user->validate()) {
@@ -483,31 +483,7 @@ class CertificatesController extends Controller
             
             print_r($model->getErrors());
         }
-        
-        
     }
-    /*
-    public function actionCertdel()
-    {
-        $users = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('user')
-            ->where(['>=', 'id', 1999])
-            ->column();
-        
-        
-        
-        foreach ($users as $user) {
-              
-            //User::findOne($user)->delete();
-            
-        }
-        
-        echo "ok";
-    }
-    
-    */
-    
 
     /**
      * Finds the Certificates model based on its primary key value.
