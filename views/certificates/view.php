@@ -65,20 +65,18 @@ $this->params['breadcrumbs'][] = $this->title;
         if (Yii::$app->user->can('payer')) {
             echo '<div class="pull-right">';
             if ($model->actual == 0) {
-
                 echo Html::a('Активировать', Url::to(['/certificates/actual', 'id' => $model->id]), ['class' => 'btn btn-success']);
-                echo '&nbsp;';
-             } else {
-                
+            } else {
                 echo Html::a('Заморозить', Url::to(['/certificates/noactual', 'id' => $model->id]), ['class' => 'btn btn-danger']);
-                echo '&nbsp;';
-             }
+            }
+            echo '&nbsp;';
             echo Html::a('Удалить', Url::to(['/certificates/delete', 'id' => $model->id]), ['class' => 'btn btn-danger',
             'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post']]);
+                'confirm' => 'Уверены, что хотите удалить сертификат?',
+                'method' => 'post'
+            ]]);
             echo '</div>';
-            
+
             echo Html::a('Назад', '/personal/payer-certificates', ['class' => 'btn btn-primary']);
             echo '&nbsp;';
             echo Html::a('Редактировать', Url::to(['/certificates/update', 'id' => $model->id]), ['class' => 'btn btn-primary']);
