@@ -2,11 +2,20 @@
 
 namespace app\models;
 
-use developeruz\db_rbac\interfaces\UserRbacInterface;
 use Yii;
+use yii\db\ActiveRecord;
+use developeruz\db_rbac\interfaces\UserRbacInterface;
 
-class UserIdentity extends User implements \yii\web\IdentityInterface, UserRbacInterface
+class UserIdentity extends ActiveRecord implements \yii\web\IdentityInterface, UserRbacInterface
 {
+    /**
+     * @inheritdoc
+     */
+    public static function tableName()
+    {
+        return '{{%user}}';
+    }
+
     /**
      * @inheritdoc
      */
@@ -82,7 +91,7 @@ class UserIdentity extends User implements \yii\web\IdentityInterface, UserRbacI
      */
     public function setPassword($password)
     {
-        $this->password_hash = Yii::$app->security->generatePasswordHash($password);
+        $this->password = Yii::$app->security->generatePasswordHash($password);
     }
 
     /**

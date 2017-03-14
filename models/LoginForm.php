@@ -75,7 +75,7 @@ class LoginForm extends Model
         if ($this->validate() && $this->getUser()) {
             return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600*24*30 : 0);
         }
-        
+
         return false;
     }
 
