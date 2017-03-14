@@ -81,4 +81,9 @@ class SiteController extends Controller
 
         return $this->goHome();
     }
+
+    public function actionNoVideo()
+    {
+        return $this->render('no-video');
+    }
 }

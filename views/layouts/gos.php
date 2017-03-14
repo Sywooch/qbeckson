@@ -168,12 +168,20 @@ AppAsset::register($this);
                 </div>
 
                 <div class="row">
-                   <div class="col-xs-12">
-                       <?= Breadcrumbs::widget([
-                        'homeLink' => ['label' => 'Главная', 'url' => '/', 'template' => '<span class="glyphicon glyphicon-home"></span> <li>{link}</li>'],
-                        'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-                    ]) ?>
-                   </div>
+                    <div class="col-xs-12">
+                    <?php
+                        $links = isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [];
+                        $links = array_merge($links, [[
+                            'label' => 'Your Label',
+                            'url' => ['controller/action'],
+                            'template' => "<li class=\"breadcrumbs-help-icon\"><a href=\"" . Url::to(['site/no-video']) . "\"><span class=\"glyphicon glyphicon-film\"></span></a></li>\n"
+                        ]]);
+                        echo Breadcrumbs::widget([
+                            'homeLink' => ['label' => 'Главная', 'url' => '/', 'template' => '<span class="glyphicon glyphicon-home"></span> <li>{link}</li>'],
+                            'links' => $links,
+                        ])
+                        ?>
+                    </div>
                     <div class="col-xs-12 col-md-8 col-md-offset-2">
                          <?php
                             // TODO: Убрать всё это говно
