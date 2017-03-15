@@ -174,7 +174,7 @@ AppAsset::register($this);
                         $links = array_merge($links, [[
                             'label' => 'Your Label',
                             'url' => ['controller/action'],
-                            'template' => "<li class=\"breadcrumbs-help-icon\"><a href=\"" . Url::to(['site/no-video']) . "\"><span class=\"glyphicon glyphicon-film\"></span></a></li>\n"
+                            'template' => "<li class=\"breadcrumbs-help-icon\"><a href=\"" . Url::to(['site/no-video']) . "\"><span class=\"glyphicon glyphicon-film\"> Видео-урок</span></a></li>\n"
                         ]]);
                         echo Breadcrumbs::widget([
                             'homeLink' => ['label' => 'Главная', 'url' => '/', 'template' => '<span class="glyphicon glyphicon-home"></span> <li>{link}</li>'],
