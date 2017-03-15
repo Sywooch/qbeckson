@@ -71,10 +71,17 @@ AppAsset::register($this);
                                 echo Nav::widget([
                                     'options' => ['class' => 'navbar-nav'],
                                     'items' => [
-                                        ['label' => 'Главная', 'url' => ['/site/index']],
-                                        ['label' => 'Справочный раздел', 'url' => ['/site/about']],
-                                        ['label' => 'Обратная связь', 'url' => ['/site/contact']],
-                                        ['label' => 'Поиск программ', 'url' => ['/programs/index']],
+                                        ['label' => 'Главная', 'url' => ['/personal/index']],
+                                        ['label' => 'Страницы помощи', 'url' => ['/help/index']],
+                                        [
+                                            'label' => 'Ролевая система',
+                                            'url' => ['/personal/index'],
+                                            'items' => [
+                                                ['label' => 'Правила доступа', 'url' => ['/permit/access/permission']],
+                                                ['label' => 'Управление ролями', 'url' => ['/permit/access/role']],
+                                                ['label' => 'Список пользователей', 'url' => ['/user/index']],
+                                            ],
+                                        ],
                                     ],
                                 ]);
                             }
