@@ -56,9 +56,9 @@ $this->params['breadcrumbs'][] = ['label' => 'Персональная инфо�
        <div class="col-md-7 ">
             <h2><?= $certificate['fio_child'] ?></h2>
             
-            <p class="biglabel">Номер сертификата <strong><?= $certificate['number'] ?></strong><p>
+            <p class="biglabel">Номер сертификата <strong><?= $certificate['number'] ?></strong></p>
             
-            <p class="biglabel">ФИО законного представителя <strong ><?= $certificate['fio_parent'] ?></strong><p>
+            <p class="biglabel">ФИО законного представителя <strong ><?= $certificate['fio_parent'] ?></strong></p>
             <br>
             <br>
             <p>
@@ -70,7 +70,7 @@ $this->params['breadcrumbs'][] = ['label' => 'Персональная инфо�
             <div>
                 <p class="biglabel">Номинал сертификата<br><strong class="bignumbers"><?= $certificate['nominal'] ?></strong></p>
                 <p class="biglabel">Осталось средств<br><strong class="bignumbers"><?= $certificate['balance'] ?></strong></p>
-                <p class="biglabel">Зарезервированно на оплату договоров<br><strong class="bignumbers"><?= $certificate['rezerv'] ?></strong></p> 
+                <p class="biglabel">Зарезервировано на оплату договоров<br><strong class="bignumbers"><?= $certificate['rezerv'] ?></strong></p> 
             </div>
             <!-- <div class="col-md-4">
                 <div class="nominal">
