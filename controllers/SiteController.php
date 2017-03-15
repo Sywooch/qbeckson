@@ -82,8 +82,15 @@ class SiteController extends Controller
         return $this->goHome();
     }
 
-    public function actionNoVideo()
+    public function actionHelp()
     {
+        if (!Yii::$app->user->isGuest) {
+            $role = array_shift(Yii::$app->authManager->getRolesByUser(Yii::$app->user->id));
+            if (!empty($role) && !empty($role->data)) {
+                return $this->render('help', ['helpText' => $role->data]);
+            }
+        }
+
         return $this->render('no-video');
     }
 }

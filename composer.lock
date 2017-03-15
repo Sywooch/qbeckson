@@ -4,9 +4,69 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "3f23333aafac19ebbcada0ba9d30cc4c",
-    "content-hash": "438b0ee00b6c39d3db5714131182b7fa",
+    "hash": "63a9442ff8cd7f41be81ebe259f5f3e4",
+    "content-hash": "26a53e5210c18a83bc07a431a045b12a",
     "packages": [
+        {
+            "name": "2amigos/yii2-ckeditor-widget",
+            "version": "2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/2amigos/yii2-ckeditor-widget.git",
+                "reference": "a842bbf4c5b3adc48d4cd58aa294d593dd005c24"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/2amigos/yii2-ckeditor-widget/zipball/a842bbf4c5b3adc48d4cd58aa294d593dd005c24",
+                "reference": "a842bbf4c5b3adc48d4cd58aa294d593dd005c24",
+                "shasum": ""
+            },
+            "require": {
+                "ckeditor/ckeditor": "^4.5",
+                "yiisoft/yii2": "^2.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "4.*"
+            },
+            "type": "yii2-extension",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                },
+                "asset-installer-paths": {
+                    "bower-asset-library": "vendor/bower"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "dosamigos\\ckeditor\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "2amigOS! Consulting Group",
+                    "email": "hola@2amigos.us",
+                    "homepage": "http://2amigos.us",
+                    "role": "Developer"
+                }
+            ],
+            "description": "CKEditor widget for Yii2.",
+            "homepage": "http://yiiwheels.com/extension/ckeditor-widget",
+            "keywords": [
+                "2amigos",
+                "CKEditor",
+                "extension",
+                "widget",
+                "yii",
+                "yii 2",
+                "yii2"
+            ],
+            "time": "2016-09-21 09:50:22"
+        },
         {
             "name": "arius/number-formatter",
             "version": "v1.1.0",
@@ -383,17 +443,58 @@
             "time": "2016-09-14 20:40:20"
         },
         {
-            "name": "developeruz/yii2-db-rbac",
-            "version": "1.1.1",
+            "name": "ckeditor/ckeditor",
+            "version": "4.6.2",
             "source": {
                 "type": "git",
-                "url": "https://github.com/developeruz/yii2-db-rbac.git",
-                "reference": "ef181cbb2d80a9a68d65c42d54bcd113260729ec"
+                "url": "https://github.com/ckeditor/ckeditor-releases.git",
+                "reference": "268078ab43195b6004d64bc8764c41f2f829640e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/developeruz/yii2-db-rbac/zipball/ef181cbb2d80a9a68d65c42d54bcd113260729ec",
-                "reference": "ef181cbb2d80a9a68d65c42d54bcd113260729ec",
+                "url": "https://api.github.com/repos/ckeditor/ckeditor-releases/zipball/268078ab43195b6004d64bc8764c41f2f829640e",
+                "reference": "268078ab43195b6004d64bc8764c41f2f829640e",
+                "shasum": ""
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0+",
+                "LGPL-2.1+",
+                "MPL-1.1+"
+            ],
+            "authors": [
+                {
+                    "name": "CKSource",
+                    "homepage": "http://cksource.com"
+                }
+            ],
+            "description": "JavaScript WYSIWYG web text editor.",
+            "homepage": "http://ckeditor.com",
+            "keywords": [
+                "CKEditor",
+                "editor",
+                "fckeditor",
+                "html",
+                "javascript",
+                "richtext",
+                "text",
+                "wysiwyg"
+            ],
+            "time": "2017-01-12 17:36:48"
+        },
+        {
+            "name": "developeruz/yii2-db-rbac",
+            "version": "1.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/developeruz/yii2-db-rbac.git",
+                "reference": "0cd8031d56d487a28b967d0af236a82577c0ea51"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/developeruz/yii2-db-rbac/zipball/0cd8031d56d487a28b967d0af236a82577c0ea51",
+                "reference": "0cd8031d56d487a28b967d0af236a82577c0ea51",
                 "shasum": ""
             },
             "require": {
@@ -421,24 +522,27 @@
                 "rbac",
                 "yii"
             ],
-            "time": "2016-12-09 13:28:47"
+            "time": "2017-03-05 11:58:10"
         },
         {
             "name": "ezyang/htmlpurifier",
-            "version": "v4.8.0",
+            "version": "v4.9.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ezyang/htmlpurifier.git",
-                "reference": "d0c392f77d2f2a3dcf7fcb79e2a1e2b8804e75b2"
+                "reference": "6d50e5282afdfdfc3e0ff6d192aff56c5629b3d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ezyang/htmlpurifier/zipball/d0c392f77d2f2a3dcf7fcb79e2a1e2b8804e75b2",
-                "reference": "d0c392f77d2f2a3dcf7fcb79e2a1e2b8804e75b2",
+                "url": "https://api.github.com/repos/ezyang/htmlpurifier/zipball/6d50e5282afdfdfc3e0ff6d192aff56c5629b3d4",
+                "reference": "6d50e5282afdfdfc3e0ff6d192aff56c5629b3d4",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.2"
+            },
+            "require-dev": {
+                "simpletest/simpletest": "^1.1"
             },
             "type": "library",
             "autoload": {
@@ -465,7 +569,7 @@
             "keywords": [
                 "html"
             ],
-            "time": "2016-07-16 12:58:58"
+            "time": "2017-03-13 06:30:53"
         },
         {
             "name": "kartik-v/bootstrap-fileinput",
@@ -713,12 +817,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/kartik-v/yii2-dialog.git",
-                "reference": "8fcd774e705d715cd98afcf91e90932d069da6e2"
+                "reference": "8c12fabcd45634ab1091e5bf4c2a9132dfb695a4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kartik-v/yii2-dialog/zipball/8fcd774e705d715cd98afcf91e90932d069da6e2",
-                "reference": "8fcd774e705d715cd98afcf91e90932d069da6e2",
+                "url": "https://api.github.com/repos/kartik-v/yii2-dialog/zipball/8c12fabcd45634ab1091e5bf4c2a9132dfb695a4",
+                "reference": "8c12fabcd45634ab1091e5bf4c2a9132dfb695a4",
                 "shasum": ""
             },
             "require": {
@@ -757,7 +861,7 @@
                 "modal",
                 "yii2"
             ],
-            "time": "2016-12-01 05:23:53"
+            "time": "2017-03-11 08:47:41"
         },
         {
             "name": "kartik-v/yii2-dynagrid",
@@ -825,12 +929,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/kartik-v/yii2-export.git",
-                "reference": "2324fd5c4a7a92fb9002e38217859e2a256fe889"
+                "reference": "4862c52f9190e2e199d4490ee8a6b24d3c7947f5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kartik-v/yii2-export/zipball/2324fd5c4a7a92fb9002e38217859e2a256fe889",
-                "reference": "2324fd5c4a7a92fb9002e38217859e2a256fe889",
+                "url": "https://api.github.com/repos/kartik-v/yii2-export/zipball/4862c52f9190e2e199d4490ee8a6b24d3c7947f5",
+                "reference": "4862c52f9190e2e199d4490ee8a6b24d3c7947f5",
                 "shasum": ""
             },
             "require": {
@@ -877,7 +981,7 @@
                 "xlsx",
                 "yii2"
             ],
-            "time": "2016-12-28 16:02:15"
+            "time": "2017-03-13 06:21:23"
         },
         {
             "name": "kartik-v/yii2-field-range",
@@ -936,12 +1040,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/kartik-v/yii2-grid.git",
-                "reference": "a178f26bc6d86d21088319a8afd406ad103e3535"
+                "reference": "05b889d6b51cdebd7e442be51b3cb7cf4f49fb9a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kartik-v/yii2-grid/zipball/a178f26bc6d86d21088319a8afd406ad103e3535",
-                "reference": "a178f26bc6d86d21088319a8afd406ad103e3535",
+                "url": "https://api.github.com/repos/kartik-v/yii2-grid/zipball/05b889d6b51cdebd7e442be51b3cb7cf4f49fb9a",
+                "reference": "05b889d6b51cdebd7e442be51b3cb7cf4f49fb9a",
                 "shasum": ""
             },
             "require": {
@@ -981,7 +1085,7 @@
                 "widget",
                 "yii2"
             ],
-            "time": "2017-02-26 07:48:11"
+            "time": "2017-03-11 10:54:52"
         },
         {
             "name": "kartik-v/yii2-helpers",
@@ -1040,12 +1144,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/kartik-v/yii2-krajee-base.git",
-                "reference": "2479241c03c87995cfc528ae7b297f5ae9e733cb"
+                "reference": "4c26c71ca3f536f0d904de25d1ebffc04e22079c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kartik-v/yii2-krajee-base/zipball/2479241c03c87995cfc528ae7b297f5ae9e733cb",
-                "reference": "2479241c03c87995cfc528ae7b297f5ae9e733cb",
+                "url": "https://api.github.com/repos/kartik-v/yii2-krajee-base/zipball/4c26c71ca3f536f0d904de25d1ebffc04e22079c",
+                "reference": "4c26c71ca3f536f0d904de25d1ebffc04e22079c",
                 "shasum": ""
             },
             "require": {
@@ -1083,7 +1187,7 @@
                 "widget",
                 "yii2"
             ],
-            "time": "2017-02-22 05:58:53"
+            "time": "2017-03-06 16:00:52"
         },
         {
             "name": "kartik-v/yii2-mpdf",
@@ -2616,16 +2720,16 @@
         },
         {
             "name": "symfony/css-selector",
-            "version": "v3.2.4",
+            "version": "v3.2.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/css-selector.git",
-                "reference": "f0e628f04fc055c934b3211cfabdb1c59eefbfaa"
+                "reference": "a48f13dc83c168f1253a5d2a5a4fb46c36244c4c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/css-selector/zipball/f0e628f04fc055c934b3211cfabdb1c59eefbfaa",
-                "reference": "f0e628f04fc055c934b3211cfabdb1c59eefbfaa",
+                "url": "https://api.github.com/repos/symfony/css-selector/zipball/a48f13dc83c168f1253a5d2a5a4fb46c36244c4c",
+                "reference": "a48f13dc83c168f1253a5d2a5a4fb46c36244c4c",
                 "shasum": ""
             },
             "require": {
@@ -2665,20 +2769,20 @@
             ],
             "description": "Symfony CssSelector Component",
             "homepage": "https://symfony.com",
-            "time": "2017-01-02 20:32:22"
+            "time": "2017-02-21 09:12:04"
         },
         {
             "name": "symfony/dom-crawler",
-            "version": "v3.2.4",
+            "version": "v3.2.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/dom-crawler.git",
-                "reference": "b814b41373fc4e535aff8c765abe39545216f391"
+                "reference": "403944e294cf4ceb3b8447f54cbad88ea7b99cee"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/dom-crawler/zipball/b814b41373fc4e535aff8c765abe39545216f391",
-                "reference": "b814b41373fc4e535aff8c765abe39545216f391",
+                "url": "https://api.github.com/repos/symfony/dom-crawler/zipball/403944e294cf4ceb3b8447f54cbad88ea7b99cee",
+                "reference": "403944e294cf4ceb3b8447f54cbad88ea7b99cee",
                 "shasum": ""
             },
             "require": {
@@ -2721,7 +2825,7 @@
             ],
             "description": "Symfony DomCrawler Component",
             "homepage": "https://symfony.com",
-            "time": "2017-01-21 17:14:11"
+            "time": "2017-02-21 09:12:04"
         },
         {
             "name": "symfony/polyfill-mbstring",

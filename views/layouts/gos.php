@@ -72,13 +72,12 @@ AppAsset::register($this);
                                     'options' => ['class' => 'navbar-nav'],
                                     'items' => [
                                         ['label' => 'Главная', 'url' => ['/personal/index']],
-                                        ['label' => 'Страницы помощи', 'url' => ['/help/index']],
                                         [
                                             'label' => 'Ролевая система',
                                             'url' => ['/personal/index'],
                                             'items' => [
                                                 ['label' => 'Правила доступа', 'url' => ['/permit/access/permission']],
-                                                ['label' => 'Управление ролями', 'url' => ['/permit/access/role']],
+                                                ['label' => 'Управление ролями', 'url' => ['/rbac-access/role']],
                                                 ['label' => 'Список пользователей', 'url' => ['/user/index']],
                                             ],
                                         ],
@@ -179,9 +178,9 @@ AppAsset::register($this);
                     <?php
                         $links = isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [];
                         $links = array_merge($links, [[
-                            'label' => 'Your Label',
+                            'label' => 'Видео-уроки',
                             'url' => ['controller/action'],
-                            'template' => "<li class=\"breadcrumbs-help-icon\"><a href=\"" . Url::to(['site/no-video']) . "\"><span class=\"glyphicon glyphicon-film\"></span> Видео-урок</a></li>\n"
+                            'template' => "<li class=\"breadcrumbs-help-icon\"><a href=\"" . Url::to(['site/help']) . "\"><span class=\"glyphicon glyphicon-film\"></span> Видео-урок</a></li>\n"
                         ]]);
                         echo Breadcrumbs::widget([
                             'homeLink' => ['label' => 'Главная', 'url' => '/', 'template' => '<span class="glyphicon glyphicon-home"></span> <li>{link}</li>'],
