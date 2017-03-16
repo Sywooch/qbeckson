@@ -347,22 +347,14 @@ class PersonalController extends \yii\web\Controller
 
     public function actionOrganizationInfo()
     {
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
+        $organization = Yii::$app->user->identity->organization;
 
-        $informsProvider = new ActiveDataProvider([
-            'query' => Informs::find()->where(['read'=> 0])->andwhere(['from'=> 3])->andwhere(['prof_id'=> $organization['id']]),
-        ]);
-
-        $model = Organization::findOne($organization['id']);
-        if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->save()) {
+        if ($organization->load(Yii::$app->request->post()) && $organization->save()) {
             return $this->redirect(['/personal/organization-info']);
         }
 
         return $this->render('organization-info', [
-            'informsProvider' => $informsProvider,
             'organization' => $organization,
-            'model' => $model,
         ]);
     }
 

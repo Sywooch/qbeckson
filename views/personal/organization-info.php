@@ -14,7 +14,7 @@ $this->title = 'Информация';
 <div class="col-md-10 col-md-offset-1">
 <div class="container-fluid" ng-app>
     <div class="row">
-        <div class="col-md-<?= $model->type == 4 ? "12" : "4" ?> well">
+        <div class="col-md-<?= $organization->type == 4 ? "12" : "4" ?> well">
             <p><label class="control-label">Наименование организации</label> - <?= $organization['name'] ?></p>
             <p><label class="control-label">ИНН</label> - <?= $organization['inn'] ?></p>
             <p><label class="control-label">КПП</label> - <?= $organization['KPP'] ?></p>
@@ -37,13 +37,13 @@ $this->title = 'Информация';
                 
                        
                     <?php
-                    if ($model->type != 4) {
-                        if ($model->doc_type == 1) {
+                    if ($organization->type != 4) {
+                        if ($organization->doc_type == 1) {
                             $doc_type = 'block';
                         } else {
                             $doc_type = 'none';
                         }
-                        if ($model->doc_type == 3) {
+                        if ($organization->doc_type == 3) {
                             $doc_types = 'block';
                         } else {
                             $doc_types = 'none';
@@ -57,15 +57,15 @@ $this->title = 'Информация';
                             <div class="row">
                                 <div class="col-md-3 license">
                                     <p>(от </p>'.
-                                     $form->field($model, 'license_date')->textInput(['readOnly'=>true])->label(false)
+                                     $form->field($organization, 'license_date')->textInput(['readOnly'=>true])->label(false)
                                 .'</div>
                                 <div class="col-md-3 license">
                                     <p>№</p>'.
-                                        $form->field($model, 'license_number')->textInput(['readOnly'=>true])->label(false)
+                                        $form->field($organization, 'license_number')->textInput(['readOnly'=>true])->label(false)
                                 .'</div>
                                 <div class="col-md-6 license">
                                     <p>,&nbsp;выдана</p>'.
-                                    $form->field($model, 'license_issued_dat', ['template' => "{label}\n{hint}\n{input}\n<small>(в творительном падеже)</small>\n{error}"])->textInput(['maxlength' => true])->label(false)
+                                    $form->field($organization, 'license_issued_dat', ['template' => "{label}\n{hint}\n{input}\n<small>(в творительном падеже)</small>\n{error}"])->textInput(['maxlength' => true])->label(false)
                                     .'<p>).</p>
                                 </div>
                             </div>
@@ -73,23 +73,23 @@ $this->title = 'Информация';
                    </div>';
                     
 
-                    echo $form->field($model, 'fio', ['template' => "{label}\n{hint}\n{input}\n<small>(в родительном падеже)</small>\n{error}"])->textInput(['maxlength' => true]);
+                    echo $form->field($organization, 'fio', ['template' => "{label}\n{hint}\n{input}\n<small>(в родительном падеже)</small>\n{error}"])->textInput(['maxlength' => true]);
                     
-                    echo $form->field($model, 'position_min', ['template' => "{label}\n{hint}\n{input}\n<small>(кратко)</small>\n{error}"])->textInput(['maxlength' => true])->label('Должность представителя организации');
+                    echo $form->field($organization, 'position_min', ['template' => "{label}\n{hint}\n{input}\n<small>(кратко)</small>\n{error}"])->textInput(['maxlength' => true])->label('Должность представителя организации');
 
-                    echo $form->field($model, 'position', ['template' => "{label}\n{hint}\n{input}\n<small>(в родительном падеже)</small>\n{error}"])->textInput(['maxlength' => true]);
+                    echo $form->field($organization, 'position', ['template' => "{label}\n{hint}\n{input}\n<small>(в родительном падеже)</small>\n{error}"])->textInput(['maxlength' => true]);
 
-                    if ($model->type == 3) {
+                    if ($organization->type == 3) {
                             
-                        echo $form->field($model, 'doc_type')->dropDownList([1 => 'Доверенности', 3 => 'Cвидетельства о государственной регистрации'], ['onChange' => 'selectType(this.value);']);
+                        echo $form->field($organization, 'doc_type')->dropDownList([1 => 'Доверенности', 3 => 'Cвидетельства о государственной регистрации'], ['onChange' => 'selectType(this.value);']);
 
                         echo '<div id="svidet" style="display: '.$doc_types.'">'.
-                            $form->field($model, 'svidet')->textInput(['readOnly'=>true])
+                            $form->field($organization, 'svidet')->textInput(['readOnly'=>true])
                         .'</div>';
                          
                         echo '<div class="row" id="proxy" style="display: '.$doc_type.'">
                            <div class="col-md-6">'.
-                                 $form->field($model, 'date_proxy')->widget(DateControl::classname(), [
+                                 $form->field($organization, 'date_proxy')->widget(DateControl::classname(), [
                                         'type'=>DateControl::FORMAT_DATE,
                                         'ajaxConversion'=>false,
                                         'options' => [
@@ -100,15 +100,15 @@ $this->title = 'Информация';
                                     ])
                             .'</div>
                            <div class="col-md-6">'.
-                                 $form->field($model, 'number_proxy')->textInput(['id' => 'number_proxy', 'maxlength' => true])
+                                 $form->field($organization, 'number_proxy')->textInput(['id' => 'number_proxy', 'maxlength' => true])
                            .'</div>
                         </div>';
                     } else {
-                        echo $form->field($model, 'doc_type')->dropDownList([1 => 'Доверенности', 2 => 'Устава'], ['onChange' => 'selectType(this.value);']);
+                        echo $form->field($organization, 'doc_type')->dropDownList([1 => 'Доверенности', 2 => 'Устава'], ['onChange' => 'selectType(this.value);']);
 
                         echo '<div class="row" id="proxy" style="display: '.$doc_type.'">
                            <div class="col-md-6">'.
-                                 $form->field($model, 'date_proxy')->widget(DateControl::classname(), [
+                                 $form->field($organization, 'date_proxy')->widget(DateControl::classname(), [
                                         'type'=>DateControl::FORMAT_DATE,
                                         'ajaxConversion'=>false,
                                         'options' => [
@@ -119,13 +119,13 @@ $this->title = 'Информация';
                                     ])
                             .'</div>
                            <div class="col-md-6">'.
-                                 $form->field($model, 'number_proxy')->textInput(['id' => 'number_proxy', 'maxlength' => true])
+                                 $form->field($organization, 'number_proxy')->textInput(['id' => 'number_proxy', 'maxlength' => true])
                            .'</div>
                         </div>';
                     }
 
                     echo '<div class="form-group">'.
-                         Html::submitButton('Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary'])
+                         Html::submitButton('Сохранить', ['class' => $organization->isNewRecord ? 'btn btn-success' : 'btn btn-primary'])
                     .'</div>
                     </div>';
                     }
@@ -139,10 +139,10 @@ $this->title = 'Информация';
         <div class="col-md-12">
             <?php $form = ActiveForm::begin(); ?>
 
-                <?= $form->field($model, 'about')->textarea(['rows' => 6]) ?>
+                <?= $form->field($organization, 'about')->textarea(['rows' => 6]) ?>
 
                 <div class="form-group">
-                    <?= Html::submitButton($model->isNewRecord ? 'Добавить "Почему выбирают нас"' : 'Сохранить "Почему выбирают нас"', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
+                    <?= Html::submitButton($organization->isNewRecord ? 'Добавить "Почему выбирают нас"' : 'Сохранить "Почему выбирают нас"', ['class' => $organization->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
                 </div>
 
             <?php ActiveForm::end(); ?>
