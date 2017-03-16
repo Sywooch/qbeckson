@@ -272,7 +272,7 @@ class Contracts extends \yii\db\ActiveRecord
         return $this->hasMany(Informs::className(), ['contract_id' => 'id']);
     }
     
-      public function getInvoices()
+    public function getInvoices()
     {
         return $this->hasMany(Invoices::className(), ['contract_id' => 'id']);
     }
@@ -356,6 +356,9 @@ class Contracts extends \yii\db\ActiveRecord
         if (!empty($params['payerId'])) {
             $query .= " AND payer_id = " . $params['payerId'];
         }
+        if (!empty($params['organizationId'])) {
+            $query .= " AND organization_id = " . $params['organizationId'];
+        }
 
         $query = "SELECT count(*) as cnt FROM (" . $query . " " . $groupBy . ") as t";
         $command = Yii::$app->db->createCommand($query, [':status' => 1]);
@@ -364,25 +367,18 @@ class Contracts extends \yii\db\ActiveRecord
         return $result['cnt'];
     }
 
-    public function getCountWaitContracts($organization_id) {
-        $query = Contracts::find();
-
-        $query->where(['organization_id' => $organization_id]);
-        $query->andWhere(['status' => [0, 3]]);
-
-        return $query->count();
-    }
-
     public static function getCountContracts($params = []) {
-        $query = static::find()
-            ->where(['status' => 1]);
+        $query = static::find();
 
-        if (!empty($params['payerId'])) {
-            $query->andWhere(['payer_id' => $params['payerId']]);
+        if (empty($params['status'])) {
+            $query->where(['status' => 1]);
+        } else {
+            $query->where(['status' => $params['status']]);
         }
-        if (!empty($params['certificateId'])) {
-            $query->andWhere(['certificate_id' => $params['certificateId']]);
-        }
+
+        $query->andFilterWhere(['payer_id' => $params['payerId']]);
+        $query->andFilterWhere(['certificate_id' => $params['certificateId']]);
+        $query->andFilterWhere(['organization_id' => $params['organizationId']]);
 
         return $query->count();
     }

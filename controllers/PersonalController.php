@@ -340,25 +340,8 @@ class PersonalController extends \yii\web\Controller
     
     public function actionOrganizationStatistic()
     {
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
-
-        $informsProvider = new ActiveDataProvider([
-            'query' => Informs::find()->where(['read'=> 0])->andwhere(['from'=> 3])->andwhere(['prof_id'=> $organization['id']]),
-        ]);
-
-        $count_programs = Programs::getCountPrograms($organization['id'], 2);
-        $count_wait_programs = Programs::getCountPrograms($organization['id'], 0) + Programs::getCountPrograms($organization['id'], 1);
-
-        $contracts = new Contracts();
-        $contract_wait = $contracts->getCountWaitContracts($organization['id']);
-
         return $this->render('organization-statistic', [
-            'informsProvider' => $informsProvider,
-            'organization' => $organization,
-            'count_programs' => $count_programs,
-            'count_wait_programs' => $count_wait_programs,
-            'contract_wait' => $contract_wait,
+            'organization' => Yii::$app->user->identity->organization,
         ]);
     }
 
