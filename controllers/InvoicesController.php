@@ -5,7 +5,6 @@ namespace app\controllers;
 use Yii;
 use app\models\Invoices;
 use app\models\InvoicesSearch;
-use app\models\ProgramsSearch;
 use app\models\Contracts;
 use app\models\Programs;
 use app\models\Organization;
@@ -93,10 +92,6 @@ class InvoicesController extends Controller
         $organization = $organizations->getOrganization();
         
         if ($model->load(Yii::$app->request->post())) {
-    
-            $organizations = new Organization();
-            $organization = $organizations->getOrganization();
-        
             $lmonth = date('m')-1;
             $start = date('Y').'-'.$lmonth.'-01';
             

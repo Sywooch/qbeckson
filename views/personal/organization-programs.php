@@ -1,35 +1,27 @@
 <?php
 use yii\helpers\Html;
 use kartik\grid\GridView;
-use yii\widgets\ActiveForm;
-use yii\helpers\Url;
-use app\models\YearsCertSearch;
-use app\models\Organization;
+
+/* @var $this yii\web\View */
 
 $this->title = 'Программы';
-   $this->params['breadcrumbs'][] = 'Программы';
-/* @var $this yii\web\View */
+$this->params['breadcrumbs'][] = $this->title;
 ?>
 <ul class="nav nav-tabs">
     <li class="active"><a data-toggle="tab" href="#panel1">Сертифицированные <span class="badge"><?= $Programs1Provider->getTotalCount() ?></span></a></li>
-    <li><a data-toggle="tab" href="#panel2">Ожидающие сертификации <span class="badge"><?= $Programs0Provider->getTotalCount() ?></span></a></li>
+    <li><a data-toggle="tab" href="#panel2">Ожидающие сертификации <span class="badge"><?= $waitProgramsProvider->getTotalCount() ?></span></a></li>
     <li><a data-toggle="tab" href="#panel3">Отказано в сертификации <span class="badge"><?= $Programs2Provider->getTotalCount() ?></span></a></li>
 </ul>
 <br>
 
 
 <div class="tab-content">
-  
-   <?php
-    $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-    $organizations = new Organization();
-    $organization = $organizations->getOrganization();
-    if ($roles['organizations'] and $organization['actual'] != 0) {
-        
-        echo "<p>";
-        echo Html::a('Отправить программу на сертификацию', ['programs/create'], ['class' => 'btn btn-success']); 
-        echo "</p>";
-    }
+    <?php
+        if (Yii::$app->user->can('organizations') && Yii::$app->user->identity->organization->actual > 0) {
+            echo "<p>";
+            echo Html::a('Отправить программу на сертификацию', ['programs/create'], ['class' => 'btn btn-success']);
+            echo "</p>";
+        }
     ?>
     <div id="panel1" class="tab-pane fade in active">
         <?= GridView::widget([
@@ -51,7 +43,7 @@ $this->title = 'Программы';
 
                         return Yii::$app->controller->renderPartial('/years/main', ['searchModel'=>$searchModel, 'dataProvider'=>$dataProvider]);
                     },
-                    'headerOptions'=>['class'=>'kartik-sheet-style'], 
+                    'headerOptions'=>['class'=>'kartik-sheet-style'],
                     'expandOneOnly'=>true
                 ],
                 [
@@ -116,49 +108,32 @@ $this->title = 'Программы';
                      'label' => 'Рейтинг',
                  ],
                 [
-                     'attribute' => 'limit',
-                     'label' => 'Лимит',
-                 ],
-                 
-                /*[
-                    'attribute'=>'link',
-                    'format' => 'raw',
-                    'value' => function($data){
-                        return Html::a('<span class="glyphicon glyphicon-download-alt"></span>', '/'.$data->link );
-                    }
+                    'attribute' => 'limit',
+                    'label' => 'Лимит',
                 ],
-                [
-                  'label' => 'Предварительные записи',
-                  'format' => 'raw',
-                  'value' => function($data){
-                      $previus = (new \yii\db\Query())
-                        ->select(['id'])
-                        ->from('previus')
-                        ->where(['program_id' => $data->id])
-                        ->count();
-                         return Html::a($previus, Url::to(['/personal/organization-favorites', 'program' => $data->id]));
-                  }
-                 ],*/
 
                 ['class' => 'yii\grid\ActionColumn',
                     'controller' => 'programs',
                     'template' => '{view}',
-                 ],
+                ],
             ],
         ]); ?>
     </div>
     <div id="panel2" class="tab-pane fade">
         <?= GridView::widget([
-            'dataProvider' => $Programs0Provider,
-            'filterModel' => $searchPrograms0,
-            'pjax'=>true,
+            'dataProvider' => $waitProgramsProvider,
+            'filterModel' => $searchWaitPrograms,
+            'pjax' => true,
             'rowOptions' => function ($model, $index, $widget, $grid){
               if($model->verification == 1){
                 return ['class' => 'info'];
               }
             },
             'columns' => [
-
+                [
+                    'attribute' => 'organization',
+                    'value' => 'organization.name'
+                ],
                 [
                     'attribute'=>'name',
                     'label' => 'Наименование',

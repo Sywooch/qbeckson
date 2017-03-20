@@ -196,7 +196,7 @@ class Programs extends \yii\db\ActiveRecord
         return $query->count();
     }
 
-        public function getPrograms($id) {
+    public function getPrograms($id) {
 
         $query = Programs::find();
 
@@ -332,7 +332,7 @@ class Programs extends \yii\db\ActiveRecord
         return $rows;
     }
 
-  public function zabName($data, $ovz) {
+    public function zabName($data, $ovz) {
          if ($ovz == 2) {
                 $zab = explode(',', $data);
                         $display = '';
@@ -369,7 +369,4 @@ class Programs extends \yii\db\ActiveRecord
             if ($data == 6) { return 'Шестилетняя';}
             if ($data == 7) { return 'Семилетняя';}
     }
-    
-    
-  
 }

@@ -12,61 +12,12 @@ use app\models\Mun;
 /* @var $this yii\web\View */
 
 $this->title = 'Программы';
-   $this->params['breadcrumbs'][] = 'Программы';
+$this->params['breadcrumbs'][] = $this->title;
 ?>
-
-<?php /* if ($InformsProvider->getTotalCount() > 0) { ?>
-    <div class="modal fade">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title">Оповещения</h4>
-          </div>
-          <div class="modal-body">
-            <?= GridView::widget([
-                'dataProvider' => $InformsProvider,
-                'summary' => false,
-                'showHeader' => false,
-                'columns' => [
-                    // 'id',
-                    // 'contract_id',
-                    // 'from',
-                    'date',
-                    'text:ntext',
-                    'program_id',
-                    // 'read',
-
-                    ['class' => 'yii\grid\ActionColumn',
-                        'template' => '{permit} {view}',
-                         'buttons' =>
-                             [
-                                 'permit' => function ($url, $model) {
-                                     return Html::a('<span class="glyphicon glyphicon-ok"></span>', Url::to(['/informs/read', 'id' => $model->id]), [
-                                         'title' => Yii::t('yii', 'Отметить как прочитанное'),
-                                        'data-toggle' => 'tooltip',
-                                        'data-placement' => 'top'
-                                     ]); },
-
-                                'view' => function ($url, $model) {
-                                     return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', Url::to(['/programs/view', 'id' => $model->program_id]), [
-                                         'title' => Yii::t('yii', 'Просмотреть программу'),
-                                        'data-toggle' => 'tooltip',
-                                        'data-placement' => 'top'
-                                     ]); },
-                             ]
-                     ],
-                ],
-            ]); ?>
-          </div>
-        </div><!-- /.modal-content -->
-      </div><!-- /.modal-dialog -->
-    </div>
-<?php } */ ?>
 
 <ul class="nav nav-tabs">
     <li class="active"><a data-toggle="tab" href="#panel1">Сертифицированные <span class="badge"><?= $Programs1Provider->getTotalCount() ?></span></a></li>
-    <li><a data-toggle="tab" href="#panel2">Ожидающие сертификации <span class="badge"><?= $Programs0Provider->getTotalCount() ?></span></a></li>
+    <li><a data-toggle="tab" href="#panel2">Ожидающие сертификации <span class="badge"><?= $waitProgramsProvider->getTotalCount() ?></span></a></li>
     <li><a data-toggle="tab" href="#panel3">Отказано в сертификации <span class="badge"><?= $Programs2Provider->getTotalCount() ?></span></a></li>
 </ul>
 <br>
@@ -74,7 +25,7 @@ $this->title = 'Программы';
 <div class="tab-content">
     <div id="panel1" class="tab-pane fade in active">
 <p class="text-right">
-        
+
         <?= Html::a('Пересчитать нормативные стоимости', ['years/allnormprice'], ['class' => 'btn btn-success']) ?>
         <?= Html::a('Пересчитать лимиты', ['programs/alllimit'], ['class' => 'btn btn-success']) ?>
         <?= Html::a('Пересчитать рейтинги', ['programs/allraiting'], ['class' => 'btn btn-success']) ?>
@@ -89,28 +40,6 @@ $this->title = 'Программы';
             'pjax'=>true,
             'summary' => false,
             'columns' => [
-                //['class' => 'yii\grid\SerialColumn'],
-
-                //'id',
-                //'organization_id',
-                //'verification',
-                /*[
-                    'class'=>'kartik\grid\ExpandRowColumn',
-                    'width'=>'50px',
-                    'value'=>function ($model, $key, $index, $column) {
-                        return GridView::ROW_COLLAPSED;
-                    },
-                    'detail'=>function ($model, $key, $index, $column) {
-                        $searchModel = new YearsSearch();
-                        $searchModel->program_id = $model->id;
-                        //$searchModel->open = 1;
-                        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-                    
-                         return Yii::$app->controller->renderPartial('/years/operator', ['searchModel'=>$searchModel, 'dataProvider'=>$dataProvider]);
-                    },
-                    'headerOptions'=>['class'=>'kartik-sheet-style'], 
-                    'expandOneOnly'=>true
-                ], */
                 [
                     'attribute'=>'name',
                     'label' => 'Наименование',
@@ -195,8 +124,7 @@ $this->title = 'Программы';
                     },
                 ],   
                  [
-                    'attribute'=>'mun',
-                     'label' => 'Муниципалитет',
+                    'attribute'=>'mun', 'label' => 'Муниципалитет',
                     'filter'=>ArrayHelper::map(Mun::find()->all(), 'id', 'name'),
                      'value' => function ($data) { 
                         $mun = (new \yii\db\Query())
@@ -207,28 +135,7 @@ $this->title = 'Программы';
                          return $mun['name'];
                      },
                 ],
-                //'normative_price',
-                
-                 //'price',
-                 //'rating',
-                 //'limit',
-                 //'study',
-                // 'open',
-                // 'goal:ntext',
-                // 'task:ntext',
-                // 'annotation:ntext',
-                // 'hours',
-                // 'ovz',
-                // 'quality_control',
-                 //'link',
-                /* [
-                    'attribute'=>'link',
-                    'format' => 'raw',
-                    'value' => function($data){
-                        return Html::a('<span class="glyphicon glyphicon-download-alt"></span>', '/'.$data->link );
-                    }
-                ], */
-                // 'certification_date',
+
                 ['class' => 'yii\grid\ActionColumn',
                     'controller' => 'programs',
                     'template' => '{view}',
@@ -342,8 +249,8 @@ $this->title = 'Программы';
 
     <div id="panel2" class="tab-pane fade">
         <?= GridView::widget([
-            'dataProvider' => $Programs0Provider,
-            'filterModel' => $searchPrograms0,
+            'dataProvider' => $waitProgramsProvider,
+            'filterModel' => $searchWaitPrograms,
             'rowOptions' => function ($model, $index, $widget, $grid){
               if($model->verification == 1){
                 return ['class' => 'danger'];
@@ -351,15 +258,10 @@ $this->title = 'Программы';
             },
             'pjax'=>true,
             'columns' => [
-                //['class' => 'yii\grid\SerialColumn'],
-
-                //'id',
-                //'organization_id',
-                //'verification',
                 'name',
                 [
-                     'attribute' => 'organization',
-                     'label' => 'Наименование организации',
+                    'attribute' => 'organization',
+                    'label' => 'Наименование организации',
                     'format' => 'raw',
                     'value'=> function($data){
                         
@@ -375,19 +277,6 @@ $this->title = 'Программы';
                  ],
                  'directivity',
                 'vid',
-                 //'price',
-                 //'rating',
-                 //'limit',
-                 //'study',
-                // 'open',
-                // 'goal:ntext',
-                // 'task:ntext',
-                // 'annotation:ntext',
-                // 'hours',
-                // 'ovz',
-                // 'quality_control',
-                // 'link',
-                // 'certification_date',
 
                 ['class' => 'yii\grid\ActionColumn',
                     'controller' => 'programs',
@@ -414,8 +303,8 @@ $this->title = 'Программы';
         ]); ?>
 
         <?= ExportMenu::widget([
-            'dataProvider' => $Programs0Provider,
-    'target' => '_self',
+            'dataProvider' => $waitProgramsProvider,
+            'target' => '_self',
             'columns' => [
                  'name',
                 [
@@ -659,10 +548,9 @@ $this->title = 'Программы';
                 ExportMenu::FORMAT_PDF => false,
                 ExportMenu::FORMAT_CSV => false,
                 ExportMenu::FORMAT_HTML => false,
-                
             ],
             'columns' => [
-                'id',
+            'id',
             'organization_id',
             'program_id',
             'year_id',

@@ -4,7 +4,7 @@ namespace app\controllers;
 
 use Yii;
 use app\models\Programs;
-use app\models\ProgramsSearch;
+use app\models\search\ProgramsSearch;
 use app\models\ProgramsotkSearch;
 use app\models\ProgramsallSearch;
 use app\models\ProgramsPreviusSearch;
@@ -141,7 +141,7 @@ class PersonalController extends \yii\web\Controller
             
         $search3Contracts = new Contracts3Search();
         $Contracts3Provider = $search3Contracts->search(Yii::$app->request->queryParams); // Подтвержденые
-            
+
         $searchContracts5 = new Contracts5Search();
         $Contracts5Provider = $searchContracts5->search(Yii::$app->request->queryParams);
             
@@ -165,33 +165,32 @@ class PersonalController extends \yii\web\Controller
 
     public function actionOperatorPrograms()
     {
-        $InformsProvider = new ActiveDataProvider([
-            'query' => Informs::find()->where(['read'=> 0])->andwhere(['from'=> 1]),
+        $searchWaitPrograms = new ProgramsSearch([
+            'organization_id' => Yii::$app->user->identity->organization->id,
+            'verification' => [0, 1],
+            'open' => 0,
         ]);
-
-        $searchPrograms0 = new ProgramsSearch();
-        $Programs0Provider = $searchPrograms0->search(Yii::$app->request->queryParams);
+        $waitProgramsProvider = $searchWaitPrograms->search(Yii::$app->request->queryParams);
 
         $searchPrograms1 = new ProgramscertSearch();
         if (isset($_GET['org'])) { $searchPrograms1->organization = $_GET['org']; }
         $Programs1Provider = $searchPrograms1->search(Yii::$app->request->queryParams);
-            
+
         $searchPrograms2 = new ProgramsotkSearch();
         $Programs2Provider = $searchPrograms2->search(Yii::$app->request->queryParams);
-            
+
         $searchProgramsall = new ProgramsclearSearch();
         $ProgramsallProvider = $searchProgramsall->search(Yii::$app->request->queryParams);
-            
+
         $searchYearsall = new YearsSearch();
         $YearsallProvider = $searchYearsall->search(Yii::$app->request->queryParams);
-            
+
         $searchGroupsall = new GroupsSearch();
         $GroupsallProvider = $searchGroupsall->search(Yii::$app->request->queryParams);
 
         return $this->render('operator-programs', [
-            'InformsProvider' => $InformsProvider,
-            'searchPrograms0' => $searchPrograms0,
-            'Programs0Provider' => $Programs0Provider,
+            'searchWaitPrograms' => $searchWaitPrograms,
+            'waitProgramsProvider' => $waitProgramsProvider,
             'searchPrograms1' => $searchPrograms1,
             'Programs1Provider' => $Programs1Provider,
             'searchPrograms2' => $searchPrograms2,
@@ -337,7 +336,7 @@ class PersonalController extends \yii\web\Controller
             'searchPrograms' => $searchPrograms,
         ]);
     }
-    
+
     public function actionOrganizationStatistic()
     {
         return $this->render('organization-statistic', [
@@ -382,35 +381,31 @@ class PersonalController extends \yii\web\Controller
 
     public function actionOrganizationPrograms()
     {
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
-
-        $informsProvider = new ActiveDataProvider([
-            'query' => Informs::find()->where(['read'=> 0])->andwhere(['from'=> 3])->andwhere(['prof_id'=> $organization['id']]),
-        ]);
-        
         $searchYears1 = new YearsCertSearch();
         $Years1Provider = $searchYears1->search(Yii::$app->request->queryParams);
 
-        $searchPrograms0 = new ProgramsSearch();
-        $Programs0Provider = $searchPrograms0->search(Yii::$app->request->queryParams);
+        $searchWaitPrograms = new ProgramsSearch([
+            'organization_id' => Yii::$app->user->identity->organization->id,
+            'verification' => [0, 1],
+            'open' => 0,
+        ]);
+        $waitProgramsProvider = $searchWaitPrograms->search(Yii::$app->request->queryParams);
 
         $searchPrograms1 = new ProgramscertSearch();
         $Programs1Provider = $searchPrograms1->search(Yii::$app->request->queryParams);
-        
+
         $searchPrograms2 = new ProgramsotkSearch();
-        $Programs2Provider = $searchPrograms2->search(Yii::$app->request->queryParams); 
+        $Programs2Provider = $searchPrograms2->search(Yii::$app->request->queryParams);
 
         return $this->render('organization-programs', [
-            'informsProvider' => $informsProvider,
-            'searchPrograms0' => $searchPrograms0,
-            'Programs0Provider' => $Programs0Provider,
-            'searchYears1' => $searchYears1,
-            'Years1Provider' => $Years1Provider,
+            'searchWaitPrograms' => $searchWaitPrograms,
+            'waitProgramsProvider' => $waitProgramsProvider,
             'searchPrograms1' => $searchPrograms1,
             'Programs1Provider' => $Programs1Provider,
             'searchPrograms2' => $searchPrograms2,
             'Programs2Provider' => $Programs2Provider,
+            'searchYears1' => $searchYears1,
+            'Years1Provider' => $Years1Provider,
         ]);
     }
 
