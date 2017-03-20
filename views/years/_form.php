@@ -5,7 +5,7 @@ use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Years */
+/* @var $model app\models\ProgrammeModule */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

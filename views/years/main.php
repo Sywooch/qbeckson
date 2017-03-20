@@ -8,7 +8,7 @@ use app\models\Contracts;
 use app\models\Organization;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\models\YearsSearch */
+/* @var $searchModel app\models\ProgrammeModuleSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 ?>

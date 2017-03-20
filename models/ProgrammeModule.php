@@ -15,7 +15,7 @@ use app\models\Programs;
  *
  * @property Programs $program
  */
-class Years extends \yii\db\ActiveRecord
+class ProgrammeModule extends \yii\db\ActiveRecord
 {
     public $selectyear1;
     public $selectyear2;
@@ -93,7 +93,7 @@ class Years extends \yii\db\ActiveRecord
     
     public function getYear($id)
     {
-         $query = Years::find();
+         $query = ProgrammeModule::find();
 
         $query->where(['id' => $id]);
 

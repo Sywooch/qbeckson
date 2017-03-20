@@ -7,7 +7,7 @@ use app\models\Favorites;
 use app\models\FavoritesSearch;
 use app\models\Certificates;
 use app\models\Previus;
-use app\models\Years;
+use app\models\ProgrammeModule;
 use app\models\Programs;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -139,7 +139,7 @@ class FavoritesController extends Controller
         $certificates = new Certificates();
         $certificate = $certificates->getCertificates();
 
-        $year = Years::findOne($id);
+        $year = ProgrammeModule::findOne($id);
         $program = Programs::findOne($year->program_id);
 
         $model->certificate_id = $certificate['id'];
@@ -155,7 +155,7 @@ class FavoritesController extends Controller
     
     public function actionDisprev($id)
     {
-        $year = Years::findOne($id);
+        $year = ProgrammeModule::findOne($id);
         
         $rows = (new \yii\db\Query())
             ->select(['id'])

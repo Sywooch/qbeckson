@@ -42,7 +42,7 @@ class Groups extends \yii\db\ActiveRecord
             ['datestop', 'compare', 'compareAttribute' => 'datestart', 'operator' => '>'],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
             [['program_id'], 'exist', 'skipOnError' => true, 'targetClass' => Programs::className(), 'targetAttribute' => ['program_id' => 'id']],
-            [['year_id'], 'exist', 'skipOnError' => true, 'targetClass' => Years::className(), 'targetAttribute' => ['year_id' => 'id']],
+            [['year_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProgrammeModule::className(), 'targetAttribute' => ['year_id' => 'id']],
         ];
     }
 
@@ -91,6 +91,6 @@ class Groups extends \yii\db\ActiveRecord
     
         public function getYear()
     {
-        return $this->hasOne(Years::className(), ['id' => 'year_id']);
+        return $this->hasOne(ProgrammeModule::className(), ['id' => 'year_id']);
     }
 }

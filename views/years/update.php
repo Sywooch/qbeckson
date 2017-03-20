@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Years */
+/* @var $model app\models\ProgrammeModule */
 
 $this->title = 'Установить цену: '. $model->program->name.' '.$model->year.' год';
 $this->params['breadcrumbs'][] = ['label' => 'Программы', 'url' => ['/personal/organization-programs']];

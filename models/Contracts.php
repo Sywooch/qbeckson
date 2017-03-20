@@ -66,7 +66,7 @@ class Contracts extends \yii\db\ActiveRecord
             [['payer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payers::className(), 'targetAttribute' => ['payer_id' => 'id']],
             [['certificate_id'], 'exist', 'skipOnError' => true, 'targetClass' => Certificates::className(), 'targetAttribute' => ['certificate_id' => 'id']],
             [['group_id'], 'exist', 'skipOnError' => true, 'targetClass' => Groups::className(), 'targetAttribute' => ['group_id' => 'id']],
-            [['year_id'], 'exist', 'skipOnError' => true, 'targetClass' => Years::className(), 'targetAttribute' => ['year_id' => 'id']],
+            [['year_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProgrammeModule::className(), 'targetAttribute' => ['year_id' => 'id']],
             /*[['date'], 'required', 'when' => function($model) {
                 return $model->status == 3;
             }] */
@@ -225,7 +225,7 @@ class Contracts extends \yii\db\ActiveRecord
     
     public function getYear()
     {
-        return $this->hasOne(Years::className(), ['id' => 'year_id']);
+        return $this->hasOne(ProgrammeModule::className(), ['id' => 'year_id']);
     }
 
     public function getYearyear()

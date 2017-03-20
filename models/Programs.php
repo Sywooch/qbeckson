@@ -46,7 +46,7 @@ use app\models\Cooperate;
  * @property Groups[] $groups
  * @property Informs[] $informs
  * @property Organization $organization
- * @property Years[] $years
+ * @property ProgrammeModule[] $years
  */
 
 class Programs extends \yii\db\ActiveRecord
@@ -177,7 +177,7 @@ class Programs extends \yii\db\ActiveRecord
      */
     public function getYears()
     {
-        return $this->hasMany(Years::className(), ['program_id' => 'id']);
+        return $this->hasMany(ProgrammeModule::className(), ['program_id' => 'id']);
     }
 
 

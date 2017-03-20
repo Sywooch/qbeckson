@@ -126,7 +126,7 @@ $this->title = 'Программы';
                         return GridView::ROW_COLLAPSED;
                     },
                     'detail'=>function ($model, $key, $index, $column) {
-                        $searchModel = new YearsSearch();
+                        $searchModel = new ProgrammeModuleSearch();
                         $searchModel->program_id = $model->id;
                         //$searchModel->open = 1;
                         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);

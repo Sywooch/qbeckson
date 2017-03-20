@@ -1,7 +1,7 @@
 <?php
 use yii\helpers\Html;
 use kartik\grid\GridView;
-use app\models\YearsCertSearch;
+use app\models\ProgrammeModuleCertSearch;
 
 /* @var $this yii\web\View */
 
@@ -38,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         return GridView::ROW_COLLAPSED;
                     },
                     'detail'=>function ($model, $key, $index, $column) {
-                        $searchModel = new YearsCertSearch();
+                        $searchModel = new ProgrammeModuleCertSearch();
                         $searchModel->program_id = $model->id;
                         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 

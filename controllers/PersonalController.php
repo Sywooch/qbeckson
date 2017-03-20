@@ -47,11 +47,11 @@ use app\models\FavoritesSearch;
 use app\models\ProgramsfavoritesSearch;
 use app\models\Cooperate;
 use yii\data\ActiveDataProvider;
-use app\models\Years;
-use app\models\YearsWaitSearch;
-use app\models\YearsSearch;
-use app\models\YearsNoSearch;
-use app\models\YearsCertSearch;
+use app\models\ProgrammeModule;
+use app\models\ProgrammeModuleWaitSearch;
+use app\models\ProgrammeModuleSearch;
+use app\models\ProgrammeModuleNoSearch;
+use app\models\ProgrammeModuleCertSearch;
 use app\models\PreviusSearch;
 use app\models\Payer1ContractsSearch;
 use app\models\Payer0ContractsSearch;
@@ -182,7 +182,7 @@ class PersonalController extends \yii\web\Controller
         $searchProgramsall = new ProgramsclearSearch();
         $ProgramsallProvider = $searchProgramsall->search(Yii::$app->request->queryParams);
 
-        $searchYearsall = new YearsSearch();
+        $searchYearsall = new ProgrammeModuleSearch();
         $YearsallProvider = $searchYearsall->search(Yii::$app->request->queryParams);
 
         $searchGroupsall = new GroupsSearch();
@@ -381,7 +381,7 @@ class PersonalController extends \yii\web\Controller
 
     public function actionOrganizationPrograms()
     {
-        $searchYears1 = new YearsCertSearch();
+        $searchYears1 = new ProgrammeModuleCertSearch();
         $Years1Provider = $searchYears1->search(Yii::$app->request->queryParams);
 
         $searchWaitPrograms = new ProgramsSearch([

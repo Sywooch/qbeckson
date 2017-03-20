@@ -4,7 +4,7 @@ use kartik\grid\GridView;
 use app\models\Informs;
 use yii\helpers\Url;
 use kartik\export\ExportMenu;
-use app\models\YearsSearch;
+use app\models\ProgrammeModuleSearch;
 use yii\helpers\ArrayHelper;
 use app\models\Mun;
 

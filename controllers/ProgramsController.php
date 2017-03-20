@@ -8,7 +8,7 @@ use app\models\ProgramsallSearch;
 use app\models\ProgramsPreviusSearch;
 use app\models\AllProgramsSearch;
 use app\models\Certificates;
-use app\models\Years;
+use app\models\ProgrammeModule;
 use app\models\Groups;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -120,7 +120,7 @@ class ProgramsController extends Controller
         
             $i = 0;
             foreach ($year as $value) {
-                $years[$i] = Years::findOne($value['id']);
+                $years[$i] = ProgrammeModule::findOne($value['id']);
                 $i ++;
             }
         
@@ -171,10 +171,10 @@ class ProgramsController extends Controller
     {
         $model = new Programs();
         $file = new ProgramsFile();
-        $modelsYears = [new Years];
+        $modelsYears = [new ProgrammeModule];
 
         if ($model->load(Yii::$app->request->post())) {
-            $modelsYears = Model::createMultiple(Years::classname());
+            $modelsYears = Model::createMultiple(ProgrammeModule::classname());
             Model::loadMultiple($modelsYears, Yii::$app->request->post());
 
             // ajax validation
@@ -372,7 +372,7 @@ class ProgramsController extends Controller
         return $this->render('create', [
             'model' => $model,
             'file' => $file,
-            'modelsYears' => (empty($modelsYears)) ? [new Years] : $modelsYears
+            'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
         ]);
     }
     
@@ -390,7 +390,7 @@ class ProgramsController extends Controller
         
         $i = 0;
         foreach ($rows as $value) {
-            $years[$i] = Years::findOne($value['id']);
+            $years[$i] = ProgrammeModule::findOne($value['id']);
             $i++;
         }
 
@@ -464,7 +464,7 @@ class ProgramsController extends Controller
         if ($model->load(Yii::$app->request->post())) {
             
             $oldIDs = ArrayHelper::map($modelsYears, 'id', 'id');
-            $modelsYears = Model::createMultiple(Years::classname(), $modelsYears);
+            $modelsYears = Model::createMultiple(ProgrammeModule::classname(), $modelsYears);
             Model::loadMultiple($modelsYears, Yii::$app->request->post());
             $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelsYears, 'id', 'id')));
 
@@ -486,7 +486,7 @@ class ProgramsController extends Controller
                 try {
                     if ($flag = $model->save(false)) {
                         if (! empty($deletedIDs)) {
-                            Years::deleteAll(['id' => $deletedIDs]);
+                            ProgrammeModule::deleteAll(['id' => $deletedIDs]);
                         }
                         foreach ($modelsYears as $modelYears) {
                             
@@ -626,7 +626,7 @@ class ProgramsController extends Controller
         } else {
             return $this->render('cert', [
                 'model' => $model,
-                 'modelsYears' => (empty($modelsYears)) ? [new Years] : $modelsYears
+                 'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
             ]);
         }
     }
@@ -639,7 +639,7 @@ class ProgramsController extends Controller
         if ($model->load(Yii::$app->request->post())) {
             
             $oldIDs = ArrayHelper::map($modelsYears, 'id', 'id');
-            $modelsYears = Model::createMultiple(Years::classname(), $modelsYears);
+            $modelsYears = Model::createMultiple(ProgrammeModule::classname(), $modelsYears);
             Model::loadMultiple($modelsYears, Yii::$app->request->post());
             $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelsYears, 'id', 'id')));
 
@@ -661,7 +661,7 @@ class ProgramsController extends Controller
                 try {
                     if ($flag = $model->save(false)) {
                         if (! empty($deletedIDs)) {
-                            Years::deleteAll(['id' => $deletedIDs]);
+                            ProgrammeModule::deleteAll(['id' => $deletedIDs]);
                         }
                         foreach ($modelsYears as $modelYears) {      
                             
@@ -797,7 +797,7 @@ class ProgramsController extends Controller
         } else {
             return $this->render('newnormprice', [
                 'model' => $model,
-                 'modelsYears' => (empty($modelsYears)) ? [new Years] : $modelsYears
+                 'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
             ]);
         }
     }
@@ -805,7 +805,7 @@ class ProgramsController extends Controller
     public function actionNormpricesave($id)
     {
         
-        $model = Years::findOne($id);
+        $model = ProgrammeModule::findOne($id);
         
         if ($model->load(Yii::$app->request->post())) {
             $model->save();
@@ -842,7 +842,7 @@ class ProgramsController extends Controller
             $year = array();
             $i = 0;
             foreach ($params as $param) {
-                $year[$i] = Years::findOne($param['id']);
+                $year[$i] = ProgrammeModule::findOne($param['id']);
                 
                 if ($year[$i]->load(Yii::$app->request->post())) {
                     if ($i == 0 ) {return var_dump($year);}
@@ -921,7 +921,7 @@ class ProgramsController extends Controller
         $modelsYears = $model->years;
         
         $oldIDs = ArrayHelper::map($modelsYears, 'id', 'id');
-        $modelYears = Model::createMultiple(Years::classname(), $modelsYears);
+        $modelYears = Model::createMultiple(ProgrammeModule::classname(), $modelsYears);
         Model::loadMultiple($modelsYears, Yii::$app->request->post());
         $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelsYears, 'id', 'id')));
         
@@ -944,7 +944,7 @@ class ProgramsController extends Controller
                             
         } else {
             return $this->render('open', [
-                'modelsYears' => (empty($modelsYears)) ? [new Years] : $modelsYears
+                'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
             ]);
         }
     }
@@ -993,7 +993,7 @@ class ProgramsController extends Controller
             }
             
             $oldIDs = ArrayHelper::map($modelYears, 'id', 'id');
-            $modelYears = Model::createMultiple(Years::classname(), $modelYears);
+            $modelYears = Model::createMultiple(ProgrammeModule::classname(), $modelYears);
             Model::loadMultiple($modelYears, Yii::$app->request->post());
             $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelYears, 'id', 'id')));
 
@@ -1014,7 +1014,7 @@ class ProgramsController extends Controller
                 try {
                     if ($flag = $model->save(false)) {
                         if (! empty($deletedIDs)) {
-                            Years::deleteAll(['id' => $deletedIDs]);
+                            ProgrammeModule::deleteAll(['id' => $deletedIDs]);
                         }
                         $i = 1;
                         foreach ($modelYears as $modelYears) {
@@ -1049,7 +1049,7 @@ class ProgramsController extends Controller
             return $this->render('update', [
                 'model' => $model,
                 'file' => $file,
-                 'modelYears' => (empty($modelYears)) ? [new Years] : $modelYears
+                 'modelYears' => (empty($modelYears)) ? [new ProgrammeModule] : $modelYears
             ]);
         }
     }
@@ -1064,7 +1064,7 @@ class ProgramsController extends Controller
         if ($model->load(Yii::$app->request->post())) {
             
             $oldIDs = ArrayHelper::map($modelYears, 'id', 'id');
-            $modelYears = Model::createMultiple(Years::classname(), $modelYears);
+            $modelYears = Model::createMultiple(ProgrammeModule::classname(), $modelYears);
             Model::loadMultiple($modelYears, Yii::$app->request->post());
             $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelYears, 'id', 'id')));
 
@@ -1085,7 +1085,7 @@ class ProgramsController extends Controller
                 try {
                     if ($flag = $model->save(false)) {
                         if (! empty($deletedIDs)) {
-                            Years::deleteAll(['id' => $deletedIDs]);
+                            ProgrammeModule::deleteAll(['id' => $deletedIDs]);
                         }
                         $i = 1;
                         foreach ($modelYears as $modelYears) {
@@ -1111,7 +1111,7 @@ class ProgramsController extends Controller
             return $this->render('edit', [
                 'model' => $model,
                 'file' => $file,
-                 'modelYears' => (empty($modelYears)) ? [new Years] : $modelYears
+                 'modelYears' => (empty($modelYears)) ? [new ProgrammeModule] : $modelYears
             ]);
         }
     }

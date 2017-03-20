@@ -6,7 +6,7 @@ use yii\widgets\ActiveForm;
 use yii\helpers\ArrayHelper;
 use app\models\Organization;
 use app\models\Programs;
-use app\models\Years;
+use app\models\ProgrammeModule;
 use kartik\widgets\DepDrop;
 use kartik\slider\Slider;
 
@@ -14,7 +14,7 @@ use kartik\slider\Slider;
 /* @var $model app\models\Contracts */
 
 $program = Programs::findOne($model->program_id);
-$year = Years::findOne($model->year_id);
+$year = ProgrammeModule::findOne($model->year_id);
 
 //return var_dump($program);
 
