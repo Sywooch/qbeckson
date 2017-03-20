@@ -102,6 +102,7 @@ class Certificates extends \yii\db\ActiveRecord
             'pasport_v' => 'выдан',
             'phone' => 'Телефон',
             'rezerv' => 'Зарезервированно на оплату программ',
+            'cert_group' => 'Группа сертификата',
         ];
     }
 
