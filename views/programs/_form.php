@@ -20,13 +20,13 @@ use kartik\file\FileInput;
 $js = '
 jQuery(".dynamicform_wrapper").on("afterInsert", function(e, item) {
     jQuery(".dynamicform_wrapper .panel-title").each(function(index) {
-        jQuery(this).html((index + 1) + " Год")
+        jQuery(this).html((index + 1) + " модуль")
     });
 });
 
 jQuery(".dynamicform_wrapper").on("afterDelete", function(e) {
     jQuery(".dynamicform_wrapper .panel-title").each(function(index) {
-        jQuery(this).html((index + 1) + " Год")
+        jQuery(this).html((index + 1) + " модуль")
     });
 });
 ';

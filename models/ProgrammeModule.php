@@ -39,7 +39,7 @@ class ProgrammeModule extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'month', 'hours', 'hoursindivid', 'hoursdop', 'kvfirst', 'kvdop'], 'required'],
+            [['name', 'month', 'hours', 'hoursindivid', 'hoursdop', 'kvfirst', 'kvdop', 'results'], 'required'],
             [['minchild', 'maxchild'], 'required'],
             [['hours', 'program_id', 'year', 'hoursdop', 'hoursindivid', 'minchild', 'maxchild', 'open', 'quality_control', 'p21z', 'p22z'], 'integer'],
             [['price', 'normative_price'], 'number'],
@@ -60,7 +60,7 @@ class ProgrammeModule extends \yii\db\ActiveRecord
             'id' => 'ID',
             'name' => 'Наименование модуля',
             'program_id' => 'Program ID',
-            'year' => 'Год',
+            'year' => 'Модуль',
             'month' => 'Число месяцев реализации программы',
             'hours' => 'Продолжительность реализации образовательной программы в часах',
             'kvfirst' => 'Квалификация педагогического работника непосредственно осуществляющего реализацию образовательной программы в группе детей',
@@ -77,6 +77,7 @@ class ProgrammeModule extends \yii\db\ActiveRecord
             'p21z' => 'Квалификация педагогического работника непосредственно осуществляющего реализацию образовательной программы в группе детей',
             'p22z' => 'Квалификация педагогического работника, дополнительно привлекаемого для совместной реализации образовательной программы в группе',
             'results' => 'Ожидаемые результаты освоения модуля',
+            'fullname' => 'Наименование модуля',
         ];
     }
 
@@ -86,6 +87,11 @@ class ProgrammeModule extends \yii\db\ActiveRecord
     public function getProgram()
     {
         return $this->hasOne(Programs::className(), ['id' => 'program_id']);
+    }
+
+    public function getFullname($prefix = true)
+    {
+        return ($prefix === false ?: 'Модуль ' . $this->year . (empty($this->name) ? '' : '. ') . $this->name);
     }
 
     public function getOpenYear()

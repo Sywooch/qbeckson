@@ -362,10 +362,6 @@ class PersonalController extends \yii\web\Controller
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
 
-        $informsProvider = new ActiveDataProvider([
-            'query' => Informs::find()->where(['read'=> 0])->andwhere(['from'=> 3])->andwhere(['prof_id'=> $organization['id']]),
-        ]);
-
         $searchFavorites = new PreviusSearch();
         $searchFavorites->organization_id = $organization['id'];
         if (isset($_GET['year'])) { $searchFavorites->year_id = $_GET['year']; }
@@ -373,7 +369,6 @@ class PersonalController extends \yii\web\Controller
         $FavoritesProvider = $searchFavorites->search(Yii::$app->request->queryParams);
 
         return $this->render('organization-favorites', [
-            'informsProvider' => $informsProvider,
             'searchFavorites' => $searchFavorites,
             'FavoritesProvider' => $FavoritesProvider,
         ]);

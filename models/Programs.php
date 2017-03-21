@@ -93,7 +93,7 @@ class Programs extends \yii\db\ActiveRecord
             'id' => 'ID',
             'organization_id' => 'Организация',
             'verification' => 'Статус сертификации',
-            //'verification' => 'Запись о подтверждении прохождения экспертизы и доступности программы для выбора',
+            'countHours' => 'Учебных часов',
             'form' => 'Форма обучения',  
             'name' => 'Наименование программы',
             'directivity' => 'Направленность программы',
@@ -105,7 +105,7 @@ class Programs extends \yii\db\ActiveRecord
             'age_group_max' => 'Возрастная категория детей, определяемая максимальным возрастом лиц, которые могут быть зачислены на обучение по образовательной программе',
             'ovz' => 'Категория состояния здоровья детей, которые могут быть зачислены на обучение по образовательной программе (ОВЗ/без ОВЗ)',
             'zab' => 'Заболевание',
-            'year' => 'Продолжительность',
+            'year' => 'Число модулей',
             'norm_providing' => 'Нормы оснащения детей средствами обучения при проведении обучения по образовательной программе и интенсивность их использования',
             'ground' => 'Тип местности',
             'rating' => 'Рейтинг программы ',
@@ -368,5 +368,27 @@ class Programs extends \yii\db\ActiveRecord
             if ($data == 5) { return 'Пятилетняя';}
             if ($data == 6) { return 'Шестилетняя';}
             if ($data == 7) { return 'Семилетняя';}
+    }
+
+    // TODO Избавиться от этого метода, джойнить программы с годами сразу
+    public function getCountHours()
+    {
+        $query = "SELECT sum(`years`.hours) as summa FROM `programs` CROSS JOIN `years` ON `programs`.id = `years`.program_id WHERE `programs`.id=:id GROUP BY `programs`.id";
+
+        $command = Yii::$app->db->createCommand($query, [':id' => $this->id]);
+        $result = $command->queryOne();
+
+        return $result['summa'];
+    }
+
+    // TODO Избавиться от этого метода, джойнить программы с годами сразу
+    public function getCountMonths()
+    {
+        $query = "SELECT sum(`years`.`month`) as summa FROM `programs` CROSS JOIN `years` ON `programs`.id = `years`.program_id WHERE `programs`.id=:id GROUP BY `programs`.id";
+
+        $command = Yii::$app->db->createCommand($query, [':id' => $this->id]);
+        $result = $command->queryOne();
+
+        return $result['summa'];
     }
 }
