@@ -40,6 +40,7 @@ class ProgrammeModule extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'month', 'hours', 'hoursindivid', 'hoursdop', 'kvfirst', 'kvdop'], 'required'],
+            [['minchild', 'maxchild'], 'required'],
             [['hours', 'program_id', 'year', 'hoursdop', 'hoursindivid', 'minchild', 'maxchild', 'open', 'quality_control', 'p21z', 'p22z'], 'integer'],
             [['price', 'normative_price'], 'number'],
             [['month'], 'integer', 'max' => 12],
