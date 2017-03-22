@@ -175,7 +175,7 @@ class ProgramsController extends Controller
     {
         $model = new Programs();
         $file = new ProgramsFile();
-        $modelsYears = [new ProgrammeModule];
+        $modelsYears = [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])];
 
         if ($model->load(Yii::$app->request->post())) {
             $modelsYears = Model::createMultiple(ProgrammeModule::classname());
@@ -195,14 +195,8 @@ class ProgramsController extends Controller
             $organizations = new Organization();
             $organization = $organizations->getOrganization();
             $model->organization_id = $organization['id'];
-//            $model->payer_id = $organization['payer_id'];
-
             $model->verification = 0;
-            //$model->rating = 0;
-            //$model->limit = 0;
-            //$model->study = 0;
             $model->open = 0;
-            //$model->quality_control = 0;
             if ($model->ovz == 2) {
                 if (!empty($model->zab)) {
                     $model->zab = implode(',', $model->zab);
@@ -894,32 +888,8 @@ class ProgramsController extends Controller
                 }
                 $year[$i]->save();
             }
-
-
-            //$year[$i]->save();
             $i++;
         }
-        //return var_dump($year);
-
-        //return $this->render('/programs/viewprice', ['year' => $year, 'id' => $id]);
-        //return $this->redirect('/personal/operator-programs');
-
-        //$model-> verification = 2;
-
-        /*if ($model->save())  {
-            $informs = new Informs();
-            $informs->program_id = $model->id;
-            $informs->prof_id = $model->organization_id;
-            $informs->text = 'Сертифицированна программа';
-            $informs->from = 3;
-            $informs->date = date("Y-m-d");
-            $informs->read = 0;
-            $informs->save();
-            return $this->render('certificate', [
-                'model' => $model,
-                'year' => $year,
-            ]);
-        } */
 
         return $this->render('certificate', [
             'model' => $model,
@@ -1071,11 +1041,11 @@ class ProgramsController extends Controller
                             ProgrammeModule::deleteAll(['id' => $deletedIDs]);
                         }
                         $i = 1;
-                        foreach ($modelYears as $modelYears) {
-                            $modelYears->program_id = $model->id;
-                            $modelYears->year = $i;
+                        foreach ($modelYears as $modelYear) {
+                            $modelYear->program_id = $model->id;
+                            $modelYear->year = $i;
 
-                            if (!($flag = $modelYears->save(false))) {
+                            if (!($flag = $modelYear->save(false))) {
                                 $transaction->rollBack();
                                 break;
                             }
@@ -1104,7 +1074,7 @@ class ProgramsController extends Controller
             return $this->render('update', [
                 'model' => $model,
                 'file' => $file,
-                'modelYears' => (empty($modelYears)) ? [new ProgrammeModule] : $modelYears
+                'modelYears' => (empty($modelYears)) ? [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])] : $modelYears
             ]);
         }
     }

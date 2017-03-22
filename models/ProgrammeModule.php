@@ -17,12 +17,20 @@ use app\models\Programs;
  */
 class ProgrammeModule extends \yii\db\ActiveRecord
 {
+    const SCENARIO_CREATE = 'create';
+
     public $selectyear1;
+
     public $selectyear2;
+
     public $selectyear3;
+
     public $selectyear4;
+
     public $selectyear5;
+
     public $selectyear6;
+
     public $selectyear7;
 
     /**
@@ -33,14 +41,22 @@ class ProgrammeModule extends \yii\db\ActiveRecord
         return 'years';
     }
 
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_CREATE] = $scenarios['default'];
+
+        return $scenarios;
+    }
+
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['name', 'month', 'hours', 'hoursindivid', 'hoursdop', 'kvfirst', 'kvdop', 'results'], 'required'],
-            [['minchild', 'maxchild'], 'required'],
+            [['month', 'hours', 'hoursindivid', 'hoursdop', 'kvfirst', 'kvdop'], 'required'],
+            [['name', 'minchild', 'maxchild', 'results'], 'required', 'on' => self::SCENARIO_CREATE],
             [['hours', 'program_id', 'year', 'hoursdop', 'hoursindivid', 'minchild', 'maxchild', 'open', 'quality_control', 'p21z', 'p22z'], 'integer'],
             [['price', 'normative_price'], 'number'],
             [['month'], 'integer', 'max' => 12],
