@@ -59,7 +59,6 @@ use app\models\Payer4ContractsSearch;
 use app\models\Payer3ContractsSearch;
 
 
-
 class PersonalController extends \yii\web\Controller
 {
     public function actionIndex()
@@ -101,16 +100,20 @@ class PersonalController extends \yii\web\Controller
     public function actionOperatorCertificates()
     {
         $InformsProvider = new ActiveDataProvider([
-            'query' => Informs::find()->where(['read'=> 0])->andwhere(['from'=> 1]),
+            'query' => Informs::find()->where(['read' => 0])->andwhere(['from' => 1]),
         ]);
 
         $searchCertificates = new CertificatesSearch();
-        if (isset($_GET['payer'])) { $searchCertificates->payers = $_GET['payer']; }
+        if (isset($_GET['payer'])) {
+            $searchCertificates->payers = $_GET['payer'];
+        }
         $CertificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
-            
-        
+
+
         $searchCertificatesExport = new CertificatesExportSearch();
-        if (isset($_GET['payer'])) { $searchCertificatesExport->payers = $_GET['payer']; }
+        if (isset($_GET['payer'])) {
+            $searchCertificatesExport->payers = $_GET['payer'];
+        }
         $CertificatesExportProvider = $searchCertificatesExport->search(Yii::$app->request->queryParams);
 
         return $this->render('operator-certificates', [
@@ -125,26 +128,34 @@ class PersonalController extends \yii\web\Controller
     public function actionOperatorContracts()
     {
         $InformsProvider = new ActiveDataProvider([
-            'query' => Informs::find()->where(['read'=> 0])->andwhere(['from'=> 1]),
+            'query' => Informs::find()->where(['read' => 0])->andwhere(['from' => 1]),
         ]);
 
         $searchContracts1 = new ContractsoSearch();
-        if (isset($_GET['payer'])) { $searchContracts1->payers = $_GET['payer']; }
-        if (isset($_GET['org'])) { $searchContracts1->organization = $_GET['org']; }
-        if (isset($_GET['cert'])) { $searchContracts1->certificate = $_GET['cert']; }
-        if (isset($_GET['prog'])) { $searchContracts1->program = $_GET['prog']; }
-            
+        if (isset($_GET['payer'])) {
+            $searchContracts1->payers = $_GET['payer'];
+        }
+        if (isset($_GET['org'])) {
+            $searchContracts1->organization = $_GET['org'];
+        }
+        if (isset($_GET['cert'])) {
+            $searchContracts1->certificate = $_GET['cert'];
+        }
+        if (isset($_GET['prog'])) {
+            $searchContracts1->program = $_GET['prog'];
+        }
+
         $Contracts1Provider = $searchContracts1->search(Yii::$app->request->queryParams);
 
         $searchContracts0 = new ContractsnSearch();
         $Contracts0Provider = $searchContracts0->search(Yii::$app->request->queryParams);
-            
+
         $search3Contracts = new Contracts3Search();
         $Contracts3Provider = $search3Contracts->search(Yii::$app->request->queryParams); // Подтвержденые
 
         $searchContracts5 = new Contracts5Search();
         $Contracts5Provider = $searchContracts5->search(Yii::$app->request->queryParams);
-            
+
         $searchContractsall = new ContractsclearSearch();
         $ContractsallProvider = $searchContractsall->search(Yii::$app->request->queryParams);
 
@@ -173,7 +184,9 @@ class PersonalController extends \yii\web\Controller
         $waitProgramsProvider = $searchWaitPrograms->search(Yii::$app->request->queryParams);
 
         $searchPrograms1 = new ProgramscertSearch();
-        if (isset($_GET['org'])) { $searchPrograms1->organization = $_GET['org']; }
+        if (isset($_GET['org'])) {
+            $searchPrograms1->organization = $_GET['org'];
+        }
         $Programs1Provider = $searchPrograms1->search(Yii::$app->request->queryParams);
 
         $searchPrograms2 = new ProgramsotkSearch();
@@ -227,16 +240,22 @@ class PersonalController extends \yii\web\Controller
     {
         $payers = new Payers();
         $payer = $payers->getPayer();
-        
+
         $searchContracts1 = new Payer1ContractsSearch();
-        if (isset($_GET['cert'])) { $searchContracts1->certificate_id = $_GET['cert']; }
-        if (isset($_GET['org'])) { $searchContracts1->organization_id = $_GET['org']; }
-        if (isset($_GET['prog'])) { $searchContracts1->program = $_GET['prog']; }
+        if (isset($_GET['cert'])) {
+            $searchContracts1->certificate_id = $_GET['cert'];
+        }
+        if (isset($_GET['org'])) {
+            $searchContracts1->organization_id = $_GET['org'];
+        }
+        if (isset($_GET['prog'])) {
+            $searchContracts1->program = $_GET['prog'];
+        }
         $Contracts1Provider = $searchContracts1->search(Yii::$app->request->queryParams);
 
         $searchContracts0 = new Payer0ContractsSearch();
         $Contracts0Provider = $searchContracts0->search(Yii::$app->request->queryParams);
-        
+
         $searchContracts5 = new Payer4ContractsSearch();
         $Contracts5Provider = $searchContracts5->search(Yii::$app->request->queryParams);
 
@@ -268,13 +287,13 @@ class PersonalController extends \yii\web\Controller
             ->select(['organization_id'])
             ->from('cooperate')
             ->where(['status' => 1])
-            ->andwhere(['payer_id'=> $payer['id']])
+            ->andwhere(['payer_id' => $payer['id']])
             ->column();
-        
+
         if (empty($cooperate)) {
             $cooperate = 0;
         }
-        
+
         $searchInvoices = new InvoicesPayerSearch();
         $InvoicesProvider = $searchInvoices->search(Yii::$app->request->queryParams);
 
@@ -290,11 +309,11 @@ class PersonalController extends \yii\web\Controller
         $payer = $payers->getPayer();
 
         $InformsProvider = new ActiveDataProvider([
-            'query' => Informs::find()->where(['read'=> 0])->andwhere(['from'=> 2]),
+            'query' => Informs::find()->where(['read' => 0])->andwhere(['from' => 2]),
         ]);
 
         $CooperateProvider = new ActiveDataProvider([
-            'query' => Cooperate::find()->where(['status'=> 0])->andWhere(['reade'=> 0])->andwhere(['payer_id' => $payer['id']]),
+            'query' => Cooperate::find()->where(['status' => 0])->andWhere(['reade' => 0])->andwhere(['payer_id' => $payer['id']]),
         ]);
 
         $searchOrganization1 = new OrganizationmySearch();
@@ -321,13 +340,13 @@ class PersonalController extends \yii\web\Controller
             ->select(['organization_id'])
             ->from('cooperate')
             ->where(['status' => 1])
-            ->andwhere(['payer_id'=> $payer['id']])
+            ->andwhere(['payer_id' => $payer['id']])
             ->column();
 
         if (empty($cooperate)) {
             $cooperate = 0;
         }
-        
+
         $searchPrograms = new ProgramsPayerSearch();
         $ProgramsProvider = $searchPrograms->search(Yii::$app->request->queryParams);
 
@@ -364,8 +383,12 @@ class PersonalController extends \yii\web\Controller
 
         $searchFavorites = new PreviusSearch();
         $searchFavorites->organization_id = $organization['id'];
-        if (isset($_GET['year'])) { $searchFavorites->year_id = $_GET['year']; }
-        if (isset($_GET['program'])) { $searchFavorites->program_id = $_GET['program']; }
+        if (isset($_GET['year'])) {
+            $searchFavorites->year_id = $_GET['year'];
+        }
+        if (isset($_GET['program'])) {
+            $searchFavorites->program_id = $_GET['program'];
+        }
         $FavoritesProvider = $searchFavorites->search(Yii::$app->request->queryParams);
 
         return $this->render('organization-favorites', [
@@ -410,12 +433,14 @@ class PersonalController extends \yii\web\Controller
         $organization = $organizations->getOrganization();
 
         $informsProvider = new ActiveDataProvider([
-            'query' => Informs::find()->where(['read'=> 0])->andwhere(['from'=> 3])->andwhere(['prof_id'=> $organization['id']]),
+            'query' => Informs::find()->where(['read' => 0])->andwhere(['from' => 3])->andwhere(['prof_id' => $organization['id']]),
         ]);
 
         $searchContracts1 = new ContractsoSearch();
         $searchContracts1->organization = $organization['name'];
-        if (isset($_GET['prog'])) { $searchContracts1->program = $_GET['prog']; }
+        if (isset($_GET['prog'])) {
+            $searchContracts1->program = $_GET['prog'];
+        }
         $Contracts1Provider = $searchContracts1->search(Yii::$app->request->queryParams); // Действующий
 
         $searchContracts0 = new ContractsnSearch();
@@ -492,7 +517,7 @@ class PersonalController extends \yii\web\Controller
         $organization = $organizations->getOrganization();
 
         $informsProvider = new ActiveDataProvider([
-            'query' => Informs::find()->where(['read'=> 0])->andwhere(['from'=> 3])->andwhere(['prof_id'=> $organization['id']]),
+            'query' => Informs::find()->where(['read' => 0])->andwhere(['from' => 3])->andwhere(['prof_id' => $organization['id']]),
         ]);
 
         $searchGroups = new GroupsSearch();
@@ -510,7 +535,7 @@ class PersonalController extends \yii\web\Controller
     {
         $certificates = new Certificates();
         $certificate = $certificates->getCertificates();
-        
+
         $model = new Programs();
 
         if ($model->load(Yii::$app->request->post())) {
@@ -526,36 +551,36 @@ class PersonalController extends \yii\web\Controller
         $Contracts3Search->certificate_id = $certificate['id'];
         $Contracts3Provider = $Contracts3Search->search(Yii::$app->request->queryParams);
         $contracts_wait_count = $Contracts3Provider->getTotalCount();
-        
+
         $ContractsnSearch = new ContractsnSearch();
         $ContractsnSearch->certificate_id = $certificate['id'];
         $ContractsnProvider = $ContractsnSearch->search(Yii::$app->request->queryParams);
         $contracts_wait_request = $ContractsnProvider->getTotalCount();
-        
+
         $Contracts2Search = new Contracts2Search();
         $Contracts2Search->certificate_id = $certificate['id'];
         $Contracts2Provider = $Contracts2Search->search(Yii::$app->request->queryParams);
         $contracts_arh1 = $Contracts2Provider->getTotalCount();
-        
+
         $Contracts4Search = new Contracts5Search();
         $Contracts4Search->certificate_id = $certificate['id'];
         $Contracts4Provider = $Contracts4Search->search(Yii::$app->request->queryParams);
         $contracts_arh2 = $Contracts4Provider->getTotalCount();
-        
+
         $contracts_arhive = $contracts_arh2 + $contracts_arh1;
-        
+
         $searchPrev = new PreviusSearch();
         $searchPrev->certificate_id = $certificate['id'];
         $searchPrev->actual = 1;
         $PrevProvider = $searchPrev->search(Yii::$app->request->queryParams);
         $contracts_previus = $PrevProvider->getTotalCount();
-        
+
         $searchFavorites = new FavoritesSearch();
         $searchFavorites->certificate_id = $certificate['id'];
         $FavoritesProvider = $searchFavorites->search(Yii::$app->request->queryParams);
         $contracts_favorites = $FavoritesProvider->getTotalCount();
-        
-        
+
+
         return $this->render('certificate-statistic', [
             'model' => $model,
             'contracts_count' => $contracts_count,
@@ -573,13 +598,13 @@ class PersonalController extends \yii\web\Controller
         $certificate = $certificates->getCertificates();
 
         $informsProvider = new ActiveDataProvider([
-        'query' => Informs::find()->where(['read'=> 0])->andwhere(['from'=> 4])->andwhere(['prof_id'=> $certificate['id']]),
+            'query' => Informs::find()->where(['read' => 0])->andwhere(['from' => 4])->andwhere(['prof_id' => $certificate['id']]),
         ]);
-    
+
         $programcertModel = new ProgramsfromcertSearch();
         $programcertProvider = $programcertModel->search(Yii::$app->request->queryParams);
         $count_programs = $programcertProvider->getTotalCount();
-        
+
         $searchContracts1 = new ContractsoSearch();
         $Contracts1Provider = $searchContracts1->search(Yii::$app->request->queryParams);
         $count_organizations = $Contracts1Provider->getTotalCount();
@@ -590,8 +615,8 @@ class PersonalController extends \yii\web\Controller
             'count_programs' => $count_programs,
             'certificate' => $certificate,
         ]);
-    } 
-    
+    }
+
     public function actionCertificateWaitContract()
     {
         $certificates = new Certificates();
@@ -606,7 +631,7 @@ class PersonalController extends \yii\web\Controller
             'Contracts3Provider' => $Contracts3Provider,
         ]);
     }
-    
+
     public function actionCertificateWaitRequest()
     {
         $certificates = new Certificates();
@@ -627,13 +652,12 @@ class PersonalController extends \yii\web\Controller
     }
 
 
-
     public function actionCertificatePrevius()
     {
         $certificates = new Certificates();
         $certificate = $certificates->getCertificates();
-        
-        $searchPrev= new PreviusSearch();
+
+        $searchPrev = new PreviusSearch();
         $searchPrev->certificate_id = $certificate['id'];
         $searchPrev->actual = 1;
         $PrevProvider = $searchPrev->search(Yii::$app->request->queryParams);
@@ -681,7 +705,7 @@ class PersonalController extends \yii\web\Controller
         ]);
     }
 
-    
+
     public function actionCertificateFavorites()
     {
         $certificates = new Certificates();
@@ -697,10 +721,10 @@ class PersonalController extends \yii\web\Controller
             'FavoritesProvider' => $FavoritesProvider,
         ]);
     }
-    
+
     public function actionCertificateOrganizations()
     {
-       
+
 
         $searchOrganization = new OrganizationSearch();
         $OrganizationProvider = $searchOrganization->search(Yii::$app->request->queryParams);
@@ -710,5 +734,5 @@ class PersonalController extends \yii\web\Controller
             'OrganizationProvider' => $OrganizationProvider,
         ]);
     }
- 
+
 }
