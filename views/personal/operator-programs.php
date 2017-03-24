@@ -175,35 +175,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'year',
                     'value' => function ($data) {
-                        if ($data->year == 1) {
-                            return 'Однолетняя';
-                        }
-                        if ($data->year == 2) {
-                            return 'Двухлетняя';
-                        }
-                        if ($data->year == 3) {
-                            return 'Трехлетняя';
-                        }
-                        if ($data->year == 4) {
-                            return 'Четырехлетняя';
-                        }
-                        if ($data->year == 5) {
-                            return 'Пятилетняя';
-                        }
-                        if ($data->year == 6) {
-                            return 'Шестилетняя';
-                        }
-                        if ($data->year == 7) {
-                            return 'Семилетняя';
-                        }
+                        return Yii::$app->i18n->messageFormatter->format(
+                            '{n, plural, one{# модуль} few{# модуля} many{# модулей} other{# модуля}}',
+                            ['n' => $data->year],
+                            Yii::$app->language
+                        );
                     }
-
                 ],
+                'countHours',
                 [
                     'attribute' => 'directivity',
                     'label' => 'Направленность',
                 ],
-
                 [
                     'attribute' => 'zab',
                     'label' => 'Категория детей',
@@ -389,30 +372,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'year',
                     'value' => function ($data) {
-                        if ($data->year == 1) {
-                            return 'Однолетняя';
-                        }
-                        if ($data->year == 2) {
-                            return 'Двулетняя';
-                        }
-                        if ($data->year == 3) {
-                            return 'Трехлетняя';
-                        }
-                        if ($data->year == 4) {
-                            return 'Четырехлетняя';
-                        }
-                        if ($data->year == 5) {
-                            return 'Пятилетняя';
-                        }
-                        if ($data->year == 6) {
-                            return 'Шестилетняя';
-                        }
-                        if ($data->year == 7) {
-                            return 'Семилетняя';
-                        }
+                        return Yii::$app->i18n->messageFormatter->format(
+                            '{n, plural, one{# модуль} few{# модуля} many{# модулей} other{# модуля}}',
+                            ['n' => $data->year],
+                            Yii::$app->language
+                        );
                     }
-
                 ],
+                'countHours',
                 [
                     'attribute' => 'directivity',
                     'label' => 'Направленность',
