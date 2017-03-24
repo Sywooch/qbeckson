@@ -24,7 +24,7 @@ use yii\helpers\ArrayHelper;
 
     <?= $form->field($model, 'program_id')->dropDownList(ArrayHelper::map(app\models\Programs::find()->where(['organization_id' => $organization['id']])->andwhere(['verification' => 2])->all(), 'id', 'name'), ['id'=>'prog-id', 'prompt'=>'-- Не выбрана --',]) ?>
     
-    <?php // $form->field($model, 'year_id')->dropDownList(ArrayHelper::map(app\models\Years::find()->all(), 'id', 'year')) ?>
+    <?php // $form->field($model, 'year_id')->dropDownList(ArrayHelper::map(app\models\ProgrammeModule::find()->all(), 'id', 'year')) ?>
     
     <?= $form->field($model, 'year_id')->widget(DepDrop::classname(), [
         'options'=>['id'=>'year-id'],

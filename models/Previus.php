@@ -13,7 +13,7 @@ use Yii;
  * @property integer $organization_id
  * @property integer $program_id
  *
- * @property Years $year
+ * @property ProgrammeModule $year
  * @property Certificates $certificate
  * @property Organization $organization
  * @property Programs $program
@@ -36,7 +36,7 @@ class Previus extends \yii\db\ActiveRecord
         return [
             [['certificate_id', 'year_id', 'organization_id', 'program_id'], 'required'],
             [['certificate_id', 'year_id', 'organization_id', 'program_id', 'actual'], 'integer'],
-            [['year_id'], 'exist', 'skipOnError' => true, 'targetClass' => Years::className(), 'targetAttribute' => ['year_id' => 'id']],
+            [['year_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProgrammeModule::className(), 'targetAttribute' => ['year_id' => 'id']],
             [['certificate_id'], 'exist', 'skipOnError' => true, 'targetClass' => Certificates::className(), 'targetAttribute' => ['certificate_id' => 'id']],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
             [['program_id'], 'exist', 'skipOnError' => true, 'targetClass' => Programs::className(), 'targetAttribute' => ['program_id' => 'id']],
@@ -63,7 +63,7 @@ class Previus extends \yii\db\ActiveRecord
      */
     public function getYear()
     {
-        return $this->hasOne(Years::className(), ['id' => 'year_id']);
+        return $this->hasOne(ProgrammeModule::className(), ['id' => 'year_id']);
     }
 
     /**

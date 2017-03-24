@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use kartik\grid\GridView;
 use yii\helpers\Url;
 use app\models\Certificates;
-use app\models\YearsSearch;
+use app\models\ProgrammeModuleSearch;
 use yii\helpers\ArrayHelper;
 use app\models\Mun;
 
@@ -89,18 +89,16 @@ $this->params['breadcrumbs'][] = $this->title;
                     'label' => 'Наименование',
                 ],
                 [
-                    'attribute'=>'year',
-                    'value'=> function ($data) {
-                         if ($data->year == 1) { return '1 год';}
-                        if ($data->year == 2) { return '2 года';}
-                        if ($data->year == 3) { return '3 года';}
-                        if ($data->year == 4) { return '4 года';}
-                        if ($data->year == 5) { return '5 лет';}
-                        if ($data->year == 6) { return '6 лет';}
-                        if ($data->year == 7) { return '7 лет';}
-                    } 
-                    
+                    'attribute' => 'year',
+                    'value' => function ($data) {
+                        return Yii::$app->i18n->messageFormatter->format(
+                            '{n, plural, one{# модуль} few{# модуля} many{# модулей} other{# модуля}}',
+                            ['n' => $data->year],
+                            Yii::$app->language
+                        );
+                    }
                 ],
+                'countHours',
                 [
                      'attribute' => 'directivity',
                      'label' => 'Направленность',

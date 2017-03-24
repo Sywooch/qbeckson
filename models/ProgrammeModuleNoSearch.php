@@ -5,13 +5,13 @@ namespace app\models;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Years;
+use app\models\ProgrammeModule;
 use app\models\Programs;
 
 /**
- * YearsSearch represents the model behind the search form about `app\models\Years`.
+ * ProgrammeModuleSearch represents the model behind the search form about `app\models\ProgrammeModule`.
  */
-class YearsNoSearch extends Years
+class ProgrammeModuleNoSearch extends ProgrammeModule
 {
     /**
      * @inheritdoc
@@ -42,7 +42,7 @@ class YearsNoSearch extends Years
      */
     public function search($params)
     {
-        $query = Years::find();
+        $query = ProgrammeModule::find();
 
         // add conditions that should always apply here
 

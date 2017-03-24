@@ -79,9 +79,10 @@ class Favorites extends \yii\db\ActiveRecord
         return $this->hasOne(Programs::className(), ['id' => 'program_id']);
     }
 
-     public function getFavoritesProgram() {
+    public function getFavoritesProgram()
+    {
 
-        if(!Yii::$app->user->isGuest) {
+        if (!Yii::$app->user->isGuest) {
 
             $certificates = new Certificates();
             $certificate = $certificates->getCertificates();

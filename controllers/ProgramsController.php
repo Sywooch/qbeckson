@@ -8,7 +8,7 @@ use app\models\ProgramsallSearch;
 use app\models\ProgramsPreviusSearch;
 use app\models\AllProgramsSearch;
 use app\models\Certificates;
-use app\models\Years;
+use app\models\ProgrammeModule;
 use app\models\Groups;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -61,12 +61,16 @@ class ProgramsController extends Controller
             'searchModel' => $searchModel,
         ]);
     }
-    
-        public function actionSearch()
+
+    public function actionSearch()
     {
         $searchModel = new AllProgramsSearch();
-        if (isset($_GET['org'])) { $searchModel->organization_id = $_GET['org']; }
-        if (isset($_GET['name'])) { $searchModel->name = $_GET['name']; }
+        if (isset($_GET['org'])) {
+            $searchModel->organization_id = $_GET['org'];
+        }
+        if (isset($_GET['name'])) {
+            $searchModel->name = $_GET['name'];
+        }
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('search', [
@@ -74,7 +78,7 @@ class ProgramsController extends Controller
             'searchModel' => $searchModel,
         ]);
     }
-    
+
     /**
      * Lists all Programs models.
      * @return mixed
@@ -99,63 +103,63 @@ class ProgramsController extends Controller
     {
         $model = $this->findModel($id);
         //$model->zab = explode(',', $model->zab);
-        
+
         $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-        
+
         if (isset($roles['organizations'])) {
             $organizations = new Organization();
             $organization = $organizations->getOrganization();
-            
+
             if ($organization['id'] != $model->organization_id) {
                 throw new ForbiddenHttpException('Нет доступа');
             }
         }
-        
-            
-            $year = (new \yii\db\Query())
+
+
+        $year = (new \yii\db\Query())
+            ->select(['id'])
+            ->from('years')
+            ->where(['program_id' => $id])
+            ->all();
+
+        $i = 0;
+        foreach ($year as $value) {
+            $years[$i] = ProgrammeModule::findOne($value['id']);
+            $i++;
+        }
+
+        if (isset($roles['certificate'])) {
+            $certificates = new Certificates();
+            $certificate = $certificates->getCertificates();
+
+            $cont = (new \yii\db\Query())
                 ->select(['id'])
-                ->from('years')
+                ->from('contracts')
                 ->where(['program_id' => $id])
-                ->all();
-        
-            $i = 0;
-            foreach ($year as $value) {
-                $years[$i] = Years::findOne($value['id']);
-                $i ++;
-            }
-        
-            if (isset($roles['certificate'])) {
-                $certificates = new Certificates();
-                $certificate = $certificates->getCertificates();
+                ->andWhere(['certificate_id' => $certificate->id])
+                ->andWhere(['status' => 0])
+                ->one();
 
-                $cont = (new \yii\db\Query())
-                    ->select(['id'])
-                    ->from('contracts')
-                    ->where(['program_id' => $id])
-                    ->andWhere(['certificate_id' => $certificate->id])
-                    ->andWhere(['status' => 0])
-                    ->one();
+            $rows = (new \yii\db\Query())
+                ->select(['id'])
+                ->from('cooperate')
+                ->where(['payer_id' => $certificate['payer_id']])
+                ->andWhere(['organization_id' => $model['organization_id']])
+                ->andWhere(['status' => 1])
+                ->count();
 
-                $rows = (new \yii\db\Query())
-                    ->select(['id'])
-                    ->from('cooperate')
-                    ->where(['payer_id'=> $certificate['payer_id']])
-                    ->andWhere(['organization_id' => $model['organization_id']])
-                    ->andWhere(['status'=> 1])
-                    ->count();
-            
-                if ($rows == 0) {
+            if ($rows == 0) {
                 Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в организацию, реализующую выбранную программу. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
-                }
-            
-                return $this->render('view', [
+            }
+
+            return $this->render('view', [
                 'model' => $this->findModel($model['id']),
                 'years' => $years,
                 'cont' => $cont,
                 'cooperate' => $rows,
             ]);
         }
-        
+
         return $this->render('view', [
             'model' => $model,
             'years' => $years,
@@ -171,33 +175,28 @@ class ProgramsController extends Controller
     {
         $model = new Programs();
         $file = new ProgramsFile();
-        $modelsYears = [new Years];
+        $modelsYears = [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])];
 
         if ($model->load(Yii::$app->request->post())) {
-            $modelsYears = Model::createMultiple(Years::classname());
+            $modelsYears = Model::createMultiple(ProgrammeModule::classname());
             Model::loadMultiple($modelsYears, Yii::$app->request->post());
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
                 Yii::$app->response->format = Response::FORMAT_JSON;
+
                 return ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelsYears),
                     ActiveForm::validate($model)
                 );
             }
-                        
-            
+
+
             $organizations = new Organization();
             $organization = $organizations->getOrganization();
             $model->organization_id = $organization['id'];
-//            $model->payer_id = $organization['payer_id'];
-
             $model->verification = 0;
-            //$model->rating = 0;
-            //$model->limit = 0;
-            //$model->study = 0;
             $model->open = 0;
-            //$model->quality_control = 0;
             if ($model->ovz == 2) {
                 if (!empty($model->zab)) {
                     $model->zab = implode(',', $model->zab);
@@ -205,25 +204,26 @@ class ProgramsController extends Controller
             }
 
             if (Yii::$app->request->isPost) {
-                
+
                 $file->docFile = UploadedFile::getInstance($file, 'docFile');
-                
+
                 if (empty($file->docFile)) {
                     Yii::$app->session->setFlash('error', 'Программа не добавлена.');
+
                     return $this->render('create', [
                         'model' => $model,
                         'file' => $file,
                         'modelsYears' => $modelsYears,
                     ]);
                 }
-                    
+
                 $datetime = microtime(true); // date("Y-m-d-G-i-s");
                 $filename = 'programs/program-' . $organization['id'] . '-' . $datetime . '.' . $file->docFile->extension;
                 $model->link = $filename;
                 $model->year = count($modelsYears);
 
                 if ($file->upload($filename)) {
-                    
+
                     $valid = $model->validate();
                     $valid = Model::validateMultiple($modelsYears) && $valid;
 
@@ -240,7 +240,7 @@ class ProgramsController extends Controller
                                         ->select('p3v')
                                         ->from('coefficient')
                                         ->one();
-                                    $p3 = $rows['p3v'];    
+                                    $p3 = $rows['p3v'];
 
                                     $mun = (new \yii\db\Query())
                                         ->select(['pc', 'zp', 'cozp', 'stav', 'costav', 'dop', 'codop', 'uvel', 'couvel', 'otch', 'cootch', 'otpusk', 'cootpusk', 'polezn', 'copolezn', 'nopc', 'conopc', 'rob', 'corob', 'tex', 'cotex', 'est', 'coest', 'fiz', 'cofiz', 'xud', 'coxud', 'tur', 'cotur', 'soc', 'cosoc'])
@@ -252,7 +252,7 @@ class ProgramsController extends Controller
                                         $p5 = $mun['pc'];
                                         $p6 = $mun['zp'];
                                         $p12 = $mun['stav'];
-                                        $p7 = $mun['dop']; 
+                                        $p7 = $mun['dop'];
                                         $p8 = $mun['uvel'];
                                         $p9 = $mun['otch'];
                                         $p10 = $mun['otpusk'];
@@ -324,26 +324,26 @@ class ProgramsController extends Controller
                                     $p13 = $coef['weekyear'];
 
                                     $rows = (new \yii\db\Query())
-                                            ->select('p21v')
-                                            ->from('coefficient')
-                                            ->one();
+                                        ->select('p21v')
+                                        ->from('coefficient')
+                                        ->one();
                                     $p21 = $rows['p21v'];
 
                                     $rows = (new \yii\db\Query())
-                                            ->select('p21v')
-                                            ->from('coefficient')
-                                            ->one();
+                                        ->select('p21v')
+                                        ->from('coefficient')
+                                        ->one();
                                     $p22 = $rows['p21v'];
 
                                     //return var_dump($p3);
 
-                                    $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / (($modelYears->maxchild + $modelYears->minchild) / 2)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) / ($p11 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * $p5;        
+                                    $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / (($modelYears->maxchild + $modelYears->minchild) / 2)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) / ($p11 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * $p5;
 
                                     $modelYears->normative_price = round($nprice);
                                     $modelYears->previus = 1;
                                     //$modelYears->verification = 0;
                                     $i++;
-                                    if (! ($flag = $modelYears->save(false))) {
+                                    if (!($flag = $modelYears->save(false))) {
                                         $transaction->rollBack();
                                         break;
                                     }
@@ -351,7 +351,7 @@ class ProgramsController extends Controller
                             }
                             if ($flag) {
                                 $transaction->commit();
-                                
+
                                 $informs = new Informs();
                                 $informs->program_id = $model->id;
                                 $informs->text = 'Поступила программа на сертификацию';
@@ -359,6 +359,7 @@ class ProgramsController extends Controller
                                 $informs->date = date("Y-m-d");
                                 $informs->read = 0;
                                 $informs->save();
+
                                 return $this->redirect(['/personal/organization-programs']);
                             }
                         } catch (Exception $e) {
@@ -372,50 +373,48 @@ class ProgramsController extends Controller
         return $this->render('create', [
             'model' => $model,
             'file' => $file,
-            'modelsYears' => (empty($modelsYears)) ? [new Years] : $modelsYears
+            'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
         ]);
     }
-    
-   
+
 
     public function actionVerificate($id)
     {
         $model = $this->findModel($id);
-        
+
         $rows = (new \yii\db\Query())
             ->select(['id'])
             ->from('years')
             ->where(['program_id' => $id])
             ->all();
-        
+
         $i = 0;
         foreach ($rows as $value) {
-            $years[$i] = Years::findOne($value['id']);
+            $years[$i] = ProgrammeModule::findOne($value['id']);
             $i++;
         }
 
         $model->verification = 1;
         //$model->zab = explode(',', $model->zab);
-        
+
         if ($model->save()) {
-             return $this->render('verificate', [
-                 'model' => $model,
-                 'years' => $years,
-             ]);   
+            return $this->render('verificate', [
+                'model' => $model,
+                'years' => $years,
+            ]);
         }
     }
-    
+
     public function actionSave($id)
-    {   
+    {
         $model = $this->findModel($id);
-         
-        
-        
-         $coefficient = (new \yii\db\Query())
+
+
+        $coefficient = (new \yii\db\Query())
             ->select(['blimrob', 'blimtex', 'blimest', 'blimfiz', 'blimxud', 'blimtur', 'blimsoc'])
             ->from('coefficient')
-            ->one();   
-        
+            ->one();
+
         if ($model->directivity == 'Техническая (робототехника)') {
             $model->limit = $coefficient['blimrob'] * $model->year;
         }
@@ -438,10 +437,10 @@ class ProgramsController extends Controller
             $model->limit = $coefficient['blimsoc'] * $model->year;
         }
 
-        $model-> verification = 2;
-         
+        $model->verification = 2;
+
         //return var_dump($model->limit);
-        if ($model->save())  {
+        if ($model->save()) {
             $informs = new Informs();
             $informs->program_id = $model->id;
             $informs->prof_id = $model->organization_id;
@@ -452,54 +451,60 @@ class ProgramsController extends Controller
             if ($informs->save()) {
                 return $this->redirect('/personal/operator-programs');
             }
-        } 
+        }
     }
-    
-    
+
+
     public function actionCertificate($id)
     {
         $model = $this->findModel($id);
         $modelsYears = $model->years;
 
         if ($model->load(Yii::$app->request->post())) {
-            
+
             $oldIDs = ArrayHelper::map($modelsYears, 'id', 'id');
-            $modelsYears = Model::createMultiple(Years::classname(), $modelsYears);
+            $modelsYears = Model::createMultiple(ProgrammeModule::classname(), $modelsYears);
             Model::loadMultiple($modelsYears, Yii::$app->request->post());
             $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelsYears, 'id', 'id')));
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
                 Yii::$app->response->format = Response::FORMAT_JSON;
+
                 return ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelsYears),
                     ActiveForm::validate($model)
                 );
             }
-            
+
             $valid = $model->validate();
             $valid = Model::validateMultiple($modelsYears) && $valid;
 
             if ($valid) {
                 $transaction = \Yii::$app->db->beginTransaction();
-                
+
                 try {
                     if ($flag = $model->save(false)) {
-                        if (! empty($deletedIDs)) {
-                            Years::deleteAll(['id' => $deletedIDs]);
+                        if (!empty($deletedIDs)) {
+                            ProgrammeModule::deleteAll(['id' => $deletedIDs]);
                         }
                         foreach ($modelsYears as $modelYears) {
-                            
-                            
-                            
-                            if ($model->p3z == 1) { $p3r = 'p3v'; }
-                            if ($model->p3z == 2) { $p3r = 'p3s'; }
-                            if ($model->p3z == 3) { $p3r = 'p3n'; }
+
+
+                            if ($model->p3z == 1) {
+                                $p3r = 'p3v';
+                            }
+                            if ($model->p3z == 2) {
+                                $p3r = 'p3s';
+                            }
+                            if ($model->p3z == 3) {
+                                $p3r = 'p3n';
+                            }
                             $rows = (new \yii\db\Query())
                                 ->select([$p3r])
                                 ->from('coefficient')
                                 ->one();
-                            $p3 = $rows[$p3r];    
+                            $p3 = $rows[$p3r];
 
                             $mun = (new \yii\db\Query())
                                 ->select(['pc', 'zp', 'cozp', 'stav', 'costav', 'dop', 'codop', 'uvel', 'couvel', 'otch', 'cootch', 'otpusk', 'cootpusk', 'polezn', 'copolezn', 'nopc', 'conopc', 'rob', 'corob', 'tex', 'cotex', 'est', 'coest', 'fiz', 'cofiz', 'xud', 'coxud', 'tur', 'cotur', 'soc', 'cosoc'])
@@ -511,7 +516,7 @@ class ProgramsController extends Controller
                                 $p5 = $mun['pc'];
                                 $p6 = $mun['zp'];
                                 $p12 = $mun['stav'];
-                                $p7 = $mun['dop']; 
+                                $p7 = $mun['dop'];
                                 $p8 = $mun['uvel'];
                                 $p9 = $mun['otch'];
                                 $p10 = $mun['otpusk'];
@@ -582,33 +587,44 @@ class ProgramsController extends Controller
                             $p15 = $coef['pk'];
                             $p13 = $coef['weekyear'];
 
-                            if ($modelYears->p21z == 1) { $p1y = 'p21v'; }
-                            if ($modelYears->p21z == 2) { $p1y = 'p21s'; }
-                            if ($modelYears->p21z == 3) { $p1y = 'p21o'; }
+                            if ($modelYears->p21z == 1) {
+                                $p1y = 'p21v';
+                            }
+                            if ($modelYears->p21z == 2) {
+                                $p1y = 'p21s';
+                            }
+                            if ($modelYears->p21z == 3) {
+                                $p1y = 'p21o';
+                            }
                             $rows = (new \yii\db\Query())
-                                    ->select([$p1y])
-                                    ->from('coefficient')
-                                    ->one();
+                                ->select([$p1y])
+                                ->from('coefficient')
+                                ->one();
                             $p21 = $rows[$p1y];
 
-                            if ($modelYears->p22z == 1) { $p2y = 'p22v'; }
-                            if ($modelYears->p22z == 2) { $p2y = 'p22s'; }
-                            if ($modelYears->p22z == 3) { $p2y = 'p22o'; }
+                            if ($modelYears->p22z == 1) {
+                                $p2y = 'p22v';
+                            }
+                            if ($modelYears->p22z == 2) {
+                                $p2y = 'p22s';
+                            }
+                            if ($modelYears->p22z == 3) {
+                                $p2y = 'p22o';
+                            }
                             $rows = (new \yii\db\Query())
-                                    ->select([$p2y])
-                                    ->from('coefficient')
-                                    ->one();
+                                ->select([$p2y])
+                                ->from('coefficient')
+                                ->one();
                             $p22 = $rows[$p2y];
-                            
+
                             //return var_dump($p3);
 
-                            $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / (($modelYears->maxchild + $modelYears->minchild) / 2)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) / ($p11 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * $p5;        
-                
-                            $modelYears->normative_price = round($nprice); 
-                
-                                                    
-                            
-                            if (! ($flag = $modelYears->save(false))) {
+                            $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / (($modelYears->maxchild + $modelYears->minchild) / 2)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) / ($p11 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * $p5;
+
+                            $modelYears->normative_price = round($nprice);
+
+
+                            if (!($flag = $modelYears->save(false))) {
                                 $transaction->rollBack();
                                 break;
                             }
@@ -616,63 +632,71 @@ class ProgramsController extends Controller
                     }
                     if ($flag) {
                         $transaction->commit();
+
                         return $this->redirect(['certificate', 'id' => $id]);
                     }
                 } catch (Exception $e) {
                     $transaction->rollBack();
                 }
             }
-            
+
         } else {
             return $this->render('cert', [
                 'model' => $model,
-                 'modelsYears' => (empty($modelsYears)) ? [new Years] : $modelsYears
+                'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
             ]);
         }
     }
-    
+
     public function actionNewnormprice($id)
     {
         $model = $this->findModel($id);
         $modelsYears = $model->years;
 
         if ($model->load(Yii::$app->request->post())) {
-            
+
             $oldIDs = ArrayHelper::map($modelsYears, 'id', 'id');
-            $modelsYears = Model::createMultiple(Years::classname(), $modelsYears);
+            $modelsYears = Model::createMultiple(ProgrammeModule::classname(), $modelsYears);
             Model::loadMultiple($modelsYears, Yii::$app->request->post());
             $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelsYears, 'id', 'id')));
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
                 Yii::$app->response->format = Response::FORMAT_JSON;
+
                 return ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelsYears),
                     ActiveForm::validate($model)
                 );
             }
-            
+
             $valid = $model->validate();
             $valid = Model::validateMultiple($modelsYears) && $valid;
 
             if ($valid) {
                 $transaction = \Yii::$app->db->beginTransaction();
-                
+
                 try {
                     if ($flag = $model->save(false)) {
-                        if (! empty($deletedIDs)) {
-                            Years::deleteAll(['id' => $deletedIDs]);
+                        if (!empty($deletedIDs)) {
+                            ProgrammeModule::deleteAll(['id' => $deletedIDs]);
                         }
-                        foreach ($modelsYears as $modelYears) {      
-                            
-                            if ($model->p3z == 1) { $p3r = 'p3v'; }
-                            if ($model->p3z == 2) { $p3r = 'p3s'; }
-                            if ($model->p3z == 3) { $p3r = 'p3n'; }
+                        foreach ($modelsYears as $modelYears) {
+
+                            if ($model->p3z == 1) {
+                                $p3r = 'p3v';
+                            }
+                            if ($model->p3z == 2) {
+                                $p3r = 'p3s';
+                            }
+                            if ($model->p3z == 3) {
+                                $p3r = 'p3n';
+                            }
                             $rows = (new \yii\db\Query())
                                 ->select([$p3r])
                                 ->from('coefficient')
                                 ->one();
-                            $p3 = $rows[$p3r];    
+                            $p3 = $rows[$p3r];
 
                             $mun = (new \yii\db\Query())
                                 ->select(['pc', 'zp', 'cozp', 'stav', 'costav', 'dop', 'codop', 'uvel', 'couvel', 'otch', 'cootch', 'otpusk', 'cootpusk', 'polezn', 'copolezn', 'nopc', 'conopc', 'rob', 'corob', 'tex', 'cotex', 'est', 'coest', 'fiz', 'cofiz', 'xud', 'coxud', 'tur', 'cotur', 'soc', 'cosoc'])
@@ -684,7 +708,7 @@ class ProgramsController extends Controller
                                 $p5 = $mun['pc'];
                                 $p6 = $mun['zp'];
                                 $p12 = $mun['stav'];
-                                $p7 = $mun['dop']; 
+                                $p7 = $mun['dop'];
                                 $p8 = $mun['uvel'];
                                 $p9 = $mun['otch'];
                                 $p10 = $mun['otpusk'];
@@ -755,31 +779,43 @@ class ProgramsController extends Controller
                             $p15 = $coef['pk'];
                             $p13 = $coef['weekyear'];
 
-                            if ($modelYears->p21z == 1) { $p1y = 'p21v'; }
-                            if ($modelYears->p21z == 2) { $p1y = 'p21s'; }
-                            if ($modelYears->p21z == 3) { $p1y = 'p21o'; }
+                            if ($modelYears->p21z == 1) {
+                                $p1y = 'p21v';
+                            }
+                            if ($modelYears->p21z == 2) {
+                                $p1y = 'p21s';
+                            }
+                            if ($modelYears->p21z == 3) {
+                                $p1y = 'p21o';
+                            }
                             $rows = (new \yii\db\Query())
-                                    ->select([$p1y])
-                                    ->from('coefficient')
-                                    ->one();
+                                ->select([$p1y])
+                                ->from('coefficient')
+                                ->one();
                             $p21 = $rows[$p1y];
 
-                            if ($modelYears->p22z == 1) { $p2y = 'p22v'; }
-                            if ($modelYears->p22z == 2) { $p2y = 'p22s'; }
-                            if ($modelYears->p22z == 3) { $p2y = 'p22o'; }
+                            if ($modelYears->p22z == 1) {
+                                $p2y = 'p22v';
+                            }
+                            if ($modelYears->p22z == 2) {
+                                $p2y = 'p22s';
+                            }
+                            if ($modelYears->p22z == 3) {
+                                $p2y = 'p22o';
+                            }
                             $rows = (new \yii\db\Query())
-                                    ->select([$p2y])
-                                    ->from('coefficient')
-                                    ->one();
+                                ->select([$p2y])
+                                ->from('coefficient')
+                                ->one();
                             $p22 = $rows[$p2y];
-                            
+
                             //return var_dump($p3);
 
-                            $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / (($modelYears->maxchild + $modelYears->minchild) / 2)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) / ($p11 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * $p5;        
-                
-                            $modelYears->normative_price = round($nprice);             
-                            
-                            if (! ($flag = $modelYears->save(false))) {
+                            $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / (($modelYears->maxchild + $modelYears->minchild) / 2)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) / ($p11 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * $p5;
+
+                            $modelYears->normative_price = round($nprice);
+
+                            if (!($flag = $modelYears->save(false))) {
                                 $transaction->rollBack();
                                 break;
                             }
@@ -787,110 +823,90 @@ class ProgramsController extends Controller
                     }
                     if ($flag) {
                         $transaction->commit();
+
                         return $this->redirect(['newnormprice', 'id' => $id]);
                     }
                 } catch (Exception $e) {
                     $transaction->rollBack();
                 }
             }
-            
+
         } else {
             return $this->render('newnormprice', [
                 'model' => $model,
-                 'modelsYears' => (empty($modelsYears)) ? [new Years] : $modelsYears
+                'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
             ]);
         }
     }
 
     public function actionNormpricesave($id)
     {
-        
-        $model = Years::findOne($id);
-        
+
+        $model = ProgrammeModule::findOne($id);
+
         if ($model->load(Yii::$app->request->post())) {
             $model->save();
-            
+
             $programs = (new \yii\db\Query())
                 ->select(['verification'])
                 ->from('programs')
                 ->where(['id' => $model->program_id])
                 ->one();
-            
+
             if ($programs['verification'] == 1) {
                 return $this->redirect(['certificate', 'id' => $model->program_id]);
             } else {
                 return $this->redirect(['newnormprice', 'id' => $model->program_id]);
             }
         }
+
         return $this->render('newnormpricesave', [
-                'model' => $model,
-            ]);
-        
+            'model' => $model,
+        ]);
+
     }
-    
+
     public function actionCertificateold($id)
     {
         $model = $this->findModel($id);
-        
-            
-            $params = (new \yii\db\Query())
-                ->select(['id', 'hours', 'hoursindivid', 'hoursdop', 'minchild', 'maxchild', 'p21z', 'p22z'])
-                ->from('years')
-                ->where(['program_id' => $model->id])
-                ->all();
-            
-            $year = array();
-            $i = 0;
-            foreach ($params as $param) {
-                $year[$i] = Years::findOne($param['id']);
-                
-                if ($year[$i]->load(Yii::$app->request->post())) {
-                    if ($i == 0 ) {return var_dump($year);}
-                    $year[$i]->save();
+
+
+        $params = (new \yii\db\Query())
+            ->select(['id', 'hours', 'hoursindivid', 'hoursdop', 'minchild', 'maxchild', 'p21z', 'p22z'])
+            ->from('years')
+            ->where(['program_id' => $model->id])
+            ->all();
+
+        $year = [];
+        $i = 0;
+        foreach ($params as $param) {
+            $year[$i] = ProgrammeModule::findOne($param['id']);
+
+            if ($year[$i]->load(Yii::$app->request->post())) {
+                if ($i == 0) {
+                    return var_dump($year);
                 }
-                
-                 
-                //$year[$i]->save();
-                $i++;
+                $year[$i]->save();
             }
-            //return var_dump($year);
-            
-            //return $this->render('/programs/viewprice', ['year' => $year, 'id' => $id]);
-            //return $this->redirect('/personal/operator-programs');
-            
-            //$model-> verification = 2;
-            
-            /*if ($model->save())  {
-                $informs = new Informs();
-                $informs->program_id = $model->id;
-                $informs->prof_id = $model->organization_id;
-                $informs->text = 'Сертифицированна программа';
-                $informs->from = 3;
-                $informs->date = date("Y-m-d");
-                $informs->read = 0;
-                $informs->save(); 
-                return $this->render('certificate', [
-                    'model' => $model,
-                    'year' => $year,
-                ]);
-            } */
-        
+            $i++;
+        }
+
         return $this->render('certificate', [
-                    'model' => $model,
-                    'year' => $year,
-                ]);
+            'model' => $model,
+            'year' => $year,
+        ]);
     }
-    
-    
+
+
     public function actionDecertificate($id)
     {
         $model = $this->findModel($id);
         $informs = new Informs();
-        
+
         if ($informs->load(Yii::$app->request->post())) {
             $model->verification = 3;
 
-            if ($model->save())  {
+            if ($model->save()) {
                 $informs->program_id = $model->id;
                 $informs->prof_id = $model->organization_id;
                 //$informs->text = 'Программа не сертифицированна. Причина: '.$informs->dop;
@@ -900,55 +916,61 @@ class ProgramsController extends Controller
                 $informs->date = date("Y-m-d");
                 $informs->read = 0;
                 $informs->save();
+
                 return $this->redirect('/personal/operator-programs');
             }
         }
+
         return $this->render('/informs/comment', [
             'informs' => $informs,
             'model' => $model,
         ]);
     }
-    
+
     public function actionCertificateok($year)
     {
         $id = 1;
-            return $this->render('/programs/viewprice', ['year' => $year, 'id' => $id]);
+
+        return $this->render('/programs/viewprice', ['year' => $year, 'id' => $id]);
     }
-    
+
     public function actionProperty($id)
-    {    
+    {
         $model = $this->findModel($id);
         $modelsYears = $model->years;
-        
+
         $oldIDs = ArrayHelper::map($modelsYears, 'id', 'id');
-        $modelYears = Model::createMultiple(Years::classname(), $modelsYears);
+        $modelYears = Model::createMultiple(ProgrammeModule::classname(), $modelsYears);
         Model::loadMultiple($modelsYears, Yii::$app->request->post());
         $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelsYears, 'id', 'id')));
-        
+
         if (Yii::$app->request->isAjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                return ActiveForm::validateMultiple($modelsGroups);
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            return ActiveForm::validateMultiple($modelsGroups);
         }
-        
-        if (Yii::$app->request->isPost) {      
+
+        if (Yii::$app->request->isPost) {
             if ($model->verification == 1) {
                 Yii::$app->session->setFlash('error', 'Редактирование недоступно, программа проходит сертификацию.');
+
                 return $this->redirect(['/personal/organization-programs']);
             }
 
-                        foreach ($modelsYears as $modelYears) {
-                            
-                            $modelYears->save();
-                            }
+            foreach ($modelsYears as $modelYears) {
+
+                $modelYears->save();
+            }
+
             return $this->redirect(['/personal/organization-programs']);
-                            
+
         } else {
             return $this->render('open', [
-                'modelsYears' => (empty($modelsYears)) ? [new Years] : $modelsYears
+                'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
             ]);
         }
     }
-    
+
     /**
      * Updates an existing Programs model.
      * If update is successful, the browser will be redirected to the 'view' page.
@@ -961,13 +983,13 @@ class ProgramsController extends Controller
         $modelYears = $model->years;
         $file = new ProgramsFile();
         $model->zab = explode(',', $model->zab);
-        
+
         $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-        
+
         if (isset($roles['organizations'])) {
             $organizations = new Organization();
             $organization = $organizations->getOrganization();
-            
+
             if ($organization['id'] != $model->organization_id) {
                 throw new ForbiddenHttpException('Нет доступа');
             }
@@ -976,9 +998,10 @@ class ProgramsController extends Controller
         if ($model->load(Yii::$app->request->post())) {
             if ($model->verification == 1) {
                 Yii::$app->session->setFlash('error', 'Редактирование недоступно, программа проходит сертификацию.');
+
                 return $this->redirect(['/personal/organization-programs']);
             }
-            
+
             $file->docFile = UploadedFile::getInstance($file, 'docFile');
             if ($file->docFile) {
                 $datetime = microtime(true); // date("Y-m-d-G-i-s");
@@ -986,26 +1009,27 @@ class ProgramsController extends Controller
                 $model->link = $filename;
                 $file->upload($filename);
             }
-             $model->verification = 0;
+            $model->verification = 0;
             $model->open = 0;
             if ($model->zab) {
-            $model->zab = implode(',', $model->zab);
+                $model->zab = implode(',', $model->zab);
             }
-            
+
             $oldIDs = ArrayHelper::map($modelYears, 'id', 'id');
-            $modelYears = Model::createMultiple(Years::classname(), $modelYears);
+            $modelYears = Model::createMultiple(ProgrammeModule::classname(), $modelYears);
             Model::loadMultiple($modelYears, Yii::$app->request->post());
             $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelYears, 'id', 'id')));
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
                 Yii::$app->response->format = Response::FORMAT_JSON;
+
                 return ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelYears),
                     ActiveForm::validate($model)
                 );
             }
-            
+
             $valid = $model->validate();
             $valid = Model::validateMultiple($modelYears) && $valid;
 
@@ -1013,15 +1037,15 @@ class ProgramsController extends Controller
                 $transaction = \Yii::$app->db->beginTransaction();
                 try {
                     if ($flag = $model->save(false)) {
-                        if (! empty($deletedIDs)) {
-                            Years::deleteAll(['id' => $deletedIDs]);
+                        if (!empty($deletedIDs)) {
+                            ProgrammeModule::deleteAll(['id' => $deletedIDs]);
                         }
                         $i = 1;
-                        foreach ($modelYears as $modelYears) {
-                            $modelYears->program_id = $model->id;
-                            $modelYears->year = $i;
-                            
-                            if (! ($flag = $modelYears->save(false))) {
+                        foreach ($modelYears as $modelYear) {
+                            $modelYear->program_id = $model->id;
+                            $modelYear->year = $i;
+
+                            if (!($flag = $modelYear->save(false))) {
                                 $transaction->rollBack();
                                 break;
                             }
@@ -1030,7 +1054,7 @@ class ProgramsController extends Controller
                     }
                     if ($flag) {
                         $transaction->commit();
-                                
+
                         $informs = new Informs();
                         $informs->program_id = $model->id;
                         $informs->text = 'Отредактирована программа для сертификации';
@@ -1038,22 +1062,23 @@ class ProgramsController extends Controller
                         $informs->date = date("Y-m-d");
                         $informs->read = 0;
                         $informs->save();
+
                         return $this->redirect(['/personal/organization-programs']);
                     }
                 } catch (Exception $e) {
                     $transaction->rollBack();
                 }
             }
-            
+
         } else {
             return $this->render('update', [
                 'model' => $model,
                 'file' => $file,
-                 'modelYears' => (empty($modelYears)) ? [new Years] : $modelYears
+                'modelYears' => (empty($modelYears)) ? [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])] : $modelYears
             ]);
         }
     }
-    
+
     public function actionEdit($id)
     {
         $model = $this->findModel($id);
@@ -1062,21 +1087,22 @@ class ProgramsController extends Controller
         $model->zab = explode(',', $model->zab);
 
         if ($model->load(Yii::$app->request->post())) {
-            
+
             $oldIDs = ArrayHelper::map($modelYears, 'id', 'id');
-            $modelYears = Model::createMultiple(Years::classname(), $modelYears);
+            $modelYears = Model::createMultiple(ProgrammeModule::classname(), $modelYears);
             Model::loadMultiple($modelYears, Yii::$app->request->post());
             $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelYears, 'id', 'id')));
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
                 Yii::$app->response->format = Response::FORMAT_JSON;
+
                 return ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelYears),
                     ActiveForm::validate($model)
                 );
             }
-            
+
             $valid = $model->validate();
             $valid = Model::validateMultiple($modelYears) && $valid;
 
@@ -1084,51 +1110,56 @@ class ProgramsController extends Controller
                 $transaction = \Yii::$app->db->beginTransaction();
                 try {
                     if ($flag = $model->save(false)) {
-                        if (! empty($deletedIDs)) {
-                            Years::deleteAll(['id' => $deletedIDs]);
+                        if (!empty($deletedIDs)) {
+                            ProgrammeModule::deleteAll(['id' => $deletedIDs]);
                         }
                         $i = 1;
                         foreach ($modelYears as $modelYears) {
                             $modelYears->program_id = $model->id;
                             $modelYears->year = $i;
-                            if (! ($flag = $modelYears->save(false))) {
+                            if (!($flag = $modelYears->save(false))) {
                                 $transaction->rollBack();
                                 break;
                             }
-                        $i++;
+                            $i++;
                         }
                     }
                     if ($flag) {
                         $transaction->commit();
+
                         return $this->redirect(['/personal/operator-programs']);
                     }
                 } catch (Exception $e) {
                     $transaction->rollBack();
                 }
             }
-            
+
         } else {
             return $this->render('edit', [
                 'model' => $model,
                 'file' => $file,
-                 'modelYears' => (empty($modelYears)) ? [new Years] : $modelYears
+                'modelYears' => (empty($modelYears)) ? [new ProgrammeModule] : $modelYears
             ]);
         }
     }
-    
+
     public function actionNewlimit($id)
     {
         $model = $this->findModel($id);
-               
+
         $coefficient = (new \yii\db\Query())
             ->select(['ngrp', 'sgrp', 'vgrp', 'ppchr1', 'ppchr2', 'ppzm1', 'ppzm2', 'blimrob', 'blimtex', 'blimest', 'blimfiz', 'blimxud', 'blimtur', 'blimsoc'])
             ->from('coefficient')
-            ->one();   
-        
-        if ($model->rating < $coefficient['ngrp']) {  $coef_raiting = 0; }
-        if ($model->rating == NULL) { $coef_raiting = 1; }
-        
-       // return var_dump($coef_raiting);
+            ->one();
+
+        if ($model->rating < $coefficient['ngrp']) {
+            $coef_raiting = 0;
+        }
+        if ($model->rating == null) {
+            $coef_raiting = 1;
+        }
+
+        // return var_dump($coef_raiting);
         if ($model->rating >= $coefficient['ngrp'] and $model->rating < $coefficient['sgrp']) {
             $coef_raiting = ($model->rating - $coefficient['ppchr1']) / $coefficient['ppzm1'];
         }
@@ -1138,8 +1169,8 @@ class ProgramsController extends Controller
         if ($model->rating >= $coefficient['vgrp']) {
             $coef_raiting = ($model->rating - $coefficient['ppchr2']) / $coefficient['ppzm2'];
         }
-           
-        
+
+
         if ($model->directivity == 'Техническая (робототехника)') {
             $model->limit = round(($coefficient['blimrob'] * $coef_raiting) * $model->year, 0);
         }
@@ -1160,9 +1191,9 @@ class ProgramsController extends Controller
         }
         if ($model->directivity == 'Социально-педагогическая') {
             $model->limit = round(($coefficient['blimsoc'] * $coef_raiting) * $model->year, 0);
-        }     
-        
-        if($model->load(Yii::$app->request->post()) && $model->validate() && $model->save()) {
+        }
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->save()) {
             return $this->redirect(['/programs/view', 'id' => $model->id]);
         }
 
@@ -1178,19 +1209,23 @@ class ProgramsController extends Controller
             ->select(['id'])
             ->from('programs')
             ->column();
-        
+
         $coefficient = (new \yii\db\Query())
             ->select(['ngrp', 'sgrp', 'vgrp', 'ppchr1', 'ppchr2', 'ppzm1', 'ppzm2', 'blimrob', 'blimtex', 'blimest', 'blimfiz', 'blimxud', 'blimtur', 'blimsoc'])
             ->from('coefficient')
-            ->one(); 
-        
+            ->one();
+
         foreach ($programs as $program_id) {
-            
+
             $model = $this->findModel($program_id);
 
 
-            if ($model->rating < $coefficient['ngrp']) {  $coef_raiting = 0; }
-            if ($model->rating == NULL) { $coef_raiting = 1; }
+            if ($model->rating < $coefficient['ngrp']) {
+                $coef_raiting = 0;
+            }
+            if ($model->rating == null) {
+                $coef_raiting = 1;
+            }
             if ($model->rating >= $coefficient['ngrp'] and $model->rating < $coefficient['sgrp']) {
                 $coef_raiting = ($model->rating - $coefficient['ppchr1']) / $coefficient['ppzm1'];
             }
@@ -1222,24 +1257,24 @@ class ProgramsController extends Controller
             }
             if ($model->directivity == 'Социально-педагогическая') {
                 $model->limit = round(($coefficient['blimsoc'] * $coef_raiting) * $model->year, 0);
-            }     
-        
+            }
+
             $model->save();
         }
 
         return $this->redirect(['/personal/operator-programs']);
     }
 
-    
+
     public function actionRaiting($id)
     {
         $model = $this->findModel($id);
-        
+
         $coefficient = (new \yii\db\Query())
             ->select(['ocsootv', 'ocku', 'ocmt', 'obsh', 'ktob', 'vgs', 'sgs', 'pchsrd', 'pzmsrd', 'minraiting'])
             ->from('coefficient')
-            ->one(); 
-        
+            ->one();
+
         /* 'ocsootv' => 'Значимость оценки соответствия заявленных при включении образовательной программы в Реестр образовательных программ ожидаемых результатов ее освоения фактическому направлению развития ребенка при освоении образовательной программы',
             'ocku' => 'Значимость оценки кадровых условий реализации образовательной программы и соблюдения при реализации программы заявленных характеристик наполняемости',
             'ocmt' => 'Значимость оценки материально-технических условий реализации образовательной программы',
@@ -1250,26 +1285,27 @@ class ProgramsController extends Controller
             'pchsrd' => 'Параметр числителя соотношения расторгнутых договоров',
             'pzmsrd' => 'Параметр знаменателя соотношения расторгнутых договоров',
             'minraiting' => 'Минимальная доля оценок для определения рейтинга программы, %', */
-        
-        
+
+
         if ($model->quality_control >= (($coefficient['minraiting'] * $model->last_contracts) / 100) && $model->quality_control > 0) {
-            if (($model->last_s_contracts_rod / $model->last_contracts) >= $coefficient['vgs'] / 100) { $coef_tek = 0; }
-            if (($model->last_s_contracts_rod / $model->last_contracts) >= $coefficient['sgs'] / 100 and ($model->last_s_contracts_rod / $model->last_contracts) < $coefficient['vgs'] / 100) { 
-                $coef_tek = ($coefficient['pchsrd'] - ($model->last_s_contracts_rod / $model->last_contracts)) / $coefficient['pzmsrd']; 
+            if (($model->last_s_contracts_rod / $model->last_contracts) >= $coefficient['vgs'] / 100) {
+                $coef_tek = 0;
+            }
+            if (($model->last_s_contracts_rod / $model->last_contracts) >= $coefficient['sgs'] / 100 and ($model->last_s_contracts_rod / $model->last_contracts) < $coefficient['vgs'] / 100) {
+                $coef_tek = ($coefficient['pchsrd'] - ($model->last_s_contracts_rod / $model->last_contracts)) / $coefficient['pzmsrd'];
             }
             if (($model->last_s_contracts_rod / $model->last_contracts) < $coefficient['sgs'] / 100) {
                 $coef_tek = 1;
             }
-            
-           $model->rating = (($coefficient['ocsootv'] * $model->ocen_fact)) + (($coefficient['ocku'] * $model->ocen_kadr)) + (($coefficient['ocmt'] * $model->ocen_mat)) + (($coefficient['obsh'] * $model->ocen_obch)) + (($coefficient['ktob'] * $coef_tek) * 100); 
+
+            $model->rating = (($coefficient['ocsootv'] * $model->ocen_fact)) + (($coefficient['ocku'] * $model->ocen_kadr)) + (($coefficient['ocmt'] * $model->ocen_mat)) + (($coefficient['obsh'] * $model->ocen_obch)) + (($coefficient['ktob'] * $coef_tek) * 100);
+        } else {
+            $model->rating = null;
         }
-        else {
-            $model->rating = NULL;
+
+        if ($model->save()) {
+            return $this->redirect(['/programs/view', 'id' => $model->id]);
         }
-        
-       if ($model->save()) {
-           return $this->redirect(['/programs/view', 'id' => $model->id]);
-       }
     }
 
     public function actionAllraiting()
@@ -1278,35 +1314,38 @@ class ProgramsController extends Controller
             ->select(['id'])
             ->from('programs')
             ->column();
-        
+
         $coefficient = (new \yii\db\Query())
             ->select(['ocsootv', 'ocku', 'ocmt', 'obsh', 'ktob', 'vgs', 'sgs', 'pchsrd', 'pzmsrd', 'minraiting'])
             ->from('coefficient')
-            ->one(); 
-        
+            ->one();
+
         foreach ($programs as $program_id) {
-            
+
             $model = $this->findModel($program_id);
 
-            if ($model->quality_control >=  (($coefficient['minraiting'] * $model->last_contracts) / 100) && $model->quality_control > 0) {
-                if (($model->last_s_contracts_rod / $model->last_contracts) >= $coefficient['vgs'] / 100) { $coef_tek = 0; }
-                if (($model->last_s_contracts_rod / $model->last_contracts) >= $coefficient['sgs'] / 100 and ($model->last_s_contracts_rod / $model->last_contracts) < $coefficient['vgs'] / 100) { 
-                    $coef_tek = ($coefficient['pchsrd'] - ($model->last_s_contracts_rod / $model->last_contracts)) / $coefficient['pzmsrd']; 
+            if ($model->quality_control >= (($coefficient['minraiting'] * $model->last_contracts) / 100) && $model->quality_control > 0) {
+                if (($model->last_s_contracts_rod / $model->last_contracts) >= $coefficient['vgs'] / 100) {
+                    $coef_tek = 0;
+                }
+                if (($model->last_s_contracts_rod / $model->last_contracts) >= $coefficient['sgs'] / 100 and ($model->last_s_contracts_rod / $model->last_contracts) < $coefficient['vgs'] / 100) {
+                    $coef_tek = ($coefficient['pchsrd'] - ($model->last_s_contracts_rod / $model->last_contracts)) / $coefficient['pzmsrd'];
                 }
                 if (($model->last_s_contracts_rod / $model->last_contracts) < $coefficient['sgs'] / 100) {
                     $coef_tek = 1;
                 }
 
-               $model->rating = (($coefficient['ocsootv'] * $model->ocen_fact)) + (($coefficient['ocku'] * $model->ocen_kadr)) + (($coefficient['ocmt'] * $model->ocen_mat)) + (($coefficient['obsh'] * $model->ocen_obch)) + (($coefficient['ktob'] * $coef_tek) * 100); 
-            }
-            else {
-                $model->rating = NULL;
+                $model->rating = (($coefficient['ocsootv'] * $model->ocen_fact)) + (($coefficient['ocku'] * $model->ocen_kadr)) + (($coefficient['ocmt'] * $model->ocen_mat)) + (($coefficient['obsh'] * $model->ocen_obch)) + (($coefficient['ktob'] * $coef_tek) * 100);
+            } else {
+                $model->rating = null;
             }
 
             $model->save();
-       }
+        }
+
         return $this->redirect(['personal/operator-programs']);
     }
+
     /**
      * Deletes an existing Programs model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
@@ -1315,32 +1354,32 @@ class ProgramsController extends Controller
      */
     public function actionDelete($id)
     {
-         $user = User::findOne(Yii::$app->user->id);
+        $user = User::findOne(Yii::$app->user->id);
 
-        if($user->load(Yii::$app->request->post())) {
+        if ($user->load(Yii::$app->request->post())) {
 
             if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
-                    $model = $this->findModel($id);
+                $model = $this->findModel($id);
 
-                    $contarcts = (new \yii\db\Query())
-                        ->select(['id'])
-                        ->from('contracts')
-                        ->where(['program_id' => $model->id])
-                        ->andWhere(['status' => [0,2,3,4]])
-                        ->column();
-                    
-                    foreach ($contarcts as $contarct) {
-                        $cont  = Contracts::findOne($contarct);
-                        $cont->delete();
-                    }
-                
-                    $model->delete();
+                $contarcts = (new \yii\db\Query())
+                    ->select(['id'])
+                    ->from('contracts')
+                    ->where(['program_id' => $model->id])
+                    ->andWhere(['status' => [0, 2, 3, 4]])
+                    ->column();
 
-                    return $this->redirect(['/personal/organization-programs']);
+                foreach ($contarcts as $contarct) {
+                    $cont = Contracts::findOne($contarct);
+                    $cont->delete();
                 }
-            else {
+
+                $model->delete();
+
+                return $this->redirect(['/personal/organization-programs']);
+            } else {
                 Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
-                 return $this->redirect(['/personal/operator-payers']);
+
+                return $this->redirect(['/personal/operator-payers']);
             }
         }
 

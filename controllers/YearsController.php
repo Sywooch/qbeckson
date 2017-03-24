@@ -3,8 +3,8 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\Years;
-use app\models\YearsSearch;
+use app\models\ProgrammeModule;
+use app\models\ProgrammeModuleSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -15,7 +15,7 @@ use app\models\Completeness;
 use app\models\Programs;
 
 /**
- * YearsController implements the CRUD actions for Years model.
+ * YearsController implements the CRUD actions for ProgrammeModule model.
  */
 class YearsController extends Controller
 {
@@ -35,12 +35,12 @@ class YearsController extends Controller
     }
 
     /**
-     * Lists all Years models.
+     * Lists all ProgrammeModule models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new YearsSearch();
+        $searchModel = new ProgrammeModuleSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -50,7 +50,7 @@ class YearsController extends Controller
     }
 
     /**
-     * Displays a single Years model.
+     * Displays a single ProgrammeModule model.
      * @param integer $id
      * @return mixed
      */
@@ -62,13 +62,13 @@ class YearsController extends Controller
     }
 
     /**
-     * Creates a new Years model.
+     * Creates a new ProgrammeModule model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Years();
+        $model = new ProgrammeModule();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
@@ -80,7 +80,7 @@ class YearsController extends Controller
     }
 
     /**
-     * Updates an existing Years model.
+     * Updates an existing ProgrammeModule model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -117,7 +117,7 @@ class YearsController extends Controller
     }
 
     /**
-     * Deletes an existing Years model.
+     * Deletes an existing ProgrammeModule model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -538,7 +538,7 @@ class YearsController extends Controller
                 continue;
             }
 
-            $years = Years::findOne($rowDada[0][0]);
+            $years = ProgrammeModule::findOne($rowDada[0][0]);
             $years->price = $rowDada[0][1];
             $years->open = 1;
             
@@ -553,15 +553,15 @@ class YearsController extends Controller
     }
 
     /**
-     * Finds the Years model based on its primary key value.
+     * Finds the ProgrammeModule model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Years the loaded model
+     * @return ProgrammeModule the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Years::findOne($id)) !== null) {
+        if (($model = ProgrammeModule::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

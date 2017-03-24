@@ -10,7 +10,11 @@ use yii\widgets\Pjax;
 /* @var $model app\models\Programs */
 
 $this->title = 'Сертифицировать программу';
-$this->params['breadcrumbs'][] = ['label' => 'Программы', 'url' => ['/personal/organization-programs']];
+if (Yii::$app->user->can('operators')) {
+    $this->params['breadcrumbs'][] = ['label' => 'Программы', 'url' => ['/personal/operator-programs']];
+} elseif (Yii::$app->user->can('organizations')) {
+    $this->params['breadcrumbs'][] = ['label' => 'Программы', 'url' => ['/personal/organization-programs']];
+}
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="programs-create">

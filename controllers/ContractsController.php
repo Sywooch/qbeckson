@@ -17,7 +17,7 @@ use app\models\Programs;
 use app\models\Certificates;
 use app\models\Organization;
 use app\models\Favorites;
-use app\models\Years;
+use app\models\ProgrammeModule;
 use app\models\Groups;
 use app\models\GroupsSearch;
 use app\models\Payers;
@@ -108,7 +108,7 @@ class ContractsController extends Controller
 
             $model->start_edu_contract = $group['datestart'];
          
-            $year = Years::findOne($group['year_id']);
+            $year = ProgrammeModule::findOne($group['year_id']);
          
             $date_elements_start  = explode("-", $group['datestart']);
         $date_elements_stop  = explode("-", $group['datestop']);
@@ -142,7 +142,7 @@ class ContractsController extends Controller
 
         $teach_day = $first_m_day - $date_elements_start[2] + 1;
         
-            $year = Years::findOne($group['year_id']);
+            $year = ProgrammeModule::findOne($group['year_id']);
         
             $first_m_price = $teach_day / $prodolj_d * $year['price'];
             $other_m_price = ($year['price'] - $first_m_price) / ($prodolj_m - 1);
@@ -280,7 +280,7 @@ class ContractsController extends Controller
             ->one();
         
         $program = Programs::findOne($rows['program_id']);
-        $year = Years::findOne($id);
+        $year = ProgrammeModule::findOne($id);
             
          return $this->render('/contracts/groups', [
             'GroupsProvider' => $GroupsProvider,
@@ -433,7 +433,7 @@ class ContractsController extends Controller
         //return $teach_day;
         
        // return $first_m_day;
-        $year = Years::findOne($group['year_id']);
+        $year = ProgrammeModule::findOne($group['year_id']);
         
         $first_m_price = $teach_day / $prodolj_d * $year['price'];
        
@@ -667,7 +667,7 @@ class ContractsController extends Controller
         //return $teach_day;
         
        // return $first_m_day;
-        $year = Years::findOne($group['year_id']);
+        $year = ProgrammeModule::findOne($group['year_id']);
         
         $first_m_price = $teach_day / $prodolj_d * $year['price'];
        
@@ -1290,7 +1290,7 @@ class ContractsController extends Controller
         $organization = Organization::findOne($model->organization_id);
         $program = Programs::findOne($model->program_id);
         $group = Groups::findOne($model->group_id);
-        $year = Years::findOne($model->year_id);
+        $year = ProgrammeModule::findOne($model->year_id);
         $payer = Payers::findOne($model->payer_id);
         if ($year->p21z == 1) { $kv_osn = 'Высшая'; }
         if ($year->p21z == 2) { $kv_osn = 'Первая'; }
@@ -2143,7 +2143,7 @@ EOD;
             if ($parents != null) {
                 $prog_id = $parents[0];
                 
-                //$out = Years::find()->where(['program_id' => $prog_id])->asArray()->all();
+                //$out = ProgrammeModule::find()->where(['program_id' => $prog_id])->asArray()->all();
                 
                 $rows = (new \yii\db\Query())
                     ->select(['id', 'year'])
@@ -2169,7 +2169,7 @@ EOD;
                 } 
                 
 
-                //$out = ArrayHelper::map(Years::find()->where(['program_id' => $prog_id])->all(), 'id', 'year');
+                //$out = ArrayHelper::map(ProgrammeModule::find()->where(['program_id' => $prog_id])->all(), 'id', 'year');
                 //$out = self::getSubCatList($cat_id); 
                 // the getSubCatList function will query the database based on the
                 // cat_id and return an array like below:

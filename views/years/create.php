@@ -4,10 +4,10 @@ use yii\helpers\Html;
 
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Years */
+/* @var $model app\models\ProgrammeModule */
 
-$this->title = Yii::t('app', 'Create Years');
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Years'), 'url' => ['index']];
+$this->title = Yii::t('app', 'Create ProgrammeModule');
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'ProgrammeModule'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="years-create">

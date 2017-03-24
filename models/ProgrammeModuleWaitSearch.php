@@ -5,12 +5,13 @@ namespace app\models;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Years;
+use app\models\ProgrammeModule;
+use app\models\Programs;
 
 /**
- * YearsSearch represents the model behind the search form about `app\models\Years`.
+ * ProgrammeModuleSearch represents the model behind the search form about `app\models\ProgrammeModule`.
  */
-class YearsSearch extends Years
+class ProgrammeModuleWaitSearch extends ProgrammeModule
 {
     /**
      * @inheritdoc
@@ -41,7 +42,7 @@ class YearsSearch extends Years
      */
     public function search($params)
     {
-        $query = Years::find();
+        $query = ProgrammeModule::find();
 
         // add conditions that should always apply here
 
@@ -57,14 +58,14 @@ class YearsSearch extends Years
             return $dataProvider;
         }
         
-        $years = new Years();
-        //$year = $years->getMyYear();
-        if (empty($year)) { $year = 0; }
+        $programs = new Programs();
+        $program = $programs->getOrganizationWaitProgram();
+        if (empty($program)) { $program = 0; }
 
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'program_id' => $this->program_id,
+            'program_id' => $program,
             'year' => $this->year,
             'month' => $this->month,
             'hours' => $this->hours,

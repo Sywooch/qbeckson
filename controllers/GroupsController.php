@@ -4,7 +4,7 @@ namespace app\controllers;
 
 use Yii;
 use app\models\Groups;
-use app\models\Years;
+use app\models\ProgrammeModule;
 use app\models\Payers;
 use app\models\User;
 use app\models\GroupsSearch;
@@ -218,7 +218,7 @@ class GroupsController extends Controller
             if ($parents != null) {
                 $prog_id = $parents[0];
                 
-                //$out = Years::find()->where(['program_id' => $prog_id])->asArray()->all();
+                //$out = ProgrammeModule::find()->where(['program_id' => $prog_id])->asArray()->all();
                 
                 $rows = (new \yii\db\Query())
                     ->select(['id', 'year'])
@@ -232,7 +232,7 @@ class GroupsController extends Controller
                 } 
                 
 
-                //$out = ArrayHelper::map(Years::find()->where(['program_id' => $prog_id])->all(), 'id', 'year');
+                //$out = ArrayHelper::map(ProgrammeModule::find()->where(['program_id' => $prog_id])->all(), 'id', 'year');
                 //$out = self::getSubCatList($cat_id); 
                 // the getSubCatList function will query the database based on the
                 // cat_id and return an array like below:

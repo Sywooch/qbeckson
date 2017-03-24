@@ -64,7 +64,7 @@ class ProgramsPreviusSearch extends Programs
                 $organizations = new Organization();
         $organization = $organizations->getActualOrganization();
         
-        $years = new Years();
+        $years = new ProgrammeModule();
         $year = $years->getAllYear();
         if (empty($year)) { $year = 0; }
 
