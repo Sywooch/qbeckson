@@ -16,13 +16,13 @@ $this->params['breadcrumbs'][] = $this->title;
 $js = '
 jQuery(".dynamicform_wrapper").on("afterInsert", function(e, item) {
     jQuery(".dynamicform_wrapper .panel-title").each(function(index) {
-        jQuery(this).html((index + 1) + " Год")
+        jQuery(this).html((index + 1) + " модуль")
     });
 });
 
 jQuery(".dynamicform_wrapper").on("afterDelete", function(e) {
     jQuery(".dynamicform_wrapper .panel-title").each(function(index) {
-        jQuery(this).html((index + 1) + " Год")
+        jQuery(this).html((index + 1) + " модуль")
     });
 });
 ';
@@ -59,7 +59,7 @@ $this->registerJs($js);
                 <?php foreach ($modelsYears as $i => $modelYears): ?>
                     <div class="item panel panel-default"><!-- widgetBody -->
                         <div class="panel-heading">
-                            <h3 class="panel-title pull-left"><?= $i + 1 ?> Год</h3>
+                            <h3 class="panel-title pull-left"><?= $i + 1 ?> модуль</h3>
                             <div class="clearfix"></div>
                         </div>
                         <div class="panel-body">

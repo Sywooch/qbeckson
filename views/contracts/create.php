@@ -218,7 +218,7 @@ if ($certificate->balance == 0) {
                             'placeholder'=>'-- Не выбран --',
                             'url'=>Url::to(['/contracts/year'])
                         ]
-                    ])->label('Год');
+                    ])->label('Модуль');
 
     
                     echo $form->field($model, 'group_id')->widget(DepDrop::classname(), [

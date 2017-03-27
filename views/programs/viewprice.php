@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <?php
     foreach ($year as $data) {
-        echo '<h3>'.$data->year.' Год</h3>';
+        echo '<h3>'.$data->year.' модуль</h3>';
         
         echo DetailView::widget([
         'model' => $data,

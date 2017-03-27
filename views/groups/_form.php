@@ -33,7 +33,7 @@ use yii\helpers\ArrayHelper;
             'placeholder'=>'-- Не выбран --',
             'url'=>Url::to(['/groups/year'])
         ]
-    ])->label('Год')
+    ])->label('Модуль')
     ?>
     
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
