@@ -208,7 +208,7 @@ class ProgramsController extends Controller
                 $file->docFile = UploadedFile::getInstance($file, 'docFile');
 
                 if (empty($file->docFile)) {
-                    Yii::$app->session->setFlash('error', 'Программа не добавлена.');
+                    Yii::$app->session->setFlash('error', 'Пожалуйста, добавьте файл образовательной программы.');
 
                     return $this->render('create', [
                         'model' => $model,

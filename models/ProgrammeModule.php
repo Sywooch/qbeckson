@@ -19,20 +19,6 @@ class ProgrammeModule extends \yii\db\ActiveRecord
 {
     const SCENARIO_CREATE = 'create';
 
-    public $selectyear1;
-
-    public $selectyear2;
-
-    public $selectyear3;
-
-    public $selectyear4;
-
-    public $selectyear5;
-
-    public $selectyear6;
-
-    public $selectyear7;
-
     /**
      * @inheritdoc
      */

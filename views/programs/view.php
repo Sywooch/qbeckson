@@ -450,7 +450,7 @@ $this->params['breadcrumbs'][] = $this->title;
             }
 
             if ($countyears > 1) {
-                echo $form->field($value, 'selectyear' . $i)->checkbox(['value' => 1, 'ng-model' => 'selectyear' . $i])->label($label);
+                echo '<a ng-click="collapsed' . $i . ' = !collapsed' . $i . '" ng-model="collapsed' . $i . '" href="javascript:void(0);">' . $value->fullname . '<span ng-class="{\'glyphicon glyphicon-menu-right pull-right\': !collapsed' . $i . ', \'glyphicon glyphicon-menu-down pull-right\': collapsed' . $i . '}"><span/></a>';
             }
 
             $group = [
@@ -498,7 +498,7 @@ $this->params['breadcrumbs'][] = $this->title;
             }
 
             if ($countyears > 1) {
-                echo '<div ng-show="selectyear' . $i . '">';
+                echo '<div ng-init="collapsed' . $i . ' = false" ng-show="collapsed' . $i . '"><br />';
             }
 
             echo DetailView::widget([
