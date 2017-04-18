@@ -22,7 +22,7 @@ $this->title = 'Информация';
             <p><label class="control-label">ОКПО</label> - <?= $organization['okopo'] ?></p>
             <p><label class="control-label">Юридический адрес</label> - <?= $organization['address_legal'] ?></p>
             <p><label class="control-label">Фактический адрес</label> - <?= $organization['address_actual'] ?></p>
-            <p><label class="control-label">Наименвание банка</label> - <?= $organization['bank_name'] ?></p>
+            <p><label class="control-label">Наименование банка</label> - <?= $organization['bank_name'] ?></p>
             <p><label class="control-label">Расчетный счет банка</label> - <?= $organization['rass_invoice'] ?></p>
             <p><label class="control-label">БИК Банка</label> - <?= $organization['bank_bik'] ?></p>
             <p><label class="control-label">Корр/Счет</label> - <?= $organization['korr_invoice'] ?></p>

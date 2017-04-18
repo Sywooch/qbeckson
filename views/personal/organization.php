@@ -85,7 +85,7 @@ use yii\helpers\Url;
         <p>ОКПО - <?= $organization['okopo'] ?></p>
         <p>Юридический адрес - <?= $organization['address_legal'] ?></p>
         <p>Фактический адрес - <?= $organization['address_actual'] ?></p>
-        <p>Наименвание банка - <?= $organization['bank_name'] ?></p>
+        <p>Наименование банка - <?= $organization['bank_name'] ?></p>
         <p>Расчетный счет банка - <?= $organization['rass_invoice'] ?></p>
         <p>БИК Банка - <?= $organization['bank_bik'] ?></p>
         <p>Корр/Счет - <?= $organization['korr_invoice'] ?></p>
