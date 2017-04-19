@@ -24,168 +24,143 @@ use app\models\Completeness;
  */
 class RecalculationController extends Controller
 {
-    /**
-     * This command echoes what you have entered as the message.
-     * @param string $message the message to be echoed.
-     */
-    public function actionIndex($message = 'hello recalculation')
-    {
-        echo $message . "\n";
-    }
-    
     public function actionCompleatnesscreate()
     {
-         $contracts5 = (new \yii\db\Query())
+        $contracts5 = (new \yii\db\Query())
             ->select(['id'])
             ->from('contracts')
             ->where(['status' => 1])
             ->column();
 
-         foreach ($contracts5 as $contract5) {
-             
-             $model = Contracts::findOne($contract5);
+        foreach ($contracts5 as $contract5) {
 
-                $com_pre = (new \yii\db\Query())
-                    ->select(['completeness', 'id'])
-                    ->from('completeness')
-                    ->where(['contract_id' => $model->id])
-                    ->andWhere(['month' => date('m')])
-                    ->andWhere(['preinvoice' => 1])
-                    ->one();
+            $model = Contracts::findOne($contract5);
 
-                $com = (new \yii\db\Query())
-                    ->select(['completeness', 'id'])
-                    ->from('completeness')
-                    ->where(['contract_id' => $model->id])
-                    ->andWhere(['month' => date('m')-1])
-                    ->andWhere(['preinvoice' => 0])
-                    ->one();
+            $com_pre = (new \yii\db\Query())
+                ->select(['completeness', 'id'])
+                ->from('completeness')
+                ->where(['contract_id' => $model->id])
+                ->andWhere(['month' => date('m')])
+                ->andWhere(['preinvoice' => 1])
+                ->one();
 
-                if (empty($com) && empty($com_pre)) {
+            $com = (new \yii\db\Query())
+                ->select(['completeness', 'id'])
+                ->from('completeness')
+                ->where(['contract_id' => $model->id])
+                ->andWhere(['month' => date('m') - 1])
+                ->andWhere(['preinvoice' => 0])
+                ->one();
 
-                        $completeness = new Completeness();
-                        $completeness->group_id = $model->group_id;
-                        $completeness->contract_id = $model->id;
+            if (empty($com) && empty($com_pre)) {
 
-                        $start_edu_contract  = explode("-", $model->start_edu_contract);
+                $completeness = new Completeness();
+                $completeness->group_id = $model->group_id;
+                $completeness->contract_id = $model->id;
 
-                       
-                        if (date('m') == 12) {
-                            $completeness->month = 12;
-                            $completeness->year = $start_edu_contract[0];
-                        } else {
-                            $completeness->month = date('m') - 1;
-                            $completeness->year = $start_edu_contract[0];
-                        }
-                        
-                        $completeness->preinvoice = 0;
-                        $completeness->completeness = 100;
+                $start_edu_contract = explode("-", $model->start_edu_contract);
 
-                        $month = $start_edu_contract[1];
-
-                                if ($month == date('m')-1) {
-                                    $price = $model->first_m_price * $model->payer_dol;
-                                } else {
-                                    $price = $model->other_m_price * $model->payer_dol;
-                                }
-
-                        $completeness->sum = ($price * $completeness->completeness) / 100;  
-                         
-                         if (date('m') != 1) {
-                            $completeness->save();
-                        } 
-
-                        $preinvoice = new Completeness();
-                        $preinvoice->group_id = $model->group_id;
-                        $preinvoice->contract_id = $model->id;
-                        $preinvoice->month = date('m');
-                        $preinvoice->year =  date('Y');
-                        $preinvoice->preinvoice = 1;
-                        $preinvoice->completeness = 80;
-
-                        $start_edu_contract  = explode("-", $model->start_edu_contract);
-                        $month = $start_edu_contract[1];
-
-                                if ($month == date('m')) {
-                                    $price = $model->first_m_price * $model->payer_dol;
-                                } else {
-                                    $price = $model->other_m_price * $model->payer_dol;
-                                }
-
-                        $preinvoice->sum = ($price * $preinvoice->completeness) / 100;
-                        $preinvoice->save();
-
-                        
-                    }
+                if (date('m') == 12) {
+                    $completeness->month = 12;
+                    $completeness->year = date('Y');
+                    // TODO тут надо создавать еще и за 11 месяц
+                } else {
+                    // Если месяц 1 - за предыдущий вообще не надо создавать.
+                    $completeness->month = date('m') - 1;
+                    $completeness->year = date('Y');
                 }
+
+                $completeness->preinvoice = 0;
+                $completeness->completeness = 100;
+
+                $month = $start_edu_contract[1];
+
+                if ($month == date('m') - 1) {
+                    $price = $model->first_m_price * $model->payer_dol;
+                } else {
+                    $price = $model->other_m_price * $model->payer_dol;
+                }
+
+                $completeness->sum = ($price * $completeness->completeness) / 100;
+
+                if (date('m') != 1) {
+                    $completeness->save();
+                }
+
+                $preinvoice = new Completeness();
+                $preinvoice->group_id = $model->group_id;
+                $preinvoice->contract_id = $model->id;
+                $preinvoice->month = date('m');
+                $preinvoice->year = date('Y');
+                $preinvoice->preinvoice = 1;
+                $preinvoice->completeness = 80;
+
+                $start_edu_contract = explode("-", $model->start_edu_contract);
+                $month = $start_edu_contract[1];
+
+                if ($month == date('m')) {
+                    $price = $model->first_m_price * $model->payer_dol;
+                } else {
+                    $price = $model->other_m_price * $model->payer_dol;
+                }
+
+                $preinvoice->sum = ($price * $preinvoice->completeness) / 100;
+                $preinvoice->save();
+
+
+            }
+        }
         echo "ok";
     }
-    
+
     public function actionTerminate()
-    { 
+    {
         $contracts = (new \yii\db\Query())
             ->select(['id'])
             ->from('contracts')
             ->where(['wait_termnate' => 1])
             ->column();
-        
+
         foreach ($contracts as $contract) {
-         
+
             $cont = Contracts::findOne($contract);
-    
-          /*  $certificates = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('certificates')
-                ->andWhere(['id' => $cont->certificate_id])
-                ->column();
-                
-            foreach ($certificates as $certificate) {
-                $cert = Certificates::findOne($certificate);
-                $cert->balance = $cert->balance + $cont->rezerv;
-                $cert->save();
-            } */
-               
 
             $program = Programs::findOne($cont->program_id);
 
-            //return var_dump($cont->terminator_user);
-
             if ($cont->terminator_user == 1) {
-                $program->last_s_contracts_rod = $program->last_s_contracts_rod+1;
-                $program->last_s_contracts = $program->last_s_contracts+1;
+                $program->last_s_contracts_rod++;
             }
-            if ($cont->terminator_user == 2) {
-                $program->last_s_contracts = $program->last_s_contracts+1;
-            }            
-           
+            $program->last_s_contracts++;
+            $program->last_contracts--;
+
             //$program->last_contracts = $program->last_contracts+1;
             $org = Organization::findOne($cont->organization_id);
-            $org->amount_child = $org->amount_child - 1;
+            $org->amount_child--;
             $org->save();
 
-             /* $certificate = Certificates::findOne($cont->certificate_id);
-            $certificate->rezerv = $certificate->rezerv - $cont->rezerv; 
-            $certificate->save(); */
-            
+            /* $certificate = Certificates::findOne($cont->certificate_id);
+           $certificate->rezerv = $certificate->rezerv - $cont->rezerv;
+           $certificate->save(); */
+
             $program->save();
-   
+
             //$cont->rezerv = 0;
             $cont->status = 4;
             $cont->wait_termnate = 0;
             if (date("m") == 1) {
-                        $cal_days_in_month = cal_days_in_month(CAL_GREGORIAN, 12, date('Y')-1);
-                        $cont->date_termnate = (date("Y")-1).'-12-'.$cal_days_in_month;
-                    } else {
-                         $cal_days_in_month = cal_days_in_month(CAL_GREGORIAN, date('m')-1, date('Y'));
-                        $cont->date_termnate = date("Y").'-'.(date('m')-1).'-'.$cal_days_in_month;
-                    }
+                $cal_days_in_month = cal_days_in_month(CAL_GREGORIAN, 12, date('Y') - 1);
+                $cont->date_termnate = (date("Y") - 1) . '-12-' . $cal_days_in_month;
+            } else {
+                $cal_days_in_month = cal_days_in_month(CAL_GREGORIAN, date('m') - 1, date('Y'));
+                $cont->date_termnate = date("Y") . '-' . (date('m') - 1) . '-' . $cal_days_in_month;
+            }
             $cont->save();
-            
 
-                    // по этим договорам возвращать резерв на баланс + оставшиеся месяца * ежемесячный платеж
-                    // дата окончания - дата удаления
+
+            // по этим договорам возвращать резерв на баланс + оставшиеся месяца * ежемесячный платеж
+            // дата окончания - дата удаления
         }
-        
+
         $contracts3 = (new \yii\db\Query())
             ->select(['id'])
             ->from('contracts')
@@ -196,15 +171,15 @@ class RecalculationController extends Controller
         foreach ($contracts3 as $contract) {
             $cont = $this->findModel($contract);
             $cont->wait_termnate = 1;
-            $cont->save();   
+            $cont->save();
         }
-        
+
         echo "ok";
     }
-    
+
     public function actionWriteoff()
     {
-        $datestart = date("Y-m").'-01';
+        $datestart = date("Y-m") . '-01';
 
         $contracts2 = (new \yii\db\Query())
             ->select(['id', 'certificate_id'])
@@ -214,7 +189,6 @@ class RecalculationController extends Controller
             ->all();
 
         foreach ($contracts2 as $contract2) {
-                    //return var_dump ($contract2);
             $model = Contracts::findOne($contract2['id']);
 
             $certificates = (new \yii\db\Query())
@@ -224,22 +198,22 @@ class RecalculationController extends Controller
                 ->andWhere(['id' => $contract2['certificate_id']])
                 ->column();
 
-        
+
             foreach ($certificates as $certificate) {
                 $cert = Certificates::findOne($certificate);
                 //$cert->balance = $cert->balance - $cert->rezerv;
-                $model->rezerv = $model->rezerv - ($model->other_m_price * $model->payer_dol);
-                $model->paid = $model->paid + ($model->other_m_price * $model->payer_dol);
-                $cert->rezerv = $cert->rezerv - ($model->other_m_price * $model->payer_dol);
+                $model->rezerv -= $model->other_m_price * $model->payer_dol;
+                $model->paid += $model->other_m_price * $model->payer_dol;
+                $cert->rezerv -= $model->other_m_price * $model->payer_dol;
 
                 $model->save();
                 $cert->save();
             }
-        } 
-        
+        }
+
         echo "ok";
     }
-    
+
     public function actionCompleatnessrefound()
     {
         $contracts4 = (new \yii\db\Query())
@@ -248,9 +222,15 @@ class RecalculationController extends Controller
             ->where(['status' => [1, 4]])
             ->column();
 
-        if (date('m') == 1) { $twomonth = 11; }
-        if (date('m') == 2) { $twomonth = 12; }
-        if (date('m') > 2) { $twomonth = date('m')-2; }
+        if (date('m') == 1) {
+            $twomonth = 11;
+        }
+        if (date('m') == 2) {
+            $twomonth = 12;
+        }
+        if (date('m') > 2) {
+            $twomonth = date('m') - 2;
+        }
 
         foreach ($contracts4 as $contract4) {
             $contract = Contracts::findOne($contract4);
@@ -270,16 +250,15 @@ class RecalculationController extends Controller
                 $start_edu_contract = explode('-', $contract->start_edu_contract);
 
                 if ($start_edu_contract[1] == $twomonth) {
-                     $certificate->balance = $certificate->balance + (($contract->first_m_price * $contract->payer_dol) / 100) * (100 - $completeness['completeness']);
-                 }
-                 else {
-                     $certificate->balance = $certificate->balance + (($contract->other_m_price * $contract->payer_dol) / 100) * (100 - $completeness['completeness']);
-                 }
+                    $certificate->balance = $certificate->balance + (($contract->first_m_price * $contract->payer_dol) / 100) * (100 - $completeness['completeness']);
+                } else {
+                    $certificate->balance = $certificate->balance + (($contract->other_m_price * $contract->payer_dol) / 100) * (100 - $completeness['completeness']);
+                }
 
-                 $certificate->save();
-             }                 
+                $certificate->save();
+            }
         }
-        
+
         echo "ok";
     }
 }
