@@ -11,7 +11,7 @@ use app\models\Completeness;
 
 class ContractController extends Controller
 {
-    // Подготовка к тесту
+    // Подготовка к тесту Close
     public function actionPrepareCloseTest()
     {
         // Для контрактов обнуляем параметры
@@ -26,6 +26,8 @@ class ContractController extends Controller
         Contracts::updateAll(['stop_edu_contract' => date('Y-m-d')], 'RAND() <= 0.02');
         // Для нескольких контрактов случайно ставим stop_edu_contract будущим месяцем
         Contracts::updateAll(['stop_edu_contract' => date('Y-m-d', time() + 40 * 24 * 60 * 60)], 'RAND() <= 0.02');
+
+        return Controller::EXIT_CODE_NORMAL;
     }
 
     public function actionClose()
@@ -45,6 +47,28 @@ class ContractController extends Controller
         $command = Yii::$app->db->createCommand("UPDATE contracts as c SET c.wait_termnate = 1 WHERE MONTH(c.stop_edu_contract) = :month AND YEAR(c.stop_edu_contract) = :year", [
             ':year' => date('Y'),
             ':month' => date('m'),
+        ]);
+        $command->execute();
+
+        return Controller::EXIT_CODE_NORMAL;
+    }
+
+    // Подготовка к тесту Write Off
+    public function actionPrepareWriteOffTest()
+    {
+        Yii::$app->db->createCommand()->delete('contracts')->execute();
+        Certificates::updateAll(['balance' => 5000, 'rezerv' => 0]);
+
+        return Controller::EXIT_CODE_NORMAL;
+    }
+    // Списание средств за месяц
+    public function actionWriteOff()
+    {
+        // == Вынимаем действующие контракты, дата начала обучения которых меньше первого числа текущего месяца
+        // Для контракта уменьшаем rezerv, увеличиваем paid
+        // Для  связанного сертификата уменьшаем rezerv
+        $command = Yii::$app->db->createCommand("UPDATE contracts as c CROSS JOIN certificates as crt ON c.certificate_id = crt.id SET crt.rezerv = c.rezerv - c.other_m_price * c.payer_dol, c.rezerv = c.rezerv - c.other_m_price * c.payer_dol, c.paid = c.paid + c.other_m_price * c.payer_dol WHERE c.status = 1 AND c.start_edu_contract < :contract_start", [
+            ':contract_start' => date('Y-m-d', strtotime('first day of this month')),
         ]);
         $command->execute();
 

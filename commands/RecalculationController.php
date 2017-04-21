@@ -198,7 +198,6 @@ class RecalculationController extends Controller
                 ->andWhere(['id' => $contract2['certificate_id']])
                 ->column();
 
-
             foreach ($certificates as $certificate) {
                 $cert = Certificates::findOne($certificate);
                 //$cert->balance = $cert->balance - $cert->rezerv;
