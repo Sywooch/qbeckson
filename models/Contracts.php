@@ -34,6 +34,16 @@ use yii\helpers\Url;
  */
 class Contracts extends \yii\db\ActiveRecord
 {
+    const STATUS_CREATED = 0;
+
+    const STATUS_ACTIVE = 1;
+
+    const STATUS_REFUSED = 2;
+
+    const STATUS_ACCEPTED = 3;
+
+    const STATUS_CLOSED = 4;
+
     public $certnumber;
 
     public $certfio;
@@ -322,16 +332,43 @@ class Contracts extends \yii\db\ActiveRecord
             return $rows;
         }
     }
-    
-    public function statusName($id) {
-         
+
+    /**
+     * DEPRECATED
+     * Use getStatusName() instead
+     */
+    public function statusName($id)
+    {
         if ($id == 0) { return 'Создан, ожидает подтверждения'; }
         if ($id == 1) { return 'Действует'; }
         if ($id == 2) { return 'Отклонен без заключения'; }
         if ($id == 3) { return 'Подтвержден, ожидает заключения'; }
         if ($id == 4) { return 'Прекратил действие'; }
     }
-    
+
+    public function getStatusName()
+    {
+        $statusName = '';
+        switch ($this->status) {
+            case self::STATUS_CREATED:
+                $statusName = 'Создан, ожидает подтверждения';
+                break;
+            case self::STATUS_ACTIVE:
+                $statusName = 'Действует';
+                break;
+            case self::STATUS_REFUSED:
+                $statusName = 'Отклонен без заключения';
+                break;
+            case self::STATUS_ACCEPTED:
+                $statusName = 'Подтвержден, ожидает заключения';
+                break;
+            case self::STATUS_CLOSED:
+                $statusName = 'Прекратил действие';
+        }
+
+        return $statusName;
+    }
+
     /**
      * DEPRECATED
      * Use app\helpers\FormattingHelper::asSpelloutOrdinal() instead

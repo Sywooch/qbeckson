@@ -257,7 +257,5 @@ class RecalculationController extends Controller
                 $certificate->save();
             }
         }
-
-        echo "ok";
     }
 }

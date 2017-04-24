@@ -61,6 +61,7 @@ class ContractController extends Controller
 
         return Controller::EXIT_CODE_NORMAL;
     }
+
     // Списание средств за месяц
     public function actionWriteOff()
     {
@@ -73,5 +74,115 @@ class ContractController extends Controller
         $command->execute();
 
         return Controller::EXIT_CODE_NORMAL;
+    }
+
+    public function actionCompletenessRefound()
+    {
+        $contracts = Contracts::find()
+            ->where(['status' => [Contracts::STATUS_ACTIVE, Contracts::STATUS_CLOSED]])
+            ->all();
+
+        $dateTwoMonthsAgo = strtotime('first day of 2 months ago');
+        foreach ($contracts as $contract) {
+            $completeness = Completeness::find()
+                ->where([
+                    'month' => date('m', $dateTwoMonthsAgo),
+                    'year' => date('Y', $dateTwoMonthsAgo),
+                    'preinvoice' => 0,
+                    'contract_id' => $contract->id,
+                ])
+                ->one();
+
+            if (!empty($completeness) && $completeness['completeness'] < 100) {
+                $certificate = $contract->certificate;
+                $monthlyPrice = $this->monthlyPrice($contract, $dateTwoMonthsAgo);
+                $certificate->updateCounters(['balance' => (($monthlyPrice * $contract->payer_dol) / 100) * (100 - $completeness['completeness'])]);
+            }
+        }
+
+        return Controller::EXIT_CODE_NORMAL;
+    }
+
+    public function actionCompletenessCreate()
+    {
+        $contracts = Contracts::find()
+            ->where(['status' => Contracts::STATUS_ACTIVE])
+            ->all();
+
+        $previousMonth = strtotime('first day of previous month');
+        foreach ($contracts as $contract) {
+            $completenessExists = Completeness::find()
+                ->where([
+                    'contract_id' => $contract->id,
+                    'preinvoice' => 0,
+                    'month' => date('m', $previousMonth),
+                    'year' => date('Y', $previousMonth),
+                ])
+                ->count();
+            $preinvoiceExists = Completeness::find()
+                ->where([
+                    'contract_id' => $contract->id,
+                    'preinvoice' => 1,
+                    'month' => date('m'),
+                    'year' => date('Y'),
+                ])
+                ->count();
+            // Создаем за предыдущий месяц
+            // Если месяц январь - создаваться не будет
+            if (!$completenessExists) {
+                $this->createCompleteness($contract, $previousMonth, $this->monthlyPrice($contract, $previousMonth));
+            }
+            // Если текущий месяц == декабрь, то тоже создаем
+            if (date('m') == 12) {
+                $this->createCompleteness($contract, time(), $this->monthlyPrice($contract, time()));
+            }
+            // Создаем преинвойс
+            if (!$preinvoiceExists) {
+                $this->createPreinvoice($contract, $this->monthlyPrice($contract, time()));
+            }
+        }
+
+        return Controller::EXIT_CODE_NORMAL;
+    }
+
+    private function createCompleteness($contract, $date, $price)
+    {
+        $completeness = new Completeness([
+            'group_id' => $contract->group_id,
+            'contract_id' => $contract->id,
+            'preinvoice' => 0,
+            'completeness' => 100,
+            'sum' => $price,
+            'month' => date('m', $date),
+            'year' => date('Y', $date),
+        ]);
+
+        return $completeness->save();
+    }
+
+    private function createPreinvoice($contract, $price)
+    {
+        $preinvoice = new Completeness([
+            'group_id' => $contract->group_id,
+            'contract_id' => $contract->id,
+            'preinvoice' => 1,
+            'completeness' => 80,
+            'sum' => ($price * 80) / 100,
+            'month' => date('m'),
+            'year' => date('Y'),
+        ]);
+
+        return $preinvoice->save();
+    }
+
+    private function monthlyPrice($contract, $date)
+    {
+        $monthlyPrice = $contract->other_m_price;
+        $contractStartDate = strtotime($contract->start_edu_contract);
+        if (date('Y-m', $contractStartDate) == date('Y-m', $date)) {
+            $monthlyPrice = $contract->first_m_price;
+        }
+
+        return $monthlyPrice;
     }
 }
