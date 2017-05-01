@@ -44,7 +44,7 @@ class ContractController extends Controller
 
         // == Ищем контракты, которые поставлены на закрытие в текущем месяце
         // Меняем им wait_termnate на 1
-        $command = Yii::$app->db->createCommand("UPDATE contracts as c SET c.wait_termnate = 1 WHERE MONTH(c.stop_edu_contract) = :month AND YEAR(c.stop_edu_contract) = :year", [
+        $command = Yii::$app->db->createCommand("UPDATE contracts as c SET c.wait_termnate = 1 WHERE c.status = 1 AND MONTH(c.stop_edu_contract) = :month AND YEAR(c.stop_edu_contract) = :year", [
             ':year' => date('Y'),
             ':month' => date('m'),
         ]);
