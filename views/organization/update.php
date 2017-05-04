@@ -6,14 +6,12 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model app\models\Organization */
 
-$this->title = 'Редактировать организацию: ' . $model->name;
+$this->title = 'Редактировать поставщика: ' . $model->name;
 
-$roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-if (isset($roles['operators'])) {
-    $this->params['breadcrumbs'][] = ['label' => 'Организации', 'url' => ['/personal/operator-organizations']];
-}
-if (isset($roles['organizations'])) {
-    $this->params['breadcrumbs'][] = 'Организации';
+if (Yii::$app->user->can('operators')) {
+    $this->params['breadcrumbs'][] = ['label' => 'Поставщики', 'url' => ['/personal/operator-organizations']];
+} elseif (Yii::$app->user->can('organizations')) {
+    $this->params['breadcrumbs'][] = 'Поставщики';
 }
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Редактировать';
