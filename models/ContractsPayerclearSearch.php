@@ -67,7 +67,7 @@ class ContractsPayerclearSearch extends Contracts
             'date' => $this->date,
             'certificate_id' => $this->certificate_id,
             'organization_id' => $this->organization_id,
-            'status' => [0,1,2,3,4],
+            '`contracts`.status' => [0,1,2,3,4],
             'payer_id' => $payer->id,
             'status_termination' => $this->status_termination,
             'status_year' => $this->status_year,

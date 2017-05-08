@@ -104,7 +104,7 @@ class Contracts3Search extends Contracts
             'payer_id' => $this->payer_id,
             'certificate_id' => $this->certificate_id,
             'contracts.organization_id' => $this->organization_id,
-            'status' => 3,
+            '`contracts`.status' => 3,
             'status_termination' => $this->status_termination,
             'status_year' => $this->status_year,
             'start_edu_programm' => $this->start_edu_programm,

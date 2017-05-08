@@ -60,25 +60,25 @@ class OrganizationController extends Controller
     public function actionView($id)
     {
         $model = $this->findModel($id);
-        
+
         $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
         if (isset($roles['certificate'])) {
-            
+
             $certificates = new Certificates();
             $certificate = $certificates->getCertificates();
-            
-                $rows = (new \yii\db\Query())
-                    ->select(['id'])
-                    ->from('cooperate')
-                    ->where(['payer_id'=> $certificate['payer_id']])
-                    ->andWhere(['organization_id' => $model['id']])
-                    ->andWhere(['status'=> 1])
-                    ->count();
+
+            $rows = (new \yii\db\Query())
+                ->select(['id'])
+                ->from('cooperate')
+                ->where(['payer_id' => $certificate['payer_id']])
+                ->andWhere(['organization_id' => $model['id']])
+                ->andWhere(['status' => 1])
+                ->count();
             if ($rows == 0) {
-            Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в данную организацию. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
+                Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в данную организацию. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
             }
         }
-        
+
         return $this->render('view', [
             'model' => $model,
         ]);
@@ -89,60 +89,96 @@ class OrganizationController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate() {
+    public function actionCreate()
+    {
         $model = new Organization();
         $user = new User();
 
         if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
+
             return ActiveForm::validate($user);
         }
 
-       if($user->load(Yii::$app->request->post()) && $user->validate() && $model->load(Yii::$app->request->post())) {
+        if ($user->load(Yii::$app->request->post()) && $user->validate() && $model->load(Yii::$app->request->post())) {
 
-           //return var_dump($user->password);
+            //return var_dump($user->password);
 
-           if (!$user->password) {
-               $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
-               $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
-           }
-           else {
-               $password = $user->password;
-               $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
-           }
+            if (!$user->password) {
+                $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
+                $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+            } else {
+                $password = $user->password;
+                $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+            }
 
-           if ($user->save()) {
-               $userRole = Yii::$app->authManager->getRole('organizations');
-               Yii::$app->authManager->assign($userRole, $user->id);
+            if ($user->save()) {
+                $userRole = Yii::$app->authManager->getRole('organizations');
+                Yii::$app->authManager->assign($userRole, $user->id);
 
-               $model->user_id = $user->id;
-               $model->actual = 1;
-               $model->cratedate = date("Y-m-d");
-                   
-               $mun = Mun::findOne($model->mun);
-               
-               $coefficient = (new \yii\db\Query())
+                $model->user_id = $user->id;
+                $model->actual = 1;
+                $model->cratedate = date("Y-m-d");
+
+                $mun = Mun::findOne($model->mun);
+
+                $coefficient = (new \yii\db\Query())
                     ->select(['potenc'])
                     ->from('coefficient')
                     ->one();
-               
-               //return var_dump($coefficient['potenc']);
-                                
-               $model->max_child = floor((($mun->deystv / ($mun->countdet * 0.7)) * $coefficient['potenc']) * $model->last);
-               //$model->mun = implode(",", $model->mun);
 
-               if ($model->save()) {
+                //return var_dump($coefficient['potenc']);
+
+                $model->max_child = floor((($mun->deystv / ($mun->countdet * 0.7)) * $coefficient['potenc']) * $model->last);
+                //$model->mun = implode(",", $model->mun);
+
+                if ($model->save()) {
                     $user->password = $password;
+
                     return $this->render('/user/view', [
                         'model' => $user,
                     ]);
                 }
-           }
+            }
         }
 
         return $this->render('create', [
-                'model' => $model,
-                'user' => $user,
+            'model' => $model,
+            'user' => $user,
+        ]);
+    }
+
+    public function actionRequest()
+    {
+        $model = new Organization([
+            'status' => Organization::STATUS_NEW,
+            'scenario' => Organization::SCENARIO_GUEST,
+            'actual' => 0,
+            'cratedate' => date("Y-m-d"),
+        ]);
+        $user = new User([
+            'username' => Yii::$app->getSecurity()->generateRandomString(6),
+            'password' => Yii::$app->security->generatePasswordHash(Yii::$app->getSecurity()->generateRandomString(6)),
+            'auth_key' => Yii::$app->security->generateRandomString(),
+        ]);
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            if ($user->save()) {
+                Yii::$app->authManager->assign(Yii::$app->authManager->getRole('organizations'), $user->id);
+                $model->user_id = $user->id;
+                if ($model->save(false)) {
+                    Yii::$app->session->setFlash('success', 'Вы успешно отправили заявку на регистрацию поставщика образовательных услуг!');
+
+                    return $this->redirect(['/site/index']);
+                }
+            }
+
+            Yii::$app->session->setFlash('danger', 'Ошибка при отправке заявки на регистрацию.');
+        }
+
+        return $this->render('request', [
+            'model' => $model,
+            'user' => $user,
         ]);
     }
 
@@ -159,11 +195,12 @@ class OrganizationController extends Controller
 
         if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
+
             return ActiveForm::validate($user);
         }
 
-        if($user->load(Yii::$app->request->post())) {
-            if($model->load(Yii::$app->request->post())) {
+        if ($user->load(Yii::$app->request->post())) {
+            if ($model->load(Yii::$app->request->post())) {
 
                 //$model->mun = implode(",", $model->mun);
 
@@ -174,18 +211,18 @@ class OrganizationController extends Controller
             if ($user->newlogin == 1 || $user->newpass == 1) {
 
                 if ($user->newpass == 1) {
-                   if (!$user->password) {
-                       $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
-                       $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
-                   }
-                   else {
-                       $password = $user->password;
-                       $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
-                   }
+                    if (!$user->password) {
+                        $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
+                        $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+                    } else {
+                        $password = $user->password;
+                        $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+                    }
                 }
 
                 if ($user->validate() && $user->save()) {
                     $user->password = $password;
+
                     return $this->render('/user/view', [
                         'model' => $user,
                     ]);
@@ -193,14 +230,15 @@ class OrganizationController extends Controller
             }
         }
 
-        if($model->load(Yii::$app->request->post())) {
+        if ($model->load(Yii::$app->request->post())) {
             //$model->mun = implode(",", $model->mun);
 
             if ($model->validate() && $model->save()) {
                 return $this->redirect(['/organization/view', 'id' => $model->id]);
             }
         }
-       //$model->mun = explode(',', $model->mun);
+
+        //$model->mun = explode(',', $model->mun);
 
         return $this->render('update', [
             'model' => $model,
@@ -212,11 +250,11 @@ class OrganizationController extends Controller
     {
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
-        
+
         $model = $this->findModel($organization['id']);
 
-        if($model->load(Yii::$app->request->post()) && $model->validate() && $model->save()) {
-                return $this->redirect(['/personal/organization-info', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->save()) {
+            return $this->redirect(['/personal/organization-info', 'id' => $model->id]);
         }
 
         return $this->render('edit', [
@@ -224,24 +262,24 @@ class OrganizationController extends Controller
         ]);
 
     }
-    
+
     public function actionNewlimit($id)
     {
         $model = $this->findModel($id);
-        
+
         $mun = Mun::findOne($model->mun);
-        
-        $lastyear = date("Y")-1;
-        $llastyear = date("Y")-2;
-        
+
+        $lastyear = date("Y") - 1;
+        $llastyear = date("Y") - 2;
+
         if (date("m") >= 9) {
-            $mindate = $lastyear.'-09-01';
-            $maxdate = date("Y").'-09-01';
+            $mindate = $lastyear . '-09-01';
+            $maxdate = date("Y") . '-09-01';
         } else {
-            $mindate = $llastyear.'-09-01';
-            $maxdate = $lastyear.'-09-01';
+            $mindate = $llastyear . '-09-01';
+            $maxdate = $lastyear . '-09-01';
         }
-        
+
         $contracts = (new \yii\db\Query())
             ->select(['id'])
             ->from('contracts')
@@ -249,16 +287,20 @@ class OrganizationController extends Controller
             ->andWhere(['<', 'date_termnate', $maxdate])
             ->andWhere(['>', 'date_termnate', $mindate])
             ->count();
-        
+
         $model->last_year_contract = $contracts;
-               
+
         $coefficient = (new \yii\db\Query())
             ->select(['potenc', 'ngr', 'sgr', 'vgr', 'chr1', 'chr2', 'zmr1', 'zmr2'])
             ->from('coefficient')
-            ->one();   
-        
-        if ($model->raiting < $coefficient['ngr']) {  $coef_raiting = 0; }
-        if ($model->raiting == null) { $coef_raiting = 1; }
+            ->one();
+
+        if ($model->raiting < $coefficient['ngr']) {
+            $coef_raiting = 0;
+        }
+        if ($model->raiting == null) {
+            $coef_raiting = 1;
+        }
         if ($model->raiting >= $coefficient['ngr'] and $model->raiting < $coefficient['sgr']) {
             $coef_raiting = ($model->raiting - $coefficient['chr1']) / $coefficient['zmr1'];
         }
@@ -268,16 +310,15 @@ class OrganizationController extends Controller
         if ($model->raiting > $coefficient['vgr']) {
             $coef_raiting = ($model->raiting - $coefficient['chr2']) / $coefficient['zmr2'];
         }
-        
-        
+
+
         if ($model->cratedate >= $mindate) {
-                    $model->max_child = floor(((($mun->deystv / ($mun->countdet * 0.7)) * $coefficient['potenc']) * $model->last ) * $coef_raiting);
-                }
-                else {
-                    $model->max_child = floor(($model->last_year_contract * ($mun->deystv / $mun->lastdeystv)) * $coef_raiting);
-                }
-           
-        if($model->load(Yii::$app->request->post()) && $model->validate() && $model->save()) {
+            $model->max_child = floor(((($mun->deystv / ($mun->countdet * 0.7)) * $coefficient['potenc']) * $model->last) * $coef_raiting);
+        } else {
+            $model->max_child = floor(($model->last_year_contract * ($mun->deystv / $mun->lastdeystv)) * $coef_raiting);
+        }
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->save()) {
             return $this->redirect(['/organization/view', 'id' => $model->id]);
         }
 
@@ -286,34 +327,34 @@ class OrganizationController extends Controller
         ]);
 
     }
-    
+
     public function actionAlllimit()
     {
-        
+
         $org = (new \yii\db\Query())
             ->select(['id'])
             ->from('organization')
-            ->column(); 
-        
-       
+            ->column();
+
+
         $coefficient = (new \yii\db\Query())
             ->select(['potenc', 'ngr', 'sgr', 'vgr', 'chr1', 'chr2', 'zmr1', 'zmr2'])
             ->from('coefficient')
             ->one();
-        
+
         foreach ($org as $organization_id) {
-        
+
             $model = $this->findModel($organization_id);
-            
-             $lastyear = date("Y")-1;
-            $llastyear = date("Y")-2;
+
+            $lastyear = date("Y") - 1;
+            $llastyear = date("Y") - 2;
 
             if (date("m") >= 9) {
-                $mindate = $lastyear.'-09-01';
-                $maxdate = date("Y").'-09-01';
+                $mindate = $lastyear . '-09-01';
+                $maxdate = date("Y") . '-09-01';
             } else {
-                $mindate = $llastyear.'-09-01';
-                $maxdate = $lastyear.'-09-01';
+                $mindate = $llastyear . '-09-01';
+                $maxdate = $lastyear . '-09-01';
             }
 
             $contracts = (new \yii\db\Query())
@@ -326,11 +367,15 @@ class OrganizationController extends Controller
 
             $model->last_year_contract = $contracts;
 
-        
+
             $mun = Mun::findOne($model->mun);
-        
-            if ($model->raiting < $coefficient['ngr']) {  $coef_raiting = 0; }
-            if ($model->raiting == NULL) { $coef_raiting = 1; }
+
+            if ($model->raiting < $coefficient['ngr']) {
+                $coef_raiting = 0;
+            }
+            if ($model->raiting == null) {
+                $coef_raiting = 1;
+            }
             if ($model->raiting >= $coefficient['ngr'] and $model->raiting < $coefficient['sgr']) {
                 $coef_raiting = ($model->raiting - $coefficient['chr1']) / $coefficient['zmr1'];
             }
@@ -340,72 +385,69 @@ class OrganizationController extends Controller
             if ($model->raiting > $coefficient['vgr']) {
                 $coef_raiting = ($model->raiting - $coefficient['chr2']) / $coefficient['zmr2'];
             }
-        
-           
-                if ($model->cratedate >= $mindate) {
-                    $model->max_child = floor(((($mun->deystv / ($mun->countdet * 0.7)) * $coefficient['potenc']) * $model->last ) * $coef_raiting);
-                }
-                else {
-                    $model->max_child = floor(($model->last_year_contract * ($mun->deystv / $mun->lastdeystv)) * $coef_raiting);
-                }
-            
-                
-            
-        
+
+
+            if ($model->cratedate >= $mindate) {
+                $model->max_child = floor(((($mun->deystv / ($mun->countdet * 0.7)) * $coefficient['potenc']) * $model->last) * $coef_raiting);
+            } else {
+                $model->max_child = floor(($model->last_year_contract * ($mun->deystv / $mun->lastdeystv)) * $coef_raiting);
+            }
+
+
             $model->save();
         }
 
         return $this->redirect(['/personal/operator-organizations']);
     }
-    
+
     public function actionRaiting($id)
     {
         $model = $this->findModel($id);
-        
+
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
-        
+
         $programs = (new \yii\db\Query())
             ->select(['id'])
             ->from('programs')
             ->where(['organization_id' => $model->id])
             ->andWhere(['>', 'rating', 0])
             ->column();
-        
-        
-         $count = 0;
-            $count2 = 0;
+
+
+        $count = 0;
+        $count2 = 0;
         foreach ($programs as $program) {
             $model_program = Programs::findOne($program);
-            
+
             $count += $model_program->rating * $model_program->last_contracts;
-            $count2+= $model_program->last_contracts;
-                
+            $count2 += $model_program->last_contracts;
+
         }
-        
-        
+
+
         //return var_dump();
         if ($count2 != 0) {
-            $model->raiting = round($count / $count2 , 2);
+            $model->raiting = round($count / $count2, 2);
         } else {
-            $model->raiting = NULL;
+            $model->raiting = null;
         }
-        
-        
-       if ($model->save()) {
-           return $this->redirect(['/organization/view', 'id' => $model->id]);
-       }
+
+
+        if ($model->save()) {
+            return $this->redirect(['/organization/view', 'id' => $model->id]);
+        }
     }
-    
+
     public function actionAllraiting()
     {
         $org = (new \yii\db\Query())
             ->select(['id'])
             ->from('organization')
-            ->column();  
-        
+            ->column();
+
         foreach ($org as $organization_id) {
-        
+
             $model = $this->findModel($organization_id);
 
             $programs = (new \yii\db\Query())
@@ -421,86 +463,88 @@ class OrganizationController extends Controller
                 $model_program = Programs::findOne($program);
 
                 $count += $model_program->rating * $model_program->last_contracts;
-                $count2+= $model_program->last_contracts;
+                $count2 += $model_program->last_contracts;
 
             }
 
-             if ($count2 != 0) {
-                $model->raiting = round($count / $count2 , 2);
+            if ($count2 != 0) {
+                $model->raiting = round($count / $count2, 2);
             } else {
-                $model->raiting = NULL;
+                $model->raiting = null;
             }
-        
+
             $model->save();
-       }
-    return $this->redirect(['/personal/operator-organizations']);
+        }
+
+        return $this->redirect(['/personal/operator-organizations']);
     }
-    
+
     public function actionActual($id)
     {
         $model = $this->findModel($id);
-        
+
         $model->actual = 1;
 
         $model->save();
-        
+
         return $this->redirect(['view', 'id' => $model->id]);
     }
-    
+
     public function actionNoactual($id)
     {
-$user = User::findOne(Yii::$app->user->id);
+        $user = User::findOne(Yii::$app->user->id);
 
-        if($user->load(Yii::$app->request->post())) {
+        if ($user->load(Yii::$app->request->post())) {
 
             if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
 
-                   $model = $this->findModel($id);
+                $model = $this->findModel($id);
 
-                   $zajavki = (new \yii\db\Query())
-                         ->select(['id'])
-                         ->from('contracts')
-                         ->where(['organization_id' => $model->id])
-                         ->andWhere(['status' => 0])
-                         ->column();
+                $zajavki = (new \yii\db\Query())
+                    ->select(['id'])
+                    ->from('contracts')
+                    ->where(['organization_id' => $model->id])
+                    ->andWhere(['status' => 0])
+                    ->column();
 
-                   foreach ($zajavki as $value) {
-                                $contract = Contracts::findOne($value);
+                foreach ($zajavki as $value) {
+                    $contract = Contracts::findOne($value);
 
-                                $cert = Certificates::findOne($contract->certificate_id);
-                               $cert->balance = $cert->balance + $contract->rezerv;
-                               $cert->rezerv = $cert->rezerv - $contract->rezerv;
-                               $cert->save();
-            
-                               $contract->rezerv = 0;
-                               $contract->status = 2;
-            
-                               if ($contract->save()) {
-                                       $inform = new Informs();
-                                       $inform->program_id = $contract->program_id;
-                                       $inform->contract_id = $contract->id;
-                                       $inform->prof_id = $contract->certificate_id;
-                                       $inform->text = 'Заявка отменена. Причина: приостановлена деятельность организации';
-                                       $inform->from = 4;
-                                       $inform->date = date("Y-m-d");
-                                       $inform->read = 0;
+                    $cert = Certificates::findOne($contract->certificate_id);
+                    $cert->balance = $cert->balance + $contract->rezerv;
+                    $cert->rezerv = $cert->rezerv - $contract->rezerv;
+                    $cert->save();
 
-                                       $inform->save();          
-                              }
-                   }
+                    $contract->rezerv = 0;
+                    $contract->status = 2;
 
-        
-                    $model->actual = 0;
+                    if ($contract->save()) {
+                        $inform = new Informs();
+                        $inform->program_id = $contract->program_id;
+                        $inform->contract_id = $contract->id;
+                        $inform->prof_id = $contract->certificate_id;
+                        $inform->text = 'Заявка отменена. Причина: приостановлена деятельность организации';
+                        $inform->from = 4;
+                        $inform->date = date("Y-m-d");
+                        $inform->read = 0;
 
-                    $model->save();
-        
-                    return $this->redirect(['view', 'id' => $model->id]);
-            }
-            else {
+                        $inform->save();
+                    }
+                }
+
+
+                $model->actual = 0;
+
+                $model->save();
+
+                return $this->redirect(['view', 'id' => $model->id]);
+            } else {
                 Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
-                 return $this->redirect(['/personal/operator-organizations']);
+
+                return $this->redirect(['/personal/operator-organizations']);
             }
         }
+
         return $this->render('/user/delete', [
             'user' => $user,
             'title' => 'Приостановить деятельность организации',
@@ -517,7 +561,7 @@ $user = User::findOne(Yii::$app->user->id);
     {
         $user = User::findOne(Yii::$app->user->id);
 
-        if($user->load(Yii::$app->request->post())) {
+        if ($user->load(Yii::$app->request->post())) {
 
             if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
                 $model = $this->findModel($id);
@@ -525,12 +569,13 @@ $user = User::findOne(Yii::$app->user->id);
                 User::findOne($model['user_id'])->delete();
 
                 return $this->redirect(['/personal/operator-organizations']);
-            }
-            else {
+            } else {
                 Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
-                 return $this->redirect(['/personal/operator-organizations']);
+
+                return $this->redirect(['/personal/operator-organizations']);
             }
         }
+
         return $this->render('/user/delete', [
             'user' => $user,
         ]);

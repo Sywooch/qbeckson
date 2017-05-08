@@ -46,6 +46,8 @@ use Yii;
  */
 class Organization extends \yii\db\ActiveRecord
 {
+    const SCENARIO_GUEST = 'guest';
+
     const TYPE_EDUCATION = 1;
 
     const TYPE_TRAINING = 2;
@@ -53,6 +55,12 @@ class Organization extends \yii\db\ActiveRecord
     const TYPE_IP_WITH_WORKERS = 3;
 
     const TYPE_IP_WITHOUT_WORKERS = 4;
+
+    const STATUS_NEW = 10;
+
+    const STATUS_ACCEPTED = 20;
+
+    const STATUS_REFUSED = 30;
 
     public $cooperate;
 
@@ -64,31 +72,39 @@ class Organization extends \yii\db\ActiveRecord
         return 'organization';
     }
 
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_GUEST] = ['name', 'full_name', 'organizational_form', 'type', 'license_date', 'license_number', 'license_issued', 'svidet', 'bank_name', 'bank_sity', 'bank_bik', 'korr_invoice', 'rass_invoice', 'phone', 'email', 'site', 'fio_contact', 'address_actual', 'address_legal', 'inn', 'KPP', 'OGRN', 'last', 'mun', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
+
+        return $scenarios;
+    }
+
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['name', 'bank_name', 'bank_bik', 'korr_invoice', 'rass_invoice', 'fio_contact', 'address_actual'], 'required'],
+            /*[['name', 'bank_name', 'bank_bik', 'korr_invoice', 'rass_invoice', 'fio_contact', 'address_actual'], 'required'],
             [['license_date', 'license_number', 'license_issued'], 'required', 
              'when' => function($model) {
-                return $model->type != 4;
+                return $model->type != self::TYPE_IP_WITHOUT_WORKERS;
             },
              'whenClient' => "function (attribute, value) {
                  return $('#organization-type').val() != 4;
             }"],
             [['svidet'], 'required', 
              'when' => function($model) {
-                return $model->type == 3;
+                return $model->type == self::TYPE_IP_WITH_WORKERS;
             },
              'whenClient' => "function (attribute, value) {
                  return $('#organization-type').val() == 3;
-            }"],
-            [['user_id', 'actual', 'type', 'bank_bik', 'korr_invoice', 'doc_type', 'max_child', 'amount_child', 'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'last', 'last_year_contract', 'certprogram'], 'integer'],
-            [['license_date', 'date_proxy', 'cratedate'], 'safe'],
+            }"],*/
+            [['user_id', 'actual', 'type', 'bank_bik', 'korr_invoice', 'doc_type', 'max_child', 'amount_child', 'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'last', 'last_year_contract', 'certprogram', 'status'], 'integer'],
+            [['license_date', 'date_proxy', 'cratedate', 'accepted_date'], 'safe'],
             [['raiting'], 'number'],
-            [['about', 'site', 'phone'], 'string'],
+            [['about', 'site', 'phone', 'refuse_reason', 'organizational_form'], 'string'],
             [['email'], 'email'],
             [['name', 'license_number', 'license_issued', 'license_issued_dat', 'bank_name', 'bank_sity', 'fio_contact', 'fio', 'position', 'position_min', 'address_legal', 'address_actual', 'geocode', 'full_name'], 'string', 'max' => 255],
             [['rass_invoice', 'ground', 'number_proxy'], 'string', 'max' => 45],
@@ -106,6 +122,7 @@ class Organization extends \yii\db\ActiveRecord
             'id' => 'ID',
             'user_id' => 'User ID',
             'actual' => 'Актуальность',
+            'organizational_form' => 'Организационно-правовая форма',
             'type' => 'Тип поставщика',
             'typeLabel' => 'Тип поставщика',
             'name' => 'Наименование поставщика',
@@ -148,6 +165,7 @@ class Organization extends \yii\db\ActiveRecord
             'email' => 'E-mail',
             'site' => 'Сайт',
             'phone' => 'Телефон',
+            'refuse_reason' => 'Причина отказа',
             'certprogram' => 'Число программ',
         ];
     }

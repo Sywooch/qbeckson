@@ -78,7 +78,7 @@ class ContractsInvoiceSearch extends Contracts
                 ->from('contracts')
                 ->where(['<=', 'start_edu_contract', $start])
                 ->andWhere(['>=', 'stop_edu_contract', $start])
-                ->andWhere(['status' => 1])
+                ->andWhere(['`contracts`.status' => 1])
                 ->andWhere(['>', 'all_funds', 0])
                 ->column();
                             
@@ -87,7 +87,7 @@ class ContractsInvoiceSearch extends Contracts
                 ->from('contracts')
                 ->where(['<=', 'start_edu_contract', $start])
                 ->andWhere(['>=', 'stop_edu_contract', $start])
-                ->andWhere(['status' => 4])
+                ->andWhere(['`contracts`.status' => 4])
                 ->andWhere(['<=' ,'date_termnate', $stop])
                 ->andWhere(['>=' ,'date_termnate', $start])
                 ->andWhere(['>', 'all_funds', 0])
@@ -107,7 +107,7 @@ class ContractsInvoiceSearch extends Contracts
             'certificate_id' => $this->certificate_id,
             'organization_id' => $organization['id'],
             'payer_id' => $this->payer_id,
-            'status' => $this->status,
+            '`contracts`.status' => $this->status,
             'status_termination' => $this->status_termination,
             'status_year' => $this->status_year,
             'start_edu_programm' => $this->start_edu_programm,

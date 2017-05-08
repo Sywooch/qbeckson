@@ -78,7 +78,7 @@ class ContractsDecInvoiceSearch extends Contracts
                 ->andWhere(['>=', 'stop_edu_contract', $start])
                 ->andWhere(['organization_id' => $organization->id])
                 ->andWhere(['payer_id' => $payer])
-                ->andWhere(['status' => 1])
+                ->andWhere(['`contracts`.status' => 1])
                 ->andWhere(['>', 'all_funds', 0])
                 ->column();
 
@@ -90,7 +90,7 @@ class ContractsDecInvoiceSearch extends Contracts
             'certificate_id' => $this->certificate_id,
             'organization_id' => $organization['id'],
             'payer_id' => $this->payer_id,
-            'status' => 1,
+            '`contracts`.status' => 1,
             'status_termination' => $this->status_termination,
             'status_year' => $this->status_year,
             'start_edu_programm' => $this->start_edu_programm,

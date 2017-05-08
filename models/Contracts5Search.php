@@ -110,7 +110,7 @@ class Contracts5Search extends Contracts
             'date' => $this->date,
             'certificate_id' => $this->certificate_id,
             'contracts.organization_id' => $this->organization_id,
-            'status' => 4,
+            '`contracts`.status' => 4,
             'status_termination' => $this->status_termination,
             'status_year' => $this->status_year,
             'start_edu_programm' => $this->start_edu_programm,

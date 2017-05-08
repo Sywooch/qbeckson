@@ -56,12 +56,12 @@ $config = [
                 '<module:\w+>/<controller:\w+>/<action:(\w|-)+>' => '<module>/<controller>/<action>',
                 '<module:\w+>/<controller:\w+>/<action:(\w|-)+>/<id:\d+>' => '<module>/<controller>/<action>',
             ],
-        ], 
+        ],
 
         'authManager' => [
             'class' => 'yii\rbac\DbManager',
         ],
- 
+
         'formatter' => [
             'class' => 'yii\i18n\Formatter',
             'dateFormat' => 'php:d.m.Y',
@@ -77,16 +77,16 @@ $config = [
                 'userClass' => 'app\models\UserIdentity'
             ]
         ],
-        'gridview' =>  [
-        'class' => '\kartik\grid\Module'
+        'gridview' => [
+            'class' => '\kartik\grid\Module'
         ],
-        'datecontrol' =>  [
+        'datecontrol' => [
             'class' => 'kartik\datecontrol\Module',
-            
+
             'displaySettings' => [
                 Module::FORMAT_DATE => 'php:d.m.Y',
                 Module::FORMAT_TIME => 'hh:mm:ss a',
-                Module::FORMAT_DATETIME => 'dd-MM-yyyy hh:mm:ss a', 
+                Module::FORMAT_DATETIME => 'dd-MM-yyyy hh:mm:ss a',
             ],
 
             'saveSettings' => [
@@ -94,11 +94,11 @@ $config = [
                 Module::FORMAT_TIME => 'php:H:i:s',
                 Module::FORMAT_DATETIME => 'php:Y-m-d H:i:s',
             ],
-            
+
             'autoWidget' => true,
- 
+
             'autoWidgetSettings' => [
-                Module::FORMAT_DATE => ['type'=>2, 'pluginOptions'=>['autoclose'=>true]], // example
+                Module::FORMAT_DATE => ['type' => 2, 'pluginOptions' => ['autoclose' => true]], // example
                 Module::FORMAT_DATETIME => [], // setup if needed
                 Module::FORMAT_TIME => [], // setup if needed
             ],
@@ -108,7 +108,7 @@ $config = [
                     'class' => 'yii\jui\DatePicker', // example
                     'options' => [
                         'dateFormat' => 'php:Y-m-d',
-                        'options' => ['class'=>'form-control'],
+                        'options' => ['class' => 'form-control'],
                     ]
                 ]
             ]
@@ -124,34 +124,41 @@ $config = [
                         'allow' => true,
                     ],
                 ],
-             
-             'operators' =>
-                [
+                'organization' =>
                     [
-                        'actions' => ['view'],
-                        'allow' => true,
+                        [
+                            'actions' => ['request', 'check-status'],
+                            'allow' => true,
+                            'roles' => ['?'],
+                        ],
                     ],
-                ],
-             'programs' =>
-                [
+                'operators' =>
                     [
-                        'actions' => ['index', 'view'],
-                        'allow' => true,
+                        [
+                            'actions' => ['view'],
+                            'allow' => true,
+                        ],
                     ],
-                ],
-             'user' =>
-                [
+                'programs' =>
                     [
-                        'actions' => ['view'],
-                        'allow' => true,
+                        [
+                            'actions' => ['index', 'view'],
+                            'allow' => true,
+                        ],
                     ],
-                ],
-             'debug/default' =>
-                [
+                'user' =>
                     [
-                         'allow' => true,
+                        [
+                            'actions' => ['view'],
+                            'allow' => true,
+                        ],
                     ],
-                ]
+                'debug/default' =>
+                    [
+                        [
+                            'allow' => true,
+                        ],
+                    ]
             ]
     ],
 

@@ -9,6 +9,8 @@ use yii\helpers\ArrayHelper;
 /* @var $this yii\web\View */
 /* @var $model app\models\Organization */
 /* @var $form yii\widgets\ActiveForm */
+
+$readonlyField = $readonlyField && !Yii::$app->user->isGuest;
 ?>
 
 <div class="organization-form" ng-app>
@@ -16,8 +18,7 @@ use yii\helpers\ArrayHelper;
     <?php $form = ActiveForm::begin(); ?>
 
     <?php
-    $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-    if (isset($roles['operators'])) {
+    if (Yii::$app->user->can('operators')) {
         echo '<div class="well">';
 
         if ($user->isNewRecord) {
@@ -42,11 +43,12 @@ use yii\helpers\ArrayHelper;
         echo '</div>';
     } ?>
 
-    <?= $form->field($model, 'name')->textInput(!isset($roles['operators']) ? ['readOnly' => true] : ['maxlength' => true])->label('Сокращенное наименование организации') ?>
+    <?= $form->field($model, 'name')->textInput($readonlyField ? ['readOnly' => true] : ['maxlength' => true])->label('Сокращенное наименование организации') ?>
 
-    <?= $form->field($model, 'full_name')->textInput(!isset($roles['operators']) ? ['readOnly' => true] : ['maxlength' => true]) ?>
+    <?= $form->field($model, 'full_name')->textInput($readonlyField ? ['readOnly' => true] : ['maxlength' => true]) ?>
 
-    <?php if (isset($roles['operators'])) {
+    <?php if (!$readonlyField) {
+        echo $form->field($model, 'organizational_form')->textInput();
         echo $form->field($model, 'type')->dropDownList([1 => 'Образовательная организация', 2 => 'Организация, осуществляющая обучение', 3 => 'Индивидуальный предприниматель, оказывающий услуги с наймом работников', 4 => 'Индивидуальный предприниматель, оказывающий услуги без найма работников'], ['onChange' => 'selectTypes(this.value);']);
 
 
@@ -130,11 +132,11 @@ use yii\helpers\ArrayHelper;
 
     <?= $form->field($model, 'address_actual')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'address_legal')->textInput(!isset($roles['operators']) ? ['readOnly' => true] : ['maxlength' => true]) ?>
+    <?= $form->field($model, 'address_legal')->textInput($readonlyField ? ['readOnly' => true] : ['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'inn')->textInput(!isset($roles['operators']) ? ['readOnly' => true] : ['maxlength' => true]) ?>
+    <?= $form->field($model, 'inn')->textInput($readonlyField ? ['readOnly' => true] : ['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'KPP')->textInput(!isset($roles['operators']) ? ['readOnly' => true] : ['maxlength' => true]) ?>
+    <?= $form->field($model, 'KPP')->textInput($readonlyField ? ['readOnly' => true] : ['maxlength' => true]) ?>
 
     <?php
     if ($model->type == 3 or $model->type == 4) {
@@ -144,12 +146,12 @@ use yii\helpers\ArrayHelper;
     }
     ?>
 
-    <?= $form->field($model, 'OGRN')->textInput(!isset($roles['operators']) ? ['readOnly' => true] : ['maxlength' => true])->label($ogrn); ?>
+    <?= $form->field($model, 'OGRN')->textInput($readonlyField ? ['readOnly' => true] : ['maxlength' => true])->label($ogrn); ?>
 
     <?= $form->field($model, 'last')->textInput(['maxlength' => true]) ?>
 
 
-    <?php if (isset($roles['operators'])) {
+    <?php if (!$readonlyField) {
         if (!$model->isNewRecord) {
             echo $form->field($model, 'last_year_contract')->textInput();
             echo $form->field($model, 'cratedate')->textInput();
@@ -159,14 +161,19 @@ use yii\helpers\ArrayHelper;
 
     <div class="form-group">
         <?php
-        if (isset($roles['operators'])) {
+        if (Yii::$app->user->can('operators')) {
             echo Html::a('Отменить', '/personal/operator-organizations', ['class' => 'btn btn-danger']);
         }
-        if (isset($roles['organizations'])) {
+        elseif (Yii::$app->user->can('organizations')) {
             echo Html::a('Отменить', '/personal/organization-info', ['class' => 'btn btn-danger']);
         }
         ?>
-        <?= Html::submitButton($model->isNewRecord ? 'Создать' : 'Обновить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
+        <?php
+        if (Yii::$app->user->isGuest) {
+            echo Html::submitButton('Отправить заявку на подключение', ['class' => 'btn btn-success btn-lg']);
+        } else {
+            echo Html::submitButton($model->isNewRecord ? 'Создать' : 'Обновить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
+        } ?>
     </div>
 
     <?php ActiveForm::end(); ?>

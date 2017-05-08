@@ -63,7 +63,7 @@ class ContractsStatus1onlySearch extends Contracts
                 ->select(['id'])
                 ->from('contracts')
                 ->where(['group_id' => $this->group_id])
-                ->andWhere(['status' => 1])
+                ->andWhere([`contracts`.'status' => 1])
                 ->column();
         
         if (empty($rows)) { $rows = 0; }
@@ -73,7 +73,7 @@ class ContractsStatus1onlySearch extends Contracts
             'id' => $rows,
             'number' => $this->number,
             'date' => $this->date,
-            'status' => 1,
+            '`contracts`.status' => 1,
             'status_termination' => $this->status_termination,
             'status_year' => $this->status_year,
             'start_edu_programm' => $this->start_edu_programm,

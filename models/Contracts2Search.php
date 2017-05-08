@@ -71,7 +71,7 @@ class Contracts2Search extends Contracts
             'date' => $this->date,
             'certificate_id' => $this->certificate_id,
             'organization_id' => $this->organization_id,
-            'status' => 2,
+            '`contracts`.status' => 2,
             'status_termination' => $this->status_termination,
             'status_year' => $this->status_year,
             'start_edu_programm' => $this->start_edu_programm,

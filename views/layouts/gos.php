@@ -28,7 +28,6 @@ AppAsset::register($this);
     </head>
     <body>
         <?php $this->beginBody() ?>
-
         <div class="wrap">
            <div class="container-fluid">
                <div class="top-line row">
