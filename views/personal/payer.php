@@ -62,7 +62,7 @@ use yii\helpers\Url;
 
 
 <?php if ($dataProviderCooperate->getTotalCount() > 0) { ?>
-    <div class="modal fade">
+    <div class="modal fade modal-auto-popup">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">

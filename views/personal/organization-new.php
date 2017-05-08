@@ -21,7 +21,7 @@ use yii\helpers\Url;
 <br>
 
 <?php if ($informsProvider->getTotalCount() > 0) { ?>
-    <div class="modal fade">
+    <div class="modal fade modal-auto-popup">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">

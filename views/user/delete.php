@@ -15,7 +15,7 @@ else {
 ?>
 <div class="user-delete">
 
-    <div class="modal fade">
+    <div class="modal fade modal-auto-popup">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">

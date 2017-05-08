@@ -13,7 +13,7 @@ $this->params['breadcrumbs'][] = 'Редактировать';
 ?>
 <div class="programs-update col-md-10 col-md-offset-1">
     
-    <div class="modal fade">
+    <div class="modal fade modal-auto-popup">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">

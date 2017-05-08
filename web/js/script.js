@@ -10,7 +10,7 @@ $(document).ready(function () {
     var hash = window.location.hash;
     hash && $('ul.nav-tabs a[href="' + hash + '"]').tab('show');
 
-    $('.modal').modal('show');
+    $('. modal-auto-popup').modal('show');
     $('[data-toggle="tooltip"]').tooltip();
     $('[data-toggle="popover"]').popover({ 
         placement : 'bottom',
