@@ -604,3 +604,7 @@ p.message {
 li.breadcrumbs-help-icon:before {
     content: none !important;
 }
+
+.container-refuse-reason {
+    display: none;
+}

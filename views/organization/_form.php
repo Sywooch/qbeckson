@@ -21,11 +21,11 @@ $readonlyField = $readonlyField && !Yii::$app->user->isGuest;
     if (Yii::$app->user->can('operators')) {
         echo '<div class="well">';
 
-        if ($user->isNewRecord) {
+        if ($user->isNewRecord || $model->isModerating) {
             echo $form->field($user, 'username', ['enableAjaxValidation' => true])->textInput(['id' => 'login', 'maxlength' => true]);
             echo Html::button('Сгенерировать логин', ['class' => 'btn btn-success', 'onclick' => '(function () { $("#login").val(Math.random().toString(36).slice(-8)); })();']);
             echo '<br><br>';
-            echo $form->field($user, 'password')->textInput(['id' => 'pass']);
+            echo $form->field($user, 'password')->textInput(['id' => 'pass', 'value' => '']);
             echo Html::button('Сгенерировать пароль', ['class' => 'btn btn-success', 'onclick' => '(function () { $("#pass").val(Math.random().toString(36).slice(-8)); })();']);
 
         } else {
@@ -34,7 +34,7 @@ $readonlyField = $readonlyField && !Yii::$app->user->isGuest;
             echo $form->field($user, 'username', ['enableAjaxValidation' => true])->textInput(['id' => 'login', 'maxlength' => true]);
             echo Html::button('Сгенерировать логин', ['class' => 'btn btn-success', 'onclick' => '(function () { $("#login").val(Math.random().toString(36).slice(-8)); })();']);
             echo '</div>';
-            echo $form->field($user, 'newpass')->checkbox(['value' => 1, 'ng-model' => 'newpass']);
+            echo $form->field($user, 'newpass')->checkbox(['value' => 1, 'ng-model' => 'newpass', 'ng-init' => 'checked=1']);
             echo '<div ng-show="newpass">';
             echo $form->field($user, 'password')->textInput(['id' => 'pass', 'value' => '']);
             echo Html::button('Сгенерировать пароль', ['class' => 'btn btn-success', 'onclick' => '(function () { $("#pass").val(Math.random().toString(36).slice(-8)); })();']);
@@ -161,16 +161,21 @@ $readonlyField = $readonlyField && !Yii::$app->user->isGuest;
 
     <div class="form-group">
         <?php
-        if (Yii::$app->user->can('operators')) {
+        if (Yii::$app->user->can('operators') && !$model->isModerating) {
             echo Html::a('Отменить', '/personal/operator-organizations', ['class' => 'btn btn-danger']);
-        }
-        elseif (Yii::$app->user->can('organizations')) {
+        } elseif (Yii::$app->user->can('organizations')) {
             echo Html::a('Отменить', '/personal/organization-info', ['class' => 'btn btn-danger']);
         }
         ?>
         <?php
         if (Yii::$app->user->isGuest) {
             echo Html::submitButton('Отправить заявку на подключение', ['class' => 'btn btn-success btn-lg']);
+        } elseif ($model->isModerating) {
+            echo Html::submitButton('Подтвердить заявку', ['class' => 'btn btn-success', 'name' => 'accept-button']);
+            echo '&nbsp;&nbsp;' . Html::a('Отклонить заявку', 'javascript:void();', ['class' => 'btn btn-warning show-refuse-reason']);
+            echo '<div class="container-refuse-reason"><br />';
+            echo $form->field($model, 'refuse_reason')->textarea(['rows' => 6]);
+            echo Html::submitButton('Отклонить заявку', ['class' => 'btn btn-warning', 'name' => 'refuse-button']) . '</div>';
         } else {
             echo Html::submitButton($model->isNewRecord ? 'Создать' : 'Обновить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
         } ?>

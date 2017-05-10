@@ -129,7 +129,6 @@ $config = [
                         [
                             'actions' => ['request', 'check-status'],
                             'allow' => true,
-                            'roles' => ['?'],
                         ],
                     ],
                 'operators' =>

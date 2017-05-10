@@ -48,6 +48,8 @@ class Organization extends \yii\db\ActiveRecord
 {
     const SCENARIO_GUEST = 'guest';
 
+    const SCENARIO_MODERATOR = 'moderator';
+
     const TYPE_EDUCATION = 1;
 
     const TYPE_TRAINING = 2;
@@ -56,11 +58,17 @@ class Organization extends \yii\db\ActiveRecord
 
     const TYPE_IP_WITHOUT_WORKERS = 4;
 
+    // Новая организация (не промодерированная)
     const STATUS_NEW = 10;
 
-    const STATUS_ACCEPTED = 20;
+    // Активная организация
+    const STATUS_ACTIVE = 20;
 
+    // Отклоненная организация (можно редактировать заявителю)
     const STATUS_REFUSED = 30;
+
+    // Забаненная организация
+    const STATUS_BANNED = 40;
 
     public $cooperate;
 
@@ -75,6 +83,7 @@ class Organization extends \yii\db\ActiveRecord
     public function scenarios()
     {
         $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_MODERATOR] = $scenarios[self::SCENARIO_DEFAULT];
         $scenarios[self::SCENARIO_GUEST] = ['name', 'full_name', 'organizational_form', 'type', 'license_date', 'license_number', 'license_issued', 'svidet', 'bank_name', 'bank_sity', 'bank_bik', 'korr_invoice', 'rass_invoice', 'phone', 'email', 'site', 'fio_contact', 'address_actual', 'address_legal', 'inn', 'KPP', 'OGRN', 'last', 'mun', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
 
         return $scenarios;
@@ -86,6 +95,7 @@ class Organization extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            ['name', 'required'],
             /*[['name', 'bank_name', 'bank_bik', 'korr_invoice', 'rass_invoice', 'fio_contact', 'address_actual'], 'required'],
             [['license_date', 'license_number', 'license_issued'], 'required', 
              'when' => function($model) {
@@ -311,6 +321,24 @@ class Organization extends \yii\db\ActiveRecord
         
         return $rows;
     }
-    
-    
+
+    public function setActive()
+    {
+        $this->status = self::STATUS_ACTIVE;
+    }
+
+    public function setRefused()
+    {
+        $this->status = self::STATUS_REFUSED;
+    }
+
+    public function sendModerateEmail()
+    {
+        return null;
+    }
+
+    public function getIsModerating()
+    {
+        return $this->scenario == self::SCENARIO_MODERATOR ? true : false;
+    }
 }

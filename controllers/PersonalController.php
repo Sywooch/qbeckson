@@ -13,7 +13,7 @@ use app\models\ProgramsfromcertSearch;
 use app\models\ProgramsfromnocertSearch;
 use app\models\ProgramsPayerSearch;
 use app\models\Organization;
-use app\models\OrganizationSearch;
+use app\models\search\OrganizationSearch;
 use app\models\OrganizationmySearch;
 use app\models\OrganizationwaitSearch;
 use app\models\Informs;
@@ -87,12 +87,21 @@ class PersonalController extends \yii\web\Controller
 
     public function actionOperatorOrganizations()
     {
-        $searchOrganization = new OrganizationSearch();
-        $OrganizationProvider = $searchOrganization->search(Yii::$app->request->queryParams);
+        $searchRegistry = new OrganizationSearch(['statusArray' => [
+            Organization::STATUS_ACTIVE,
+            Organization::STATUS_REFUSED,
+            Organization::STATUS_BANNED,
+        ]]);
+        $registryProvider = $searchRegistry->search(Yii::$app->request->queryParams);
+
+        $searchRequest = new OrganizationSearch(['statusArray' => [Organization::STATUS_NEW]]);
+        $requestProvider = $searchRequest->search(Yii::$app->request->queryParams);
 
         return $this->render('operator-organizations', [
-            'searchOrganization' => $searchOrganization,
-            'OrganizationProvider' => $OrganizationProvider,
+            'searchRegistry' => $searchRegistry,
+            'registryProvider' => $registryProvider,
+            'searchRequest' => $searchRequest,
+            'requestProvider' => $requestProvider,
         ]);
     }
 

@@ -11,12 +11,15 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="user-view  col-md-8  col-md-offset-2">
 
-<?php if (!$model->password) { $model->password = 'Не изменялся';}  ?>
+<?php if (empty($password)) { $password = 'Не изменялся';}  ?>
 <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
             'username',
-            'password',
+            [
+                'attribute' => 'password',
+                'value' => $password
+            ],
         ],
     ]) ?>
 

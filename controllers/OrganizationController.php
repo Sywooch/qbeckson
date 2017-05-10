@@ -10,6 +10,7 @@ use app\models\Informs;
 use app\models\OrganizationSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\filters\VerbFilter;
 use app\models\User;
 use app\models\Mun;
@@ -150,15 +151,21 @@ class OrganizationController extends Controller
 
     public function actionRequest()
     {
+        // TODO: Разобраться с правами, as accessbehavior из конфига не работает, так что костыль
+        if (!Yii::$app->user->isGuest) {
+            throw new ForbiddenHttpException('Недостаточно прав');
+        }
+
         $model = new Organization([
             'status' => Organization::STATUS_NEW,
             'scenario' => Organization::SCENARIO_GUEST,
             'actual' => 0,
             'cratedate' => date("Y-m-d"),
+            'anonymous_update_token' => Yii::$app->security->generateRandomString(),
         ]);
         $user = new User([
-            'username' => Yii::$app->getSecurity()->generateRandomString(6),
-            'password' => Yii::$app->security->generatePasswordHash(Yii::$app->getSecurity()->generateRandomString(6)),
+            'username' => Yii::$app->security->generateRandomString(6),
+            'password' => Yii::$app->security->generatePasswordHash(Yii::$app->security->generateRandomString(6)),
             'auth_key' => Yii::$app->security->generateRandomString(),
         ]);
 
@@ -191,7 +198,11 @@ class OrganizationController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        $user = User::findOne($model->user_id);
+        $user = $model->user;
+        if ($model->status == Organization::STATUS_NEW) {
+            $model->scenario = Organization::SCENARIO_MODERATOR;
+            $user->newpass = 1;
+        }
 
         if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -199,46 +210,48 @@ class OrganizationController extends Controller
             return ActiveForm::validate($user);
         }
 
-        if ($user->load(Yii::$app->request->post())) {
-            if ($model->load(Yii::$app->request->post())) {
+        $showUserInfo = false;
 
-                //$model->mun = implode(",", $model->mun);
-
-                $model->validate();
-                $model->save();
+        if ($user->load(Yii::$app->request->post()) && ($user->newlogin > 0 || $user->newpass > 0)) {
+            $password = null;
+            if ($user->newpass > 0) {
+                if (!$user->password) {
+                    $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
+                    $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+                } else {
+                    $password = $user->password;
+                    $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+                }
             }
 
-            if ($user->newlogin == 1 || $user->newpass == 1) {
-
-                if ($user->newpass == 1) {
-                    if (!$user->password) {
-                        $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
-                        $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
-                    } else {
-                        $password = $user->password;
-                        $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
-                    }
-                }
-
-                if ($user->validate() && $user->save()) {
-                    $user->password = $password;
-
-                    return $this->render('/user/view', [
-                        'model' => $user,
-                    ]);
-                }
+            if ($user->save()) {
+                $showUserInfo = true;
             }
         }
 
-        if ($model->load(Yii::$app->request->post())) {
-            //$model->mun = implode(",", $model->mun);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            if ($model->isModerating) {
+                $post = Yii::$app->request->post();
+                if (isset($post['accept-button'])) {
+                    $model->setActive();
 
-            if ($model->validate() && $model->save()) {
-                return $this->redirect(['/organization/view', 'id' => $model->id]);
+                } elseif (isset($post['refuse-button'])) {
+                    $model->setRefused();
+                }
+                $model->sendModerateEmail($password);
             }
-        }
 
-        //$model->mun = explode(',', $model->mun);
+            $model->save(false);
+
+            if ($showUserInfo === true) {
+                return $this->render('/user/view', [
+                    'model' => $user,
+                    'password' => $password,
+                ]);
+            }
+
+            return $this->redirect(['/organization/view', 'id' => $model->id]);
+        }
 
         return $this->render('update', [
             'model' => $model,
