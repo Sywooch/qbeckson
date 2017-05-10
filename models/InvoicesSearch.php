@@ -78,7 +78,7 @@ class InvoicesSearch extends Invoices
             'number' => $this->number,
             'date' => $this->date,
             'prepayment' => $this->prepayment,
-            'status' => [0, 1, 2],
+            '`invoices`.status' => [0, 1, 2],
         ]);
 
         $query->andFilterWhere(['like', 'month', $this->month])

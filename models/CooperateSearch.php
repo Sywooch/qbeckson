@@ -98,7 +98,7 @@ class CooperateSearch extends Cooperate
             'payer_id' => $this->payer_id,
             'date' => $this->date,
             'date_dissolution' => $this->date_dissolution,
-            'status' => $this->status,
+            '`cooperate`.status' => $this->status,
             'reade' => $this->reade,
         ]);
 

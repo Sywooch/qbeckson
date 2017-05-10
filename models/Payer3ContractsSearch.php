@@ -120,7 +120,7 @@ class Payer3ContractsSearch extends Contracts
             'contracts.organization_id' => $cooperate,
             'program_id' => $this->program_id,
             'contracts.payer_id' => $payer['id'],
-            'status' => 3,
+            '`contracts`.status' => 3,
             'status_termination' => $this->status_termination,
             'status_year' => $this->status_year,
             'start_edu_programm' => $this->start_edu_programm,
