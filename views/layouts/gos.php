@@ -80,6 +80,13 @@ AppAsset::register($this);
                                                 ['label' => 'Список пользователей', 'url' => ['/user/index']],
                                             ],
                                         ],
+                                        [
+                                            'label' => 'Импорт данных',
+                                            'url' => ['/import/index'],
+                                            'items' => [
+                                                ['label' => 'Дети (сертификаты)', 'url' => ['/import/children']],
+                                            ],
+                                        ],
                                     ],
                                 ]);
                             }

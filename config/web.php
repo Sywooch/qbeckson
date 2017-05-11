@@ -124,6 +124,13 @@ $config = [
                         'allow' => true,
                     ],
                 ],
+                'import' =>
+                    [
+                        [
+                            'allow' => true,
+                            'roles' => ['admins'],
+                        ],
+                    ],
                 'organization' =>
                     [
                         [
