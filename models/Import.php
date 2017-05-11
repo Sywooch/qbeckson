@@ -37,7 +37,7 @@ class Import extends Model
             $i = 0;
             $certificateArray = [];
             while (($data = fgetcsv($handle, 1000, ";")) !== false) {
-                if (!$i++) {
+                if (!$i++ || intval($data[3]) < 1) {
                     continue;
                 }
                 Yii::$app->db->createCommand()->insert('user', [
