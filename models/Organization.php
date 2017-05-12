@@ -90,7 +90,7 @@ class Organization extends \yii\db\ActiveRecord
     {
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_MODERATOR] = $scenarios[self::SCENARIO_DEFAULT];
-        $scenarios[self::SCENARIO_GUEST] = ['name', 'full_name', 'organizational_form', 'type', 'license_date', 'license_number', 'license_issued', 'svidet', 'bank_name', 'bank_sity', 'bank_bik', 'korr_invoice', 'rass_invoice', 'phone', 'email', 'site', 'fio_contact', 'address_actual', 'address_legal', 'inn', 'KPP', 'OGRN', 'last', 'mun', 'licenseDocument', 'commonDocuments'];
+        $scenarios[self::SCENARIO_GUEST] = ['name', 'full_name', 'organizational_form', 'type', 'license_date', 'license_number', 'license_issued', 'svidet', 'bank_name', 'bank_sity', 'bank_bik', 'korr_invoice', 'rass_invoice', 'phone', 'email', 'site', 'fio_contact', 'address_actual', 'address_legal', 'inn', 'KPP', 'OGRN', 'last', 'mun', 'licenseDocument', 'commonDocuments', 'anonymous_update_token'];
 
         return $scenarios;
     }
@@ -101,7 +101,7 @@ class Organization extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            ['name', 'required'],
+            [['name', 'email'], 'required'],
             /*[['name', 'bank_name', 'bank_bik', 'korr_invoice', 'rass_invoice', 'fio_contact', 'address_actual'], 'required'],
             [['license_date', 'license_number', 'license_issued'], 'required', 
              'when' => function($model) {
@@ -120,7 +120,7 @@ class Organization extends \yii\db\ActiveRecord
             [['user_id', 'actual', 'type', 'bank_bik', 'korr_invoice', 'doc_type', 'max_child', 'amount_child', 'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'last', 'last_year_contract', 'certprogram', 'status'], 'integer'],
             [['license_date', 'date_proxy', 'cratedate', 'accepted_date'], 'safe'],
             [['raiting'], 'number'],
-            [['about', 'site', 'phone', 'refuse_reason', 'organizational_form'], 'string'],
+            [['about', 'site', 'phone', 'refuse_reason', 'organizational_form', 'anonymous_update_token'], 'string'],
             [['email'], 'email'],
             [['name', 'license_number', 'license_issued', 'license_issued_dat', 'bank_name', 'bank_sity', 'fio_contact', 'fio', 'position', 'position_min', 'address_legal', 'address_actual', 'geocode', 'full_name'], 'string', 'max' => 255],
             [['rass_invoice', 'ground', 'number_proxy'], 'string', 'max' => 45],
@@ -379,6 +379,12 @@ class Organization extends \yii\db\ActiveRecord
         return $rows;
     }
 
+    public function setNew()
+    {
+        $this->status = self::STATUS_NEW;
+        $this->actual = 0;
+    }
+
     public function setActive()
     {
         $this->status = self::STATUS_ACTIVE;
@@ -394,12 +400,41 @@ class Organization extends \yii\db\ActiveRecord
 
     public function sendRequestEmail()
     {
-        return null;
+        $mail = Yii::$app->mailer
+            ->compose(
+                ['html' => 'organizationRequestNew-html', 'text' => 'organizationRequestNew-text'],
+                ['model' => $this]
+            )
+            ->setTo($this->email)
+            ->setFrom([Yii::$app->params['adminEmail'] => 'PFDO'])
+            ->setSubject('Успешная заявк поставщика');
+
+        if ($mail->send()) {
+            return true;
+        }
+
+        return false;
     }
 
-    public function sendModerateEmail()
+    public function sendModerateEmail($password = null)
     {
-        return null;
+        $mail = Yii::$app->mailer
+            ->compose(
+                ['html' => $this->isRefused ? 'organizationRequestRefused-html' : 'organizationRequestAccepted-html', 'text' => $this->isRefused ? 'organizationRequestRefused-text' : 'organizationRequestAccepted-text'],
+                [
+                    'model' => $this,
+                    'password' => $password,
+                ]
+            )
+            ->setTo($this->email)
+            ->setFrom([Yii::$app->params['adminEmail'] => 'PFDO'])
+            ->setSubject($this->isRefused ? 'Ваша заявка отклонена' : 'Ваша заявка одобрена');
+
+        if ($mail->send()) {
+            return true;
+        }
+
+        return false;
     }
 
     public function getIsModerating()

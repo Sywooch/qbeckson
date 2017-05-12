@@ -179,6 +179,7 @@ class OrganizationController extends Controller
                     $model->licenseDocument = UploadedFile::getInstance($model, 'licenseDocument');
                     $model->commonDocuments = UploadedFile::getInstances($model, 'commonDocuments');
                     $model->uploadDocuments();
+                    $model->sendRequestEmail();
                     Yii::$app->session->setFlash('success', 'Вы успешно отправили заявку на регистрацию поставщика образовательных услуг!');
 
                     return $this->redirect(['/site/index']);
@@ -203,7 +204,9 @@ class OrganizationController extends Controller
         $model = $this->findModelByToken($token);
         $model->scenario = Organization::SCENARIO_GUEST;
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $model->setNew();
+            $model->save(false);
             $model->licenseDocument = UploadedFile::getInstance($model, 'licenseDocument');
             $model->commonDocuments = UploadedFile::getInstances($model, 'commonDocuments');
             $model->uploadDocuments();
