@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\Organization */
 
-$this->title = 'Редактирование заявки на добавление поставщика образовательных услуг';
+$this->title = 'Заявка на добавление поставщика образовательных услуг';
 ?>
 <div class="organization-create  col-md-10 col-md-offset-1">
 

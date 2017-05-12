@@ -19,6 +19,7 @@ use app\models\Programs;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
 use yii\web\UploadedFile;
+use yii\base\DynamicModel;
 
 /**
  * OrganizationController implements the CRUD actions for Organization model.
@@ -163,7 +164,7 @@ class OrganizationController extends Controller
             'scenario' => Organization::SCENARIO_GUEST,
             'actual' => 0,
             'cratedate' => date("Y-m-d"),
-            'anonymous_update_token' => Yii::$app->security->generateRandomString(),
+            'anonymous_update_token' => Yii::$app->security->generateRandomString(10),
         ]);
         $user = new User([
             'username' => Yii::$app->security->generateRandomString(6),
@@ -218,6 +219,30 @@ class OrganizationController extends Controller
         return $this->render('request-update', [
             'model' => $model,
         ]);
+    }
+
+    public function actionCheckStatus($token = null)
+    {
+        // TODO: Разобраться с правами, as accessbehavior из конфига не работает, так что костыль
+        if (!Yii::$app->user->isGuest) {
+            throw new ForbiddenHttpException('Недостаточно прав');
+        }
+
+        if (!empty($token)) {
+            $model = DynamicModel::validateData(compact('token'), [
+                ['token', 'string', 'min' => 1],
+                ['token', 'exist', 'targetClass' => Organization::className(), 'targetAttribute' => 'anonymous_update_token'],
+            ]);
+            if ($model->hasErrors()) {
+                Yii::$app->session->setFlash('danger', 'Заявки с указанным номером не найдено.');
+
+                return $this->redirect(['check-status']);
+            } else {
+                $this->redirect(['request-update', 'token' => $token]);
+            }
+        }
+
+        return $this->render('check-status');
     }
 
     /**
