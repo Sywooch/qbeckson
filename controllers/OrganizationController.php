@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use Yii;
 use app\models\Organization;
+use app\models\OrganizationDocument;
 use app\models\Contracts;
 use app\models\Certificates;
 use app\models\Informs;
@@ -17,6 +18,7 @@ use app\models\Mun;
 use app\models\Programs;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
+use yii\web\UploadedFile;
 
 /**
  * OrganizationController implements the CRUD actions for Organization model.
@@ -165,7 +167,7 @@ class OrganizationController extends Controller
         ]);
         $user = new User([
             'username' => Yii::$app->security->generateRandomString(6),
-            'password' => Yii::$app->security->generatePasswordHash(Yii::$app->security->generateRandomString(6)),
+            'password' => Yii::$app->security->generatePasswordHash(Yii::$app->security->generateRandomString(6), 10),
             'auth_key' => Yii::$app->security->generateRandomString(),
         ]);
 
@@ -174,6 +176,9 @@ class OrganizationController extends Controller
                 Yii::$app->authManager->assign(Yii::$app->authManager->getRole('organizations'), $user->id);
                 $model->user_id = $user->id;
                 if ($model->save(false)) {
+                    $model->licenseDocument = UploadedFile::getInstance($model, 'licenseDocument');
+                    $model->commonDocuments = UploadedFile::getInstances($model, 'commonDocuments');
+                    $model->uploadDocuments();
                     Yii::$app->session->setFlash('success', 'Вы успешно отправили заявку на регистрацию поставщика образовательных услуг!');
 
                     return $this->redirect(['/site/index']);
@@ -185,7 +190,30 @@ class OrganizationController extends Controller
 
         return $this->render('request', [
             'model' => $model,
-            'user' => $user,
+        ]);
+    }
+
+    public function actionRequestUpdate($token)
+    {
+        // TODO: Разобраться с правами, as accessbehavior из конфига не работает, так что костыль
+        if (!Yii::$app->user->isGuest) {
+            throw new ForbiddenHttpException('Недостаточно прав');
+        }
+
+        $model = $this->findModelByToken($token);
+        $model->scenario = Organization::SCENARIO_GUEST;
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $model->licenseDocument = UploadedFile::getInstance($model, 'licenseDocument');
+            $model->commonDocuments = UploadedFile::getInstances($model, 'commonDocuments');
+            $model->uploadDocuments();
+            Yii::$app->session->setFlash('success', 'Вы успешно отредактировали заявку на регистрацию поставщика образовательных услуг!');
+
+            return $this->redirect(['/site/index']);
+        }
+
+        return $this->render('request-update', [
+            'model' => $model,
         ]);
     }
 
@@ -604,6 +632,15 @@ class OrganizationController extends Controller
     protected function findModel($id)
     {
         if (($model = Organization::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+    }
+
+    protected function findModelByToken($token)
+    {
+        if (($model = Organization::findOne(['anonymous_update_token' => $token])) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

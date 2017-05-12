@@ -13,7 +13,6 @@ $this->title = 'Заявка на добавление поставщика об
 
     <?= $this->render('_form', [
         'model' => $model,
-        'guest' => true,
     ]) ?>
 
 </div>

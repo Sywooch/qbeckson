@@ -134,7 +134,7 @@ $config = [
                 'organization' =>
                     [
                         [
-                            'actions' => ['request', 'check-status'],
+                            'actions' => ['request', 'request-update', 'check-status'],
                             'allow' => true,
                         ],
                     ],

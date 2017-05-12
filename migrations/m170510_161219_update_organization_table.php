@@ -6,14 +6,12 @@ class m170510_161219_update_organization_table extends Migration
 {
     public function up()
     {
-        $this->addColumn('organization', 'anonymous_update_token', $this->integer());
+        $this->addColumn('organization', 'anonymous_update_token', $this->string());
     }
 
     public function down()
     {
-        echo "m170510_161219_update_organization_table cannot be reverted.\n";
-
-        return false;
+        $this->dropColumn('organization', 'anonymous_update_token');
     }
 
     /*

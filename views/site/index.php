@@ -33,7 +33,7 @@ $this->title = 'Портал сопровождения персонифицир
 
                 <?php ActiveForm::end(); ?>
 
-                <!--<a href="javascript:void(0);" data-toggle="modal" data-target="#create-organization-modal">Отправить заявку на регистрацию организации</a>-->
+                <a href="javascript:void(0);" data-toggle="modal" data-target="#create-organization-modal">Отправить заявку на регистрацию организации</a>
             </div>
         </div>
 

@@ -72,6 +72,12 @@ class Organization extends \yii\db\ActiveRecord
 
     public $cooperate;
 
+    // Лицензия (документ)
+    public $licenseDocument;
+
+    // Иные документы
+    public $commonDocuments;
+
     /**
      * @inheritdoc
      */
@@ -84,7 +90,7 @@ class Organization extends \yii\db\ActiveRecord
     {
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_MODERATOR] = $scenarios[self::SCENARIO_DEFAULT];
-        $scenarios[self::SCENARIO_GUEST] = ['name', 'full_name', 'organizational_form', 'type', 'license_date', 'license_number', 'license_issued', 'svidet', 'bank_name', 'bank_sity', 'bank_bik', 'korr_invoice', 'rass_invoice', 'phone', 'email', 'site', 'fio_contact', 'address_actual', 'address_legal', 'inn', 'KPP', 'OGRN', 'last', 'mun', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
+        $scenarios[self::SCENARIO_GUEST] = ['name', 'full_name', 'organizational_form', 'type', 'license_date', 'license_number', 'license_issued', 'svidet', 'bank_name', 'bank_sity', 'bank_bik', 'korr_invoice', 'rass_invoice', 'phone', 'email', 'site', 'fio_contact', 'address_actual', 'address_legal', 'inn', 'KPP', 'OGRN', 'last', 'mun', 'licenseDocument', 'commonDocuments'];
 
         return $scenarios;
     }
@@ -119,6 +125,8 @@ class Organization extends \yii\db\ActiveRecord
             [['name', 'license_number', 'license_issued', 'license_issued_dat', 'bank_name', 'bank_sity', 'fio_contact', 'fio', 'position', 'position_min', 'address_legal', 'address_actual', 'geocode', 'full_name'], 'string', 'max' => 255],
             [['rass_invoice', 'ground', 'number_proxy'], 'string', 'max' => 45],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
+            ['licenseDocument', 'file', 'skipOnEmpty' => true, 'extensions' => 'doc, docx, pdf', 'on' => self::SCENARIO_GUEST],
+            ['commonDocuments', 'file', 'skipOnEmpty' => true, 'extensions' => 'doc, docx, pdf', 'maxFiles' => (!empty($this->documents) ? 3 - count($this->documents) : 3), 'on' => self::SCENARIO_GUEST],
         ];
 
     }
@@ -177,7 +185,30 @@ class Organization extends \yii\db\ActiveRecord
             'phone' => 'Телефон',
             'refuse_reason' => 'Причина отказа',
             'certprogram' => 'Число программ',
+            'licenseDocument' => 'Лицензия',
+            'commonDocuments' => 'Иные документы',
         ];
+    }
+
+    public function getStatusName()
+    {
+        $title = '';
+        switch ($this->status) {
+            case self::STATUS_ACTIVE:
+                $title = 'Активна.';
+                break;
+            case self::STATUS_NEW:
+                $title = 'Заявка в рассмотрении. Подождите, пожалуйста.';
+                break;
+            case self::STATUS_REFUSED:
+                $title = 'Отказано. Вы можете исправить информацию и отправить заявку повторно.';
+                break;
+            case self::STATUS_BANNED:
+                $title = 'Забанена.';
+                break;
+        }
+
+        return $title;
     }
 
     /**
@@ -229,7 +260,26 @@ class Organization extends \yii\db\ActiveRecord
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 
-    public function getUserName() {
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLicense()
+    {
+        return $this->hasOne(OrganizationDocument::className(), ['organization_id' => 'id'])
+            ->andWhere(['type' => OrganizationDocument::TYPE_LICENSE]);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDocuments()
+    {
+        return $this->hasMany(OrganizationDocument::className(), ['organization_id' => 'id'])
+            ->andWhere(['type' => OrganizationDocument::TYPE_COMMON]);
+    }
+
+    public function getUserName()
+    {
         return $this->user->username;
     }
 
@@ -245,25 +295,28 @@ class Organization extends \yii\db\ActiveRecord
      * DEPRECATED
      * Use relation in app\models\User instead
      */
-    public function getOrganization() {
+    public function getOrganization()
+    {
 
         $query = Organization::find();
 
-        if(!Yii::$app->user->isGuest) {
+        if (!Yii::$app->user->isGuest) {
             $query->where(['user_id' => Yii::$app->user->id]);
         }
 
         return $query->one();
     }
 
-    public static function getCountOrganization() {
+    public static function getCountOrganization()
+    {
         $query = static::find()
             ->where(['actual' => 1]);
 
         return $query->count();
     }
 
-    public function getActualOrganization() {
+    public function getActualOrganization()
+    {
         $query = Organization::find();
 
         $query->Where(['actual' => 1]);
@@ -271,7 +324,8 @@ class Organization extends \yii\db\ActiveRecord
         return $query->column();
     }
 
-    public function getTypeLabel() {
+    public function getTypeLabel()
+    {
         $title = '';
         switch ($this->type) {
             case self::TYPE_EDUCATION:
@@ -290,46 +344,57 @@ class Organization extends \yii\db\ActiveRecord
         return $title;
     }
 
-    public function getCertprogram() {
-         $rows = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('programs')
-                ->where(['organization_id'=> $this->id])
-                ->andWhere(['verification'=> 2])
-                ->count();
-        
+    public function getCertprogram()
+    {
+        $rows = (new \yii\db\Query())
+            ->select(['id'])
+            ->from('programs')
+            ->where(['organization_id' => $this->id])
+            ->andWhere(['verification' => 2])
+            ->count();
+
         return $rows;
     }
 
-    public function munName($data) {
-         $rows = (new \yii\db\Query())
-                ->select(['name'])
-                ->from('mun')
-                ->where(['id'=> $data])
-                ->one();
-        
+    public function munName($data)
+    {
+        $rows = (new \yii\db\Query())
+            ->select(['name'])
+            ->from('mun')
+            ->where(['id' => $data])
+            ->one();
+
         return $rows['name'];
     }
-    
-     public function invoiceCount($data, $id) {
-         $rows = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('invoices')
-                ->where(['organization_id'=> $data])
-                ->where(['payers_id'=> $id])
-                ->count();
-        
+
+    public function invoiceCount($data, $id)
+    {
+        $rows = (new \yii\db\Query())
+            ->select(['id'])
+            ->from('invoices')
+            ->where(['organization_id' => $data])
+            ->where(['payers_id' => $id])
+            ->count();
+
         return $rows;
     }
 
     public function setActive()
     {
         $this->status = self::STATUS_ACTIVE;
+        $this->actual = 1;
+        $this->accepted_date = time();
     }
 
     public function setRefused()
     {
         $this->status = self::STATUS_REFUSED;
+        $this->actual = 0;
+    }
+
+    public function sendRequestEmail()
+    {
+        return null;
     }
 
     public function sendModerateEmail()
@@ -340,5 +405,44 @@ class Organization extends \yii\db\ActiveRecord
     public function getIsModerating()
     {
         return $this->scenario == self::SCENARIO_MODERATOR ? true : false;
+    }
+
+    public function getRequestCanBeUpdated()
+    {
+        return $this->scenario != self::SCENARIO_GUEST || $this->status == self::STATUS_REFUSED;
+    }
+
+    public function getIsRefused()
+    {
+        return $this->status == self::STATUS_REFUSED;
+    }
+
+    public function uploadDocuments()
+    {
+        if (!empty($this->licenseDocument)) {
+            $licenseFilename = Yii::$app->security->generateRandomString(12) . '.' . $this->licenseDocument->extension;
+            $this->licenseDocument->saveAs('uploads/organization/' . $licenseFilename);
+            $model = new OrganizationDocument([
+                'organization_id' => $this->id,
+                'type' => OrganizationDocument::TYPE_LICENSE,
+                'filename' => $licenseFilename,
+            ]);
+            $model->save();
+        }
+
+        if (!empty($this->commonDocuments)) {
+            foreach ($this->commonDocuments as $commonDocument) {
+                $commonFilename = Yii::$app->security->generateRandomString(12) . '.' . $commonDocument->extension;
+                $commonDocument->saveAs('uploads/organization/' . $commonFilename);
+                $model = new OrganizationDocument([
+                    'organization_id' => $this->id,
+                    'type' => OrganizationDocument::TYPE_COMMON,
+                    'filename' => $commonFilename,
+                ]);
+                $model->save();
+            }
+        }
+
+        return true;
     }
 }

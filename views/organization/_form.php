@@ -159,6 +159,24 @@ $readonlyField = $readonlyField && !Yii::$app->user->isGuest;
         echo $form->field($model, 'mun')->dropDownList(ArrayHelper::map(Mun::find()->all(), 'id', 'name'));
     } ?>
 
+    <?php if (Yii::$app->user->isGuest || $model->isModerating): ?>
+        <div class="well">
+        <?php if (!empty($model->license)): ?>
+            <?= Html::a('Лицензия (документ)', '/uploads/organization/' . $model->license->filename) ?>
+        <? endif; ?>
+        <?php if (!empty($model->documents)): ?>
+            <h4>Иные документы:</h4>
+            <?php foreach ($model->documents as $i => $document): ?>
+                <?= Html::a('Документ ' . ($i + 1), '/uploads/organization/' . $document->filename) ?><br />
+           <? endforeach; ?>
+        <? endif; ?>
+        </div>
+    <? endif; ?>
+    <?php if (Yii::$app->user->isGuest): ?>
+    <?= $form->field($model, 'licenseDocument')->fileInput() ?>
+    <?= $form->field($model, 'commonDocuments[]')->fileInput(['multiple' => true]) ?>
+    <?php endif; ?>
+
     <div class="form-group">
         <?php
         if (Yii::$app->user->can('operators') && !$model->isModerating) {
