@@ -78,6 +78,9 @@ class Organization extends \yii\db\ActiveRecord
     // Иные документы
     public $commonDocuments;
 
+    // Капча
+    public $verifyCode;
+
     /**
      * @inheritdoc
      */
@@ -90,7 +93,7 @@ class Organization extends \yii\db\ActiveRecord
     {
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_MODERATOR] = $scenarios[self::SCENARIO_DEFAULT];
-        $scenarios[self::SCENARIO_GUEST] = ['name', 'full_name', 'organizational_form', 'type', 'license_date', 'license_number', 'license_issued', 'svidet', 'bank_name', 'bank_sity', 'bank_bik', 'korr_invoice', 'rass_invoice', 'phone', 'email', 'site', 'fio_contact', 'address_actual', 'address_legal', 'inn', 'KPP', 'OGRN', 'last', 'mun', 'licenseDocument', 'commonDocuments', 'anonymous_update_token'];
+        $scenarios[self::SCENARIO_GUEST] = ['name', 'full_name', 'organizational_form', 'type', 'license_date', 'license_number', 'license_issued', 'svidet', 'bank_name', 'bank_sity', 'bank_bik', 'korr_invoice', 'rass_invoice', 'phone', 'email', 'site', 'fio_contact', 'address_actual', 'address_legal', 'inn', 'KPP', 'OGRN', 'last', 'mun', 'licenseDocument', 'commonDocuments', 'anonymous_update_token', 'verifyCode'];
 
         return $scenarios;
     }
@@ -101,7 +104,7 @@ class Organization extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'bank_name', 'bank_bik', 'korr_invoice', 'rass_invoice', 'fio_contact', 'address_actual'], 'required'],
+            [['name', 'bank_name', 'bank_bik', 'korr_invoice', 'rass_invoice', 'fio_contact', 'address_actual', 'email'], 'required'],
             [['license_date', 'license_number', 'license_issued'], 'required', 
              'when' => function($model) {
                 return $model->type != self::TYPE_IP_WITHOUT_WORKERS;
@@ -126,6 +129,7 @@ class Organization extends \yii\db\ActiveRecord
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
             ['licenseDocument', 'file', 'skipOnEmpty' => true, 'extensions' => 'doc, docx, pdf', 'on' => self::SCENARIO_GUEST],
             ['commonDocuments', 'file', 'skipOnEmpty' => true, 'extensions' => 'doc, docx, pdf', 'maxFiles' => (!empty($this->documents) ? 3 - count($this->documents) : 3), 'on' => self::SCENARIO_GUEST],
+            ['verifyCode', 'captcha', 'on' => self::SCENARIO_GUEST],
         ];
 
     }

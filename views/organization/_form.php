@@ -162,22 +162,23 @@ $readonlyField = $readonlyField && !Yii::$app->user->isGuest;
 
     <?php if (Yii::$app->user->isGuest || $model->isModerating): ?>
         <div class="well">
-        <?php if (!empty($model->license)): ?>
-            <?= Html::a('Лицензия (документ)', '/uploads/organization/' . $model->license->filename) ?>
-        <? endif; ?>
-        <?php if (!empty($model->documents)): ?>
-            <h4>Иные документы:</h4>
-            <?php foreach ($model->documents as $i => $document): ?>
-                <?= Html::a('Документ ' . ($i + 1), '/uploads/organization/' . $document->filename) ?><br />
-           <? endforeach; ?>
-        <? endif; ?>
+            <?php if (!empty($model->license)): ?>
+                <?= Html::a('Лицензия (документ)', '/uploads/organization/' . $model->license->filename) ?>
+            <? endif; ?>
+            <?php if (!empty($model->documents)): ?>
+                <h4>Иные документы:</h4>
+                <?php foreach ($model->documents as $i => $document): ?>
+                    <?= Html::a('Документ ' . ($i + 1), '/uploads/organization/' . $document->filename) ?><br/>
+                <? endforeach; ?>
+            <? endif; ?>
         </div>
     <? endif; ?>
     <?php if (Yii::$app->user->isGuest): ?>
-    <?= $form->field($model, 'licenseDocument')->fileInput() ?>
-    <?= $form->field($model, 'commonDocuments[]')->fileInput() ?>
-    <?= $form->field($model, 'commonDocuments[]')->fileInput() ?>
-    <?= $form->field($model, 'commonDocuments[]')->fileInput() ?>
+        <?= $form->field($model, 'licenseDocument')->fileInput() ?>
+        <?= $form->field($model, 'commonDocuments[]')->fileInput() ?>
+        <?= $form->field($model, 'commonDocuments[]')->fileInput() ?>
+        <?= $form->field($model, 'commonDocuments[]')->fileInput() ?>
+        <?= $form->field($model, 'verifyCode')->widget(yii\captcha\Captcha::className()) ?>
     <?php endif; ?>
 
     <div class="form-group">

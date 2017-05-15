@@ -15,11 +15,11 @@ use yii\helpers\Html;
     <table>
         <tr>
             <td>Имя пользователя</td>
-            <td><span style="color: yellow;"><?= $model->user->username ?></span></td>
+            <td><span style="background-color: yellow;"><?= $model->user->username ?></span></td>
         </tr>
         <tr>
             <td>Пароль</td>
-            <td><span style="color: yellow;"><?= $password ?></span></td>
+            <td><span style="background-color: yellow;"><?= $password ?></span></td>
         </tr>
     </table>
 
