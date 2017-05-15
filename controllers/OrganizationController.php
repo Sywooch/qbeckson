@@ -131,10 +131,7 @@ class OrganizationController extends Controller
                     ->from('coefficient')
                     ->one();
 
-                //return var_dump($coefficient['potenc']);
-
                 $model->max_child = floor((($mun->deystv / ($mun->countdet * 0.7)) * $coefficient['potenc']) * $model->last);
-                //$model->mun = implode(",", $model->mun);
 
                 if ($model->save()) {
                     $user->password = $password;
@@ -159,6 +156,12 @@ class OrganizationController extends Controller
             throw new ForbiddenHttpException('Недостаточно прав');
         }
 
+        // TODO: Избавиться от этого говна
+        $coefficient = (new \yii\db\Query())
+            ->select(['potenc'])
+            ->from('coefficient')
+            ->one();
+
         $model = new Organization([
             'status' => Organization::STATUS_NEW,
             'scenario' => Organization::SCENARIO_GUEST,
@@ -176,6 +179,8 @@ class OrganizationController extends Controller
             if ($user->save()) {
                 Yii::$app->authManager->assign(Yii::$app->authManager->getRole('organizations'), $user->id);
                 $model->user_id = $user->id;
+                $model->max_child = floor((($model->municipality->deystv / ($model->municipality->countdet * 0.7)) * $coefficient['potenc']) * $model->last);
+
                 if ($model->save(false)) {
                     $model->licenseDocument = UploadedFile::getInstance($model, 'licenseDocument');
                     $model->commonDocuments = UploadedFile::getInstances($model, 'commonDocuments');

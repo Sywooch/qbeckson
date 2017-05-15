@@ -101,8 +101,7 @@ class Organization extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'email'], 'required'],
-            /*[['name', 'bank_name', 'bank_bik', 'korr_invoice', 'rass_invoice', 'fio_contact', 'address_actual'], 'required'],
+            [['name', 'bank_name', 'bank_bik', 'korr_invoice', 'rass_invoice', 'fio_contact', 'address_actual'], 'required'],
             [['license_date', 'license_number', 'license_issued'], 'required', 
              'when' => function($model) {
                 return $model->type != self::TYPE_IP_WITHOUT_WORKERS;
@@ -116,7 +115,7 @@ class Organization extends \yii\db\ActiveRecord
             },
              'whenClient' => "function (attribute, value) {
                  return $('#organization-type').val() == 3;
-            }"],*/
+            }"],
             [['user_id', 'actual', 'type', 'bank_bik', 'korr_invoice', 'doc_type', 'max_child', 'amount_child', 'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'last', 'last_year_contract', 'certprogram', 'status'], 'integer'],
             [['license_date', 'date_proxy', 'cratedate', 'accepted_date'], 'safe'],
             [['raiting'], 'number'],
@@ -186,7 +185,7 @@ class Organization extends \yii\db\ActiveRecord
             'refuse_reason' => 'Причина отказа',
             'certprogram' => 'Число программ',
             'licenseDocument' => 'Лицензия',
-            'commonDocuments' => 'Иные документы',
+            'commonDocuments' => 'Иной документ',
         ];
     }
 
@@ -195,10 +194,10 @@ class Organization extends \yii\db\ActiveRecord
         $title = '';
         switch ($this->status) {
             case self::STATUS_ACTIVE:
-                $title = 'Активна.';
+                $title = 'Ваша заявка на включение в реестр поставщиков образовательных услуг одобрена, организация внесена в Реестр, и Вы уже даже должны были получить на указанную Вами при формировании заявки электронную почту логин и пароль для входа в личный кабинет. Если логин и пароль Вами не получен – посмотрите в папке «спам» почты, если и там нет письма – обратитесь к оператору.';
                 break;
             case self::STATUS_NEW:
-                $title = 'Заявка в рассмотрении. Подождите, пожалуйста.';
+                $title = 'Ваша заявка на включение в реестр поставщиков образовательных услуг пока проходит рассмотрение оператором персонифицированного финансирования. Вы получите уведомление о результатах рассмотрения заявки на электронную почту, указанную для организации.';
                 break;
             case self::STATUS_REFUSED:
                 $title = 'Отказано. Вы можете исправить информацию и отправить заявку повторно.';
@@ -258,6 +257,14 @@ class Organization extends \yii\db\ActiveRecord
     public function getUser()
     {
         return $this->hasOne(User::className(), ['id' => 'user_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMunicipality()
+    {
+        return $this->hasOne(Mun::className(), ['id' => 'mun']);
     }
 
     /**
@@ -407,7 +414,7 @@ class Organization extends \yii\db\ActiveRecord
             )
             ->setTo($this->email)
             ->setFrom([Yii::$app->params['adminEmail'] => 'PFDO'])
-            ->setSubject('Успешная заявк поставщика');
+            ->setSubject('Заявка на включение в реестр поставщиков зарегистрирована');
 
         if ($mail->send()) {
             return true;
@@ -428,7 +435,7 @@ class Organization extends \yii\db\ActiveRecord
             )
             ->setTo($this->email)
             ->setFrom([Yii::$app->params['adminEmail'] => 'PFDO'])
-            ->setSubject($this->isRefused ? 'Ваша заявка отклонена' : 'Ваша заявка одобрена');
+            ->setSubject($this->isRefused ? 'Заявка на включение в реестр поставщиков отклонена' : 'Заявка на включение в реестр поставщиков одобрена');
 
         if ($mail->send()) {
             return true;

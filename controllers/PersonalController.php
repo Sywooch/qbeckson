@@ -89,7 +89,6 @@ class PersonalController extends \yii\web\Controller
     {
         $searchRegistry = new OrganizationSearch(['statusArray' => [
             Organization::STATUS_ACTIVE,
-            Organization::STATUS_REFUSED,
             Organization::STATUS_BANNED,
         ]]);
         $registryProvider = $searchRegistry->search(Yii::$app->request->queryParams);

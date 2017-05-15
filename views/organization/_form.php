@@ -48,7 +48,8 @@ $readonlyField = $readonlyField && !Yii::$app->user->isGuest;
     <?= $form->field($model, 'full_name')->textInput($readonlyField ? ['readOnly' => true] : ['maxlength' => true]) ?>
 
     <?php if (!$readonlyField) {
-        echo $form->field($model, 'organizational_form')->textInput();
+        echo $form->field($model, 'organizational_form')->dropDownList(ArrayHelper::map(app\models\DirectoryOrganizationForm::getList(), 'id', 'name'), ['prompt' => 'Выберите..', 'options' => [5 => ['disabled' => true]]]);
+
         echo $form->field($model, 'type')->dropDownList([1 => 'Образовательная организация', 2 => 'Организация, осуществляющая обучение', 3 => 'Индивидуальный предприниматель, оказывающий услуги с наймом работников', 4 => 'Индивидуальный предприниматель, оказывающий услуги без найма работников'], ['onChange' => 'selectTypes(this.value);']);
 
 
@@ -174,7 +175,9 @@ $readonlyField = $readonlyField && !Yii::$app->user->isGuest;
     <? endif; ?>
     <?php if (Yii::$app->user->isGuest): ?>
     <?= $form->field($model, 'licenseDocument')->fileInput() ?>
-    <?= $form->field($model, 'commonDocuments[]')->fileInput(['multiple' => true]) ?>
+    <?= $form->field($model, 'commonDocuments[]')->fileInput() ?>
+    <?= $form->field($model, 'commonDocuments[]')->fileInput() ?>
+    <?= $form->field($model, 'commonDocuments[]')->fileInput() ?>
     <?php endif; ?>
 
     <div class="form-group">
