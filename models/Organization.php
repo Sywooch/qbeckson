@@ -190,6 +190,7 @@ class Organization extends \yii\db\ActiveRecord
             'certprogram' => 'Число программ',
             'licenseDocument' => 'Лицензия',
             'commonDocuments' => 'Иной документ',
+            'verifyCode' => 'Проверочный код',
         ];
     }
 
