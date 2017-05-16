@@ -104,7 +104,7 @@ class Organization extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'bank_name', 'bank_bik', 'korr_invoice', 'rass_invoice', 'fio_contact', 'address_actual', 'email'], 'required'],
+            [['name', 'bank_name', 'bank_bik', 'korr_invoice', 'rass_invoice', 'fio_contact', 'address_actual', 'email', 'full_name', 'organizational_form', 'type', 'bank_sity', 'phone', 'address_legal', 'inn', 'KPP', 'OGRN', 'last', 'mun'], 'required'],
             [['license_date', 'license_number', 'license_issued'], 'required', 
              'when' => function($model) {
                 return $model->type != self::TYPE_IP_WITHOUT_WORKERS;

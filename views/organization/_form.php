@@ -43,7 +43,7 @@ $readonlyField = $readonlyField && !Yii::$app->user->isGuest;
         echo '</div>';
     } ?>
 
-    <?= $form->field($model, 'name')->textInput($readonlyField ? ['readOnly' => true] : ['maxlength' => true])->label('Сокращенное наименование организации') ?>
+    <?= $form->field($model, 'name')->textInput($readonlyField ? ['readOnly' => true] : ['maxlength' => true])->label('Сокращенное наименование поставщика') ?>
 
     <?= $form->field($model, 'full_name')->textInput($readonlyField ? ['readOnly' => true] : ['maxlength' => true]) ?>
 
@@ -153,7 +153,7 @@ $readonlyField = $readonlyField && !Yii::$app->user->isGuest;
 
 
     <?php if (!$readonlyField) {
-        if (!$model->isNewRecord) {
+        if (!$model->isNewRecord && !Yii::$app->user->isGuest) {
             echo $form->field($model, 'last_year_contract')->textInput();
             echo $form->field($model, 'cratedate')->textInput();
         }
