@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use Yii;
+use yii\web\Response;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use app\models\CertGroup;
@@ -21,6 +22,28 @@ class CertGroupController extends Controller
     {
         $searchModel = new CertGroupSearch(['payerId' => Yii::$app->user->identity->payer->id]);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        if (Yii::$app->request->isAjax && Yii::$app->request->post('hasEditable')) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $model = $this->findModel(Yii::$app->request->post('editableKey'));
+            $post = Yii::$app->request->post();
+
+            $out = ['output' => '', 'message' => ''];
+            $data = ['CertGroup' => current($post['CertGroup'])];
+
+            $output = '';
+            if ($model->load($data) && $model->validate()) {
+                if (isset($data['CertGroup']['nominal']) && (empty($post['password']) || !Yii::$app->security->validatePassword($post['password'], Yii::$app->user->identity->password))) {
+                    return ['output' => '', 'message' => 'Неверный пароль.'];
+                }
+
+                $model->save(false);
+            } else {
+                $out = ['output' => $output, 'message' => 'Ошибка при сохранении.'];
+            }
+
+            return $out;
+        }
 
         return $this->render('index', [
             'searchModel' => $searchModel,

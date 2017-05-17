@@ -13,6 +13,9 @@ use app\models\Certificates;
 class CertificatesSearch extends Certificates
 {
     public $payers;
+
+    public $enableContractsCount = false;
+
     /**
      * @inheritdoc
      */
@@ -48,13 +51,15 @@ class CertificatesSearch extends Certificates
             $query->joinWith(['payers']);
         }
 
-        $subQuery = \app\models\Contracts::find()
-            ->select('certificate_id, COUNT(*) as contractCount')
-            ->where(['status' => 1])
-            ->groupBy('certificate_id');
+        if ($this->enableContractsCount === true) {
+            $subQuery = \app\models\Contracts::find()
+                ->select('certificate_id, COUNT(*) as contractCount')
+                ->where(['status' => 1])
+                ->groupBy('certificate_id');
 
-        $query->select(['certificates.*', 'tableContractsCount.contractCount'])
-            ->leftJoin(['tableContractsCount' => $subQuery], 'tableContractsCount.certificate_id = id');
+            $query->select(['certificates.*', 'tableContractsCount.contractCount'])
+                ->leftJoin(['tableContractsCount' => $subQuery], 'tableContractsCount.certificate_id = id');
+        }
 
         // add conditions that should always apply here
 
@@ -64,16 +69,19 @@ class CertificatesSearch extends Certificates
                 'pagesize' => 50,
             ],
         ]);
-        
-        $dataProvider->sort->attributes['payers'] = [
-            'asc' => ['payers.name' => SORT_ASC],
-            'desc' => ['payers.name' => SORT_DESC],
-        ];
 
-        $dataProvider->sort->attributes['contractCount'] = [
-            'asc' => ['tableContractsCount.contractCount' => SORT_ASC],
-            'desc' => ['tableContractsCount.contractCount' => SORT_DESC],
-        ];
+        if (isset($this->payer)) {
+            $dataProvider->sort->attributes['payers'] = [
+                'asc' => ['payers.name' => SORT_ASC],
+                'desc' => ['payers.name' => SORT_DESC],
+            ];
+        }
+        if ($this->enableContractsCount === true) {
+            $dataProvider->sort->attributes['contractCount'] = [
+                'asc' => ['tableContractsCount.contractCount' => SORT_ASC],
+                'desc' => ['tableContractsCount.contractCount' => SORT_DESC],
+            ];
+        }
 
         $this->load($params);
 

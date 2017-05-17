@@ -233,7 +233,7 @@ class PersonalController extends \yii\web\Controller
     {
         $payer = Yii::$app->user->identity->payer;
 
-        $searchCertificates = new CertificatesSearch();
+        $searchCertificates = new CertificatesSearch(['enableContractsCount' => true]);
         $certificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
 
         return $this->render('payer-certificates', [
