@@ -231,23 +231,21 @@ class PersonalController extends \yii\web\Controller
 
     public function actionPayerCertificates()
     {
-        $payers = new Payers();
-        $payer = $payers->getPayer();
+        $payer = Yii::$app->user->identity->payer;
 
-        $searchCertificates = new CertificatesPayersSearch();
-        $CertificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
+        $searchCertificates = new CertificatesSearch();
+        $certificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
 
         return $this->render('payer-certificates', [
-            'payer_id' => $payer['id'],
-            'CertificatesProvider' => $CertificatesProvider,
+            'payer_id' => $payer->id,
+            'certificatesProvider' => $certificatesProvider,
             'searchCertificates' => $searchCertificates,
         ]);
     }
 
     public function actionPayerContracts()
     {
-        $payers = new Payers();
-        $payer = $payers->getPayer();
+        $payer = Yii::$app->user->identity->payer;
 
         $searchContracts1 = new Payer1ContractsSearch();
         if (isset($_GET['cert'])) {
@@ -288,8 +286,7 @@ class PersonalController extends \yii\web\Controller
 
     public function actionPayerInvoices()
     {
-        $payers = new Payers();
-        $payer = $payers->getPayer();
+        $payer = Yii::$app->user->identity->payer;
 
         $cooperate = (new \yii\db\Query())
             ->select(['organization_id'])
@@ -313,8 +310,7 @@ class PersonalController extends \yii\web\Controller
 
     public function actionPayerOrganizations()
     {
-        $payers = new Payers();
-        $payer = $payers->getPayer();
+        $payer = Yii::$app->user->identity->payer;
 
         $InformsProvider = new ActiveDataProvider([
             'query' => Informs::find()->where(['read' => 0])->andwhere(['from' => 2]),
@@ -342,8 +338,8 @@ class PersonalController extends \yii\web\Controller
 
     public function actionPayerPrograms()
     {
-        $payers = new Payers();
-        $payer = $payers->getPayer();
+        $payer = Yii::$app->user->identity->payer;
+
         $cooperate = (new \yii\db\Query())
             ->select(['organization_id'])
             ->from('cooperate')

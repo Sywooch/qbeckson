@@ -19,7 +19,7 @@ class CertificatesSearch extends Certificates
     public function rules()
     {
         return [
-            [['id', 'user_id', 'payer_id', 'actual', 'nominal', 'balance', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6'], 'integer'],
+            [['id', 'user_id', 'payer_id', 'actual', 'nominal', 'balance', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'contractCount'], 'integer'],
             [['number', 'fio_child', 'fio_parent', 'payers'], 'safe'],
         ];
     }
@@ -43,9 +43,19 @@ class CertificatesSearch extends Certificates
     public function search($params)
     {
         $query = Certificates::find();
-        
-        $query->joinWith(['payers']);
-        
+
+        if (isset($this->payer)) {
+            $query->joinWith(['payers']);
+        }
+
+        $subQuery = \app\models\Contracts::find()
+            ->select('certificate_id, COUNT(*) as contractCount')
+            ->where(['status' => 1])
+            ->groupBy('certificate_id');
+
+        $query->select(['certificates.*', 'tableContractsCount.contractCount'])
+            ->leftJoin(['tableContractsCount' => $subQuery], 'tableContractsCount.certificate_id = id');
+
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
@@ -56,16 +66,18 @@ class CertificatesSearch extends Certificates
         ]);
         
         $dataProvider->sort->attributes['payers'] = [
-        // The tables are the ones our relation are configured to
-        // in my case they are prefixed with "tbl_"
             'asc' => ['payers.name' => SORT_ASC],
             'desc' => ['payers.name' => SORT_DESC],
+        ];
+
+        $dataProvider->sort->attributes['contractCount'] = [
+            'asc' => ['tableContractsCount.contractCount' => SORT_ASC],
+            'desc' => ['tableContractsCount.contractCount' => SORT_DESC],
         ];
 
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
             $query->where('0=1');
             return $dataProvider;
         }
@@ -90,7 +102,8 @@ class CertificatesSearch extends Certificates
         $query->andFilterWhere(['like', 'number', $this->number])
             ->andFilterWhere(['like', 'fio_child', $this->fio_child])
             ->andFilterWhere(['like', 'fio_parent', $this->fio_parent])
-            ->andFilterWhere(['like', 'payers.name', $this->payers]);
+            ->andFilterWhere(['like', 'payers.name', $this->payers])
+            ->andFilterWhere(['tableContractsCount.contractCount' => $this->contractCount]);
 
         return $dataProvider;
     }
