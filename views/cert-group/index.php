@@ -31,6 +31,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'nominal',
                 'pageSummary' => true,
                 'editableOptions' => [
+                    'submitButton' => [
+                        'icon' => '<i class="glyphicon glyphicon-ok"></i>',
+                        'class' => 'btn btn-sm btn-success',
+                    ],
                     'afterInput' => function ($form, $widget) {
                         echo '<br />' . Html::passwordInput('password', '', ['class' => 'form-control', 'placeholder' => 'Введите пароль']);
                     }

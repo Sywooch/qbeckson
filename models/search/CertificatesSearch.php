@@ -22,8 +22,8 @@ class CertificatesSearch extends Certificates
     public function rules()
     {
         return [
-            [['id', 'user_id', 'payer_id', 'actual', 'nominal', 'balance', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'contractCount'], 'integer'],
-            [['number', 'fio_child', 'fio_parent', 'payers'], 'safe'],
+            [['id', 'user_id', 'payer_id', 'actual', 'nominal', 'balance', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'contractCount'], 'integer', 'message' => 'Неверное значение.'],
+            [['number', 'fio_child', 'fio_parent', 'payers', 'rezerv'], 'safe'],
         ];
     }
 
