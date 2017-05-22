@@ -24,7 +24,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => 'kartik\grid\EditableColumn',
                 'attribute' => 'group',
                 'pageSummary' => true,
-                'editableOptions' => ['asPopover' => false],
+                'editableOptions' => [
+                    'asPopover' => false,
+                    'submitButton' => [
+                        'icon' => '<i class="glyphicon glyphicon-ok"></i>',
+                        'class' => 'btn btn-sm btn-success',
+                    ],
+                ],
             ],
             [
                 'class' => 'kartik\grid\EditableColumn',
