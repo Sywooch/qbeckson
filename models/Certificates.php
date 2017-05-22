@@ -41,6 +41,8 @@ class Certificates extends \yii\db\ActiveRecord
     public $pasport_v;
 
     public $phone;
+
+    public $contractCount;
     
     /**
      * @inheritdoc
@@ -66,6 +68,7 @@ class Certificates extends \yii\db\ActiveRecord
             [['name', 'soname', 'phname'], 'string', 'max' => 50],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
             [['payer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payers::className(), 'targetAttribute' => ['payer_id' => 'id']],
+            [['contractCount', 'safe']],
         ];
     }
 

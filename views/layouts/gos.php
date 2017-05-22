@@ -111,7 +111,7 @@ AppAsset::register($this);
 
                             if (Yii::$app->user->can('payer')) {
                                 echo Nav::widget([
-                                    'options' => ['class' => 'navbar-nav'],
+                                    'options' => ['class' => 'navbar-nav inner-nav'],
                                     'items' => [
                                         ['label' => 'Информация', 'url' => ['/personal/payer-statistic']],
                                         ['label' => 'Номиналы групп', 'url' => ['/cert-group/index']],

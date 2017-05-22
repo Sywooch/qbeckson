@@ -43,7 +43,8 @@ class CertGroupSearch extends CertGroup
      */
     public function search($params)
     {
-        $query = CertGroup::find();
+        $query = CertGroup::find()
+            ->indexBy('id');
 
         $query->andFilterWhere(['payer_id' => $this->payerId]);
 

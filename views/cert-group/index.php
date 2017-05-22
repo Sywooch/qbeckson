@@ -1,7 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-use yii\grid\GridView;
+use kartik\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\CertGroupSearch */
@@ -20,12 +20,31 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'summary' => false,
         'columns' => [
-            'group',
-            'nominal',
-
             [
-                'class' => 'yii\grid\ActionColumn',
-                'template' => '{update}'
+                'class' => 'kartik\grid\EditableColumn',
+                'attribute' => 'group',
+                'pageSummary' => true,
+                'editableOptions' => [
+                    'asPopover' => false,
+                    'submitButton' => [
+                        'icon' => '<i class="glyphicon glyphicon-ok"></i>',
+                        'class' => 'btn btn-sm btn-success',
+                    ],
+                ],
+            ],
+            [
+                'class' => 'kartik\grid\EditableColumn',
+                'attribute' => 'nominal',
+                'pageSummary' => true,
+                'editableOptions' => [
+                    'submitButton' => [
+                        'icon' => '<i class="glyphicon glyphicon-ok"></i>',
+                        'class' => 'btn btn-sm btn-success',
+                    ],
+                    'afterInput' => function ($form, $widget) {
+                        echo '<br />' . Html::passwordInput('password', '', ['class' => 'form-control', 'placeholder' => 'Введите пароль']);
+                    }
+                ],
             ],
         ],
     ]); ?>
