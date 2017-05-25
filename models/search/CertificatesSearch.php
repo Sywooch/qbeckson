@@ -12,7 +12,9 @@ use app\models\Certificates;
  */
 class CertificatesSearch extends Certificates
 {
-    public $payers;
+    public $onlyPayerIds = null;
+
+    public $payers = null;
 
     public $enableContractsCount = false;
 
@@ -47,7 +49,7 @@ class CertificatesSearch extends Certificates
     {
         $query = Certificates::find();
 
-        if (isset($this->payer)) {
+        if (!empty($this->payers)) {
             $query->joinWith(['payers']);
         }
 
@@ -70,7 +72,7 @@ class CertificatesSearch extends Certificates
             ],
         ]);
 
-        if (isset($this->payer)) {
+        if (!empty($this->payers)) {
             $dataProvider->sort->attributes['payers'] = [
                 'asc' => ['payers.name' => SORT_ASC],
                 'desc' => ['payers.name' => SORT_DESC],
@@ -94,7 +96,6 @@ class CertificatesSearch extends Certificates
         $query->andFilterWhere([
             'id' => $this->id,
             'user_id' => $this->user_id,
-            'payer_id' => $this->payer_id,
             'actual' => $this->actual,
             'nominal' => $this->nominal,
             'balance' => $this->balance,
@@ -106,6 +107,12 @@ class CertificatesSearch extends Certificates
             'directivity5' => $this->directivity5,
             'directivity6' => $this->directivity6,
         ]);
+
+        if (!empty($this->onlyPayerIds)) {
+            $query->andFilterWhere(['payer_id' => $this->onlyPayerIds]);
+        } else {
+            $query->andFilterWhere(['payer_id' => $this->payer_id]);
+        }
 
         $query->andFilterWhere(['like', 'number', $this->number])
             ->andFilterWhere(['like', 'fio_child', $this->fio_child])

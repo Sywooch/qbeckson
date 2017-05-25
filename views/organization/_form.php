@@ -10,7 +10,7 @@ use yii\helpers\ArrayHelper;
 /* @var $model app\models\Organization */
 /* @var $form yii\widgets\ActiveForm */
 
-$readonlyField = $readonlyField && !Yii::$app->user->isGuest;
+$readonlyField = !Yii::$app->user->can('operators') && !Yii::$app->user->isGuest;
 ?>
 
 <div class="organization-form" ng-app>

@@ -40,7 +40,6 @@ use app\models\ContractsPayerclearSearch;
 use app\models\Certificates;
 use app\models\search\CertificatesSearch;
 use app\models\CertificatesExportSearch;
-use app\models\CertificatesPayersSearch;
 use app\models\Operators;
 use app\models\GroupsSearch;
 use app\models\FavoritesSearch;
@@ -233,7 +232,10 @@ class PersonalController extends \yii\web\Controller
     {
         $payer = Yii::$app->user->identity->payer;
 
-        $searchCertificates = new CertificatesSearch(['enableContractsCount' => true]);
+        $searchCertificates = new CertificatesSearch([
+            'enableContractsCount' => true,
+            'onlyPayerIds' => $payer->id,
+        ]);
         $certificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
 
         return $this->render('payer-certificates', [
@@ -372,7 +374,9 @@ class PersonalController extends \yii\web\Controller
         $organization = Yii::$app->user->identity->organization;
 
         if ($organization->load(Yii::$app->request->post()) && $organization->save()) {
-            return $this->redirect(['/personal/organization-info']);
+            Yii::$app->session->setFlash('success', 'Информация успешно сохранена.');
+
+            return $this->refresh();
         }
 
         return $this->render('organization-info', [
