@@ -182,9 +182,9 @@ class OrganizationController extends Controller
                 $model->max_child = floor((($model->municipality->deystv / ($model->municipality->countdet * 0.7)) * $coefficient['potenc']) * $model->last);
 
                 if ($model->save(false)) {
-                    $model->licenseDocument = UploadedFile::getInstance($model, 'licenseDocument');
-                    $model->commonDocuments = UploadedFile::getInstances($model, 'commonDocuments');
-                    $model->uploadDocuments();
+                    // $model->licenseDocument = UploadedFile::getInstance($model, 'licenseDocument');
+                    // $model->commonDocuments = UploadedFile::getInstances($model, 'commonDocuments');
+                    // $model->uploadDocuments();
                     $model->sendRequestEmail();
                     Yii::$app->session->setFlash('success', 'Вы успешно отправили заявку на регистрацию поставщика образовательных услуг!');
 

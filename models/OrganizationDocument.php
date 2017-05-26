@@ -12,13 +12,16 @@ use yii\behaviors\TimestampBehavior;
  * @property integer $organization_id
  * @property integer $type
  * @property string $filename
+ * @property string $path
+ * @property string $base_url
  * @property integer $created_at
  */
 class OrganizationDocument extends \yii\db\ActiveRecord
 {
     const TYPE_COMMON = 10;
-
     const TYPE_LICENSE = 20;
+    const TYPE_CHARTER = 30;
+    const TYPE_STATEMENT = 40;
 
     /**
      * @inheritdoc
@@ -48,6 +51,7 @@ class OrganizationDocument extends \yii\db\ActiveRecord
             [['organization_id', 'type', 'filename'], 'required'],
             [['organization_id', 'type', 'created_at'], 'integer'],
             [['filename'], 'string', 'max' => 255],
+            [['path', 'base_url'], 'string', 'max' => 50],
         ];
     }
 
@@ -63,5 +67,17 @@ class OrganizationDocument extends \yii\db\ActiveRecord
             'filename' => 'Файл',
             'created_at' => 'Загружен',
         ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrl()
+    {
+        if (null === $this->path && null === $this->base_url && !empty($this->filename)) {
+            return '/web/uploads/' . $this->filename;
+        }
+
+        return $this->base_url . '/' . $this->path;
     }
 }

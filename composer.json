@@ -41,7 +41,8 @@
         "phpoffice/phpword": "^0.13.0",
         "phpoffice/phpexcel": "^1.8",
         "arius/number-formatter": "1.*",
-        "2amigos/yii2-ckeditor-widget" : "2.0"
+        "2amigos/yii2-ckeditor-widget" : "2.0",
+        "trntv/yii2-file-kit": "^1.2"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

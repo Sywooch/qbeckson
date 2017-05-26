@@ -1,6 +1,8 @@
 <?php
+use app\components\LocalFlysystemBuilder;
 use developeruz\db_rbac\behaviors\AccessBehavior;
 use \kartik\datecontrol\Module;
+use trntv\filekit\Storage;
 
 $params = array_merge(
     require(__DIR__ . '/params.php'),
@@ -68,7 +70,15 @@ $config = [
             'datetimeFormat' => 'php:d.m.Y H:i:s',
             'timeFormat' => 'php:H:i:s',
             'nullDisplay' => '-',
-        ]
+        ],
+        'fileStorage' => [
+            'class' => Storage::class,
+            'baseUrl' => '@web/uploads',
+            'filesystem' => [
+                'class' => LocalFlysystemBuilder::class,
+                'path' => '@webroot/uploads'
+            ],
+        ],
     ],
     'modules' => [
         'permit' => [
@@ -118,7 +128,13 @@ $config = [
     'as AccessBehavior' => [
         'class' => AccessBehavior::className(),
         'rules' =>
-            ['site' =>
+            [
+                'file-storage' => [
+                    [
+                        'allow' => true,
+                    ],
+                ],
+                'site' =>
                 [
                     [
                         'allow' => true,
