@@ -59,15 +59,18 @@ use app\models\Payers;
 
     <?php
     if (isset($roles['payer'])) {
-        
-        $payers = new Payers();
-        $payer = $payers->getPayer();
-        
-        print $form->field($model, 'cert_group')->dropDownList(ArrayHelper::map(app\models\CertGroup::find()->where(['payer_id' => $payer['id']])->andWhere(['>', 'nominal', '0'])->all(), 'nominal', 'group'), ['onChange' => 'selectGroup(this.value);', 'prompt' => 'Выберите группу...']);
+        $payer = Yii::$app->user->identity->payer;
+        $groupList = CertGroup::getActiveList($payer->id);
+        $dataOptions = ArrayHelper::map($groupList, 'id', 'nominal');
+        foreach ($dataOptions as $index => $value) {
+            $dataOptions[$index] = ['data-nominal' => $value];
+        }
+
+        echo $form->field($model, 'cert_group')->dropDownList(ArrayHelper::map($groupList, 'id', 'group'), ['options' => $dataOptions, 'onChange' => 'selectGroup(this);', 'prompt' => 'Выберите группу...']);
     }
     ?>
 
-    <?= $form->field($model, 'nominal')->textInput(!isset($roles['payer']) ? ['readOnly'=>true] : ['maxlength' => true, 'id' => 'nom']) ?>
+    <?= $form->field($model, 'nominal')->textInput(!isset($roles['payer']) ? ['readOnly'=>true] : ['maxlength' => true, 'id' => 'nominalField']) ?>
     
      <?php if (!$model->isNewRecord) { 
           echo  $form->field($model, 'balance')->textInput(!isset($roles['payer']) ? ['readOnly'=>true] : ['maxlength' => true, 'id' => 'nom']);

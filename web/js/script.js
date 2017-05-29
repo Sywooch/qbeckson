@@ -46,9 +46,11 @@ $(document).ready(function () {
     });
 });
 
-function selectGroup(value) {
-        if (value) { $("#nom").val(value); }
+function selectGroup(obj) {
+    value = $(obj).find("option:selected").attr("data-nominal");
+    $("#nominalField").val(value);
 }
+
 
 function selectType(value) {
         if (value == 2) { 

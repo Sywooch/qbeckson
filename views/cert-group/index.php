@@ -31,6 +31,13 @@ $this->params['breadcrumbs'][] = $this->title;
                         'class' => 'btn btn-sm btn-success',
                     ],
                 ],
+                'readonly' => function ($model, $key, $index, $widget) {
+                    if ($model->is_special) {
+                        return true;
+                    }
+
+                    return false;
+                },
             ],
             [
                 'class' => 'kartik\grid\EditableColumn',
@@ -45,6 +52,13 @@ $this->params['breadcrumbs'][] = $this->title;
                         echo '<br />' . Html::passwordInput('password', '', ['class' => 'form-control', 'placeholder' => 'Введите пароль']);
                     }
                 ],
+                'readonly' => function ($model, $key, $index, $widget) {
+                    if ($model->is_special) {
+                        return true;
+                    }
+
+                    return false;
+                },
             ],
         ],
     ]); ?>

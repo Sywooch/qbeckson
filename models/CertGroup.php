@@ -32,11 +32,21 @@ class CertGroup extends \yii\db\ActiveRecord
     {
         return [
             [['payer_id', 'group', 'nominal'], 'required'],
-            [['payer_id'], 'integer'],
+            [['payer_id', 'is_special'], 'integer'],
             [['nominal'], 'integer', 'max' => 100000],
             [['group'], 'string', 'max' => 255],
             [['payer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payers::className(), 'targetAttribute' => ['payer_id' => 'id']],
         ];
+    }
+
+    public static function getActiveList($payerId)
+    {
+        $query = static::find()
+            ->where(['payer_id' => $payerId])
+            ->andWhere(['or', ['>', 'nominal', 0], ['=', 'is_special', 1]]);
+        //print_r($query->asArray()->all());exit;
+
+        return $query->all();
     }
 
     /**

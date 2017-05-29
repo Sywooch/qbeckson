@@ -100,14 +100,6 @@ class CertificatesController extends Controller
                $model->rezerv = 0;
                $model->fio_child = $model->soname.' '.$model->name.' '.$model->phname;
 
-               $rows = (new \yii\db\Query())
-                    ->select(['id'])
-                    ->from('cert_group')
-                    ->where(['nominal' => $model->cert_group])
-                    ->one();
-
-               $model->cert_group = $rows['id'];
-
                if ($model->save()) {
                     $user->password = $password;
                     return $this->render('/user/view', [
@@ -151,14 +143,6 @@ class CertificatesController extends Controller
 
         if($user->load(Yii::$app->request->post())) {
             if($model->load(Yii::$app->request->post())) {
-
-                $rows = (new \yii\db\Query())
-                    ->select(['id'])
-                    ->from('cert_group')
-                    ->where(['nominal' => $model->cert_group])
-                    ->one();
-
-               $model->cert_group = $rows['id'];
                 $model->fio_child = $model->soname.' '.$model->name.' '.$model->phname;
                 
                 $model->validate();
