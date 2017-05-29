@@ -74,8 +74,9 @@ class OrganizationDocument extends \yii\db\ActiveRecord
      */
     public function getUrl()
     {
+        // Чтобы не ломались прошлые файлы.
         if (null === $this->path && null === $this->base_url && !empty($this->filename)) {
-            return '/web/uploads/' . $this->filename;
+            return '/uploads/organization/' . $this->filename;
         }
 
         return $this->base_url . '/' . $this->path;

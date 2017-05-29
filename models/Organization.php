@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use app\behaviors\UploadBehavior;
 
 /**
  * This is the model class for table "organization".
@@ -75,8 +76,14 @@ class Organization extends \yii\db\ActiveRecord
     // Лицензия (документ)
     public $licenseDocument;
 
+    // Устав
+    public $charterDocument;
+
+    // Выписка
+    public $statementDocument;
+
     // Иные документы
-    public $commonDocuments;
+    public $commonDocuments = [];
 
     // Капча
     public $verifyCode;
@@ -93,7 +100,7 @@ class Organization extends \yii\db\ActiveRecord
     {
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_MODERATOR] = $scenarios[self::SCENARIO_DEFAULT];
-        $scenarios[self::SCENARIO_GUEST] = ['name', 'full_name', 'organizational_form', 'type', 'license_date', 'license_number', 'license_issued', 'svidet', 'bank_name', 'bank_sity', 'bank_bik', 'korr_invoice', 'rass_invoice', 'phone', 'email', 'site', 'fio_contact', 'address_actual', 'address_legal', 'inn', 'KPP', 'OGRN', 'last', 'mun', 'licenseDocument', 'commonDocuments', 'anonymous_update_token', 'verifyCode'];
+        $scenarios[self::SCENARIO_GUEST] = ['charterDocument', 'statementDocument', 'name', 'full_name', 'organizational_form', 'type', 'license_date', 'license_number', 'license_issued', 'svidet', 'bank_name', 'bank_sity', 'bank_bik', 'korr_invoice', 'rass_invoice', 'phone', 'email', 'site', 'fio_contact', 'address_actual', 'address_legal', 'inn', 'KPP', 'OGRN', 'last', 'mun', 'licenseDocument', 'commonDocuments', 'anonymous_update_token', 'verifyCode'];
 
         return $scenarios;
     }
@@ -127,11 +134,104 @@ class Organization extends \yii\db\ActiveRecord
             [['name', 'license_number', 'license_issued', 'license_issued_dat', 'bank_name', 'bank_sity', 'fio_contact', 'fio', 'position', 'position_min', 'address_legal', 'address_actual', 'geocode', 'full_name'], 'string', 'max' => 255],
             [['rass_invoice', 'ground', 'number_proxy'], 'string', 'max' => 45],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
-            ['licenseDocument', 'file', 'skipOnEmpty' => true, 'extensions' => 'doc, docx, pdf', 'on' => self::SCENARIO_GUEST],
-            ['commonDocuments', 'file', 'skipOnEmpty' => true, 'extensions' => 'doc, docx, pdf', 'maxFiles' => (!empty($this->documents) ? 3 - count($this->documents) : 3), 'on' => self::SCENARIO_GUEST],
+            [
+                ['licenseDocument', 'charterDocument', 'statementDocument', 'commonDocuments'],
+                'safe', 'on' => self::SCENARIO_GUEST
+            ],
             ['verifyCode', 'captcha', 'on' => self::SCENARIO_GUEST],
         ];
+    }
 
+    /**
+     * @return array
+     */
+    public function behaviors()
+    {
+        $defaultAttributes = [
+            'class' => UploadBehavior::class,
+            'multiple' => true,
+            'pathAttribute' => 'path',
+            'baseUrlAttribute' => 'base_url',
+            'nameAttribute' => 'filename',
+            'documentType' => 'type',
+        ];
+        return [
+            array_merge($defaultAttributes, [
+                'attribute' => 'licenseDocument',
+                'uploadRelation' => 'license',
+            ]),
+            array_merge($defaultAttributes, [
+                'attribute' => 'charterDocument',
+                'uploadRelation' => 'charter',
+            ]),
+            array_merge($defaultAttributes, [
+                'attribute' => 'statementDocument',
+                'uploadRelation' => 'statement',
+            ]),
+            array_merge($defaultAttributes, [
+                'attribute' => 'commonDocuments',
+                'uploadRelation' => 'documents',
+            ]),
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function beforeValidate()
+    {
+        if (!empty($this->commonDocuments) && is_array($this->commonDocuments)) {
+            foreach ($this->commonDocuments as $key => $document) {
+                $this->commonDocuments[$key]['document_type'] = OrganizationDocument::TYPE_COMMON;
+            }
+        }
+        if (!empty($this->licenseDocument) && is_array($this->licenseDocument)) {
+            $this->licenseDocument[0]['document_type'] = OrganizationDocument::TYPE_LICENSE;
+        }
+        if (!empty($this->charterDocument) && is_array($this->charterDocument)) {
+            $this->charterDocument[0]['document_type'] = OrganizationDocument::TYPE_CHARTER;
+        }
+        if (!empty($this->statementDocument) && is_array($this->statementDocument)) {
+            $this->statementDocument[0]['document_type'] = OrganizationDocument::TYPE_STATEMENT;
+        }
+
+        return parent::beforeValidate();
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLicense()
+    {
+        return $this->hasMany(OrganizationDocument::className(), ['organization_id' => 'id'])
+            ->andWhere(['type' => OrganizationDocument::TYPE_LICENSE]);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCharter()
+    {
+        return $this->hasMany(OrganizationDocument::className(), ['organization_id' => 'id'])
+            ->andWhere(['type' => OrganizationDocument::TYPE_CHARTER]);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getStatement()
+    {
+        return $this->hasMany(OrganizationDocument::className(), ['organization_id' => 'id'])
+            ->andWhere(['type' => OrganizationDocument::TYPE_STATEMENT]);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDocuments()
+    {
+        return $this->hasMany(OrganizationDocument::className(), ['organization_id' => 'id'])
+            ->andWhere(['type' => OrganizationDocument::TYPE_COMMON]);
     }
 
     /**
@@ -189,7 +289,9 @@ class Organization extends \yii\db\ActiveRecord
             'refuse_reason' => 'Причина отказа',
             'certprogram' => 'Число программ',
             'licenseDocument' => 'Лицензия',
-            'commonDocuments' => 'Иной документ',
+            'charterDocument' => 'Устав',
+            'statementDocument' => 'Выписка из ЕГРЮЛ/ЕГРИП',
+            'commonDocuments' => 'Иные документы (не более трёх)',
             'verifyCode' => 'Проверочный код',
         ];
     }
@@ -270,24 +372,6 @@ class Organization extends \yii\db\ActiveRecord
     public function getMunicipality()
     {
         return $this->hasOne(Mun::className(), ['id' => 'mun']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getLicense()
-    {
-        return $this->hasOne(OrganizationDocument::className(), ['organization_id' => 'id'])
-            ->andWhere(['type' => OrganizationDocument::TYPE_LICENSE]);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getDocuments()
-    {
-        return $this->hasMany(OrganizationDocument::className(), ['organization_id' => 'id'])
-            ->andWhere(['type' => OrganizationDocument::TYPE_COMMON]);
     }
 
     public function getUserName()
@@ -462,34 +546,5 @@ class Organization extends \yii\db\ActiveRecord
     public function getIsRefused()
     {
         return $this->status == self::STATUS_REFUSED;
-    }
-
-    public function uploadDocuments()
-    {
-        if (!empty($this->licenseDocument)) {
-            $licenseFilename = Yii::$app->security->generateRandomString(12) . '.' . $this->licenseDocument->extension;
-            $this->licenseDocument->saveAs('uploads/organization/' . $licenseFilename);
-            $model = new OrganizationDocument([
-                'organization_id' => $this->id,
-                'type' => OrganizationDocument::TYPE_LICENSE,
-                'filename' => $licenseFilename,
-            ]);
-            $model->save();
-        }
-
-        if (!empty($this->commonDocuments)) {
-            foreach ($this->commonDocuments as $commonDocument) {
-                $commonFilename = Yii::$app->security->generateRandomString(12) . '.' . $commonDocument->extension;
-                $commonDocument->saveAs('uploads/organization/' . $commonFilename);
-                $model = new OrganizationDocument([
-                    'organization_id' => $this->id,
-                    'type' => OrganizationDocument::TYPE_COMMON,
-                    'filename' => $commonFilename,
-                ]);
-                $model->save();
-            }
-        }
-
-        return true;
     }
 }

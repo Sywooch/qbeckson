@@ -4,7 +4,6 @@ namespace app\controllers;
 
 use Yii;
 use app\models\Organization;
-use app\models\OrganizationDocument;
 use app\models\Contracts;
 use app\models\Certificates;
 use app\models\Informs;
@@ -18,7 +17,6 @@ use app\models\Mun;
 use app\models\Programs;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
-use yii\web\UploadedFile;
 use yii\base\DynamicModel;
 
 /**
@@ -182,9 +180,6 @@ class OrganizationController extends Controller
                 $model->max_child = floor((($model->municipality->deystv / ($model->municipality->countdet * 0.7)) * $coefficient['potenc']) * $model->last);
 
                 if ($model->save(false)) {
-                    // $model->licenseDocument = UploadedFile::getInstance($model, 'licenseDocument');
-                    // $model->commonDocuments = UploadedFile::getInstances($model, 'commonDocuments');
-                    // $model->uploadDocuments();
                     $model->sendRequestEmail();
                     Yii::$app->session->setFlash('success', 'Вы успешно отправили заявку на регистрацию поставщика образовательных услуг!');
 
@@ -213,9 +208,6 @@ class OrganizationController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $model->setNew();
             $model->save(false);
-            $model->licenseDocument = UploadedFile::getInstance($model, 'licenseDocument');
-            $model->commonDocuments = UploadedFile::getInstances($model, 'commonDocuments');
-            $model->uploadDocuments();
             Yii::$app->session->setFlash('success', 'Вы успешно отредактировали заявку на регистрацию поставщика образовательных услуг!');
 
             return $this->redirect(['/site/index']);

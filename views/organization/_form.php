@@ -1,10 +1,12 @@
 <?php
 
+use trntv\filekit\widget\Upload;
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 use kartik\datecontrol\DateControl;
 use app\models\Mun;
 use yii\helpers\ArrayHelper;
+use yii\web\JsExpression;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Organization */
@@ -163,21 +165,37 @@ $readonlyField = !Yii::$app->user->can('operators') && !Yii::$app->user->isGuest
     <?php if (Yii::$app->user->isGuest || $model->isModerating): ?>
         <div class="well">
             <?php if (!empty($model->license)): ?>
-                <?= Html::a('Лицензия (документ)', '/uploads/organization/' . $model->license->filename) ?>
+                <?= Html::a('Лицензия (документ)', $model->license[0]->getUrl()) ?>
+                <br>
+            <? endif; ?>
+            <?php if (!empty($model->charter)): ?>
+                <?= Html::a('Устав (документ)', $model->charter[0]->getUrl()) ?>
+                <br>
+            <? endif; ?>
+            <?php if (!empty($model->statement)): ?>
+                <?= Html::a('Выписка из ЕГРЮЛ/ЕГРИП (документ)', $model->statement[0]->getUrl()) ?>
             <? endif; ?>
             <?php if (!empty($model->documents)): ?>
                 <h4>Иные документы:</h4>
                 <?php foreach ($model->documents as $i => $document): ?>
-                    <?= Html::a('Документ ' . ($i + 1), '/uploads/organization/' . $document->filename) ?><br/>
+                    <?= Html::a('Документ ' . ($i + 1), $document->getUrl()) ?><br/>
                 <? endforeach; ?>
             <? endif; ?>
         </div>
-    <? endif; ?>
-    <?php if (Yii::$app->user->isGuest): ?>
-        <?= $form->field($model, 'licenseDocument')->fileInput() ?>
-        <?= $form->field($model, 'commonDocuments[]')->fileInput() ?>
-        <?= $form->field($model, 'commonDocuments[]')->fileInput() ?>
-        <?= $form->field($model, 'commonDocuments[]')->fileInput() ?>
+    <?php endif; ?>
+    <?php if (Yii::$app->user->isGuest) : ?>
+        <?php $fileUploadAttributes = [
+            'url' => ['file-storage/upload'],
+            'maxFileSize' => 10 * 1024 * 1024,
+            'multiple' => true,
+            'acceptFileTypes' => new JsExpression('/(\.|\/)(pdf|doc|docx)$/i'),
+        ] ?>
+        <?= $form->field($model, 'licenseDocument')->widget(Upload::class, $fileUploadAttributes); ?>
+        <?= $form->field($model, 'charterDocument')->widget(Upload::class, $fileUploadAttributes); ?>
+        <?= $form->field($model, 'statementDocument')->widget(Upload::class, $fileUploadAttributes); ?>
+        <?= $form->field($model, 'commonDocuments')->widget(Upload::class, array_merge($fileUploadAttributes, [
+            'maxNumberOfFiles' => 3,
+        ])); ?>
         <?= $form->field($model, 'verifyCode')->widget(yii\captcha\Captcha::className()) ?>
     <?php endif; ?>
 
