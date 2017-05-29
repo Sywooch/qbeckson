@@ -41,10 +41,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'label' => 'Остаток',
         ],
         [
-            'attribute' => 'balance',
-            'label' => 'Остаток',
-        ],
-        [
             'attribute' => 'contractCount',
             'label' => 'Договоров',
         ],
