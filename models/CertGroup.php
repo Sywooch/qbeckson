@@ -44,7 +44,6 @@ class CertGroup extends \yii\db\ActiveRecord
         $query = static::find()
             ->where(['payer_id' => $payerId])
             ->andWhere(['or', ['>', 'nominal', 0], ['=', 'is_special', 1]]);
-        //print_r($query->asArray()->all());exit;
 
         return $query->all();
     }
