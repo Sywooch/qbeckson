@@ -613,6 +613,10 @@ li.breadcrumbs-help-icon:before {
     height: 50px;
 }
 
+.header-nav > li > a {
+    font-size: 14px;
+}
+
 .header-nav > li > a:hover,
 .header-nav > li > a:focus {
     color: white;

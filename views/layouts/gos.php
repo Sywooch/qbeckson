@@ -35,10 +35,10 @@ $user = Yii::$app->user->getIdentity();
         <div class="wrap">
            <div class="container-fluid">
                <div class="top-line row">
-                   <div class="col-md-8 text-center">
+                   <div class="col-md-7 text-center">
                        <a href="<?= Url::home() ?>">Портал персонифицированного финансирования дополнительного образования детей</a>
                    </div>
-                   <div class="col-md-4">
+                   <div class="col-md-5">
                         <?php
                         $municipalityItems = [];
                         foreach (Mun::findAllRecords('id, name') as $record) {
@@ -52,12 +52,12 @@ $user = Yii::$app->user->getIdentity();
                                 'items' => [
                                     Yii::$app->user->can('certificate') ?
                                         ['label' => $user->municipality->name ?
-                                            'Регион: ' . StringHelper::truncate($user->municipality->name, 12, '...') :
+                                            'Регион: ' . StringHelper::truncate($user->municipality->name, 10, '...') :
                                             'Выберите регион',
                                             'items' => $municipalityItems
                                         ] : '',
                                     [
-                                        'label' => 'Выйти(' . $user->username .')',
+                                        'label' => 'Выйти(' .  $user->username .')',
                                         'url' => ['/site/logout'],
                                         'linkOptions' => [
                                             'data-method' => 'post',
