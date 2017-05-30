@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "user".
@@ -12,10 +12,12 @@ use Yii;
  * @property string $password
  * @property string $access_token
  * @property string $auth_key
+ * @property integer $mun_id
  *
+ * @property null|\yii\db\ActiveQuery|\app\models\Mun $municipality
  * @property Organization[] $organizations
  */
-class User extends \yii\db\ActiveRecord
+class User extends ActiveRecord
 {
     public $confirm;
     public $oldpassword;
@@ -42,7 +44,12 @@ class User extends \yii\db\ActiveRecord
             [['username'], 'string', 'length' => [2, 10]],
             [['confirm', 'oldpassword', 'newpassword'], 'string', 'max' => 10, 'min' => 6],
             [['password', 'access_token', 'auth_key'], 'string', 'max' => 64, 'min' => 6],
-            [['newlogin', 'newpass'], 'boolean']
+            [['newlogin', 'newpass'], 'boolean'],
+            [
+                'mun_id', 'exist', 'skipOnError' => true,
+                'targetClass' => Mun::class,
+                'targetAttribute' => ['mun_id' => 'id']
+            ],
         ];
     }
 
@@ -66,10 +73,18 @@ class User extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return \yii\db\ActiveQuery|null|Organization[]
      */
     public function getOrganizations()
     {
         return $this->hasMany(Organization::className(), ['user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery|null|Mun
+     */
+    public function getMunicipality()
+    {
+        return $this->hasOne(Mun::class, ['id' => 'mun_id']);
     }
 }

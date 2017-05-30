@@ -3,6 +3,7 @@
 /* @var $this \yii\web\View */
 /* @var $content string */
 
+use app\models\Mun;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\bootstrap\Nav;
@@ -15,6 +16,8 @@ use app\models\Organization;
 use app\models\Certificates;
 
 AppAsset::register($this);
+/** @var \app\models\UserIdentity $user */
+$user = Yii::$app->user->getIdentity();
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -31,27 +34,39 @@ AppAsset::register($this);
         <div class="wrap">
            <div class="container-fluid">
                <div class="top-line row">
-                   <div class="col-md-10 col-md-offset-1 text-center">
+                   <div class="col-md-6 col-md-offset-3 text-center">
                        <a href="<?= Url::home() ?>">Портал персонифицированного финансирования дополнительного образования детей</a>
                    </div>
-                   <div class="col-md-1">
+                   <div class="col-md-3">
                         <?php
+                        $municipalityItems = [];
+                        foreach (Mun::findAsArray() as $record) {
+                            $municipalityItems[$record['id']]['label'] = $record['name'];
+                            $municipalityItems[$record['id']]['url'] = ['/personal/update-municipality', 'munId' => $record['id']];
+                            $municipalityItems[$record['id']]['linkOptions'] = ['data-method' => 'post'];
+                        }
                         if (!Yii::$app->user->isGuest) {
                             echo Nav::widget([
-                                'options' => ['class' => 'navbar-nav navbar-right'],
+                                'options' => ['class' => 'navbar-nav navbar-right header-nav'],
                                 'items' => [
-                                    '<li>'
-                                        . Html::beginForm(['/site/logout'], 'post', ['class' => 'navbar-form'])
-                                        . Html::submitButton('Выйти (' . Yii::$app->user->identity->username . ')', ['class' => 'btn btn-link'])
-                                        . Html::endForm() .
-                                    '</li>'
+                                    Yii::$app->user->can('certificate') ?
+                                        ['label' => $user->municipality->name ? 'Регион: ' . $user->municipality->name : 'Выберите регион',
+                                            'items' => $municipalityItems
+                                        ] : '',
+                                    [
+                                        'label' => 'Выйти(' . $user->username .')',
+                                        'url' => ['/site/logout'],
+                                        'linkOptions' => [
+                                            'data-method' => 'post',
+                                            'class' => 'btn btn-link'
+                                        ],
+                                    ]
                                 ],
                             ]);
                         }
                         ?>
                     </div>
                 </div>
-
                 <div class="row">
                     <div class="col-xs-12">
                         <?php

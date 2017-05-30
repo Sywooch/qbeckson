@@ -129,6 +129,13 @@ $config = [
         'class' => AccessBehavior::className(),
         'rules' =>
             [
+                'personal' => [
+                    [
+                        'actions' => ['update-municipality'],
+                        'allow' => true,
+                        'roles' => ['certificate']
+                    ],
+                ],
                 'file-storage' => [
                     [
                         'allow' => true,
