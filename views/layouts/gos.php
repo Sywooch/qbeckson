@@ -5,6 +5,7 @@
 
 use app\models\Mun;
 use yii\helpers\Html;
+use yii\helpers\StringHelper;
 use yii\helpers\Url;
 use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
@@ -34,15 +35,15 @@ $user = Yii::$app->user->getIdentity();
         <div class="wrap">
            <div class="container-fluid">
                <div class="top-line row">
-                   <div class="col-md-6 col-md-offset-3 text-center">
+                   <div class="col-md-8 text-center">
                        <a href="<?= Url::home() ?>">Портал персонифицированного финансирования дополнительного образования детей</a>
                    </div>
-                   <div class="col-md-3">
+                   <div class="col-md-4">
                         <?php
                         $municipalityItems = [];
-                        foreach (Mun::findAsArray() as $record) {
-                            $municipalityItems[$record['id']]['label'] = $record['name'];
-                            $municipalityItems[$record['id']]['url'] = ['/personal/update-municipality', 'munId' => $record['id']];
+                        foreach (Mun::findAllRecords('id, name') as $record) {
+                            $municipalityItems[$record['id']]['label'] = $record->name;
+                            $municipalityItems[$record['id']]['url'] = ['/personal/update-municipality', 'munId' => $record->id];
                             $municipalityItems[$record['id']]['linkOptions'] = ['data-method' => 'post'];
                         }
                         if (!Yii::$app->user->isGuest) {
@@ -50,7 +51,9 @@ $user = Yii::$app->user->getIdentity();
                                 'options' => ['class' => 'navbar-nav navbar-right header-nav'],
                                 'items' => [
                                     Yii::$app->user->can('certificate') ?
-                                        ['label' => $user->municipality->name ? 'Регион: ' . $user->municipality->name : 'Выберите регион',
+                                        ['label' => $user->municipality->name ?
+                                            'Регион: ' . StringHelper::truncate($user->municipality->name, 12, '...') :
+                                            'Выберите регион',
                                             'items' => $municipalityItems
                                         ] : '',
                                     [

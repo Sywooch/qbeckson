@@ -37,6 +37,20 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
     /**
      * @inheritdoc
      */
+    public function rules()
+    {
+        return [
+            [
+                'mun_id', 'exist', 'skipOnError' => true,
+                'targetClass' => Mun::class,
+                'targetAttribute' => ['mun_id' => 'id']
+            ],
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
     public static function findIdentity($id)
     {
         return static::findOne($id);

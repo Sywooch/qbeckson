@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\Mun;
 use app\models\User;
+use app\models\UserIdentity;
 use Yii;
 use app\models\Programs;
 use app\models\search\ProgramsSearch;
@@ -88,7 +89,8 @@ class PersonalController extends \yii\web\Controller
     public function actionUpdateMunicipality($munId)
     {
         if (Mun::findOne($munId)) {
-            $user = User::findOne(Yii::$app->user->getId());
+            /** @var UserIdentity $user */
+            $user = Yii::$app->user->getIdentity();
             $user->mun_id = $munId;
             if ($user->save()) {
                 Yii::$app->session->setFlash('success', 'Информация обновлена');
@@ -96,7 +98,7 @@ class PersonalController extends \yii\web\Controller
                 Yii::$app->session->setFlash('danger', 'Что-то не так!');
             }
 
-            return $this->goBack();
+            return $this->redirect(Yii::$app->request->referrer);
         }
         throw new NotFoundHttpException('Model not found!');
     }

@@ -45,11 +45,6 @@ class User extends ActiveRecord
             [['confirm', 'oldpassword', 'newpassword'], 'string', 'max' => 10, 'min' => 6],
             [['password', 'access_token', 'auth_key'], 'string', 'max' => 64, 'min' => 6],
             [['newlogin', 'newpass'], 'boolean'],
-            [
-                'mun_id', 'exist', 'skipOnError' => true,
-                'targetClass' => Mun::class,
-                'targetAttribute' => ['mun_id' => 'id']
-            ],
         ];
     }
 

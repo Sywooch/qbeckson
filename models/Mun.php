@@ -91,13 +91,11 @@ class Mun extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return array|self[]
+     * @param string $columns
+     * @return static[]
      */
-    public static function findAsArray()
+    public static function findAllRecords($columns = '*')
     {
-        return self::find()
-            ->select('id, name')
-            ->asArray()
-            ->all();
+        return static::find()->select($columns)->all();
     }
 }
