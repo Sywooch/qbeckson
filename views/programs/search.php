@@ -16,11 +16,16 @@ $this->title = 'Поиск программ';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="programs-index">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-   
-    
-
+    <?php if (Yii::$app->user->can('certificate')) : ?>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="pull-right">
+                    <?= $this->render('../common/_select-municipality-modal') ?>
+                </div>
+            </div>
+        </div>
+        <br>
+    <?php endif; ?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,

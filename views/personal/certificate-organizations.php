@@ -9,9 +9,18 @@ use app\models\Certificates;
 
 /* @var $this yii\web\View */
 $this->title = 'Организации';
-   $this->params['breadcrumbs'][] = 'Организации';
+$this->params['breadcrumbs'][] = 'Организации';
 ?>
-
+<?php if (Yii::$app->user->can('certificate')) : ?>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="pull-right">
+                <?= $this->render('../common/_select-municipality-modal') ?>
+            </div>
+        </div>
+    </div>
+    <br>
+<?php endif; ?>
 <?= GridView::widget([
     'dataProvider' => $OrganizationProvider,
     'filterModel' => $searchOrganization,

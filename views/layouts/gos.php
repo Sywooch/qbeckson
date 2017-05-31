@@ -3,18 +3,13 @@
 /* @var $this \yii\web\View */
 /* @var $content string */
 
-use app\models\Mun;
 use yii\helpers\Html;
-use yii\helpers\StringHelper;
 use yii\helpers\Url;
 use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use app\assets\AppAsset;
-use yii\data\ActiveDataProvider;
-use app\models\Informs;
 use app\models\Organization;
-use app\models\Certificates;
 
 AppAsset::register($this);
 /** @var \app\models\UserIdentity $user */
@@ -35,29 +30,17 @@ $user = Yii::$app->user->getIdentity();
         <div class="wrap">
            <div class="container-fluid">
                <div class="top-line row">
-                   <div class="col-md-7 text-center">
+                   <div class="col-md-10 col-md-offset-1 text-center">
                        <a href="<?= Url::home() ?>">Портал персонифицированного финансирования дополнительного образования детей</a>
                    </div>
-                   <div class="col-md-5">
+                   <div class="col-md-1">
                         <?php
-                        $municipalityItems = [];
-                        foreach (Mun::findAllRecords('id, name') as $record) {
-                            $municipalityItems[$record['id']]['label'] = $record->name;
-                            $municipalityItems[$record['id']]['url'] = ['/personal/update-municipality', 'munId' => $record->id];
-                            $municipalityItems[$record['id']]['linkOptions'] = ['data-method' => 'post'];
-                        }
                         if (!Yii::$app->user->isGuest) {
                             echo Nav::widget([
                                 'options' => ['class' => 'navbar-nav navbar-right header-nav'],
                                 'items' => [
-                                    Yii::$app->user->can('certificate') ?
-                                        ['label' => $user->municipality->name ?
-                                            'Регион: ' . StringHelper::truncate($user->municipality->name, 10, '...') :
-                                            'Выберите регион',
-                                            'items' => $municipalityItems
-                                        ] : '',
                                     [
-                                        'label' => 'Выйти(' .  $user->username .')',
+                                        'label' => 'Выйти(' .  $user->username . ')',
                                         'url' => ['/site/logout'],
                                         'linkOptions' => [
                                             'data-method' => 'post',

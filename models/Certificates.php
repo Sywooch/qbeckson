@@ -25,7 +25,7 @@ use Yii;
  * @property integer $directivity6
  *
  * @property User $user
- * @property Payers $payer
+ * @property Payers $payers
  * @property Contracts[] $contracts0
  */
 class Certificates extends \yii\db\ActiveRecord

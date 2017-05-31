@@ -18,10 +18,10 @@ use yii\web\IdentityInterface;
  *
  * @property \yii\db\ActiveQuery $dispute
  * @property \yii\db\ActiveQuery $organization
- * @property \yii\db\ActiveQuery $certificate
- * @property null|\yii\db\ActiveQuery|\app\models\Mun $municipality
+ * @property null|Certificates $certificate
+ * @property null|Mun $municipality
  * @property mixed $userName
- * @property \yii\db\ActiveQuery $payer
+ * @property Payers $payer
  * @property \yii\db\ActiveQuery $operator
  */
 class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacInterface

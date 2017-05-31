@@ -86,9 +86,9 @@ class PersonalController extends \yii\web\Controller
      * @return \yii\web\Response
      * @throws NotFoundHttpException
      */
-    public function actionUpdateMunicipality($munId)
+    public function actionUpdateMunicipality($munId = null)
     {
-        if (Mun::findOne($munId)) {
+        if (Mun::findOne($munId) || null === $munId) {
             /** @var UserIdentity $user */
             $user = Yii::$app->user->getIdentity();
             $user->mun_id = $munId;

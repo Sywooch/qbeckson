@@ -86,6 +86,10 @@ class CertificatesController extends Controller
                 $username = $user->username;
             }
 
+            /** @var \app\models\UserIdentity $identity */
+            $identity = Yii::$app->user->getIdentity();
+            $user->mun_id = $identity->payer->mun;
+
            if ($user->validate() && $user->save()) {
                $userRole = Yii::$app->authManager->getRole('certificate');
                Yii::$app->authManager->assign($userRole, $user->id);
