@@ -8,6 +8,7 @@ use kartik\export\ExportMenu;
 use app\models\Certificates;
 
 /* @var $this yii\web\View */
+/* @var $OrganizationProvider \yii\data\ActiveDataProvider */
 $this->title = 'Организации';
 $this->params['breadcrumbs'][] = 'Организации';
 ?>
@@ -21,6 +22,7 @@ $this->params['breadcrumbs'][] = 'Организации';
     </div>
     <br>
 <?php endif; ?>
+
 <?= GridView::widget([
     'dataProvider' => $OrganizationProvider,
     'filterModel' => $searchOrganization,

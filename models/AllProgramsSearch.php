@@ -45,11 +45,10 @@ class AllProgramsSearch extends Programs
         $query = Programs::find();
 
         // add conditions that should always apply here
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
-                'pagesize' => 50,
+                'pageSize' => 50,
             ],
         ]);
 
@@ -81,7 +80,14 @@ class AllProgramsSearch extends Programs
             ->andFilterWhere(['like', 'annotation', $this->annotation])
             ->andFilterWhere(['like', 'link', $this->link])
             ->andFilterWhere(['like', 'vid', $this->vid]);
-        
+
+        if (Yii::$app->user->can('certificate')) {
+            /** @var UserIdentity $identity */
+            $identity = Yii::$app->user->getIdentity();
+            if (null !== $identity->mun_id) {
+                $query->andFilterWhere(['mun' => $identity->mun_id]);
+            }
+        }
 
         return $dataProvider;
     }

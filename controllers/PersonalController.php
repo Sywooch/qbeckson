@@ -775,8 +775,6 @@ class PersonalController extends \yii\web\Controller
 
     public function actionCertificateOrganizations()
     {
-
-
         $searchOrganization = new OrganizationSearch();
         $OrganizationProvider = $searchOrganization->search(Yii::$app->request->queryParams);
 
