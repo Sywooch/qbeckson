@@ -19,7 +19,7 @@ $user = Yii::$app->user->getIdentity();
 Modal::begin([
     'header' => '<h2>Выберите регион</h2>',
     'toggleButton' => [
-        'label' => 'Регион: ' . ($user->municipality->name ?: 'Все муниципалитеты'),
+        'label' => !empty($user->municipality) ? $user->municipality->name : 'Все муниципалитеты',
         'style' => 'cursor: pointer',
         'class' => 'btn btn-success'
     ],
