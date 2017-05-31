@@ -1,6 +1,5 @@
 <?php
 
-use app\models\UserIdentity;
 use yii\db\Migration;
 
 class m170531_090819_update_user_certificate_mun_id extends Migration
@@ -10,16 +9,12 @@ class m170531_090819_update_user_certificate_mun_id extends Migration
      */
     public function up()
     {
-        /** @var UserIdentity[] $users */
-        $users = UserIdentity::find()->joinWith(['certificate'])->all();
-
-        foreach ($users as $user) {
-            if (null !== $user->certificate) {
-                $user->mun_id = $user->certificate->payers->mun;
-                echo $user->save() ? 'OK' : 'Something wrong';
-                echo PHP_EOL;
-            }
-        }
+        $this->execute('
+            UPDATE user
+            INNER JOIN certificates ON certificates.user_id = user.id
+            INNER JOIN payers ON certificates.payer_id = payers.id
+            SET user.mun_id = payers.mun
+        ');
     }
 
     /**
@@ -27,6 +22,6 @@ class m170531_090819_update_user_certificate_mun_id extends Migration
      */
     public function down()
     {
-        return false;
+        $this->execute('UPDATE user SET mun_id = NULL');
     }
 }
