@@ -37,7 +37,14 @@ class Import extends Model
             $i = 0;
             $certificateArray = [];
             while (($data = fgetcsv($handle, 1000, ";")) !== false) {
+                // Пропускаем первый ряд или ряды без username
                 if (!$i++ || intval($data[3]) < 1) {
+                    continue;
+                }
+                // Пропускаем, если есть такой юзер
+                if ($cnt = User::find()
+                    ->where(['username' => $data[3]])
+                    ->count()) {
                     continue;
                 }
                 Yii::$app->db->createCommand()->insert('user', [
