@@ -38,7 +38,9 @@ class m170601_100107_create_table_directory_program_direction_and_activity exten
             'directory_program_activity',
             'direction_id',
             'directory_program_direction',
-            'id'
+            'id',
+            'cascade',
+            'cascade'
         );
 
         $this->addForeignKey(
@@ -46,7 +48,9 @@ class m170601_100107_create_table_directory_program_direction_and_activity exten
             'directory_program_activity',
             'user_id',
             'user',
-            'id'
+            'id',
+            'cascade',
+            'cascade'
         );
 
         $this->addForeignKey(
@@ -54,7 +58,9 @@ class m170601_100107_create_table_directory_program_direction_and_activity exten
             'program_activity',
             'program_id',
             'programs',
-            'id'
+            'id',
+            'cascade',
+            'cascade'
         );
 
         $this->addForeignKey(
@@ -62,7 +68,9 @@ class m170601_100107_create_table_directory_program_direction_and_activity exten
             'program_activity',
             'activity_id',
             'directory_program_activity',
-            'id'
+            'id',
+            'cascade',
+            'cascade'
         );
     }
 
