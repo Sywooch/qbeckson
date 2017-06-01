@@ -66,27 +66,27 @@ class GroupsController extends Controller
             'model' => $this->findModel($id),
         ]);
     }
-    
+
     public function actionContracts($id)
     {
         $model = $this->findModel($id);
-        
-       /* $rows = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('contracts')
-                ->where(['group_id' => $id])
-                ->andWhere(['status' => 1])
-                ->column();
-        
-        if (empty($rows)) { $rows = 0; }*/
-        
-        
+
+        /* $rows = (new \yii\db\Query())
+                 ->select(['id'])
+                 ->from('contracts')
+                 ->where(['group_id' => $id])
+                 ->andWhere(['status' => 1])
+                 ->column();
+
+         if (empty($rows)) { $rows = 0; }*/
+
+
         $Contracts1Search = new ContractsStatus1onlySearch();
-        $Contracts1Search->group_id = $id; 
+        $Contracts1Search->group_id = $id;
         $ContractsProvider = $Contracts1Search->search(Yii::$app->request->queryParams);
-        
+
         //return var_dump($rows);
-        
+
         return $this->render('contracts', [
             'model' => $model,
             'ContractsProvider' => $ContractsProvider,
@@ -108,50 +108,51 @@ class GroupsController extends Controller
         if ($model->load(Yii::$app->request->post())) {
             $model->organization_id = $organization['id'];
             //$model->program_id = (int) $model->program_id;
-            
+
             $rows = (new \yii\db\Query())
                 ->select(['month'])
                 ->from('years')
                 ->where(['id' => $model->year_id])
                 ->one();
-            
+
             $d1 = strtotime($model->datestart);
             $d2 = strtotime($model->datestop);
-            $diff = $d2-$d1;
-            $diff = $diff/(60*60*24*31);
+            $diff = $d2 - $d1;
+            $diff = $diff / (60 * 60 * 24 * 31);
             $month = floor($diff);
-            
-            if ($rows['month'] < $month-1 or  $rows['month'] > $month+1) {
-                Yii::$app->session->setFlash('error', 'Продолжительность программы должна быть '.$rows['month'].' месяцев.');
+
+            if ($rows['month'] < $month - 1 or $rows['month'] > $month + 1) {
+                Yii::$app->session->setFlash('error', 'Продолжительность программы должна быть ' . $rows['month'] . ' месяцев.');
+
                 return $this->render('create', [
                     'model' => $model,
                 ]);
             }
-            
+
             if ($model->save()) {
-               /* $completeness = new Completeness();
-                $completeness->group_id = $model->id;
-                
-                if (date(m) == 1) {
-                    $completeness->month = 12;
-                    $completeness->year = date(Y) - 1;
-                } else {
-                    $completeness->month = date(m) - 1;
-                    $completeness->year = date(Y);
-                }
-                $completeness->preinvoice = 0;
-                $completeness->completeness = 100;
-                if ($completeness->save()) {
-                    $preinvoice = new Completeness();
-                    $preinvoice->group_id = $model->id;
-                    $preinvoice->month = date(m);
-                    $preinvoice->year = date(Y);
-                    $preinvoice->preinvoice = 1;
-                    $preinvoice->completeness = 80;
-                    if ($preinvoice->save()) { */
-                        return $this->redirect(['/personal/organization-groups']);    
-                  //  }
-               // }
+                /* $completeness = new Completeness();
+                 $completeness->group_id = $model->id;
+
+                 if (date(m) == 1) {
+                     $completeness->month = 12;
+                     $completeness->year = date(Y) - 1;
+                 } else {
+                     $completeness->month = date(m) - 1;
+                     $completeness->year = date(Y);
+                 }
+                 $completeness->preinvoice = 0;
+                 $completeness->completeness = 100;
+                 if ($completeness->save()) {
+                     $preinvoice = new Completeness();
+                     $preinvoice->group_id = $model->id;
+                     $preinvoice->month = date(m);
+                     $preinvoice->year = date(Y);
+                     $preinvoice->preinvoice = 1;
+                     $preinvoice->completeness = 80;
+                     if ($preinvoice->save()) { */
+                return $this->redirect(['/personal/organization-groups']);
+                //  }
+                // }
             }
         } else {
             return $this->render('create', [
@@ -159,31 +160,31 @@ class GroupsController extends Controller
             ]);
         }
     }
-    
+
     public function actionNewgroup($id)
     {
         $modelsGroups = new Groups();
         $modelsGroups->year_id = $id;
-        
+
         $rows = (new \yii\db\Query())
             ->select(['program_id'])
             ->from('years')
             ->where(['id' => $id])
             ->one();
-        
+
         $modelsGroups->program_id = $rows['program_id'];
-            
+
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
-        
+
         $modelsGroups->organization_id = $organization['id'];
 
         if ($modelsGroups->load(Yii::$app->request->post())) {
-            
+
             if ($modelsGroups->save()) {
-              
-                        return $this->redirect(['programs/view', 'id' => $modelsGroups->program_id]);    
-    
+
+                return $this->redirect(['programs/view', 'id' => $modelsGroups->program_id]);
+
             }
         } else {
             return $this->render('newgroup', [
@@ -211,39 +212,41 @@ class GroupsController extends Controller
         }
     }
 
-    public function actionYear() {
+    public function actionYear()
+    {
         $out = [];
         if (isset($_POST['depdrop_parents'])) {
             $parents = $_POST['depdrop_parents'];
             if ($parents != null) {
                 $prog_id = $parents[0];
-                
+
                 //$out = ProgrammeModule::find()->where(['program_id' => $prog_id])->asArray()->all();
-                
+
                 $rows = (new \yii\db\Query())
                     ->select(['id', 'year'])
                     ->from('years')
                     ->where(['program_id' => $prog_id])
                     ->all();
-                
-                $out = array();
+
+                $out = [];
                 foreach ($rows as $value) {
-                    array_push($out, array('id'=> $value['id'], 'name'=> $value['year']));
-                } 
-                
+                    array_push($out, ['id' => $value['id'], 'name' => $value['year']]);
+                }
+
 
                 //$out = ArrayHelper::map(ProgrammeModule::find()->where(['program_id' => $prog_id])->all(), 'id', 'year');
                 //$out = self::getSubCatList($cat_id); 
                 // the getSubCatList function will query the database based on the
                 // cat_id and return an array like below:
                 //$out = [['id'=>'<sub-cat-id-1>', 'name'=>'<sub-cat-name1>'],['id'=>'<sub-cat_id_2>', 'name'=>'<sub-cat-name2>']];
-                echo Json::encode(['output'=>$out, 'selected'=>'']);
+                echo Json::encode(['output' => $out, 'selected' => '']);
+
                 return;
             }
         }
-        echo Json::encode(['output'=>'', 'selected'=>'']);
+        echo Json::encode(['output' => '', 'selected' => '']);
     }
-    
+
     /**
      * Deletes an existing Groups model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
@@ -254,73 +257,74 @@ class GroupsController extends Controller
     {
         $user = User::findOne(Yii::$app->user->id);
 
-        if($user->load(Yii::$app->request->post())) {
+        if ($user->load(Yii::$app->request->post())) {
 
             if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
                 $this->findModel($id)->delete();
 
                 return $this->redirect(['/personal/organization-groups']);
-            }
-            else {
+            } else {
                 Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
-                 return $this->redirect(['/personal/payer-certificates']);
+
+                return $this->redirect(['/personal/payer-certificates']);
             }
         }
+
         return $this->render('/user/delete', [
             'user' => $user,
             'title' => 'Удалить группу',
         ]);
     }
-    
+
     public function actionInvoice()
     {
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
 
-            $searchGroups = new GroupsInvoiceSearch();
-            $searchGroups->organization_id = $organization['id'];  
+        $searchGroups = new GroupsInvoiceSearch();
+        $searchGroups->organization_id = $organization['id'];
 
-            $GroupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
+        $GroupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
 
-            return $this->render('invoice', [
-                'searchGroups' => $searchGroups,
-                'GroupsProvider' => $GroupsProvider,
-            ]);
-       
+        return $this->render('invoice', [
+            'searchGroups' => $searchGroups,
+            'GroupsProvider' => $GroupsProvider,
+        ]);
+
     }
-    
+
     public function actionDec()
     {
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
 
-            $searchGroups = new GroupsInvoiceSearch();
-            $searchGroups->organization_id = $organization['id'];  
+        $searchGroups = new GroupsInvoiceSearch();
+        $searchGroups->organization_id = $organization['id'];
 
-            $GroupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
+        $GroupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
 
-            return $this->render('dec', [
-                'searchGroups' => $searchGroups,
-                'GroupsProvider' => $GroupsProvider,
-            ]);
-       
+        return $this->render('dec', [
+            'searchGroups' => $searchGroups,
+            'GroupsProvider' => $GroupsProvider,
+        ]);
+
     }
-    
+
     public function actionPreinvoice()
     {
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
 
-            $searchGroups = new GroupsInvoiceSearch();
-            $searchGroups->organization_id = $organization['id'];  
+        $searchGroups = new GroupsInvoiceSearch();
+        $searchGroups->organization_id = $organization['id'];
 
-            $GroupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
+        $GroupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
 
-            return $this->render('preinvoice', [
-                'searchGroups' => $searchGroups,
-                'GroupsProvider' => $GroupsProvider,
-            ]);
-       
+        return $this->render('preinvoice', [
+            'searchGroups' => $searchGroups,
+            'GroupsProvider' => $GroupsProvider,
+        ]);
+
     }
     /*
     public function actionFgroup()

@@ -43,6 +43,7 @@ class ContractsInvoiceSearch extends Contracts
     public function search($params)
     {   
         $lmonth = date('m')-1;
+        // День - первое число предыдущего месяца
         $start = date('Y').'-'.$lmonth.'-'.date('d');
         $query = Contracts::find()->where(['<=', 'start_edu_contract', $start])->andWhere(['>=', 'stop_edu_contract', $start]);
 
