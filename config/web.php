@@ -180,7 +180,15 @@ $config = [
                         [
                             'allow' => true,
                         ],
+                    ],
+                'activity' =>
+                [
+                    [
+                        'actions' => ['load-activities', 'add-activity'],
+                        'allow' => true,
+                        'roles' => ['organizations'],
                     ]
+                ]
             ]
     ],
 
@@ -189,11 +197,6 @@ $config = [
 
 if (YII_ENV_DEV) {
     // configuration adjustments for 'dev' environment
-    $config['bootstrap'][] = 'gii';
-    $config['modules']['gii'] = [
-        'class' => 'yii\gii\Module',
-    ];
-
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',

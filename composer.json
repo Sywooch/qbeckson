@@ -42,7 +42,11 @@
         "phpoffice/phpexcel": "^1.8",
         "arius/number-formatter": "1.*",
         "2amigos/yii2-ckeditor-widget" : "2.0",
-        "trntv/yii2-file-kit": "^1.2"
+
+        "trntv/yii2-file-kit": "^1.2",
+        "voskobovich/yii2-linker-behavior": "^4.0",
+        "kartik-v/yii2-widget-depdrop": "@dev",
+        "kartik-v/yii2-widget-select2": "@dev"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

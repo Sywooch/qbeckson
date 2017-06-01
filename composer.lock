@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "d646099627ed81da47e3e268573560ba",
+    "content-hash": "23ba3d974db898adc6f37936aecd7f55",
     "packages": [
         {
             "name": "2amigos/yii2-ckeditor-widget",
@@ -982,12 +982,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/kartik-v/yii2-dialog.git",
-                "reference": "70138dd873d545fa07a8bebb9eb554821d7d11a4"
+                "reference": "ff4317c73e87e6a4e186de779984d928316db253"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kartik-v/yii2-dialog/zipball/70138dd873d545fa07a8bebb9eb554821d7d11a4",
-                "reference": "70138dd873d545fa07a8bebb9eb554821d7d11a4",
+                "url": "https://api.github.com/repos/kartik-v/yii2-dialog/zipball/ff4317c73e87e6a4e186de779984d928316db253",
+                "reference": "ff4317c73e87e6a4e186de779984d928316db253",
                 "shasum": ""
             },
             "require": {
@@ -1026,7 +1026,7 @@
                 "modal",
                 "yii2"
             ],
-            "time": "2017-05-08 19:19:17"
+            "time": "2017-05-30 11:13:05"
         },
         {
             "name": "kartik-v/yii2-dynagrid",
@@ -1258,12 +1258,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/kartik-v/yii2-grid.git",
-                "reference": "25af365c063484220ea087daa4c2d52a9a7ecd00"
+                "reference": "200bb55caca3121c3aa33edc9e18a23262cc239e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kartik-v/yii2-grid/zipball/25af365c063484220ea087daa4c2d52a9a7ecd00",
-                "reference": "25af365c063484220ea087daa4c2d52a9a7ecd00",
+                "url": "https://api.github.com/repos/kartik-v/yii2-grid/zipball/200bb55caca3121c3aa33edc9e18a23262cc239e",
+                "reference": "200bb55caca3121c3aa33edc9e18a23262cc239e",
                 "shasum": ""
             },
             "require": {
@@ -1303,7 +1303,7 @@
                 "widget",
                 "yii2"
             ],
-            "time": "2017-05-12 17:12:11"
+            "time": "2017-05-29 00:18:40"
         },
         {
             "name": "kartik-v/yii2-helpers",
@@ -1911,7 +1911,7 @@
         },
         {
             "name": "kartik-v/yii2-widget-depdrop",
-            "version": "v1.0.4",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kartik-v/yii2-widget-depdrop.git",
@@ -1956,7 +1956,7 @@
                 "widget",
                 "yii2"
             ],
-            "time": "2016-01-10T17:30:48+00:00"
+            "time": "2016-01-10 17:30:48"
         },
         {
             "name": "kartik-v/yii2-widget-fileinput",
@@ -2169,7 +2169,7 @@
         },
         {
             "name": "kartik-v/yii2-widget-select2",
-            "version": "v2.0.9",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kartik-v/yii2-widget-select2.git",
@@ -2218,7 +2218,7 @@
                 "widget",
                 "yii2"
             ],
-            "time": "2017-04-12T09:00:24+00:00"
+            "time": "2017-04-12 09:00:24"
         },
         {
             "name": "kartik-v/yii2-widget-sidenav",
@@ -3069,16 +3069,16 @@
         },
         {
             "name": "symfony/css-selector",
-            "version": "v3.2.8",
+            "version": "v3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/css-selector.git",
-                "reference": "02983c144038e697c959e6b06ef6666de759ccbc"
+                "reference": "4d882dced7b995d5274293039370148e291808f2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/css-selector/zipball/02983c144038e697c959e6b06ef6666de759ccbc",
-                "reference": "02983c144038e697c959e6b06ef6666de759ccbc",
+                "url": "https://api.github.com/repos/symfony/css-selector/zipball/4d882dced7b995d5274293039370148e291808f2",
+                "reference": "4d882dced7b995d5274293039370148e291808f2",
                 "shasum": ""
             },
             "require": {
@@ -3087,7 +3087,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.2-dev"
+                    "dev-master": "3.3-dev"
                 }
             },
             "autoload": {
@@ -3118,20 +3118,20 @@
             ],
             "description": "Symfony CssSelector Component",
             "homepage": "https://symfony.com",
-            "time": "2017-05-01T14:55:58+00:00"
+            "time": "2017-05-01T15:01:29+00:00"
         },
         {
             "name": "symfony/dom-crawler",
-            "version": "v3.2.8",
+            "version": "v3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/dom-crawler.git",
-                "reference": "f1ad34e8af09ed17570e027cf0c58a12eddec286"
+                "reference": "fc2c588ce376e9fe04a7b8c79e3ec62fe32d95b1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/dom-crawler/zipball/f1ad34e8af09ed17570e027cf0c58a12eddec286",
-                "reference": "f1ad34e8af09ed17570e027cf0c58a12eddec286",
+                "url": "https://api.github.com/repos/symfony/dom-crawler/zipball/fc2c588ce376e9fe04a7b8c79e3ec62fe32d95b1",
+                "reference": "fc2c588ce376e9fe04a7b8c79e3ec62fe32d95b1",
                 "shasum": ""
             },
             "require": {
@@ -3147,7 +3147,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.2-dev"
+                    "dev-master": "3.3-dev"
                 }
             },
             "autoload": {
@@ -3174,7 +3174,7 @@
             ],
             "description": "Symfony DomCrawler Component",
             "homepage": "https://symfony.com",
-            "time": "2017-04-12T14:13:17+00:00"
+            "time": "2017-05-25T23:10:31+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
@@ -3283,6 +3283,65 @@
             ],
             "description": "Yii2 file upload and storage kit",
             "time": "2017-01-16T10:32:27+00:00"
+        },
+        {
+            "name": "voskobovich/yii2-linker-behavior",
+            "version": "4.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/voskobovich/yii2-linker-behavior.git",
+                "reference": "4eafb2335eb546df1c1915a0d7468c0d1f7df2f9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/voskobovich/yii2-linker-behavior/zipball/4eafb2335eb546df1c1915a0d7468c0d1f7df2f9",
+                "reference": "4eafb2335eb546df1c1915a0d7468c0d1f7df2f9",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0",
+                "yiisoft/yii2": "^2"
+            },
+            "require-dev": {
+                "codeception/codeception": "*",
+                "yiisoft/yii2-codeception": "^2"
+            },
+            "type": "yii2-behavior",
+            "autoload": {
+                "psr-4": {
+                    "voskobovich\\linker\\": "src",
+                    "voskobovich\\linker\\interfaces\\": "src/interfaces",
+                    "voskobovich\\linker\\updaters\\": "src/updaters"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Vitaly Voskobovich",
+                    "email": "vitaly@voskobovich.com",
+                    "homepage": "http://voskobovich.com"
+                },
+                {
+                    "name": "Konstantin Sirotkin",
+                    "email": "beowulfenator@gmail.com",
+                    "homepage": "http://beowulfenator.github.io"
+                }
+            ],
+            "description": "This behavior makes it easy to maintain many-to-many and one-to-many relations in your ActiveRecord models.",
+            "homepage": "https://github.com/voskobovich/yii2-linker-behavior",
+            "keywords": [
+                "Active Record",
+                "Behavior",
+                "ar",
+                "many-to-many",
+                "one-to-many",
+                "relations",
+                "yii2"
+            ],
+            "time": "2017-02-26T08:12:40+00:00"
         },
         {
             "name": "wbraganca/yii2-dynamicform",
@@ -4121,7 +4180,9 @@
         "kartik-v/yii2-dialog": 20,
         "kartik-v/yii2-krajee-base": 20,
         "kartik-v/yii2-helpers": 20,
-        "kartik-v/yii2-slider": 20
+        "kartik-v/yii2-slider": 20,
+        "kartik-v/yii2-widget-depdrop": 20,
+        "kartik-v/yii2-widget-select2": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

@@ -1,5 +1,7 @@
 <?php
 
+use app\models\statics\DirectoryProgramActivity;
+use app\models\statics\DirectoryProgramDirection;
 use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
 use app\models\Cooperate;
@@ -12,6 +14,10 @@ use kartik\field\FieldRange;
 use kartik\touchspin\TouchSpin;
 use kartik\widgets\Spinner;
 use kartik\file\FileInput;
+use kartik\widgets\DepDrop;
+use kartik\select2\Select2;
+use yii\helpers\Url;
+use yii\web\JsExpression;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Programs */
@@ -40,9 +46,59 @@ $this->registerJs($js);
 
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'directivity')->dropdownList(\Yii::$app->params['directivity']) ?>
-
-    <?= $form->field($model, 'vid')->textInput(['maxlength' => true]) ?>
+    <?php
+        echo $form->field($model, 'directivity')->widget(Select2::class, [
+            'data' => ArrayHelper::map(DirectoryProgramDirection::findAllRecords(), 'id', 'name'),
+            'options' => [
+                'placeholder' => 'Выберите направленность программы ...',
+                'id' => 'direction-id'
+            ],
+        ]);
+        echo $form->field($model, 'activity_ids')->widget(DepDrop::class, [
+            'data'=> $model->directivity ?
+                ArrayHelper::map(
+                    DirectoryProgramActivity::findAllActiveActivitiesByDirection($model->directivity),
+                    'id',
+                    'name'
+                ) : [],
+            'type' => DepDrop::TYPE_SELECT2,
+            'options' => [
+                'multiple' => true,
+            ],
+            'select2Options' => [
+                'pluginOptions' => [
+                    'tags' => true,
+                    'maximumSelectionLength' => 3,
+                ],
+                'pluginEvents' => [
+                    'change' => 'function() {
+                        var isNew = $(this).find("[data-select2-tag=\"true\"]");
+                        var name = isNew.val();
+                        var directionId = $("#direction-id").val();
+                        if (isNew.length && name !== "...") {
+                            $.ajax({
+                            	type: "POST",
+                            	url: "' . Url::to(['activity/add-activity']) . '",
+                            	data: {name: name, directionId: directionId},
+                            	success: function(id) {
+                            	    isNew.replaceWith("<option selected value=" + id +">" + name + "</option>");
+                            	},
+                            	error: function (xhr, ajaxOptions, thrownError) {
+                            	    console.log("somethingWrong");
+                                },
+                            });
+                        }
+                    }',
+                ],
+            ],
+            'pluginOptions' => [
+                'placeholder' => 'Выберите виды деятельности программы, либо добавьте свои ...',
+                'depends' => ['direction-id'],
+                'url' => Url::to(['activity/load-activities']),
+                'loadingText' => 'Загрузка видов деятельности ...',
+            ],
+        ]);
+    ?>
 
     <?= $form->field($model, 'form')->dropdownList(\Yii::$app->params['form']) ?>
 
