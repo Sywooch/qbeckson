@@ -56,23 +56,33 @@ class GroupsInvoiceSearch extends Groups
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             $query->where('0=1');
+
             return $dataProvider;
         }
 
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
 
-$contracts = (new \yii\db\Query())
-                    ->select(['group_id'])
-                    ->from('contracts')
-                    ->where(['organization_id' => $organization['id']])
-                    ->andWhere(['status' => 1])
-                    ->column();
+        $contracts = (new \yii\db\Query())
+            ->select(['group_id'])
+            ->from('contracts')
+            ->where(['organization_id' => $organization['id']])
+            ->andWhere([
+                'or',
+                ['status' => 1],
+                [
+                    'and',
+                    ['status' => 4],
+                    ['>=', 'date_termnate', date('Y-m-d', strtotime('first day of previous month'))]
+                ],
+            ])
+            ->column();
 
- if (empty($contracts)) { $contracts  = 0; 
-} else {
-             $contracts  = array_unique($contracts);
-}
+        if (empty($contracts)) {
+            $contracts = 0;
+        } else {
+            $contracts = array_unique($contracts);
+        }
 
         $query->andFilterWhere([
             'id' => $contracts,
