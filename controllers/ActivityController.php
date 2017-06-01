@@ -44,6 +44,7 @@ class ActivityController extends Controller
             $model->name = Yii::$app->request->post('name');
             $model->direction_id = Yii::$app->request->post('directionId');
             $model->user_id = Yii::$app->user->id;
+            $model->status = DirectoryProgramActivity::STATUS_NEW;
 
             return $model->save() ? $model->id : null;
         }
