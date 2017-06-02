@@ -54,69 +54,68 @@ class CertificatesController extends Controller
     {
         $model = new Certificates();
         $user = new User();
-        
-        $payers = new Payers();           
+
+        $payers = new Payers();
         $payer = $payers->getPayer();
-        
+
         $region = Yii::$app->params['region'];
 
         if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {
-            $user->username = $region.$payer->code.$user->username;
+            $user->username = $region . $payer->code . $user->username;
             Yii::$app->response->format = Response::FORMAT_JSON;
+
             return ActiveForm::validate($user);
         }
 
-        if($user->load(Yii::$app->request->post()) && $model->load(Yii::$app->request->post()) && $model->validate()) {
+        if ($user->load(Yii::$app->request->post()) && $model->load(Yii::$app->request->post()) && $model->validate()) {
 
-           if (!$user->password) {
-               $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
-               $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
-           }
-           else {
-               $password = $user->password;
-               $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
-           }
+            if (!$user->password) {
+                $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
+                $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+            } else {
+                $password = $user->password;
+                $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+            }
 
             if (!$user->username) {
-               $username = Yii::$app->getSecurity()->generateRandomString($length = 6);
-               $user->username = $region.$payer->code.$username;
-           }
-            else {
-                $user->username = $region.$payer->code.$user->username;
+                $username = Yii::$app->getSecurity()->generateRandomString($length = 6);
+                $user->username = $region . $payer->code . $username;
+            } else {
+                $user->username = $region . $payer->code . $user->username;
                 $username = $user->username;
             }
 
-           if ($user->validate() && $user->save()) {
-               $userRole = Yii::$app->authManager->getRole('certificate');
-               Yii::$app->authManager->assign($userRole, $user->id);
+            if ($user->validate() && $user->save()) {
+                $userRole = Yii::$app->authManager->getRole('certificate');
+                Yii::$app->authManager->assign($userRole, $user->id);
 
-               $model->user_id = $user->id;
-               //$payers = new Payers();           
-               //$payer = $payers->getPayer();
-               $model->payer_id = $payer->id;
-               $model->number = $username;
-               $model->actual = 1;
-               $model->balance = $model->nominal;
-               $model->rezerv = 0;
-               $model->fio_child = $model->soname.' '.$model->name.' '.$model->phname;
+                $model->user_id = $user->id;
+                //$payers = new Payers();
+                //$payer = $payers->getPayer();
+                $model->payer_id = $payer->id;
+                $model->number = $username;
+                $model->actual = 1;
+                $model->balance = $model->nominal;
+                $model->rezerv = 0;
+                $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
 
-               if ($model->save()) {
+                if ($model->save()) {
                     $user->password = $password;
+
                     return $this->render('/user/view', [
                         'model' => $user,
                     ]);
+                } else {
+                    $user->delete();
                 }
-               else {
-                   $user->delete();
-               }
-           }
+            }
 
         }
 
         //$payers = new Payers();
         //$payer = $payers->getPayer();
         //$pref = Yii::$app->params['region'].'-'.$payer['mun'].'-';               
-        
+
         return $this->render('create', [
             'model' => $model,
             'user' => $user,
@@ -138,60 +137,46 @@ class CertificatesController extends Controller
 
         if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
+
             return ActiveForm::validate($user);
         }
 
-        if($user->load(Yii::$app->request->post())) {
-            if($model->load(Yii::$app->request->post())) {
-                $model->fio_child = $model->soname.' '.$model->name.' '.$model->phname;
-                
-                $model->validate();
+        if ($user->load(Yii::$app->request->post())) {
+            // TODO: дублирование кода, избавиться
+            if ($model->load(Yii::$app->request->post())) {
+                $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
+
                 $model->save();
             }
 
+            $password = null;
             if ($user->newlogin == 1 || $user->newpass == 1) {
-
                 if ($user->newpass == 1) {
-                   if (!$user->password) {
-                       $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
-                       $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
-                   }
-                   else {
-                       $password = $user->password;
-                       $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
-                   }
+                    if (!$user->password) {
+                        $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
+                        $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+                    } else {
+                        $password = $user->password;
+                        $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+                    }
                 }
 
-                if ($user->validate() && $user->save()) {
-                    $user->password = $password;
+                if ($user->save()) {
                     return $this->render('/user/view', [
                         'model' => $user,
+                        'password' => $password,
                     ]);
                 }
             }
         }
 
-        if($model->load(Yii::$app->request->post())) {
+        if ($model->load(Yii::$app->request->post())) {
+            $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
 
-            $rows = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('cert_group')
-                ->where(['nominal' => $model->cert_group])
-                ->one();
-           $model->cert_group = $rows['id'];
-            $model->fio_child = $model->soname.' '.$model->name.' '.$model->phname;
-
-            if ($model->validate() && $model->save()) {
+            if ($model->save()) {
                 return $this->redirect(['/certificates/view', 'id' => $model->id]);
             }
         }
-
-        $rows = (new \yii\db\Query())
-                ->select(['nominal'])
-                ->from('cert_group')
-                ->where(['id' => $model->cert_group])
-                ->one();
-           $model->cert_group = $rows['nominal'];
 
         return $this->render('update', [
             'model' => $model,
@@ -203,13 +188,13 @@ class CertificatesController extends Controller
     {
         $certificates = new Certificates();
         $certificate = $certificates->getCertificates();
-        
+
         $model = $this->findModel($certificate['id']);
 
-        if($model->load(Yii::$app->request->post()) && $model->validate()) {
-            $model->fio_child = $model->soname.' '.$model->name.' '.$model->phname;
-            
-            if($model->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
+
+            if ($model->save()) {
                 return $this->redirect(['/personal/certificate-statistic', 'id' => $model->id]);
             }
         }
@@ -219,7 +204,7 @@ class CertificatesController extends Controller
         ]);
 
     }
-    
+
     public function actionPassword()
     {
         $certificates = new Certificates();
@@ -227,24 +212,24 @@ class CertificatesController extends Controller
 
         $user = User::findOne($certificate['user_id']);
 
-        if($user->load(Yii::$app->request->post()) && $user->validate()) {
+        if ($user->load(Yii::$app->request->post()) && $user->validate()) {
             if (Yii::$app->getSecurity()->validatePassword($user->oldpassword, $user->password)) {
                 if ($user->newpassword == $user->confirm) {
-                    
+
                     $user->password = Yii::$app->getSecurity()->generatePasswordHash($user->newpassword);
-                    
+
                     if ($user->save()) {
                         return $this->redirect(['/personal/certificate-info']);
                     }
-                }
-                else {
+                } else {
                     Yii::$app->session->setFlash('error', 'Пароли не совпадают.');
+
                     return $this->redirect(['/certificates/password']);
                 }
-            }
-            else {
+            } else {
                 Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
-                 return $this->redirect(['/certificates/password']);
+
+                return $this->redirect(['/certificates/password']);
             }
         }
 
@@ -253,27 +238,27 @@ class CertificatesController extends Controller
         ]);
 
     }
-    
+
     public function actionVerificate()
     {
         $model = new Certificates();
 
-        if($model->load(Yii::$app->request->post())) {
-        
+        if ($model->load(Yii::$app->request->post())) {
+
             $rows = (new \yii\db\Query())
-                    ->select(['id', 'actual', 'payer_id'])
-                    ->from('certificates')
-                    ->where(['number' => $model->number])
-                    ->andWhere(['name' => $model->name])
-                    ->andWhere(['soname' => $model->soname])
-                    ->andWhere(['phname' => $model->phname])
-                    ->one();
-            
+                ->select(['id', 'actual', 'payer_id'])
+                ->from('certificates')
+                ->where(['number' => $model->number])
+                ->andWhere(['name' => $model->name])
+                ->andWhere(['soname' => $model->soname])
+                ->andWhere(['phname' => $model->phname])
+                ->one();
+
             if ($rows['id']) {
-                
+
                 $organizations = new Organization();
                 $organization = $organizations->getOrganization();
-                
+
 
                 $cooperate = (new \yii\db\Query())
                     ->select(['id'])
@@ -282,26 +267,23 @@ class CertificatesController extends Controller
                     ->andWhere(['payer_id' => $rows['payer_id']])
                     ->andWhere(['status' => 1])
                     ->one();
-                
+
                 if (isset($cooperate['id']) and !empty($cooperate['id'])) {
                     if ($rows['actual'] == 1) {
                         return $this->redirect(['/contracts/create', 'id' => $rows['id']]);
-                    }
-                    else {
+                    } else {
                         return $this->render('verificate', [
                             'model' => $model,
                             'display' => 'Сертификат заморожен.',
                         ]);
                     }
-                }
-                else {
-                     return $this->render('verificate', [
+                } else {
+                    return $this->render('verificate', [
                         'model' => $model,
                         'display' => 'Нет соглашения с плательщиком этого сертификата.',
                     ]);
                 }
-            }
-            else {
+            } else {
                 return $this->render('verificate', [
                     'model' => $model,
                     'display' => 'Такого сертификата нет.',
@@ -314,31 +296,31 @@ class CertificatesController extends Controller
         ]);
 
     }
-    
+
     public function actionActual($id)
     {
         $model = $this->findModel($id);
-        
+
         $model->actual = 1;
 
-        if($model->load(Yii::$app->request->post()) && $model->validate() && $model->save()) {
-              return $this->redirect(['/certificates/view', 'id' => $id]);
+        if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->save()) {
+            return $this->redirect(['/certificates/view', 'id' => $id]);
         }
 
         return $this->render('nominal', [
             'model' => $model,
         ]);
     }
-    
+
     public function actionNoactual($id)
     {
         $model = $this->findModel($id);
-        
+
         $model->actual = 0;
         $model->nominal = 0;
-        
+
         $model->save();
-        
+
         return $this->redirect(['/certificates/view', 'id' => $id]);
     }
 
@@ -352,7 +334,7 @@ class CertificatesController extends Controller
     {
         $user = User::findOne(Yii::$app->user->id);
 
-        if($user->load(Yii::$app->request->post())) {
+        if ($user->load(Yii::$app->request->post())) {
 
             if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
                 $model = $this->findModel($id);
@@ -360,90 +342,91 @@ class CertificatesController extends Controller
                 User::findOne($model['user_id'])->delete();
 
                 return $this->redirect(['/personal/payer-certificates']);
-            }
-            else {
+            } else {
                 Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
-                 return $this->redirect(['/personal/payer-certificates']);
+
+                return $this->redirect(['/personal/payer-certificates']);
             }
         }
+
         return $this->render('/user/delete', [
             'user' => $user,
         ]);
     }
-    
+
     public function actionAllnominal($id)
     {
         ini_set('memory_limit', '-1');
-        
+
         $certificates = (new \yii\db\Query())
             ->select(['id'])
             ->from('certificates')
             ->where(['payer_id' => $id])
             ->column();
-        
+
         foreach ($certificates as $certificate_id) {
-            
+
             $model = $this->findModel($certificate_id);
 
             $nominal = (new \yii\db\Query())
-            ->select(['nominal'])
-            ->from('cert_group')
-            ->where(['id' => $model->cert_group])
-            ->one();
-            
+                ->select(['nominal'])
+                ->from('cert_group')
+                ->where(['id' => $model->cert_group])
+                ->one();
+
             $model->balance = $nominal['nominal'] - $model->nominal + $model->balance;
             $model->nominal = $nominal['nominal'];
-            
+
             $model->save();
         }
 
         return $this->redirect(['/personal/payer-certificates']);
     }
-    
-    
+
+
     public function actionImport()
     {
         ini_set('memory_limit', '-1');
         set_time_limit(0);
-        
-        $inputFile = "uploads/certs.xlsx";
-        
-            $inputFileType = \PHPExcel_IOFactory::identify($inputFile);
-            $objReader = \PHPExcel_IOFactory::createReader($inputFileType);
-            $objPHPExcel = $objReader->load($inputFile);
 
-        
+        $inputFile = "uploads/certs.xlsx";
+
+        $inputFileType = \PHPExcel_IOFactory::identify($inputFile);
+        $objReader = \PHPExcel_IOFactory::createReader($inputFileType);
+        $objPHPExcel = $objReader->load($inputFile);
+
+
         $sheet = $objPHPExcel->getSheet(0);
-        $highestRow = $sheet->getHighestRow(); 
+        $highestRow = $sheet->getHighestRow();
         $highestColumn = $sheet->getHighestColumn();
-        
+
         set_time_limit(0);
-        
+
         for ($row = 1; $row <= $highestRow; $row++) {
-            $rowDada = $sheet->rangeToArray('A'.$row.':'.$highestColumn.$row,NULL,TRUE,FALSE);
-            
-            if($row == 1) {
+            $rowDada = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row, null, true, false);
+
+            if ($row == 1) {
                 continue;
             }
-            
+
             $user = new User();
             //$user_id = $rowDada[0][0];
             $user->username = $rowDada[0][0];
             $user->password = Yii::$app->getSecurity()->generatePasswordHash($rowDada[0][5]);
             $user->save();
-            
+
             echo $user->id;
-            
+
             $userRole = Yii::$app->authManager->getRole('certificate');
-              
+
             Yii::$app->authManager->assign($userRole, $user->id);
-            
+
             print_r($user->getErrors());
-            
+
             $model = new Certificates();
             $model->user_id = $user->id;
             $model->number = $rowDada[0][0];
-            $model->fio_child = $rowDada[0][1].' '.$rowDada[0][2].' '.$rowDada[0][3];
+            $model->fio_child = $rowDada[0][1] . ' ' . $rowDada[0][2] . ' ' . $rowDada[0][3];
             $model->name = $rowDada[0][2];
             $model->soname = $rowDada[0][1];
             $model->phname = $rowDada[0][3];
@@ -452,9 +435,9 @@ class CertificatesController extends Controller
             $model->balance = $rowDada[0][6];
             $model->cert_group = $rowDada[0][7];
             $model->payer_id = $rowDada[0][8];
-            
+
             $model->actual = 1;
-            
+
             $model->contracts = 0;
             $model->directivity1 = 0;
             $model->directivity2 = 0;
@@ -464,7 +447,7 @@ class CertificatesController extends Controller
             $model->directivity6 = 0;
             $model->rezerv = 0;
             $model->save();
-            
+
             print_r($model->getErrors());
         }
     }
