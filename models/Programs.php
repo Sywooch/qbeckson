@@ -110,7 +110,7 @@ class Programs extends \yii\db\ActiveRecord
     public function getActivities()
     {
         return $this->hasMany(DirectoryProgramActivity::class, ['id' => 'activity_id'])
-            ->viaTable('{{%program_activity}}', ['program_id' => 'id']);
+            ->viaTable('{{%program_activity_assignment}}', ['program_id' => 'id']);
     }
 
     /**

@@ -2,7 +2,7 @@
 
 use yii\db\Migration;
 
-class m170601_110129_add_test_data extends Migration
+class m170602_074335_add_test_data extends Migration
 {
     public function up()
     {

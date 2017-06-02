@@ -20,9 +20,9 @@ use yii\db\ActiveRecord;
  */
 class DirectoryProgramActivity extends ActiveRecord
 {
-    const STATUS_ACTIVE = 1;
-    const STATUS_NEW = 2;
-    const STATUS_DELETED = 3;
+    const STATUS_ACTIVE = 10;
+    const STATUS_NEW = 20;
+    const STATUS_DELETED = 30;
 
     /**
      * @inheritdoc
@@ -96,12 +96,12 @@ class DirectoryProgramActivity extends ActiveRecord
 
         if (!Yii::$app->user->isGuest) {
             $query->andWhere([
-                'status' => DirectoryProgramActivity::STATUS_ACTIVE
+                'status' => self::STATUS_ACTIVE
             ]);
         } else {
             $query->andWhere([
                 'OR',
-                ['status' => DirectoryProgramActivity::STATUS_ACTIVE],
+                ['status' => self::STATUS_ACTIVE],
                 ['user_id' => Yii::$app->user->id]
             ]);
         }
