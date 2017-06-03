@@ -66,6 +66,7 @@ $this->registerJs($js);
                 'multiple' => true,
             ],
             'select2Options' => [
+                'showToggleAll' => false,
                 'pluginOptions' => [
                     'tags' => true,
                     'maximumSelectionLength' => 3,
@@ -92,10 +93,10 @@ $this->registerJs($js);
                 ],
             ],
             'pluginOptions' => [
-                'placeholder' => 'Выберите виды деятельности программы, либо добавьте свои ...',
+                'placeholder' => 'Выберите вид (виды) деятельности или добавьте свой',
                 'depends' => ['direction-id'],
                 'url' => Url::to(['activity/load-activities']),
-                'loadingText' => 'Загрузка видов деятельности ...',
+                'loadingText' => 'Загрузка видов деятельности..',
             ],
         ]);
     ?>
