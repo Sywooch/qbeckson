@@ -26,56 +26,30 @@ $this->params['breadcrumbs'][] = 'Организации';
 <?= GridView::widget([
     'dataProvider' => $OrganizationProvider,
     'filterModel' => $searchOrganization,
-    'pjax'=>true,
-    'rowOptions' => function ($model, $index, $widget, $grid){
-                  if($model){
-                      $certificates = new Certificates();
-                            $certificate = $certificates->getCertificates();
+    'pjax' => true,
+    'rowOptions' => function ($model, $index, $widget, $grid) {
+        if ($model) {
+            $certificates = new Certificates();
+            $certificate = $certificates->getCertificates();
 
-                $rows = (new \yii\db\Query())
-                    ->select(['id'])
-                    ->from('cooperate')
-                    ->where(['payer_id'=> $certificate['payer_id']])
-                    ->andWhere(['organization_id' => $model['id']])
-                    ->andWhere(['status'=> 1])
-                    ->count();
-                      
-                      if ($rows == 0) {
-                    return ['class' => 'danger'];
-                          }
-                  }
-            },
+            $rows = (new \yii\db\Query())
+                ->select(['id'])
+                ->from('cooperate')
+                ->where(['payer_id' => $certificate['payer_id']])
+                ->andWhere(['organization_id' => $model['id']])
+                ->andWhere(['status' => 1])
+                ->count();
+
+            if ($rows == 0) {
+                return ['class' => 'danger'];
+            }
+        }
+    },
     'summary' => false,
     'columns' => [
-        //['class' => 'yii\grid\SerialColumn'],
-
-        //'id',
-        //'user_id',
-      /*  ['attribute'=>'actual',
-                  'format' => 'raw',
-                  'value' => function($data){
-                         if ($data->actual == 0) {
-                            return Html::a('Разрешить деятельность', Url::to(['/organization/actual', 'id' => $data->id]), ['class' => 'btn btn-success']);
-                         } else {
-                        $previus = (new \yii\db\Query())
-                            ->select(['id'])
-                            ->from('contracts')
-                            ->where(['organization_id' => $data->id])
-                            ->andWhere(['status' => 1])
-                            ->count();
-                            if (!$previus) {
-                                return Html::a('Приостановить', Url::to(['/organization/noactual', 'id' => $data->id]), ['class' => 'btn btn-danger']);
-                            }
-                            else {
-                                return '';
-                            }
-                        }
-                  }
-        ], */
         'name',
-        //'type',
-        ['attribute'=>'type',
-            'value' => function($data){
+        ['attribute' => 'type',
+            'value' => function ($data) {
                 if ($data->type == 1) {
                     return 'Образовательная организация';
                 }
@@ -92,82 +66,68 @@ $this->params['breadcrumbs'][] = 'Организации';
         ],
         [
             'label' => 'Число программ',
-            'value' => function($data){
-            $programs = (new \yii\db\Query())
-                        ->select(['id'])
-                        ->from('programs')
-                        ->where(['organization_id' => $data->id])
-                        ->andWhere(['verification' => 2])
-                        ->count();
-            
-            return $programs;
+            'value' => function ($data) {
+                $programs = (new \yii\db\Query())
+                    ->select(['id'])
+                    ->from('programs')
+                    ->where(['organization_id' => $data->id])
+                    ->andWhere(['verification' => 2])
+                    ->count();
+
+                return $programs;
             }
         ],
-        //'license_date',
-        //'license_number',
-         //'license_issued',
-        // 'requisites',
-        // 'representative',
-        //'address_legal',
-        //'geocode',
-        
         [
             'label' => 'Число обучающихся',
-            'value' => function($data){
+            'value' => function ($data) {
                 $cert = (new \yii\db\Query())
-                        ->select(['certificate_id'])
-                        ->from('contracts')
-                        ->where(['organization_id' => $data->id])
-                        ->andWhere(['status' => 1])
-                        ->all();
+                    ->select(['certificate_id'])
+                    ->from('contracts')
+                    ->where(['organization_id' => $data->id])
+                    ->andWhere(['status' => 1])
+                    ->all();
                 $cert = array_unique($cert);
                 $cert = count($cert);
-            
-            return $cert;
+
+                return $cert;
             }
         ],
         'max_child',
-        //'inn',
-        //'okopo',
         'raiting',
-        // 'ground',
-        //'user.id',
-        //'user.username',
-        //'user.password',
-        ['attribute'=>'actual',
-          'value' => function($data){
-                 if ($data->actual == 0) {
+        ['attribute' => 'actual',
+            'value' => function ($data) {
+                if ($data->actual == 0) {
                     return '-';
-                 } else {
+                } else {
                     return '+';
                 }
-          }
+            }
         ],
         [
-                     'label' => 'Соглашение',
-                     'value' => function ($data) { 
-                          $certificates = new Certificates();
-                            $certificate = $certificates->getCertificates();
-                         
-                      $rows = (new \yii\db\Query())
-                        ->select(['id'])
-                        ->from('cooperate')
-                        ->where(['payer_id'=> $certificate['payer_id']])
-                        ->andWhere(['organization_id' => $data['id']])
-                        ->andWhere(['status'=> 1])
-                        ->count();
+            'label' => 'Соглашение',
+            'value' => function ($data) {
+                $certificates = new Certificates();
+                $certificate = $certificates->getCertificates();
 
-                          if ($rows == 0) {
-                            return 'Нет';
-                            }
-                         else {
-                            return 'Да';
-                            }
-                     },
-                ],
-        ['class' => 'yii\grid\ActionColumn',
+                $rows = (new \yii\db\Query())
+                    ->select(['id'])
+                    ->from('cooperate')
+                    ->where(['payer_id' => $certificate['payer_id']])
+                    ->andWhere(['organization_id' => $data['id']])
+                    ->andWhere(['status' => 1])
+                    ->count();
+
+                if ($rows == 0) {
+                    return 'Нет';
+                } else {
+                    return 'Да';
+                }
+            },
+        ],
+        [
+            'class' => 'yii\grid\ActionColumn',
             'controller' => 'organization',
-         'template' => '{view}',
+            'template' => '{view}',
         ],
     ],
 ]); ?>

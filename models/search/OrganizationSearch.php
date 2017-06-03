@@ -127,7 +127,11 @@ class OrganizationSearch extends Organization
                 $query->andFilterWhere([
                     'OR',
                     ['organization.mun' => $identity->mun_id],
-                    ['programs.mun' => $identity->mun_id]
+                    [
+                        'AND',
+                        ['programs.mun' => $identity->mun_id],
+                        ['programs.verification' => 2],
+                    ]
                 ]);
             }
         }
