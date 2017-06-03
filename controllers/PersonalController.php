@@ -92,9 +92,7 @@ class PersonalController extends \yii\web\Controller
             /** @var UserIdentity $user */
             $user = Yii::$app->user->getIdentity();
             $user->mun_id = $munId;
-            if ($user->save()) {
-                Yii::$app->session->setFlash('success', 'Информация обновлена');
-            } else {
+            if (!$user->save()) {
                 Yii::$app->session->setFlash('danger', 'Что-то не так!');
             }
 
