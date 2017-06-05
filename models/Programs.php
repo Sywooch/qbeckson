@@ -50,6 +50,7 @@ use app\models\Cooperate;
  * @property Informs[] $informs
  * @property Organization $organization
  * @property ProgrammeModule[] $years
+ * @property \app\models\statics\DirectoryProgramActivity[]|null $activities
  */
 
 class Programs extends \yii\db\ActiveRecord
@@ -159,6 +160,7 @@ class Programs extends \yii\db\ActiveRecord
             'ocen_mat' => 'Оценка выполнения требований к средствам обучения',
             'ocen_obch' => 'Оценка общей удовлетворенности программой',
             'selectyear' => 'Выберите год обучения по программе для просмотра подробной информации',
+            'activities' => 'Виды деятельности',
         ];
     }
 

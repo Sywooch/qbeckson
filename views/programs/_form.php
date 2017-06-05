@@ -48,7 +48,7 @@ $this->registerJs($js);
 
     <?php
         echo $form->field($model, 'directivity')->widget(Select2::class, [
-            'data' => ArrayHelper::map(DirectoryProgramDirection::findAllRecords(), 'id', 'name'),
+            'data' => ArrayHelper::map(DirectoryProgramDirection::findAllRecords(), 'name', 'name'),
             'options' => [
                 'placeholder' => 'Выберите направленность программы ...',
                 'id' => 'direction-id'

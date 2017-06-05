@@ -20,9 +20,9 @@ class ActivityController extends Controller
     {
         $out = [];
         if (isset($_POST['depdrop_parents'])) {
-            $id = end($_POST['depdrop_parents']);
-            $list = DirectoryProgramActivity::findAllActiveActivitiesByDirection($id);
-            if (null !== $id && null !== $list) {
+            $direction = end($_POST['depdrop_parents']);
+            $list = DirectoryProgramActivity::findAllActiveActivitiesByDirection($direction);
+            if (null !== $direction && null !== $list) {
                 foreach ($list as $i => $activity) {
                     $out[] = ['id' => $activity->id, 'name' => $activity->name];
                 }

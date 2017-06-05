@@ -85,14 +85,16 @@ class DirectoryProgramActivity extends ActiveRecord
     }
 
     /**
-     * @param $directionId
+     * @param string $direction
      * @return array|ActiveRecord[]|DirectoryProgramActivity[]
      */
-    public static function findAllActiveActivitiesByDirection($directionId)
+    public static function findAllActiveActivitiesByDirection($direction)
     {
-        $query = static::find()->andWhere([
-            'direction_id' => $directionId
-        ]);
+        $query = static::find()
+            ->joinWith(['direction'])
+            ->andWhere([
+                'directory_program_direction.name' => $direction
+            ]);
 
         if (!Yii::$app->user->isGuest) {
             $query->andWhere([
