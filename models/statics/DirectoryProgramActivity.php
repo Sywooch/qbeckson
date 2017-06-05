@@ -105,20 +105,21 @@ class DirectoryProgramActivity extends ActiveRecord
      */
     public static function findAllActiveActivitiesByDirection($direction)
     {
-        $query = static::find()->joinWith(['direction'])
+        $query = static::find()
+            ->joinWith(['direction'])
             ->andWhere([
                 'directory_program_direction.name' => $direction
             ]);
 
-        if (!Yii::$app->user->isGuest) {
+        if (Yii::$app->user->isGuest) {
             $query->andWhere([
-                'status' => self::STATUS_ACTIVE
+                'directory_program_activity.status' => self::STATUS_ACTIVE
             ]);
         } else {
             $query->andWhere([
                 'OR',
-                ['status' => self::STATUS_ACTIVE],
-                ['user_id' => Yii::$app->user->id]
+                ['directory_program_activity.status' => self::STATUS_ACTIVE],
+                ['directory_program_activity.user_id' => Yii::$app->user->id]
             ]);
         }
 

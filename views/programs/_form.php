@@ -17,7 +17,6 @@ use kartik\file\FileInput;
 use kartik\widgets\DepDrop;
 use kartik\select2\Select2;
 use yii\helpers\Url;
-use yii\web\JsExpression;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Programs */
@@ -51,7 +50,7 @@ $this->registerJs($js);
             'data' => ArrayHelper::map(DirectoryProgramDirection::findAllRecords(), 'name', 'name'),
             'options' => [
                 'placeholder' => 'Выберите направленность программы ...',
-                'id' => 'direction-id'
+                'id' => 'direction-name'
             ],
         ]);
         echo $form->field($model, 'activity_ids')->widget(DepDrop::class, [
@@ -75,12 +74,12 @@ $this->registerJs($js);
                     'change' => 'function() {
                         var isNew = $(this).find("[data-select2-tag=\"true\"]");
                         var name = isNew.val();
-                        var directionId = $("#direction-id").val();
+                        var directionName = $("#direction-name").val();
                         if (isNew.length && name !== "...") {
                             $.ajax({
                             	type: "POST",
                             	url: "' . Url::to(['activity/add-activity']) . '",
-                            	data: {name: name, directionId: directionId},
+                            	data: {name: name, directionName: directionName},
                             	success: function(id) {
                             	    isNew.replaceWith("<option selected value=" + id +">" + name + "</option>");
                             	},
@@ -94,7 +93,7 @@ $this->registerJs($js);
             ],
             'pluginOptions' => [
                 'placeholder' => 'Выберите вид (виды) деятельности или добавьте свой',
-                'depends' => ['direction-id'],
+                'depends' => ['direction-name'],
                 'url' => Url::to(['activity/load-activities']),
                 'loadingText' => 'Загрузка видов деятельности..',
             ],

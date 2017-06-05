@@ -1,5 +1,6 @@
 <?php
 
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
@@ -31,7 +32,17 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'name',
             'directivity',
-            'vid',
+            [
+                'attribute' => 'activities',
+                'value' => function ($model) {
+                    /** @var \app\models\Programs $model */
+                    if ($model->activities) {
+                        return implode(', ', ArrayHelper::getColumn($model->activities, 'name'));
+                    }
+
+                    return $model->vid;
+                }
+            ],
             [
                 'attribute' => 'mun',
                 'value' => $model->munName($model->mun),

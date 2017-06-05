@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\statics\DirectoryProgramActivity;
+use app\models\statics\DirectoryProgramDirection;
 use Yii;
 use yii\helpers\Json;
 use yii\web\Controller;
@@ -41,8 +42,11 @@ class ActivityController extends Controller
     {
         if (Yii::$app->request->post()) {
             $model = new DirectoryProgramActivity;
+            $direction = DirectoryProgramDirection::findOne([
+                'name' => Yii::$app->request->post('directionName')
+            ]);
             $model->name = Yii::$app->request->post('name');
-            $model->direction_id = Yii::$app->request->post('directionId');
+            $model->direction_id = $direction->id;
             $model->user_id = Yii::$app->user->id;
             $model->status = DirectoryProgramActivity::STATUS_NEW;
 

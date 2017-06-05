@@ -87,6 +87,17 @@ AppAsset::register($this);
                                                 ['label' => 'Дети (сертификаты)', 'url' => ['/import/children']],
                                             ],
                                         ],
+                                        [
+                                            'label' => 'Другое',
+                                            'url' => ['#'],
+                                            'items' => [
+                                                [
+                                                    'label' => 'Направленности программ',
+                                                    'url' => ['admin/directory-program-direction/index']
+                                                ],
+                                            ],
+
+                                        ]
                                     ],
                                 ]);
                             }
