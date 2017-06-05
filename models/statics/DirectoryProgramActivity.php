@@ -41,6 +41,7 @@ class DirectoryProgramActivity extends ActiveRecord
             [['direction_id'], 'required'],
             [['direction_id', 'user_id', 'status'], 'integer'],
             [['name'], 'string', 'max' => 255],
+            ['status', 'in', 'range' => array_keys(self::statuses())],
             [
                 ['direction_id'], 'exist', 'skipOnError' => true,
                 'targetClass' => DirectoryProgramDirection::class,
@@ -63,8 +64,22 @@ class DirectoryProgramActivity extends ActiveRecord
             'id' => 'ID',
             'direction_id' => 'Direction ID',
             'user_id' => 'User ID',
-            'name' => 'Name',
-            'status' => 'Status',
+            'direction' => 'Направленность',
+            'user' => 'Пользователь',
+            'name' => 'Название',
+            'status' => 'Статус',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public static function statuses()
+    {
+        return [
+            self::STATUS_ACTIVE => 'Активный',
+            self::STATUS_NEW => 'Новый',
+            self::STATUS_DELETED => 'Удалённый',
         ];
     }
 
@@ -90,8 +105,7 @@ class DirectoryProgramActivity extends ActiveRecord
      */
     public static function findAllActiveActivitiesByDirection($direction)
     {
-        $query = static::find()
-            ->joinWith(['direction'])
+        $query = static::find()->joinWith(['direction'])
             ->andWhere([
                 'directory_program_direction.name' => $direction
             ]);

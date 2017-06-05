@@ -188,7 +188,19 @@ $config = [
                         'allow' => true,
                         'roles' => ['organizations'],
                     ]
-                ]
+                ],
+                'admin/directory-program-direction' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['admins'],
+                    ]
+                ],
+                'admin/directory-program-activity' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['admins'],
+                    ]
+                ],
             ]
     ],
 
