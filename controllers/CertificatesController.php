@@ -85,7 +85,7 @@ class CertificatesController extends Controller
                 $username = $user->username;
             }
 
-            if ($user->validate() && $user->save()) {
+            if ($user->save()) {
                 $userRole = Yii::$app->authManager->getRole('certificate');
                 Yii::$app->authManager->assign($userRole, $user->id);
 
@@ -100,10 +100,9 @@ class CertificatesController extends Controller
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
 
                 if ($model->save()) {
-                    $user->password = $password;
-
                     return $this->render('/user/view', [
                         'model' => $user,
+                        'password' => $password,
                     ]);
                 } else {
                     $user->delete();
@@ -111,10 +110,6 @@ class CertificatesController extends Controller
             }
 
         }
-
-        //$payers = new Payers();
-        //$payer = $payers->getPayer();
-        //$pref = Yii::$app->params['region'].'-'.$payer['mun'].'-';               
 
         return $this->render('create', [
             'model' => $model,
