@@ -5,8 +5,26 @@ namespace app\models;
 use Yii;
 use yii\db\ActiveRecord;
 use developeruz\db_rbac\interfaces\UserRbacInterface;
+use yii\web\IdentityInterface;
 
-class UserIdentity extends ActiveRecord implements \yii\web\IdentityInterface, UserRbacInterface
+/**
+ * @property integer $id
+ * @property string $username
+ * @property string $password
+ * @property string $access_token
+ * @property string $auth_key
+ * @property integer $mun_id
+ * @property mixed $authKey
+ *
+ * @property \yii\db\ActiveQuery $dispute
+ * @property \yii\db\ActiveQuery $organization
+ * @property null|Certificates $certificate
+ * @property null|Mun $municipality
+ * @property mixed $userName
+ * @property Payers $payer
+ * @property \yii\db\ActiveQuery $operator
+ */
+class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacInterface
 {
     /**
      * @inheritdoc
@@ -14,6 +32,20 @@ class UserIdentity extends ActiveRecord implements \yii\web\IdentityInterface, U
     public static function tableName()
     {
         return '{{%user}}';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+        return [
+            [
+                'mun_id', 'exist', 'skipOnError' => true,
+                'targetClass' => Mun::class,
+                'targetAttribute' => ['mun_id' => 'id']
+            ],
+        ];
     }
 
     /**
@@ -51,9 +83,12 @@ class UserIdentity extends ActiveRecord implements \yii\web\IdentityInterface, U
         return $this->id;
     }
 
+    /**
+     * @return mixed
+     */
     public function getUserName()
     {
-       return $this->username;
+        return $this->username;
     }
 
     /**
@@ -132,5 +167,13 @@ class UserIdentity extends ActiveRecord implements \yii\web\IdentityInterface, U
     public function getPayer()
     {
         return $this->hasOne(Payers::className(), ['user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery|null|Mun
+     */
+    public function getMunicipality()
+    {
+        return $this->hasOne(Mun::class, ['id' => 'mun_id']);
     }
 }

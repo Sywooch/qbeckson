@@ -287,7 +287,7 @@ form-group field-organization-license_issued_dat {
 .top-line {
     height: 50px;
     padding: 0 20px;
-    /*background: #1e3685; */
+    /*background: #1e3685;*/
     background: #0C5EAB;
     color: #fff;
 }
@@ -607,4 +607,22 @@ li.breadcrumbs-help-icon:before {
 
 .container-refuse-reason {
     display: none;
+}
+
+.header-nav > li {
+    height: 50px;
+}
+
+.header-nav > li > a:hover,
+.header-nav > li > a:focus {
+    color: white;
+    text-decoration: none;
+    background-color: #0C5EAB;
+}
+
+.header-nav .open > a,
+.header-nav .open > a:hover,
+.header-nav .open > a:focus {
+    background-color: #0C5EAB;
+    border-color: #337ab7;
 }

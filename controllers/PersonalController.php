@@ -2,6 +2,9 @@
 
 namespace app\controllers;
 
+use app\models\Mun;
+use app\models\User;
+use app\models\UserIdentity;
 use Yii;
 use app\models\Programs;
 use app\models\search\ProgramsSearch;
@@ -56,10 +59,48 @@ use app\models\Payer1ContractsSearch;
 use app\models\Payer0ContractsSearch;
 use app\models\Payer4ContractsSearch;
 use app\models\Payer3ContractsSearch;
-
+use yii\filters\VerbFilter;
+use yii\web\NotFoundHttpException;
 
 class PersonalController extends \yii\web\Controller
 {
+    /**
+     * @inheritdoc
+     */
+    public function behaviors()
+    {
+        return [
+            'verbs' => [
+                'class' => VerbFilter::className(),
+                'actions' => [
+                    'update-municipality' => ['post'],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Update user municipality binding.
+     *
+     * @param $munId
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     */
+    public function actionUpdateMunicipality($munId = null)
+    {
+        if (Mun::findOne($munId) || null === $munId) {
+            /** @var UserIdentity $user */
+            $user = Yii::$app->user->getIdentity();
+            $user->mun_id = $munId;
+            if (!$user->save()) {
+                Yii::$app->session->setFlash('danger', 'Что-то не так!');
+            }
+
+            return $this->redirect(Yii::$app->request->referrer);
+        }
+        throw new NotFoundHttpException('Model not found!');
+    }
+
     public function actionIndex()
     {
         return $this->render('index');
@@ -732,8 +773,6 @@ class PersonalController extends \yii\web\Controller
 
     public function actionCertificateOrganizations()
     {
-
-
         $searchOrganization = new OrganizationSearch();
         $OrganizationProvider = $searchOrganization->search(Yii::$app->request->queryParams);
 

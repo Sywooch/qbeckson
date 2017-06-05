@@ -2,8 +2,6 @@
 
 namespace app\models;
 
-use Yii;
-
 /**
  * This is the model class for table "mun".
  *
@@ -86,10 +84,18 @@ class Mun extends \yii\db\ActiveRecord
             'coxud' => 'Художественная',
             'cotur' => 'Туристско-краеведческая',
             'cosoc' => 'Социально-педагогическая',
-            
             'deystv' => 'Число действующих в очередном учебном году сертификатов дополнительного образования',
             'lastdeystv' => 'Число действовавших в предыдущем учебном году сертификатов дополнительного образования',
             'countdet' => 'Общее число детей в возрасте от 5-ти до 18-ти лет, проживающее на территории муниципального района (городского округа)'
         ];
+    }
+
+    /**
+     * @param string $columns
+     * @return static[]
+     */
+    public static function findAllRecords($columns = '*')
+    {
+        return static::find()->select($columns)->all();
     }
 }

@@ -9,12 +9,11 @@ use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use app\assets\AppAsset;
-use yii\data\ActiveDataProvider;
-use app\models\Informs;
 use app\models\Organization;
-use app\models\Certificates;
 
 AppAsset::register($this);
+/** @var \app\models\UserIdentity $user */
+$user = Yii::$app->user->getIdentity();
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -38,20 +37,22 @@ AppAsset::register($this);
                         <?php
                         if (!Yii::$app->user->isGuest) {
                             echo Nav::widget([
-                                'options' => ['class' => 'navbar-nav navbar-right'],
+                                'options' => ['class' => 'navbar-nav navbar-right header-nav'],
                                 'items' => [
-                                    '<li>'
-                                        . Html::beginForm(['/site/logout'], 'post', ['class' => 'navbar-form'])
-                                        . Html::submitButton('Выйти (' . Yii::$app->user->identity->username . ')', ['class' => 'btn btn-link'])
-                                        . Html::endForm() .
-                                    '</li>'
+                                    [
+                                        'label' => 'Выйти(' .  $user->username . ')',
+                                        'url' => ['/site/logout'],
+                                        'linkOptions' => [
+                                            'data-method' => 'post',
+                                            'class' => 'btn btn-link'
+                                        ],
+                                    ]
                                 ],
                             ]);
                         }
                         ?>
                     </div>
                 </div>
-
                 <div class="row">
                     <div class="col-xs-12">
                         <?php

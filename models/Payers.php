@@ -21,6 +21,7 @@ use app\models\Cooperate;
  * @property string $email
  * @property string $position
  * @property string $fio
+ * @property integer $mun
  * @property string $directionality
  * @property integer $directionality_1_count
  * @property integer $directionality_2_count
