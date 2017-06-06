@@ -126,17 +126,16 @@ class Programs extends \yii\db\ActiveRecord
      */
     public function getDirection()
     {
-        return $this->hasOne(DirectoryProgramDirection::class, ['id', 'direction_id']);
+        return $this->hasOne(DirectoryProgramDirection::className(), ['id' => 'direction_id']);
     }
 
     /**
      * @return string
      */
+    // TODO: Избавиться от этого метода (старая система "направленностей")
     public function getDirectivity()
     {
-        //return $this->direction->old_name;
-        //TODO test
-        return 'sdf';
+        return $this->direction->old_name;
     }
 
     /**
@@ -151,6 +150,7 @@ class Programs extends \yii\db\ActiveRecord
             'countHours' => 'Учебных часов',
             'form' => 'Форма обучения',
             'name' => 'Наименование программы',
+            'directivity' => 'Направленность программы',
             'direction_id' => 'Направленность программы',
             'vid' => 'Вид деятельности образовательной программы',
             'activity_ids' => 'Виды деятельности образовательной программы',
