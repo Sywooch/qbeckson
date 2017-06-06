@@ -20,7 +20,7 @@ class ProgramsPayerSearch extends Programs
     {
         return [
             [['id', 'organization_id', 'verification', 'rating', 'limit', 'study', 'open', 'ovz', 'quality_control'], 'integer'],
-            [['name', 'directivity', 'task', 'annotation', 'link', 'vid', 'certification_date'], 'safe'],
+            [['name', 'task', 'annotation', 'link', 'vid', 'certification_date'], 'safe'],
         ];
     }
 

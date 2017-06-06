@@ -21,7 +21,7 @@ class ProgramsSearch extends Programs
     {
         return [
             [['id', 'organization_id', 'form', 'mun', 'ground', 'price', 'limit', 'study', 'last_contracts', 'last_s_contracts', 'last_s_contracts_rod', 'open', 'year', 'both_teachers', 'ovz', 'age_group_min', 'age_group_max', 'quality_control', 'p3z'], 'integer'],
-            [['name', 'directivity', 'vid', 'colse_date', 'task', 'annotation', 'fullness', 'complexity', 'norm_providing', 'zab', 'link', 'certification_date', 'verification'], 'safe'],
+            [['name', 'vid', 'colse_date', 'task', 'annotation', 'fullness', 'complexity', 'norm_providing', 'zab', 'link', 'certification_date', 'verification'], 'safe'],
             [['rating', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch'], 'number'],
             ['organization', 'string'],
         ];
