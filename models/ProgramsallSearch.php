@@ -86,7 +86,7 @@ class ProgramsallSearch extends Programs
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'directivity', $this->directivity])
+            ->andFilterWhere(['like', 'direction_id', $this->direction_id])
             ->andFilterWhere(['like', 'task', $this->task])
             ->andFilterWhere(['like', 'annotation', $this->annotation])
             ->andFilterWhere(['like', 'link', $this->link])

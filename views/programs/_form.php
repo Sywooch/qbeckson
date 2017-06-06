@@ -4,15 +4,10 @@ use app\models\statics\DirectoryProgramActivity;
 use app\models\statics\DirectoryProgramDirection;
 use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
-use app\models\Cooperate;
 use app\models\Mun;
-use kartik\datecontrol\DateControl;
 use kartik\form\ActiveForm;
-use kartik\date\DatePicker;
 use wbraganca\dynamicform\DynamicFormWidget;
 use kartik\field\FieldRange;
-use kartik\touchspin\TouchSpin;
-use kartik\widgets\Spinner;
 use kartik\file\FileInput;
 use kartik\widgets\DepDrop;
 use kartik\select2\Select2;
@@ -35,28 +30,23 @@ jQuery(".dynamicform_wrapper").on("afterDelete", function(e) {
     });
 });
 ';
-
 $this->registerJs($js);
 ?>
-
 <div class="programs-form" ng-app>
-
     <?php $form = ActiveForm::begin(['id' => 'dynamic-form', 'options' => ['enctype' => 'multipart/form-data']]); ?>
-
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
-
     <?php
-        echo $form->field($model, 'directivity')->widget(Select2::class, [
-            'data' => ArrayHelper::map(DirectoryProgramDirection::findAllRecords(), 'name', 'name'),
+        echo $form->field($model, 'direction_id')->widget(Select2::class, [
+            'data' => ArrayHelper::map(DirectoryProgramDirection::findAllRecords(), 'id', 'name'),
             'options' => [
                 'placeholder' => 'Выберите направленность программы ...',
-                'id' => 'direction-name'
+                'id' => 'direction-id'
             ],
         ]);
         echo $form->field($model, 'activity_ids')->widget(DepDrop::class, [
-            'data'=> $model->directivity ?
+            'data'=> $model->direction_id ?
                 ArrayHelper::map(
-                    DirectoryProgramActivity::findAllActiveActivitiesByDirection($model->directivity),
+                    DirectoryProgramActivity::findAllActiveActivitiesByDirection($model->direction_id),
                     'id',
                     'name'
                 ) : [],
@@ -71,21 +61,19 @@ $this->registerJs($js);
                     'maximumSelectionLength' => 3,
                 ],
                 'pluginEvents' => [
-                    'change' => 'function() {
+                    'change' => 'function () {
                         var isNew = $(this).find("[data-select2-tag=\"true\"]");
                         var name = isNew.val();
-                        var directionName = $("#direction-name").val();
+                        var directionId = $("#direction-id").val();
                         if (isNew.length && name !== "...") {
                             $.ajax({
                             	type: "POST",
                             	url: "' . Url::to(['activity/add-activity']) . '",
-                            	data: {name: name, directionName: directionName},
-                            	success: function(id) {
+                            	data: {name: name, directionId: directionId},
+                            	success: function (id) {
                             	    isNew.replaceWith("<option selected value=" + id +">" + name + "</option>");
                             	},
-                            	error: function (xhr, ajaxOptions, thrownError) {
-                            	    console.log("somethingWrong");
-                                },
+                            	error: function (xhr, ajaxOptions, thrownError) { },
                             });
                         }
                     }',
@@ -93,26 +81,20 @@ $this->registerJs($js);
             ],
             'pluginOptions' => [
                 'placeholder' => 'Выберите вид (виды) деятельности или добавьте свой',
-                'depends' => ['direction-name'],
+                'depends' => ['direction-id'],
                 'url' => Url::to(['activity/load-activities']),
                 'loadingText' => 'Загрузка видов деятельности..',
             ],
         ]);
     ?>
-
-    <?= $form->field($model, 'form')->dropdownList(\Yii::$app->params['form']) ?>
-
-    <?= $form->field($model, 'mun')->dropdownList(ArrayHelper::map(Mun::find()->all(), 'id', 'name')) ?>
-
-    <?= $form->field($model, 'ground')->dropdownList(\Yii::$app->params['ground']) ?>
-
+    <?= $form->field($model, 'form')->dropDownList(Yii::$app->params['form']) ?>
+    <?= $form->field($model, 'mun')->dropDownList(ArrayHelper::map(Mun::find()->all(), 'id', 'name')) ?>
+    <?= $form->field($model, 'ground')->dropDownList(Yii::$app->params['ground']) ?>
     <?= $form->field($model, 'annotation')->textarea(['rows' => 5]) ?>
-
     <?= $form->field($model, 'task')->textarea(['rows' => 5]) ?>
-
     <?php
     if ($model->isNewRecord) {
-        echo $form->field($file, 'docFile')->widget(FileInput::classname(), ['pluginOptions' => [
+        echo $form->field($file, 'docFile')->widget(FileInput::class, ['pluginOptions' => [
             'showPreview' => false,
             'showCaption' => true,
             'showRemove' => true,
@@ -120,10 +102,9 @@ $this->registerJs($js);
         ]]);
     } else {
         echo '<a href="/' . $model->link . '"><span class="glyphicon glyphicon-download-alt"></span> Скачать программу</a>';
-
         echo $form->field($file, 'newprogram')->checkbox(['value' => 1, 'ng-model' => 'newprogram']);
         echo '<div ng-show="newprogram">';
-        echo $form->field($file, 'docFile')->widget(FileInput::classname(), ['pluginOptions' => [
+        echo $form->field($file, 'docFile')->widget(FileInput::class, ['pluginOptions' => [
             'showPreview' => false,
             'showCaption' => true,
             'showRemove' => true,

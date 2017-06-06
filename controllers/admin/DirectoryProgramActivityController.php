@@ -9,7 +9,8 @@ use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 
 /**
- * DirectoryProgramActivityController implements the CRUD actions for DirectoryProgramActivity model.
+ * Class DirectoryProgramActivityController
+ * @package app\controllers\admin
  */
 class DirectoryProgramActivityController extends BaseAdminController
 {

@@ -100,26 +100,23 @@ class DirectoryProgramActivity extends ActiveRecord
     }
 
     /**
-     * @param string $direction
+     * @param string $directionId
      * @return array|ActiveRecord[]|DirectoryProgramActivity[]
      */
-    public static function findAllActiveActivitiesByDirection($direction)
+    public static function findAllActiveActivitiesByDirection($directionId)
     {
-        $query = static::find()
-            ->joinWith(['direction'])
-            ->andWhere([
-                'directory_program_direction.name' => $direction
-            ]);
-
+        $query = static::find()->andWhere([
+            'direction_id' => $directionId
+        ]);
         if (Yii::$app->user->isGuest) {
             $query->andWhere([
-                'directory_program_activity.status' => self::STATUS_ACTIVE
+                'status' => self::STATUS_ACTIVE
             ]);
         } else {
             $query->andWhere([
                 'OR',
-                ['directory_program_activity.status' => self::STATUS_ACTIVE],
-                ['directory_program_activity.user_id' => Yii::$app->user->id]
+                ['status' => self::STATUS_ACTIVE],
+                ['user_id' => Yii::$app->user->id]
             ]);
         }
 

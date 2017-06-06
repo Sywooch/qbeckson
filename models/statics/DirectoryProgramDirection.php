@@ -9,6 +9,7 @@ use yii\db\ActiveRecord;
  *
  * @property integer $id
  * @property string $name
+ * @property string $old_name
  *
  * @property \yii\db\ActiveQuery $directoryProgramActivities
  */
@@ -29,7 +30,7 @@ class DirectoryProgramDirection extends ActiveRecord
     {
         return [
             [['name'], 'required'],
-            [['name'], 'string', 'max' => 255],
+            [['name', 'old_name'], 'string', 'max' => 255],
         ];
     }
 
@@ -40,7 +41,8 @@ class DirectoryProgramDirection extends ActiveRecord
     {
         return [
             'id' => 'ID',
-            'name' => 'Название',
+            'name' => 'Направленность программы',
+            'old_name' => 'Направленность программы',
         ];
     }
 
