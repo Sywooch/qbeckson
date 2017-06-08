@@ -48,17 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'model' => $model,
                 'attributes' => [
                     'directivity',
-                    [
-                        'attribute' => 'activities',
-                        'value' => function ($model) {
-                            /** @var \app\models\Programs $model */
-                            if ($model->activities) {
-                                return implode(', ', ArrayHelper::getColumn($model->activities, 'name'));
-                            }
-
-                            return $model->vid;
-                        }
-                    ],
+                    'commonActivities',
                     'limit',
                     [
                         'label' => 'Возраст детей',

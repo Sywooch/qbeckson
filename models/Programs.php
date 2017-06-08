@@ -7,6 +7,7 @@ use app\models\statics\DirectoryProgramDirection;
 use voskobovich\linker\LinkerBehavior;
 use Yii;
 use app\models\Cooperate;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "programs".
@@ -138,6 +139,16 @@ class Programs extends \yii\db\ActiveRecord
         return $this->direction->old_name;
     }
 
+    // TODO: Избавиться от этого метода (старая система "видов")
+    public function getCommonActivities()
+    {
+        if (!empty($this->activities)) {
+            return implode(', ', ArrayHelper::getColumn($this->activities, 'name'));
+        }
+
+        return $this->vid;
+    }
+
     /**
      * @inheritdoc
      */
@@ -153,6 +164,7 @@ class Programs extends \yii\db\ActiveRecord
             'directivity' => 'Направленность программы',
             'direction_id' => 'Направленность программы',
             'vid' => 'Вид деятельности образовательной программы',
+            'commonActivities' => 'Вид деятельности образовательной программы',
             'activity_ids' => 'Виды деятельности образовательной программы',
             'mun' => 'Муниципальное образование',
             'annotation' => 'Аннотация программы',
