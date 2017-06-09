@@ -314,7 +314,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     },
                 ],
                 'directivity',
-                'vid',
+                'commonActivities',
 
                 ['class' => 'yii\grid\ActionColumn',
                     'controller' => 'programs',

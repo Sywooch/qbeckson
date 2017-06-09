@@ -88,6 +88,17 @@ $user = Yii::$app->user->getIdentity();
                                                 ['label' => 'Дети (сертификаты)', 'url' => ['/import/children']],
                                             ],
                                         ],
+                                        [
+                                            'label' => 'Другое',
+                                            'url' => ['#'],
+                                            'items' => [
+                                                [
+                                                    'label' => 'Направленности программ',
+                                                    'url' => ['admin/directory-program-direction/index']
+                                                ],
+                                            ],
+
+                                        ]
                                     ],
                                 ]);
                             }

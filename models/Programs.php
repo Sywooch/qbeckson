@@ -2,8 +2,12 @@
 
 namespace app\models;
 
+use app\models\statics\DirectoryProgramActivity;
+use app\models\statics\DirectoryProgramDirection;
+use voskobovich\linker\LinkerBehavior;
 use Yii;
 use app\models\Cooperate;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "programs".
@@ -12,7 +16,6 @@ use app\models\Cooperate;
  * @property integer $organization_id
  * @property integer $verification
  * @property string $name
- * @property string $directivity
  * @property string $vid
  * @property integer $mun
  * @property integer $ground
@@ -40,6 +43,8 @@ use app\models\Cooperate;
  * @property integer $quality_control
  * @property string $link
  * @property string $certification_date
+ * @property array activity_ids
+ * @property integer direction_id
  *
  * @property Contracts[] $contracts
  * @property Favorites[] $favorites
@@ -47,6 +52,9 @@ use app\models\Cooperate;
  * @property Informs[] $informs
  * @property Organization $organization
  * @property ProgrammeModule[] $years
+ * @property DirectoryProgramActivity[]|null $activities
+ * @property DirectoryProgramDirection|null $direction
+ * @property string $directivity
  */
 
 class Programs extends \yii\db\ActiveRecord
@@ -68,20 +76,77 @@ class Programs extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
-
     public function rules()
     {
-      return [
-            [['directivity', 'name', 'task', 'annotation', 'ovz', 'norm_providing', 'age_group_min', 'age_group_max', 'ground'], 'required'],
-            [['organization_id', 'ovz', 'mun', 'year', 'ground', 'age_group_min', 'age_group_max', 'verification', 'form', 'p3z', 'study', 'last_contracts', 'limit', 'last_s_contracts', 'quality_control', 'last_s_contracts_rod'], 'integer'],
+        return [
+            [['direction_id', 'name', 'task', 'annotation', 'ovz', 'norm_providing', 'age_group_min', 'age_group_max', 'ground'], 'required'],
+            [['organization_id', 'ovz', 'mun', 'year', 'ground', 'age_group_min', 'age_group_max', 'verification', 'form', 'p3z', 'study', 'last_contracts', 'limit', 'last_s_contracts', 'quality_control', 'last_s_contracts_rod', 'direction_id'], 'integer'],
             [['rating' , 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch'], 'number'],
-            [['directivity', 'task', 'annotation', 'vid', 'norm_providing', 'search'], 'string'],
+            [['task', 'annotation', 'vid', 'norm_providing', 'search'], 'string'],
             [['name', 'zab'], 'string', 'max' => 255],
             [['link'], 'string', 'max' => 45],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
             ['age_group_min', 'compare', 'compareAttribute' => 'age_group_max', 'type' => 'number', 'operator' => '<='],
             ['age_group_max', 'compare', 'compareAttribute' => 'age_group_min', 'type' => 'number', 'operator' => '>='],
+
+            [['activity_ids'], 'each', 'rule' => ['integer']],
+            [
+                'direction_id', 'exist', 'skipOnError' => true,
+                'targetClass' => DirectoryProgramDirection::class,
+                'targetAttribute' => ['direction_id' => 'id']
+            ]
         ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => LinkerBehavior::class,
+                'relations' => [
+                    'activity_ids' => 'activities',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery|DirectoryProgramActivity[]|null
+     */
+    public function getActivities()
+    {
+        return $this->hasMany(DirectoryProgramActivity::class, ['id' => 'activity_id'])
+            ->viaTable('{{%program_activity_assignment}}', ['program_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery|DirectoryProgramDirection|null
+     */
+    public function getDirection()
+    {
+        return $this->hasOne(DirectoryProgramDirection::className(), ['id' => 'direction_id']);
+    }
+
+    /**
+     * @return string
+     */
+    // TODO: Избавиться от этого метода (старая система "направленностей")
+    public function getDirectivity()
+    {
+        return $this->direction->old_name;
+    }
+
+    // TODO: Избавиться от этого метода (старая система "видов")
+    public function getCommonActivities()
+    {
+        if (!empty($this->activities)) {
+            return implode(', ', ArrayHelper::getColumn($this->activities, 'name'));
+        }
+
+        return $this->vid;
     }
 
     /**
@@ -94,10 +159,13 @@ class Programs extends \yii\db\ActiveRecord
             'organization_id' => 'Организация',
             'verification' => 'Статус сертификации',
             'countHours' => 'Учебных часов',
-            'form' => 'Форма обучения',  
+            'form' => 'Форма обучения',
             'name' => 'Наименование программы',
             'directivity' => 'Направленность программы',
+            'direction_id' => 'Направленность программы',
             'vid' => 'Вид деятельности образовательной программы',
+            'commonActivities' => 'Вид деятельности образовательной программы',
+            'activity_ids' => 'Виды деятельности образовательной программы',
             'mun' => 'Муниципальное образование',
             'annotation' => 'Аннотация программы',
             'task' => 'Цели и задачи программы',
@@ -129,7 +197,8 @@ class Programs extends \yii\db\ActiveRecord
             'ocen_mat' => 'Оценка выполнения требований к средствам обучения',
             'ocen_obch' => 'Оценка общей удовлетворенности программой',
             'selectyear' => 'Выберите год обучения по программе для просмотра подробной информации',
-            ];
+            'activities' => 'Виды деятельности',
+        ];
     }
 
     /**

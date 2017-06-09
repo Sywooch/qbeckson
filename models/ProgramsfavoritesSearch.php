@@ -19,7 +19,7 @@ class ProgramsfavoritesSearch extends Programs
     {
         return [
             [['id', 'organization_id', 'verification', 'rating', 'limit', 'study', 'open', 'ovz', 'quality_control'], 'integer'],
-            [['name', 'directivity', 'task', 'annotation', 'link', 'certification_date'], 'safe'],
+            [['name', 'task', 'annotation', 'link', 'certification_date'], 'safe'],
         ];
     }
 

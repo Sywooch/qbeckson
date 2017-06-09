@@ -188,7 +188,27 @@ $config = [
                         [
                             'allow' => true,
                         ],
+                    ],
+                'activity' =>
+                [
+                    [
+                        'actions' => ['load-activities', 'add-activity'],
+                        'allow' => true,
+                        'roles' => ['organizations'],
                     ]
+                ],
+                'admin/directory-program-direction' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['admins'],
+                    ]
+                ],
+                'admin/directory-program-activity' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['admins'],
+                    ]
+                ],
             ]
     ],
 
@@ -197,11 +217,6 @@ $config = [
 
 if (YII_ENV_DEV) {
     // configuration adjustments for 'dev' environment
-    $config['bootstrap'][] = 'gii';
-    $config['modules']['gii'] = [
-        'class' => 'yii\gii\Module',
-    ];
-
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',

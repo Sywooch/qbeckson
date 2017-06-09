@@ -1,5 +1,6 @@
 <?php
 
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\GridView;
@@ -47,10 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'model' => $model,
                 'attributes' => [
                     'directivity',
-                    [
-                        'attribute' => 'vid',
-                        'label' => 'Вид деятельности',
-                    ],
+                    'commonActivities',
                     'limit',
                     [
                         'label' => 'Возраст детей',
@@ -92,8 +90,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attributes' => [
                     'directivity',
                     [
-                        'attribute' => 'vid',
-                        'label' => 'Вид деятельности',
+                        'attribute' => 'activities',
+                        'value' => function ($model) {
+                            /** @var \app\models\Programs $model */
+                            if ($model->activities) {
+                                return implode(', ', ArrayHelper::getColumn($model->activities, 'name'));
+                            }
+
+                            return $model->vid;
+                        }
                     ],
                     [
                         'label' => 'Возраст детей',
@@ -139,8 +144,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'directivity',
                     [
-                        'attribute' => 'vid',
-                        'label' => 'Вид деятельности',
+                        'attribute' => 'activities',
+                        'value' => function ($model) {
+                            /** @var \app\models\Programs $model */
+                            if ($model->activities) {
+                                return implode(', ', ArrayHelper::getColumn($model->activities, 'name'));
+                            }
+
+                            return $model->vid;
+                        }
                     ],
                     [
                         'label' => 'Возраст детей',
@@ -193,8 +205,15 @@ $this->params['breadcrumbs'][] = $this->title;
                         ],
                         'directivity',
                         [
-                            'attribute' => 'vid',
-                            'label' => 'Вид деятельности',
+                            'attribute' => 'activities',
+                            'value' => function ($model) {
+                                /** @var \app\models\Programs $model */
+                                if ($model->activities) {
+                                    return implode(', ', ArrayHelper::getColumn($model->activities, 'name'));
+                                }
+
+                                return $model->vid;
+                            }
                         ],
                         'limit',
                         [
@@ -241,8 +260,15 @@ $this->params['breadcrumbs'][] = $this->title;
                         ],
                         'directivity',
                         [
-                            'attribute' => 'vid',
-                            'label' => 'Вид деятельности',
+                            'attribute' => 'activities',
+                            'value' => function ($model) {
+                                /** @var \app\models\Programs $model */
+                                if ($model->activities) {
+                                    return implode(', ', ArrayHelper::getColumn($model->activities, 'name'));
+                                }
+
+                                return $model->vid;
+                            }
                         ],
                         'limit',
                         [
@@ -290,8 +316,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'directivity',
                     [
-                        'attribute' => 'vid',
-                        'label' => 'Вид деятельности',
+                        'attribute' => 'activities',
+                        'value' => function ($model) {
+                            /** @var \app\models\Programs $model */
+                            if ($model->activities) {
+                                return implode(', ', ArrayHelper::getColumn($model->activities, 'name'));
+                            }
+
+                            return $model->vid;
+                        }
                     ],
                     'limit',
                     [

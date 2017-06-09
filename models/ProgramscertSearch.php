@@ -20,7 +20,7 @@ class ProgramscertSearch extends Programs
     {
         return [
             [['id', 'organization_id', 'verification', 'rating', 'limit', 'study', 'open', 'ovz', 'quality_control'], 'integer'],
-            [['name', 'directivity', 'task', 'annotation', 'link', 'certification_date', 'organization'], 'safe'],
+            [['name', 'task', 'annotation', 'link', 'certification_date', 'organization'], 'safe'],
         ];
     }
 
