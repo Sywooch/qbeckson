@@ -181,7 +181,7 @@ class PersonalController extends \yii\web\Controller
 
         $searchContracts1 = new ContractsoSearch();
         if (isset($_GET['payer'])) {
-            $searchContracts1->payers = $_GET['payer'];
+            $searchContracts1->payersname = $_GET['payer'];
         }
         if (isset($_GET['org'])) {
             $searchContracts1->organization = $_GET['org'];
