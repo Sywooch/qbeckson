@@ -99,20 +99,17 @@ class PayersController extends Controller
                $model->directionality = $model->directionality_1rob.",".$model->directionality_1.",".$model->directionality_2.",".$model->directionality_3.",".$model->directionality_4.",".$model->directionality_5.",".$model->directionality_6;
 
                if ($model->save()) {
-                   
-                   $groups = Yii::$app->params['groups'];
-                   
-                   foreach ($groups as $value) {
+                   foreach (Yii::$app->params['groups'] as $value) {
                        $group = new CertGroup();
                        $group->payer_id = $model->id;
                        $group->group = $value[0];
                        $group->nominal = $value[1];
+                       $group->is_special = !empty($value[2]) ? 1 : null;
                        $group->save();
                     }
-                   
-                    $user->password = $password;
                     return $this->render('/user/view', [
                         'model' => $user,
+                        'password' => $password,
                     ]);
                 }
            }
