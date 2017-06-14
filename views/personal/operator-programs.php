@@ -167,6 +167,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= ExportMenu::widget([
             'dataProvider' => $Programs1Provider,
             'target' => '_self',
+            'exportConfig' => [
+                ExportMenu::FORMAT_EXCEL => false
+            ],
             'columns' => [
                 [
                     'attribute' => 'name',
@@ -346,6 +349,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= ExportMenu::widget([
             'dataProvider' => $waitProgramsProvider,
             'target' => '_self',
+            'exportConfig' => [
+                ExportMenu::FORMAT_EXCEL => false
+            ],
             'columns' => [
                 'name',
                 [

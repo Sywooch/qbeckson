@@ -68,6 +68,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <?= ExportMenu::widget([
     'dataProvider' => $CertificatesExportProvider,
+    'exportConfig' => [
+        ExportMenu::FORMAT_EXCEL => false,
+    ],
     'target' => '_self',
     'columns' => array_merge(['id', 'user_id'], $columns),
 ]); ?>

@@ -142,6 +142,9 @@ use kartik\export\ExportMenu;
 
     <?= ExportMenu::widget([
             'dataProvider' => $PayersProvider,
+        'exportConfig' => [
+            ExportMenu::FORMAT_EXCEL => false,
+        ],
             'columns' => [
                 'id',
                 'user_id',
@@ -206,6 +209,9 @@ use kartik\export\ExportMenu;
         ]); ?>
         <?= ExportMenu::widget([
             'dataProvider' => $PayersProvider,
+            'exportConfig' => [
+                ExportMenu::FORMAT_EXCEL => false,
+            ],
             'columns' => [
                 'id',
                 'user_id',
@@ -254,6 +260,9 @@ use kartik\export\ExportMenu;
             ]); ?>
         <?= ExportMenu::widget([
             'dataProvider' => $PayersProvider,
+            'exportConfig' => [
+                ExportMenu::FORMAT_EXCEL => false,
+            ],
             'columns' => [
                 'id',
                 'number',
@@ -301,6 +310,9 @@ use kartik\export\ExportMenu;
         ]); ?>
         <?= ExportMenu::widget([
             'dataProvider' => $PayersProvider,
+            'exportConfig' => [
+                ExportMenu::FORMAT_EXCEL => false,
+            ],
             'columns' => [
                 'id',
                 'number',
@@ -344,6 +356,9 @@ use kartik\export\ExportMenu;
         ]); ?>
         <?= ExportMenu::widget([
             'dataProvider' => $PayersProvider,
+            'exportConfig' => [
+                ExportMenu::FORMAT_EXCEL => false,
+            ],
             'columns' => [
                 'id',
                 'number',
@@ -403,6 +418,9 @@ use kartik\export\ExportMenu;
         ]); ?>
         <?= ExportMenu::widget([
             'dataProvider' => $Programs0Provider,
+            'exportConfig' => [
+                ExportMenu::FORMAT_EXCEL => false,
+            ],
             'columns' => [
                  'id',
                  'organization_id',
@@ -461,6 +479,9 @@ use kartik\export\ExportMenu;
         ]); ?>
             <?= ExportMenu::widget([
             'dataProvider' => $Programs0Provider,
+                'exportConfig' => [
+                    ExportMenu::FORMAT_EXCEL => false,
+                ],
             'columns' => [
                  'id',
                  'organization_id',

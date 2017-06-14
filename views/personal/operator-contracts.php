@@ -151,6 +151,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= ExportMenu::widget([
             'dataProvider' => $Contracts1Provider,
             'target' => '_self',
+            'exportConfig' => [
+                ExportMenu::FORMAT_EXCEL => false,
+            ],
             'columns' => [
                 [
                     'attribute' => 'number',
@@ -452,6 +455,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= ExportMenu::widget([
             'dataProvider' => $Contracts0Provider,
             'target' => '_self',
+            'exportConfig' => [
+                ExportMenu::FORMAT_EXCEL => false,
+            ],
             'columns' => [
                 [
                     'attribute' => 'certificate',
@@ -639,6 +645,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= ExportMenu::widget([
             'dataProvider' => $Contracts0Provider,
             'target' => '_self',
+            'exportConfig' => [
+                ExportMenu::FORMAT_EXCEL => false,
+            ],
             'columns' => [
                 [
                     'attribute' => 'number',

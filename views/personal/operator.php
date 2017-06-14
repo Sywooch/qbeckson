@@ -146,6 +146,9 @@ $this->title = 'Информация';
 
     <?= ExportMenu::widget([
             'dataProvider' => $PayersProvider,
+        'exportConfig' => [
+            ExportMenu::FORMAT_EXCEL => false,
+        ],
             'columns' => [
                 'id',
                 'user_id',
@@ -210,6 +213,9 @@ $this->title = 'Информация';
         ]); ?>
         <?= ExportMenu::widget([
             'dataProvider' => $PayersProvider,
+            'exportConfig' => [
+                ExportMenu::FORMAT_EXCEL => false,
+            ],
             'columns' => [
                 'id',
                 'user_id',
@@ -258,6 +264,9 @@ $this->title = 'Информация';
             ]); ?>
         <?= ExportMenu::widget([
             'dataProvider' => $PayersProvider,
+            'exportConfig' => [
+                ExportMenu::FORMAT_EXCEL => false,
+            ],
             'columns' => [
                 'id',
                 'number',
@@ -305,6 +314,9 @@ $this->title = 'Информация';
         ]); ?>
         <?= ExportMenu::widget([
             'dataProvider' => $PayersProvider,
+            'exportConfig' => [
+                ExportMenu::FORMAT_EXCEL => false,
+            ],
             'columns' => [
                 'id',
                 'number',
@@ -348,6 +360,9 @@ $this->title = 'Информация';
         ]); ?>
         <?= ExportMenu::widget([
             'dataProvider' => $PayersProvider,
+            'exportConfig' => [
+                ExportMenu::FORMAT_EXCEL => false,
+            ],
             'columns' => [
                 'id',
                 'number',
@@ -407,6 +422,9 @@ $this->title = 'Информация';
         ]); ?>
         <?= ExportMenu::widget([
             'dataProvider' => $Programs0Provider,
+            'exportConfig' => [
+                ExportMenu::FORMAT_EXCEL => false,
+            ],
             'columns' => [
                  'id',
                  'organization_id',
@@ -465,6 +483,9 @@ $this->title = 'Информация';
         ]); ?>
             <?= ExportMenu::widget([
             'dataProvider' => $Programs0Provider,
+                'exportConfig' => [
+                    ExportMenu::FORMAT_EXCEL => false,
+                ],
             'columns' => [
                  'id',
                  'organization_id',

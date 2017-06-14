@@ -76,6 +76,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= ExportMenu::widget([
             'dataProvider' => $registryProvider,
             'target' => '_self',
+            'exportConfig' => [
+                ExportMenu::FORMAT_EXCEL => false,
+            ],
             'columns' => [
                 'name',
                 'typeLabel',
