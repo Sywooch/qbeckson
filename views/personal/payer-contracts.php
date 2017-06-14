@@ -49,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ExportMenu::FORMAT_TEXT => false,
             ExportMenu::FORMAT_CSV => false,
             ExportMenu::FORMAT_HTML => false,
-
+            ExportMenu::FORMAT_EXCEL => false,
         ],
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
@@ -364,7 +364,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ExportMenu::FORMAT_PDF => false,
             ExportMenu::FORMAT_CSV => false,
             ExportMenu::FORMAT_HTML => false,
-
+            ExportMenu::FORMAT_EXCEL => false,
         ],
         'columns' => [
             'id',

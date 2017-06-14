@@ -138,10 +138,7 @@ $col = [
     'dataProvider' => $PayersProvider,
     'target' => '_self',
     'exportConfig' => [
-               // ExportMenu::FORMAT_TEXT => false,
-            //    ExportMenu::FORMAT_PDF => false,
-            //    ExportMenu::FORMAT_CSV => false,
-            //    ExportMenu::FORMAT_HTML => false,  
-            ],
+        ExportMenu::FORMAT_EXCEL => false,
+    ],
     'columns' => $col,
 ]); ?>
