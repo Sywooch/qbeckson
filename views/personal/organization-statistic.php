@@ -4,7 +4,7 @@ use app\models\Programs;
 
 /* @var $this yii\web\View */
 
-$this->title = 'Информация';
+$this->title = 'Статистическая информация';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

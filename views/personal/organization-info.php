@@ -8,8 +8,8 @@ use kartik\datecontrol\DateControl;
 
 /* @var $this yii\web\View */
 
-$this->title = 'Информация';
-$this->params['breadcrumbs'][] = 'Информация';
+$this->title = 'Сведения об организации';
+$this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <div class="col-md-10 col-md-offset-1">
