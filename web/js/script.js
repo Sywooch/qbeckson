@@ -44,6 +44,10 @@ $(document).ready(function () {
         $(".container-refuse-reason").show();
         $(".container-refuse-reason textarea").focus();
     });
+
+    $(".show-search-form").click(function(){
+        $(".search-form").slideToggle();
+    });
 });
 
 function selectGroup(obj) {

@@ -8,6 +8,7 @@ use app\models\search\SettingsSearchFiltersSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * SearchFiltersController implements the CRUD actions for SettingsSearchFilters model.
@@ -92,6 +93,24 @@ class SearchFiltersController extends Controller
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
+    }
+
+    public function actionGetTableColumns()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $post = Yii::$app->request->post();
+        $out = [];
+        if (!empty($post['depdrop_parents'])) {
+            $parents = $post['depdrop_parents'];
+            if ($parents != null) {
+                $tableName = $parents[0];
+                $out = SettingsSearchFilters::getColumnsList($tableName);
+
+                return ['output' => $out, 'selected' => ''];
+            }
+        }
+
+        return ['output' => '', 'selected' => ''];
     }
 
     /**

@@ -1,5 +1,6 @@
 <?php
 
+use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use kartik\widgets\DepDrop;
@@ -15,6 +16,16 @@ use kartik\widgets\DepDrop;
 
     <?= $form->field($model, 'table_name')->dropDownList(array_combine(Yii::$app->db->schema->tableNames, Yii::$app->db->schema->tableNames), ['prompt' => 'Выберите..', 'id' => 'table-name']) ?>
 
+    <?= $form->field($model, 'table_columns')->widget(DepDrop::classname(), [
+        'type' => DepDrop::TYPE_SELECT2,
+        'options' => ['id' => 'table-columns'],
+        'select2Options' => ['pluginOptions' => ['allowClear' => true, 'multiple' => true]],
+        'pluginOptions' => [
+            'depends' => ['table-name'],
+            'placeholder' => 'Выберите..',
+            'url' => Url::to(['/admin/search-filters/get-table-columns'])
+        ]
+    ]) ?>
     <?= $form->field($model, 'table_columns')->textarea(['rows' => 6]) ?>
 
     <?= $form->field($model, 'is_active')->textInput() ?>

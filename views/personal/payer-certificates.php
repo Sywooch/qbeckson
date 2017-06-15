@@ -9,8 +9,14 @@ $this->params['breadcrumbs'][] = $this->title;
 /* @var $this yii\web\View */
 ?>
 
+<?php echo $this->render('/certificates/_search', [
+    'model' => $searchCertificates,
+    'action' => ['personal/payer-certificates'],
+]); ?>
+
 <div class="pull-right">
     <?= Html::a('Обновить номиналы', Url::to(['/certificates/allnominal', 'id' => $payer_id]), ['class' => 'btn btn-success']) ?>
+    <a href="javascrip:void(0);" class="btn btn-warning show-search-form">Расширенный поиск</a>
 </div>
 
 <p>
@@ -18,9 +24,8 @@ $this->params['breadcrumbs'][] = $this->title;
 </p>
 <?= GridView::widget([
     'dataProvider' => $certificatesProvider,
-    'filterModel' => $searchCertificates,
+    'filterModel' => null,
     'pjax' => true,
-    'summary' => false,
     'summary' => false,
     'columns' => [
         [
@@ -51,7 +56,8 @@ $this->params['breadcrumbs'][] = $this->title;
             }
         ],
 
-        ['class' => 'yii\grid\ActionColumn',
+        [
+            'class' => 'yii\grid\ActionColumn',
             'controller' => 'certificates',
             'template' => '{view}',
         ],

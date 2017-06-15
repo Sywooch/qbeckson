@@ -2,55 +2,87 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use kartik\widgets\TouchSpin;
+use kartik\slider\Slider;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\CertificatesSearch */
+/* @var $model app\models\search\CertificatesSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="certificates-search">
+<div class="certificates-search search-form" style="display:none;">
 
     <?php $form = ActiveForm::begin([
-        'action' => ['index'],
+        'action' => !empty($action) ? $action : ['index'],
         'method' => 'get',
     ]); ?>
 
-    <?= $form->field($model, 'id') ?>
+    <div class="row">
+        <div class="col-md-3">
+            <?php echo $form->field($model, 'number') ?>
+        </div>
 
-    <?= $form->field($model, 'user_id') ?>
+        <div class="col-md-3">
+            <?php echo $form->field($model, 'fio_child') ?>
+        </div>
 
-    <?= $form->field($model, 'number') ?>
+        <div class="col-md-12">
+            <?php echo $form->field($model, 'nominalRange')->widget(Slider::classname(), [
+                'sliderColor' => Slider::TYPE_GREY,
+                'handleColor' => Slider::TYPE_DANGER,
+                'pluginOptions' => [
+                    'handle' => 'triangle',
+                    'min' => 0,
+                    'max' => 150000,
+                    'step' => 10,
+                    'range' => true
+                ]
+            ]); ?>
+        </div>
 
-    <?= $form->field($model, 'payer_id') ?>
+        <div class="col-md-12">
+            <?php echo $form->field($model, 'rezervRange')->widget(Slider::classname(), [
+                'sliderColor' => Slider::TYPE_GREY,
+                'handleColor' => Slider::TYPE_DANGER,
+                'pluginOptions' => [
+                    'handle' => 'triangle',
+                    'min' => -100,
+                    'max' => 150000,
+                    'step' => 10,
+                    'range' => true
+                ]
+            ]); ?>
+        </div>
 
-    <?= $form->field($model, 'actual') ?>
+        <div class="col-md-12">
+            <?php echo $form->field($model, 'balanceRange')->widget(Slider::classname(), [
+                'sliderColor' => Slider::TYPE_GREY,
+                'handleColor' => Slider::TYPE_DANGER,
+                'pluginOptions' => [
+                    'handle' => 'triangle',
+                    'min' => 0,
+                    'max' => 150000,
+                    'step' => 10,
+                    'range' => true
+                ]
+            ]); ?>
+        </div>
 
-    <?php // echo $form->field($model, 'fio_child') ?>
+        <div class="col-md-3">
+            <?php echo $form->field($model, 'contractCount')->widget(TouchSpin::classname(), [
+                'options' => ['placeholder' => $model->getAttributeLabel('contractCount')],
+            ]); ?>
+        </div>
 
-    <?php // echo $form->field($model, 'fio_parent') ?>
+        <div class="col-md-3">
+            <?php echo $form->field($model, 'actual')->dropDownList([1 => 'Активен', 0 => 'Приостановлен'], ['prompt' => 'Выберите..']) ?>
+        </div>
 
-    <?php // echo $form->field($model, 'nominal') ?>
-
-    <?php // echo $form->field($model, 'balance') ?>
-
-    <?php // echo $form->field($model, 'contracts') ?>
-
-    <?php // echo $form->field($model, 'directivity1') ?>
-
-    <?php // echo $form->field($model, 'directivity2') ?>
-
-    <?php // echo $form->field($model, 'directivity3') ?>
-
-    <?php // echo $form->field($model, 'directivity4') ?>
-
-    <?php // echo $form->field($model, 'directivity5') ?>
-
-    <?php // echo $form->field($model, 'directivity6') ?>
-
-    <div class="form-group">
-        <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
-        <?= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
+        <div class="col-md-12">
+            <?= Html::submitButton('Начать поиск', ['class' => 'btn btn-primary']) ?>
+        </div>
     </div>
+    <br/>
 
     <?php ActiveForm::end(); ?>
 

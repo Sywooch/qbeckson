@@ -18,15 +18,35 @@ class CertificatesSearch extends Certificates
 
     public $enableContractsCount = false;
 
+    public $nominalRange = '0,150000';
+
+    public $rezervRange = '-1,150000';
+
+    public $balanceRange = '0,150000';
+
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['id', 'user_id', 'payer_id', 'actual', 'nominal', 'balance', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'contractCount'], 'integer', 'message' => 'Неверное значение.'],
-            [['number', 'fio_child', 'fio_parent', 'payers', 'rezerv'], 'safe'],
+            [['id', 'user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'contractCount'], 'integer', 'message' => 'Неверное значение.'],
+            [['fio_child', 'number'], 'string'],
+            [['rezerv', 'nominal', 'balance'], 'number'],
+            [['fio_parent', 'payers', 'nominalRange', 'rezervRange', 'balanceRange'], 'safe'],
         ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        return array_merge(parent::attributeLabels(), [
+            'nominalRange' => 'Номинал сертификата',
+            'rezervRange' => 'Резерв сертификата',
+            'balanceRange' => 'Остаток сертификата',
+        ]);
     }
 
     /**
@@ -112,6 +132,21 @@ class CertificatesSearch extends Certificates
             $query->andFilterWhere(['payer_id' => $this->onlyPayerIds]);
         } else {
             $query->andFilterWhere(['payer_id' => $this->payer_id]);
+        }
+
+        if (!empty($this->nominalRange)) {
+            $nominalRange = explode(',', $this->nominalRange);
+            $query->andWhere(['and', ['>=', 'nominal', intval($nominalRange[0])], ['<=', 'nominal', intval($nominalRange[1])]]);
+        }
+
+        if (!empty($this->rezervRange)) {
+            $rezervRange = explode(',', $this->rezervRange);
+            $query->andWhere(['and', ['>=', 'rezerv', intval($rezervRange[0])], ['<=', 'rezerv', intval($rezervRange[1])]]);
+        }
+
+        if (!empty($this->balanceRange)) {
+            $balanceRange = explode(',', $this->balanceRange);
+            $query->andWhere(['and', ['>=', 'balance', intval($balanceRange[0])], ['<=', 'balance', intval($balanceRange[1])]]);
         }
 
         $query->andFilterWhere(['like', 'number', $this->number])

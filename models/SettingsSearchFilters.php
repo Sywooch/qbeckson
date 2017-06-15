@@ -47,4 +47,15 @@ class SettingsSearchFilters extends \yii\db\ActiveRecord
             'is_active' => 'Активно',
         ];
     }
+
+    public static function getColumnsList($tableName)
+    {
+        $columns = [];
+        $schema = Yii::$app->db->schema->getTableSchema($tableName);
+        foreach ($schema->columns as $key => $column) {
+            array_push($columns, ['id' => $key, 'name' => $key]);
+        }
+
+        return $columns;
+    }
 }
