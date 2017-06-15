@@ -2,6 +2,7 @@
 use yii\helpers\Html;
 use kartik\grid\GridView;
 use yii\helpers\Url;
+use app\widgets\SearchFilter;
 
 
 $this->title = 'Сертификаты';
@@ -9,9 +10,34 @@ $this->params['breadcrumbs'][] = $this->title;
 /* @var $this yii\web\View */
 ?>
 
-<?php echo $this->render('/certificates/_search', [
+<?php echo SearchFilter::widget([
     'model' => $searchCertificates,
     'action' => ['personal/payer-certificates'],
+    'data' => [
+        'number',
+        'fio_child',
+        [
+            'attribute' => 'nominalRange',
+            'type' => SearchFilter::TYPE_RANGE_SLIDER,
+        ],
+        [
+            'attribute' => 'rezervRange',
+            'type' => SearchFilter::TYPE_RANGE_SLIDER,
+        ],
+        [
+            'attribute' => 'balanceRange',
+            'type' => SearchFilter::TYPE_RANGE_SLIDER,
+        ],
+        [
+            'attribute' => 'contractCount',
+            'type' => SearchFilter::TYPE_TOUCH_SPIN,
+        ],
+        [
+            'attribute' => 'actual',
+            'type' => SearchFilter::TYPE_DROPDOWN,
+            'data' => [1 => 'Активен', 0 => 'Приостановлен'],
+        ],
+    ],
 ]); ?>
 
 <div class="pull-right">
