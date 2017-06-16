@@ -10,19 +10,12 @@ use yii\widgets\ActiveForm;
 ?>
 
 <div class="years-form">
-
     <?php $form = ActiveForm::begin(); ?>
-
-      
     <label class="control-label">Нормативная стоимость&nbsp;</label><?= $model->normative_price; ?>
-    
     <?= $form->field($model, 'price')->textInput() ?>
-
     <div class="form-group">
-        <?= Html::a('Назад', Url::to(['/personal/organization-programs']), ['class' => 'btn btn-primary']); ?>
+        <?= Html::a('Назад', Url::to(['programs/view', 'id' => $model->program_id]), ['class' => 'btn btn-primary']); ?>
         <?= Html::submitButton('Сохранить', ['class' => 'btn btn-primary']) ?>
     </div>
-
     <?php ActiveForm::end(); ?>
-
 </div>

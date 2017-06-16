@@ -1,5 +1,6 @@
 <?php
 
+use kartik\tabs\TabsX;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -24,10 +25,10 @@ if (Yii::$app->user->can('operators')) {
 
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="programs-view col-md-8 col-md-offset-2" ng-app>
+<div class="programs-view">
 
     <?php
-    if ($model->verification == 2) {
+    if ($model->verification === 2) {
         if ($model->rating) {
             echo '<h1 class="pull-right">' . $model->rating . '%</h1>';
         } else {
@@ -37,332 +38,468 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
 
     <h3><?= Html::encode($this->title) ?></h3>
-
-
-    <?php
-
-    if (Yii::$app->user->can('organizations')) {
-        if ($model->verification == 2 || $model->verification == 0) {
-
-            echo DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    'directivity',
-                    'commonActivities',
-                    'limit',
-                    [
-                        'label' => 'Возраст детей',
-                        'value' => 'с ' . $model->age_group_min . ' лет до ' . $model->age_group_max . ' лет',
-                    ],
-                    [
-                        'attribute' => 'zab',
-                        'label' => 'Категория детей',
-                        'value' => $model->zabName($model->zab, $model->ovz),
-                    ],
-                    'task:ntext',
-                    'annotation:ntext',
-
-                    [
-                        'attribute' => 'link',
-                        'format' => 'raw',
-                        'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', '/' . $model->link),
-                    ],
-                    [
-                        'attribute' => 'mun',
-                        'value' => $model->munName($model->mun),
-                    ],
-                    [
-                        'attribute' => 'ground',
-                        'value' => $model->groundName($model->ground),
-                    ],
-                    [
-                        'attribute' => 'norm_providing',
-                        'label' => 'Нормы оснащения',
-                    ],
-
-
-                ],
-            ]);
-        }
-        if ($model->verification == 1) {
-            echo DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    'directivity',
-                    [
-                        'attribute' => 'activities',
-                        'value' => function ($model) {
-                            /** @var \app\models\Programs $model */
-                            if ($model->activities) {
-                                return implode(', ', ArrayHelper::getColumn($model->activities, 'name'));
-                            }
-
-                            return $model->vid;
-                        }
-                    ],
-                    [
-                        'label' => 'Возраст детей',
-                        'value' => 'с ' . $model->age_group_min . ' лет до ' . $model->age_group_max . ' лет',
-                    ],
-                    [
-                        'attribute' => 'zab',
-                        'label' => 'Категория детей',
-                        'value' => $model->zabName($model->zab, $model->ovz),
-                    ],
-                    'task:ntext',
-                    'annotation:ntext',
-
-                    [
-                        'attribute' => 'link',
-                        'format' => 'raw',
-                        'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', '/' . $model->link),
-                    ],
-                    [
-                        'attribute' => 'mun',
-                        'value' => $model->munName($model->mun),
-                    ],
-                    [
-                        'attribute' => 'ground',
-                        'value' => $model->groundName($model->ground),
-                    ],
-                    [
-                        'attribute' => 'norm_providing',
-                        'label' => 'Нормы оснащения',
-                    ],
-
-
-                ],
-            ]);
-        }
-        if ($model->verification == 3) {
-            echo DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    [
-                        'label' => 'Причина отказа',
-                        'value' => $model->otkazName($model->id),
-                    ],
-                    'directivity',
-                    [
-                        'attribute' => 'activities',
-                        'value' => function ($model) {
-                            /** @var \app\models\Programs $model */
-                            if ($model->activities) {
-                                return implode(', ', ArrayHelper::getColumn($model->activities, 'name'));
-                            }
-
-                            return $model->vid;
-                        }
-                    ],
-                    [
-                        'label' => 'Возраст детей',
-                        'value' => 'с ' . $model->age_group_min . ' лет до ' . $model->age_group_max . ' лет',
-                    ],
-                    [
-                        'attribute' => 'zab',
-                        'label' => 'Категория детей',
-                        'value' => $model->zabName($model->zab, $model->ovz),
-                    ],
-                    'task:ntext',
-                    'annotation:ntext',
-
-                    [
-                        'attribute' => 'link',
-                        'format' => 'raw',
-                        'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', '/' . $model->link),
-                    ],
-                    [
-                        'attribute' => 'mun',
-                        'value' => $model->munName($model->mun),
-                    ],
-                    [
-                        'attribute' => 'ground',
-                        'value' => $model->groundName($model->ground),
-                    ],
-                    [
-                        'attribute' => 'norm_providing',
-                        'label' => 'Нормы оснащения',
-                    ],
-
-
-                ],
-            ]);
-        }
-    } else {
-        if (Yii::$app->user->can('operators')) {
-            if ($model->verification == 3) {
-                echo DetailView::widget([
-                    'model' => $model,
-                    'attributes' => [
-                        [
-                            'label' => 'Причина отказа',
-                            'value' => $model->otkazName($model->id),
+    <div class="row">
+        <div class="col-md-8">
+            <?php
+            if (Yii::$app->user->can('organizations')) {
+                if ($model->verification === 2 || $model->verification === 0) {
+                    echo DetailView::widget([
+                        'model' => $model,
+                        'attributes' => [
+                            'directivity',
+                            'commonActivities',
+                            'limit',
+                            [
+                                'label' => 'Возраст детей',
+                                'value' => 'с ' . $model->age_group_min . ' лет до ' . $model->age_group_max . ' лет',
+                            ],
+                            [
+                                'attribute' => 'zab',
+                                'label' => 'Категория детей',
+                                'value' => $model->zabName($model->zab, $model->ovz),
+                            ],
+                            'task:ntext',
+                            'annotation:ntext',
+                            [
+                                'attribute' => 'link',
+                                'format' => 'raw',
+                                'value' => Html::a(
+                                    '<span class="glyphicon glyphicon-download-alt"></span>',
+                                    '/' . $model->link
+                                ),
+                            ],
+                            [
+                                'attribute' => 'mun',
+                                'value' => $model->munName($model->mun),
+                            ],
+                            [
+                                'attribute' => 'ground',
+                                'value' => $model->groundName($model->ground),
+                            ],
+                            [
+                                'attribute' => 'norm_providing',
+                                'label' => 'Нормы оснащения',
+                            ],
                         ],
-                        [
-                            'attribute' => 'organization.name',
-                            'format' => 'raw',
-                            'value' => Html::a($model->organization->name, Url::to(['/organization/view', 'id' => $model->organization->id]), ['class' => 'blue']),
-                        ],
-                        'directivity',
-                        [
-                            'attribute' => 'activities',
-                            'value' => function ($model) {
-                                /** @var \app\models\Programs $model */
-                                if ($model->activities) {
-                                    return implode(', ', ArrayHelper::getColumn($model->activities, 'name'));
+                    ]);
+                }
+                if ($model->verification === 1) {
+                    echo DetailView::widget([
+                        'model' => $model,
+                        'attributes' => [
+                            'directivity',
+                            [
+                                'attribute' => 'activities',
+                                'value' => function ($model) {
+                                    /** @var \app\models\Programs $model */
+                                    if ($model->activities) {
+                                        return implode(', ', ArrayHelper::getColumn($model->activities, 'name'));
+                                    }
+
+                                    return $model->vid;
                                 }
+                            ],
+                            [
+                                'label' => 'Возраст детей',
+                                'value' => 'с ' . $model->age_group_min . ' лет до ' . $model->age_group_max . ' лет',
+                            ],
+                            [
+                                'attribute' => 'zab',
+                                'label' => 'Категория детей',
+                                'value' => $model->zabName($model->zab, $model->ovz),
+                            ],
+                            'task:ntext',
+                            'annotation:ntext',
+                            [
+                                'attribute' => 'link',
+                                'format' => 'raw',
+                                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', '/' . $model->link),
+                            ],
+                            [
+                                'attribute' => 'mun',
+                                'value' => $model->munName($model->mun),
+                            ],
+                            [
+                                'attribute' => 'ground',
+                                'value' => $model->groundName($model->ground),
+                            ],
+                            [
+                                'attribute' => 'norm_providing',
+                                'label' => 'Нормы оснащения',
+                            ],
+                        ],
+                    ]);
+                }
+                if ($model->verification === 3) {
+                    echo DetailView::widget([
+                        'model' => $model,
+                        'attributes' => [
+                            [
+                                'label' => 'Причина отказа',
+                                'value' => $model->otkazName($model->id),
+                            ],
+                            'directivity',
+                            [
+                                'attribute' => 'activities',
+                                'value' => function ($model) {
+                                    /** @var \app\models\Programs $model */
+                                    if ($model->activities) {
+                                        return implode(', ', ArrayHelper::getColumn($model->activities, 'name'));
+                                    }
 
-                                return $model->vid;
-                            }
-                        ],
-                        'limit',
-                        [
-                            'label' => 'Возраст детей',
-                            'value' => 'с ' . $model->age_group_min . ' лет до ' . $model->age_group_max . ' лет',
-                        ],
-                        [
-                            'attribute' => 'zab',
-                            'label' => 'Категория детей',
-                            'value' => $model->zabName($model->zab, $model->ovz),
-                        ],
-                        'task:ntext',
-                        'annotation:ntext',
-
-                        [
-                            'attribute' => 'link',
-                            'format' => 'raw',
-                            'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', '/' . $model->link),
-                        ],
-                        [
-                            'attribute' => 'mun',
-                            'value' => $model->munName($model->mun),
-                        ],
-                        [
-                            'attribute' => 'ground',
-                            'value' => $model->groundName($model->ground),
-                        ],
-                        [
-                            'attribute' => 'norm_providing',
-                            'label' => 'Нормы оснащения',
-                        ],
+                                    return $model->vid;
+                                }
+                            ],
+                            [
+                                'label' => 'Возраст детей',
+                                'value' => 'с ' . $model->age_group_min . ' лет до ' . $model->age_group_max . ' лет',
+                            ],
+                            [
+                                'attribute' => 'zab',
+                                'label' => 'Категория детей',
+                                'value' => $model->zabName($model->zab, $model->ovz),
+                            ],
+                            'task:ntext',
+                            'annotation:ntext',
+                            [
+                                'attribute' => 'link',
+                                'format' => 'raw',
+                                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', '/' . $model->link),
+                            ],
+                            [
+                                'attribute' => 'mun',
+                                'value' => $model->munName($model->mun),
+                            ],
+                            [
+                                'attribute' => 'ground',
+                                'value' => $model->groundName($model->ground),
+                            ],
+                            [
+                                'attribute' => 'norm_providing',
+                                'label' => 'Нормы оснащения',
+                            ],
 
 
-                    ],
-                ]);
+                        ],
+                    ]);
+                }
             } else {
-                echo DetailView::widget([
-                    'model' => $model,
-                    'attributes' => [
-                        [
-                            'attribute' => 'organization.name',
-                            'format' => 'raw',
-                            'value' => Html::a($model->organization->name, Url::to(['/organization/view', 'id' => $model->organization->id]), ['class' => 'blue']),
-                        ],
-                        'directivity',
-                        [
-                            'attribute' => 'activities',
-                            'value' => function ($model) {
-                                /** @var \app\models\Programs $model */
-                                if ($model->activities) {
-                                    return implode(', ', ArrayHelper::getColumn($model->activities, 'name'));
+                if (Yii::$app->user->can('operators')) {
+                    if ($model->verification === 3) {
+                        echo DetailView::widget([
+                            'model' => $model,
+                            'attributes' => [
+                                [
+                                    'label' => 'Причина отказа',
+                                    'value' => $model->otkazName($model->id),
+                                ],
+                                [
+                                    'attribute' => 'organization.name',
+                                    'format' => 'raw',
+                                    'value' => Html::a($model->organization->name, Url::to(['/organization/view', 'id' => $model->organization->id]), ['class' => 'blue']),
+                                ],
+                                'directivity',
+                                [
+                                    'attribute' => 'activities',
+                                    'value' => function ($model) {
+                                        /** @var \app\models\Programs $model */
+                                        if ($model->activities) {
+                                            return implode(', ', ArrayHelper::getColumn($model->activities, 'name'));
+                                        }
+
+                                        return $model->vid;
+                                    }
+                                ],
+                                'limit',
+                                [
+                                    'label' => 'Возраст детей',
+                                    'value' => 'с ' . $model->age_group_min . ' лет до ' . $model->age_group_max . ' лет',
+                                ],
+                                [
+                                    'attribute' => 'zab',
+                                    'label' => 'Категория детей',
+                                    'value' => $model->zabName($model->zab, $model->ovz),
+                                ],
+                                'task:ntext',
+                                'annotation:ntext',
+                                [
+                                    'attribute' => 'link',
+                                    'format' => 'raw',
+                                    'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', '/' . $model->link),
+                                ],
+                                [
+                                    'attribute' => 'mun',
+                                    'value' => $model->munName($model->mun),
+                                ],
+                                [
+                                    'attribute' => 'ground',
+                                    'value' => $model->groundName($model->ground),
+                                ],
+                                [
+                                    'attribute' => 'norm_providing',
+                                    'label' => 'Нормы оснащения',
+                                ],
+                            ],
+                        ]);
+                    } else {
+                        echo DetailView::widget([
+                            'model' => $model,
+                            'attributes' => [
+                                [
+                                    'attribute' => 'organization.name',
+                                    'format' => 'raw',
+                                    'value' => Html::a($model->organization->name, Url::to(['/organization/view', 'id' => $model->organization->id]), ['class' => 'blue']),
+                                ],
+                                'directivity',
+                                [
+                                    'attribute' => 'activities',
+                                    'value' => function ($model) {
+                                        /** @var \app\models\Programs $model */
+                                        if ($model->activities) {
+                                            return implode(', ', ArrayHelper::getColumn($model->activities, 'name'));
+                                        }
+
+                                        return $model->vid;
+                                    }
+                                ],
+                                'limit',
+                                [
+                                    'label' => 'Возраст детей',
+                                    'value' => 'с ' . $model->age_group_min . ' лет до ' . $model->age_group_max . ' лет',
+                                ],
+                                [
+                                    'attribute' => 'zab',
+                                    'label' => 'Категория детей',
+                                    'value' => $model->zabName($model->zab, $model->ovz),
+                                ],
+                                'task:ntext',
+                                'annotation:ntext',
+
+                                [
+                                    'attribute' => 'link',
+                                    'format' => 'raw',
+                                    'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', '/' . $model->link),
+                                ],
+                                [
+                                    'attribute' => 'mun',
+                                    'value' => $model->munName($model->mun),
+                                ],
+                                [
+                                    'attribute' => 'ground',
+                                    'value' => $model->groundName($model->ground),
+                                ],
+                                [
+                                    'attribute' => 'norm_providing',
+                                    'label' => 'Нормы оснащения',
+                                ],
+                            ],
+                        ]);
+                    }
+                } else {
+                    echo DetailView::widget([
+                        'model' => $model,
+                        'attributes' => [
+                            [
+                                'attribute' => 'organization.name',
+                                'format' => 'raw',
+                                'value' => Html::a($model->organization->name, Url::to(['/organization/view', 'id' => $model->organization->id]), ['class' => 'blue']),
+                            ],
+                            'directivity',
+                            [
+                                'attribute' => 'activities',
+                                'value' => function ($model) {
+                                    /** @var \app\models\Programs $model */
+                                    if ($model->activities) {
+                                        return implode(', ', ArrayHelper::getColumn($model->activities, 'name'));
+                                    }
+
+                                    return $model->vid;
                                 }
-
-                                return $model->vid;
-                            }
+                            ],
+                            'limit',
+                            [
+                                'label' => 'Возраст детей',
+                                'value' => 'с ' . $model->age_group_min . ' лет до ' . $model->age_group_max . ' лет',
+                            ],
+                            [
+                                'attribute' => 'zab',
+                                'label' => 'Категория детей',
+                                'value' => $model->zabName($model->zab, $model->ovz),
+                            ],
+                            'task:ntext',
+                            'annotation:ntext',
+                            [
+                                'attribute' => 'link',
+                                'format' => 'raw',
+                                'value' => Html::a(
+                                    '<span class="glyphicon glyphicon-download-alt"></span>',
+                                    '/' . $model->link
+                                ),
+                            ],
+                            [
+                                'attribute' => 'mun',
+                                'value' => $model->munName($model->mun),
+                            ],
+                            [
+                                'attribute' => 'ground',
+                                'value' => $model->groundName($model->ground),
+                            ],
+                            [
+                                'attribute' => 'norm_providing',
+                                'label' => 'Нормы оснащения',
+                            ],
                         ],
-                        'limit',
-                        [
-                            'label' => 'Возраст детей',
-                            'value' => 'с ' . $model->age_group_min . ' лет до ' . $model->age_group_max . ' лет',
-                        ],
-                        [
-                            'attribute' => 'zab',
-                            'label' => 'Категория детей',
-                            'value' => $model->zabName($model->zab, $model->ovz),
-                        ],
-                        'task:ntext',
-                        'annotation:ntext',
-
-                        [
-                            'attribute' => 'link',
-                            'format' => 'raw',
-                            'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', '/' . $model->link),
-                        ],
-                        [
-                            'attribute' => 'mun',
-                            'value' => $model->munName($model->mun),
-                        ],
-                        [
-                            'attribute' => 'ground',
-                            'value' => $model->groundName($model->ground),
-                        ],
-                        [
-                            'attribute' => 'norm_providing',
-                            'label' => 'Нормы оснащения',
-                        ],
-
-
-                    ],
-                ]);
+                    ]);
+                }
             }
-        } else {
-            echo DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    [
-                        'attribute' => 'organization.name',
-                        'format' => 'raw',
-                        'value' => Html::a($model->organization->name, Url::to(['/organization/view', 'id' => $model->organization->id]), ['class' => 'blue']),
-                    ],
-                    'directivity',
-                    [
-                        'attribute' => 'activities',
-                        'value' => function ($model) {
-                            /** @var \app\models\Programs $model */
-                            if ($model->activities) {
-                                return implode(', ', ArrayHelper::getColumn($model->activities, 'name'));
-                            }
+            ?>
+        </div>
+        <div class="col-md-4">
+            <?php $items = []; ?>
+            <?php if (Yii::$app->user->can('organizations')) : ?>
+                <?php foreach ($model->modules as $key => $module) : ?>
+                    <?php
+                    $items[$key]['label'] = $module->getFullname();
+                    $items[$key]['content'] = DetailView::widget([
+                        'model' => $module,
+                        'attributes' => [
+                            'fullname',
+                            [
+                                'attribute' => 'open',
+                                'label' => 'Зачисление',
+                                'format' => 'raw',
+                                //TODO переделать. На onf я пытался это разгребсти, но надо ещё сравнить логику и пересмотреть.
+                                'value' => function ($data) {
+                                    $price = (new \yii\db\Query())
+                                        ->select(['price'])
+                                        ->from('years')
+                                        ->where(['id' => $data->id])
+                                        ->one();
+                                    $organizations = new Organization();
+                                    $organization = $organizations->getOrganization();
+                                    if ($organization['actual'] !== 0) {
+                                        if ($price['price'] > 0) {
+                                            if ($organization->type !== 4) {
+                                                if (!empty($organization['license_issued_dat']) && !empty($organization['fio']) && !empty($organization['position']) && !empty($organization['doc_type'])) {
+                                                    if ($organization['doc_type'] === 1) {
+                                                        if (!empty($organization['date_proxy']) && !empty($organization['number_proxy'])) {
+                                                            if ($data->open === 0) {
+                                                                return Html::a('Открыть', Url::to(['years/start', 'id' => $data->id]), ['class' => 'btn btn-success']);
+                                                            } else {
+                                                                return Html::a('Закрыть', Url::to(['years/stop', 'id' => $data->id]), ['class' => 'btn btn-danger']);
+                                                            }
+                                                        } else {
+                                                            return 'Заполните информацию "Для договора"';
+                                                        }
+                                                    } else {
+                                                        if ($data->open === 0) {
+                                                            return Html::a('Открыть', Url::to(['years/start', 'id' => $data->id]), ['class' => 'btn btn-success']);
+                                                        } else {
+                                                            return Html::a('Закрыть', Url::to(['years/stop', 'id' => $data->id]), ['class' => 'btn btn-danger']);
+                                                        }
+                                                    }
+                                                } else {
+                                                    return 'Заполните информацию "Для договора"';
+                                                }
+                                            } else {
+                                                if ($organization['doc_type'] === 1) {
+                                                    if ($data->open === 0) {
+                                                        return Html::a('Открыть', Url::to(['years/start', 'id' => $data->id]), ['class' => 'btn btn-success']);
+                                                    } else {
+                                                        return Html::a('Закрыть', Url::to(['years/stop', 'id' => $data->id]), ['class' => 'btn btn-danger']);
+                                                    }
+                                                } else {
+                                                    if ($data->open === 0) {
+                                                        return Html::a('Открыть', Url::to(['years/start', 'id' => $data->id]), ['class' => 'btn btn-success']);
+                                                    } else {
+                                                        return Html::a('Закрыть', Url::to(['years/stop', 'id' => $data->id]), ['class' => 'btn btn-danger']);
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            return 'Нет цены';
+                                        }
+                                    } else {
+                                        return 'Деятельность приостановлена';
+                                    }
+                                }
+                            ],
+                            ['attribute' => 'price',
+                                'format' => 'raw',
+                                'value' => function ($data) {
+                                    $price = (new \yii\db\Query())
+                                        ->select(['price'])
+                                        ->from('years')
+                                        ->where(['id' => $data->id])
+                                        ->one();
 
-                            return $model->vid;
-                        }
-                    ],
-                    'limit',
-                    [
-                        'label' => 'Возраст детей',
-                        'value' => 'с ' . $model->age_group_min . ' лет до ' . $model->age_group_max . ' лет',
-                    ],
-                    [
-                        'attribute' => 'zab',
-                        'label' => 'Категория детей',
-                        'value' => $model->zabName($model->zab, $model->ovz),
-                    ],
-                    'task:ntext',
-                    'annotation:ntext',
-
-                    [
-                        'attribute' => 'link',
-                        'format' => 'raw',
-                        'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', '/' . $model->link),
-                    ],
-                    [
-                        'attribute' => 'mun',
-                        'value' => $model->munName($model->mun),
-                    ],
-                    [
-                        'attribute' => 'ground',
-                        'value' => $model->groundName($model->ground),
-                    ],
-                    [
-                        'attribute' => 'norm_providing',
-                        'label' => 'Нормы оснащения',
-                    ],
-
-
-                ],
-            ]);
-        }
-    }
-    ?>
+                                    if ($price['price'] > 0) {
+                                        if ($data->open === 1) {
+                                            return $price['price'];
+                                        } else {
+                                            return Html::a($price['price'], Url::to(['years/update', 'id' => $data->id]), ['class' => 'btn btn-primary']);
+                                        }
+                                    } else {
+                                        return Html::a('Установить цену', Url::to(['years/update', 'id' => $data->id]), ['class' => 'btn btn-success']);
+                                    }
+                                }
+                            ],
+                            'normative_price',
+                            [
+                                'label' => 'Число обучающихся',
+                                'value' => count($module->activeContracts),
+                            ],
+                            [
+                                'label' => 'Предварительные записи',
+                                'format' => 'raw',
+                                'value' => function ($data) {
+                                    if ($data->previus === 1) {
+                                        return Html::a('<span class="glyphicon glyphicon-ok green"></span>', Url::to(['years/prevstop', 'id' => $data->id]));
+                                    }
+                                    if ($data->previus === 0) {
+                                        return Html::a('<span class="glyphicon glyphicon-remove red"></span>', Url::to(['years/prevstart', 'id' => $data->id]));
+                                    }
+                                }
+                            ],
+                        ],
+                    ]);
+                    ?>
+                <?php endforeach; ?>
+            <?php else : ?>
+                <?php foreach ($model->modules as $key => $module) : ?>
+                    <?php
+                    $items[$key]['label'] = $module->getFullname();
+                    $items[$key]['content'] = DetailView::widget([
+                        'model' => $module,
+                        'attributes' => [
+                            'fullname',
+                            [
+                                'value' => $module->open === 1 ? 'Да' : 'Нет',
+                                'label' => 'Зачисление',
+                            ],
+                            'price',
+                            'normative_price',
+                            [
+                                'label' => 'Число обучающихся',
+                                'value' => count($module->activeContracts),
+                            ],
+                            [
+                                'label' => 'Предварительные записи',
+                                'value' => $module->previus === 1 ? 'Да' : 'Нет',
+                            ],
+                        ],
+                    ]);
+                    ?>
+                <?php endforeach; ?>
+            <?php endif; ?>
+            <?= TabsX::widget([
+                'items' => $items,
+                'position' => TabsX::POS_LEFT,
+                'bordered' => true,
+                'encodeLabels' => false,
+            ]); ?>
+        </div>
+    </div>
 
     <?php
     $payers = new Payers();
@@ -376,12 +513,16 @@ $this->params['breadcrumbs'][] = $this->title;
         $link = '/personal/organization-contracts';
     }
 
-    if ($model->verification == 2 && !Yii::$app->user->can('certificate')) {
+    if ($model->verification === 2 && !Yii::$app->user->can('certificate')) {
         echo DetailView::widget([
             'model' => $model,
             'attributes' => [
                 [
-                    'label' => Html::a('Число обучающихся по программе', Url::to([$link, 'prog' => $model->name]), ['class' => 'blue', 'target' => '_blank']),
+                    'label' => Html::a(
+                        'Число обучающихся по программе',
+                        Url::to([$link, 'prog' => $model->name]),
+                        ['class' => 'blue', 'target' => '_blank']
+                    ),
                     'value' => $model->countContract($model->id, $payer),
                 ],
             ],
@@ -390,7 +531,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php
     if (Yii::$app->user->can('payer')) {
-
         DetailView::widget([
             'model' => $model,
             'attributes' => [
@@ -402,7 +542,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]);
     }
-
     ?>
 
     <?php
@@ -410,30 +549,14 @@ $this->params['breadcrumbs'][] = $this->title;
         echo DetailView::widget([
             'model' => $model,
             'attributes' => [
-
-                [
-                    'attribute' => 'ocen_fact',
-                    //   'value'=> $ocen_fact_sum / $ocen_fact_count,
-                ],
-                [
-                    'attribute' => 'ocen_kadr',
-                    // 'value'=> $ocen_kadr_sum / $ocen_kadr_count,
-                ],
-                [
-                    'attribute' => 'ocen_mat',
-                    //'value'=> $ocen_mat_sum / $ocen_mat_count,
-                ],
-                [
-                    'attribute' => 'ocen_obch',
-                    //   'value'=> $ocen_obch_sum / $ocen_obch_count,
-                ],
+                'ocen_fact',
+                'ocen_kadr',
+                'ocen_mat',
+                'ocen_obch',
             ],
         ]);
     }
-
     ?>
-
-
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
@@ -451,8 +574,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]) ?>
-
-
 
     <?php
     if (!empty($years)) {

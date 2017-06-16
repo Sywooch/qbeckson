@@ -43,8 +43,8 @@ use yii\helpers\ArrayHelper;
  * @property integer $quality_control
  * @property string $link
  * @property string $certification_date
- * @property array activity_ids
- * @property integer direction_id
+ * @property array $activity_ids
+ * @property integer $direction_id
  *
  * @property Contracts[] $contracts
  * @property Favorites[] $favorites
@@ -55,14 +55,13 @@ use yii\helpers\ArrayHelper;
  * @property DirectoryProgramActivity[]|null $activities
  * @property DirectoryProgramDirection|null $direction
  * @property string $directivity
+ * @property ProgrammeModule[] $modules
  */
 
 class Programs extends \yii\db\ActiveRecord
 {
     public $file;
-
     public $edit;
-
     public $search;
 
     /**
@@ -111,6 +110,14 @@ class Programs extends \yii\db\ActiveRecord
                 ],
             ],
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getModules()
+    {
+        return $this->hasMany(ProgrammeModule::class, ['program_id' => 'id']);
     }
 
     /**

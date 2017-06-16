@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'summary' => false,
             'pjax' => true,
             'columns' => [
-                [
+                /*[
                     'class' => 'kartik\grid\ExpandRowColumn',
                     'width' => '50px',
                     'value' => function ($model, $key, $index, $column) {
@@ -45,11 +45,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         $searchModel->program_id = $model->id;
                         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-                        return Yii::$app->controller->renderPartial('/years/main', ['searchModel' => $searchModel, 'dataProvider' => $dataProvider]);
+                        return Yii::$app->controller->renderPartial('/years/main', [
+                            'searchModel' => $searchModel,
+                            'dataProvider' => $dataProvider
+                        ]);
                     },
                     'headerOptions' => ['class' => 'kartik-sheet-style'],
                     'expandOneOnly' => true
-                ],
+                ],*/
                 [
                     'attribute' => 'name',
                     'label' => 'Наименование',
