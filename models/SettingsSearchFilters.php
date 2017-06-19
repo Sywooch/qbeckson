@@ -28,7 +28,7 @@ class SettingsSearchFilters extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['table_columns'], 'string'],
+            [['table_columns', 'inaccessible_columns'], 'safe'],
             [['is_active'], 'integer'],
             [['table_name'], 'string', 'max' => 255],
             [['table_name'], 'unique'],
@@ -44,18 +44,18 @@ class SettingsSearchFilters extends \yii\db\ActiveRecord
             'id' => 'ID',
             'table_name' => 'Название таблицы',
             'table_columns' => 'Атрибуты для поиска',
+            'inaccessible_columns' => 'Атрибуты, которые невозможно выключить',
             'is_active' => 'Активно',
         ];
     }
 
-    public static function getColumnsList($tableName)
+    public function getTableColumns()
     {
-        $columns = [];
-        $schema = Yii::$app->db->schema->getTableSchema($tableName);
-        foreach ($schema->columns as $key => $column) {
-            array_push($columns, ['id' => $key, 'name' => $key]);
-        }
+        return preg_split('/[\s*,\s*]*,+[\s*,\s*]*/', $this->table_columns);
+    }
 
-        return $columns;
+    public function getInaccessibleColumns()
+    {
+        return preg_split('/[\s*,\s*]*,+[\s*,\s*]*/', $this->inaccessible_columns);
     }
 }

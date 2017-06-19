@@ -48,6 +48,10 @@ $(document).ready(function () {
     $(".show-search-form").click(function(){
         $(".search-form").slideToggle();
     });
+
+    $(".toggle-search-settings").click(function(){
+        $(".search-settings").removeClass('hidden');
+    });
 });
 
 function selectGroup(obj) {

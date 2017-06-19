@@ -276,6 +276,9 @@ class PersonalController extends \yii\web\Controller
         $searchCertificates = new CertificatesSearch([
             'enableContractsCount' => true,
             'onlyPayerIds' => $payer->id,
+            'nominal' => '0,150000',
+            'rezerv' => '-1,150000',
+            'balance' => '0,150000',
         ]);
         $certificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
 

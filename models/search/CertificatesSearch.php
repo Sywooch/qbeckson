@@ -18,12 +18,6 @@ class CertificatesSearch extends Certificates
 
     public $enableContractsCount = false;
 
-    public $nominalRange = '0,150000';
-
-    public $rezervRange = '-1,150000';
-
-    public $balanceRange = '0,150000';
-
     /**
      * @inheritdoc
      */
@@ -32,21 +26,8 @@ class CertificatesSearch extends Certificates
         return [
             [['id', 'user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'contractCount'], 'integer', 'message' => 'Неверное значение.'],
             [['fio_child', 'number'], 'string'],
-            [['rezerv', 'nominal', 'balance'], 'number'],
-            [['fio_parent', 'payers', 'nominalRange', 'rezervRange', 'balanceRange'], 'safe'],
+            [['fio_parent', 'payers', 'nominal', 'rezerv', 'balance'], 'safe'],
         ];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function attributeLabels()
-    {
-        return array_merge(parent::attributeLabels(), [
-            'nominalRange' => 'Номинал сертификата',
-            'rezervRange' => 'Резерв сертификата',
-            'balanceRange' => 'Остаток сертификата',
-        ]);
     }
 
     /**
@@ -112,13 +93,13 @@ class CertificatesSearch extends Certificates
             return $dataProvider;
         }
 
+        //print_r($this);exit;
+
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
             'user_id' => $this->user_id,
             'actual' => $this->actual,
-            'nominal' => $this->nominal,
-            'balance' => $this->balance,
             'contracts' => $this->contracts,
             'directivity1' => $this->directivity1,
             'directivity2' => $this->directivity2,
@@ -134,19 +115,19 @@ class CertificatesSearch extends Certificates
             $query->andFilterWhere(['payer_id' => $this->payer_id]);
         }
 
-        if (!empty($this->nominalRange)) {
-            $nominalRange = explode(',', $this->nominalRange);
-            $query->andWhere(['and', ['>=', 'nominal', intval($nominalRange[0])], ['<=', 'nominal', intval($nominalRange[1])]]);
+        if (!empty($this->nominal)) {
+            $nominal = explode(',', $this->nominal);
+            $query->andWhere(['and', ['>=', 'nominal', intval($nominal[0])], ['<=', 'nominal', intval($nominal[1])]]);
         }
 
-        if (!empty($this->rezervRange)) {
-            $rezervRange = explode(',', $this->rezervRange);
-            $query->andWhere(['and', ['>=', 'rezerv', intval($rezervRange[0])], ['<=', 'rezerv', intval($rezervRange[1])]]);
+        if (!empty($this->rezerv)) {
+            $rezerv = explode(',', $this->rezerv);
+            $query->andWhere(['and', ['>=', 'rezerv', intval($rezerv[0])], ['<=', 'rezerv', intval($rezerv[1])]]);
         }
 
-        if (!empty($this->balanceRange)) {
-            $balanceRange = explode(',', $this->balanceRange);
-            $query->andWhere(['and', ['>=', 'balance', intval($balanceRange[0])], ['<=', 'balance', intval($balanceRange[1])]]);
+        if (!empty($this->balance)) {
+            $balance = explode(',', $this->balance);
+            $query->andWhere(['and', ['>=', 'balance', intval($balance[0])], ['<=', 'balance', intval($balance[1])]]);
         }
 
         $query->andFilterWhere(['like', 'number', $this->number])

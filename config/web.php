@@ -215,6 +215,11 @@ $config = [
                         'roles' => ['admins'],
                     ]
                 ],
+                'site/save-filter' => [
+                    [
+                        'allow' => true,
+                    ]
+                ],
             ]
     ],
 

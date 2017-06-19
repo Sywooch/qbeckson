@@ -42,6 +42,8 @@ class SearchFilter extends Widget
 	 */
 	public function run()
 	{
+
+
     	return $this->render('search-filter/_search', [
             'model' => $this->model,
             'action' => $this->action,

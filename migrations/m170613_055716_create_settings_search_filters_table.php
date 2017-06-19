@@ -21,6 +21,7 @@ class m170613_055716_create_settings_search_filters_table extends Migration
             'id' => $this->primaryKey(),
             'table_name' => $this->string()->unique(),
             'table_columns' => $this->text(),
+            'inaccessible_columns' => $this->text(),
             'is_active' => $this->integer()->defaultValue(1),
         ], $tableOptions);
     }

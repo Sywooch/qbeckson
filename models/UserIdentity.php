@@ -176,4 +176,17 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
     {
         return $this->hasOne(Mun::class, ['id' => 'mun_id']);
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFilterSettings($tableName)
+    {
+        $query = UserSearchFiltersAssignment::find()
+            ->joinWith('filter')
+            ->where(['user_id' => Yii::$app->user->id])
+            ->andWhere('`settings_search_filters`.table_name = :tableName', [':tableName' => $tableName]);
+
+        return $query->one();
+    }
 }
