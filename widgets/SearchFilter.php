@@ -1,6 +1,8 @@
 <?php
 namespace app\widgets;
 
+use app\models\SettingsSearchFilters;
+use app\models\UserSearchFiltersAssignment;
 use yii;
 use yii\base\Widget;
 
@@ -42,12 +44,14 @@ class SearchFilter extends Widget
 	 */
 	public function run()
 	{
-
+        $filter = SettingsSearchFilters::findByTable($this->model->tableName());
+        $userFilter = UserSearchFiltersAssignment::findByFilter($filter);
 
     	return $this->render('search-filter/_search', [
             'model' => $this->model,
             'action' => $this->action,
             'data' => $this->data,
+            'userFilter' => $userFilter,
 		]);
 	}
 }

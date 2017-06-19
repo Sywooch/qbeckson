@@ -58,4 +58,18 @@ class SettingsSearchFilters extends \yii\db\ActiveRecord
     {
         return preg_split('/[\s*,\s*]*,+[\s*,\s*]*/', $this->inaccessible_columns);
     }
+
+    public function getColumnsForUser()
+    {
+        return array_diff($this->tableColumns, $this->inaccessibleColumns);
+    }
+
+    public static function findByTable($tableName)
+    {
+        $query = static::find()
+            ->where(['>', 'is_active', 0])
+            ->andWhere(['table_name' => $tableName]);
+
+        return $query->one();
+    }
 }

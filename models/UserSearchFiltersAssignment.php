@@ -32,7 +32,7 @@ class UserSearchFiltersAssignment extends \yii\db\ActiveRecord
         return [
             [['user_id', 'filter_id'], 'required'],
             [['user_id', 'filter_id'], 'integer'],
-            [['user_columns'], 'string'],
+            [['user_columns'], 'safe'],
             [['filter_id'], 'exist', 'skipOnError' => true, 'targetClass' => SettingsSearchFilters::className(), 'targetAttribute' => ['filter_id' => 'id']],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
@@ -47,7 +47,14 @@ class UserSearchFiltersAssignment extends \yii\db\ActiveRecord
             'user_id' => 'User ID',
             'filter_id' => 'Filter ID',
             'user_columns' => 'Отображаемые данные',
+            'columns' => 'Отображаемые данные',
         ];
+    }
+
+    public function beforeValidate()
+    {
+        //if (!empty)
+        return parent::beforeValidate();
     }
 
     /**
@@ -64,5 +71,37 @@ class UserSearchFiltersAssignment extends \yii\db\ActiveRecord
     public function getUser()
     {
         return $this->hasOne(User::className(), ['id' => 'user_id']);
+    }
+
+    public function getColumns()
+    {
+        $arrayColumns = preg_split('/[\s*,\s*]*,+[\s*,\s*]*/', $this->user_columns);
+
+        return array_combine($arrayColumns, $arrayColumns);
+    }
+
+    public function setColumns($data)
+    {
+        $this->user_columns = join(',', $data);
+    }
+
+    public static function findByFilter($filter)
+    {
+        $query = static::find()
+            ->andWhere([
+                'filter_id' => $filter->id,
+                'user_id' => Yii::$app->user->id,
+            ]);
+
+        if (!$userfilter = $query->one()) {
+            $userfilter = new static([
+                'filter_id' => $filter->id,
+                'user_id' => Yii::$app->user->id,
+                'user_columns' => join(',', $filter->columnsForUser),
+            ]);
+            $userfilter->save();
+        }
+
+        return $userfilter;
     }
 }
