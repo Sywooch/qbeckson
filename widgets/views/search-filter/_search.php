@@ -14,14 +14,36 @@ use kartik\widgets\Select2;
         <?php $form = ActiveForm::begin([
             'action' => !empty($action) ? $action : ['index'],
             'method' => 'get',
-        ]); ?>
+        ]);
+        $inaccessibleRows = '';
+        $otherRows = '';
+        ?>
         <?php foreach ($data as $row): ?>
-            <?php echo $this->render($row['type'], [
+            <?php
+            $result = $this->render($row['type'], [
                 'form' => $form,
                 'model' => $model,
                 'row' => $row,
-            ]) ?>
+            ]);
+            if (in_array($row['attribute'], $userFilter->filter->inaccessibleColumns)) {
+                $inaccessibleRows .= $result;
+            } else {
+                $otherRows .= $result;
+            }
+            ?>
         <?php endforeach; ?>
+
+        <?= $inaccessibleRows ?>
+        <div class="col-md-12">
+            <a href="javascript:void(0);" class="show-additional-params">
+                <small>дополнительные параметры</small>
+            </a><br/><br/>
+        </div>
+        <div class="col-md-12 additional-params collapse">
+            <div class="row">
+                <?= $otherRows ?>
+            </div>
+        </div>
 
         <div class="col-md-12">
             <?= Html::submitButton('Начать поиск', ['class' => 'btn btn-primary']) ?>&nbsp;&nbsp;&nbsp;<a
@@ -29,8 +51,8 @@ use kartik\widgets\Select2;
                         class="glyphicon glyphicon-cog"></span> настроить</a>
         </div>
         <?php ActiveForm::end(); ?>
-        <div class="col-md-12 search-settings hidden">
-            <br /><br />
+        <div class="col-md-12 search-settings collapse">
+            <br/><br/>
             <?php
             $form = ActiveForm::begin(['action' => ['site/save-filter']]);
             $columnLabels = [];
@@ -49,7 +71,7 @@ use kartik\widgets\Select2;
             ]); ?>
             <?= Html::submitButton('Сохранить', ['class' => 'btn btn-warning']) ?>
             <?php ActiveForm::end(); ?>
-            <br /><br />
+            <br/><br/>
         </div>
     </div>
     <br/>

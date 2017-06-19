@@ -50,7 +50,10 @@ $(document).ready(function () {
     });
 
     $(".toggle-search-settings").click(function(){
-        $(".search-settings").removeClass('hidden');
+        $(".search-settings").slideToggle();
+    });
+    $(".show-additional-params").click(function(){
+        $(".additional-params").slideToggle();
     });
 });
 

@@ -82,7 +82,11 @@ class UserSearchFiltersAssignment extends \yii\db\ActiveRecord
 
     public function setColumns($data)
     {
-        $this->user_columns = join(',', $data);
+        if (is_array($data)) {
+            $this->user_columns = join(',', $data);
+        } else {
+            $this->user_columns = '';
+        }
     }
 
     public static function findByFilter($filter)

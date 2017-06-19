@@ -14,7 +14,9 @@ $columns = [
         'attribute' => 'number',
         'label' => 'Номер',
     ],
-    'fio_child',
+    [
+        'attribute' => 'fio_child',
+    ],
     [
         'attribute' => 'nominal',
         'type' => SearchFilter::TYPE_RANGE_SLIDER,
@@ -55,12 +57,11 @@ $columns = [
 <?php echo SearchFilter::widget([
     'model' => $searchCertificates,
     'action' => ['personal/payer-certificates'],
-    'data' => GridviewHelper::prepareColumns($columns, 'searchFilter', null),
+    'data' => GridviewHelper::prepareColumns('certificates', $columns, 'searchFilter', null),
 ]); ?>
 
 <div class="pull-right">
     <?= Html::a('Обновить номиналы', Url::to(['/certificates/allnominal', 'id' => $payer_id]), ['class' => 'btn btn-success']) ?>
-    <a href="javascript:void(0);" class="btn btn-warning show-search-form">Расширенный поиск</a>
 </div>
 
 <p>
@@ -71,5 +72,5 @@ $columns = [
     'filterModel' => null,
     'pjax' => true,
     'summary' => false,
-    'columns' => GridviewHelper::prepareColumns($columns),
+    'columns' => GridviewHelper::prepareColumns('certificates', $columns),
 ]); ?>
