@@ -8,7 +8,7 @@ use kartik\widgets\Select2;
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="data-search search-form">
+<div class="data-search search-form well">
 
     <div class="row">
         <?php $form = ActiveForm::begin([
@@ -34,11 +34,6 @@ use kartik\widgets\Select2;
         <?php endforeach; ?>
 
         <?= $inaccessibleRows ?>
-        <div class="col-md-12">
-            <a href="javascript:void(0);" class="show-additional-params">
-                <small>дополнительные параметры</small>
-            </a><br/><br/>
-        </div>
         <div class="col-md-12 additional-params collapse">
             <div class="row">
                 <?= $otherRows ?>
@@ -46,13 +41,16 @@ use kartik\widgets\Select2;
         </div>
 
         <div class="col-md-12">
-            <?= Html::submitButton('Начать поиск', ['class' => 'btn btn-primary']) ?>&nbsp;&nbsp;&nbsp;<a
-                    href="javascript:void(0);" class="toggle-search-settings"><span
-                        class="glyphicon glyphicon-cog"></span> настроить</a>
+            <?= Html::submitButton('Начать поиск', ['class' => 'btn btn-primary']) ?>&nbsp;&nbsp;
+            <?= Html::a('Сбросить', !empty($action) ? $action : ['index'], ['class' => 'btn btn-default']) ?>&nbsp;&nbsp;
+            <a href="javascript:void(0);" class="btn btn-warning show-additional-params">Расширенный поиск</a>&nbsp;&nbsp;
+            <a href="javascript:void(0);" class="toggle-search-settings">
+                <span class="glyphicon glyphicon-cog"></span> настроить
+            </a>
         </div>
         <?php ActiveForm::end(); ?>
         <div class="col-md-12 search-settings collapse">
-            <br/><br/>
+            <br/>
             <?php
             $form = ActiveForm::begin(['action' => ['site/save-filter']]);
             $columnLabels = [];
@@ -71,9 +69,6 @@ use kartik\widgets\Select2;
             ]); ?>
             <?= Html::submitButton('Сохранить', ['class' => 'btn btn-warning']) ?>
             <?php ActiveForm::end(); ?>
-            <br/><br/>
         </div>
     </div>
-    <br/>
-
 </div>

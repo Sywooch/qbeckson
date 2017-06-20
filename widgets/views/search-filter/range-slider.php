@@ -12,5 +12,5 @@ use kartik\slider\Slider;
             'step' => 10,
             'range' => true
         ]
-    ]); ?>
+    ])->label($model->getAttributeLabel($row['attribute']) . '&nbsp;&nbsp;&nbsp;'); ?>
 </div>
