@@ -145,7 +145,10 @@ $user = Yii::$app->user->getIdentity();
                                             ['label' => 'Сведения об организации', 'url' => ['/personal/organization-info']],
                                             ['label' => 'Предварительные записи', 'url' => ['/personal/organization-favorites']],
                                         ]],
-                                        ['label' => 'Программы', 'url' => ['/personal/organization-programs']],
+                                        ['label' => 'Программы', 'items' => [
+                                            ['label' => 'Реестр программ', 'url' => ['personal/organization-programs']],
+                                            ['label' => 'Муниципальное задание', 'url' => ['maintenance/index']],
+                                        ]],
                                         ['label' => 'Договоры', 'url' => ['/personal/organization-contracts']],
                                         ['label' => 'Счета', 'url' => ['/personal/organization-invoices']],
                                         ['label' => 'Плательщики', 'url' => ['/personal/organization-payers']],
