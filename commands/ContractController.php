@@ -67,7 +67,7 @@ class ContractController extends Controller
     {
         // == Вынимаем действующие контракты, дата начала обучения которых меньше первого числа текущего месяца
         // Для контракта уменьшаем rezerv, увеличиваем paid
-        // Для  связанного сертификата уменьшаем rezerv
+        // Для связанного сертификата уменьшаем rezerv
         $command = Yii::$app->db->createCommand("UPDATE contracts as c CROSS JOIN certificates as crt ON c.certificate_id = crt.id SET crt.rezerv = c.rezerv - c.other_m_price * c.payer_dol, c.rezerv = c.rezerv - c.other_m_price * c.payer_dol, c.paid = c.paid + c.other_m_price * c.payer_dol WHERE c.status = 1 AND c.start_edu_contract < :contract_start", [
             ':contract_start' => date('Y-m-d', strtotime('first day of this month')),
         ]);
@@ -105,11 +105,15 @@ class ContractController extends Controller
 
     public function actionCompletenessCreate()
     {
+        $previousMonth = strtotime('first day of previous month');
+        $currentMonth = strtotime('first day of this month');
+
         $contracts = Contracts::find()
-            ->where(['status' => Contracts::STATUS_ACTIVE])
+            ->where(['<=', 'start_edu_contract', date('Y-m-d', $currentMonth)])
+            ->andWhere(['or', ['status' => Contracts::STATUS_ACTIVE], ['and', ['status' => Contracts::STATUS_CLOSED], ['>=', 'date_termnate', date('Y-m-d', $previousMonth)]]])
+            ->asArray()
             ->all();
 
-        $previousMonth = strtotime('first day of previous month');
         foreach ($contracts as $contract) {
             $completenessExists = Completeness::find()
                 ->where([
@@ -143,6 +147,18 @@ class ContractController extends Controller
         }
 
         return Controller::EXIT_CODE_NORMAL;
+    }
+
+    public function actionReserveRefound()
+    {
+        // Все действующие договора расторгаем
+        $command = Yii::$app->db->createCommand("UPDATE contracts as c SET c.status = 4, c.wait_termnate = 0, c.date_termnate = :date_terminate WHERE c.status = 1", [
+            ':date_terminate' => date('Y-m-d', strtotime('last day of previous month')),
+        ]);
+        $command->execute();
+
+        $command = Yii::$app->db->createCommand("UPDATE contracts as c CROSS JOIN certificates as crt ON c.certificate_id = crt.id SET crt.rezerv = crt.rezerv + ABS(c.rezerv), c.paid = c.paid + c.rezerv, c.rezerv = 0 WHERE c.rezerv < 0");
+        $command->execute();
     }
 
     private function createCompleteness($contract, $date, $price)
