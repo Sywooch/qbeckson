@@ -54,7 +54,7 @@ $user = Yii::$app->user->getIdentity();
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-12">
+                    <div class="col-md-12">
                         <?php
                             NavBar::begin([
                                 'brandLabel' => '<div class="logo"></div>',
@@ -195,7 +195,7 @@ $user = Yii::$app->user->getIdentity();
                 </div>
 
                 <div class="row">
-                    <div class="col-xs-12">
+                    <div class="col-md-12">
                     <?php
                         $links = isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [];
                         $links = array_merge($links, [[
@@ -209,7 +209,7 @@ $user = Yii::$app->user->getIdentity();
                         ])
                         ?>
                     </div>
-                    <div class="col-xs-12 col-md-8 col-md-offset-2">
+                    <div class="col-md-12 col-md-8 col-md-offset-2">
                          <?php
                             // TODO: Убрать всё это говно
                             $organizations = new Organization();
@@ -233,7 +233,7 @@ $user = Yii::$app->user->getIdentity();
 
                          <?= app\widgets\Alert::widget() ?>
                     </div>
-                    <div class="col-xs-12">
+                    <div class="col-md-12">
                         <?= $content ?>
                     </div>
                 </div>
