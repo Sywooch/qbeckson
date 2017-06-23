@@ -78,6 +78,9 @@ class ContractController extends Controller
 
     public function actionCompletenessRefound()
     {
+        // TODO: временный костыль, переделать логику
+        ini_set('memory_limit', '-1');
+
         $contracts = Contracts::find()
             ->where(['status' => [Contracts::STATUS_ACTIVE, Contracts::STATUS_CLOSED]])
             ->all();
@@ -105,13 +108,15 @@ class ContractController extends Controller
 
     public function actionCompletenessCreate()
     {
+        // TODO: временный костыль, переделать логику
+        ini_set('memory_limit', '-1');
+
         $previousMonth = strtotime('first day of previous month');
         $currentMonth = strtotime('first day of this month');
 
         $contracts = Contracts::find()
             ->where(['<=', 'start_edu_contract', date('Y-m-d', $currentMonth)])
             ->andWhere(['or', ['status' => Contracts::STATUS_ACTIVE], ['and', ['status' => Contracts::STATUS_CLOSED], ['>=', 'date_termnate', date('Y-m-d', $previousMonth)]]])
-            ->asArray()
             ->all();
 
         foreach ($contracts as $contract) {
@@ -141,7 +146,7 @@ class ContractController extends Controller
                 $this->createCompleteness($contract, time(), $this->monthlyPrice($contract, time()));
             }
             // Создаем преинвойс
-            if (!$preinvoiceExists) {
+            if (!$preinvoiceExists && $contract->status == Contracts::STATUS_ACTIVE) {
                 $this->createPreinvoice($contract, $this->monthlyPrice($contract, time()));
             }
         }
