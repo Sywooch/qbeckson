@@ -626,3 +626,19 @@ li.breadcrumbs-help-icon:before {
     background-color: #0C5EAB;
     border-color: #337ab7;
 }
+
+@media only screen and (max-width: 766px) {
+    .navbar-collapse {
+        position: absolute;
+        z-index: 9999;
+        background: rgb(255, 255, 255);
+        width: 100%;
+        border: 1px solid rgb(204, 204, 204) !important;
+        border-radius: 5px;
+    }
+
+    .navbar-collapse .navbar-nav {
+        padding-top: 0px;
+        padding-left: 10px;
+    }
+}
