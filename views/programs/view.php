@@ -56,7 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <h3><?= Html::encode($this->title) ?></h3>
     </div>
     <div class="row">
-        <div class="col-sm-4">
+        <div class="col-md-4">
             <div class="affix-top" data-spy="affix" data-offset-top="205">
                 <?php $items = []; ?>
                 <?php if (Yii::$app->user->can('organizations')) : ?>
@@ -203,7 +203,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]); ?>
             </div>
         </div>
-        <div class="col-sm-8">
+        <div class="col-md-8">
             <?php
             if (Yii::$app->user->can('organizations')) {
                 if ($model->verification === 2 || $model->verification === 0) {
