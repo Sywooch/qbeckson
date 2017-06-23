@@ -1,6 +1,5 @@
 <?php
 
-use yii\helpers\Html;
 use kartik\slider\Slider;
 
 ?>

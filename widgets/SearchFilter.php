@@ -3,7 +3,6 @@ namespace app\widgets;
 
 use app\models\SettingsSearchFilters;
 use app\models\UserSearchFiltersAssignment;
-use yii;
 use yii\base\Widget;
 
 /**
@@ -13,19 +12,19 @@ use yii\base\Widget;
 class SearchFilter extends Widget
 {
     const TYPE_INPUT = 'input';
-
     const TYPE_RANGE_SLIDER = 'range-slider';
-
     const TYPE_TOUCH_SPIN = 'touch-spin';
-
     const TYPE_DROPDOWN = 'drop-down';
+    const TYPE_SELECT2 = 'select2';
 
+    /** @var array */
+    public $data;
     public $model;
-
     public $action;
 
-    public $data;
-
+    /**
+     * @inheritdoc
+     */
     public function init()
     {
         foreach ($this->data as $index => $row) {
@@ -40,18 +39,18 @@ class SearchFilter extends Widget
     }
 
     /**
-	 * @return string
-	 */
-	public function run()
-	{
+     * @return string
+     */
+    public function run()
+    {
         $filter = SettingsSearchFilters::findByTable($this->model->tableName());
         $userFilter = UserSearchFiltersAssignment::findByFilter($filter);
 
-    	return $this->render('search-filter/_search', [
+        return $this->render('search-filter/_search', [
             'model' => $this->model,
             'action' => $this->action,
             'data' => $this->data,
             'userFilter' => $userFilter,
-		]);
-	}
+        ]);
+    }
 }

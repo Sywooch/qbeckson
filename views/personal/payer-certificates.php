@@ -37,6 +37,11 @@ $columns = [
         'type' => SearchFilter::TYPE_TOUCH_SPIN,
     ],
     [
+        'attribute' => 'cert_group',
+        'value' => 'certGroup.group',
+        'type' => SearchFilter::TYPE_SELECT2,
+    ],
+    [
         'attribute' => 'actual',
         'value' => function ($data) {
             return $data->actual > 0 ? '+' : '-';

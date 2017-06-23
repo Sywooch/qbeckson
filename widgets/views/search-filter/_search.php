@@ -19,7 +19,7 @@ use kartik\widgets\Select2;
         $inaccessibleRows = '';
         $otherRows = '';
         ?>
-        <?php foreach ($data as $row): ?>
+        <?php foreach ($data as $row) : ?>
             <?php
             $result = $this->render($row['type'], [
                 'form' => $form,
@@ -60,7 +60,7 @@ use kartik\widgets\Select2;
             }
             ?>
             <?= $form->field($userFilter, 'filter_id')->hiddenInput()->label(false) ?>
-            <?= $form->field($userFilter, 'columns')->widget(Select2::classname(), [
+            <?= $form->field($userFilter, 'columns')->widget(Select2::class, [
                 'data' => array_combine($userFilter->filter->columnsForUser, $columnLabels),
                 'options' => ['placeholder' => 'Выберите..'],
                 'pluginOptions' => [

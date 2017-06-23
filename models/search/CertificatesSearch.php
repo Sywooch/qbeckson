@@ -2,7 +2,7 @@
 
 namespace app\models\search;
 
-use Yii;
+use app\models\Contracts;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\Certificates;
@@ -12,11 +12,10 @@ use app\models\Certificates;
  */
 class CertificatesSearch extends Certificates
 {
-    public $onlyPayerIds = null;
-
-    public $payers = null;
-
+    public $onlyPayerIds;
+    public $payers;
     public $enableContractsCount = false;
+    public $cert_group = [];
 
     /**
      * @inheritdoc
@@ -24,9 +23,12 @@ class CertificatesSearch extends Certificates
     public function rules()
     {
         return [
-            [['id', 'user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'contractCount'], 'integer', 'message' => 'Неверное значение.'],
+            [[
+                'id', 'user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3',
+                'directivity4', 'directivity5', 'directivity6', 'contractCount'
+            ], 'integer', 'message' => 'Неверное значение.'],
             [['fio_child', 'number'], 'string'],
-            [['fio_parent', 'payers', 'nominal', 'rezerv', 'balance'], 'safe'],
+            [['fio_parent', 'payers', 'nominal', 'rezerv', 'balance', 'cert_group'], 'safe'],
         ];
     }
 
@@ -55,7 +57,7 @@ class CertificatesSearch extends Certificates
         }
 
         if ($this->enableContractsCount === true) {
-            $subQuery = \app\models\Contracts::find()
+            $subQuery = Contracts::find()
                 ->select('certificate_id, COUNT(*) as contractCount')
                 ->where(['status' => 1])
                 ->groupBy('certificate_id');
@@ -69,7 +71,7 @@ class CertificatesSearch extends Certificates
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
-                'pagesize' => 50,
+                'pageSize' => 50,
             ],
         ]);
 
@@ -109,6 +111,10 @@ class CertificatesSearch extends Certificates
             'directivity6' => $this->directivity6,
         ]);
 
+        if (!empty($this->cert_group)) {
+            $query->andFilterWhere(['cert_group' => $this->cert_group]);
+        }
+
         if (!empty($this->onlyPayerIds)) {
             $query->andFilterWhere(['payer_id' => $this->onlyPayerIds]);
         } else {
@@ -117,17 +123,17 @@ class CertificatesSearch extends Certificates
 
         if (!empty($this->nominal)) {
             $nominal = explode(',', $this->nominal);
-            $query->andWhere(['and', ['>=', 'nominal', intval($nominal[0])], ['<=', 'nominal', intval($nominal[1])]]);
+            $query->andWhere(['and', ['>=', 'nominal', (int)$nominal[0]], ['<=', 'nominal', (int)$nominal[1]]]);
         }
 
         if (!empty($this->rezerv)) {
             $rezerv = explode(',', $this->rezerv);
-            $query->andWhere(['and', ['>=', 'rezerv', intval($rezerv[0])], ['<=', 'rezerv', intval($rezerv[1])]]);
+            $query->andWhere(['and', ['>=', 'rezerv', (int)$rezerv[0]], ['<=', 'rezerv', (int)$rezerv[1]]]);
         }
 
         if (!empty($this->balance)) {
             $balance = explode(',', $this->balance);
-            $query->andWhere(['and', ['>=', 'balance', intval($balance[0])], ['<=', 'balance', intval($balance[1])]]);
+            $query->andWhere(['and', ['>=', 'balance', (int)$balance[0]], ['<=', 'balance', (int)$balance[1]]]);
         }
 
         $query->andFilterWhere(['like', 'number', $this->number])
