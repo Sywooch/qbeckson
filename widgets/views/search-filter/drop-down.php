@@ -3,6 +3,10 @@
 use yii\helpers\Html;
 
 ?>
-<div class="col-md-3">
-    <?php echo $form->field($model, $row['attribute'])->dropDownList($row['data'], ['prompt' => 'Не важно']) ?>
+<div class="col-md-12">
+    <?php echo $form->field($model, $row['attribute'], [
+        'horizontalCssClasses' => [
+            'wrapper' => 'col-sm-2',
+        ]
+    ])->dropDownList($row['data'], ['prompt' => 'Не важно']) ?>
 </div>

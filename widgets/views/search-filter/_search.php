@@ -1,7 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-use yii\widgets\ActiveForm;
+use yii\bootstrap\ActiveForm;
 use kartik\widgets\Select2;
 
 /* @var $this yii\web\View */
@@ -13,6 +13,7 @@ use kartik\widgets\Select2;
     <div class="row">
         <?php $form = ActiveForm::begin([
             'action' => !empty($action) ? $action : ['index'],
+            'layout' => 'horizontal',
             'method' => 'get',
         ]);
         $inaccessibleRows = '';
