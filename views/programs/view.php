@@ -31,9 +31,8 @@ $this->params['breadcrumbs'][] = $this->title;
         top: 20px;
         max-width: 30%;
     }
-
-    @media only screen and (max-width: 766px) {
-        .programs-view .affix {
+    @media only screen and (max-width: 992px) {
+        .programs-view .affix-top, .programs-view .affix {
             top: 0;
             position: inherit;
             max-width: 100%;
@@ -57,42 +56,60 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
     <div class="row">
         <div class="col-md-4">
-            <div class="affix-top" data-spy="affix" data-offset-top="205">
-                <?php $items = []; ?>
-                <?php if (Yii::$app->user->can('organizations')) : ?>
-                    <?php foreach ($model->modules as $key => $module) : ?>
-                        <?php
-                        $items[$key]['label'] = $module->getFullname();
-                        $items[$key]['content'] = DetailView::widget([
-                            'model' => $module,
-                            'attributes' => [
-                                'fullname',
-                                [
-                                    'attribute' => 'open',
-                                    'label' => 'Зачисление',
-                                    'format' => 'raw',
-                                    //TODO переделать. На onf я пытался это разгребсти, но надо ещё сравнить логику и пересмотреть.
-                                    'value' => function ($data) {
-                                        $price = (new \yii\db\Query())
-                                            ->select(['price'])
-                                            ->from('years')
-                                            ->where(['id' => $data->id])
-                                            ->one();
-                                        $organizations = new Organization();
-                                        $organization = $organizations->getOrganization();
-                                        if ($organization['actual'] !== 0) {
-                                            if ($price['price'] > 0) {
-                                                if ($organization->type !== 4) {
-                                                    if (!empty($organization['license_issued_dat']) && !empty($organization['fio']) && !empty($organization['position']) && !empty($organization['doc_type'])) {
-                                                        if ($organization['doc_type'] === 1) {
-                                                            if (!empty($organization['date_proxy']) && !empty($organization['number_proxy'])) {
+            <div class="row">
+                <div class="affix-top col-md-12" data-spy="affix" data-offset-top="205">
+                    <?php $items = []; ?>
+                    <?php if (Yii::$app->user->can('organizations')) : ?>
+                        <?php foreach ($model->modules as $key => $module) : ?>
+                            <?php
+                            $items[$key]['label'] = $module->getFullname();
+                            $items[$key]['content'] = DetailView::widget([
+                                'model' => $module,
+                                'attributes' => [
+                                    'fullname',
+                                    [
+                                        'attribute' => 'open',
+                                        'label' => 'Зачисление',
+                                        'format' => 'raw',
+                                        //TODO переделать. На onf я пытался это разгребсти, но надо ещё сравнить логику и пересмотреть.
+                                        'value' => function ($data) {
+                                            $price = (new \yii\db\Query())
+                                                ->select(['price'])
+                                                ->from('years')
+                                                ->where(['id' => $data->id])
+                                                ->one();
+                                            $organizations = new Organization();
+                                            $organization = $organizations->getOrganization();
+                                            if ($organization['actual'] !== 0) {
+                                                if ($price['price'] > 0) {
+                                                    if ($organization->type !== 4) {
+                                                        if (!empty($organization['license_issued_dat']) && !empty($organization['fio']) && !empty($organization['position']) && !empty($organization['doc_type'])) {
+                                                            if ($organization['doc_type'] === 1) {
+                                                                if (!empty($organization['date_proxy']) && !empty($organization['number_proxy'])) {
+                                                                    if ($data->open === 0) {
+                                                                        return Html::a('Открыть', Url::to(['years/start', 'id' => $data->id]), ['class' => 'btn btn-success']);
+                                                                    } else {
+                                                                        return Html::a('Закрыть', Url::to(['years/stop', 'id' => $data->id]), ['class' => 'btn btn-danger']);
+                                                                    }
+                                                                } else {
+                                                                    return 'Заполните информацию "Для договора"';
+                                                                }
+                                                            } else {
                                                                 if ($data->open === 0) {
                                                                     return Html::a('Открыть', Url::to(['years/start', 'id' => $data->id]), ['class' => 'btn btn-success']);
                                                                 } else {
                                                                     return Html::a('Закрыть', Url::to(['years/stop', 'id' => $data->id]), ['class' => 'btn btn-danger']);
                                                                 }
+                                                            }
+                                                        } else {
+                                                            return 'Заполните информацию "Для договора"';
+                                                        }
+                                                    } else {
+                                                        if ($organization['doc_type'] === 1) {
+                                                            if ($data->open === 0) {
+                                                                return Html::a('Открыть', Url::to(['years/start', 'id' => $data->id]), ['class' => 'btn btn-success']);
                                                             } else {
-                                                                return 'Заполните информацию "Для договора"';
+                                                                return Html::a('Закрыть', Url::to(['years/stop', 'id' => $data->id]), ['class' => 'btn btn-danger']);
                                                             }
                                                         } else {
                                                             if ($data->open === 0) {
@@ -101,106 +118,90 @@ $this->params['breadcrumbs'][] = $this->title;
                                                                 return Html::a('Закрыть', Url::to(['years/stop', 'id' => $data->id]), ['class' => 'btn btn-danger']);
                                                             }
                                                         }
-                                                    } else {
-                                                        return 'Заполните информацию "Для договора"';
                                                     }
                                                 } else {
-                                                    if ($organization['doc_type'] === 1) {
-                                                        if ($data->open === 0) {
-                                                            return Html::a('Открыть', Url::to(['years/start', 'id' => $data->id]), ['class' => 'btn btn-success']);
-                                                        } else {
-                                                            return Html::a('Закрыть', Url::to(['years/stop', 'id' => $data->id]), ['class' => 'btn btn-danger']);
-                                                        }
-                                                    } else {
-                                                        if ($data->open === 0) {
-                                                            return Html::a('Открыть', Url::to(['years/start', 'id' => $data->id]), ['class' => 'btn btn-success']);
-                                                        } else {
-                                                            return Html::a('Закрыть', Url::to(['years/stop', 'id' => $data->id]), ['class' => 'btn btn-danger']);
-                                                        }
-                                                    }
+                                                    return 'Нет цены';
                                                 }
                                             } else {
-                                                return 'Нет цены';
+                                                return 'Деятельность приостановлена';
                                             }
-                                        } else {
-                                            return 'Деятельность приостановлена';
                                         }
-                                    }
-                                ],
-                                ['attribute' => 'price',
-                                    'format' => 'raw',
-                                    'value' => function ($data) {
-                                        $price = (new \yii\db\Query())
-                                            ->select(['price'])
-                                            ->from('years')
-                                            ->where(['id' => $data->id])
-                                            ->one();
+                                    ],
+                                    ['attribute' => 'price',
+                                        'format' => 'raw',
+                                        'value' => function ($data) {
+                                            $price = (new \yii\db\Query())
+                                                ->select(['price'])
+                                                ->from('years')
+                                                ->where(['id' => $data->id])
+                                                ->one();
 
-                                        if ($price['price'] > 0) {
-                                            if ($data->open === 1) {
-                                                return $price['price'];
+                                            if ($price['price'] > 0) {
+                                                if ($data->open === 1) {
+                                                    return $price['price'];
+                                                } else {
+                                                    return Html::a($price['price'], Url::to(['years/update', 'id' => $data->id]), ['class' => 'btn btn-primary']);
+                                                }
                                             } else {
-                                                return Html::a($price['price'], Url::to(['years/update', 'id' => $data->id]), ['class' => 'btn btn-primary']);
+                                                return Html::a('Установить цену', Url::to(['years/update', 'id' => $data->id]), ['class' => 'btn btn-success']);
                                             }
-                                        } else {
-                                            return Html::a('Установить цену', Url::to(['years/update', 'id' => $data->id]), ['class' => 'btn btn-success']);
                                         }
-                                    }
-                                ],
-                                'normative_price',
-                                [
-                                    'label' => 'Число обучающихся',
-                                    'value' => count($module->activeContracts),
-                                ],
-                                [
-                                    'label' => 'Предварительные записи',
-                                    'format' => 'raw',
-                                    'value' => function ($data) {
-                                        if ($data->previus === 1) {
-                                            return Html::a('<span class="glyphicon glyphicon-ok green"></span>', Url::to(['years/prevstop', 'id' => $data->id]));
+                                    ],
+                                    'normative_price',
+                                    [
+                                        'label' => 'Число обучающихся',
+                                        'value' => count($module->activeContracts),
+                                    ],
+                                    [
+                                        'label' => 'Предварительные записи',
+                                        'format' => 'raw',
+                                        'value' => function ($data) {
+                                            if ($data->previus === 1) {
+                                                return Html::a('<span class="glyphicon glyphicon-ok green"></span>', Url::to(['years/prevstop', 'id' => $data->id]));
+                                            }
+                                            if ($data->previus === 0) {
+                                                return Html::a('<span class="glyphicon glyphicon-remove red"></span>', Url::to(['years/prevstart', 'id' => $data->id]));
+                                            }
                                         }
-                                        if ($data->previus === 0) {
-                                            return Html::a('<span class="glyphicon glyphicon-remove red"></span>', Url::to(['years/prevstart', 'id' => $data->id]));
-                                        }
-                                    }
+                                    ],
                                 ],
-                            ],
-                        ]);
-                        ?>
-                    <?php endforeach; ?>
-                <?php else : ?>
-                    <?php foreach ($model->modules as $key => $module) : ?>
-                        <?php
-                        $items[$key]['label'] = $module->getFullname();
-                        $items[$key]['content'] = DetailView::widget([
-                            'model' => $module,
-                            'attributes' => [
-                                'fullname',
-                                [
-                                    'value' => $module->open === 1 ? 'Да' : 'Нет',
-                                    'label' => 'Зачисление',
+                            ]);
+                            ?>
+                        <?php endforeach; ?>
+                    <?php else : ?>
+                        <?php foreach ($model->modules as $key => $module) : ?>
+                            <?php
+                            $items[$key]['label'] = $module->getFullname();
+                            $items[$key]['content'] = DetailView::widget([
+                                'model' => $module,
+                                'attributes' => [
+                                    'fullname',
+                                    [
+                                        'value' => $module->open === 1 ? 'Да' : 'Нет',
+                                        'label' => 'Зачисление',
+                                    ],
+                                    'price',
+                                    'normative_price',
+                                    [
+                                        'label' => 'Число обучающихся',
+                                        'value' => count($module->activeContracts),
+                                    ],
+                                    [
+                                        'label' => 'Предварительные записи',
+                                        'value' => $module->previus === 1 ? 'Да' : 'Нет',
+                                    ],
                                 ],
-                                'price',
-                                'normative_price',
-                                [
-                                    'label' => 'Число обучающихся',
-                                    'value' => count($module->activeContracts),
-                                ],
-                                [
-                                    'label' => 'Предварительные записи',
-                                    'value' => $module->previus === 1 ? 'Да' : 'Нет',
-                                ],
-                            ],
-                        ]);
-                        ?>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-                <?= TabsX::widget([
-                    'items' => $items,
-                    'position' => TabsX::POS_LEFT,
-                    'bordered' => true,
-                    'encodeLabels' => false,
-                ]); ?>
+                            ]);
+                            ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                    <?= TabsX::widget([
+                        'items' => $items,
+                        'position' => TabsX::POS_LEFT,
+                        'bordered' => true,
+                        'encodeLabels' => false,
+                    ]); ?>
+                </div>
             </div>
         </div>
         <div class="col-md-8">
