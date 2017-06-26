@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <style>
     .programs-view .affix {
         top: 20px;
-        max-width: 30%;
+        max-width: 33.3333333%;
     }
     @media only screen and (max-width: 992px) {
         .programs-view .affix-top, .programs-view .affix {
