@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\models\SettingsSearchFilters;
+use app\models\UserSearchFiltersAssignment;
 use Yii;
 use yii\captcha\CaptchaAction;
 use yii\filters\AccessControl;
@@ -43,7 +45,7 @@ class SiteController extends Controller
             ],
             'captcha' => [
                 'class' => CaptchaAction::class,
-                'fixedVerifyCode' => YII_ENV_DEV  ? 'test' : null,
+                'fixedVerifyCode' => YII_ENV_DEV ? 'test' : null,
             ],
         ];
     }
@@ -81,5 +83,22 @@ class SiteController extends Controller
         }
 
         return $this->render('no-video');
+    }
+
+    public function actionSaveFilter()
+    {
+        $post = Yii::$app->request->post('UserSearchFiltersAssignment');
+        $filter = SettingsSearchFilters::findOne($post['filter_id']);
+        $model = UserSearchFiltersAssignment::findByFilter($filter);
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $model->columns = $post['columns'];
+            $model->save(false);
+            Yii::$app->session->setFlash('success', 'Настройки поиска; успешно сохранены.');
+        } else {
+            Yii::$app->session->setFlash('danger', 'Ошибка при сохранении настроек поиска.');
+        }
+
+        return $this->redirect(Yii::$app->request->referrer);
     }
 }

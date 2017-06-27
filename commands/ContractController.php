@@ -9,6 +9,13 @@ use app\models\Certificates;
 use app\models\Organization;
 use app\models\Completeness;
 
+/*
+php yii contract/close
+php yii contract/write-off
+php yii contract/completeness-refound
+php yii contract/completeness-create
+*/
+
 class ContractController extends Controller
 {
     // Подготовка к тесту Close
@@ -100,6 +107,7 @@ class ContractController extends Controller
                 $certificate = $contract->certificate;
                 $monthlyPrice = $this->monthlyPrice($contract, $dateTwoMonthsAgo);
                 $certificate->updateCounters(['balance' => (($monthlyPrice * $contract->payer_dol) / 100) * (100 - $completeness['completeness'])]);
+                // TODO: Уменьшить и paid по договору, резерв не возвращая
             }
         }
 
@@ -118,6 +126,7 @@ class ContractController extends Controller
             ->where(['<=', 'start_edu_contract', date('Y-m-d', $currentMonth)])
             ->andWhere(['or', ['status' => Contracts::STATUS_ACTIVE], ['and', ['status' => Contracts::STATUS_CLOSED], ['>=', 'date_termnate', date('Y-m-d', $previousMonth)]]])
             ->all();
+        // создает счета, которые только-только закрылись
 
         foreach ($contracts as $contract) {
             $completenessExists = Completeness::find()

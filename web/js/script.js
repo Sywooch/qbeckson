@@ -44,6 +44,17 @@ $(document).ready(function () {
         $(".container-refuse-reason").show();
         $(".container-refuse-reason textarea").focus();
     });
+
+    $(".show-search-form").click(function(){
+        $(".search-form").slideToggle();
+    });
+
+    $(".toggle-search-settings").click(function(){
+        $(".search-settings").slideToggle();
+    });
+    $(".show-additional-params").click(function(){
+        $(".additional-params").slideToggle();
+    });
 });
 
 function selectGroup(obj) {

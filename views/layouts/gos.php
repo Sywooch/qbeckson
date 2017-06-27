@@ -96,6 +96,10 @@ $user = Yii::$app->user->getIdentity();
                                                     'label' => 'Направленности программ',
                                                     'url' => ['admin/directory-program-direction/index']
                                                 ],
+                                                [
+                                                    'label' => 'Настройки фильтров',
+                                                    'url' => ['admin/search-filters/index']
+                                                ],
                                             ],
 
                                         ]
