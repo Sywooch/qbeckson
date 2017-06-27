@@ -100,7 +100,7 @@ class YearsController extends Controller
             
             if ($contracts == 0) {
                 $model->save();
-                return $this->redirect(['/personal/organization-programs']);
+                return $this->redirect(['programs/view', 'id' => $model->program_id]);
             }
             else {
                 Yii::$app->session->setFlash('error', 'Нельзя изменить цену программы, есть заявку на эту программу.');
@@ -142,7 +142,7 @@ class YearsController extends Controller
         if ($rows > 0) {
             $model->open = 1;
             if ($model->save()) {
-                return $this->redirect('/personal/organization-programs');
+                return $this->redirect(['programs/view', 'id' => $model->program_id]);
             }
         }
         else {
@@ -201,8 +201,8 @@ class YearsController extends Controller
                             $preinvoice->completeness = 80;
                             if ($preinvoice->save()) {*/
                                 $model->open = 1;
-                                if ($model->save()) { 
-                                    return $this->redirect(['/personal/organization-programs']);
+                                if ($model->save()) {
+                                    return $this->redirect(['programs/view', 'id' => $model->program_id]);
                                 }
                            // }
                         //}
@@ -221,7 +221,7 @@ class YearsController extends Controller
         $model = $this->findModel($id);
         $model->open = 0;
         if ($model->save()) {
-            return $this->redirect('/personal/organization-programs');
+            return $this->redirect(['programs/view', 'id' => $model->program_id]);
         }
     }
     
@@ -500,7 +500,7 @@ class YearsController extends Controller
         $model = $this->findModel($id);
         $model->previus = 1;
         if ($model->save()) {
-            return $this->redirect('/personal/organization-programs');
+            return $this->redirect(['programs/view', 'id' => $model->program_id]);
         }
     }
     
@@ -509,7 +509,7 @@ class YearsController extends Controller
         $model = $this->findModel($id);
         $model->previus = 0;
         if ($model->save()) {
-            return $this->redirect('/personal/organization-programs');
+            return $this->redirect(['programs/view', 'id' => $model->program_id]);
         }
     }
     

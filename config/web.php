@@ -209,6 +209,11 @@ $config = [
                         'roles' => ['admins'],
                     ]
                 ],
+                'maintenance' => [
+                    [
+                        'allow' => true,
+                    ]
+                ],
             ]
     ],
 

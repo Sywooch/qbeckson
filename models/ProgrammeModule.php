@@ -12,8 +12,11 @@ use app\models\Programs;
  * @property integer $program_id
  * @property integer $year
  * @property integer $month
+ * @property integer $previus
+ * @property integer $open
  *
  * @property Programs $program
+ * @property Contracts[] $activeContracts
  */
 class ProgrammeModule extends \yii\db\ActiveRecord
 {
@@ -82,6 +85,16 @@ class ProgrammeModule extends \yii\db\ActiveRecord
             'fullname' => 'Наименование модуля',
         ];
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getActiveContracts()
+    {
+        return $this->hasMany(Contracts::class, ['year_id' => 'id'])
+            ->andWhere(['contracts.status' => 1]);
+    }
+
 
     /**
      * @return \yii\db\ActiveQuery
