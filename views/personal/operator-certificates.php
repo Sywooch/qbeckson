@@ -33,10 +33,16 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'rezerv',
             'label' => 'Резерв',
+            'value' => function ($data) {
+                return abs(round($data->rezerv));
+            },
         ],
         [
             'attribute' => 'balance',
             'label' => 'Остаток',
+            'value' => function ($data) {
+                return round($data->balance);
+            },
         ],
         [
             'label' => 'Договоров',

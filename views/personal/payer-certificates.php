@@ -25,11 +25,17 @@ $columns = [
         'attribute' => 'rezerv',
         'label' => 'Резерв',
         'type' => SearchFilter::TYPE_RANGE_SLIDER,
+        'value' => function ($data) {
+            return abs(round($data->rezerv));
+        },
     ],
     [
         'attribute' => 'balance',
         'label' => 'Остаток',
         'type' => SearchFilter::TYPE_RANGE_SLIDER,
+        'value' => function ($data) {
+            return round($data->balance);
+        },
     ],
     [
         'attribute' => 'contractCount',
