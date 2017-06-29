@@ -388,6 +388,14 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOperators()
+    {
+        return $this->hasMany(Operators::className(), ['id' => 'operator_id'])->viaTable('organization_operator_assignment', ['organization_id' => 'id']);
+    }
+
+    /**
      * DEPRECATED
      * Use relation in app\models\User instead
      */

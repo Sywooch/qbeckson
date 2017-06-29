@@ -40,7 +40,7 @@ class Operators extends \yii\db\ActiveRecord
     {
         return [
             [['user_id', 'name', 'OGRN', 'INN', 'KPP', 'OKPO', 'address_legal', 'address_actual', 'phone', 'email', 'position', 'fio'], 'required'],
-            [['user_id', 'OGRN', 'INN', 'KPP', 'OKPO'], 'integer'],
+            [['user_id', 'OGRN', 'INN', 'KPP', 'OKPO', 'region'], 'integer'],
             [['name', 'address_legal', 'address_actual', 'phone', 'email', 'position', 'fio'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
@@ -74,6 +74,15 @@ class Operators extends \yii\db\ActiveRecord
     public function getUser()
     {
         return $this->hasOne(User::className(), ['id' => 'user_id']);
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrganizations()
+    {
+        return $this->hasMany(Organization::className(), ['id' => 'organization_id'])->viaTable('organization_operator_assignment', ['operator_id' => 'id']);
     }
 
     /**

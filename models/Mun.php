@@ -37,7 +37,8 @@ class Mun extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'nopc', 'conopc', 'pc', 'copc', 'zp', 'cozp', 'dop', 'codop', 'uvel', 'couvel', 'otch', 'cootch', 'otpusk', 'cootpusk', 'polezn', 'copolezn', 'stav', 'costav', 'rob', 'corob', 'tex', 'cotex', 'est', 'coest', 'fiz', 'cofiz', 'xud', 'coxud', 'tur', 'cotur', 'soc', 'cosoc', 'deystv', 'countdet', 'lastdeystv'], 'required'],            
+            [['name', 'nopc', 'conopc', 'pc', 'copc', 'zp', 'cozp', 'dop', 'codop', 'uvel', 'couvel', 'otch', 'cootch', 'otpusk', 'cootpusk', 'polezn', 'copolezn', 'stav', 'costav', 'rob', 'corob', 'tex', 'cotex', 'est', 'coest', 'fiz', 'cofiz', 'xud', 'coxud', 'tur', 'cotur', 'soc', 'cosoc', 'deystv', 'countdet', 'lastdeystv'], 'required'],
+            ['operator_id', 'integer'],
             [['nopc', 'conopc', 'pc', 'copc', 'zp', 'cozp', 'dop', 'codop', 'uvel', 'couvel', 'otch', 'cootch', 'otpusk', 'cootpusk', 'polezn', 'copolezn', 'stav', 'costav'], 'number'],
             [['rob', 'corob', 'tex', 'cotex', 'est', 'coest', 'fiz', 'cofiz', 'xud', 'coxud', 'tur', 'cotur', 'soc', 'cosoc', 'deystv', 'countdet', 'lastdeystv'], 'integer'],
             [['name'], 'string', 'max' => 255],
