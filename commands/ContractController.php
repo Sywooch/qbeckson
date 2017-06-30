@@ -165,13 +165,16 @@ class ContractController extends Controller
 
     public function actionReserveRefound()
     {
-        // Все действующие договора расторгаем
-        $command = Yii::$app->db->createCommand("UPDATE contracts as c SET c.status = 4, c.wait_termnate = 0, c.date_termnate = :date_terminate WHERE c.status = 1", [
+        // Договора расторгаем
+        $command = Yii::$app->db->createCommand("UPDATE contracts as c SET c.status = 4, c.wait_termnate = 0, c.date_termnate = :date_terminate WHERE c.status = 1 AND c.stop_edu_contract < :date_terminate", [
             ':date_terminate' => date('Y-m-d', strtotime('last day of previous month')),
         ]);
         $command->execute();
 
-        $command = Yii::$app->db->createCommand("UPDATE contracts as c CROSS JOIN certificates as crt ON c.certificate_id = crt.id SET crt.rezerv = crt.rezerv + ABS(c.rezerv), c.paid = c.paid + c.rezerv, c.rezerv = 0 WHERE c.rezerv < 0");
+        $command = Yii::$app->db->createCommand("UPDATE contracts as c CROSS JOIN certificates as crt ON c.certificate_id = crt.id SET crt.rezerv = crt.rezerv + ABS(c.rezerv), c.paid = c.paid - ABS(c.rezerv), c.rezerv = 0 WHERE c.rezerv < 0");
+        $command->execute();
+
+        $command = Yii::$app->db->createCommand("UPDATE contracts as c CROSS JOIN certificates as crt ON c.certificate_id = crt.id SET crt.rezerv = 0 WHERE c.status = 4");
         $command->execute();
     }
 
