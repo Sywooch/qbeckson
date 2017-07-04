@@ -104,6 +104,11 @@ class ProgrammeModule extends \yii\db\ActiveRecord
         return $this->hasOne(Programs::className(), ['id' => 'program_id']);
     }
 
+    public function getShortName()
+    {
+        return 'Модуль ' . $this->year;
+    }
+
     public function getFullname($prefix = true)
     {
         return ($prefix === false ?: 'Модуль ' . $this->year . (empty($this->name) ? '' : '. ') . $this->name);
