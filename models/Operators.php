@@ -76,6 +76,12 @@ class Operators extends \yii\db\ActiveRecord
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 
+    public function setRegion($region)
+    {
+        $this->region = $region;
+
+        return $this->save();
+    }
 
     /**
      * @return \yii\db\ActiveQuery

@@ -483,6 +483,15 @@ class Organization extends \yii\db\ActiveRecord
         return $rows;
     }
 
+    public static function findWithoutOperator($operatorId)
+    {
+        $query = static::find()
+            ->leftJoin('organization_operator_assignment', 'organization.id = organization_operator_assignment.organization_id')
+            ->where(['organization_operator_assignment.operator_id' => null]);
+        
+        return $query->all();
+    }
+
     public function setNew()
     {
         $this->status = self::STATUS_NEW;

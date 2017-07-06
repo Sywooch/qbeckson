@@ -1,4 +1,6 @@
 <?php
+use app\components\LocalFlysystemBuilder;
+use trntv\filekit\Storage;
 
 Yii::setAlias('@tests', dirname(__DIR__) . '/tests/codeception');
 
@@ -25,6 +27,14 @@ $config = [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
                 ],
+            ],
+        ],
+        'fileStorage' => [
+            'class' => Storage::class,
+            'baseUrl' => '@runtime/uploads',
+            'filesystem' => [
+                'class' => LocalFlysystemBuilder::class,
+                'path' => '@runtime/uploads'
             ],
         ],
         'db' => $db,
