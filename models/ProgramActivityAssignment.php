@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use app\models\statics\DirectoryProgramActivity;
 
 /**
  * This is the model class for table "program_activity_assignment".
