@@ -111,23 +111,23 @@ class Organization extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'bank_name', 'bank_bik', 'korr_invoice', 'rass_invoice', 'fio_contact', 'address_actual', 'email', 'full_name', 'type', 'phone', 'address_legal', 'inn', 'KPP', 'OGRN', 'mun'], 'required'],
+            [['name', 'bank_name', 'bank_bik', 'korr_invoice', 'rass_invoice', 'fio_contact', 'address_actual', 'email', 'full_name', 'type', 'phone', 'address_legal', 'mun'], 'required'],
             // TODO: Вернуть обратно после слияния баз
-            //[['organizational_form', 'last', 'bank_sity'], 'required'],
-            [['license_date', 'license_number', 'license_issued'], 'required',
-             'when' => function($model) {
-                return $model->type != self::TYPE_IP_WITHOUT_WORKERS;
-            },
-             'whenClient' => "function (attribute, value) {
-                 return $('#organization-type').val() != 4;
-            }"],
-            [['svidet'], 'required', 
+            //[['organizational_form', 'last', 'bank_sity', 'inn', 'KPP', 'OGRN'], 'required'],
+            /*[['svidet'], 'required', 
              'when' => function($model) {
                 return $model->type == self::TYPE_IP_WITH_WORKERS;
             },
              'whenClient' => "function (attribute, value) {
                  return $('#organization-type').val() == 3;
             }"],
+            [['license_date', 'license_number', 'license_issued'], 'required',
+             'when' => function($model) {
+                return $model->type != self::TYPE_IP_WITHOUT_WORKERS;
+            },
+             'whenClient' => "function (attribute, value) {
+                 return $('#organization-type').val() != 4;
+            }"],*/
             [['user_id', 'actual', 'type', 'bank_bik', 'korr_invoice', 'doc_type', 'max_child', 'amount_child', 'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'last', 'last_year_contract', 'certprogram', 'status', 'organizational_form'], 'integer'],
             [['license_date', 'date_proxy', 'cratedate', 'accepted_date'], 'safe'],
             [['raiting'], 'number'],
