@@ -17,17 +17,79 @@ use app\models\Organization;
 class MergerController extends Controller
 {
     public $merged = [
-        /*
         'mun:\app\models\Mun',
         'coefficient:\app\models\Coefficient',
         'user:\app\models\User' => ['mun_id' => 'mun'],
         'auth_assignment:\app\models\AuthAssignment' => ['user_id' => 'user'],
         'user_search_filters_assignment:\app\models\UserSearchFiltersAssignment' => ['user_id' => 'user'],
         'directory_program_activity:\app\models\DirectoryProgramActivity' => ['user_id' => 'user'],
-        */
         'organization:\app\models\Organization' => [
             'user_id' => 'user',
-            'mun' => 'mun'
+            'mun' => 'mun',
+        ],
+        'organization_document:\app\models\OrganizationDocument' => [
+            'organization_id' => 'organization',
+        ],
+        'payers:\app\models\Payers' => [
+            'user_id' => 'user',
+            'mun' => 'mun',
+        ],
+        'programs:\app\models\Programs' => [
+            'organization_id' => 'organization',
+            'mun' => 'mun',
+        ],
+        'program_activity_assignment:\app\models\ProgramActivityAssignment' => [
+            'program_id' => 'programs',
+            'activity_id' => 'directory_program_activity',
+        ],
+        'years:\app\models\Years' => [
+            'program_id' => 'programs',
+        ],
+        'cert_group:\app\models\CertGroup' => [
+            'payer_id' => 'payers',
+        ],
+        'certificates:\app\models\Certificates' => [
+            'user_id' => 'user',
+            'payer_id' => 'payers',
+            'cert_group' => 'cert_group',
+        ],
+        'groups:\app\models\Groups' => [
+            'organization_id' => 'organization',
+            'program_id' => 'programs',
+            'year_id' => 'years',
+        ],
+        'contracts:\app\models\Contracts' => [
+            'organization_id' => 'organization',
+            'program_id' => 'programs',
+            'year_id' => 'years',
+            'group_id' => 'groups',
+            'payer_id' => 'payers',
+            'certificate_id' => 'certificates',
+        ],
+        'completeness:\app\models\Completeness' => [
+            'group_id' => 'groups',
+            'contract_id' => 'contracts',
+        ],
+        'cooperate:\app\models\Cooperate' => [
+            'organization_id' => 'organization',
+            'payer_id' => 'payers',
+        ],
+        'disputes:\app\models\Disputes' => [
+            'contract_id' => 'contracts',
+            'user_id' => 'user',
+        ],
+        'favorites:\app\models\Favorites' => [
+            'organization_id' => 'organization',
+            'program_id' => 'programs',
+            'certificate_id' => 'certificates',
+        ],
+        'informs:\app\models\Informs' => [
+            'program_id' => 'programs',
+            'contract_id' => 'contracts',
+        ],
+        'invoices:\app\models\Invoices' => [
+            'organization_id' => 'organization',
+            'payers_id' => 'payers',
         ],
     ];
 
@@ -37,6 +99,7 @@ class MergerController extends Controller
 
     public function actionMerge()
     {
+        Yii::$app->db->createCommand('TRUNCATE TABLE `temporary_merger_id`')->execute();
         foreach ($this->merged as $table => $columns) {
             if (!is_array($columns)) {
                 $table = $columns;
@@ -53,7 +116,6 @@ class MergerController extends Controller
                 if (isset($value['item_name']) && in_array($value['item_name'], $this->blackListRoles)) {
                     continue;
                 }
-
                 if (is_array($columns)) {
                     foreach ($columns as $attribute => $parentTable) {
                         if (empty($value[$attribute])) {
@@ -65,11 +127,10 @@ class MergerController extends Controller
 
                 $model = new $model;
                 $model->attributes = $value;
-                //print_r($model);exit;
-                if ($model->validate()) {
+                if ($model->save()) {
                     if (isset($value['id'])) {
                         echo 'Adding (' . $table . ' - ' . $value['id'] . ')' . PHP_EOL;
-                        //$this->addOldId($table, $value['id'], $model->id);
+                        $this->addOldId($table, $value['id'], $model->id);
                     } else {
                         echo 'Adding (' . $table . ')' . PHP_EOL;
                     }
@@ -80,7 +141,7 @@ class MergerController extends Controller
             }
         }
 
-        return Controller::EXIT_CODE_ERROR;
+        return Controller::EXIT_CODE_NORMAL;
     }
 
     public function actionImportOperator($newLogin)
@@ -154,7 +215,10 @@ class MergerController extends Controller
         $query = (new \yii\db\Query)
             ->select('new_id')
             ->from('temporary_merger_id')
-            ->where(['old_id' => $oldId]);
+            ->where([
+                'table_name' => $table,
+                'old_id' => $oldId,
+            ]);
 
         return $query->createCommand()->queryScalar();
     }
