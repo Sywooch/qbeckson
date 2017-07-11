@@ -22,7 +22,7 @@ class MergerController extends Controller
         'user:\app\models\User' => ['mun_id' => 'mun'],
         'auth_assignment:\app\models\AuthAssignment' => ['user_id' => 'user'],
         'user_search_filters_assignment:\app\models\UserSearchFiltersAssignment' => ['user_id' => 'user'],
-        'directory_program_activity:\app\models\DirectoryProgramActivity' => ['user_id' => 'user'],
+        'directory_program_activity:\app\models\statics\DirectoryProgramActivity' => ['user_id' => 'user'],
         'organization:\app\models\Organization' => [
             'user_id' => 'user',
             'mun' => 'mun',
