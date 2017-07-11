@@ -111,10 +111,10 @@ class Organization extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'bank_name', 'bank_bik', 'korr_invoice', 'rass_invoice', 'fio_contact', 'address_actual', 'email', 'full_name', 'type', 'phone', 'address_legal', 'mun'], 'required'],
             // TODO: Вернуть обратно после слияния баз
+            //[['name', 'bank_name', 'bank_bik', 'korr_invoice', 'rass_invoice', 'fio_contact', 'address_actual', 'email', 'full_name', 'type', 'phone', 'address_legal', 'mun'], 'required'],
             //[['organizational_form', 'last', 'bank_sity', 'inn', 'KPP', 'OGRN'], 'required'],
-            /*[['svidet'], 'required', 
+            /*[['svidet'], 'required',
              'when' => function($model) {
                 return $model->type == self::TYPE_IP_WITH_WORKERS;
             },
