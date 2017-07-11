@@ -99,6 +99,7 @@ class MergerController extends Controller
 
     public function actionMerge()
     {
+        ini_set('memory_limit', '-1');
         Yii::$app->db->createCommand('TRUNCATE TABLE `temporary_merger_id`')->execute();
         foreach ($this->merged as $table => $columns) {
             if (!is_array($columns)) {
