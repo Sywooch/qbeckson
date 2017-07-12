@@ -51,10 +51,11 @@ class ContractsoSearch extends Contracts
      */
     public function search($params)
     {
-        $query = Contracts::find();
+        $query = Contracts::find()
+            ->joinWith(['payers'])
+            ->where('`payers`.operator_id = ' . Yii::$app->operator->identity->id);
 
         $query->joinWith(['program']);
-        $query->joinWith(['payers']);
         $query->joinWith(['organization']);
         $query->joinWith(['certificate']);
         $query->joinWith(['year']);

@@ -41,7 +41,9 @@ class ProgramsotkSearch extends Programs
      */
     public function search($params)
     {
-        $query = Programs::find();
+        $query = Programs::find()
+            ->joinWith(['municipality'])
+            ->where('`mun`.operator_id = ' . Yii::$app->operator->identity->id);
 
         // add conditions that should always apply here
 

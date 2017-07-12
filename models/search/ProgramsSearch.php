@@ -46,6 +46,8 @@ class ProgramsSearch extends Programs
     public function search($params)
     {
         $query = Programs::find()
+            ->joinWith(['municipality'])
+            ->where('`mun`.operator_id = ' . Yii::$app->operator->identity->id)
             ->joinWith('organization');
 
         $sort = new \yii\data\Sort([

@@ -42,8 +42,10 @@ class ProgramscertSearch extends Programs
      */
     public function search($params)
     {
-        $query = Programs::find();
-        
+        $query = Programs::find()
+            ->joinWith(['municipality'])
+            ->where('`mun`.operator_id = ' . Yii::$app->operator->identity->id);
+
        // $query->joinWith(['organization']);
 
         // add conditions that should always apply here

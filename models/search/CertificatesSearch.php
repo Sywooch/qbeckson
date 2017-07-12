@@ -2,6 +2,7 @@
 
 namespace app\models\search;
 
+use Yii;
 use app\models\Contracts;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -50,11 +51,9 @@ class CertificatesSearch extends Certificates
      */
     public function search($params)
     {
-        $query = Certificates::find();
-
-        if (!empty($this->payers)) {
-            $query->joinWith(['payers']);
-        }
+        $query = Certificates::find()
+            ->joinWith(['payers'])
+            ->where('`payers`.operator_id = ' . Yii::$app->operator->identity->id);
 
         if ($this->enableContractsCount === true) {
             $subQuery = Contracts::find()
@@ -63,7 +62,7 @@ class CertificatesSearch extends Certificates
                 ->groupBy('certificate_id');
 
             $query->select(['certificates.*', 'tableContractsCount.contractCount'])
-                ->leftJoin(['tableContractsCount' => $subQuery], 'tableContractsCount.certificate_id = id');
+                ->leftJoin(['tableContractsCount' => $subQuery], 'tableContractsCount.certificate_id = `certificates`.id');
         }
 
         // add conditions that should always apply here

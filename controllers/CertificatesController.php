@@ -58,7 +58,7 @@ class CertificatesController extends Controller
         $payers = new Payers();
         $payer = $payers->getPayer();
 
-        $region = Yii::$app->params['region'];
+        $region = Yii::$app->operator->identity->region;
 
         if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {
             $user->username = $region . $payer->code . $user->username;

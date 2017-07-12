@@ -41,7 +41,9 @@ class ContractsclearSearch extends Contracts
      */
     public function search($params)
     {
-        $query = Contracts::find();
+        $query = Contracts::find()
+            ->joinWith(['payers'])
+            ->where('`payers`.operator_id = ' . Yii::$app->operator->identity->id);
 
         // add conditions that should always apply here
 
