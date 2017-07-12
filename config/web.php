@@ -25,6 +25,9 @@ $config = [
         'operator' => [
             'class' => 'app\components\Operator',
         ],
+        'coefficient' => [
+            'class' => 'app\components\Coefficient',
+        ],
         'user' => [
             'identityClass' => 'app\models\UserIdentity',
             'enableAutoLogin' => true,

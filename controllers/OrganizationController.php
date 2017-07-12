@@ -124,12 +124,7 @@ class OrganizationController extends Controller
 
                 $mun = Mun::findOne($model->mun);
 
-                $coefficient = (new \yii\db\Query())
-                    ->select(['potenc'])
-                    ->from('coefficient')
-                    ->one();
-
-                $model->max_child = floor((($mun->deystv / ($mun->countdet * 0.7)) * $coefficient['potenc']) * $model->last);
+                $model->max_child = floor((($mun->deystv / ($mun->countdet * 0.7)) * Yii::$app->coefficient->data->potenc) * $model->last);
 
                 if ($model->save()) {
                     $user->password = $password;
@@ -154,12 +149,6 @@ class OrganizationController extends Controller
             throw new ForbiddenHttpException('Недостаточно прав');
         }
 
-        // TODO: Избавиться от этого говна
-        $coefficient = (new \yii\db\Query())
-            ->select(['potenc'])
-            ->from('coefficient')
-            ->one();
-
         $model = new Organization([
             'status' => Organization::STATUS_NEW,
             'scenario' => Organization::SCENARIO_GUEST,
@@ -177,7 +166,7 @@ class OrganizationController extends Controller
             if ($user->save()) {
                 Yii::$app->authManager->assign(Yii::$app->authManager->getRole('organizations'), $user->id);
                 $model->user_id = $user->id;
-                $model->max_child = floor((($model->municipality->deystv / ($model->municipality->countdet * 0.7)) * $coefficient['potenc']) * $model->last);
+                $model->max_child = floor((($model->municipality->deystv / ($model->municipality->countdet * 0.7)) * Yii::$app->coefficient->data->potenc) * $model->last);
 
                 if ($model->save(false)) {
                     $model->sendRequestEmail();
@@ -356,30 +345,25 @@ class OrganizationController extends Controller
 
         $model->last_year_contract = $contracts;
 
-        $coefficient = (new \yii\db\Query())
-            ->select(['potenc', 'ngr', 'sgr', 'vgr', 'chr1', 'chr2', 'zmr1', 'zmr2'])
-            ->from('coefficient')
-            ->one();
-
-        if ($model->raiting < $coefficient['ngr']) {
+        if ($model->raiting < Yii::$app->coefficient->data->ngr) {
             $coef_raiting = 0;
         }
         if ($model->raiting == null) {
             $coef_raiting = 1;
         }
-        if ($model->raiting >= $coefficient['ngr'] and $model->raiting < $coefficient['sgr']) {
-            $coef_raiting = ($model->raiting - $coefficient['chr1']) / $coefficient['zmr1'];
+        if ($model->raiting >= Yii::$app->coefficient->data->ngr and $model->raiting < Yii::$app->coefficient->data->sgr) {
+            $coef_raiting = ($model->raiting - Yii::$app->coefficient->data->chr1) / Yii::$app->coefficient->data->zmr1;
         }
-        if ($model->raiting >= $coefficient['sgr'] and $model->raiting < $coefficient['vgr']) {
+        if ($model->raiting >= Yii::$app->coefficient->data->sgr and $model->raiting < Yii::$app->coefficient->data->vgr) {
             $coef_raiting = 1;
         }
-        if ($model->raiting > $coefficient['vgr']) {
-            $coef_raiting = ($model->raiting - $coefficient['chr2']) / $coefficient['zmr2'];
+        if ($model->raiting > Yii::$app->coefficient->data->vgr) {
+            $coef_raiting = ($model->raiting - Yii::$app->coefficient->data->chr2) / Yii::$app->coefficient->data->zmr2;
         }
 
 
         if ($model->cratedate >= $mindate) {
-            $model->max_child = floor(((($mun->deystv / ($mun->countdet * 0.7)) * $coefficient['potenc']) * $model->last) * $coef_raiting);
+            $model->max_child = floor(((($mun->deystv / ($mun->countdet * 0.7)) * Yii::$app->coefficient->data->potenc) * $model->last) * $coef_raiting);
         } else {
             $model->max_child = floor(($model->last_year_contract * ($mun->deystv / $mun->lastdeystv)) * $coef_raiting);
         }
@@ -396,17 +380,10 @@ class OrganizationController extends Controller
 
     public function actionAlllimit()
     {
-
         $org = (new \yii\db\Query())
             ->select(['id'])
             ->from('organization')
             ->column();
-
-
-        $coefficient = (new \yii\db\Query())
-            ->select(['potenc', 'ngr', 'sgr', 'vgr', 'chr1', 'chr2', 'zmr1', 'zmr2'])
-            ->from('coefficient')
-            ->one();
 
         foreach ($org as $organization_id) {
 
@@ -436,25 +413,25 @@ class OrganizationController extends Controller
 
             $mun = Mun::findOne($model->mun);
 
-            if ($model->raiting < $coefficient['ngr']) {
+            if ($model->raiting < Yii::$app->coefficient->data->ngr) {
                 $coef_raiting = 0;
             }
             if ($model->raiting == null) {
                 $coef_raiting = 1;
             }
-            if ($model->raiting >= $coefficient['ngr'] and $model->raiting < $coefficient['sgr']) {
-                $coef_raiting = ($model->raiting - $coefficient['chr1']) / $coefficient['zmr1'];
+            if ($model->raiting >= Yii::$app->coefficient->data->ngr and $model->raiting < Yii::$app->coefficient->data->sgr) {
+                $coef_raiting = ($model->raiting - Yii::$app->coefficient->data->chr1) / Yii::$app->coefficient->data->zmr1;
             }
-            if ($model->raiting >= $coefficient['sgr'] and $model->raiting < $coefficient['vgr']) {
+            if ($model->raiting >= Yii::$app->coefficient->data->sgr and $model->raiting < Yii::$app->coefficient->data->vgr) {
                 $coef_raiting = 1;
             }
-            if ($model->raiting > $coefficient['vgr']) {
-                $coef_raiting = ($model->raiting - $coefficient['chr2']) / $coefficient['zmr2'];
+            if ($model->raiting > Yii::$app->coefficient->data->vgr) {
+                $coef_raiting = ($model->raiting - Yii::$app->coefficient->data->chr2) / Yii::$app->coefficient->data->zmr2;
             }
 
 
             if ($model->cratedate >= $mindate) {
-                $model->max_child = floor(((($mun->deystv / ($mun->countdet * 0.7)) * $coefficient['potenc']) * $model->last) * $coef_raiting);
+                $model->max_child = floor(((($mun->deystv / ($mun->countdet * 0.7)) * Yii::$app->coefficient->data->potenc) * $model->last) * $coef_raiting);
             } else {
                 $model->max_child = floor(($model->last_year_contract * ($mun->deystv / $mun->lastdeystv)) * $coef_raiting);
             }
