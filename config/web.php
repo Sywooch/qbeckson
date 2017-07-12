@@ -4,10 +4,7 @@ use developeruz\db_rbac\behaviors\AccessBehavior;
 use \kartik\datecontrol\Module;
 use trntv\filekit\Storage;
 
-$params = array_merge(
-    require(__DIR__ . '/params.php'),
-    require(__DIR__ . '/params-local.php')
-);
+$params = require(__DIR__ . '/params.php');
 
 $config = [
     'id' => 'basic',
