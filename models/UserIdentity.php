@@ -26,6 +26,12 @@ use yii\web\IdentityInterface;
  */
 class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacInterface
 {
+    const ROLE_ADMINISTRATOR = 'admins';
+    const ROLE_CERTIFICATE = 'certificate';
+    const ROLE_PAYER = 'payer';
+    const ROLE_ORGANIZATION = 'organizations';
+    const ROLE_OPERATOR = 'operators';
+
     /**
      * @inheritdoc
      */
@@ -178,7 +184,8 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @param $tableName
+     * @return array|\yii\db\ActiveQuery|ActiveRecord
      */
     public function getFilterSettings($tableName)
     {
@@ -188,5 +195,19 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
             ->andWhere('`settings_search_filters`.table_name = :tableName', [':tableName' => $tableName]);
 
         return $query->one();
+    }
+
+    /**
+     * @return array
+     */
+    public static function roles()
+    {
+        return [
+            self::ROLE_ADMINISTRATOR => 'Администратор',
+            self::ROLE_CERTIFICATE => 'Сертификат',
+            self::ROLE_PAYER => 'Плательщик',
+            self::ROLE_ORGANIZATION => 'Организация',
+            self::ROLE_OPERATOR => 'Оператор',
+        ];
     }
 }

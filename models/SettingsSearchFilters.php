@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "settings_search_filters".
@@ -10,9 +10,14 @@ use Yii;
  * @property integer $id
  * @property string $table_name
  * @property string $table_columns
+ * @property string $inaccessible_columns
+ * @property string $role
+ * @property array $inaccessibleColumns
+ * @property array $columnsForUser
+ * @property array $tableColumns
  * @property integer $is_active
  */
-class SettingsSearchFilters extends \yii\db\ActiveRecord
+class SettingsSearchFilters extends ActiveRecord
 {
     /**
      * @inheritdoc
@@ -28,10 +33,13 @@ class SettingsSearchFilters extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['role'], 'required'],
+            [['role'], 'string', 'max' => 50],
             [['table_columns', 'inaccessible_columns'], 'safe'],
             [['is_active'], 'integer'],
             [['table_name'], 'string', 'max' => 255],
             [['table_name'], 'unique'],
+            ['role', 'in', 'range' => array_keys(UserIdentity::roles())],
         ];
     }
 
@@ -46,24 +54,38 @@ class SettingsSearchFilters extends \yii\db\ActiveRecord
             'table_columns' => 'Атрибуты для поиска',
             'inaccessible_columns' => 'Атрибуты, которые невозможно выключить',
             'is_active' => 'Активно',
+            'role' => 'Роль',
         ];
     }
 
+    /**
+     * @return array
+     */
     public function getTableColumns()
     {
         return preg_split('/[\s*,\s*]*,+[\s*,\s*]*/', $this->table_columns);
     }
 
+    /**
+     * @return array
+     */
     public function getInaccessibleColumns()
     {
         return preg_split('/[\s*,\s*]*,+[\s*,\s*]*/', $this->inaccessible_columns);
     }
 
+    /**
+     * @return array
+     */
     public function getColumnsForUser()
     {
-        return array_diff($this->tableColumns, $this->inaccessibleColumns);
+        return array_diff($this->getTableColumns(), $this->getInaccessibleColumns());
     }
 
+    /**
+     * @param $tableName
+     * @return SettingsSearchFilters|array|ActiveRecord
+     */
     public static function findByTable($tableName)
     {
         $query = static::find()
