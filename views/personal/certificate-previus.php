@@ -155,7 +155,7 @@ use app\models\Certificates;
                 [
                     'attribute' => 'program.mun',
                     'label' => 'Муниципалитет',
-                    'filter' => ArrayHelper::map(Mun::find()->all(), 'id', 'name'),
+                    'filter' => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
                     'value' => function ($data) {
                         $mun = (new \yii\db\Query())
                             ->select(['name'])

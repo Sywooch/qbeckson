@@ -88,7 +88,7 @@ $this->registerJs($js);
         ]);
     ?>
     <?= $form->field($model, 'form')->dropDownList(Yii::$app->params['form']) ?>
-    <?= $form->field($model, 'mun')->dropDownList(ArrayHelper::map(Mun::find()->all(), 'id', 'name')) ?>
+    <?= $form->field($model, 'mun')->dropDownList(ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name')) ?>
     <?= $form->field($model, 'ground')->dropDownList(Yii::$app->params['ground']) ?>
     <?= $form->field($model, 'annotation')->textarea(['rows' => 5]) ?>
     <?= $form->field($model, 'task')->textarea(['rows' => 5]) ?>

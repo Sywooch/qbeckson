@@ -152,7 +152,7 @@ $this->params['breadcrumbs'][] = $this->title;
                  [
                     'attribute'=>'mun',
                      'label' => 'Муниципалитет',
-                    'filter'=>ArrayHelper::map(Mun::find()->all(), 'id', 'name'),
+                    'filter'=>ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
                      'value' => function ($data) { 
                         $mun = (new \yii\db\Query())
                             ->select(['name'])

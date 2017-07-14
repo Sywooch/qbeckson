@@ -127,6 +127,7 @@ class OrganizationController extends Controller
                 $model->max_child = floor((($mun->deystv / ($mun->countdet * 0.7)) * Yii::$app->coefficient->data->potenc) * $model->last);
 
                 if ($model->save()) {
+                    $model->link('operators', Yii::$app->operator->identity);
                     $user->password = $password;
 
                     return $this->render('/user/view', [

@@ -70,7 +70,7 @@ use yii\helpers\ArrayHelper;
     <?= $form->field($model, 'fio')->textInput(['maxlength' => true]) ?>
 
     <?php if(isset($roles['operators'])) {
-        echo $form->field($model, 'mun')->dropDownList(ArrayHelper::map(Mun::find()->all(), 'id', 'name')); 
+        echo $form->field($model, 'mun')->dropDownList(ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'));
     } ?>
 
     <label class="control-label" >Оплачивает направленности</label>
