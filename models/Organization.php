@@ -416,7 +416,11 @@ class Organization extends \yii\db\ActiveRecord
     public static function getCountOrganization()
     {
         $query = static::find()
-            ->where(['actual' => 1]);
+            ->joinWith(['municipality'])
+            ->where([
+                'actual' => 1,
+                '`mun`.operator_id' => GLOBAL_OPERATOR,
+            ]);
 
         return $query->count();
     }

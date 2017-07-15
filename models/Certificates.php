@@ -163,7 +163,9 @@ class Certificates extends \yii\db\ActiveRecord
 
     public static function getCountCertificates($payerId = null) {
         $query = static::find()
-            ->where(['actual' => 1]);
+            ->joinWith(['payers'])
+            ->where(['actual' => 1])
+            ->andWhere('`payers`.operator_id = ' . GLOBAL_OPERATOR);
 
         $query->andFilterWhere(['payer_id' => $payerId]);
 
@@ -172,7 +174,9 @@ class Certificates extends \yii\db\ActiveRecord
 
     public static function getSumCertificates($payerId = null) {
         $query = static::find()
-            ->where(['actual' => 1]);
+            ->joinWith(['payers'])
+            ->where(['actual' => 1])
+            ->andWhere('`payers`.operator_id = ' . GLOBAL_OPERATOR);
 
         if (!empty($payerId)) {
             $query->andWhere(['payer_id' => $payerId]);

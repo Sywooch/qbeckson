@@ -24,10 +24,7 @@ class CertificatesSearch extends Certificates
     public function rules()
     {
         return [
-            [[
-                'id', 'user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3',
-                'directivity4', 'directivity5', 'directivity6', 'contractCount'
-            ], 'integer', 'message' => 'Неверное значение.'],
+            [['id', 'user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'contractCount'], 'integer', 'message' => 'Неверное значение.'],
             [['fio_child', 'number'], 'string'],
             [['fio_parent', 'payers', 'nominal', 'rezerv', 'balance', 'cert_group'], 'safe'],
         ];
@@ -91,6 +88,7 @@ class CertificatesSearch extends Certificates
 
         if (!$this->validate()) {
             $query->where('0=1');
+
             return $dataProvider;
         }
 

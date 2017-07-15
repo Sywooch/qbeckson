@@ -89,7 +89,7 @@ class ProgramscertSearch extends Programs
             'certification_date' => $this->certification_date,
         ]);
 
-        $query->andFilterWhere(['like', 'name', $this->name])
+        $query->andFilterWhere(['like', '`programs`.name', $this->name])
             ->andFilterWhere(['like', 'directivity', $this->directivity])
             ->andFilterWhere(['like', 'task', $this->task])
             ->andFilterWhere(['like', 'annotation', $this->annotation])

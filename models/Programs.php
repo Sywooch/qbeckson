@@ -264,15 +264,15 @@ class Programs extends \yii\db\ActiveRecord
     }
 
 
-    public function getCountPrograms($organization_id = null, $verification = null)
+    public static function getCountPrograms($organization_id = null, $verification = null)
     {
-
-        $query = Programs::find();
+        $query = static::find()
+            ->joinWith(['municipality'])
+            ->where('`mun`.operator_id = ' . GLOBAL_OPERATOR);
 
         if (!empty($organization_id)) {
             $query->andWhere(['organization_id' => $organization_id]);
         }
-
         if (!empty($verification)) {
             $query->andWhere(['verification' => $verification]);
         }
