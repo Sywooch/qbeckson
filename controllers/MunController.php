@@ -64,7 +64,7 @@ class MunController extends Controller
      */
     public function actionCreate()
     {
-        $model = new Mun();
+        $model = new Mun(['operator_id' => GLOBAL_OPERATOR]);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
@@ -132,7 +132,13 @@ class MunController extends Controller
      */
     protected function findModel($id)
     {
-        if (($model = Mun::findOne($id)) !== null) {
+        $model = Mun::find()
+            ->where([
+                'id' => $id,
+                'operator_id' => Yii::$app->operator->identity->id
+            ])
+            ->one();
+        if ($model !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

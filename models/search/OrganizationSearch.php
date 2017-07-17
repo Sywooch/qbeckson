@@ -48,7 +48,9 @@ class OrganizationSearch extends Organization
      */
     public function search($params)
     {
-        $query = Organization::find();
+        $query = Organization::find()
+            ->joinWith(['municipality'])
+            ->where('`mun`.operator_id = ' . Yii::$app->operator->identity->id);
 
         // add conditions that should always apply here
         $dataProvider = new ActiveDataProvider([

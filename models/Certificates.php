@@ -58,11 +58,14 @@ class Certificates extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['nominal', 'cert_group', 'name', 'soname', 'fio_parent'], 'required'],
+            [['nominal', 'cert_group', 'name', 'soname'], 'required'],
+            // TODO: Вернуть обратно после слияния баз
+            //[['fio_parent'], 'required'],
             [['user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'cert_group', 'pasport_s', 'pasport_n', 'pasport_v', 'phone'], 'integer'],
-            [['nominal'], 'number', 'max' => 100000],
+            // TODO: Вернуть обратно после слияния баз
+            //[['nominal'], 'number', 'max' => 100000],
+            //[['number'], 'string', 'length' => [10, 10]],
             [['balance', 'rezerv'], 'number'],
-            [['number'], 'string', 'length' => [10, 10]],
             [['number'], 'unique'],
             [['fio_child', 'fio_parent', 'birthday', 'address'], 'string', 'max' => 255],
             [['name', 'soname', 'phname'], 'string', 'max' => 50],
@@ -160,7 +163,9 @@ class Certificates extends \yii\db\ActiveRecord
 
     public static function getCountCertificates($payerId = null) {
         $query = static::find()
-            ->where(['actual' => 1]);
+            ->joinWith(['payers'])
+            ->where(['actual' => 1])
+            ->andWhere('`payers`.operator_id = ' . GLOBAL_OPERATOR);
 
         $query->andFilterWhere(['payer_id' => $payerId]);
 
@@ -169,7 +174,9 @@ class Certificates extends \yii\db\ActiveRecord
 
     public static function getSumCertificates($payerId = null) {
         $query = static::find()
-            ->where(['actual' => 1]);
+            ->joinWith(['payers'])
+            ->where(['actual' => 1])
+            ->andWhere('`payers`.operator_id = ' . GLOBAL_OPERATOR);
 
         if (!empty($payerId)) {
             $query->andWhere(['payer_id' => $payerId]);

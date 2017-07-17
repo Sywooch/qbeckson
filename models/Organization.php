@@ -111,21 +111,23 @@ class Organization extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'bank_name', 'bank_bik', 'korr_invoice', 'rass_invoice', 'fio_contact', 'address_actual', 'email', 'full_name', 'organizational_form', 'type', 'bank_sity', 'phone', 'address_legal', 'inn', 'KPP', 'OGRN', 'last', 'mun'], 'required'],
-            [['license_date', 'license_number', 'license_issued'], 'required', 
-             'when' => function($model) {
-                return $model->type != self::TYPE_IP_WITHOUT_WORKERS;
-            },
-             'whenClient' => "function (attribute, value) {
-                 return $('#organization-type').val() != 4;
-            }"],
-            [['svidet'], 'required', 
+            // TODO: Вернуть обратно после слияния баз
+            //[['name', 'bank_name', 'bank_bik', 'korr_invoice', 'rass_invoice', 'fio_contact', 'address_actual', 'email', 'full_name', 'type', 'phone', 'address_legal', 'mun'], 'required'],
+            //[['organizational_form', 'last', 'bank_sity', 'inn', 'KPP', 'OGRN'], 'required'],
+            /*[['svidet'], 'required',
              'when' => function($model) {
                 return $model->type == self::TYPE_IP_WITH_WORKERS;
             },
              'whenClient' => "function (attribute, value) {
                  return $('#organization-type').val() == 3;
             }"],
+            [['license_date', 'license_number', 'license_issued'], 'required',
+             'when' => function($model) {
+                return $model->type != self::TYPE_IP_WITHOUT_WORKERS;
+            },
+             'whenClient' => "function (attribute, value) {
+                 return $('#organization-type').val() != 4;
+            }"],*/
             [['user_id', 'actual', 'type', 'bank_bik', 'korr_invoice', 'doc_type', 'max_child', 'amount_child', 'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'last', 'last_year_contract', 'certprogram', 'status', 'organizational_form'], 'integer'],
             [['license_date', 'date_proxy', 'cratedate', 'accepted_date'], 'safe'],
             [['raiting'], 'number'],
@@ -414,7 +416,11 @@ class Organization extends \yii\db\ActiveRecord
     public static function getCountOrganization()
     {
         $query = static::find()
-            ->where(['actual' => 1]);
+            ->joinWith(['municipality'])
+            ->where([
+                'actual' => 1,
+                '`mun`.operator_id' => GLOBAL_OPERATOR,
+            ]);
 
         return $query->count();
     }
@@ -481,6 +487,15 @@ class Organization extends \yii\db\ActiveRecord
             ->count();
 
         return $rows;
+    }
+
+    public static function findWithoutOperator($operatorId)
+    {
+        $query = static::find()
+            ->leftJoin('organization_operator_assignment', 'organization.id = organization_operator_assignment.organization_id')
+            ->where(['organization_operator_assignment.operator_id' => null]);
+        
+        return $query->all();
     }
 
     public function setNew()

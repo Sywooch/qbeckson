@@ -384,7 +384,7 @@ class Contracts extends \yii\db\ActiveRecord
     }
 
     public static function getCountUsedCertificates($amountPerCertificate = null, $params = []) {
-        $query = "SELECT count(*) FROM `contracts` WHERE status=:status";
+        $query = "SELECT count(*) FROM `contracts` CROSS JOIN `payers` ON `contracts`.payer_id = `payers`.id WHERE status=:status AND `payers`.operator_id = " . 3;
         $groupBy = "GROUP BY certificate_id";
 
         if (!empty($amountPerCertificate) && $operation = substr($amountPerCertificate, 0, 1)) {
@@ -405,7 +405,9 @@ class Contracts extends \yii\db\ActiveRecord
     }
 
     public static function getCountContracts($params = []) {
-        $query = static::find();
+        $query = static::find()
+            ->joinWith(['payers'])
+            ->where('`payers`.operator_id = ' . GLOBAL_OPERATOR);
 
         if (empty($params['status'])) {
             $query->where(['status' => 1]);

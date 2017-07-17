@@ -159,7 +159,7 @@ $readonlyField = !Yii::$app->user->can('operators') && !Yii::$app->user->isGuest
             echo $form->field($model, 'last_year_contract')->textInput();
             echo $form->field($model, 'cratedate')->textInput();
         }
-        echo $form->field($model, 'mun')->dropDownList(ArrayHelper::map(Mun::find()->all(), 'id', 'name'));
+        echo $form->field($model, 'mun')->dropDownList(ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'));
     } ?>
 
     <?php if (Yii::$app->user->isGuest || $model->isModerating): ?>

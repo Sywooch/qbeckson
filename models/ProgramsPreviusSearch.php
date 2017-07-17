@@ -55,18 +55,21 @@ class ProgramsPreviusSearch extends Programs
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             $query->where('0=1');
+
             return $dataProvider;
         }
 
         $payers = new Payers();
         $payer = $payers->getPayer();
-        
-                $organizations = new Organization();
+
+        $organizations = new Organization();
         $organization = $organizations->getActualOrganization();
-        
+
         $years = new ProgrammeModule();
         $year = $years->getAllYear();
-        if (empty($year)) { $year = 0; }
+        if (empty($year)) {
+            $year = 0;
+        }
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -82,13 +85,13 @@ class ProgramsPreviusSearch extends Programs
             'certification_date' => $this->certification_date,
         ]);
 
-        $query->andFilterWhere(['like', 'name', $this->name])
+        $query->andFilterWhere(['like', '`programs`.name', $this->name])
             ->andFilterWhere(['like', 'directivity', $this->directivity])
             ->andFilterWhere(['like', 'task', $this->task])
             ->andFilterWhere(['like', 'annotation', $this->annotation])
             ->andFilterWhere(['like', 'link', $this->link])
             ->andFilterWhere(['like', 'vid', $this->vid]);
-        
+
 
         return $dataProvider;
     }

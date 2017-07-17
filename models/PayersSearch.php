@@ -42,7 +42,8 @@ class PayersSearch extends Payers
      */
     public function search($params)
     {
-        $query = Payers::find();
+        $query = Payers::find()
+            ->where(['operator_id' => Yii::$app->operator->identity->id]);
 
         // add conditions that should always apply here
 

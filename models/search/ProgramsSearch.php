@@ -46,6 +46,8 @@ class ProgramsSearch extends Programs
     public function search($params)
     {
         $query = Programs::find()
+            ->joinWith(['municipality'])
+            ->where('`mun`.operator_id = ' . Yii::$app->operator->identity->id)
             ->joinWith('organization');
 
         $sort = new \yii\data\Sort([
@@ -109,7 +111,7 @@ class ProgramsSearch extends Programs
             'ocen_obch' => $this->ocen_obch,
         ]);
 
-        $query->andFilterWhere(['like', 'name', $this->name])
+        $query->andFilterWhere(['like', '`programs`.name', $this->name])
             ->andFilterWhere(['like', 'directivity', $this->directivity])
             ->andFilterWhere(['like', 'vid', $this->vid])
             ->andFilterWhere(['like', 'task', $this->task])

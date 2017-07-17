@@ -15,8 +15,9 @@ class MainFooter extends Widget
 	 * @return string
 	 */
 	public function run()
-	{
+    {
         $operator = Operators::find()
+            ->where(['id' => Yii::$app->operator->identity->id])
             ->asArray()
             ->one();
 

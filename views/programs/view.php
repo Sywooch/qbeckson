@@ -708,9 +708,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             $programscolumn = (new \yii\db\Query())
                                 ->select(['id'])
                                 ->from('programs')
-                                ->where(['directivity' => $model->directivity])
+                                ->where(['direction_id' => $model->direction_id])
                                 ->column();
-
 
                             $count3 = (new \yii\db\Query())
                                 ->select(['id'])

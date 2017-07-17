@@ -67,17 +67,16 @@ if ($certificate->balance == 0) {
                     echo '<h2>Достигнут максимальный лимит зачисления на обучение по программе. Свяжитесь с представителем организации.</h2>';
                 }
                 else { */
-                
-                    $programs = (new \yii\db\Query())
-                        ->select(['id', 'name', 'directivity', 'limit'])
-                        ->from('programs')
-                        ->where(['organization_id' => $organization->id])
-                        ->andwhere(['verification' => 2])
+
+                    $programs = \app\models\Programs::find()
+                        ->where([
+                            'organization_id' => $organization->id,
+                            'verification' => 2,
+                        ])
                         ->all();
-                    
+
                     $val = array();
                     foreach ($programs as $program) {
-                        
                         $count5 = (new \yii\db\Query())
                             ->select(['id'])
                             ->from('contracts')

@@ -236,11 +236,7 @@ class ProgramsController extends Controller
                                     $modelYears->program_id = $model->id;
                                     $modelYears->year = $i;
 
-                                    $rows = (new \yii\db\Query())
-                                        ->select('p3v')
-                                        ->from('coefficient')
-                                        ->one();
-                                    $p3 = $rows['p3v'];
+                                    $p3 = Yii::$app->coefficient->data->p3v;
 
                                     $mun = (new \yii\db\Query())
                                         ->select(['pc', 'zp', 'cozp', 'stav', 'costav', 'dop', 'codop', 'uvel', 'couvel', 'otch', 'cootch', 'otpusk', 'cootpusk', 'polezn', 'copolezn', 'nopc', 'conopc', 'rob', 'corob', 'tex', 'cotex', 'est', 'coest', 'fiz', 'cofiz', 'xud', 'coxud', 'tur', 'cotur', 'soc', 'cosoc'])
@@ -314,34 +310,17 @@ class ProgramsController extends Controller
                                         }
                                     }
 
-                                    $coef = (new \yii\db\Query())
-                                        ->select(['weekmonth', 'norm', 'pk', 'weekyear'])
-                                        ->from('coefficient')
-                                        ->one();
-                                    $p14 = $coef['weekmonth'];
-                                    $p16 = $coef['norm'];
-                                    $p15 = $coef['pk'];
-                                    $p13 = $coef['weekyear'];
-
-                                    $rows = (new \yii\db\Query())
-                                        ->select('p21v')
-                                        ->from('coefficient')
-                                        ->one();
-                                    $p21 = $rows['p21v'];
-
-                                    $rows = (new \yii\db\Query())
-                                        ->select('p21v')
-                                        ->from('coefficient')
-                                        ->one();
-                                    $p22 = $rows['p21v'];
-
-                                    //return var_dump($p3);
+                                    $p14 = Yii::$app->coefficient->data->weekmonth;
+                                    $p16 = Yii::$app->coefficient->data->norm;
+                                    $p15 = Yii::$app->coefficient->data->pk;
+                                    $p13 = Yii::$app->coefficient->data->weekyear;
+                                    $p21 = Yii::$app->coefficient->data->p21v;
+                                    $p22 = Yii::$app->coefficient->data->p22v;
 
                                     $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / (($modelYears->maxchild + $modelYears->minchild) / 2)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) / ($p11 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * $p5;
 
                                     $modelYears->normative_price = round($nprice);
                                     $modelYears->previus = 1;
-                                    //$modelYears->verification = 0;
                                     $i++;
                                     if (!($flag = $modelYears->save(false))) {
                                         $transaction->rollBack();
@@ -409,32 +388,26 @@ class ProgramsController extends Controller
     {
         $model = $this->findModel($id);
 
-
-        $coefficient = (new \yii\db\Query())
-            ->select(['blimrob', 'blimtex', 'blimest', 'blimfiz', 'blimxud', 'blimtur', 'blimsoc'])
-            ->from('coefficient')
-            ->one();
-
         if ($model->directivity == 'Техническая (робототехника)') {
-            $model->limit = $coefficient['blimrob'] * $model->year;
+            $model->limit = Yii::$app->coefficient->data->blimrob * $model->year;
         }
         if ($model->directivity == 'Техническая (иная)') {
-            $model->limit = $coefficient['blimtex'] * $model->year;
+            $model->limit = Yii::$app->coefficient->data->blimtex * $model->year;
         }
         if ($model->directivity == 'Естественнонаучная') {
-            $model->limit = $coefficient['blimest'] * $model->year;
+            $model->limit = Yii::$app->coefficient->data->blimest * $model->year;
         }
         if ($model->directivity == 'Физкультурно-спортивная') {
-            $model->limit = $coefficient['blimfiz'] * $model->year;
+            $model->limit = Yii::$app->coefficient->data->blimfiz * $model->year;
         }
         if ($model->directivity == 'Художественная') {
-            $model->limit = $coefficient['blimxud'] * $model->year;
+            $model->limit = Yii::$app->coefficient->data->blimxud * $model->year;
         }
         if ($model->directivity == 'Туристско-краеведческая') {
-            $model->limit = $coefficient['blimtur'] * $model->year;
+            $model->limit = Yii::$app->coefficient->data->blimtur * $model->year;
         }
         if ($model->directivity == 'Социально-педагогическая') {
-            $model->limit = $coefficient['blimsoc'] * $model->year;
+            $model->limit = Yii::$app->coefficient->data->blimsoc * $model->year;
         }
 
         $model->verification = 2;
@@ -500,11 +473,8 @@ class ProgramsController extends Controller
                             if ($model->p3z == 3) {
                                 $p3r = 'p3n';
                             }
-                            $rows = (new \yii\db\Query())
-                                ->select([$p3r])
-                                ->from('coefficient')
-                                ->one();
-                            $p3 = $rows[$p3r];
+
+                            $p3 = Yii::$app->coefficient->data->$p3r;
 
                             $mun = (new \yii\db\Query())
                                 ->select(['pc', 'zp', 'cozp', 'stav', 'costav', 'dop', 'codop', 'uvel', 'couvel', 'otch', 'cootch', 'otpusk', 'cootpusk', 'polezn', 'copolezn', 'nopc', 'conopc', 'rob', 'corob', 'tex', 'cotex', 'est', 'coest', 'fiz', 'cofiz', 'xud', 'coxud', 'tur', 'cotur', 'soc', 'cosoc'])
@@ -578,14 +548,10 @@ class ProgramsController extends Controller
                                 }
                             }
 
-                            $coef = (new \yii\db\Query())
-                                ->select(['weekmonth', 'norm', 'pk', 'weekyear'])
-                                ->from('coefficient')
-                                ->one();
-                            $p14 = $coef['weekmonth'];
-                            $p16 = $coef['norm'];
-                            $p15 = $coef['pk'];
-                            $p13 = $coef['weekyear'];
+                            $p14 = Yii::$app->coefficient->data->weekmonth;
+                            $p16 = Yii::$app->coefficient->data->norm;
+                            $p15 = Yii::$app->coefficient->data->pk;
+                            $p13 = Yii::$app->coefficient->data->weekyear;
 
                             if ($modelYears->p21z == 1) {
                                 $p1y = 'p21v';
@@ -596,11 +562,7 @@ class ProgramsController extends Controller
                             if ($modelYears->p21z == 3) {
                                 $p1y = 'p21o';
                             }
-                            $rows = (new \yii\db\Query())
-                                ->select([$p1y])
-                                ->from('coefficient')
-                                ->one();
-                            $p21 = $rows[$p1y];
+                            $p21 = Yii::$app->coefficient->data->$p1y;
 
                             if ($modelYears->p22z == 1) {
                                 $p2y = 'p22v';
@@ -611,13 +573,7 @@ class ProgramsController extends Controller
                             if ($modelYears->p22z == 3) {
                                 $p2y = 'p22o';
                             }
-                            $rows = (new \yii\db\Query())
-                                ->select([$p2y])
-                                ->from('coefficient')
-                                ->one();
-                            $p22 = $rows[$p2y];
-
-                            //return var_dump($p3);
+                            $p22 = Yii::$app->coefficient->data->$p2y;
 
                             $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / (($modelYears->maxchild + $modelYears->minchild) / 2)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) / ($p11 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * $p5;
 
@@ -692,11 +648,7 @@ class ProgramsController extends Controller
                             if ($model->p3z == 3) {
                                 $p3r = 'p3n';
                             }
-                            $rows = (new \yii\db\Query())
-                                ->select([$p3r])
-                                ->from('coefficient')
-                                ->one();
-                            $p3 = $rows[$p3r];
+                            $p3 = Yii::$app->coefficient->data->$p3r;
 
                             $mun = (new \yii\db\Query())
                                 ->select(['pc', 'zp', 'cozp', 'stav', 'costav', 'dop', 'codop', 'uvel', 'couvel', 'otch', 'cootch', 'otpusk', 'cootpusk', 'polezn', 'copolezn', 'nopc', 'conopc', 'rob', 'corob', 'tex', 'cotex', 'est', 'coest', 'fiz', 'cofiz', 'xud', 'coxud', 'tur', 'cotur', 'soc', 'cosoc'])
@@ -770,14 +722,10 @@ class ProgramsController extends Controller
                                 }
                             }
 
-                            $coef = (new \yii\db\Query())
-                                ->select(['weekmonth', 'norm', 'pk', 'weekyear'])
-                                ->from('coefficient')
-                                ->one();
-                            $p14 = $coef['weekmonth'];
-                            $p16 = $coef['norm'];
-                            $p15 = $coef['pk'];
-                            $p13 = $coef['weekyear'];
+                            $p14 = Yii::$app->coefficient->data->weekmonth;
+                            $p16 = Yii::$app->coefficient->data->norm;
+                            $p15 = Yii::$app->coefficient->data->pk;
+                            $p13 = Yii::$app->coefficient->data->weekyear;
 
                             if ($modelYears->p21z == 1) {
                                 $p1y = 'p21v';
@@ -788,11 +736,8 @@ class ProgramsController extends Controller
                             if ($modelYears->p21z == 3) {
                                 $p1y = 'p21o';
                             }
-                            $rows = (new \yii\db\Query())
-                                ->select([$p1y])
-                                ->from('coefficient')
-                                ->one();
-                            $p21 = $rows[$p1y];
+
+                            $p21 = Yii::$app->coefficient->data->$p1y;
 
                             if ($modelYears->p22z == 1) {
                                 $p2y = 'p22v';
@@ -803,13 +748,8 @@ class ProgramsController extends Controller
                             if ($modelYears->p22z == 3) {
                                 $p2y = 'p22o';
                             }
-                            $rows = (new \yii\db\Query())
-                                ->select([$p2y])
-                                ->from('coefficient')
-                                ->one();
-                            $p22 = $rows[$p2y];
 
-                            //return var_dump($p3);
+                            $p22 = Yii::$app->coefficient->data->$p2y;
 
                             $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / (($modelYears->maxchild + $modelYears->minchild) / 2)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) / ($p11 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * $p5;
 
@@ -1147,12 +1087,7 @@ class ProgramsController extends Controller
     {
         $model = $this->findModel($id);
 
-        $coefficient = (new \yii\db\Query())
-            ->select(['ngrp', 'sgrp', 'vgrp', 'ppchr1', 'ppchr2', 'ppzm1', 'ppzm2', 'blimrob', 'blimtex', 'blimest', 'blimfiz', 'blimxud', 'blimtur', 'blimsoc'])
-            ->from('coefficient')
-            ->one();
-
-        if ($model->rating < $coefficient['ngrp']) {
+        if ($model->rating < Yii::$app->coefficient->data->ngrp) {
             $coef_raiting = 0;
         }
         if ($model->rating == null) {
@@ -1160,37 +1095,37 @@ class ProgramsController extends Controller
         }
 
         // return var_dump($coef_raiting);
-        if ($model->rating >= $coefficient['ngrp'] and $model->rating < $coefficient['sgrp']) {
-            $coef_raiting = ($model->rating - $coefficient['ppchr1']) / $coefficient['ppzm1'];
+        if ($model->rating >= Yii::$app->coefficient->data->ngrp and $model->rating < Yii::$app->coefficient->data->sgrp) {
+            $coef_raiting = ($model->rating - Yii::$app->coefficient->data->ppchr1) / Yii::$app->coefficient->data->ppzm1;
         }
-        if ($model->rating >= $coefficient['sgrp'] and $model->rating < $coefficient['vgrp']) {
+        if ($model->rating >= Yii::$app->coefficient->data->sgrp and $model->rating < Yii::$app->coefficient->data->vgrp) {
             $coef_raiting = 1;
         }
-        if ($model->rating >= $coefficient['vgrp']) {
-            $coef_raiting = ($model->rating - $coefficient['ppchr2']) / $coefficient['ppzm2'];
+        if ($model->rating >= Yii::$app->coefficient->data->vgrp) {
+            $coef_raiting = ($model->rating - Yii::$app->coefficient->data->ppchr2) / Yii::$app->coefficient->data->ppzm2;
         }
 
 
         if ($model->directivity == 'Техническая (робототехника)') {
-            $model->limit = round(($coefficient['blimrob'] * $coef_raiting) * $model->year, 0);
+            $model->limit = round((Yii::$app->coefficient->data->blimrob * $coef_raiting) * $model->year, 0);
         }
         if ($model->directivity == 'Техническая (иная)') {
-            $model->limit = round(($coefficient['blimtex'] * $coef_raiting) * $model->year, 0);
+            $model->limit = round((Yii::$app->coefficient->data->blimtex * $coef_raiting) * $model->year, 0);
         }
         if ($model->directivity == 'Естественнонаучная') {
-            $model->limit = round(($coefficient['blimest'] * $coef_raiting) * $model->year, 0);
+            $model->limit = round((Yii::$app->coefficient->data->blimest * $coef_raiting) * $model->year, 0);
         }
         if ($model->directivity == 'Физкультурно-спортивная') {
-            $model->limit = round(($coefficient['blimfiz'] * $coef_raiting) * $model->year, 0);
+            $model->limit = round((Yii::$app->coefficient->data->blimfiz * $coef_raiting) * $model->year, 0);
         }
         if ($model->directivity == 'Художественная') {
-            $model->limit = round(($coefficient['blimxud'] * $coef_raiting) * $model->year, 0);
+            $model->limit = round((Yii::$app->coefficient->data->blimxud * $coef_raiting) * $model->year, 0);
         }
         if ($model->directivity == 'Туристско-краеведческая') {
-            $model->limit = round(($coefficient['blimtur'] * $coef_raiting) * $model->year, 0);
+            $model->limit = round((Yii::$app->coefficient->data->blimtur * $coef_raiting) * $model->year, 0);
         }
         if ($model->directivity == 'Социально-педагогическая') {
-            $model->limit = round(($coefficient['blimsoc'] * $coef_raiting) * $model->year, 0);
+            $model->limit = round((Yii::$app->coefficient->data->blimsoc * $coef_raiting) * $model->year, 0);
         }
 
         if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->save()) {
@@ -1210,53 +1145,48 @@ class ProgramsController extends Controller
             ->from('programs')
             ->column();
 
-        $coefficient = (new \yii\db\Query())
-            ->select(['ngrp', 'sgrp', 'vgrp', 'ppchr1', 'ppchr2', 'ppzm1', 'ppzm2', 'blimrob', 'blimtex', 'blimest', 'blimfiz', 'blimxud', 'blimtur', 'blimsoc'])
-            ->from('coefficient')
-            ->one();
-
         foreach ($programs as $program_id) {
 
             $model = $this->findModel($program_id);
 
 
-            if ($model->rating < $coefficient['ngrp']) {
+            if ($model->rating < Yii::$app->coefficient->data->ngrp) {
                 $coef_raiting = 0;
             }
             if ($model->rating == null) {
                 $coef_raiting = 1;
             }
-            if ($model->rating >= $coefficient['ngrp'] and $model->rating < $coefficient['sgrp']) {
-                $coef_raiting = ($model->rating - $coefficient['ppchr1']) / $coefficient['ppzm1'];
+            if ($model->rating >= Yii::$app->coefficient->data->ngrp and $model->rating < Yii::$app->coefficient->data->sgrp) {
+                $coef_raiting = ($model->rating - Yii::$app->coefficient->data->ppchr1) / Yii::$app->coefficient->data->ppzm1;
             }
-            if ($model->rating >= $coefficient['sgrp'] and $model->rating < $coefficient['vgrp']) {
+            if ($model->rating >= Yii::$app->coefficient->data->sgrp and $model->rating < Yii::$app->coefficient->data->vgrp) {
                 $coef_raiting = 1;
             }
-            if ($model->rating >= $coefficient['vgrp']) {
-                $coef_raiting = ($model->rating - $coefficient['ppchr2']) / $coefficient['ppzm2'];
+            if ($model->rating >= Yii::$app->coefficient->data->vgrp) {
+                $coef_raiting = ($model->rating - Yii::$app->coefficient->data->ppchr2) / Yii::$app->coefficient->data->ppzm2;
             }
 
 
             if ($model->directivity == 'Техническая (робототехника)') {
-                $model->limit = round(($coefficient['blimrob'] * $coef_raiting) * $model->year, 0);
+                $model->limit = round((Yii::$app->coefficient->data->blimrob * $coef_raiting) * $model->year, 0);
             }
             if ($model->directivity == 'Техническая (иная)') {
-                $model->limit = round(($coefficient['blimtex'] * $coef_raiting) * $model->year, 0);
+                $model->limit = round((Yii::$app->coefficient->data->blimtex * $coef_raiting) * $model->year, 0);
             }
             if ($model->directivity == 'Естественнонаучная') {
-                $model->limit = round(($coefficient['blimest'] * $coef_raiting) * $model->year, 0);
+                $model->limit = round((Yii::$app->coefficient->data->blimest * $coef_raiting) * $model->year, 0);
             }
             if ($model->directivity == 'Физкультурно-спортивная') {
-                $model->limit = round(($coefficient['blimfiz'] * $coef_raiting) * $model->year, 0);
+                $model->limit = round((Yii::$app->coefficient->data->blimfiz * $coef_raiting) * $model->year, 0);
             }
             if ($model->directivity == 'Художественная') {
-                $model->limit = round(($coefficient['blimxud'] * $coef_raiting) * $model->year, 0);
+                $model->limit = round((Yii::$app->coefficient->data->blimxud * $coef_raiting) * $model->year, 0);
             }
             if ($model->directivity == 'Туристско-краеведческая') {
-                $model->limit = round(($coefficient['blimtur'] * $coef_raiting) * $model->year, 0);
+                $model->limit = round((Yii::$app->coefficient->data->blimtur * $coef_raiting) * $model->year, 0);
             }
             if ($model->directivity == 'Социально-педагогическая') {
-                $model->limit = round(($coefficient['blimsoc'] * $coef_raiting) * $model->year, 0);
+                $model->limit = round((Yii::$app->coefficient->data->blimsoc * $coef_raiting) * $model->year, 0);
             }
 
             $model->save();
@@ -1270,11 +1200,6 @@ class ProgramsController extends Controller
     {
         $model = $this->findModel($id);
 
-        $coefficient = (new \yii\db\Query())
-            ->select(['ocsootv', 'ocku', 'ocmt', 'obsh', 'ktob', 'vgs', 'sgs', 'pchsrd', 'pzmsrd', 'minraiting'])
-            ->from('coefficient')
-            ->one();
-
         /* 'ocsootv' => 'Значимость оценки соответствия заявленных при включении образовательной программы в Реестр образовательных программ ожидаемых результатов ее освоения фактическому направлению развития ребенка при освоении образовательной программы',
             'ocku' => 'Значимость оценки кадровых условий реализации образовательной программы и соблюдения при реализации программы заявленных характеристик наполняемости',
             'ocmt' => 'Значимость оценки материально-технических условий реализации образовательной программы',
@@ -1287,18 +1212,18 @@ class ProgramsController extends Controller
             'minraiting' => 'Минимальная доля оценок для определения рейтинга программы, %', */
 
 
-        if ($model->quality_control >= (($coefficient['minraiting'] * $model->last_contracts) / 100) && $model->quality_control > 0) {
-            if (($model->last_s_contracts_rod / $model->last_contracts) >= $coefficient['vgs'] / 100) {
+        if ($model->quality_control >= ((Yii::$app->coefficient->data->minraiting * $model->last_contracts) / 100) && $model->quality_control > 0) {
+            if (($model->last_s_contracts_rod / $model->last_contracts) >= Yii::$app->coefficient->data->vgs / 100) {
                 $coef_tek = 0;
             }
-            if (($model->last_s_contracts_rod / $model->last_contracts) >= $coefficient['sgs'] / 100 and ($model->last_s_contracts_rod / $model->last_contracts) < $coefficient['vgs'] / 100) {
-                $coef_tek = ($coefficient['pchsrd'] - ($model->last_s_contracts_rod / $model->last_contracts)) / $coefficient['pzmsrd'];
+            if (($model->last_s_contracts_rod / $model->last_contracts) >= Yii::$app->coefficient->data->sgs / 100 and ($model->last_s_contracts_rod / $model->last_contracts) < Yii::$app->coefficient->data->vgs / 100) {
+                $coef_tek = (Yii::$app->coefficient->data->pchsrd - ($model->last_s_contracts_rod / $model->last_contracts)) / Yii::$app->coefficient->data->pzmsrd;
             }
-            if (($model->last_s_contracts_rod / $model->last_contracts) < $coefficient['sgs'] / 100) {
+            if (($model->last_s_contracts_rod / $model->last_contracts) < Yii::$app->coefficient->data->sgs / 100) {
                 $coef_tek = 1;
             }
 
-            $model->rating = (($coefficient['ocsootv'] * $model->ocen_fact)) + (($coefficient['ocku'] * $model->ocen_kadr)) + (($coefficient['ocmt'] * $model->ocen_mat)) + (($coefficient['obsh'] * $model->ocen_obch)) + (($coefficient['ktob'] * $coef_tek) * 100);
+            $model->rating = ((Yii::$app->coefficient->data->ocsootv * $model->ocen_fact)) + ((Yii::$app->coefficient->data->ocku * $model->ocen_kadr)) + ((Yii::$app->coefficient->data->ocmt * $model->ocen_mat)) + ((Yii::$app->coefficient->data->obsh * $model->ocen_obch)) + ((Yii::$app->coefficient->data->ktob * $coef_tek) * 100);
         } else {
             $model->rating = null;
         }
@@ -1315,27 +1240,22 @@ class ProgramsController extends Controller
             ->from('programs')
             ->column();
 
-        $coefficient = (new \yii\db\Query())
-            ->select(['ocsootv', 'ocku', 'ocmt', 'obsh', 'ktob', 'vgs', 'sgs', 'pchsrd', 'pzmsrd', 'minraiting'])
-            ->from('coefficient')
-            ->one();
-
         foreach ($programs as $program_id) {
 
             $model = $this->findModel($program_id);
 
-            if ($model->quality_control >= (($coefficient['minraiting'] * $model->last_contracts) / 100) && $model->quality_control > 0) {
-                if (($model->last_s_contracts_rod / $model->last_contracts) >= $coefficient['vgs'] / 100) {
+            if ($model->quality_control >= ((Yii::$app->coefficient->data->minraiting * $model->last_contracts) / 100) && $model->quality_control > 0) {
+                if (($model->last_s_contracts_rod / $model->last_contracts) >= Yii::$app->coefficient->data->vgs / 100) {
                     $coef_tek = 0;
                 }
-                if (($model->last_s_contracts_rod / $model->last_contracts) >= $coefficient['sgs'] / 100 and ($model->last_s_contracts_rod / $model->last_contracts) < $coefficient['vgs'] / 100) {
-                    $coef_tek = ($coefficient['pchsrd'] - ($model->last_s_contracts_rod / $model->last_contracts)) / $coefficient['pzmsrd'];
+                if (($model->last_s_contracts_rod / $model->last_contracts) >= Yii::$app->coefficient->data->sgs / 100 and ($model->last_s_contracts_rod / $model->last_contracts) < Yii::$app->coefficient->data->vgs / 100) {
+                    $coef_tek = (Yii::$app->coefficient->data->pchsrd - ($model->last_s_contracts_rod / $model->last_contracts)) / Yii::$app->coefficient->data->pzmsrd;
                 }
-                if (($model->last_s_contracts_rod / $model->last_contracts) < $coefficient['sgs'] / 100) {
+                if (($model->last_s_contracts_rod / $model->last_contracts) < Yii::$app->coefficient->data->sgs / 100) {
                     $coef_tek = 1;
                 }
 
-                $model->rating = (($coefficient['ocsootv'] * $model->ocen_fact)) + (($coefficient['ocku'] * $model->ocen_kadr)) + (($coefficient['ocmt'] * $model->ocen_mat)) + (($coefficient['obsh'] * $model->ocen_obch)) + (($coefficient['ktob'] * $coef_tek) * 100);
+                $model->rating = ((Yii::$app->coefficient->data->ocsootv * $model->ocen_fact)) + ((Yii::$app->coefficient->data->ocku * $model->ocen_kadr)) + ((Yii::$app->coefficient->data->ocmt * $model->ocen_mat)) + ((Yii::$app->coefficient->data->obsh * $model->ocen_obch)) + ((Yii::$app->coefficient->data->ktob * $coef_tek) * 100);
             } else {
                 $model->rating = null;
             }

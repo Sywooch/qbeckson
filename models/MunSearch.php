@@ -18,7 +18,7 @@ class MunSearch extends Mun
     public function rules()
     {
         return [
-            [['id', 'nopc', 'pc', 'zp', 'dop', 'uvel', 'otch', 'otpusk', 'polezn', 'stav', 'deystv', 'lastdeystv', 'countdet'], 'integer'],
+            [['id', 'nopc', 'pc', 'zp', 'dop', 'uvel', 'otch', 'otpusk', 'polezn', 'stav', 'deystv', 'lastdeystv', 'countdet', 'operator_id'], 'integer'],
             [['name'], 'safe'],
         ];
     }
@@ -41,9 +41,8 @@ class MunSearch extends Mun
      */
     public function search($params)
     {
-        $query = Mun::find();
-
-        // add conditions that should always apply here
+        $query = Mun::find()
+            ->where(['operator_id' => Yii::$app->operator->identity->id]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

@@ -49,10 +49,10 @@ class CoefficientController extends Controller
      * @param integer $id
      * @return mixed
      */
-    public function actionView($id)
+    public function actionView()
     {
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $this->findModel(),
         ]);
     }
 
@@ -82,7 +82,7 @@ class CoefficientController extends Controller
      */
     public function actionUpdate()
     {
-        $model = $this->findModel(1);
+        $model = $this->findModel();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['update']);
@@ -113,9 +113,14 @@ class CoefficientController extends Controller
      * @return Coefficient the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel()
     {
-        if (($model = Coefficient::findOne($id)) !== null) {
+        $model = Coefficient::find()
+            ->where([
+                'operator_id' => Yii::$app->operator->identity->id
+            ])
+            ->one();
+        if ($model !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

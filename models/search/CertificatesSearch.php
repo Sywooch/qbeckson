@@ -2,6 +2,7 @@
 
 namespace app\models\search;
 
+use Yii;
 use app\models\Contracts;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -23,10 +24,7 @@ class CertificatesSearch extends Certificates
     public function rules()
     {
         return [
-            [[
-                'id', 'user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3',
-                'directivity4', 'directivity5', 'directivity6', 'contractCount'
-            ], 'integer', 'message' => 'Неверное значение.'],
+            [['id', 'user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'contractCount'], 'integer', 'message' => 'Неверное значение.'],
             [['fio_child', 'number'], 'string'],
             [['fio_parent', 'payers', 'nominal', 'rezerv', 'balance', 'cert_group'], 'safe'],
         ];
@@ -50,11 +48,9 @@ class CertificatesSearch extends Certificates
      */
     public function search($params)
     {
-        $query = Certificates::find();
-
-        if (!empty($this->payers)) {
-            $query->joinWith(['payers']);
-        }
+        $query = Certificates::find()
+            ->joinWith(['payers'])
+            ->where('`payers`.operator_id = ' . Yii::$app->operator->identity->id);
 
         if ($this->enableContractsCount === true) {
             $subQuery = Contracts::find()
@@ -63,7 +59,7 @@ class CertificatesSearch extends Certificates
                 ->groupBy('certificate_id');
 
             $query->select(['certificates.*', 'tableContractsCount.contractCount'])
-                ->leftJoin(['tableContractsCount' => $subQuery], 'tableContractsCount.certificate_id = id');
+                ->leftJoin(['tableContractsCount' => $subQuery], 'tableContractsCount.certificate_id = `certificates`.id');
         }
 
         // add conditions that should always apply here
@@ -92,6 +88,7 @@ class CertificatesSearch extends Certificates
 
         if (!$this->validate()) {
             $query->where('0=1');
+
             return $dataProvider;
         }
 

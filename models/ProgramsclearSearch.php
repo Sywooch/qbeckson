@@ -42,7 +42,9 @@ class ProgramsclearSearch extends Programs
      */
     public function search($params)
     {
-        $query = Programs::find();
+        $query = Programs::find()
+            ->joinWith(['municipality'])
+            ->where('`mun`.operator_id = ' . Yii::$app->operator->identity->id);
 
         // add conditions that should always apply here
 
@@ -74,7 +76,7 @@ class ProgramsclearSearch extends Programs
             'certification_date' => $this->certification_date,
         ]);
 
-        $query->andFilterWhere(['like', 'name', $this->name])
+        $query->andFilterWhere(['like', '`programs`.name', $this->name])
             ->andFilterWhere(['like', 'directivity', $this->directivity])
             ->andFilterWhere(['like', 'task', $this->task])
             ->andFilterWhere(['like', 'annotation', $this->annotation])

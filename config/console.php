@@ -1,4 +1,6 @@
 <?php
+use app\components\LocalFlysystemBuilder;
+use trntv\filekit\Storage;
 
 Yii::setAlias('@tests', dirname(__DIR__) . '/tests/codeception');
 
@@ -27,7 +29,16 @@ $config = [
                 ],
             ],
         ],
+        'fileStorage' => [
+            'class' => Storage::class,
+            'baseUrl' => '@runtime/uploads',
+            'filesystem' => [
+                'class' => LocalFlysystemBuilder::class,
+                'path' => '@runtime/uploads'
+            ],
+        ],
         'db' => $db,
+        'db_merge' => require(__DIR__ . '/db_merge.php'),
     ],
     'modules' => [
         'permit' => [

@@ -97,6 +97,10 @@ class Mun extends \yii\db\ActiveRecord
      */
     public static function findAllRecords($columns = '*')
     {
-        return static::find()->select($columns)->all();
+        $query = static::find()
+            ->select($columns)
+            ->where(['operator_id' => GLOBAL_OPERATOR]);
+
+        return $query->all();
     }
 }
