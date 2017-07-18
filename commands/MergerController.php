@@ -90,7 +90,7 @@ class MergerController extends Controller
         'invoices:\app\models\Invoices' => [
             'organization_id' => 'organization',
             'payers_id' => 'payers',
-        ],
+        ],/**/
     ];
 
     public $blackListUsernames = ['admin', 'operator'];
@@ -101,6 +101,7 @@ class MergerController extends Controller
     {
         ini_set('memory_limit', '-1');
         Yii::$app->db->createCommand('TRUNCATE TABLE `temporary_merger_id`')->execute();
+        $handle = fopen('log2.txt', 'a');
         foreach ($this->merged as $table => $columns) {
             if (!is_array($columns)) {
                 $table = $columns;
@@ -128,7 +129,13 @@ class MergerController extends Controller
 
                 $model = new $model;
                 $model->attributes = $value;
-                if ($model->save()) {
+                if (!$model->validate()) {
+                    $error = 'Error while saving data (' . $table . ' - ' . (!isset($value['id']) ?: $value['id']) . ')' . PHP_EOL;
+                    echo $error;
+                    fwrite($handle, $error);
+                    continue;
+                }
+                if ($model->save(false)) {
                     if (isset($value['id'])) {
                         echo 'Adding (' . $table . ' - ' . $value['id'] . ')' . PHP_EOL;
                         $this->addOldId($table, $value['id'], $model->id);
@@ -136,7 +143,6 @@ class MergerController extends Controller
                         echo 'Adding (' . $table . ')' . PHP_EOL;
                     }
                 } else {
-                    echo 'Error while saving data (' . $table . ' - ' . (!isset($value['id']) ?: $value['id']) . ')' . PHP_EOL;
                     print_r($model->errors);exit;
                 }
             }
