@@ -20,10 +20,11 @@ class ProgramsSearch extends Programs
     public function rules()
     {
         return [
-            [['id', 'organization_id', 'form', 'mun', 'ground', 'price', 'limit', 'study', 'last_contracts', 'last_s_contracts', 'last_s_contracts_rod', 'open', 'year', 'both_teachers', 'ovz', 'age_group_min', 'age_group_max', 'quality_control', 'p3z'], 'integer'],
+            [['id', 'organization_id', 'form', 'mun', 'ground', 'price', 'limit', 'study', 'last_contracts', 'last_s_contracts', 'last_s_contracts_rod', 'year', 'both_teachers', 'ovz', 'age_group_min', 'age_group_max', 'quality_control', 'p3z'], 'integer'],
             [['name', 'vid', 'colse_date', 'task', 'annotation', 'fullness', 'complexity', 'norm_providing', 'zab', 'link', 'certification_date', 'verification'], 'safe'],
             [['rating', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch'], 'number'],
             ['organization', 'string'],
+            ['open', 'safe'],
         ];
     }
 
@@ -81,6 +82,9 @@ class ProgramsSearch extends Programs
         }
 
         // grid filtering conditions
+        if (isset($this->open) && $this->open < 1) {
+            $query->andWhere(['or', ['open' => null], ['open' => 0]]);
+        }
         $query->andFilterWhere([
             'id' => $this->id,
             'organization_id' => $this->organization_id,
@@ -95,7 +99,6 @@ class ProgramsSearch extends Programs
             'last_contracts' => $this->last_contracts,
             'last_s_contracts' => $this->last_s_contracts,
             'last_s_contracts_rod' => $this->last_s_contracts_rod,
-            'open' => $this->open,
             'colse_date' => $this->colse_date,
             'year' => $this->year,
             'both_teachers' => $this->both_teachers,

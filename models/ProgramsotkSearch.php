@@ -63,6 +63,7 @@ class ProgramsotkSearch extends Programs
         $organization = $organizations->getOrganization();
 
         // grid filtering conditions
+        $query->andWhere(['or', ['open' => null], ['open' => 0]]);
         $query->andFilterWhere([
             'id' => $this->id,
             'organization_id' => $organization['id'],
@@ -70,7 +71,6 @@ class ProgramsotkSearch extends Programs
             'rating' => $this->rating,
             'limit' => $this->limit,
             'study' => $this->study,
-            'open' => 0,
             'ovz' => $this->ovz,
             'quality_control' => $this->quality_control,
             'certification_date' => $this->certification_date,
