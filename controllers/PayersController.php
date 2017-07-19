@@ -69,7 +69,7 @@ class PayersController extends Controller
      */
     public function actionCreate()
     {
-        $model = new Payers(['operator_id' => GLOBAL_OPERATOR]);
+        $model = new Payers(['operator_id' => Yii::$app->operator->identity->id]);
         $user = new User();
 
         if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {

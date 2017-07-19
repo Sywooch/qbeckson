@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use Yii;
+
 /**
  * This is the model class for table "mun".
  *
@@ -99,7 +101,7 @@ class Mun extends \yii\db\ActiveRecord
     {
         $query = static::find()
             ->select($columns)
-            ->where(['operator_id' => GLOBAL_OPERATOR]);
+            ->where(['operator_id' => Yii::$app->operator->identity->id]);
 
         return $query->all();
     }

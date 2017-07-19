@@ -398,6 +398,14 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOperator()
+    {
+        return $this->hasOne(Operators::className(), ['id' => 'operator_id'])->viaTable('organization_operator_assignment', ['organization_id' => 'id']);
+    }
+
+    /**
      * DEPRECATED
      * Use relation in app\models\User instead
      */
@@ -419,7 +427,7 @@ class Organization extends \yii\db\ActiveRecord
             ->joinWith(['municipality'])
             ->where([
                 'actual' => 1,
-                '`mun`.operator_id' => GLOBAL_OPERATOR,
+                '`mun`.operator_id' => Yii::$app->operator->identity->id,
             ]);
 
         return $query->count();

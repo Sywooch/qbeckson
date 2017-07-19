@@ -64,7 +64,7 @@ class MunController extends Controller
      */
     public function actionCreate()
     {
-        $model = new Mun(['operator_id' => GLOBAL_OPERATOR]);
+        $model = new Mun(['operator_id' => Yii::$app->operator->identity->id]);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);

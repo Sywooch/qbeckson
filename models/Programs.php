@@ -268,7 +268,7 @@ class Programs extends \yii\db\ActiveRecord
     {
         $query = static::find()
             ->joinWith(['municipality'])
-            ->where('`mun`.operator_id = ' . GLOBAL_OPERATOR);
+            ->where('`mun`.operator_id = ' . Yii::$app->operator->identity->id);
 
         if (!empty($organization_id)) {
             $query->andWhere(['organization_id' => $organization_id]);

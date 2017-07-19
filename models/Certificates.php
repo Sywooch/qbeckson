@@ -165,7 +165,7 @@ class Certificates extends \yii\db\ActiveRecord
         $query = static::find()
             ->joinWith(['payers'])
             ->where(['actual' => 1])
-            ->andWhere('`payers`.operator_id = ' . GLOBAL_OPERATOR);
+            ->andWhere('`payers`.operator_id = ' . Yii::$app->operator->identity->id);
 
         $query->andFilterWhere(['payer_id' => $payerId]);
 
@@ -176,7 +176,7 @@ class Certificates extends \yii\db\ActiveRecord
         $query = static::find()
             ->joinWith(['payers'])
             ->where(['actual' => 1])
-            ->andWhere('`payers`.operator_id = ' . GLOBAL_OPERATOR);
+            ->andWhere('`payers`.operator_id = ' . Yii::$app->operator->identity->id);
 
         if (!empty($payerId)) {
             $query->andWhere(['payer_id' => $payerId]);

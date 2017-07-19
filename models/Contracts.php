@@ -407,7 +407,7 @@ class Contracts extends \yii\db\ActiveRecord
     public static function getCountContracts($params = []) {
         $query = static::find()
             ->joinWith(['payers'])
-            ->where('`payers`.operator_id = ' . GLOBAL_OPERATOR);
+            ->where('`payers`.operator_id = ' . Yii::$app->operator->identity->id);
 
         if (empty($params['status'])) {
             $query->where(['status' => 1]);

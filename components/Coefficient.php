@@ -2,6 +2,7 @@
 
 namespace app\components;
 
+use Yii;
 use yii\base\Component;
 use yii\base\Event;
 use yii\web\BadRequestHttpException;
@@ -11,7 +12,7 @@ class Coefficient extends Component
 {
     public function getData()
     {
-        if ($model = CoefficientModel::findOne(['operator_id' => GLOBAL_OPERATOR])) {
+        if ($model = CoefficientModel::findOne(['operator_id' => Yii::$app->operator->identity->id])) {
             return $model;
         }
 
