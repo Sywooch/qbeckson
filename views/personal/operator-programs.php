@@ -27,13 +27,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <div class="tab-content">
     <div id="panel1" class="tab-pane fade in active">
-        <p class="text-right">
+        <!--<p class="text-right">
 
             <?= Html::a('Пересчитать нормативные стоимости', ['years/allnormprice'], ['class' => 'btn btn-success']) ?>
             <?= Html::a('Пересчитать лимиты', ['programs/alllimit'], ['class' => 'btn btn-success']) ?>
             <?= Html::a('Пересчитать рейтинги', ['programs/allraiting'], ['class' => 'btn btn-success']) ?>
 
-        </p>
+        </p>-->
 
 
         <?= GridView::widget([

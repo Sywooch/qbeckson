@@ -22,10 +22,10 @@ $this->params['breadcrumbs'][] = $this->title;
 </ul>
 <br />
 
-<?= Html::a('Пересчитать', ['/contracts/pereschet'], ['class' => 'btn btn-success pull-right',
+<?php /*Html::a('Пересчитать', ['/contracts/pereschet'], ['class' => 'btn btn-success pull-right',
     'data' => [
         'confirm' => 'Вы уверены, что хотите выполнить пересчет?',
-        'method' => 'post']]) ?>
+        'method' => 'post']])*/ ?>
 
 <br><br>
 <div class="tab-content">
