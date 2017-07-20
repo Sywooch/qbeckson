@@ -38,7 +38,6 @@ $config = [
             ],
         ],
         'db' => $db,
-        'db_merge' => require(__DIR__ . '/db_merge.php'),
     ],
     'modules' => [
         'permit' => [
