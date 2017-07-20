@@ -1,4 +1,6 @@
 <?php
+use app\models\CertGroup;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 use yii\helpers\Url;
@@ -46,6 +48,11 @@ $columns = [
         'attribute' => 'cert_group',
         'value' => 'certGroup.group',
         'type' => SearchFilter::TYPE_SELECT2,
+        'data' => ArrayHelper::map(
+            CertGroup::findAll(['payer_id' => Yii::$app->user->getIdentity()->payer->id]),
+            'id',
+            'group'
+        ),
     ],
     [
         'attribute' => 'actual',
@@ -55,7 +62,6 @@ $columns = [
         'type' => SearchFilter::TYPE_DROPDOWN,
         'data' => [1 => 'Активен', 0 => 'Приостановлен'],
     ],
-
     [
         'class' => 'yii\grid\ActionColumn',
         'controller' => 'certificates',

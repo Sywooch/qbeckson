@@ -10,7 +10,19 @@ use Yii;
  */
 class GridviewHelper
 {
-    public static function prepareColumns($table, $columns, $excludeType = 'gridView', $excludeAttributes = ['type', 'data', 'searchFilter', 'gridView']) {
+    /**
+     * @param $table
+     * @param $columns
+     * @param string $excludeType
+     * @param array $excludeAttributes
+     * @return mixed
+     */
+    public static function prepareColumns(
+        $table,
+        array $columns,
+        $excludeType = 'gridView',
+        array $excludeAttributes = ['type', 'data', 'searchFilter', 'gridView']
+    ) {
         if ($userFilter = Yii::$app->user->identity->getFilterSettings($table)) {
             $inaccessibleColumns = $userFilter->filter->inaccessibleColumns;
             $otherColumns = $userFilter->columns;

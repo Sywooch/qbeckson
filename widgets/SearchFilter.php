@@ -4,6 +4,7 @@ namespace app\widgets;
 use app\models\SettingsSearchFilters;
 use app\models\UserSearchFiltersAssignment;
 use yii\base\Widget;
+use yii\db\ActiveRecord;
 
 /**
  * Class SearchFilter
@@ -19,6 +20,7 @@ class SearchFilter extends Widget
 
     /** @var array */
     public $data;
+    /** @var ActiveRecord */
     public $model;
     public $action;
 

@@ -23,6 +23,7 @@ use Yii;
  * @property integer $directivity4
  * @property integer $directivity5
  * @property integer $directivity6
+ * @property integer $rezerv
  *
  * @property User $user
  * @property Payers $payers

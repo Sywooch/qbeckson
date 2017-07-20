@@ -9,7 +9,6 @@ use kartik\widgets\Select2;
 ?>
 
 <div class="data-search search-form well">
-
     <div class="row">
         <?php $form = ActiveForm::begin([
             'action' => !empty($action) ? $action : ['index'],
@@ -33,14 +32,12 @@ use kartik\widgets\Select2;
             }
             ?>
         <?php endforeach; ?>
-
         <?= $inaccessibleRows ?>
         <div class="col-md-12 additional-params collapse">
             <div class="row">
                 <?= $otherRows ?>
             </div>
         </div>
-
         <div class="col-md-12">
             <?= Html::submitButton('Начать поиск', ['class' => 'btn btn-primary']) ?>&nbsp;&nbsp;
             <?= Html::a('Сбросить', !empty($action) ? $action : ['index'], ['class' => 'btn btn-default']) ?>&nbsp;&nbsp;
