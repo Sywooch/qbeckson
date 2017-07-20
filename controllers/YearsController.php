@@ -228,11 +228,13 @@ class YearsController extends Controller
     public function actionAllnormprice()
     {
         $years = (new \yii\db\Query())
-            ->select(['id'])
+            ->select(['`years`.id'])
             ->from('years')
+            ->join('INNER JOIN', 'programs', '`programs`.id = `years`.program_id')
+            ->join('INNER JOIN', 'mun', '`mun`.id = `programs`.mun')
+            ->andWhere('`mun`.operator_id = ' . Yii::$app->operator->identity->id)
             ->column();
 
-        //return var_dump($years);
         foreach ($years as $year_id) {
 
             $modelYears = $this->findModel($year_id);

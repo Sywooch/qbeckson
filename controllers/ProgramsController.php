@@ -1141,8 +1141,10 @@ class ProgramsController extends Controller
     public function actionAlllimit()
     {
         $programs = (new \yii\db\Query())
-            ->select(['id'])
+            ->select(['`programs`.id'])
             ->from('programs')
+            ->join('INNER JOIN', 'mun', '`mun`.id = `programs`.mun')
+            ->andWhere('`mun`.operator_id = ' . Yii::$app->operator->identity->id)
             ->column();
 
         foreach ($programs as $program_id) {
@@ -1236,15 +1238,17 @@ class ProgramsController extends Controller
     public function actionAllraiting()
     {
         $programs = (new \yii\db\Query())
-            ->select(['id'])
+            ->select(['`programs`.id'])
             ->from('programs')
+            ->join('INNER JOIN', 'mun', '`mun`.id = `programs`.mun')
+            ->andWhere('`mun`.operator_id = ' . Yii::$app->operator->identity->id)
             ->column();
 
         foreach ($programs as $program_id) {
 
             $model = $this->findModel($program_id);
 
-            if ($model->quality_control >= ((Yii::$app->coefficient->data->minraiting * $model->last_contracts) / 100) && $model->quality_control > 0) {
+            if ($model->last_contracts > 0 && $model->quality_control >= ((Yii::$app->coefficient->data->minraiting * $model->last_contracts) / 100) && $model->quality_control > 0) {
                 if (($model->last_s_contracts_rod / $model->last_contracts) >= Yii::$app->coefficient->data->vgs / 100) {
                     $coef_tek = 0;
                 }
