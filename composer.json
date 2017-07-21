@@ -49,6 +49,7 @@
         "phpoffice/phpexcel": "1.8.x-dev",
         "kartik-v/yii2-export": "*",
         "kartik-v/yii2-tabs-x": "*"
+
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",
