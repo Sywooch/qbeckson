@@ -115,25 +115,29 @@ class PersonalController extends \yii\web\Controller
 
     public function actionOperatorPayers()
     {
-        $searchPayers = new PayersSearch();
-        $PayersProvider = $searchPayers->search(Yii::$app->request->queryParams);
+        $searchPayers = new PayersSearch([
+            'certificates' => '0,150000',
+            'cooperates' => '0,150000'
+        ]);
+        $payersProvider = $searchPayers->search(Yii::$app->request->queryParams);
 
         return $this->render('operator-payers', [
             'searchPayers' => $searchPayers,
-            'PayersProvider' => $PayersProvider,
+            'payersProvider' => $payersProvider,
         ]);
     }
 
 
     public function actionOperatorOrganizations()
     {
-        $searchRegistry = new OrganizationSearch(['statusArray' => [
-            Organization::STATUS_ACTIVE,
-            Organization::STATUS_BANNED,
-        ]]);
+        $searchRegistry = new OrganizationSearch([
+            'statusArray' => [Organization::STATUS_ACTIVE, Organization::STATUS_BANNED],
+        ]);
         $registryProvider = $searchRegistry->search(Yii::$app->request->queryParams);
 
-        $searchRequest = new OrganizationSearch(['statusArray' => [Organization::STATUS_NEW]]);
+        $searchRequest = new OrganizationSearch([
+            'statusArray' => [Organization::STATUS_NEW],
+        ]);
         $requestProvider = $searchRequest->search(Yii::$app->request->queryParams);
 
         return $this->render('operator-organizations', [

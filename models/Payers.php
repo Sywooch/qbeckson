@@ -99,6 +99,8 @@ class Payers extends \yii\db\ActiveRecord
             'directionality_4_count' => 'Максимальное число детей в "Художественной" направленности',
             'directionality_5_count' => 'Максимальное число детей в "Туристско-краеведческой" направленности',
             'directionality_6_count' => 'Максимальное число детей в "Социально-педагогической" направленности',
+            'cooperates' => 'Число заключенных соглашений',
+            'certificates' => 'Число выданных сертификатов'
         ];
     }
     
@@ -270,9 +272,25 @@ class Payers extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getCooperates()
+    {
+        return $this->hasMany(Cooperate::class, ['payer_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getInvoices()
     {
         return $this->hasMany(Invoices::className(), ['payers_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMunicipality()
+    {
+        return $this->hasOne(Mun::className(), ['id' => 'mun']);
     }
 
     /**

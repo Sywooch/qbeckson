@@ -23,6 +23,8 @@ class SearchFilter extends Widget
     /** @var ActiveRecord */
     public $model;
     public $action;
+    public $type;
+    public $role;
 
     /**
      * @inheritdoc
@@ -45,7 +47,15 @@ class SearchFilter extends Widget
      */
     public function run()
     {
-        $filter = SettingsSearchFilters::findByTable($this->model->tableName());
+        $filter = SettingsSearchFilters::find()
+            ->andWhere(['>', 'is_active', 0])
+            ->andWhere([
+                'table_name' => $this->model->tableName(),
+                'type' => $this->type,
+                'role' => $this->role
+            ])
+            ->one();
+
         $userFilter = UserSearchFiltersAssignment::findByFilter($filter);
 
         return $this->render('search-filter/_search', [

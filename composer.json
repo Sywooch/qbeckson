@@ -39,17 +39,14 @@
         "phpoffice/phpword": "^0.13.0",
         "arius/number-formatter": "1.*",
         "2amigos/yii2-ckeditor-widget" : "2.0",
-
         "trntv/yii2-file-kit": "^1.2",
         "voskobovich/yii2-linker-behavior": "^4.0",
         "kartik-v/yii2-widget-depdrop": "*",
         "kartik-v/yii2-widget-select2": "*",
-
         "mpdf/mpdf": "6.1.3",
         "phpoffice/phpexcel": "1.8.x-dev",
         "kartik-v/yii2-export": "*",
         "kartik-v/yii2-tabs-x": "*"
-
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

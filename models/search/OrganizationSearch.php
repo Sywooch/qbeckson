@@ -14,10 +14,9 @@ use app\models\Organization;
 class OrganizationSearch extends Organization
 {
     public $orgtype;
-
-    public $certprogram;
-
+    public $programs;
     public $statusArray = [];
+    public $children;
 
     /**
      * @inheritdoc
@@ -25,8 +24,15 @@ class OrganizationSearch extends Organization
     public function rules()
     {
         return [
-            [['id', 'user_id', 'actual', 'type', 'license_number', 'bank_bik', 'korr_invoice', 'max_child', 'amount_child', 'inn', 'KPP', 'OGRN', 'okopo', 'certprogram'], 'integer'],
-            [['name', 'license_date', 'license_issued', 'bank_name', 'bank_sity', 'rass_invoice', 'fio', 'position', 'address_legal', 'address_actual', 'geocode', 'raiting', 'ground', 'orgtype', 'statusArray'], 'safe'],
+            [[
+                'id', 'user_id', 'actual', 'type', 'license_number', 'bank_bik', 'korr_invoice', 'max_child',
+                'inn', 'KPP', 'OGRN', 'okopo', 'mun'
+            ], 'integer'],
+            [[
+                'name', 'license_date', 'license_issued', 'bank_name', 'bank_sity', 'rass_invoice', 'fio',
+                'position', 'address_legal', 'address_actual', 'geocode', 'raiting', 'ground', 'orgtype', 'statusArray',
+                'children', 'programs', 'amount_child'
+            ], 'safe'],
         ];
     }
 
@@ -41,18 +47,21 @@ class OrganizationSearch extends Organization
 
     /**
      * Creates data provider instance with search query applied
-     *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
     public function search($params)
     {
         $query = Organization::find()
-            ->joinWith(['municipality'])
-            ->where('`mun`.operator_id = ' . Yii::$app->operator->identity->id);
+            ->select([
+                'organization.*',
+                'COUNT(programs.id) as programsCount',
+                'COUNT(contracts.id) as childrenCount'
+            ])
+            ->joinWith(['municipality', 'programs', 'contracts'])
+            ->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id)
+            ->groupBy(['organization.id']);
 
-        // add conditions that should always apply here
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
@@ -60,33 +69,14 @@ class OrganizationSearch extends Organization
             ],
         ]);
 
-        $dataProvider->setSort([
-            'attributes' => [
-                'orgtype' => [
-                    'asc' => ['type' => SORT_ASC],
-                    'desc' => ['type' => SORT_DESC],
-                    'label' => 'Тип организации',
-                    'default' => SORT_ASC
-                ],
-                'certprogram' => [
-                    'asc' => ['certprogram' => SORT_ASC],
-                    'desc' => ['certprogram' => SORT_DESC],
-                    'label' => 'Число программ',
-                    'default' => SORT_ASC
-                ],
-            ]
-        ]);
-
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
             $query->where('0=1');
 
             return $dataProvider;
         }
 
-        // grid filtering conditions
         $query->andFilterWhere([
             'organization.id' => $this->id,
             'organization.user_id' => $this->user_id,
@@ -97,12 +87,11 @@ class OrganizationSearch extends Organization
             'organization.bank_bik' => $this->bank_bik,
             'organization.korr_invoice' => $this->korr_invoice,
             'organization.max_child' => $this->max_child,
-            'organization.amount_child' => $this->amount_child,
             'organization.inn' => $this->inn,
             'organization.KPP' => $this->KPP,
             'organization.OGRN' => $this->OGRN,
             'organization.okopo' => $this->okopo,
-            'organization.certprogram' => $this->certprogram,
+            'organization.mun' => $this->mun,
             'organization.status' => $this->statusArray,
         ]);
 
@@ -136,6 +125,33 @@ class OrganizationSearch extends Organization
                     ]
                 ]);
             }
+        }
+
+        if (!empty($this->programs)) {
+            $programsCount = explode(',', $this->programs);
+            $query->andHaving([
+                'AND',
+                ['>=', 'programsCount', (int)$programsCount[0]],
+                ['<=', 'programsCount', (int)$programsCount[1]]
+            ]);
+        }
+
+        if (!empty($this->children)) {
+            $childrenCount = explode(',', $this->children);
+            $query->andHaving([
+                'AND',
+                ['>=', 'childrenCount', (int)$childrenCount[0]],
+                ['<=', 'childrenCount', (int)$childrenCount[1]]
+            ]);
+        }
+
+        if (!empty($this->amount_child)) {
+            $childCount = explode(',', $this->amount_child);
+            $query->andHaving([
+                'AND',
+                ['>=', 'organization.amount_child', (int)$childCount[0]],
+                ['<=', 'organization.amount_child', (int)$childCount[1]]
+            ]);
         }
 
         return $dataProvider;
