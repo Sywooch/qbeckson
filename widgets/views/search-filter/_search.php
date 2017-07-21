@@ -59,7 +59,10 @@ use kartik\widgets\Select2;
             <?= $form->field($userFilter, 'filter_id')->hiddenInput()->label(false) ?>
             <?= $form->field($userFilter, 'columns')->widget(Select2::class, [
                 'data' => array_combine($userFilter->filter->columnsForUser, $columnLabels),
-                'options' => ['placeholder' => 'Выберите..'],
+                'options' => [
+                    'placeholder' => 'Выберите..',
+                    'id' => Yii::$app->security->generateRandomString(6)
+                ],
                 'pluginOptions' => [
                     'allowClear' => true,
                     'multiple' => true,

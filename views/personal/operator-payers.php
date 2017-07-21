@@ -56,7 +56,13 @@ $columns = [
 <?= SearchFilter::widget([
     'model' => $searchPayers,
     'action' => ['personal/operator-payers'],
-    'data' => GridviewHelper::prepareColumns('payers', $columns, 'searchFilter', null),
+    'data' => GridviewHelper::prepareColumns(
+        'payers',
+        $columns,
+        null,
+        'searchFilter',
+        null
+    ),
     'role' => UserIdentity::ROLE_OPERATOR,
     'type' => null
 ]); ?>

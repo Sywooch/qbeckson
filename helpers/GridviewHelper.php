@@ -2,6 +2,7 @@
 
 namespace app\helpers;
 
+use app\models\UserIdentity;
 use Yii;
 
 /**
@@ -12,7 +13,8 @@ class GridviewHelper
 {
     /**
      * @param $table
-     * @param $columns
+     * @param array $columns
+     * @param null|string $type
      * @param string $excludeType
      * @param array|null $excludeAttributes
      * @return mixed
@@ -20,12 +22,19 @@ class GridviewHelper
     public static function prepareColumns(
         $table,
         array $columns,
+        $type = null,
         $excludeType = 'gridView',
         $excludeAttributes = ['type', 'data', 'searchFilter', 'gridView']
     ) {
-        if ($userFilter = Yii::$app->user->identity->getFilterSettings($table)) {
+        /** @var UserIdentity $user */
+        $user = Yii::$app->user->identity;
+        if ($userFilter = $user->getFilterSettings($table, $type)) {
             $inaccessibleColumns = $userFilter->filter->inaccessibleColumns;
             $otherColumns = $userFilter->columns;
+        }
+
+        if (null === $userFilter) {
+            throw new \DomainException('Something wrong');
         }
 
         foreach ($columns as $index => $column) {
@@ -34,11 +43,13 @@ class GridviewHelper
                 continue;
             }
 
-            if (!empty($userFilter) && isset($column['attribute'])) {
-                if (!in_array($column['attribute'], $inaccessibleColumns) && !in_array($column['attribute'], $otherColumns)) {
-                    unset($columns[$index]);
-                    continue;
-                }
+            if (!empty($userFilter) &&
+                isset($column['attribute']) &&
+                !in_array($column['attribute'], $inaccessibleColumns, true) &&
+                !in_array($column['attribute'], $otherColumns, true)
+            ) {
+                unset($columns[$index]);
+                continue;
             }
 
             if (!empty($excludeAttributes)) {

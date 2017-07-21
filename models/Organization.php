@@ -38,6 +38,8 @@ use app\behaviors\UploadBehavior;
  * @property string $raiting
  * @property string $ground
  * @property string $about
+ * @property string $fio_contact
+ * @property string $email
  *
  * @property Contracts[] $contracts
  * @property Cooperate[] $cooperates
@@ -279,7 +281,6 @@ class Organization extends \yii\db\ActiveRecord
             'address_legal' => 'Юридический адрес',
             'address_actual' => 'Фактический адрес',
             'geocode' => 'Геокод',
-
             'max_child' => 'Лимит обучения',
             'amount_child' => 'Число договоров',
             'last_year_contract' => 'Число обучающихся за прошлый год',
@@ -457,9 +458,6 @@ class Organization extends \yii\db\ActiveRecord
         return $query->column();
     }
 
-    /**
-     * @return array
-     */
     public static function types()
     {
         return [

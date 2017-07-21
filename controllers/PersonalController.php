@@ -132,11 +132,17 @@ class PersonalController extends \yii\web\Controller
     {
         $searchRegistry = new OrganizationSearch([
             'statusArray' => [Organization::STATUS_ACTIVE, Organization::STATUS_BANNED],
+            'programs' => '0,150000',
+            'children' => '0,150000',
+            'amount_child' => '0,150000',
         ]);
         $registryProvider = $searchRegistry->search(Yii::$app->request->queryParams);
 
         $searchRequest = new OrganizationSearch([
             'statusArray' => [Organization::STATUS_NEW],
+            'programs' => '0,150000',
+            'children' => '0,150000',
+            'amount_child' => '0,150000',
         ]);
         $requestProvider = $searchRequest->search(Yii::$app->request->queryParams);
 

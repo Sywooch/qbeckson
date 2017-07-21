@@ -34,7 +34,7 @@ class m170721_072034_add_operator_settings_search_filters extends Migration
 
         $this->insert('settings_search_filters', [
             'table_name' => 'organization',
-            'table_columns' => 'name,mun,fio_contact,site,email,typeLabel',
+            'table_columns' => 'name,fio_contact,site,email,mun,type',
             'inaccessible_columns' => 'name,mun',
             'is_active' => 1,
             'role' => UserIdentity::ROLE_OPERATOR,

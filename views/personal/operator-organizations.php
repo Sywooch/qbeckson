@@ -35,12 +35,24 @@ $this->params['breadcrumbs'][] = $this->title;
     <div id="panel-registry" class="tab-pane fade in active">
         <?php
         $registryColumns = [
-            'name',
-            'cratedate',
-            'site',
-            'phone',
-            'max_child',
-            'raiting',
+            [
+                'attribute' => 'name',
+            ],
+            [
+                'attribute' => 'cratedate',
+            ],
+            [
+                'attribute' => 'site',
+            ],
+            [
+                'attribute' => 'phone',
+            ],
+            [
+                'attribute' => 'max_child',
+            ],
+            [
+                'attribute' => 'raiting',
+            ],
             [
                 'attribute' => 'type',
                 'value' => function ($model) {
@@ -102,8 +114,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $searchRegistry,
             'action' => ['personal/operator-organizations'],
             'data' => GridviewHelper::prepareColumns(
-                'organizations',
+                'organization',
                 $registryColumns,
+                'register',
                 'searchFilter',
                 null
             ),
@@ -119,7 +132,11 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= Html::a('Пересчитать лимиты', ['organization/alllimit'], ['class' => 'btn btn-primary']) ?>
             <?= Html::a('Пересчитать рейтинги', ['organization/allraiting'], ['class' => 'btn btn-primary']) ?>
         </div><br><br>
-        <?php $preparedRegistryColumns = GridviewHelper::prepareColumns('organization', $registryColumns); ?>
+        <?php $preparedRegistryColumns = GridviewHelper::prepareColumns(
+            'organization',
+            $registryColumns,
+            'register'
+        ); ?>
         <?= GridView::widget([
             'dataProvider' => $registryProvider,
             'filterModel' => null,
@@ -140,10 +157,18 @@ $this->params['breadcrumbs'][] = $this->title;
     <div id="panel-requests" class="tab-pane fade">
         <?php
         $requestColumns = [
-            'name',
-            'fio_contact',
-            'site',
-            'email',
+            [
+                'attribute' => 'name',
+            ],
+            [
+                'attribute' => 'fio_contact',
+            ],
+            [
+                'attribute' => 'site',
+            ],
+            [
+                'attribute' => 'email',
+            ],
             [
                 'attribute' => 'mun',
                 'value' => 'municipality.name',
@@ -171,8 +196,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $searchRequest,
             'action' => ['personal/operator-organizations'],
             'data' => GridviewHelper::prepareColumns(
-                'organizations',
+                'organization',
                 $requestColumns,
+                'request',
                 'searchFilter',
                 null
             ),
@@ -184,7 +210,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'filterModel' => null,
             'pjax' => true,
             'summary' => false,
-            'columns' =>  GridviewHelper::prepareColumns('organization', $requestColumns)
+            'columns' => GridviewHelper::prepareColumns(
+                'organization',
+                $requestColumns,
+                'request'
+            )
         ]); ?>
+
     </div>
 </div>

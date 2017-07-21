@@ -185,14 +185,18 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
 
     /**
      * @param $tableName
+     * @param null $type
      * @return array|\yii\db\ActiveQuery|ActiveRecord
      */
-    public function getFilterSettings($tableName)
+    public function getFilterSettings($tableName, $type)
     {
         $query = UserSearchFiltersAssignment::find()
-            ->joinWith('filter')
-            ->where(['user_id' => Yii::$app->user->id])
-            ->andWhere('`settings_search_filters`.table_name = :tableName', [':tableName' => $tableName]);
+            ->joinWith(['filter'])
+            ->andWhere([
+                'user_search_filters_assignment.user_id' => Yii::$app->user->id,
+                'settings_search_filters.table_name' => $tableName,
+                'settings_search_filters.type' => $type
+            ]);
 
         return $query->one();
     }

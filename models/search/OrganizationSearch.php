@@ -31,7 +31,7 @@ class OrganizationSearch extends Organization
             [[
                 'name', 'license_date', 'license_issued', 'bank_name', 'bank_sity', 'rass_invoice', 'fio',
                 'position', 'address_legal', 'address_actual', 'geocode', 'raiting', 'ground', 'orgtype', 'statusArray',
-                'children', 'programs', 'amount_child'
+                'children', 'programs', 'amount_child', 'fio_contact', 'email'
             ], 'safe'],
         ];
     }
@@ -108,6 +108,8 @@ class OrganizationSearch extends Organization
             ->andFilterWhere(['like', 'organization.geocode', $this->geocode])
             ->andFilterWhere(['like', 'organization.raiting', $this->raiting])
             ->andFilterWhere(['like', 'organization.type', $this->orgtype])
+            ->andFilterWhere(['like', 'organization.fio_contact', $this->fio_contact])
+            ->andFilterWhere(['like', 'organization.email', $this->email])
             ->andFilterWhere(['like', 'organization.ground', $this->ground]);
 
         if (Yii::$app->user->can('certificate')) {
