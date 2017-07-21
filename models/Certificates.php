@@ -10,6 +10,9 @@ use Yii;
  * @property integer $id
  * @property integer $user_id
  * @property string $number
+ * @property string $name
+ * @property string $soname
+ * @property string $phname
  * @property integer $payer_id
  * @property integer $actual
  * @property string $fio_child

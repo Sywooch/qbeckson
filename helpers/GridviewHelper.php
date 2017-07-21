@@ -14,14 +14,14 @@ class GridviewHelper
      * @param $table
      * @param $columns
      * @param string $excludeType
-     * @param array $excludeAttributes
+     * @param array|null $excludeAttributes
      * @return mixed
      */
     public static function prepareColumns(
         $table,
         array $columns,
         $excludeType = 'gridView',
-        array $excludeAttributes = ['type', 'data', 'searchFilter', 'gridView']
+        $excludeAttributes = ['type', 'data', 'searchFilter', 'gridView']
     ) {
         if ($userFilter = Yii::$app->user->identity->getFilterSettings($table)) {
             $inaccessibleColumns = $userFilter->filter->inaccessibleColumns;

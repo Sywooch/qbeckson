@@ -19,7 +19,6 @@ class LoginForm extends Model
 
     private $_user = false;
 
-
     /**
      * @return array the validation rules.
      */
@@ -35,7 +34,6 @@ class LoginForm extends Model
         ];
     }
 
-    
      public function attributeLabels()
     {
         return [
@@ -73,7 +71,7 @@ class LoginForm extends Model
      */
     public function login()
     {
-        if (($this->validate() || Yii::$app->request->getUserIP() === '127.0.0.1') && $this->getUser()) {
+        if ($this->validate() && $this->getUser()) {
             return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600*24*30 : 0);
         }
 

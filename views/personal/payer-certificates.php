@@ -17,7 +17,13 @@ $columns = [
         'label' => 'Номер',
     ],
     [
-        'attribute' => 'fio_child',
+        'attribute' => 'name',
+    ],
+    [
+        'attribute' => 'soname',
+    ],
+    [
+        'attribute' => 'phname',
     ],
     [
         'attribute' => 'nominal',
