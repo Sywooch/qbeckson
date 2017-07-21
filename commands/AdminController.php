@@ -2,6 +2,7 @@
 
 namespace app\commands;
 
+use app\models\Coefficient;
 use app\models\Operators;
 use yii;
 use yii\console\Controller;
@@ -36,7 +37,15 @@ class AdminController extends Controller
                 'position' => '-',
                 'fio' => '-',
             ]);
-            $operator->save();
+            if ($operator->save()) {
+                $coefficient = new Coefficient();
+                foreach ($coefficient->attributes as $index => $value) {
+                    $coefficient->$index = 1;
+                }
+                unset($coefficient->id);
+                $coefficient->operator_id = $operator->id;
+                $coefficient->save();
+            }
             echo 'Логин: ' . $user->username . PHP_EOL;
             echo 'Пароль: ' . $form->password . PHP_EOL;
 
