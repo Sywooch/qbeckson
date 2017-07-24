@@ -36,23 +36,27 @@ class Import extends Model
         if (($handle = fopen($this->importFile->tempName, "r")) !== false) {
             $i = 0;
             $certificateArray = [];
+            $userArray = [];
             while (($data = fgetcsv($handle, 1000, ";")) !== false) {
+                $username = $data[3];
                 // Пропускаем первый ряд или ряды без username
-                if (!$i++ || intval($data[3]) < 1) {
+                if (!$i++ || intval($username) < 1) {
                     continue;
                 }
                 $user = null;
                 // Пропускаем, если есть такой юзер с сертификатом
-                if ($userCount = User::find()->where(['username' => $data[3]])->count()) {
-                    if (!$certificateCount = Certificates::find()->where(['number' => $data[3]])->count()) {
-                        $user = User::find()->where(['username' => $data[3]])->one();
+                if ($userCount = User::find()->where(['username' => $username])->count()) {
+                    $certificateCount = Certificates::find()->where(['number' => $username])->count();
+                    if (!$certificateCount && !in_array($username, $userArray)) {
+                        $user = User::find()->where(['username' => $username])->one();
+                        array_push($userArray, $username);
                     } else {
-                        continue;
+                        die('Такой логин как ' . $username . ' уже существует');
                     }
                 }
                 if (empty($user)) {
                     Yii::$app->db->createCommand()->insert('user', [
-                        'username' => $data[3],
+                        'username' => $username,
                         'password' => Yii::$app->security->generatePasswordHash($data[22], 7),
                     ])->execute();
                     $userId = Yii::$app->db->lastInsertID;
@@ -64,7 +68,9 @@ class Import extends Model
                 } else {
                     $userId = $user->id;
                 }
-                $certificateArray[] = [$userId, $data[3], $data[4], $data[5], $this->convertEncoding($data[6]), $this->convertEncoding($data[7]), $this->convertEncoding($data[8]), $this->convertEncoding($data[9]), $data[11], $data[12], $data[20], $data[21]];
+                $certificateArray[] = [$userId, $username, $data[4], $data[5], $this->convertEncoding($data[6]), $this->convertEncoding($data[7]), $this->convertEncoding($data[8]), $this->convertEncoding($data[9]), $data[11], $data[12], $data[20], $data[21]];
+                //Yii::$app->db->createCommand()->batchInsert('certificates', ['user_id', 'number', 'payer_id', 'actual', 'fio_child', 'name', 'soname', 'phname', 'nominal', 'balance', 'cert_group', 'rezerv'], $certificateArray)->execute();
+                //$certificateArray = [];
             }
             fclose($handle);
             Yii::$app->db->createCommand()->batchInsert('certificates', ['user_id', 'number', 'payer_id', 'actual', 'fio_child', 'name', 'soname', 'phname', 'nominal', 'balance', 'cert_group', 'rezerv'], $certificateArray)->execute();
