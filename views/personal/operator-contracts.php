@@ -11,21 +11,28 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <ul class="nav nav-tabs">
-    <li class="active"><a data-toggle="tab" href="#panel1">Действующие <span
-                    class="badge"><?= $Contracts1Provider->getTotalCount() ?></span></a></li>
-    <li><a data-toggle="tab" href="#panel2">Подтвержденные <span
-                    class="badge"><?= $Contracts3Provider->getTotalCount() ?></span></a></li>
-    <li><a data-toggle="tab" href="#panel3">Ожидающие подтверждения <span
-                    class="badge"><?= $Contracts0Provider->getTotalCount() ?></span></a></li>
-    <li><a data-toggle="tab" href="#panel4">Расторгнутые <span
-                    class="badge"><?= $Contracts5Provider->getTotalCount() ?></span></a></li>
+    <li class="active">
+        <a data-toggle="tab" href="#panel1">Действующие
+            <span class="badge"><?= $Contracts1Provider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel2">Подтвержденные
+            <span class="badge"><?= $Contracts3Provider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel3">Ожидающие подтверждения
+            <span class="badge"><?= $Contracts0Provider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel4">Расторгнутые
+            <span class="badge"><?= $Contracts5Provider->getTotalCount() ?></span>
+        </a>
+    </li>
 </ul>
-<br />
-
-<?php /*Html::a('Пересчитать', ['/contracts/pereschet'], ['class' => 'btn btn-success pull-right',
-    'data' => [
-        'confirm' => 'Вы уверены, что хотите выполнить пересчет?',
-        'method' => 'post']])*/ ?>
+<br>
 
 <br><br>
 <div class="tab-content">
@@ -36,14 +43,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'pjax' => true,
             'summary' => false,
             'rowOptions' => function ($model, $index, $widget, $grid) {
-                if ($model->wait_termnate == 1) {
+                if ($model->wait_termnate === 1) {
                     return ['class' => 'danger'];
                 }
             },
             'columns' => [
-                // ['class' => 'yii\grid\SerialColumn'],
-
-                //'id',
                 [
                     'attribute' => 'number',
                     'label' => 'Номер',
@@ -74,21 +78,16 @@ $this->params['breadcrumbs'][] = $this->title;
                     'label' => 'Программа',
                     'format' => 'raw',
                     'value' => function ($data) {
-
                         $program = (new \yii\db\Query())
                             ->select(['id'])
                             ->from('programs')
                             ->where(['name' => $data->program->name])
                             ->one();
 
-
                         return Html::a($data->program->name, Url::to(['/programs/view', 'id' => $program['id']]), ['class' => 'blue', 'target' => '_blank']);
                     },
                 ],
 
-                //'status_termination',
-                //'status_comment:ntext',
-                //'status_year',
                 [
                     'attribute' => 'organization',
                     'label' => 'Организация',
@@ -136,11 +135,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     'format' => 'date',
                     'label' => 'Действует до',
                 ],
-                //'link_doc',
-                //'link_ofer',
-                // 'start_edu_programm',
-                // 'start_edu_contract',
-                // 'stop_edu_contract',
 
                 ['class' => 'yii\grid\ActionColumn',
                     'controller' => 'contracts',
@@ -559,16 +553,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'dataProvider' => $Contracts5Provider,
             'filterModel' => $searchContracts5,
             'rowOptions' => function ($model, $index, $widget, $grid) {
-                if ($model->wait_termnate == 1) {
+                if ($model->wait_termnate === 1) {
                     return ['class' => 'danger'];
                 }
             },
             'pjax' => true,
             'summary' => false,
             'columns' => [
-                // ['class' => 'yii\grid\SerialColumn'],
-
-                //'id',
                 [
                     'attribute' => 'number',
                     'label' => 'Номер',
@@ -583,13 +574,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     'label' => 'Сертификат',
                     'format' => 'raw',
                     'value' => function ($data) {
-
                         $certificate = (new \yii\db\Query())
                             ->select(['id'])
                             ->from('certificates')
                             ->where(['number' => $data->certificate->number])
                             ->one();
-
 
                         return Html::a($data->certificate->number, Url::to(['/certificates/view', 'id' => $certificate['id']]), ['class' => 'blue', 'target' => '_blank']);
                     }
@@ -599,13 +588,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     'label' => 'Программа',
                     'format' => 'raw',
                     'value' => function ($data) {
-
                         $program = (new \yii\db\Query())
                             ->select(['id'])
                             ->from('programs')
                             ->where(['name' => $data->program->name])
                             ->one();
-
 
                         return Html::a($data->program->name, Url::to(['/programs/view', 'id' => $program['id']]), ['class' => 'blue', 'target' => '_blank']);
                     },
@@ -615,13 +602,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     'label' => 'Плательщик',
                     'format' => 'raw',
                     'value' => function ($data) {
-
                         $payer = (new \yii\db\Query())
                             ->select(['id'])
                             ->from('payers')
                             ->where(['name' => $data->payers->name])
                             ->one();
-
 
                         return Html::a($data->payers->name, Url::to(['/payers/view', 'id' => $payer['id']]), ['class' => 'blue', 'target' => '_blank']);
                     },
@@ -634,7 +619,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 ],
                 'date_termnate:date',
-
                 ['class' => 'yii\grid\ActionColumn',
                     'controller' => 'contracts',
                     'template' => '{view}',
@@ -663,13 +647,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     'label' => 'Сертификат',
                     'format' => 'raw',
                     'value' => function ($data) {
-
                         $certificate = (new \yii\db\Query())
                             ->select(['id'])
                             ->from('certificates')
                             ->where(['number' => $data->certificate->number])
                             ->one();
-
 
                         return Html::a($data->certificate->number, Url::to(['/certificates/view', 'id' => $certificate['id']]), ['class' => 'blue', 'target' => '_blank']);
                     }
@@ -679,21 +661,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     'label' => 'Программа',
                     'format' => 'raw',
                     'value' => function ($data) {
-
                         $program = (new \yii\db\Query())
                             ->select(['id'])
                             ->from('programs')
                             ->where(['name' => $data->program->name])
                             ->one();
 
-
                         return Html::a($data->program->name, Url::to(['/programs/view', 'id' => $program['id']]), ['class' => 'blue', 'target' => '_blank']);
                     },
                 ],
-
-                //'status_termination',
-                //'status_comment:ntext',
-                //'status_year',     
                 [
                     'attribute' => 'payers',
                     'label' => 'Плательщик',
@@ -722,23 +698,16 @@ $this->params['breadcrumbs'][] = $this->title;
         ]); ?>
     </div>
     <br>
-    <?php
-    echo ExportMenu::widget([
+    <?= ExportMenu::widget([
         'dataProvider' => $ContractsallProvider,
         'target' => '_self',
-        //'showConfirmAlert' => false,
-        //'enableFormatter' => false,
         'showColumnSelector' => false,
-        //'contentBefore' => [
-        //    'value' => 123,
-        //],
         'filename' => 'contracts',
         'dropdownOptions' => [
             'class' => 'btn btn-success',
             'label' => 'Договоры',
             'icon' => false,
         ],
-        //'asDropdown' => false,
         'exportConfig' => [
             ExportMenu::FORMAT_TEXT => false,
             ExportMenu::FORMAT_PDF => false,
@@ -807,6 +776,5 @@ $this->params['breadcrumbs'][] = $this->title;
             'fontsize',
             'certificatenumber',
         ],
-
     ]); ?>
 </div>

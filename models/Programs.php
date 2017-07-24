@@ -55,6 +55,14 @@ use yii\helpers\ArrayHelper;
  * @property DirectoryProgramActivity[]|null $activities
  * @property DirectoryProgramDirection|null $direction
  * @property string $directivity
+ * @property mixed $countMonths
+ * @property mixed $organizationProgram
+ * @property mixed $organizationWaitProgram
+ * @property mixed $organizationNoProgram
+ * @property Mun $municipality
+ * @property mixed $cooperateProgram
+ * @property mixed $countHours
+ * @property string $commonActivities
  * @property ProgrammeModule[] $modules
  */
 class Programs extends \yii\db\ActiveRecord
@@ -520,5 +528,24 @@ class Programs extends \yii\db\ActiveRecord
         $result = $command->queryOne();
 
         return $result['summa'];
+    }
+
+    /**
+     * @return array
+     */
+    public static function illnesses()
+    {
+        return [
+            1 => 'глухие',
+            2 => 'слабослышащие и позднооглохшие',
+            3 => 'слепые',
+            4 => 'слабовидящие',
+            5 => 'нарушения речи',
+            6 => 'фонетико-фонематическое нарушение речи',
+            7 => 'нарушение опорно-двигательного аппарата',
+            8 => 'задержка психического развития',
+            9 => 'расстройство аутистического спектра',
+            10 => 'нарушение интеллекта',
+        ];
     }
 }

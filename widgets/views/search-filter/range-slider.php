@@ -12,6 +12,9 @@ use kartik\slider\Slider;
             'max' => 150000,
             'step' => 10,
             'range' => true,
+        ],
+        'options' => [
+            'id' => $row['attribute'] . '-' . Yii::$app->security->generateRandomString(8)
         ]
     ])->label($model->getAttributeLabel($row['attribute'])); ?>
 </div>

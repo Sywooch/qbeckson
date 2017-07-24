@@ -18,11 +18,21 @@ $this->params['breadcrumbs'][] = 'Плательщики';
 ?>
 <?php
 $columns = [
-    'name',
-    'phone',
-    'email',
-    'fio',
-    'directionality',
+    [
+        'attribute' => 'name',
+    ],
+    [
+        'attribute' => 'phone',
+    ],
+    [
+        'attribute' => 'email',
+    ],
+    [
+        'attribute' => 'fio',
+    ],
+    [
+        'attribute' => 'directionality',
+    ],
     [
         'attribute' => 'mun',
         'value' => 'municipality.name',

@@ -10,6 +10,9 @@ use kartik\widgets\TouchSpin;
             'wrapper' => 'col-sm-2',
         ]
     ])->widget(TouchSpin::classname(), [
-        'options' => ['placeholder' => $model->getAttributeLabel($row['attribute'])],
+        'options' => [
+            'placeholder' => $model->getAttributeLabel($row['attribute']),
+            'id' => $row['attribute'] . '-' . Yii::$app->security->generateRandomString(8)
+        ],
     ]); ?>
 </div>

@@ -114,6 +114,7 @@ class Certificates extends \yii\db\ActiveRecord
             'phone' => 'Телефон',
             'rezerv' => 'Зарезервированно на оплату программ',
             'cert_group' => 'Группа сертификата',
+            'payer' => 'Плательщик'
         ];
     }
 
@@ -123,6 +124,14 @@ class Certificates extends \yii\db\ActiveRecord
     public function getUser()
     {
         return $this->hasOne(User::className(), ['id' => 'user_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPayer()
+    {
+        return $this->hasOne(Payers::className(), ['id' => 'payer_id']);
     }
 
     /**

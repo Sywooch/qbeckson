@@ -33,9 +33,9 @@ class GridviewHelper
             $otherColumns = $userFilter->columns;
         }
 
-        if (null === $userFilter) {
+        /*if (null === $userFilter) {
             throw new \DomainException('Something wrong');
-        }
+        }*/
 
         foreach ($columns as $index => $column) {
             if (isset($column[$excludeType]) && $column[$excludeType] !== true) {

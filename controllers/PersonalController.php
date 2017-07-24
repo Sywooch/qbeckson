@@ -157,28 +157,17 @@ class PersonalController extends \yii\web\Controller
 
     public function actionOperatorCertificates()
     {
-        $InformsProvider = new ActiveDataProvider([
-            'query' => Informs::find()->where(['read' => 0])->andwhere(['from' => 1]),
+        $searchCertificates = new CertificatesSearch([
+            'enableContractsCount' => true,
+            'nominal' => '0,150000',
+            'rezerv' => '-1,150000',
+            'balance' => '0,150000',
         ]);
-
-        $searchCertificates = new CertificatesSearch();
-        if (isset($_GET['payer'])) {
-            $searchCertificates->payers = $_GET['payer'];
-        }
-        $CertificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
-
-
-        $searchCertificatesExport = new CertificatesExportSearch();
-        if (isset($_GET['payer'])) {
-            $searchCertificatesExport->payers = $_GET['payer'];
-        }
-        $CertificatesExportProvider = $searchCertificatesExport->search(Yii::$app->request->queryParams);
+        $certificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
 
         return $this->render('operator-certificates', [
-            'InformsProvider' => $InformsProvider,
             'searchCertificates' => $searchCertificates,
-            'CertificatesProvider' => $CertificatesProvider,
-            'CertificatesExportProvider' => $CertificatesExportProvider,
+            'certificatesProvider' => $certificatesProvider,
         ]);
     }
 
@@ -234,21 +223,30 @@ class PersonalController extends \yii\web\Controller
 
     public function actionOperatorPrograms()
     {
+        $searchOpenPrograms = new ProgramsSearch([
+            'verification' => [2],
+            'hours' => '-1,150000',
+            'limit' => '-1,150000',
+            'rating' => '-1,150000',
+        ]);
+        $openProgramsProvider = $searchOpenPrograms->search(Yii::$app->request->queryParams);
+
         $searchWaitPrograms = new ProgramsSearch([
-            'organization_id' => Yii::$app->user->identity->organization->id,
             'verification' => [0, 1],
             'open' => 0,
+            'hours' => '-1,150000',
+            'limit' => '-1,150000',
+            'rating' => '-1,150000',
         ]);
         $waitProgramsProvider = $searchWaitPrograms->search(Yii::$app->request->queryParams);
 
-        $searchPrograms1 = new ProgramscertSearch();
-        if (isset($_GET['org'])) {
-            $searchPrograms1->organization = $_GET['org'];
-        }
-        $Programs1Provider = $searchPrograms1->search(Yii::$app->request->queryParams);
-
-        $searchPrograms2 = new ProgramsotkSearch();
-        $Programs2Provider = $searchPrograms2->search(Yii::$app->request->queryParams);
+        $searchClosedPrograms = new ProgramsSearch([
+            'verification' => [3],
+            'hours' => '-1,150000',
+            'limit' => '-1,150000',
+            'rating' => '-1,150000',
+        ]);
+        $closedProgramsProvider = $searchClosedPrograms->search(Yii::$app->request->queryParams);
 
         $searchProgramsall = new ProgramsclearSearch();
         $ProgramsallProvider = $searchProgramsall->search(Yii::$app->request->queryParams);
@@ -260,12 +258,12 @@ class PersonalController extends \yii\web\Controller
         $GroupsallProvider = $searchGroupsall->search(Yii::$app->request->queryParams);
 
         return $this->render('operator-programs', [
+            'searchOpenPrograms' => $searchOpenPrograms,
+            'openProgramsProvider' => $openProgramsProvider,
             'searchWaitPrograms' => $searchWaitPrograms,
             'waitProgramsProvider' => $waitProgramsProvider,
-            'searchPrograms1' => $searchPrograms1,
-            'Programs1Provider' => $Programs1Provider,
-            'searchPrograms2' => $searchPrograms2,
-            'Programs2Provider' => $Programs2Provider,
+            'searchClosedPrograms' => $searchClosedPrograms,
+            'closedProgramsProvider' => $closedProgramsProvider,
             'ProgramsallProvider' => $ProgramsallProvider,
             'YearsallProvider' => $YearsallProvider,
             'GroupsallProvider' => $GroupsallProvider,

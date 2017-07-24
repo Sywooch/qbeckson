@@ -14,9 +14,10 @@ use app\models\Certificates;
 class CertificatesSearch extends Certificates
 {
     public $onlyPayerIds;
-    public $payers;
+    public $payer;
     public $enableContractsCount = false;
     public $cert_group = [];
+    public $payerMunicipality;
 
     /**
      * @inheritdoc
@@ -26,11 +27,21 @@ class CertificatesSearch extends Certificates
         return [
             [[
                 'id', 'user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2',
-                'directivity3', 'directivity4', 'directivity5', 'directivity6', 'contractCount'
+                'directivity3', 'directivity4', 'directivity5', 'directivity6', 'contractCount', 'payerMunicipality'
             ], 'integer', 'message' => 'Неверное значение.'],
             [['fio_child', 'number', 'name', 'soname', 'phname'], 'string'],
-            [['fio_parent', 'payers', 'nominal', 'rezerv', 'balance', 'cert_group'], 'safe'],
+            [['fio_parent', 'payer', 'nominal', 'rezerv', 'balance', 'cert_group'], 'safe'],
         ];
+    }
+
+    /**
+     * @return array
+     */
+    public function attributeLabels()
+    {
+        return array_merge(parent::attributeLabels(), [
+            'payerMunicipality' => 'Муниципалитет'
+        ]);
     }
 
     /**
@@ -44,9 +55,7 @@ class CertificatesSearch extends Certificates
 
     /**
      * Creates data provider instance with search query applied
-     *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
     public function search($params)
@@ -62,10 +71,11 @@ class CertificatesSearch extends Certificates
                 ->groupBy('certificate_id');
 
             $query->select(['certificates.*', 'tableContractsCount.contractCount'])
-                ->leftJoin(['tableContractsCount' => $subQuery], 'tableContractsCount.certificate_id = `certificates`.id');
+                ->leftJoin(
+                    ['tableContractsCount' => $subQuery],
+                    'tableContractsCount.certificate_id = `certificates`.id'
+                );
         }
-
-        // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -74,12 +84,13 @@ class CertificatesSearch extends Certificates
             ],
         ]);
 
-        if (!empty($this->payers)) {
-            $dataProvider->sort->attributes['payers'] = [
+        if (!empty($this->payer)) {
+            $dataProvider->sort->attributes['payer'] = [
                 'asc' => ['payers.name' => SORT_ASC],
                 'desc' => ['payers.name' => SORT_DESC],
             ];
         }
+
         if ($this->enableContractsCount === true) {
             $dataProvider->sort->attributes['contractCount'] = [
                 'asc' => ['tableContractsCount.contractCount' => SORT_ASC],
@@ -95,20 +106,18 @@ class CertificatesSearch extends Certificates
             return $dataProvider;
         }
 
-        //print_r($this);exit;
-
-        // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
-            'user_id' => $this->user_id,
-            'actual' => $this->actual,
-            'contracts' => $this->contracts,
-            'directivity1' => $this->directivity1,
-            'directivity2' => $this->directivity2,
-            'directivity3' => $this->directivity3,
-            'directivity4' => $this->directivity4,
-            'directivity5' => $this->directivity5,
-            'directivity6' => $this->directivity6,
+            'certificates.id' => $this->id,
+            'certificates.user_id' => $this->user_id,
+            'certificates.actual' => $this->actual,
+            'certificates.contracts' => $this->contracts,
+            'certificates.directivity1' => $this->directivity1,
+            'certificates.directivity2' => $this->directivity2,
+            'certificates.directivity3' => $this->directivity3,
+            'certificates.directivity4' => $this->directivity4,
+            'certificates.directivity5' => $this->directivity5,
+            'certificates.directivity6' => $this->directivity6,
+            'payers.mun' => $this->payerMunicipality,
         ]);
 
         if (!empty($this->cert_group)) {
@@ -142,7 +151,7 @@ class CertificatesSearch extends Certificates
             ->andFilterWhere(['like', 'certificates.name', $this->name])
             ->andFilterWhere(['like', 'certificates.soname', $this->soname])
             ->andFilterWhere(['like', 'certificates.phname', $this->phname])
-            ->andFilterWhere(['like', 'payers.name', $this->payers])
+            ->andFilterWhere(['like', 'payers.name', $this->payer])
             ->andFilterWhere(['tableContractsCount.contractCount' => $this->contractCount]);
 
         return $dataProvider;
