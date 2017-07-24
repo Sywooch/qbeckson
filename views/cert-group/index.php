@@ -60,6 +60,25 @@ $this->params['breadcrumbs'][] = $this->title;
                     return false;
                 },
             ],
+            [
+                'class' => 'kartik\grid\EditableColumn',
+                'attribute' => 'amount',
+                'pageSummary' => false,
+                'editableOptions' => [
+                    'asPopover' => false,
+                    'submitButton' => [
+                        'icon' => '<i class="glyphicon glyphicon-ok"></i>',
+                        'class' => 'btn btn-sm btn-success',
+                    ],
+                ],
+                'readonly' => function ($model, $key, $index, $widget) {
+                    if ($model->is_special) {
+                        return true;
+                    }
+
+                    return false;
+                },
+            ],
         ],
     ]); ?>
 </div>

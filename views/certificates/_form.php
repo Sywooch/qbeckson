@@ -16,8 +16,7 @@ use app\models\Payers;
     <?php $form = ActiveForm::begin(); ?>
 
     <?php
-    $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-    if (isset($roles['payer'])) {
+    if (Yii::$app->user->can('payer')) {
         echo '<div class="well">';
 
         if ($user->isNewRecord) {
@@ -47,18 +46,18 @@ use app\models\Payers;
     <div class="panel panel-default">
         <div class="panel-heading">ФИО ребенка</div>
         <div class="panel-body">
-            <?= $form->field($model, 'soname')->textInput(!isset($roles['payer']) ? ['readOnly'=>true] : ['maxlength' => true]) ?>
+            <?= $form->field($model, 'soname')->textInput(!Yii::$app->user->can('payer') ? ['readOnly'=>true] : ['maxlength' => true]) ?>
             
-            <?= $form->field($model, 'name')->textInput(!isset($roles['payer']) ? ['readOnly'=>true] : ['maxlength' => true]) ?>
+            <?= $form->field($model, 'name')->textInput(!Yii::$app->user->can('payer') ? ['readOnly'=>true] : ['maxlength' => true]) ?>
 
-            <?= $form->field($model, 'phname')->textInput(!isset($roles['payer']) ? ['readOnly'=>true] : ['maxlength' => true]) ?>
+            <?= $form->field($model, 'phname')->textInput(!Yii::$app->user->can('payer') ? ['readOnly'=>true] : ['maxlength' => true]) ?>
         </div>
     </div>
 
     <?= $form->field($model, 'fio_parent')->textInput(['maxlength' => true]) ?>
 
     <?php
-    if (isset($roles['payer'])) {
+    if (Yii::$app->user->can('payer')) {
         $payer = Yii::$app->user->identity->payer;
         $groupList = CertGroup::getActiveList($payer->id);
         $dataOptions = ArrayHelper::map($groupList, 'id', 'nominal');
@@ -66,22 +65,23 @@ use app\models\Payers;
             $dataOptions[$index] = ['data-nominal' => $value];
         }
 
-        echo $form->field($model, 'cert_group')->dropDownList(ArrayHelper::map($groupList, 'id', 'group'), ['options' => $dataOptions, 'onChange' => 'selectGroup(this);', 'prompt' => 'Выберите группу...']);
+        echo $form->field($model, 'cert_group')->dropDownList(ArrayHelper::map($groupList, 'id', 'group'), ['options' => $dataOptions, 'onChange' => 'selectGroup(this);', 'prompt' => 'Выберите группу...'])->label('Текущая группа сертификата');
+        echo $form->field($model, 'possible_cert_group')->dropDownList(ArrayHelper::map(CertGroup::getPossibleList($payer->id), 'id', 'group'), ['prompt' => 'Выберите группу...'])->label('Возможная группа сертификата');
     }
     ?>
 
-    <?= $form->field($model, 'nominal')->textInput(!isset($roles['payer']) ? ['readOnly'=>true] : ['maxlength' => true, 'id' => 'nominalField']) ?>
+    <?= $form->field($model, 'nominal')->textInput(!Yii::$app->user->can('payer') ? ['readOnly'=>true] : ['maxlength' => true, 'id' => 'nominalField']) ?>
     
      <?php if (!$model->isNewRecord) { 
-          echo  $form->field($model, 'balance')->textInput(!isset($roles['payer']) ? ['readOnly'=>true] : ['maxlength' => true, 'id' => 'nom']);
+          echo  $form->field($model, 'balance')->textInput(!Yii::$app->user->can('payer') ? ['readOnly'=>true] : ['maxlength' => true, 'id' => 'nom']);
     } ?>
 
     <div class="form-group">
        <?php
-        if (isset($roles['certificate'])) {
+        if (Yii::$app->user->can('certificate')) {
             echo Html::a('Отменить', '/personal/certificate-statistic', ['class' => 'btn btn-danger']);
         }
-        if (isset($roles['payer'])) {
+        if (Yii::$app->user->can('payer')) {
             echo Html::a('Отменить', '/personal/payer-certificates', ['class' => 'btn btn-danger']);
         }
         ?>    
