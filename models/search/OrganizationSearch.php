@@ -18,6 +18,16 @@ class OrganizationSearch extends Organization
     public $statusArray = [];
     public $children;
 
+    public $modelName;
+
+    /**
+     * @return string
+     */
+    public function formName()
+    {
+        return $this->modelName;
+    }
+
     /**
      * @inheritdoc
      */

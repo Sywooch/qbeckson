@@ -16,6 +16,16 @@ class ProgramsSearch extends Programs
     public $municipality;
     public $hours;
 
+    public $modelName;
+
+    /**
+     * @return string
+     */
+    public function formName()
+    {
+        return $this->modelName;
+    }
+
     /**
      * @inheritdoc
      */

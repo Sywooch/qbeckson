@@ -180,21 +180,9 @@ $closedPrograms = [
     $actions
 ];
 
-$preparedOpenColumns = GridviewHelper::prepareColumns(
-    'programs',
-    $openColumns,
-    'open'
-);
-$preparedWaitColumns = GridviewHelper::prepareColumns(
-    'programs',
-    $waitColumns,
-    'wait'
-);
-$preparedClosedPrograms = GridviewHelper::prepareColumns(
-    'programs',
-    $closedPrograms,
-    'close'
-);
+$preparedOpenColumns = GridviewHelper::prepareColumns('programs', $openColumns, 'open');
+$preparedWaitColumns = GridviewHelper::prepareColumns('programs', $waitColumns, 'wait');
+$preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedPrograms, 'close');
 ?>
 <ul class="nav nav-tabs">
     <li class="active">
