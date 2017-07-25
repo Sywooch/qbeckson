@@ -59,12 +59,10 @@ class Certificates extends \yii\db\ActiveRecord
     {
         return [
             [['nominal', 'cert_group', 'name', 'soname'], 'required'],
-            // TODO: Вернуть обратно после слияния баз
-            //[['fio_parent'], 'required'],
-            [['user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'cert_group', 'pasport_s', 'pasport_n', 'pasport_v', 'phone'], 'integer'],
-            // TODO: Вернуть обратно после слияния баз
-            //[['nominal'], 'number', 'max' => 100000],
-            //[['number'], 'string', 'length' => [10, 10]],
+            [['fio_parent'], 'required'],
+            [['user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'cert_group', 'pasport_s', 'pasport_n', 'pasport_v', 'phone', 'possible_cert_group'], 'integer'],
+            [['nominal'], 'number', 'max' => 100000],
+            [['number'], 'string', 'length' => [10, 10]],
             [['balance', 'rezerv'], 'number'],
             [['number'], 'unique'],
             [['fio_child', 'fio_parent', 'birthday', 'address'], 'string', 'max' => 255],
@@ -148,6 +146,14 @@ class Certificates extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getPossibleCertGroup()
+    {
+        return $this->hasOne(CertGroup::className(), ['id' => 'possible_cert_group']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getFavorites()
     {
         return $this->hasMany(Favorites::className(), ['certificate_id' => 'id']);
@@ -159,6 +165,16 @@ class Certificates extends \yii\db\ActiveRecord
     public function getPreviuses()
     {
         return $this->hasMany(Previus::className(), ['certificate_id' => 'id']);
+    }
+
+    public function getCanChangeGroup()
+    {
+        return true;
+    }
+
+    public function getPossibleGroupList()
+    {
+        return [$this->possibleCertGroup, $this->payers->getCertGroups(1)->one()];
     }
 
     public static function getCountCertificates($payerId = null) {

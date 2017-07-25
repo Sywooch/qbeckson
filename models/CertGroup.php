@@ -11,7 +11,6 @@ use Yii;
  * @property integer $payer_id
  * @property string $group
  * @property integer $nominal
- * @property integer $amount
  *
  * @property Payers $payer
  * @property Certificates[] $certificates
@@ -33,7 +32,7 @@ class CertGroup extends \yii\db\ActiveRecord
     {
         return [
             [['payer_id', 'group', 'nominal'], 'required'],
-            [['payer_id', 'is_special', 'amount'], 'integer'],
+            [['payer_id', 'is_special'], 'integer'],
             [['nominal'], 'integer', 'max' => 100000],
             [['group'], 'string', 'max' => 255],
             [['payer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payers::className(), 'targetAttribute' => ['payer_id' => 'id']],
@@ -49,15 +48,6 @@ class CertGroup extends \yii\db\ActiveRecord
         return $query->all();
     }
 
-    public static function getPossibleList($payerId)
-    {
-        $query = static::find()
-            ->where(['payer_id' => $payerId])
-            ->andWhere(['>', 'nominal', 0]);
-
-        return $query->all();
-    }
-
     /**
      * @inheritdoc
      */
@@ -68,7 +58,6 @@ class CertGroup extends \yii\db\ActiveRecord
             'payer_id' => 'Payer ID',
             'group' => 'Группа',
             'nominal' => 'Номинал',
-            'amount' => 'Лимит',
         ];
     }
 

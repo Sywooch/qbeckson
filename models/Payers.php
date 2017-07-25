@@ -284,6 +284,18 @@ class Payers extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCertGroups($isSpecial = null)
+    {
+        $relation = $this->hasMany(CertGroup::className(), ['payer_id' => 'id']);
+
+        $relation->andFilterWhere(['is_special' => $isSpecial]);
+
+        return $relation;
+    }
+
+    /**
      * DEPRECATED
      * Use UserIdentity::payer instead
      */
