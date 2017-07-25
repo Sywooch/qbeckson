@@ -139,12 +139,36 @@ class ProgramsSearch extends Programs
             $query->andFilterWhere(['or like', 'programs.zab', $this->zab]);
         }
 
-        if (!empty($this->age_group_min)) {
-            $query->andWhere(['>=', 'programs.age_group_min', $this->age_group_min]);
+        if (!empty($this->age_group_min) && empty($this->age_group_max)) {
+            $query->andWhere([
+                'OR',
+                ['>=', 'programs.age_group_min', $this->age_group_min],
+                ['>=', 'programs.age_group_max', $this->age_group_min]
+            ]);
         }
 
-        if (!empty($this->age_group_max)) {
-            $query->andWhere(['<=', 'programs.age_group_max', $this->age_group_max]);
+        if (!empty($this->age_group_max) && empty($this->age_group_min)) {
+            $query->andWhere([
+                'OR',
+                ['<=', 'programs.age_group_min', $this->age_group_max],
+                ['<=', 'programs.age_group_max', $this->age_group_max]
+            ]);
+        }
+
+        if (!empty($this->age_group_min) && !empty($this->age_group_max)) {
+            $query->andWhere([
+                'OR',
+                [
+                    'AND',
+                    ['>=', 'programs.age_group_min', $this->age_group_min],
+                    ['<=', 'programs.age_group_min', $this->age_group_max]
+                ],
+                [
+                    'AND',
+                    ['>=', 'programs.age_group_max', $this->age_group_min],
+                    ['<=', 'programs.age_group_max', $this->age_group_max]
+                ]
+            ]);
         }
 
         if (!empty($this->hours) && $this->hours !== '-1,150000') {

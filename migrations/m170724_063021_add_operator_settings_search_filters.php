@@ -12,8 +12,8 @@ class m170724_063021_add_operator_settings_search_filters extends Migration
     {
         $this->insert('settings_search_filters', [
             'table_name' => 'certificates',
-            'table_columns' => 'number,fio_child,nominal,rezerv,balance,contractCount,actual,payer',
-            'inaccessible_columns' => 'number,name,soname,phname,payerMunicipality',
+            'table_columns' => 'fio_child,nominal,rezerv,balance,contractCount,actual',
+            'inaccessible_columns' => 'number,name,soname,phname,payerMunicipality,payer',
             'is_active' => 1,
             'role' => UserIdentity::ROLE_OPERATOR
         ]);

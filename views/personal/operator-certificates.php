@@ -20,6 +20,17 @@ $this->params['breadcrumbs'][] = $this->title;
 <?php
 $columns = [
     [
+        'attribute' => 'payerMunicipality',
+        'value' => 'payer.municipality.name',
+        'label' => 'Муниципалитет',
+        'type' => SearchFilter::TYPE_DROPDOWN,
+        'data' => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
+    ],
+    [
+        'attribute' => 'number',
+        'label' => 'Номер',
+    ],
+    [
         'attribute' => 'payer',
         'value' => function ($model) {
             return Html::a(
@@ -31,21 +42,10 @@ $columns = [
         'format' => 'raw'
     ],
     [
-        'attribute' => 'payerMunicipality',
-        'value' => 'payer.municipality.name',
-        'label' => 'Муниципалитет',
-        'type' => SearchFilter::TYPE_DROPDOWN,
-        'data' => ArrayHelper::map(Mun::find()->all(), 'id', 'name'),
-    ],
-    [
-        'attribute' => 'number',
-        'label' => 'Номер',
+        'attribute' => 'soname',
     ],
     [
         'attribute' => 'name',
-    ],
-    [
-        'attribute' => 'soname',
     ],
     [
         'attribute' => 'phname',

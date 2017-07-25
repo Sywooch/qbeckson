@@ -35,13 +35,13 @@ class OrganizationSearch extends Organization
     {
         return [
             [[
-                'id', 'user_id', 'actual', 'type', 'license_number', 'bank_bik', 'korr_invoice', 'max_child',
+                'id', 'user_id', 'actual', 'type', 'license_number', 'bank_bik', 'korr_invoice',
                 'inn', 'KPP', 'OGRN', 'okopo', 'mun'
             ], 'integer'],
             [[
                 'name', 'license_date', 'license_issued', 'bank_name', 'bank_sity', 'rass_invoice', 'fio',
                 'position', 'address_legal', 'address_actual', 'geocode', 'raiting', 'ground', 'orgtype', 'statusArray',
-                'children', 'programs', 'amount_child', 'fio_contact', 'email'
+                'children', 'programs', 'amount_child', 'fio_contact', 'email', 'max_child'
             ], 'safe'],
         ];
     }
@@ -96,7 +96,6 @@ class OrganizationSearch extends Organization
             'organization.license_number' => $this->license_number,
             'organization.bank_bik' => $this->bank_bik,
             'organization.korr_invoice' => $this->korr_invoice,
-            'organization.max_child' => $this->max_child,
             'organization.inn' => $this->inn,
             'organization.KPP' => $this->KPP,
             'organization.OGRN' => $this->OGRN,
@@ -116,7 +115,6 @@ class OrganizationSearch extends Organization
             ->andFilterWhere(['like', 'organization.address_legal', $this->address_legal])
             ->andFilterWhere(['like', 'organization.address_actual', $this->address_actual])
             ->andFilterWhere(['like', 'organization.geocode', $this->geocode])
-            ->andFilterWhere(['like', 'organization.raiting', $this->raiting])
             ->andFilterWhere(['like', 'organization.type', $this->orgtype])
             ->andFilterWhere(['like', 'organization.fio_contact', $this->fio_contact])
             ->andFilterWhere(['like', 'organization.email', $this->email])
@@ -139,7 +137,7 @@ class OrganizationSearch extends Organization
             }
         }
 
-        if (!empty($this->programs)) {
+        if (!empty($this->programs) && $this->programs !== '0,150000') {
             $programsCount = explode(',', $this->programs);
             $query->andHaving([
                 'AND',
@@ -148,7 +146,7 @@ class OrganizationSearch extends Organization
             ]);
         }
 
-        if (!empty($this->children)) {
+        if (!empty($this->children) && $this->children !== '0,150000') {
             $childrenCount = explode(',', $this->children);
             $query->andHaving([
                 'AND',
@@ -157,12 +155,30 @@ class OrganizationSearch extends Organization
             ]);
         }
 
-        if (!empty($this->amount_child)) {
+        if (!empty($this->amount_child) && $this->amount_child !== '0,150000') {
             $childCount = explode(',', $this->amount_child);
             $query->andHaving([
                 'AND',
                 ['>=', 'organization.amount_child', (int)$childCount[0]],
                 ['<=', 'organization.amount_child', (int)$childCount[1]]
+            ]);
+        }
+
+        if (!empty($this->max_child) && $this->max_child !== '0,150000') {
+            $max_child = explode(',', $this->max_child);
+            $query->andWhere([
+                'AND',
+                ['>=', 'organization.max_child', (int)$max_child[0]],
+                ['<=', 'organization.max_child', (int)$max_child[1]]
+            ]);
+        }
+
+        if (!empty($this->raiting) && $this->raiting !== '0,150000') {
+            $raiting = explode(',', $this->raiting);
+            $query->andWhere([
+                'AND',
+                ['>=', 'organization.raiting', (int)$raiting[0]],
+                ['<=', 'organization.raiting', (int)$raiting[1]]
             ]);
         }
 

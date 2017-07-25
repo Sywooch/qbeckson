@@ -25,8 +25,8 @@ class m170721_072034_add_operator_settings_search_filters extends Migration
 
         $this->insert('settings_search_filters', [
             'table_name' => 'organization',
-            'table_columns' => 'name,mun,cratedate,site,phone,type,programs,max_child,children,amount_child,raiting,actual',
-            'inaccessible_columns' => 'name,mun',
+            'table_columns' => 'cratedate,site,phone,type,programs,max_child,children,amount_child,raiting,actual',
+            'inaccessible_columns' => 'name,fio_contact,mun',
             'is_active' => 1,
             'role' => UserIdentity::ROLE_OPERATOR,
             'type' => 'register'
@@ -34,8 +34,8 @@ class m170721_072034_add_operator_settings_search_filters extends Migration
 
         $this->insert('settings_search_filters', [
             'table_name' => 'organization',
-            'table_columns' => 'name,fio_contact,site,email,mun,type',
-            'inaccessible_columns' => 'name,mun',
+            'table_columns' => 'site,email,type',
+            'inaccessible_columns' => 'name,mun,fio_contact',
             'is_active' => 1,
             'role' => UserIdentity::ROLE_OPERATOR,
             'type' => 'request'

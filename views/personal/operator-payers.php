@@ -37,7 +37,7 @@ $columns = [
         'attribute' => 'mun',
         'value' => 'municipality.name',
         'type' => SearchFilter::TYPE_DROPDOWN,
-        'data' => ArrayHelper::map(Mun::find()->all(), 'id', 'name'),
+        'data' => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
     ],
     [
         'attribute' => 'cooperates',

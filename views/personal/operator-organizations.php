@@ -16,6 +16,125 @@ use yii\helpers\ArrayHelper;
 /* @var $requestProvider \yii\data\ActiveDataProvider */
 $this->title = 'Поставщики образовательных услуг';
 $this->params['breadcrumbs'][] = $this->title;
+
+$registryColumns = [
+    [
+        'attribute' => 'name',
+    ],
+    [
+        'attribute' => 'fio_contact',
+    ],
+    [
+        'attribute' => 'cratedate',
+    ],
+    [
+        'attribute' => 'site',
+    ],
+    [
+        'attribute' => 'phone',
+    ],
+    [
+        'attribute' => 'max_child',
+        'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    ],
+    [
+        'attribute' => 'raiting',
+        'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    ],
+    [
+        'attribute' => 'type',
+        'value' => function ($model) {
+            /** @var \app\models\Organization $model */
+            return $model::types()[$model->type];
+        },
+        'type' => SearchFilter::TYPE_DROPDOWN,
+        'data' => $searchRegistry::types(),
+    ],
+    [
+        'attribute' => 'mun',
+        'value' => 'municipality.name',
+        'type' => SearchFilter::TYPE_DROPDOWN,
+        'data' => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
+    ],
+    [
+        'attribute' => 'programs',
+        'value' => function ($model) {
+            /** @var \app\models\Organization $model */
+            return $model->getPrograms()->andWhere(['programs.verification' => 2])->count();
+        },
+        'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    ],
+    [
+        'attribute' => 'children',
+        'value' => function ($model) {
+            /** @var \app\models\Organization $model */
+            return count(array_unique(ArrayHelper::toArray(
+                $model->getChildren()->andWhere(['contracts.status' => 1])->all()
+            )));
+        },
+        'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    ],
+    [
+        'attribute' => 'amount_child',
+        'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    ],
+    [
+        'attribute' => 'actual',
+        'value' => function ($model) {
+            /** @var \app\models\Organization $model */
+            return $model->actual === 0 ? '-' : '+';
+        },
+        'type' => SearchFilter::TYPE_DROPDOWN,
+        'data' => [
+            1 => 'Да',
+            0 => 'Нет'
+        ]
+    ],
+    [
+        'class' => ActionColumn::class,
+        'controller' => 'organization',
+        'template' => '{view}',
+        'searchFilter' => false,
+    ],
+];
+
+$requestColumns = [
+    [
+        'attribute' => 'name',
+    ],
+    [
+        'attribute' => 'fio_contact',
+    ],
+    [
+        'attribute' => 'site',
+    ],
+    [
+        'attribute' => 'email',
+    ],
+    [
+        'attribute' => 'mun',
+        'value' => 'municipality.name',
+        'type' => SearchFilter::TYPE_DROPDOWN,
+        'data' => ArrayHelper::map(Mun::find()->all(), 'id', 'name'),
+    ],
+    [
+        'attribute' => 'type',
+        'value' => function ($model) {
+            /** @var \app\models\Organization $model */
+            return $model::types()[$model->type];
+        },
+        'type' => SearchFilter::TYPE_DROPDOWN,
+        'data' => $searchRequest::types()
+    ],
+    [
+        'class' => ActionColumn::class,
+        'controller' => 'organization',
+        'template' => '{update}',
+        'searchFilter' => false,
+    ],
+];
+
+$preparedRegistryColumns = GridviewHelper::prepareColumns('organization', $registryColumns, 'register');
 ?>
 
 <ul class="nav nav-tabs">
@@ -33,83 +152,6 @@ $this->params['breadcrumbs'][] = $this->title;
 <br>
 <div class="tab-content">
     <div id="panel-registry" class="tab-pane fade in active">
-        <?php
-        $registryColumns = [
-            [
-                'attribute' => 'name',
-            ],
-            [
-                'attribute' => 'cratedate',
-            ],
-            [
-                'attribute' => 'site',
-            ],
-            [
-                'attribute' => 'phone',
-            ],
-            [
-                'attribute' => 'max_child',
-            ],
-            [
-                'attribute' => 'raiting',
-            ],
-            [
-                'attribute' => 'type',
-                'value' => function ($model) {
-                /** @var \app\models\Organization $model */
-                    return $model::types()[$model->type];
-                },
-                'type' => SearchFilter::TYPE_DROPDOWN,
-                'data' => $searchRegistry::types(),
-            ],
-            [
-                'attribute' => 'mun',
-                'value' => 'municipality.name',
-                'type' => SearchFilter::TYPE_DROPDOWN,
-                'data' => ArrayHelper::map(Mun::find()->all(), 'id', 'name'),
-            ],
-            [
-                'attribute' => 'programs',
-                'value' => function ($model) {
-                    /** @var \app\models\Organization $model */
-                    return $model->getPrograms()->andWhere(['programs.verification' => 2])->count();
-                },
-                'type' => SearchFilter::TYPE_RANGE_SLIDER,
-            ],
-            [
-                'attribute' => 'children',
-                'value' => function ($model) {
-                    /** @var \app\models\Organization $model */
-                    return count(array_unique(ArrayHelper::toArray(
-                        $model->getChildren()->andWhere(['contracts.status' => 1])->all()
-                    )));
-                },
-                'type' => SearchFilter::TYPE_RANGE_SLIDER,
-            ],
-            [
-                'attribute' => 'amount_child',
-                'type' => SearchFilter::TYPE_RANGE_SLIDER,
-            ],
-            [
-                'attribute' => 'actual',
-                'value' => function ($model) {
-                    /** @var \app\models\Organization $model */
-                    return $model->actual === 0 ? '-' : '+';
-                },
-                'type' => SearchFilter::TYPE_DROPDOWN,
-                'data' => [
-                    1 => 'Да',
-                    0 => 'Нет'
-                ]
-            ],
-            [
-                'class' => ActionColumn::class,
-                'controller' => 'organization',
-                'template' => '{view}',
-                'searchFilter' => false,
-            ],
-        ]
-        ?>
         <?= SearchFilter::widget([
             'model' => $searchRegistry,
             'action' => ['personal/operator-organizations'],
@@ -132,11 +174,6 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= Html::a('Пересчитать лимиты', ['organization/alllimit'], ['class' => 'btn btn-primary']) ?>
             <?= Html::a('Пересчитать рейтинги', ['organization/allraiting'], ['class' => 'btn btn-primary']) ?>
         </div><br><br>
-        <?php $preparedRegistryColumns = GridviewHelper::prepareColumns(
-            'organization',
-            $registryColumns,
-            'register'
-        ); ?>
         <?= GridView::widget([
             'dataProvider' => $registryProvider,
             'filterModel' => null,
@@ -155,43 +192,6 @@ $this->params['breadcrumbs'][] = $this->title;
         ]); ?>
     </div>
     <div id="panel-requests" class="tab-pane fade">
-        <?php
-        $requestColumns = [
-            [
-                'attribute' => 'name',
-            ],
-            [
-                'attribute' => 'fio_contact',
-            ],
-            [
-                'attribute' => 'site',
-            ],
-            [
-                'attribute' => 'email',
-            ],
-            [
-                'attribute' => 'mun',
-                'value' => 'municipality.name',
-                'type' => SearchFilter::TYPE_DROPDOWN,
-                'data' => ArrayHelper::map(Mun::find()->all(), 'id', 'name'),
-            ],
-            [
-                'attribute' => 'type',
-                'value' => function ($model) {
-                    /** @var \app\models\Organization $model */
-                    return $model::types()[$model->type];
-                },
-                'type' => SearchFilter::TYPE_DROPDOWN,
-                'data' => $searchRequest::types()
-            ],
-            [
-                'class' => ActionColumn::class,
-                'controller' => 'organization',
-                'template' => '{update}',
-                'searchFilter' => false,
-            ],
-        ];
-        ?>
         <?= SearchFilter::widget([
             'model' => $searchRequest,
             'action' => ['personal/operator-organizations'],
@@ -216,6 +216,5 @@ $this->params['breadcrumbs'][] = $this->title;
                 'request'
             )
         ]); ?>
-
     </div>
 </div>

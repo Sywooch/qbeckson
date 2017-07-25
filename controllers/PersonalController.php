@@ -135,15 +135,14 @@ class PersonalController extends \yii\web\Controller
             'programs' => '0,150000',
             'children' => '0,150000',
             'amount_child' => '0,150000',
+            'raiting' => '0,150000',
+            'max_child' => '0,150000',
             'modelName' => 'SearchRegistry',
         ]);
         $registryProvider = $searchRegistry->search(Yii::$app->request->queryParams);
 
         $searchRequest = new OrganizationSearch([
             'statusArray' => [Organization::STATUS_NEW],
-            'programs' => '0,150000',
-            'children' => '0,150000',
-            'amount_child' => '0,150000',
             'modelName' => 'SearchRequest',
         ]);
         $requestProvider = $searchRequest->search(Yii::$app->request->queryParams);
@@ -245,6 +244,7 @@ class PersonalController extends \yii\web\Controller
             'hours' => '-1,150000',
             'limit' => '-1,150000',
             'rating' => '-1,150000',
+
             'modelName' => 'SearchClosedPrograms',
         ]);
         $closedProgramsProvider = $searchClosedPrograms->search(Yii::$app->request->queryParams);

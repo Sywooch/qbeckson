@@ -62,7 +62,7 @@ class CertificatesSearch extends Certificates
     {
         $query = Certificates::find()
             ->joinWith(['payers'])
-            ->where('`payers`.operator_id = ' . Yii::$app->operator->identity->id);
+            ->where('payers.operator_id = ' . Yii::$app->operator->identity->id);
 
         if ($this->enableContractsCount === true) {
             $subQuery = Contracts::find()
