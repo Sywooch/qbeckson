@@ -68,9 +68,14 @@ class OrganizationSearch extends Organization
                 'COUNT(programs.id) as programsCount',
                 'COUNT(contracts.id) as childrenCount'
             ])
-            ->joinWith(['municipality', 'programs', 'contracts'])
-            ->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id)
+            ->joinWith([
+                'municipality',
+                'programs',
+                'contracts'
+            ])
             ->groupBy(['organization.id']);
+
+        $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -120,7 +125,7 @@ class OrganizationSearch extends Organization
             ->andFilterWhere(['like', 'organization.email', $this->email])
             ->andFilterWhere(['like', 'organization.ground', $this->ground]);
 
-        if (Yii::$app->user->can('certificate')) {
+        if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
             /** @var UserIdentity $identity */
             $identity = Yii::$app->user->getIdentity();
             if (null !== $identity->mun_id) {

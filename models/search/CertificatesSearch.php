@@ -61,8 +61,9 @@ class CertificatesSearch extends Certificates
     public function search($params)
     {
         $query = Certificates::find()
-            ->joinWith(['payers'])
-            ->where('payers.operator_id = ' . Yii::$app->operator->identity->id);
+            ->joinWith(['payers']);
+
+        $query->andWhere(['payers.operator_id' => Yii::$app->operator->identity->id]);
 
         if ($this->enableContractsCount === true) {
             $subQuery = Contracts::find()
@@ -120,6 +121,15 @@ class CertificatesSearch extends Certificates
             'payers.mun' => $this->payerMunicipality,
         ]);
 
+        $query->andFilterWhere(['like', 'number', $this->number])
+            ->andFilterWhere(['like', 'fio_child', $this->fio_child])
+            ->andFilterWhere(['like', 'fio_parent', $this->fio_parent])
+            ->andFilterWhere(['like', 'certificates.name', $this->name])
+            ->andFilterWhere(['like', 'certificates.soname', $this->soname])
+            ->andFilterWhere(['like', 'certificates.phname', $this->phname])
+            ->andFilterWhere(['like', 'payers.name', $this->payer])
+            ->andFilterWhere(['tableContractsCount.contractCount' => $this->contractCount]);
+
         if (!empty($this->cert_group)) {
             $query->andFilterWhere(['cert_group' => $this->cert_group]);
         }
@@ -144,15 +154,6 @@ class CertificatesSearch extends Certificates
             $balance = explode(',', $this->balance);
             $query->andWhere(['and', ['>=', 'balance', (int)$balance[0]], ['<=', 'balance', (int)$balance[1]]]);
         }
-
-        $query->andFilterWhere(['like', 'number', $this->number])
-            ->andFilterWhere(['like', 'fio_child', $this->fio_child])
-            ->andFilterWhere(['like', 'fio_parent', $this->fio_parent])
-            ->andFilterWhere(['like', 'certificates.name', $this->name])
-            ->andFilterWhere(['like', 'certificates.soname', $this->soname])
-            ->andFilterWhere(['like', 'certificates.phname', $this->phname])
-            ->andFilterWhere(['like', 'payers.name', $this->payer])
-            ->andFilterWhere(['tableContractsCount.contractCount' => $this->contractCount]);
 
         return $dataProvider;
     }

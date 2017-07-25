@@ -17,124 +17,117 @@ use yii\helpers\ArrayHelper;
 $this->title = 'Поставщики образовательных услуг';
 $this->params['breadcrumbs'][] = $this->title;
 
+$name = [
+    'attribute' => 'name',
+];
+$fio_contact = [
+    'attribute' => 'fio_contact',
+];
+$cratedate = [
+    'attribute' => 'cratedate',
+];
+$site = [
+    'attribute' => 'site',
+];
+$phone = [
+    'attribute' => 'phone',
+];
+$max_child = [
+    'attribute' => 'max_child',
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
+];
+$raiting = [
+    'attribute' => 'raiting',
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
+];
+$type = [
+    'attribute' => 'type',
+    'value' => function ($model) {
+        /** @var \app\models\Organization $model */
+        return $model::types()[$model->type];
+    },
+    'type' => SearchFilter::TYPE_DROPDOWN,
+    'data' => $searchRegistry::types(),
+];
+$mun = [
+    'attribute' => 'mun',
+    'value' => 'municipality.name',
+    'type' => SearchFilter::TYPE_DROPDOWN,
+    'data' => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
+];
+$programs = [
+    'attribute' => 'programs',
+    'value' => function ($model) {
+        /** @var \app\models\Organization $model */
+        return $model->getPrograms()->andWhere(['programs.verification' => 2])->count();
+    },
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
+];
+$children = [
+    'attribute' => 'children',
+    'value' => function ($model) {
+        /** @var \app\models\Organization $model */
+        return count(array_unique(ArrayHelper::toArray(
+            $model->getChildren()->andWhere(['contracts.status' => 1])->all()
+        )));
+    },
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
+];
+$amount_child = [
+    'attribute' => 'amount_child',
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
+];
+$actual = [
+    'attribute' => 'actual',
+    'value' => function ($model) {
+        /** @var \app\models\Organization $model */
+        return $model->actual === 0 ? '-' : '+';
+    },
+    'type' => SearchFilter::TYPE_DROPDOWN,
+    'data' => [
+        1 => 'Да',
+        0 => 'Нет'
+    ]
+];
+$email = [
+    'attribute' => 'email',
+];
+$actions = [
+    'class' => ActionColumn::class,
+    'controller' => 'organization',
+    'template' => '{view}',
+    'searchFilter' => false,
+];
+
 $registryColumns = [
-    [
-        'attribute' => 'name',
-    ],
-    [
-        'attribute' => 'fio_contact',
-    ],
-    [
-        'attribute' => 'cratedate',
-    ],
-    [
-        'attribute' => 'site',
-    ],
-    [
-        'attribute' => 'phone',
-    ],
-    [
-        'attribute' => 'max_child',
-        'type' => SearchFilter::TYPE_RANGE_SLIDER,
-    ],
-    [
-        'attribute' => 'raiting',
-        'type' => SearchFilter::TYPE_RANGE_SLIDER,
-    ],
-    [
-        'attribute' => 'type',
-        'value' => function ($model) {
-            /** @var \app\models\Organization $model */
-            return $model::types()[$model->type];
-        },
-        'type' => SearchFilter::TYPE_DROPDOWN,
-        'data' => $searchRegistry::types(),
-    ],
-    [
-        'attribute' => 'mun',
-        'value' => 'municipality.name',
-        'type' => SearchFilter::TYPE_DROPDOWN,
-        'data' => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
-    ],
-    [
-        'attribute' => 'programs',
-        'value' => function ($model) {
-            /** @var \app\models\Organization $model */
-            return $model->getPrograms()->andWhere(['programs.verification' => 2])->count();
-        },
-        'type' => SearchFilter::TYPE_RANGE_SLIDER,
-    ],
-    [
-        'attribute' => 'children',
-        'value' => function ($model) {
-            /** @var \app\models\Organization $model */
-            return count(array_unique(ArrayHelper::toArray(
-                $model->getChildren()->andWhere(['contracts.status' => 1])->all()
-            )));
-        },
-        'type' => SearchFilter::TYPE_RANGE_SLIDER,
-    ],
-    [
-        'attribute' => 'amount_child',
-        'type' => SearchFilter::TYPE_RANGE_SLIDER,
-    ],
-    [
-        'attribute' => 'actual',
-        'value' => function ($model) {
-            /** @var \app\models\Organization $model */
-            return $model->actual === 0 ? '-' : '+';
-        },
-        'type' => SearchFilter::TYPE_DROPDOWN,
-        'data' => [
-            1 => 'Да',
-            0 => 'Нет'
-        ]
-    ],
-    [
-        'class' => ActionColumn::class,
-        'controller' => 'organization',
-        'template' => '{view}',
-        'searchFilter' => false,
-    ],
+    $name,
+    $fio_contact,
+    $cratedate,
+    $site,
+    $phone,
+    $max_child,
+    $raiting,
+    $type,
+    $mun,
+    $programs,
+    $children,
+    $amount_child,
+    $actual,
+    $actions,
 ];
 
 $requestColumns = [
-    [
-        'attribute' => 'name',
-    ],
-    [
-        'attribute' => 'fio_contact',
-    ],
-    [
-        'attribute' => 'site',
-    ],
-    [
-        'attribute' => 'email',
-    ],
-    [
-        'attribute' => 'mun',
-        'value' => 'municipality.name',
-        'type' => SearchFilter::TYPE_DROPDOWN,
-        'data' => ArrayHelper::map(Mun::find()->all(), 'id', 'name'),
-    ],
-    [
-        'attribute' => 'type',
-        'value' => function ($model) {
-            /** @var \app\models\Organization $model */
-            return $model::types()[$model->type];
-        },
-        'type' => SearchFilter::TYPE_DROPDOWN,
-        'data' => $searchRequest::types()
-    ],
-    [
-        'class' => ActionColumn::class,
-        'controller' => 'organization',
-        'template' => '{update}',
-        'searchFilter' => false,
-    ],
+    $name,
+    $fio_contact,
+    $site,
+    $email,
+    $mun,
+    $type,
+    $actions,
 ];
 
 $preparedRegistryColumns = GridviewHelper::prepareColumns('organization', $registryColumns, 'register');
+$preparedRequestColumns = GridviewHelper::prepareColumns('organization', $requestColumns, 'request');
 ?>
 
 <ul class="nav nav-tabs">

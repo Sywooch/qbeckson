@@ -31,14 +31,17 @@ $zab = [
         /** @var \app\models\Programs $model */
         $zab = explode(',', $model->zab);
         $display = '';
-        foreach ($zab as $value) {
-            $display .= ', ' . $model::illnesses()[$value];
+        if (is_array($zab)) {
+            foreach ($zab as $value) {
+                $display .= ', ' . $model::illnesses()[$value];
+            }
+            $display = mb_substr($display, 2);
         }
         if ($display === '') {
             return 'без ОВЗ';
         }
 
-        return mb_substr($display, 2);
+        return $display;
     }
 ];
 $year = [
@@ -204,7 +207,7 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
 <br>
 <div class="tab-content">
     <div id="panel1" class="tab-pane fade in active">
-        <?php echo SearchFilter::widget([
+        <?= SearchFilter::widget([
             'model' => $searchOpenPrograms,
             'action' => ['personal/operator-programs'],
             'data' => GridviewHelper::prepareColumns(

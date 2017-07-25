@@ -271,7 +271,6 @@ class Programs extends \yii\db\ActiveRecord
         return $this->hasMany(ProgrammeModule::className(), ['program_id' => 'id']);
     }
 
-
     public static function getCountPrograms($organization_id = null, $verification = null)
     {
         $query = static::find()

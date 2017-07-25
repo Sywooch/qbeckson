@@ -2,6 +2,7 @@
 
 namespace app\models\search;
 
+use app\models\UserIdentity;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -32,10 +33,10 @@ class ProgramsSearch extends Programs
     public function rules()
     {
         return [
-            [['id', 'organization_id', 'form', 'mun', 'ground', 'price', 'study', 'last_contracts',
+            [['id', 'form', 'mun', 'ground', 'price', 'study', 'last_contracts',
                 'last_s_contracts', 'last_s_contracts_rod', 'year', 'both_teachers', 'ovz', 'quality_control', 'p3z', 'municipality'], 'integer'],
             [['name', 'vid', 'colse_date', 'task', 'annotation', 'fullness', 'complexity', 'norm_providing',
-                'zab', 'link', 'certification_date', 'verification'], 'safe'],
+                'zab', 'link', 'certification_date', 'verification', 'organization_id'], 'safe'],
             [['ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch'], 'number'],
             [['organization', 'hours', 'age_group_min', 'age_group_max', 'limit', 'rating'], 'string'],
             ['open', 'safe'],
@@ -70,13 +71,17 @@ class ProgramsSearch extends Programs
      */
     public function search($params)
     {
-        $query = Programs::find()
-            ->select([
-                'programs.*',
-                'SUM(years.hours) as countHours'
-            ])
-            ->joinWith(['municipality', 'organization', 'modules'])
-            ->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
+        $query = Programs::find()->select([
+            'programs.*',
+            'SUM(years.hours) as countHours'
+        ])
+        ->joinWith([
+            'municipality',
+            'organization',
+            'modules'
+        ]);
+
+        $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -120,7 +125,6 @@ class ProgramsSearch extends Programs
             'programs.ocen_kadr' => $this->ocen_kadr,
             'programs.ocen_mat' => $this->ocen_mat,
             'programs.ocen_obch' => $this->ocen_obch,
-
             'organization.mun' => $this->municipality,
         ]);
 
@@ -197,6 +201,8 @@ class ProgramsSearch extends Programs
                 ['<=', 'programs.limit', (int)$limit[1]]
             ]);
         }
+
+
 
         $query->groupBy(['programs.id']);
 

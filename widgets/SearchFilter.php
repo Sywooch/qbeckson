@@ -39,6 +39,18 @@ class SearchFilter extends Widget
                 $this->data[$index]['type'] = self::TYPE_INPUT;
             }
         }
+        if (null === $this->role) {
+            throw new \DomainException('Role must be set!');
+        }
+        if (null === $this->data) {
+            throw new \DomainException('Data must be set!');
+        }
+        if (null === $this->model) {
+            throw new \DomainException('Model must be set!');
+        }
+        if (null === $this->action) {
+            throw new \DomainException('Action must be set!');
+        }
         parent::init();
     }
 

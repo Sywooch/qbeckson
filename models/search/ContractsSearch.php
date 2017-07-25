@@ -98,10 +98,7 @@ class ContractsSearch extends Contracts
                 'certificate',
                 'module'
             ]);
-
-        if (Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
-            $query->andWhere(['payers.operator_id' => Yii::$app->operator->identity->id]);
-        }
+        $query->andWhere(['payers.operator_id' => Yii::$app->operator->identity->id]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
