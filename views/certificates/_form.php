@@ -66,14 +66,12 @@ use app\models\Payers;
             $dataOptions[$index] = ['data-nominal' => $value];
         }
 
-<<<<<<< Updated upstream
-        echo $form->field($model, 'cert_group')->dropDownList(ArrayHelper::map($groupList, 'id', 'group'), ['options' => $dataOptions, 'onChange' => 'selectGroup(this);', 'prompt' => 'Выберите группу...']);
-=======
         echo $form->field($model, 'cert_group')->dropDownList(ArrayHelper::map($groupList, 'id', 'group'), ['options' => $dataOptions, 'onChange' => 'selectGroup(this);', 'prompt' => 'Выберите группу...'])->label('Текущая группа сертификата');
         echo $form->field($model, 'possible_cert_group')->dropDownList(ArrayHelper::map(CertGroup::getPossibleList($payer->id), 'id', 'group'), ['prompt' => 'Выберите группу...'])->label('Возможная группа сертификата');
+    } elseif (Yii::$app->user->can('certificate') && $model->canChangeGroup && !empty($model->getCertificateGroupQueues($model->id)->count())) {
+        echo '<div class="well">Вы находитесь в очереди на смену группы сертификата. Пожалуйста, подождите.</div>';
     } elseif (Yii::$app->user->can('certificate') && $model->canChangeGroup) {
         echo $form->field($model, 'cert_group')->dropDownList(ArrayHelper::map($model->possibleGroupList, 'id', 'group'), ['prompt' => 'Выберите группу...']);
->>>>>>> Stashed changes
     }
     ?>
 

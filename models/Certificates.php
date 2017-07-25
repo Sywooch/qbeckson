@@ -167,14 +167,93 @@ class Certificates extends \yii\db\ActiveRecord
         return $this->hasMany(Previus::className(), ['certificate_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCertificateGroupQueues($certificateId = null, $certGroupId = null)
+    {
+        $relation = $this->hasMany(CertificateGroupQueue::className(), ['certificate_id' => 'id']);
+
+        $relation->andFilterWhere([
+            'certificate_id' => $certificateId,
+            'cert_group_id' => $certGroupId,
+        ]);
+
+        return $relation;
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCertGroupsQueue()
+    {
+        return $this->hasMany(CertGroup::className(), ['id' => 'cert_group_id'])->viaTable('certificate_group_queue', ['certificate_id' => 'id']);
+    }
+
     public function getCanChangeGroup()
     {
-        return true;
+        if ($this->nominal == $this->balance) {
+            return true;
+        }
+
+        return false;
     }
 
     public function getPossibleGroupList()
     {
         return [$this->possibleCertGroup, $this->payers->getCertGroups(1)->one()];
+    }
+
+    public function changeCertGroup()
+    {
+        if ($this->certGroup->is_special > 0) {
+            $certGroup = CertGroup::findOne($this->oldAttributes['cert_group']);
+            self::updateGroupQueue($certGroup);
+            $this->nominal = 0;
+            $this->balance = 0;
+
+            return true;
+        }
+
+        if (CertGroup::hasVacancy($this->certGroup)) {
+            $this->nominal = $this->certGroup->nominal;
+            $this->balance = $this->nominal;
+        } else {
+            $this->insertIntoGroupQueue();
+            $this->cert_group = $this->oldAttributes['cert_group'];
+        }
+
+        return true;
+    }
+
+    public static function updateGroupQueue($certGroup) {
+        $model = CertificateGroupQueue::find()
+            ->where([
+                'cert_group_id' => $certGroup->id,
+            ])
+        ->one();
+
+        if ($model) {
+            $certificate = $model->certificate;
+            $certificate->nominal = $certGroup->nominal;
+            $certificate->balance = $certGroup->nominal;
+            $certificate->cert_group = $certGroup->id;
+            if ($certificate->save()) {
+                $model->delete();
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function insertIntoGroupQueue()
+    {
+        if (!$this->getCertificateGroupQueues($this->id, $this->cert_group)->count()) {
+            $this->link('certGroupsQueue', $this->certGroup);
+            Yii::$app->session->setFlash('warning', 'Свободных мест в группе нет, поэтому вы успешно поставлены в очередь на зачисление.');
+        }
     }
 
     public static function getCountCertificates($payerId = null) {

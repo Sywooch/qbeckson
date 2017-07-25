@@ -11,6 +11,7 @@ use Yii;
  * @property integer $payer_id
  * @property string $group
  * @property integer $nominal
+ * @property integer $amount
  *
  * @property Payers $payer
  * @property Certificates[] $certificates
@@ -31,12 +32,21 @@ class CertGroup extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['payer_id', 'group', 'nominal'], 'required'],
+            [['payer_id', 'group', 'nominal', 'amount'], 'required'],
             [['payer_id', 'is_special'], 'integer'],
             [['nominal'], 'integer', 'max' => 100000],
             [['group'], 'string', 'max' => 255],
             [['payer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payers::className(), 'targetAttribute' => ['payer_id' => 'id']],
         ];
+    }
+
+    public static function getPossibleList($payerId)
+    {
+        $query = static::find()
+            ->where(['payer_id' => $payerId])
+            ->andWhere(['>', 'nominal', 0]);
+
+        return $query->all();
     }
 
     public static function getActiveList($payerId)
@@ -58,7 +68,20 @@ class CertGroup extends \yii\db\ActiveRecord
             'payer_id' => 'Payer ID',
             'group' => 'Группа',
             'nominal' => 'Номинал',
+            'amount' => 'Лимит',
         ];
+    }
+
+    public static function hasVacancy($model)
+    {
+        $query = Certificates::find()
+            ->where(['cert_group' => $model->id]);
+
+        if ($model->amount - $query->count() > 0) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -75,5 +98,13 @@ class CertGroup extends \yii\db\ActiveRecord
     public function getCertificates()
     {
         return $this->hasMany(Certificates::className(), ['cert_group' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCertificateGroupQueues()
+    {
+        return $this->hasMany(CertificateGroupQueue::className(), ['cert_group_id' => 'id']);
     }
 }

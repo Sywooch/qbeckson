@@ -185,13 +185,14 @@ class CertificatesController extends Controller
 
     public function actionEdit()
     {
-        $certificates = new Certificates();
-        $certificate = $certificates->getCertificates();
-
-        $model = $this->findModel($certificate['id']);
+        $model = Yii::$app->user->identity->certificate;
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
+
+            if ($model->canChangeGroup && $model->oldAttributes['cert_group'] != $model->cert_group) {
+                $model->changeCertGroup();
+            }
 
             if ($model->save()) {
                 return $this->redirect(['/personal/certificate-statistic', 'id' => $model->id]);
