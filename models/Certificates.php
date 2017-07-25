@@ -59,12 +59,10 @@ class Certificates extends \yii\db\ActiveRecord
     {
         return [
             [['nominal', 'cert_group', 'name', 'soname'], 'required'],
-            // TODO: Вернуть обратно после слияния баз
-            //[['fio_parent'], 'required'],
+            [['fio_parent'], 'required'],
             [['user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'cert_group', 'pasport_s', 'pasport_n', 'pasport_v', 'phone'], 'integer'],
-            // TODO: Вернуть обратно после слияния баз
-            //[['nominal'], 'number', 'max' => 100000],
-            //[['number'], 'string', 'length' => [10, 10]],
+            [['nominal'], 'number', 'max' => 100000],
+            [['number'], 'string', 'length' => [10, 10]],
             [['balance', 'rezerv'], 'number'],
             [['number'], 'unique'],
             [['fio_child', 'fio_parent', 'birthday', 'address'], 'string', 'max' => 255],

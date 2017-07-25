@@ -111,10 +111,9 @@ class Organization extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            // TODO: Вернуть обратно после слияния баз
-            //[['name', 'bank_name', 'bank_bik', 'korr_invoice', 'rass_invoice', 'fio_contact', 'address_actual', 'email', 'full_name', 'type', 'phone', 'address_legal', 'mun'], 'required'],
-            //[['organizational_form', 'last', 'bank_sity', 'inn', 'KPP', 'OGRN'], 'required'],
-            /*[['svidet'], 'required',
+            [['name', 'bank_name', 'bank_bik', 'korr_invoice', 'rass_invoice', 'fio_contact', 'address_actual', 'email', 'full_name', 'type', 'phone', 'address_legal', 'mun'], 'required'],
+            [['organizational_form', 'last', 'bank_sity', 'inn', 'KPP', 'OGRN'], 'required'],
+            [['svidet'], 'required',
              'when' => function($model) {
                 return $model->type == self::TYPE_IP_WITH_WORKERS;
             },
@@ -127,7 +126,7 @@ class Organization extends \yii\db\ActiveRecord
             },
              'whenClient' => "function (attribute, value) {
                  return $('#organization-type').val() != 4;
-            }"],*/
+            }"],
             [['user_id', 'actual', 'type', 'bank_bik', 'korr_invoice', 'doc_type', 'max_child', 'amount_child', 'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'last', 'last_year_contract', 'certprogram', 'status', 'organizational_form'], 'integer'],
             [['license_date', 'date_proxy', 'cratedate', 'accepted_date'], 'safe'],
             [['raiting'], 'number'],
