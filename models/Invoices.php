@@ -22,6 +22,7 @@ use yii\db\ActiveRecord;
  * @property Contracts $contract
  * @property Organization $organization
  * @property Payers $payers
+ * @property Payers $payer
  */
 class Invoices extends ActiveRecord
 {
@@ -95,6 +96,14 @@ class Invoices extends ActiveRecord
     public function getOrganization()
     {
         return $this->hasOne(Organization::className(), ['id' => 'organization_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPayer()
+    {
+        return $this->hasOne(Payers::className(), ['id' => 'payers_id']);
     }
 
     /**

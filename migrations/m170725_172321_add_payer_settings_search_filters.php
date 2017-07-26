@@ -92,7 +92,7 @@ class m170725_172321_add_payer_settings_search_filters extends Migration
     {
         $this->execute('
             DELETE FROM settings_search_filters 
-                WHERE role = "' . UserIdentity::ROLE_OPERATOR . '"
+                WHERE role = "' . UserIdentity::ROLE_PAYER . '"
         ');
 
         return true;

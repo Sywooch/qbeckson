@@ -70,7 +70,8 @@ $columns = [
         'data' => $searchInvoices::statuses(),
     ],
     [
-        'attribute' => 'sum'
+        'attribute' => 'sum',
+        'type' => SearchFilter::TYPE_RANGE_SLIDER,
     ],
     [
         'attribute' => 'link',

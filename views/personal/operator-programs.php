@@ -230,6 +230,7 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
             'dataProvider' => $openProgramsProvider,
             'filterModel' => null,
             'pjax' => true,
+            'summary' => false,
             'columns' => $preparedOpenColumns,
         ]); ?>
         <?php array_pop($preparedOpenColumns) ?>
@@ -265,6 +266,7 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
                     return ['class' => 'danger'];
                 }
             },
+            'summary' => false,
             'pjax' => true,
             'columns' => $preparedWaitColumns,
         ]); ?>
@@ -295,13 +297,13 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
         <?= GridView::widget([
             'dataProvider' => $closedProgramsProvider,
             'filterModel' => false,
+            'summary' => false,
             'pjax' => true,
             'columns' => $preparedClosedPrograms,
         ]); ?>
     </div>
     <br>
-    <?php
-    echo ExportMenu::widget([
+    <?= ExportMenu::widget([
         'dataProvider' => $ProgramsallProvider,
         'target' => '_self',
         'showColumnSelector' => false,

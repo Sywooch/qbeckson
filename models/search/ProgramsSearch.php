@@ -2,7 +2,6 @@
 
 namespace app\models\search;
 
-use app\models\UserIdentity;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;

@@ -1,63 +1,109 @@
 <?php
+use app\helpers\GridviewHelper;
+use app\models\Organization;
+use app\models\UserIdentity;
+use app\widgets\SearchFilter;
+use yii\db\Query;
+use yii\grid\ActionColumn;
+use app\helpers\AppHelper;
 use yii\helpers\Html;
 use yii\grid\GridView;
-use yii\widgets\ActiveForm;
 use yii\helpers\Url;
-use app\models\Organization;
-
 
 $this->title = 'Счета';
-   $this->params['breadcrumbs'][] = 'Счета';
+$this->params['breadcrumbs'][] = $this->title;
+
 /* @var $this yii\web\View */
+/* @var $searchInvoices \app\models\search\InvoicesSearch */
+/* @var $invoicesProvider \yii\data\ActiveDataProvider */
+
+$columns = [
+    [
+        'attribute' => 'number'
+    ],
+    [
+        'attribute' => 'date'
+    ],
+    [
+        'attribute' => 'month',
+        'label' => 'Месяц',
+        'value' => function ($model) {
+            /** @var \app\models\Invoices $model */
+            return AppHelper::getMonthName($model->month);
+        },
+        'type' => SearchFilter::TYPE_DROPDOWN,
+        'data' => AppHelper::monthes(),
+    ],
+    [
+        'attribute' => 'payer',
+        'label' => 'Организация',
+        'format' => 'raw',
+        'value' => function ($model) {
+            /** @var \app\models\Invoices $model */
+            return Html::a(
+                $model->payer->name,
+                Url::to(['payers/view', 'id' => $model->payer->id]),
+                ['class' => 'blue', 'target' => '_blank']
+            );
+        },
+    ],
+    [
+        'attribute' => 'prepayment',
+        'label' => 'Тип',
+        'format' => 'raw',
+        'value' => function ($model) {
+            /** @var \app\models\Invoices $model */
+            return $model->prepayment === 1 ? 'Аванс' : 'Счёт';
+        },
+        'type' => SearchFilter::TYPE_DROPDOWN,
+        'data' => [
+            0 => 'Счёт',
+            1 => 'Аванс',
+        ],
+    ],
+    [
+        'attribute' => 'status',
+        'format' => 'raw',
+        'value' => function ($model) {
+            /** @var \app\models\Invoices $model */
+            return $model::statuses()[$model->status];
+        },
+        'type' => SearchFilter::TYPE_DROPDOWN,
+        'data' => $searchInvoices::statuses(),
+    ],
+    [
+        'attribute' => 'sum',
+        'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    ],
+    [
+        'attribute' => 'link',
+        'label' => 'Скачать',
+        'format' => 'raw',
+        'value' => function ($model) {
+            /** @var \app\models\Invoices $model */
+            if ($model->prepayment === 1) {
+                return Html::a(
+                    '<span class="glyphicon glyphicon-download-alt"></span>',
+                    Url::to(['invoices/mpdf', 'id' => $model->id])
+                );
+            }
+
+            return Html::a(
+                '<span class="glyphicon glyphicon-download-alt"></span>',
+                Url::to(['invoices/invoice', 'id' => $model->id])
+            );
+        }
+    ],
+    [
+        'class' => ActionColumn::class,
+        'controller' => 'invoices',
+        'template' => '{view}',
+        'searchFilter' => false,
+    ],
+];
+
+$preparedColumns = GridviewHelper::prepareColumns('invoices', $columns);
 ?>
-
-<?php /* if ($informsProvider->getTotalCount() > 0) { ?>
-    <div class="modal fade">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title">Оповещения</h4>
-          </div>
-          <div class="modal-body">
-            <?= GridView::widget([
-                'dataProvider' => $informsProvider,
-                'summary' => false,
-                'showHeader' => false,
-                'columns' => [
-                    // 'id',
-                    // 'contract_id',
-                    // 'from',
-                    'date',
-                    'text:ntext',
-                    'program_id',
-                    // 'read',
-
-                    ['class' => 'yii\grid\ActionColumn',
-                        'template' => '{permit} {view}',
-                         'buttons' =>
-                             [
-                                 'permit' => function ($url, $model) {
-                                     return Html::a('<span class="glyphicon glyphicon-ok"></span>', Url::to(['/informs/read', 'id' => $model->id]), [
-                                         'title' => Yii::t('yii', 'Отметить как прочитанное'),
-                                        'data-toggle' => 'tooltip',
-                                        'data-placement' => 'top'
-                                     ]); },
-                                'view' => function ($url, $model) {
-                                     return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', Url::to(['/programs/view', 'id' => $model->program_id]), [
-                                         'title' => Yii::t('yii', 'Просмотреть программу'),
-                                        'data-toggle' => 'tooltip',
-                                        'data-placement' => 'top'
-                                     ]); },
-                             ]
-                     ],
-                ],
-            ]); ?>
-          </div>
-        </div><!-- /.modal-content -->
-      </div><!-- /.modal-dialog -->
-    </div>
-<?php } */ ?>
 
 <?php
     $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
@@ -65,7 +111,7 @@ $this->title = 'Счета';
     $organization = $organizations->getOrganization();
     if ($roles['organizations'] and $organization['actual'] != 0) {
         
-            $rows = (new \yii\db\Query())
+            $rows = (new Query())
                 ->select(['payer_id'])
                 ->from('cooperate')
                 ->where(['organization_id' => $organization['id']])
@@ -74,7 +120,7 @@ $this->title = 'Счета';
             
             $preinvoice = array();
             foreach ($rows as $payer_id) {
-                $payer = (new \yii\db\Query())
+                $payer = (new Query())
                     ->select(['id'])
                     ->from('invoices')
                     ->where(['organization_id' => $organization['id']])
@@ -91,7 +137,7 @@ $this->title = 'Счета';
         
             $invoice = array();
             foreach ($rows as $payer_id) {
-                $payer2 = (new \yii\db\Query())
+                $payer2 = (new Query())
                     ->select(['id'])
                     ->from('invoices')
                     ->where(['organization_id' => $organization['id']])
@@ -109,7 +155,7 @@ $this->title = 'Счета';
             if (date('m') == 12) { 
             $dec = array();
             foreach ($rows as $payer_id) {
-                $payer3 = (new \yii\db\Query())
+                $payer3 = (new Query())
                     ->select(['id'])
                     ->from('invoices')
                     ->where(['organization_id' => $organization['id']])
@@ -175,98 +221,24 @@ $this->title = 'Счета';
         echo "</p>";
     }
     ?>
-<?= GridView::widget([
-    'dataProvider' => $InvoicesProvider,
-    'filterModel' => $searchInvoices,
-    'summary' => false,
-    'columns' => [
-        //['class' => 'yii\grid\SerialColumn'],
 
-            //'id',
-            //'contracts',
-            'number',
-            'date:date',
-            [
-                    'attribute'=>'month',
-                    'label' => 'Месяц',
-                    'value' => function($data){
-                        switch ($data->month){
-                            case 1: $m='январь'; break;
-                            case 2: $m='февраль'; break;
-                            case 3: $m='март'; break;
-                            case 4: $m='апрель'; break;
-                            case 5: $m='май'; break;
-                            case 6: $m='июнь'; break;
-                            case 7: $m='июль'; break;
-                            case 8: $m='август'; break;
-                            case 9: $m='сентябрь'; break;
-                            case 10: $m='октябрь'; break;
-                            case 11: $m='ноябрь'; break;
-                            case 12: $m='декабрь'; break;
-                            }
-                        return $m;
-                    }
-            ],
-            [
-                    'attribute' => 'payers',
-                    'format' => 'raw',
-                    'value'=> function($data){
-                        
-                        $payer = (new \yii\db\Query())
-                            ->select(['id'])
-                            ->from('payers')
-                            ->where(['name' => $data->payers->name])
-                            ->one();
-                        
-                        
-                    return Html::a($data->payers->name, Url::to(['/payers/view', 'id' => $payer['id']]), ['class' => 'blue', 'target' => '_blank']);
-                    },
-                    'label'=> 'Плательщик',
-                ],
-            [
-                    'attribute'=>'prepayment',
-                    'label' => 'Тип',
-                    'format' => 'raw',
-                    'value' => function($data){
-                        return $data->prepayment == 1 ? 'Аванс' : 'Счёт';
-                    }
-                ],
-        
-            [
-                    'attribute'=>'status',
-                    'format' => 'raw',
-                    'value' => function($data){
-                        if ($data->status == 0) {return 'Не просмотрен';}
-                        if ($data->status == 1) {return 'В работе';}
-                        if ($data->status == 2) {return 'Оплачен';}
-                        if ($data->status == 3) {return 'Удален';}
-                    }
-                ],
-            [
-                    'attribute'=>'link',
-                    'label' => 'Скачать',
-                    'format' => 'raw',
-                    'value' => function($data){
-                        if ($data->prepayment == 1) {
-                            return Html::a('<span class="glyphicon glyphicon-download-alt"></span>', Url::to(['/invoices/mpdf', 'id' => $data->id]));
-                        } else {
-                            return Html::a('<span class="glyphicon glyphicon-download-alt"></span>', Url::to(['/invoices/invoice', 'id' => $data->id]));
-                        }
-                    }
-                ],
-            //'status',
-            //'status_termination',
-            // 'status_comment:ntext',
-            // 'status_year',
-            // 'link_doc',
-            // 'link_ofer',
-            // 'start_edu_programm',
-            // 'start_edu_contract',
-            // 'stop_edu_contract',
+<?php
+echo SearchFilter::widget([
+    'model' => $searchInvoices,
+    'action' => ['personal/organization-invoices'],
+    'data' => GridviewHelper::prepareColumns(
+        'invoices',
+        $columns,
+        null,
+        'searchFilter',
+        null
+    ),
+    'role' => UserIdentity::ROLE_ORGANIZATION,
+]);
 
-        ['class' => 'yii\grid\ActionColumn',
-         'controller' => 'invoices',
-         'template' => '{view}',
-        ],
-    ],
-]); ?>
+echo GridView::widget([
+    'dataProvider' => $invoicesProvider,
+    'filterModel' => null,
+    'columns' => $preparedColumns
+]);
+?>

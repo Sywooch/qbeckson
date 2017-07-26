@@ -17,7 +17,7 @@ use yii\web\IdentityInterface;
  * @property mixed $authKey
  *
  * @property \yii\db\ActiveQuery $dispute
- * @property \yii\db\ActiveQuery $organization
+ * @property Organization $organization
  * @property null|Certificates $certificate
  * @property null|Mun $municipality
  * @property mixed $userName

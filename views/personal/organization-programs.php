@@ -1,24 +1,168 @@
 <?php
+
+use app\helpers\GridviewHelper;
+use app\models\UserIdentity;
+use yii\grid\ActionColumn;
+use app\widgets\SearchFilter;
 use yii\helpers\Html;
 use kartik\grid\GridView;
-use app\models\ProgrammeModuleCertSearch;
+use yii\helpers\Url;
+use kartik\export\ExportMenu;
+use yii\helpers\ArrayHelper;
+use app\models\Mun;
 
 /* @var $this yii\web\View */
+/* @var $searchOpenPrograms \app\models\search\ProgramsSearch */
+/* @var $searchWaitPrograms \app\models\search\ProgramsSearch */
+/* @var $searchClosedPrograms \app\models\search\ProgramsSearch */
+/* @var $openProgramsProvider \yii\data\ActiveDataProvider */
+/* @var $waitProgramsProvider \yii\data\ActiveDataProvider */
+/* @var $closedProgramsProvider \yii\data\ActiveDataProvider */
 
 $this->title = 'Программы';
 $this->params['breadcrumbs'][] = $this->title;
+
+$zab = [
+    'type' => SearchFilter::TYPE_SELECT2,
+    'data' => $searchOpenPrograms::illnesses(),
+    'attribute' => 'zab',
+    'label' => 'Категория детей',
+    'value' => function ($model) {
+        /** @var \app\models\Programs $model */
+        $zab = explode(',', $model->zab);
+        $display = '';
+        if (is_array($zab)) {
+            foreach ($zab as $value) {
+                $display .= ', ' . $model::illnesses()[$value];
+            }
+            $display = mb_substr($display, 2);
+        }
+        if ($display === '') {
+            return 'без ОВЗ';
+        }
+
+        return $display;
+    }
+];
+$year = [
+    'attribute' => 'year',
+    'value' => function ($model) {
+        /** @var \app\models\Programs $model */
+        return Yii::$app->i18n->messageFormatter->format(
+            '{n, plural, one{# модуль} few{# модуля} many{# модулей} other{# модуля}}',
+            ['n' => $model->year],
+            Yii::$app->language
+        );
+    },
+    'type' => SearchFilter::TYPE_TOUCH_SPIN,
+];
+$municipality = [
+    'attribute' => 'mun',
+    'label' => 'Муниципалитет',
+    'type' => SearchFilter::TYPE_DROPDOWN,
+    'data' => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
+    'value' => 'municipality.name',
+];
+$name = [
+    'attribute' => 'name',
+    'label' => 'Наименование',
+];
+$hours = [
+    'attribute' => 'hours',
+    'value' => 'countHours',
+    'label' => 'Кол-во часов',
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
+];
+$directivity = [
+    'attribute' => 'directivity',
+    'label' => 'Направленность',
+];
+$ageGroupMin = [
+    'attribute' => 'age_group_min',
+    'label' => 'Возраст от',
+    'type' => SearchFilter::TYPE_TOUCH_SPIN,
+];
+$ageGroupMax = [
+    'attribute' => 'age_group_max',
+    'label' => 'Возраст до',
+    'type' => SearchFilter::TYPE_TOUCH_SPIN,
+];
+$rating = [
+    'attribute' => 'rating',
+    'label' => 'Рейтинг',
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
+];
+$limit = [
+    'attribute' => 'limit',
+    'label' => 'Лимит',
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
+];
+$actions = [
+    'class' => ActionColumn::class,
+    'controller' => 'programs',
+    'template' => '{view}',
+    'searchFilter' => false,
+];
+
+$openColumns = [
+    $name,
+    $year,
+    $hours,
+    $directivity,
+    $zab,
+    $ageGroupMin,
+    $ageGroupMax,
+    $rating,
+    $limit,
+    $municipality,
+    $actions,
+];
+$waitColumns = [
+    $name,
+    $year,
+    $hours,
+    $directivity,
+    $zab,
+    $ageGroupMin,
+    $ageGroupMax,
+    $municipality,
+    $actions
+];
+$closedPrograms = [
+    $municipality,
+    $name,
+    $year,
+    $hours,
+    $directivity,
+    $zab,
+    $ageGroupMin,
+    $ageGroupMax,
+    $actions
+];
+
+$preparedOpenColumns = GridviewHelper::prepareColumns('programs', $openColumns, 'open');
+$preparedWaitColumns = GridviewHelper::prepareColumns('programs', $waitColumns, 'wait');
+$preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedPrograms, 'close');
+
 ?>
 <ul class="nav nav-tabs">
-    <li class="active"><a data-toggle="tab" href="#panel1">Сертифицированные <span
-                    class="badge"><?= $Programs1Provider->getTotalCount() ?></span></a></li>
-    <li><a data-toggle="tab" href="#panel2">Ожидающие сертификации <span
-                    class="badge"><?= $waitProgramsProvider->getTotalCount() ?></span></a></li>
-    <li><a data-toggle="tab" href="#panel3">Отказано в сертификации <span
-                    class="badge"><?= $Programs2Provider->getTotalCount() ?></span></a></li>
+    <li class="active">
+        <a data-toggle="tab" href="#panel1">Сертифицированные
+            <span class="badge"><?= $openProgramsProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel2">Ожидающие сертификации
+            <span class="badge"><?= $waitProgramsProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel3">Отказано в сертификации
+            <span class="badge"><?= $closedProgramsProvider->getTotalCount() ?></span>
+        </a>
+    </li>
 </ul>
 <br>
-
-
 <div class="tab-content">
     <?php
     if (Yii::$app->user->can('organizations') && Yii::$app->user->identity->organization->actual > 0) {
@@ -28,300 +172,75 @@ $this->params['breadcrumbs'][] = $this->title;
     }
     ?>
     <div id="panel1" class="tab-pane fade in active">
+        <?= SearchFilter::widget([
+            'model' => $searchOpenPrograms,
+            'action' => ['personal/organization-programs'],
+            'data' => GridviewHelper::prepareColumns(
+                'programs',
+                $openColumns,
+                'open',
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_ORGANIZATION,
+            'type' => 'open'
+        ]); ?>
         <?= GridView::widget([
-            'dataProvider' => $Programs1Provider,
-            'filterModel' => $searchPrograms1,
-            'summary' => false,
+            'dataProvider' => $openProgramsProvider,
+            'filterModel' => null,
             'pjax' => true,
-            'columns' => [
-                /*[
-                    'class' => 'kartik\grid\ExpandRowColumn',
-                    'width' => '50px',
-                    'value' => function ($model, $key, $index, $column) {
-                        return GridView::ROW_COLLAPSED;
-                    },
-                    'detail' => function ($model, $key, $index, $column) {
-                        $searchModel = new ProgrammeModuleCertSearch();
-                        $searchModel->program_id = $model->id;
-                        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-                        return Yii::$app->controller->renderPartial('/years/main', [
-                            'searchModel' => $searchModel,
-                            'dataProvider' => $dataProvider
-                        ]);
-                    },
-                    'headerOptions' => ['class' => 'kartik-sheet-style'],
-                    'expandOneOnly' => true
-                ],*/
-                [
-                    'attribute' => 'name',
-                    'label' => 'Наименование',
-                ],
-                [
-                    'attribute' => 'year',
-                    'value' => function ($data) {
-                        return Yii::$app->i18n->messageFormatter->format(
-                            '{n, plural, one{# модуль} few{# модуля} many{# модулей} other{# модуля}}',
-                            ['n' => $data->year],
-                            Yii::$app->language
-                        );
-                    }
-                ],
-                'countHours',
-                [
-                    'attribute' => 'directivity',
-                    'label' => 'Направленность',
-                ],
-                [
-                    'attribute' => 'zab',
-                    'label' => 'Категория детей',
-                    'value' => function ($data) {
-                        $zab = explode(',', $data->zab);
-                        $display = '';
-                        foreach ($zab as $value) {
-                            if ($value == 1) {
-                                $display = $display . ', глухие';
-                            }
-                            if ($value == 2) {
-                                $display = $display . ', слабослышащие и позднооглохшие';
-                            }
-                            if ($value == 3) {
-                                $display = $display . ', слепые';
-                            }
-                            if ($value == 4) {
-                                $display = $display . ', слабовидящие';
-                            }
-                            if ($value == 5) {
-                                $display = $display . ', нарушения речи';
-                            }
-                            if ($value == 6) {
-                                $display = $display . ', фонетико-фонематическое нарушение речи';
-                            }
-                            if ($value == 7) {
-                                $display = $display . ', нарушение опорно-двигательного аппарата';
-                            }
-                            if ($value == 8) {
-                                $display = $display . ', задержка психического развития';
-                            }
-                            if ($value == 9) {
-                                $display = $display . ', расстройство аутистического спектра';
-                            }
-                            if ($value == 10) {
-                                $display = $display . ', нарушение интеллекта';
-                            }
-                        }
-                        if ($display == '') {
-                            return 'без ОВЗ';
-                        } else {
-                            return mb_substr($display, 2);
-                        }
-
-                    }
-                ],
-                [
-                    'attribute' => 'age_group_min',
-                    'label' => 'Возраст от',
-                ],
-                [
-                    'attribute' => 'age_group_max',
-                    'label' => 'Возраст до',
-                ],
-
-                [
-                    'attribute' => 'rating',
-                    'label' => 'Рейтинг',
-                ],
-                [
-                    'attribute' => 'limit',
-                    'label' => 'Лимит',
-                ],
-
-                ['class' => 'yii\grid\ActionColumn',
-                    'controller' => 'programs',
-                    'template' => '{view}',
-                ],
-            ],
+            'summary' => false,
+            'columns' => $preparedOpenColumns,
         ]); ?>
     </div>
     <div id="panel2" class="tab-pane fade">
+        <?= SearchFilter::widget([
+            'model' => $searchWaitPrograms,
+            'action' => ['personal/organization-programs'],
+            'data' => GridviewHelper::prepareColumns(
+                'programs',
+                $waitColumns,
+                'wait',
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_ORGANIZATION,
+            'type' => 'wait'
+        ]); ?>
         <?= GridView::widget([
             'dataProvider' => $waitProgramsProvider,
-            'filterModel' => $searchWaitPrograms,
-            'pjax' => true,
+            'filterModel' => null,
+            'summary' => false,
             'rowOptions' => function ($model, $index, $widget, $grid) {
-                if ($model->verification == 1) {
-                    return ['class' => 'info'];
+                /** @var \app\models\Programs $model */
+                if ($model->verification === 1) {
+                    return ['class' => 'danger'];
                 }
             },
-            'columns' => [
-                [
-                    'attribute' => 'name',
-                    'label' => 'Наименование',
-                ],
-                [
-                    'attribute' => 'year',
-                    'value' => function ($data) {
-                        return Yii::$app->i18n->messageFormatter->format(
-                            '{n, plural, one{# модуль} few{# модуля} many{# модулей} other{# модуля}}',
-                            ['n' => $data->year],
-                            Yii::$app->language
-                        );
-                    }
-                ],
-                'countHours',
-                [
-                    'attribute' => 'directivity',
-                    'label' => 'Направленность',
-                ],
-                [
-                    'attribute' => 'zab',
-                    'label' => 'Категория детей',
-                    'value' => function ($data) {
-                        $zab = explode(',', $data->zab);
-                        $display = '';
-                        foreach ($zab as $value) {
-                            if ($value == 1) {
-                                $display = $display . ', глухие';
-                            }
-                            if ($value == 2) {
-                                $display = $display . ', слабослышащие и позднооглохшие';
-                            }
-                            if ($value == 3) {
-                                $display = $display . ', слепые';
-                            }
-                            if ($value == 4) {
-                                $display = $display . ', слабовидящие';
-                            }
-                            if ($value == 5) {
-                                $display = $display . ', нарушения речи';
-                            }
-                            if ($value == 6) {
-                                $display = $display . ', фонетико-фонематическое нарушение речи';
-                            }
-                            if ($value == 7) {
-                                $display = $display . ', нарушение опорно-двигательного аппарата';
-                            }
-                            if ($value == 8) {
-                                $display = $display . ', задержка психического развития';
-                            }
-                            if ($value == 9) {
-                                $display = $display . ', расстройство аутистического спектра';
-                            }
-                            if ($value == 10) {
-                                $display = $display . ', нарушение интеллекта';
-                            }
-                        }
-                        if ($display == '') {
-                            return 'без ОВЗ';
-                        } else {
-                            return mb_substr($display, 2);
-                        }
-
-                    }
-                ],
-                [
-                    'attribute' => 'age_group_min',
-                    'label' => 'Возраст от',
-                ],
-                [
-                    'attribute' => 'age_group_max',
-                    'label' => 'Возраст до',
-                ],
-
-
-                ['class' => 'yii\grid\ActionColumn',
-                    'controller' => 'programs',
-                    'template' => '{view}',
-                ],
-            ],
+            'pjax' => true,
+            'columns' => $preparedWaitColumns,
         ]); ?>
     </div>
     <div id="panel3" class="tab-pane fade">
+        <?= SearchFilter::widget([
+            'model' => $searchClosedPrograms,
+            'action' => ['personal/organization-programs'],
+            'data' => GridviewHelper::prepareColumns(
+                'programs',
+                $closedPrograms,
+                'close',
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_ORGANIZATION,
+            'type' => 'close'
+        ]); ?>
         <?= GridView::widget([
-            'dataProvider' => $Programs2Provider,
-            'filterModel' => $searchPrograms2,
+            'dataProvider' => $closedProgramsProvider,
+            'filterModel' => false,
             'pjax' => true,
-            'columns' => [
-
-                [
-                    'attribute' => 'name',
-                    'label' => 'Наименование',
-                ],
-                [
-                    'attribute' => 'year',
-                    'value' => function ($data) {
-                        return Yii::$app->i18n->messageFormatter->format(
-                            '{n, plural, one{# модуль} few{# модуля} many{# модулей} other{# модуля}}',
-                            ['n' => $data->year],
-                            Yii::$app->language
-                        );
-                    }
-                ],
-                'countHours',
-                [
-                    'attribute' => 'directivity',
-                    'label' => 'Направленность',
-                ],
-                [
-                    'attribute' => 'zab',
-                    'label' => 'Категория детей',
-                    'value' => function ($data) {
-                        $zab = explode(',', $data->zab);
-                        $display = '';
-                        foreach ($zab as $value) {
-                            if ($value == 1) {
-                                $display = $display . ', глухие';
-                            }
-                            if ($value == 2) {
-                                $display = $display . ', слабослышащие и позднооглохшие';
-                            }
-                            if ($value == 3) {
-                                $display = $display . ', слепые';
-                            }
-                            if ($value == 4) {
-                                $display = $display . ', слабовидящие';
-                            }
-                            if ($value == 5) {
-                                $display = $display . ', нарушения речи';
-                            }
-                            if ($value == 6) {
-                                $display = $display . ', фонетико-фонематическое нарушение речи';
-                            }
-                            if ($value == 7) {
-                                $display = $display . ', нарушение опорно-двигательного аппарата';
-                            }
-                            if ($value == 8) {
-                                $display = $display . ', задержка психического развития';
-                            }
-                            if ($value == 9) {
-                                $display = $display . ', расстройство аутистического спектра';
-                            }
-                            if ($value == 10) {
-                                $display = $display . ', нарушение интеллекта';
-                            }
-                        }
-                        if ($display == '') {
-                            return 'без ОВЗ';
-                        } else {
-                            return mb_substr($display, 2);
-                        }
-
-                    }
-                ],
-                [
-                    'attribute' => 'age_group_min',
-                    'label' => 'Возраст от',
-                ],
-                [
-                    'attribute' => 'age_group_max',
-                    'label' => 'Возраст до',
-                ],
-
-                ['class' => 'yii\grid\ActionColumn',
-                    'controller' => 'programs',
-                    'template' => '{view}',
-                ],
-            ],
+            'summary' => false,
+            'columns' => $preparedClosedPrograms,
         ]); ?>
     </div>
 </div>
