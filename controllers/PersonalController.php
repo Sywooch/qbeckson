@@ -404,6 +404,7 @@ class PersonalController extends Controller
             'hours' => '-1,150000',
             'limit' => '-1,150000',
             'rating' => '-1,150000',
+            'modelName' => 'SearchPrograms',
         ]);
         $programsProvider = $searchPrograms->search(Yii::$app->request->queryParams);
 
