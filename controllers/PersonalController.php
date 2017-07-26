@@ -623,28 +623,27 @@ class PersonalController extends Controller
         ]);
     }
 
-
-
+    /**
+     * @return string
+     */
     public function actionOrganizationPayers()
     {
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
-
-        $searchPayers = new PayersmySearch();
-        $PayersProvider = $searchPayers->search(Yii::$app->request->queryParams);
-
-        $searchPayersWait = new PayersWaitSearch();
-        $PayersWaitProvider = $searchPayersWait->search(Yii::$app->request->queryParams);
+        /** @var UserIdentity $user */
+        $user = Yii::$app->user->getIdentity();
 
         $searchOpenPayers = new PayersSearch([
             'certificates' => '0,150000',
-            'cooperates' => '0,150000'
+            'cooperates' => '0,150000',
+            'cooperateStatus' => 1,
+            'id' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
         ]);
         $openPayersProvider = $searchOpenPayers->search(Yii::$app->request->queryParams);
 
         $searchWaitPayers = new PayersSearch([
             'certificates' => '0,150000',
-            'cooperates' => '0,150000'
+            'cooperates' => '0,150000',
+            'cooperateStatus' => 0,
+            'id' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
         ]);
         $waitPayersProvider = $searchWaitPayers->search(Yii::$app->request->queryParams);
 
@@ -661,21 +660,17 @@ class PersonalController extends Controller
 
     public function actionOrganizationGroups()
     {
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
+        /** @var UserIdentity $user */
+        $user = Yii::$app->user->getIdentity();
 
-        $informsProvider = new ActiveDataProvider([
-            'query' => Informs::find()->where(['read' => 0])->andwhere(['from' => 3])->andwhere(['prof_id' => $organization['id']]),
+        $searchGroups = new \app\models\search\GroupsSearch([
+            'organization_id' => $user->organization->id
         ]);
-
-        $searchGroups = new GroupsSearch();
-        $searchGroups->organization_id = $organization['id'];
-        $GroupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
+        $groupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
 
         return $this->render('organization-groups', [
-            'informsProvider' => $informsProvider,
             'searchGroups' => $searchGroups,
-            'GroupsProvider' => $GroupsProvider,
+            'groupsProvider' => $groupsProvider,
         ]);
     }
 

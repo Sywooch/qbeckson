@@ -79,8 +79,10 @@ $preparedWaitColumns = GridviewHelper::prepareColumns('payers', $waitColumns, 'w
 
 ?>
 <ul class="nav nav-tabs">
-    <li class="active">
-        <a data-toggle="tab" href="#panel1"><?= $openPayersProvider->getTotalCount() ?></a>
+    <li>
+        <a data-toggle="tab" href="#panel1">Действующие
+            <span class="badge"><?= $openPayersProvider->getTotalCount() ?></span>
+        </a>
     </li>
     <li>
         <a data-toggle="tab" href="#panel2">Ожидается подтверждение
@@ -99,12 +101,49 @@ if ($roles['organizations'] and $organization['actual'] !== 0) {
     echo '</p>';
 }
 ?>
-
 <div class="tab-content">
     <div id="panel1" class="tab-pane fade in active">
-
+        <?= SearchFilter::widget([
+            'model' => $searchOpenPayers,
+            'action' => ['personal/operator-payers'],
+            'data' => GridviewHelper::prepareColumns(
+                'payers',
+                $openColumns,
+                'open',
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_ORGANIZATION,
+            'type' => 'open'
+        ]); ?>
+        <?= GridView::widget([
+            'dataProvider' => $openPayersProvider,
+            'filterModel' => null,
+            'pjax' => true,
+            'summary' => false,
+            'columns' => $preparedOpenColumns,
+        ]); ?>
     </div>
     <div id="panel2" class="tab-pane fade">
-
+        <?= SearchFilter::widget([
+            'model' => $searchWaitPayers,
+            'action' => ['personal/operator-payers'],
+            'data' => GridviewHelper::prepareColumns(
+                'payers',
+                $waitColumns,
+                'wait',
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_ORGANIZATION,
+            'type' => 'wait'
+        ]); ?>
+        <?= GridView::widget([
+            'dataProvider' => $waitPayersProvider,
+            'filterModel' => null,
+            'pjax' => true,
+            'summary' => false,
+            'columns' => $preparedWaitColumns,
+        ]); ?>
     </div>
 </div>
