@@ -65,7 +65,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $cert,
             'attributes' => [
                 'fio_child',
-                'paid',
                 [
                     'attribute' => 'fio_parent',
                     'label' => 'Заказчик по договору',

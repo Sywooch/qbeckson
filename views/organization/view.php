@@ -65,7 +65,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]); }
     }
-        
+
     $license_date = explode('-', $model->license_date);
     ?>
    
@@ -75,7 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'full_name',
                 [
                     'attribute'=>'type',
-                    'value' => $model->typeLabel,
+                    'value' => $model::types()[$model->type],
                 ],
                 'address_actual',
                 [
