@@ -30,6 +30,10 @@ use Yii;
  */
 class Certificates extends \yii\db\ActiveRecord
 {
+    const FLAG_GROUP_HAS_NOT_BEEN_CHANGED = 10;
+
+    const FLAG_GROUP_HAS_BEEN_CHANGED = 20;
+
     public $birthday;
 
     public $address;
@@ -212,18 +216,20 @@ class Certificates extends \yii\db\ActiveRecord
             $this->nominal = 0;
             $this->balance = 0;
 
-            return true;
+            return self::FLAG_GROUP_HAS_NOT_BEEN_CHANGED;
         }
 
         if (CertGroup::hasVacancy($this->certGroup)) {
             $this->nominal = $this->certGroup->nominal;
             $this->balance = $this->nominal;
+
+            return self::FLAG_GROUP_HAS_BEEN_CHANGED;
         } else {
             $this->insertIntoGroupQueue();
             $this->cert_group = $this->oldAttributes['cert_group'];
         }
 
-        return true;
+        return self::FLAG_GROUP_HAS_NOT_BEEN_CHANGED;
     }
 
     public static function updateGroupQueue($certGroup) {

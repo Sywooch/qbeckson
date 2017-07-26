@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use Yii;
+use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -12,6 +13,7 @@ use app\models\Certificates;
 use app\models\Organization;
 use app\models\User;
 use app\models\Payers;
+use kartik\mpdf\Pdf;
 
 /**
  * CertificatesController implements the CRUD actions for Certificates model.
@@ -189,12 +191,18 @@ class CertificatesController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
-
+            $flagGroupHasBeenChanged = false;
             if ($model->canChangeGroup && $model->oldAttributes['cert_group'] != $model->cert_group) {
-                $model->changeCertGroup();
+                if ($model->changeCertGroup() == Certificates::FLAG_GROUP_HAS_BEEN_CHANGED) {
+                    $flagGroupHasBeenChanged = true;
+                }
             }
 
             if ($model->save()) {
+                if ($flagGroupHasBeenChanged === true) {
+                    Yii::$app->session->setFlash('success', 'Вы успешно сменили тип сертификата. Теперь вам нужно передать заявление вышестоящей организации <a href="' . Url::to(['certificates/group-pdf']) . '" class="btn btn-primary">Открыть заявление (PDF)</a>');
+                }
+
                 return $this->redirect(['/personal/certificate-statistic', 'id' => $model->id]);
             }
         }
@@ -205,10 +213,29 @@ class CertificatesController extends Controller
 
     }
 
+    public function actionGroupPdf()
+    {
+        $content = $this->renderPartial('group-pdf');
+
+        $model = Yii::$app->user->identity->certificate;
+
+        $pdf = new Pdf([
+            'mode' => Pdf::MODE_UTF8,
+            'destination' => Pdf::DEST_BROWSER,
+            'content' => $content,
+            'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
+            'options' => ['title' => 'Заявление на смену группы сертификата'],
+            'methods' => [
+                'SetHeader'=>['Заявление на смену группы сертификата'],
+            ]
+        ]);
+
+        return $pdf->render();
+    }
+
     public function actionPassword()
     {
-        $certificates = new Certificates();
-        $certificate = $certificates->getCertificates();
+        $certificate = Yii::$app->user->identity->certificate;
 
         $user = User::findOne($certificate['user_id']);
 

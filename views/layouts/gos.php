@@ -115,6 +115,7 @@ $user = Yii::$app->user->getIdentity();
                                         ['label' => 'Коэффициенты', 'items' => [
                                             ['label' => 'Муниципалитеты', 'url' => ['/mun/index']],
                                             ['label' => 'Общие параметры', 'url' => ['/coefficient/update']],
+                                            ['label' => 'Настройки системы', 'url' => ['/operators/params']],
                                         ]],
                                         ['label' => 'Плательщики', 'url' => ['/personal/operator-payers']],
                                         ['label' => 'Организации', 'url' => ['/personal/operator-organizations']],
