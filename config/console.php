@@ -13,7 +13,6 @@ $config = [
     'bootstrap' => ['log'],
     'controllerNamespace' => 'app\commands',
     'components' => [
-
         'authManager' => [
             'class' => 'yii\rbac\DbManager',
         ],

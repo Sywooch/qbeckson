@@ -171,7 +171,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?php else : ?>
                         <?php foreach ($model->modules as $key => $module) : ?>
                             <?php
-                            $items[$key]['label'] = $module->getFullname();
+                            $items[$key]['label'] = $module->getShortName();
                             $items[$key]['content'] = DetailView::widget([
                                 'model' => $module,
                                 'attributes' => [

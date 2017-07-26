@@ -445,7 +445,7 @@ class Contracts extends \yii\db\ActiveRecord
     }
 
     public static function getCountUsedCertificates($amountPerCertificate = null, $params = []) {
-        $query = "SELECT count(*) FROM `contracts` CROSS JOIN `payers` ON `contracts`.payer_id = `payers`.id WHERE status=:status AND `payers`.operator_id = " . 3;
+        $query = "SELECT count(*) FROM `contracts` CROSS JOIN `payers` ON `contracts`.payer_id = `payers`.id WHERE status=:status AND `payers`.operator_id = " . Yii::$app->operator->identity->id;
         $groupBy = "GROUP BY certificate_id";
 
         if (!empty($amountPerCertificate) && $operation = substr($amountPerCertificate, 0, 1)) {
@@ -471,9 +471,9 @@ class Contracts extends \yii\db\ActiveRecord
             ->where('`payers`.operator_id = ' . Yii::$app->operator->identity->id);
 
         if (empty($params['status'])) {
-            $query->where(['status' => 1]);
+            $query->andWhere(['status' => 1]);
         } else {
-            $query->where(['status' => $params['status']]);
+            $query->andWhere(['status' => $params['status']]);
         }
 
         $query->andFilterWhere(['payer_id' => $params['payerId']]);
