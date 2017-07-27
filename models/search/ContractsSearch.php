@@ -2,7 +2,6 @@
 
 namespace app\models\search;
 
-use app\models\UserIdentity;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -86,9 +85,10 @@ class ContractsSearch extends Contracts
     /**
      * Creates data provider instance with search query applied
      * @param array $params
+     * @param int $pageSize
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $pageSize = 50)
     {
         $query = Contracts::find()
             ->joinWith([
@@ -102,6 +102,10 @@ class ContractsSearch extends Contracts
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'pagination' => [
+                'defaultPageSize' => false,
+                'pageSize' => $pageSize,
+            ]
         ]);
 
         $this->load($params);

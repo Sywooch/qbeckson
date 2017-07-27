@@ -1,7 +1,6 @@
 <?php
 
 use app\helpers\GridviewHelper;
-use app\models\CertGroup;
 use app\models\Mun;
 use app\models\UserIdentity;
 use app\widgets\SearchFilter;
@@ -12,6 +11,9 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 
 /* @var $this yii\web\View */
+/* @var $searchCertificates \app\models\search\CertificatesSearch */
+/* @var $certificatesProvider \yii\data\ActiveDataProvider */
+/* @var $allCertificatesProvider \yii\data\ActiveDataProvider */
 
 $this->title = 'Сертификаты';
 $this->params['breadcrumbs'][] = $this->title;
@@ -91,7 +93,7 @@ $columns = [
     ],
 ];
 ?>
-<?php echo SearchFilter::widget([
+<?= SearchFilter::widget([
     'model' => $searchCertificates,
     'action' => ['personal/operator-certificates'],
     'data' => GridviewHelper::prepareColumns(
@@ -108,15 +110,18 @@ $columns = [
     'dataProvider' => $certificatesProvider,
     'filterModel' => null,
     'pjax' => true,
-    'summary' => false,
     'columns' => $preparedColumns,
 ]); ?>
-<?php array_pop($preparedColumns); ?>
+<p class="lead">Экспорт данных:</p>
 <?= ExportMenu::widget([
-    'dataProvider' => $certificatesProvider,
+    'dataProvider' => $allCertificatesProvider,
     'exportConfig' => [
         ExportMenu::FORMAT_EXCEL => false,
     ],
-    'target' => '_self',
-    'columns' => array_merge(['id', 'user_id'], $preparedColumns),
+    'target' => ExportMenu::TARGET_BLANK,
+    'showColumnSelector' => false,
+    'columns' => array_merge(['id', 'user_id'], GridviewHelper::prepareExportColumns($columns)),
 ]); ?>
+<br>
+<br>
+<p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>

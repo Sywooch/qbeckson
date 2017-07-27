@@ -278,15 +278,20 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
             },
             'columns' => $preparedActiveColumns,
         ]); ?>
-        <?php array_pop($preparedActiveColumns) ?>
+        <p class="lead">Экспорт данных:</p>
         <?= ExportMenu::widget([
-            'dataProvider' => $activeContractsProvider,
-            'target' => '_self',
+            'dataProvider' => $allActiveContractsProvider,
+            'filename' => 'active-contracts',
             'exportConfig' => [
                 ExportMenu::FORMAT_EXCEL => false,
             ],
-            'columns' => $preparedActiveColumns,
+            'target' => ExportMenu::TARGET_BLANK,
+            'columns' => GridviewHelper::prepareExportColumns($activeColumns),
+            'showColumnSelector' => false
         ]); ?>
+        <br>
+        <br>
+        <p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>
     </div>
     <div id="panel2" class="tab-pane fade">
         <?= SearchFilter::widget([
@@ -336,15 +341,20 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
             'summary' => false,
             'columns' => $preparedPendingColumns,
         ]); ?>
-        <?php array_pop($preparedPendingColumns) ?>
+        <p class="lead">Экспорт данных:</p>
         <?= ExportMenu::widget([
-            'dataProvider' => $pendingContractsProvider,
-            'target' => '_self',
+            'dataProvider' => $allPendingContractsProvider,
+            'filename' => 'pending-contracts',
             'exportConfig' => [
                 ExportMenu::FORMAT_EXCEL => false,
             ],
-            'columns' => $preparedPendingColumns,
+            'target' => ExportMenu::TARGET_BLANK,
+            'columns' => GridviewHelper::prepareExportColumns($pendingColumns),
+            'showColumnSelector' => false
         ]); ?>
+        <br>
+        <br>
+        <p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>
     </div>
     <div id="panel4" class="tab-pane fade">
         <?= SearchFilter::widget([
@@ -372,20 +382,25 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
             'summary' => false,
             'columns' => $preparedDissolvedColumns,
         ]); ?>
-        <?php array_pop($preparedDissolvedColumns) ?>
+        <p class="lead">Экспорт данных:</p>
         <?= ExportMenu::widget([
-            'dataProvider' => $dissolvedContractsProvider,
-            'target' => '_self',
+            'dataProvider' => $allDissolvedContractsProvider,
+            'filename' => 'dissolved-contracts',
             'exportConfig' => [
                 ExportMenu::FORMAT_EXCEL => false,
             ],
-            'columns' => $preparedDissolvedColumns,
+            'target' => ExportMenu::TARGET_BLANK,
+            'columns' => GridviewHelper::prepareExportColumns($dissolvedColumns),
+            'showColumnSelector' => false
         ]); ?>
+        <br>
+        <br>
+        <p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>
     </div>
     <br>
     <?= ExportMenu::widget([
-        'dataProvider' => $ContractsallProvider,
-        'target' => '_self',
+        'dataProvider' => $allContractsProvider,
+        'target' => ExportMenu::TARGET_BLANK,
         'showColumnSelector' => false,
         'filename' => 'contracts',
         'dropdownOptions' => [

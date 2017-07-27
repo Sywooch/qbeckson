@@ -56,9 +56,10 @@ class CertificatesSearch extends Certificates
     /**
      * Creates data provider instance with search query applied
      * @param array $params
+     * @param int $pageSize
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $pageSize = 50)
     {
         $query = Certificates::find()
             ->joinWith(['payers']);
@@ -81,7 +82,8 @@ class CertificatesSearch extends Certificates
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
-                'pageSize' => 50,
+                'pageSizeLimit' => false,
+                'pageSize' => $pageSize,
             ],
         ]);
 

@@ -59,4 +59,27 @@ class GridviewHelper
 
         return $columns;
     }
+
+    /**
+     * @param array $columns
+     * @param array $excludeAttributes
+     * @return array
+     */
+    public static function prepareExportColumns(
+        array $columns,
+        array $excludeAttributes = ['type', 'data', 'searchFilter', 'gridView']
+    ) {
+        foreach ($columns as $index => $column) {
+            if (!empty($excludeAttributes)) {
+                foreach ($excludeAttributes as $excludeAttribute) {
+                    if (isset($column[$excludeAttribute])) {
+                        unset($columns[$index][$excludeAttribute]);
+                    }
+                }
+            }
+        }
+        array_pop($columns);
+
+        return $columns;
+    }
 }

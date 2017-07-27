@@ -1,4 +1,5 @@
 <?php
+
 use app\helpers\GridviewHelper;
 use app\models\Mun;
 use app\models\UserIdentity;
@@ -13,6 +14,7 @@ use yii\helpers\ArrayHelper;
 /* @var $searchRequest \app\models\search\OrganizationSearch */
 /* @var $searchRegistry \app\models\search\OrganizationSearch */
 /* @var $registryProvider \yii\data\ActiveDataProvider */
+/* @var $allRegistryProvider \yii\data\ActiveDataProvider */
 /* @var $requestProvider \yii\data\ActiveDataProvider */
 $this->title = 'Поставщики образовательных услуг';
 $this->params['breadcrumbs'][] = $this->title;
@@ -59,7 +61,8 @@ $programs = [
     'attribute' => 'programs',
     'value' => function ($model) {
         /** @var \app\models\Organization $model */
-        return $model->getPrograms()->andWhere(['programs.verification' => 2])->count();
+        $programsCount = $model->getPrograms()->andWhere(['programs.verification' => 2])->count();
+        return (int)$programsCount > 0 ? $programsCount : '-';
     },
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
 ];
@@ -67,9 +70,8 @@ $children = [
     'attribute' => 'children',
     'value' => function ($model) {
         /** @var \app\models\Organization $model */
-        return count(array_unique(ArrayHelper::toArray(
-            $model->getChildren()->andWhere(['contracts.status' => 1])->all()
-        )));
+        $childrenCount = count(array_unique($model->getChildren()->andWhere(['contracts.status' => 1])->asArray()->all()));
+        return (int)$childrenCount > 0 ? $childrenCount : '-';
     },
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
 ];
@@ -115,7 +117,6 @@ $registryColumns = [
     $actual,
     $actions,
 ];
-
 $requestColumns = [
     $name,
     $fio_contact,
@@ -129,7 +130,6 @@ $requestColumns = [
 $preparedRegistryColumns = GridviewHelper::prepareColumns('organization', $registryColumns, 'register');
 $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $requestColumns, 'request');
 ?>
-
 <ul class="nav nav-tabs">
     <li class="active">
         <a data-toggle="tab" href="#panel-registry">Реестр
@@ -174,15 +174,19 @@ $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $reques
             'summary' => false,
             'columns' => $preparedRegistryColumns,
         ]); ?>
-        <?php array_pop($preparedRegistryColumns) ?>
+        <p class="lead">Экспорт данных:</p>
         <?= ExportMenu::widget([
-            'dataProvider' => $registryProvider,
-            'target' => '_self',
+            'dataProvider' => $allRegistryProvider,
             'exportConfig' => [
                 ExportMenu::FORMAT_EXCEL => false,
             ],
-            'columns' => $preparedRegistryColumns,
+            'target' => ExportMenu::TARGET_BLANK,
+            'columns' => GridviewHelper::prepareExportColumns($registryColumns),
+            'showColumnSelector' => false
         ]); ?>
+        <br>
+        <br>
+        <p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>
     </div>
     <div id="panel-requests" class="tab-pane fade">
         <?= SearchFilter::widget([

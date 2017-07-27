@@ -19,6 +19,7 @@ use app\models\Payers;
 /* @var $confirmedContractsProvider \yii\data\ActiveDataProvider */
 /* @var $pendingContractsProvider \yii\data\ActiveDataProvider */
 /* @var $dissolvedContractsProvider \yii\data\ActiveDataProvider */
+/* @var $ContractsallProvider \yii\data\ActiveDataProvider */
 /* @var $searchActiveContracts \app\models\search\ContractsSearch */
 /* @var $searchConfirmedContracts \app\models\search\ContractsSearch */
 /* @var $searchPendingContracts \app\models\search\ContractsSearch */
@@ -343,11 +344,12 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
             'columns' => $preparedDissolvedColumns,
         ]); ?>
     </div>
+    <p class="lead">Экспорт данных:</p>
     <?= ExportMenu::widget([
         'dataProvider' => $ContractsallProvider,
-        'target' => '_self',
+        'filename' => 'all-contracts',
+        'target' => ExportMenu::TARGET_BLANK,
         'showColumnSelector' => false,
-        'filename' => 'contracts',
         'dropdownOptions' => [
             'class' => 'btn btn-success',
             'label' => 'Договоры',
@@ -433,7 +435,7 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
 
         echo ExportMenu::widget([
             'dataProvider' => $InvoiceProvider,
-            'target' => '_self',
+            'target' => ExportMenu::TARGET_BLANK,
             'showColumnSelector' => false,
             'filename' => date('d-m-Y'),
             'dropdownOptions' => [
@@ -481,4 +483,6 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
         ]);
         ?>
     <p>
+    <br>
+    <p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>
 </div>

@@ -383,9 +383,10 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
             'columns' => $preparedEndsColumns,
         ]); ?>
     </div>
+    <p class="lead">Экспорт данных:</p>
     <?= ExportMenu::widget([
         'dataProvider' => $ContractsallProvider,
-        'target' => '_self',
+        'target' => ExportMenu::TARGET_BLANK,
         'showColumnSelector' => false,
         'filename' => 'contracts',
         'dropdownOptions' => [
@@ -462,4 +463,7 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
             'certificatenumber',
         ],
     ]); ?>
+    <br>
+    <br>
+    <p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>
 </div>

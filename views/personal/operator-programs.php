@@ -18,6 +18,11 @@ use app\models\Mun;
 /* @var $openProgramsProvider \yii\data\ActiveDataProvider */
 /* @var $waitProgramsProvider \yii\data\ActiveDataProvider */
 /* @var $closedProgramsProvider \yii\data\ActiveDataProvider */
+/* @var $allOpenProgramsProvider \yii\data\ActiveDataProvider */
+/* @var $allWaitProgramsProvider \yii\data\ActiveDataProvider */
+/* @var $ProgramsallProvider \yii\data\ActiveDataProvider */
+/* @var $YearsallProvider \yii\data\ActiveDataProvider */
+/* @var $GroupsallProvider \yii\data\ActiveDataProvider */
 
 $this->title = 'Программы';
 $this->params['breadcrumbs'][] = $this->title;
@@ -234,17 +239,23 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
             'columns' => $preparedOpenColumns,
         ]); ?>
         <?php array_pop($preparedOpenColumns) ?>
+        <p class="lead">Экспорт данных:</p>
         <?= ExportMenu::widget([
-            'dataProvider' => $openProgramsProvider,
-            'target' => '_self',
+            'dataProvider' => $allOpenProgramsProvider,
             'exportConfig' => [
                 ExportMenu::FORMAT_EXCEL => false
             ],
             'columns' => $preparedOpenColumns,
+            'filename' => 'open-programs',
+            'target' => ExportMenu::TARGET_BLANK,
+            'showColumnSelector' => false
         ]); ?>
+        <br>
+        <br>
+        <p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>
     </div>
     <div id="panel2" class="tab-pane fade">
-        <?php echo SearchFilter::widget([
+        <?= SearchFilter::widget([
             'model' => $searchWaitPrograms,
             'action' => ['personal/operator-programs'],
             'data' => GridviewHelper::prepareColumns(
@@ -271,17 +282,23 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
             'columns' => $preparedWaitColumns,
         ]); ?>
         <?php array_pop($preparedWaitColumns) ?>
+        <p class="lead">Экспорт данных:</p>
         <?= ExportMenu::widget([
-            'dataProvider' => $waitProgramsProvider,
-            'target' => '_self',
+            'dataProvider' => $allWaitProgramsProvider,
+            'filename' => 'wait-programs',
+            'target' => ExportMenu::TARGET_BLANK,
+            'showColumnSelector' => false,
             'exportConfig' => [
                 ExportMenu::FORMAT_EXCEL => false
             ],
             'columns' => $preparedWaitColumns,
         ]); ?>
+        <br>
+        <br>
+        <p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>
     </div>
     <div id="panel3" class="tab-pane fade">
-        <?php echo SearchFilter::widget([
+        <?= SearchFilter::widget([
             'model' => $searchClosedPrograms,
             'action' => ['personal/operator-programs'],
             'data' => GridviewHelper::prepareColumns(
@@ -303,7 +320,8 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
         ]); ?>
     </div>
     <br>
-    <?= ExportMenu::widget([
+    <?php
+    echo ExportMenu::widget([
         'dataProvider' => $ProgramsallProvider,
         'target' => '_self',
         'showColumnSelector' => false,

@@ -66,9 +66,10 @@ class ProgramsSearch extends Programs
     /**
      * Creates data provider instance with search query applied
      * @param array $params
+     * @param int $pageSize
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $pageSize = 50)
     {
         $query = Programs::find()->select([
             'programs.*',
@@ -78,14 +79,14 @@ class ProgramsSearch extends Programs
             'municipality',
             'organization',
             'modules'
-        ]);
-
-        $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
+        ])
+            ->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
-                'pageSize' => 50,
+                'pageSizeLimit' => false,
+                'pageSize' => $pageSize,
             ]
         ]);
 
@@ -200,8 +201,6 @@ class ProgramsSearch extends Programs
                 ['<=', 'programs.limit', (int)$limit[1]]
             ]);
         }
-
-
 
         $query->groupBy(['programs.id']);
 

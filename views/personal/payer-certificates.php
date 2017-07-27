@@ -1,4 +1,5 @@
 <?php
+
 use yii\grid\ActionColumn;
 use app\models\CertGroup;
 use app\models\UserIdentity;
@@ -12,6 +13,8 @@ use app\helpers\GridviewHelper;
 $this->title = 'Сертификаты';
 $this->params['breadcrumbs'][] = $this->title;
 /* @var $this yii\web\View */
+/* @var $searchCertificates \app\models\search\CertificatesSearch */
+/* @var $certificatesProvider \yii\data\ActiveDataProvider */
 
 $columns = [
     [
@@ -78,8 +81,7 @@ $columns = [
     ],
 ];
 ?>
-
-<?php echo SearchFilter::widget([
+<?= SearchFilter::widget([
     'model' => $searchCertificates,
     'action' => ['personal/payer-certificates'],
     'data' => GridviewHelper::prepareColumns(
@@ -91,14 +93,14 @@ $columns = [
     ),
     'role' => UserIdentity::ROLE_PAYER
 ]); ?>
-
 <div class="pull-right">
-    <?= Html::a('Обновить номиналы', Url::to(['certificates/allnominal', 'id' => $payer_id]), ['class' => 'btn btn-success']) ?>
+    <?= Html::a(
+        'Обновить номиналы',
+        Url::to(['certificates/allnominal', 'id' => Yii::$app->user->identity->payer->id]),
+        ['class' => 'btn btn-success']
+    ) ?>
 </div>
-
-<p>
-    <?= Html::a('Добавить сертификат', ['certificates/create'], ['class' => 'btn btn-success']) ?>
-</p>
+<p><?= Html::a('Добавить сертификат', ['certificates/create'], ['class' => 'btn btn-success']) ?></p>
 <?= GridView::widget([
     'dataProvider' => $certificatesProvider,
     'filterModel' => null,

@@ -38,16 +38,16 @@ class PayersSearch extends Payers
      */
     public function scenarios()
     {
-        // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
 
     /**
      * Creates data provider instance with search query applied
      * @param array $params
+     * @param integer $pageSize
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $pageSize = 50)
     {
         $query = Payers::find()
             ->select([
@@ -63,6 +63,10 @@ class PayersSearch extends Payers
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'pagination' => [
+                'pageSizeLimit' => false,
+                'pageSize' => $pageSize,
+            ]
         ]);
 
         $this->load($params);
@@ -72,8 +76,7 @@ class PayersSearch extends Payers
             return $dataProvider;
         }
 
-        $query
-            ->andFilterWhere([
+        $query->andFilterWhere([
                 'payers.id' => $this->id,
                 'payers.user_id' => $this->user_id,
                 'payers.OGRN' => $this->OGRN,
@@ -90,8 +93,7 @@ class PayersSearch extends Payers
                 'cooperate.status' => $this->cooperateStatus,
             ]);
 
-        $query
-            ->andFilterWhere(['like', 'payers.name', $this->name])
+        $query->andFilterWhere(['like', 'payers.name', $this->name])
             ->andFilterWhere(['like', 'payers.address_legal', $this->address_legal])
             ->andFilterWhere(['like', 'payers.address_actual', $this->address_actual])
             ->andFilterWhere(['like', 'payers.phone', $this->phone])

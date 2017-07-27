@@ -15,6 +15,7 @@ $this->params['breadcrumbs'][] = 'Плательщики';
 /* @var $this yii\web\View */
 /* @var $searchPayers \app\models\PayersSearch */
 /* @var $payersProvider \yii\data\ActiveDataProvider */
+/* @var $allPayersProvider \yii\data\ActiveDataProvider */
 ?>
 <?php
 $columns = [
@@ -43,7 +44,9 @@ $columns = [
         'attribute' => 'cooperates',
         'value' => function ($model) {
             /** @var \app\models\Payers $model */
-            return $model->getCooperates()->andWhere(['status' => 1])->count();
+            $cooperatesCount = $model->getCooperates()->andWhere(['status' => 1])->count();
+
+            return $cooperatesCount > 0 ? $cooperatesCount : '-';
         },
         'type' => SearchFilter::TYPE_RANGE_SLIDER,
     ],
@@ -51,7 +54,9 @@ $columns = [
         'attribute' => 'certificates',
         'value' => function ($model) {
             /** @var \app\models\Payers $model */
-            return $model->getCertificates()->count();
+            $certificatesCount = $model->getCertificates()->count();
+
+            return $certificatesCount > 0 ? $certificatesCount : '-';
         },
         'type' => SearchFilter::TYPE_RANGE_SLIDER,
     ],
@@ -62,6 +67,7 @@ $columns = [
         'searchFilter' => false,
     ],
 ];
+$preparedColumns = GridviewHelper::prepareColumns('payers', $columns);
 ?>
 <?= SearchFilter::widget([
     'model' => $searchPayers,
@@ -77,7 +83,6 @@ $columns = [
     'type' => null
 ]); ?>
 <p><?= Html::a('Добавить плательщика', ['payers/create'], ['class' => 'btn btn-success']) ?></p>
-<?php $preparedColumns = GridviewHelper::prepareColumns('payers', $columns); ?>
 <?= GridView::widget([
     'dataProvider' => $payersProvider,
     'filterModel' => null,
@@ -85,12 +90,16 @@ $columns = [
     'summary' => false,
     'columns' => $preparedColumns,
 ]); ?>
-<?php array_pop($preparedColumns); ?>
+<p class="lead">Экспорт данных:</p>
 <?= ExportMenu::widget([
-    'dataProvider' => $payersProvider,
-    'target' => '_self',
+    'dataProvider' => $allPayersProvider,
     'exportConfig' => [
         ExportMenu::FORMAT_EXCEL => false,
     ],
-    'columns' => $preparedColumns,
+    'target' => ExportMenu::TARGET_BLANK,
+    'columns' => GridviewHelper::prepareExportColumns($columns),
+    'showColumnSelector' => false
 ]); ?>
+<br>
+<br>
+<p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>

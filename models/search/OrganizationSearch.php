@@ -58,9 +58,10 @@ class OrganizationSearch extends Organization
     /**
      * Creates data provider instance with search query applied
      * @param array $params
+     * @param integer $pageSize
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $pageSize = 50)
     {
         $query = Organization::find()
             ->select([
@@ -80,8 +81,9 @@ class OrganizationSearch extends Organization
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
-                'pageSize' => 50
-            ],
+                'pageSizeLimit' => false,
+                'pageSize' => $pageSize,
+            ]
         ]);
 
         $this->load($params);
@@ -129,7 +131,6 @@ class OrganizationSearch extends Organization
             /** @var UserIdentity $identity */
             $identity = Yii::$app->user->getIdentity();
             if (null !== $identity->mun_id) {
-                $query->joinWith(['programs'])->groupBy(['organization.id']);
                 $query->andFilterWhere([
                     'OR',
                     ['organization.mun' => $identity->mun_id],
