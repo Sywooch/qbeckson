@@ -27,7 +27,7 @@ $operator = (new \yii\db\Query())
         Во время обработки вашего запроса произошла ошибка.
     </p>
     <p>
-        Если ошибка повторится, свяжитесь с оператором, <a href="mailto:<?= $operator['email'] ?>"><?= $operator['email'] ?></a>. Спасибо.
+        Если ошибка повторится, свяжитесь с оператором, <a href="mailto:support@pfdo.ru">support@pfdo.ru</a>. Спасибо.
     </p>
 
 </div>
