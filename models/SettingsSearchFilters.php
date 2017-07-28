@@ -38,7 +38,7 @@ class SettingsSearchFilters extends ActiveRecord
             [['table_columns', 'inaccessible_columns'], 'safe'],
             [['is_active'], 'integer'],
             [['table_name'], 'string', 'max' => 255],
-            [['table_name'], 'unique'],
+            //[['table_name'], 'unique'],
             ['role', 'in', 'range' => array_keys(UserIdentity::roles())],
         ];
     }
