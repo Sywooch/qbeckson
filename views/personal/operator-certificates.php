@@ -22,9 +22,21 @@ $this->params['breadcrumbs'][] = $this->title;
 <?php
 $columns = [
     [
+        'attribute' => 'payer_id',
+        'type' => SearchFilter::TYPE_HIDDEN
+    ],
+    [
         'attribute' => 'payerMunicipality',
-        'value' => 'payer.municipality.name',
+        'value' => function ($model) {
+            /** @var \app\models\Certificates $model */
+            return Html::a(
+                $model->payer->municipality->name,
+                ['mun/view', 'id' => $model->payer->municipality->id],
+                ['target' => '_blank', 'data-pjax' => '0']
+            );
+        },
         'label' => 'Муниципалитет',
+        'format' => 'raw',
         'type' => SearchFilter::TYPE_DROPDOWN,
         'data' => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
     ],
@@ -120,7 +132,7 @@ $columns = [
     ],
     'target' => ExportMenu::TARGET_BLANK,
     'showColumnSelector' => false,
-    'columns' => array_merge(['id', 'user_id'], GridviewHelper::prepareExportColumns($columns)),
+    'columns' => GridviewHelper::prepareExportColumns($columns),
 ]); ?>
 <br>
 <br>

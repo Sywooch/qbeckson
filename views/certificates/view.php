@@ -48,7 +48,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'rezerv',
                 'balance',
                 [
-                    'label'=> Html::a('Число заключенных договоров', Url::to([Yii::$app->user->can('operators') ? '/personal/operator-contracts' : '/personal/payer-contracts', 'cert' => $model->number]), ['class' => 'blue', 'target' => '_blank']),
+                    'label'=> Html::a(
+                        'Число заключенных договоров',
+                        Yii::$app->user->can('operators') ?
+                            ['personal/operator-contracts', 'SearchActiveContracts[certificateNumber]' => $model->number] :
+                            ['personal/payer-contracts', 'SearchActiveContracts[certificateNumber]' => $model->number],
+                        ['class' => 'blue', 'target' => '_blank']
+                    ),
                     'value' => Contracts::getCountContracts(['certificateId' => $model->id]),
                 ],
             ],

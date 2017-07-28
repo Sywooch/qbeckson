@@ -32,6 +32,10 @@ use app\models\Cooperate;
  *
  * @property Certificates[] $certificates
  * @property Invoices[] $invoices
+ * @property mixed $payer
+ * @property mixed $noCooperatePayer
+ * @property Mun $municipality
+ * @property Cooperate[] $cooperates
  * @property User $user
  */
 class Payers extends \yii\db\ActiveRecord

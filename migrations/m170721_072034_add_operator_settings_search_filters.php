@@ -13,6 +13,7 @@ class m170721_072034_add_operator_settings_search_filters extends Migration
      */
     public function safeUp()
     {
+
         $this->addColumn('settings_search_filters', 'type', 'varchar(50) DEFAULT NULL');
         $this->dropIndex('table_name', 'settings_search_filters');
         $this->insert('settings_search_filters', [

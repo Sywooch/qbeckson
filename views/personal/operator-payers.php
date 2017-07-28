@@ -19,6 +19,7 @@ $this->params['breadcrumbs'][] = 'Плательщики';
 ?>
 <?php
 $columns = [
+
     [
         'attribute' => 'name',
     ],
@@ -27,6 +28,7 @@ $columns = [
     ],
     [
         'attribute' => 'email',
+        'format' => 'email',
     ],
     [
         'attribute' => 'fio',
@@ -36,7 +38,15 @@ $columns = [
     ],
     [
         'attribute' => 'mun',
-        'value' => 'municipality.name',
+        'value' => function ($model) {
+            /** @var \app\models\Payers $model */
+            return Html::a(
+                $model->municipality->name,
+                ['mun/view', 'id' => $model->municipality->id],
+                ['target' => '_blank', 'data-pjax' => '0']
+            );
+        },
+        'format' => 'raw',
         'type' => SearchFilter::TYPE_DROPDOWN,
         'data' => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
     ],

@@ -76,10 +76,18 @@ $organization = [
 ];
 $municipality = [
     'attribute' => 'mun',
+    'value' => function ($model) {
+        /** @var \app\models\Programs $model */
+        return Html::a(
+            $model->municipality->name,
+            ['mun/view', 'id' => $model->municipality->id],
+            ['target' => '_blank', 'data-pjax' => '0']
+        );
+    },
+    'format' => 'raw',
     'label' => 'Муниципалитет',
     'type' => SearchFilter::TYPE_DROPDOWN,
     'data' => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
-    'value' => 'municipality.name',
 ];
 $name = [
     'attribute' => 'name',

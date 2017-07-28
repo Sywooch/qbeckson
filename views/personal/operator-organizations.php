@@ -30,6 +30,7 @@ $cratedate = [
 ];
 $site = [
     'attribute' => 'site',
+    'format' => 'url'
 ];
 $phone = [
     'attribute' => 'phone',
@@ -53,7 +54,15 @@ $type = [
 ];
 $mun = [
     'attribute' => 'mun',
-    'value' => 'municipality.name',
+    'value' => function ($model) {
+        /** @var \app\models\Organization $model */
+        return Html::a(
+            $model->municipality->name,
+            ['mun/view', 'id' => $model->municipality->id],
+            ['target' => '_blank', 'data-pjax' => '0']
+        );
+    },
+    'format' => 'raw',
     'type' => SearchFilter::TYPE_DROPDOWN,
     'data' => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
 ];

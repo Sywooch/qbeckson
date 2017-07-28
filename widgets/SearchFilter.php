@@ -17,6 +17,7 @@ class SearchFilter extends Widget
     const TYPE_TOUCH_SPIN = 'touch-spin';
     const TYPE_DROPDOWN = 'drop-down';
     const TYPE_SELECT2 = 'select2';
+    const TYPE_HIDDEN = 'hiddenInput';
 
     /** @var array */
     public $data;

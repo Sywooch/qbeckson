@@ -52,6 +52,7 @@ class ProgramsSearch extends Programs
             'age_group_max' => 'Возраст до',
             'hours' => 'Кол-во часов',
             'organization' => 'Название организации',
+            'mun' => 'Муниципалитет'
         ]);
     }
 

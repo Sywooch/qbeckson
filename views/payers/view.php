@@ -22,30 +22,32 @@ if (isset($roles['payer'])) {
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="payers-view  col-md-offset-2 col-md-8">
-
     <h1><?= Html::encode($this->title) ?></h1>
-
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            //'id',
-            //'user_id',
-            //'name',
             'address_actual',
             [
-                'attribute'=>'mun',
-                'value'=>$model->munName($model->mun),
+                'attribute' => 'mun',
+                'format' => 'raw',
+                'value' => function ($model) {
+                    /** @var \app\models\Payers $model */
+                    return Html::a(
+                        $model->municipality->name,
+                        ['mun/view', 'id' => $model->municipality->id],
+                        ['target' => '_blank', 'data-pjax' => '0']
+                    );
+                },
             ],
             'phone',
             'email:email',
             'fio',
-            'position', 
+            'position',
         ],
     ]) ?>
-    
     <?= DetailView::widget([
         'model' => $model,
-        'attributes' => [ 
+        'attributes' => [
             'address_legal',
             'OGRN',
             'INN',
@@ -53,11 +55,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'OKPO',
         ],
     ]) ?>
-    
     <?= DetailView::widget([
         'model' => $model,
-        'attributes' => [        
-            //'directionality',
+        'attributes' => [
             [
                 'attribute'=> 'directionality_1rob_count',
                 'value'=> $model->directionality1rob($model->id),
@@ -93,7 +93,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ->where(['payer_id' => $model->id])
             ->count();
     
-    $cooperate = (new \yii\db\Query())
+        $cooperate = (new \yii\db\Query())
             ->select(['id'])
             ->from('cooperate')
             ->where(['payer_id' => $model->id])
@@ -102,34 +102,47 @@ $this->params['breadcrumbs'][] = $this->title;
     
         $display['previus'] = $previus;
         $display['cooperate'] = $cooperate;
-    
 
-    echo DetailView::widget([
-        'model' => $display,
-        'attributes' => [        
-            [
-                'label'=> Html::a('Число выданных сертификатов', Url::to(['/personal/operator-certificates', 'payer' => $model->name]), ['class' => 'blue', 'target' => '_blank']),
-                'value'=> $display['previus'],
+        echo DetailView::widget([
+            'model' => $display,
+            'attributes' => [
+                [
+                    'label'=> Html::a(
+                        'Число выданных сертификатов',
+                        Url::to([
+                            'personal/operator-certificates',
+                            'CertificatesSearch[payer]' => $model->name,
+                            'CertificatesSearch[payer_id]' => $model->id
+                        ]),
+                        ['class' => 'blue', 'target' => '_blank']
+                    ),
+                    'value'=> $display['previus'],
+                ],
+                [
+                    'label'=> Html::a(
+                        'Число заключенных соглашений',
+                        Url::to([
+                            'cooperate/index',
+                            'CooperateSearch[payerName]' => $model->name
+                        ]),
+                        ['class' => 'blue', 'target' => '_blank']
+                    ),
+                    'value'=> $display['cooperate'],
+                ],
             ],
-            [
-                'label'=> Html::a('Число заключенных соглашений', Url::to(['/cooperate/index', 'payer' => $model->name]), ['class' => 'blue']),
-                'value'=> $display['cooperate'],
-            ],
-        ],
-    ]);
-        
-    
-    
+        ]);
+
         echo Html::a('Назад', '/personal/operator-payers', ['class' => 'btn btn-primary']);
         echo '&nbsp;';
         echo Html::a('Редактировать', Url::to(['/payers/update', 'id' => $model->id]), ['class' => 'btn btn-primary']);
 
-        if (!$previus ) {
+        if (!$previus) {
             echo '&nbsp;';
             echo Html::a('Удалить', Url::to(['/payers/delete', 'id' => $model->id]), ['class' => 'btn btn-danger',
-        'data' => [
-            'confirm' => 'Вы действительно хотите удалить этого плательщика?',
-            'method' => 'post']]);
+            'data' => [
+                'confirm' => 'Вы действительно хотите удалить этого плательщика?',
+                'method' => 'post']
+            ]);
         }
     }
     if (isset($roles['payer'])) {
@@ -173,16 +186,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 echo '&nbsp';
                 echo Html::a('Удалить соглашение', Url::to(['/cooperate/delete', 'id' => $model->id]), ['class' => 'btn btn-danger', 'data' => [
                 'confirm' => 'Вы действительно хотите удалить соглашение с этим плательщиком?', 'method' => 'post'], 'title' => Yii::t('yii', 'Расторгнуть соглашение')]);
-            }    
+            }
             else {
                 echo '&nbsp;';
                 echo Html::a('Ввести сведения о заключенном соглашении', Url::to(['/cooperate/create', 'id' => $model->id]), ['class' => 'btn btn-primary']);
             }
         }
-
     }
-        
-       
     ?>
     </p>
 </div>

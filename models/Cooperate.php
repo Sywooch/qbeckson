@@ -5,17 +5,35 @@ namespace app\models;
 use Yii;
 use app\models\Organization;
 use app\models\Certificates;
+use yii\db\ActiveRecord;
+
 /**
  * This is the model class for table "cooperate".
  *
  * @property integer $id
  * @property integer $organization_id
  * @property integer $payer_id
+ * @property string $date
+ * @property string $date_dissolution
+ * @property integer $status
+ * @property string $reade
+ * @property string $number
+ *
+ * @property mixed $cooperateOrganization
+ * @property array $decinvoiceCooperatePayers
+ * @property mixed $cooperatePayers
+ * @property mixed $waitCooperatePayers
+ * @property mixed $cooperateOrg
+ * @property array $preInvoiceCooperatePayers
+ * @property array $invoiceCooperatePayers
+ * @property mixed $cooperateallPayers
+ * @property mixed $cooperateWaitOrganization
  *
  * @property Organization $organization
+ * @property Payers $payers
  * @property Payers $payer
  */
-class Cooperate extends \yii\db\ActiveRecord
+class Cooperate extends ActiveRecord
 {
     /**
      * @inheritdoc
@@ -28,7 +46,7 @@ class Cooperate extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
-  public function rules()
+    public function rules()
     {
         return [
             [['organization_id', 'payer_id', 'date', 'status'], 'required'],
@@ -63,6 +81,14 @@ class Cooperate extends \yii\db\ActiveRecord
     public function getOrganization()
     {
         return $this->hasOne(Organization::className(), ['id' => 'organization_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPayer()
+    {
+        return $this->hasOne(Payers::className(), ['id' => 'payer_id']);
     }
 
     /**

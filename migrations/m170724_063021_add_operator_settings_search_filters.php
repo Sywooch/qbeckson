@@ -13,7 +13,7 @@ class m170724_063021_add_operator_settings_search_filters extends Migration
         $this->insert('settings_search_filters', [
             'table_name' => 'certificates',
             'table_columns' => 'fio_child,nominal,rezerv,balance,contractCount,actual',
-            'inaccessible_columns' => 'number,name,soname,phname,payerMunicipality,payer',
+            'inaccessible_columns' => 'number,name,soname,phname,payerMunicipality,payer,payer_id',
             'is_active' => 1,
             'role' => UserIdentity::ROLE_OPERATOR
         ]);
@@ -48,8 +48,8 @@ class m170724_063021_add_operator_settings_search_filters extends Migration
         $this->insert('settings_search_filters', [
             'table_name' => 'contracts',
             'table_columns' =>
-                'number,date,rezerv,paid,start_edu_contract,stop_edu_contract,group_id,programMunicipality,childFullName,moduleName,certificateNumber,programName,organizationName,payerName',
-            'inaccessible_columns' => 'number,certificateNumber,childFullName,programMunicipality',
+                'number,date,rezerv,paid,start_edu_contract,stop_edu_contract,group_id,programMunicipality,childFullName,moduleName,certificateNumber,programName,payerName',
+            'inaccessible_columns' => 'number,certificateNumber,childFullName,programMunicipality,organization_id,organizationName',
             'is_active' => 1,
             'role' => UserIdentity::ROLE_OPERATOR,
             'type' => 'active'

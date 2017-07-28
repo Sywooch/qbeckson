@@ -46,6 +46,24 @@ use app\behaviors\UploadBehavior;
  * @property Invoices[] $invoices
  * @property Payers $payer
  * @property User $user
+ * @property mixed $certprogram
+ * @property mixed $actualOrganization
+ * @property \yii\db\ActiveQuery $statement
+ * @property string $statusName
+ * @property mixed $organization
+ * @property bool $isModerating
+ * @property \yii\db\ActiveQuery $children
+ * @property \yii\db\ActiveQuery $operators
+ * @property \yii\db\ActiveQuery $license
+ * @property \yii\db\ActiveQuery $operator
+ * @property string $userName
+ * @property \yii\db\ActiveQuery $groups
+ * @property Mun $municipality
+ * @property \yii\db\ActiveQuery $charter
+ * @property \yii\db\ActiveQuery $documents
+ * @property bool $requestCanBeUpdated
+ * @property bool $isRefused
+ * @property \yii\db\ActiveQuery $favorites
  * @property Programs[] $programs
  */
 class Organization extends \yii\db\ActiveRecord

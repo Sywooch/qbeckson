@@ -149,6 +149,10 @@ $activeColumns = [
     $certificateNumber,
     $programName,
     $organizationName,
+    [
+        'attribute' => 'payer_id',
+        'type' => SearchFilter::TYPE_HIDDEN,
+    ],
     $actions,
 ];
 $confirmedColumns = [

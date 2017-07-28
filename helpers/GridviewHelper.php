@@ -3,6 +3,7 @@
 namespace app\helpers;
 
 use app\models\UserIdentity;
+use app\widgets\SearchFilter;
 use Yii;
 
 /**
@@ -34,6 +35,11 @@ class GridviewHelper
         }
 
         foreach ($columns as $index => $column) {
+            if (isset($column['type']) && $column['type'] === SearchFilter::TYPE_HIDDEN) {
+                unset($columns[$index]);
+                continue;
+            }
+
             if (isset($column[$excludeType]) && $column[$excludeType] !== true) {
                 unset($columns[$index]);
                 continue;
@@ -70,6 +76,11 @@ class GridviewHelper
         array $excludeAttributes = ['type', 'data', 'searchFilter', 'gridView']
     ) {
         foreach ($columns as $index => $column) {
+            if (isset($column['type']) && $column['type'] === SearchFilter::TYPE_HIDDEN) {
+                unset($columns[$index]);
+                continue;
+            }
+
             if (!empty($excludeAttributes)) {
                 foreach ($excludeAttributes as $excludeAttribute) {
                     if (isset($column[$excludeAttribute])) {

@@ -52,8 +52,16 @@ $group_id = [
 ];
 $programMunicipality = [
     'attribute' => 'programMunicipality',
-    'value' => 'program.municipality.name',
     'label' => 'Муниципалитет',
+    'value' => function ($model) {
+        /** @var \app\models\Contracts $model */
+        return Html::a(
+            $model->program->municipality->name,
+            ['mun/view', 'id' => $model->program->municipality->id],
+            ['target' => '_blank', 'data-pjax' => '0']
+        );
+    },
+    'format' => 'raw',
     'type' => SearchFilter::TYPE_DROPDOWN,
     'data' => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
 ];
@@ -144,6 +152,10 @@ $actions = [
 ];
 
 $activeColumns = [
+    [
+        'attribute' => 'organization_id',
+        'type' => SearchFilter::TYPE_HIDDEN,
+    ],
     $number,
     $date,
     $rezerv,

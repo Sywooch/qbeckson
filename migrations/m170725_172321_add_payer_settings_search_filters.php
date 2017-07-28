@@ -12,8 +12,8 @@ class m170725_172321_add_payer_settings_search_filters extends Migration
     {
         $this->insert('settings_search_filters', [
             'table_name' => 'programs',
-            'table_columns' => 'name,year,hours,directivity,zab,ageGroupMin,ageGroupMax,rating,limit,organization,municipality',
-            'inaccessible_columns' => 'name,municipality',
+            'table_columns' => 'name,year,hours,directivity,zab,ageGroupMin,ageGroupMax,rating,limit,municipality',
+            'inaccessible_columns' => 'name,municipality,organization',
             'is_active' => 1,
             'role' => UserIdentity::ROLE_PAYER,
         ]);
@@ -22,7 +22,7 @@ class m170725_172321_add_payer_settings_search_filters extends Migration
             'table_name' => 'contracts',
             'table_columns' =>
                 'number,date,rezerv,paid,start_edu_contract,stop_edu_contract,group_id,programMunicipality,childFullName,moduleName,certificateNumber,programName,organizationName,payerName',
-            'inaccessible_columns' => 'number,certificateNumber,childFullName,programMunicipality',
+            'inaccessible_columns' => 'payer_id,number,certificateNumber,childFullName,programMunicipality',
             'is_active' => 1,
             'role' => UserIdentity::ROLE_PAYER,
             'type' => 'active'

@@ -235,7 +235,15 @@ $this->params['breadcrumbs'][] = $this->title;
                             ],
                             [
                                 'attribute' => 'mun',
-                                'value' => $model->munName($model->mun),
+                                'value' => function ($model) {
+                                    /** @var \app\models\Programs $model */
+                                    return Html::a(
+                                        $model->municipality->name,
+                                        ['mun/view', 'id' => $model->municipality->id],
+                                        ['target' => '_blank', 'data-pjax' => '0']
+                                    );
+                                },
+                                'format' => 'raw',
                             ],
                             [
                                 'attribute' => 'ground',
@@ -282,7 +290,15 @@ $this->params['breadcrumbs'][] = $this->title;
                             ],
                             [
                                 'attribute' => 'mun',
-                                'value' => $model->munName($model->mun),
+                                'value' => function ($model) {
+                                    /** @var \app\models\Programs $model */
+                                    return Html::a(
+                                        $model->municipality->name,
+                                        ['mun/view', 'id' => $model->municipality->id],
+                                        ['target' => '_blank', 'data-pjax' => '0']
+                                    );
+                                },
+                                'format' => 'raw',
                             ],
                             [
                                 'attribute' => 'ground',
@@ -333,7 +349,15 @@ $this->params['breadcrumbs'][] = $this->title;
                             ],
                             [
                                 'attribute' => 'mun',
-                                'value' => $model->munName($model->mun),
+                                'value' => function ($model) {
+                                    /** @var \app\models\Programs $model */
+                                    return Html::a(
+                                        $model->municipality->name,
+                                        ['mun/view', 'id' => $model->municipality->id],
+                                        ['target' => '_blank', 'data-pjax' => '0']
+                                    );
+                                },
+                                'format' => 'raw',
                             ],
                             [
                                 'attribute' => 'ground',
@@ -394,7 +418,15 @@ $this->params['breadcrumbs'][] = $this->title;
                                 ],
                                 [
                                     'attribute' => 'mun',
-                                    'value' => $model->munName($model->mun),
+                                    'value' => function ($model) {
+                                        /** @var \app\models\Programs $model */
+                                        return Html::a(
+                                            $model->municipality->name,
+                                            ['mun/view', 'id' => $model->municipality->id],
+                                            ['target' => '_blank', 'data-pjax' => '0']
+                                        );
+                                    },
+                                    'format' => 'raw',
                                 ],
                                 [
                                     'attribute' => 'ground',
@@ -447,7 +479,15 @@ $this->params['breadcrumbs'][] = $this->title;
                                 ],
                                 [
                                     'attribute' => 'mun',
-                                    'value' => $model->munName($model->mun),
+                                    'value' => function ($model) {
+                                        /** @var \app\models\Programs $model */
+                                        return Html::a(
+                                            $model->municipality->name,
+                                            ['mun/view', 'id' => $model->municipality->id],
+                                            ['target' => '_blank', 'data-pjax' => '0']
+                                        );
+                                    },
+                                    'format' => 'raw',
                                 ],
                                 [
                                     'attribute' => 'ground',
@@ -503,7 +543,15 @@ $this->params['breadcrumbs'][] = $this->title;
                             ],
                             [
                                 'attribute' => 'mun',
-                                'value' => $model->munName($model->mun),
+                                'value' => function ($model) {
+                                    /** @var \app\models\Programs $model */
+                                    return Html::a(
+                                        $model->municipality->name,
+                                        ['mun/view', 'id' => $model->municipality->id],
+                                        ['target' => '_blank', 'data-pjax' => '0']
+                                    );
+                                },
+                                'format' => 'raw',
                             ],
                             [
                                 'attribute' => 'ground',
@@ -524,11 +572,11 @@ $this->params['breadcrumbs'][] = $this->title;
             $payer = $payers->getPayer();
 
             if (Yii::$app->user->can('payer')) {
-                $link = '/personal/payer-contracts';
+                $link = 'personal/payer-contracts';
             } elseif (Yii::$app->user->can('operators')) {
-                $link = '/personal/operator-contracts';
+                $link = 'personal/operator-contracts';
             } elseif (Yii::$app->user->can('organizations')) {
-                $link = '/personal/organization-contracts';
+                $link = 'personal/organization-contracts';
             }
 
             if ($model->verification === 2 && !Yii::$app->user->can('certificate')) {
@@ -538,7 +586,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         [
                             'label' => Html::a(
                                 'Число обучающихся по программе',
-                                Url::to([$link, 'prog' => $model->name]),
+                                [
+                                    $link,
+                                    'SearchActiveContracts[programName]' => $model->name,
+                                    'SearchActiveContracts[payer_id]' => $model->id,
+                                ],
                                 ['class' => 'blue', 'target' => '_blank']
                             ),
                             'value' => $model->countContract($model->id, $payer),

@@ -38,10 +38,9 @@ class CooperateController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new CooperateSearch();
-        if ($_GET['payer']) { $searchModel->payers = $_GET['payer']; }
-         if ($_GET['org']) { $searchModel->organization = $_GET['org']; }
-        $searchModel->status = 1;
+        $searchModel = new CooperateSearch([
+            'status' => 1
+        ]);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [

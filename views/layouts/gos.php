@@ -116,7 +116,13 @@ $user = Yii::$app->user->getIdentity();
                                             ['label' => 'Муниципалитеты', 'url' => ['/mun/index']],
                                             ['label' => 'Общие параметры', 'url' => ['/coefficient/update']],
                                         ]],
-                                        ['label' => 'Плательщики', 'url' => ['/personal/operator-payers']],
+                                        [
+                                            'label' => 'Плательщики',
+                                            'items' => [
+                                                ['label' => 'Уполномоченные Организации', 'url' => ['personal/operator-payers']],
+                                                ['label' => 'Соглащения', 'url' => ['cooperate/index']]
+                                            ]
+                                        ],
                                         ['label' => 'Организации', 'url' => ['/personal/operator-organizations']],
                                         ['label' => 'Сертификаты', 'url' => ['/personal/operator-certificates']],
                                         ['label' => 'Договоры', 'url' => ['/personal/operator-contracts']],
