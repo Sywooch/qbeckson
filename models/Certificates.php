@@ -34,6 +34,10 @@ class Certificates extends \yii\db\ActiveRecord
 
     const FLAG_GROUP_HAS_BEEN_CHANGED = 20;
 
+    const TYPE_PF = 10;
+
+    const TYPE_ACCOUNTING = 20;
+
     public $birthday;
 
     public $address;
@@ -47,7 +51,9 @@ class Certificates extends \yii\db\ActiveRecord
     public $phone;
 
     public $contractCount;
-    
+
+    public $selectCertGroup;
+
     /**
      * @inheritdoc
      */
@@ -62,7 +68,7 @@ class Certificates extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['nominal', 'cert_group', 'name', 'soname'], 'required'],
+            [['name', 'soname'], 'required'],
             [['fio_parent'], 'required'],
             [['user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'cert_group', 'pasport_s', 'pasport_n', 'pasport_v', 'phone', 'possible_cert_group'], 'integer'],
             [['nominal'], 'number', 'max' => 100000],
@@ -74,6 +80,8 @@ class Certificates extends \yii\db\ActiveRecord
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
             [['payer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payers::className(), 'targetAttribute' => ['payer_id' => 'id']],
             [['contractCount'], 'safe'],
+            [['selectCertGroup', 'possible_cert_group'], 'required'],
+            ['selectCertGroup', 'in', 'range' => [self::TYPE_PF, self::TYPE_ACCOUNTING]],
         ];
     }
 
@@ -112,6 +120,26 @@ class Certificates extends \yii\db\ActiveRecord
             'phone' => 'Телефон',
             'rezerv' => 'Зарезервированно на оплату программ',
             'cert_group' => 'Группа сертификата',
+            'selectCertGroup' => 'Группа сертификата',
+        ];
+    }
+
+    public function beforeSave($insert)
+    {
+        if ($this->selectCertGroup == self::TYPE_PF) {
+            $this->cert_group = $this->possible_cert_group;
+        } elseif ($certGroup = $this->payers->getCertGroups(1)->one()) {
+            $this->cert_group = $certGroup->id;
+        }
+
+        return parent::beforeSave($insert);
+    }
+
+    public function getCertGroupTypes()
+    {
+        return [
+            self::TYPE_PF => 'Сертификат ПФ',
+            self::TYPE_ACCOUNTING => 'Сертификат учёта',
         ];
     }
 
