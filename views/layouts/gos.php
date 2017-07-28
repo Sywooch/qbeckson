@@ -148,7 +148,7 @@ $user = Yii::$app->user->getIdentity();
 
                             if (Yii::$app->user->can('organizations')) {
                                 echo Nav::widget([
-                                    'options' => ['class' => 'navbar-nav'],
+                                    'options' => ['class' => 'navbar-nav inner-nav'],
                                     'items' => [
                                         ['label' => 'Информация', 'items' => [
                                             ['label' => 'Статистическая информация', 'url' => ['/personal/organization-statistic']],
