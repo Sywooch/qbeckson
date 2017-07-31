@@ -17,6 +17,8 @@ use app\models\Programs;
  *
  * @property Programs $program
  * @property Contracts[] $activeContracts
+ * @property ProgramModuleAddress $mainAddress
+ * @property ProgramModuleAddress[] $addresses
  */
 class ProgrammeModule extends \yii\db\ActiveRecord
 {
@@ -84,6 +86,24 @@ class ProgrammeModule extends \yii\db\ActiveRecord
             'results' => 'Ожидаемые результаты освоения модуля',
             'fullname' => 'Наименование модуля',
         ];
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAddresses()
+    {
+        return $this->hasMany(ProgramModuleAddress::class, ['program_module_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMainAddress()
+    {
+        return $this->hasOne(ProgramModuleAddress::class, ['program_module_id' => 'id'])
+            ->andWhere(['program_module_address.status' => 1]);
     }
 
     /**

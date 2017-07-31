@@ -20,6 +20,7 @@ use yii\db\ActiveRecord;
  * @property Years $module
  * @property mixed $year
  * @property Programs $program
+ * @property GroupClass[] $classes
  */
 class Groups extends ActiveRecord
 {
@@ -67,6 +68,14 @@ class Groups extends ActiveRecord
             'datestart' => 'Дата начала обучения',
             'datestop' => 'Дата окончания обучения',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getClasses()
+    {
+        return $this->hasMany(GroupClass::class, ['group_id' => 'id']);
     }
 
     /**

@@ -200,6 +200,13 @@ $config = [
                         'roles' => ['organizations'],
                     ]
                 ],
+                'program-module-address' => [
+                    [
+                        'actions' => ['create', 'update', 'select'],
+                        'allow' => true,
+                        'roles' => ['organizations'],
+                    ]
+                ],
                 'admin/directory-program-direction' => [
                     [
                         'allow' => true,

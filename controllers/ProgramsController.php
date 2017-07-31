@@ -98,6 +98,7 @@ class ProgramsController extends Controller
      * Displays a single Programs model.
      * @param integer $id
      * @return mixed
+     * @throws ForbiddenHttpException
      */
     public function actionView($id)
     {

@@ -127,7 +127,8 @@ $this->params['breadcrumbs'][] = $this->title;
                                             }
                                         }
                                     ],
-                                    ['attribute' => 'price',
+                                    [
+                                        'attribute' => 'price',
                                         'format' => 'raw',
                                         'value' => function ($data) {
                                             $price = (new \yii\db\Query())
@@ -164,6 +165,31 @@ $this->params['breadcrumbs'][] = $this->title;
                                             }
                                         }
                                     ],
+                                    [
+                                        'label' => 'Основной адрес',
+                                        'format' => 'raw',
+                                        'value' => function ($model) {
+                                            /** @var \app\models\ProgrammeModule $model */
+                                            if (count($model->addresses) > 0 && $model->mainAddress->address) {
+                                                return Html::a(
+                                                    $model->mainAddress->address,
+                                                    ['program-module-address/select', 'moduleId' => $model->id]
+                                                );
+                                            }
+
+                                            if (count($model->addresses)) {
+                                                return Html::a(
+                                                    'Редактирование адресов',
+                                                    ['program-module-address/update', 'moduleId' => $model->id]
+                                                );
+                                            }
+
+                                            return Html::a(
+                                                'Добавить адресы',
+                                                ['program-module-address/create', 'moduleId' => $model->id]
+                                            );
+                                        }
+                                    ]
                                 ],
                             ]);
                             ?>
@@ -237,11 +263,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'attribute' => 'mun',
                                 'value' => function ($model) {
                                     /** @var \app\models\Programs $model */
-                                    return Html::a(
-                                        $model->municipality->name,
-                                        ['mun/view', 'id' => $model->municipality->id],
-                                        ['target' => '_blank', 'data-pjax' => '0']
-                                    );
+                                    return $model->municipality->name;
                                 },
                                 'format' => 'raw',
                             ],
@@ -292,11 +314,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'attribute' => 'mun',
                                 'value' => function ($model) {
                                     /** @var \app\models\Programs $model */
-                                    return Html::a(
-                                        $model->municipality->name,
-                                        ['mun/view', 'id' => $model->municipality->id],
-                                        ['target' => '_blank', 'data-pjax' => '0']
-                                    );
+                                    return $model->municipality->name;
                                 },
                                 'format' => 'raw',
                             ],
@@ -351,11 +369,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'attribute' => 'mun',
                                 'value' => function ($model) {
                                     /** @var \app\models\Programs $model */
-                                    return Html::a(
-                                        $model->municipality->name,
-                                        ['mun/view', 'id' => $model->municipality->id],
-                                        ['target' => '_blank', 'data-pjax' => '0']
-                                    );
+                                    return $model->municipality->name;
                                 },
                                 'format' => 'raw',
                             ],
@@ -545,11 +559,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'attribute' => 'mun',
                                 'value' => function ($model) {
                                     /** @var \app\models\Programs $model */
-                                    return Html::a(
-                                        $model->municipality->name,
-                                        ['mun/view', 'id' => $model->municipality->id],
-                                        ['target' => '_blank', 'data-pjax' => '0']
-                                    );
+                                    return $model->municipality->name;
                                 },
                                 'format' => 'raw',
                             ],
