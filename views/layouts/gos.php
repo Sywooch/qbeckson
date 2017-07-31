@@ -129,7 +129,10 @@ $user = Yii::$app->user->getIdentity();
                                 echo Nav::widget([
                                     'options' => ['class' => 'navbar-nav inner-nav'],
                                     'items' => [
-                                        ['label' => 'Информация', 'url' => ['/personal/payer-statistic']],
+                                        ['label' => 'Информация', 'items' => [
+                                            ['label' => 'Общая статистика', 'url' => ['/personal/payer-statistic']],
+                                            ['label' => 'Наблюдатели', 'url' => ['/monitor/index']],
+                                        ]],
                                         ['label' => 'Номиналы групп', 'url' => ['/cert-group/index']],
                                         ['label' => 'Сертификаты', 'url' => ['/personal/payer-certificates']],
                                         ['label' => 'Договоры', 'url' => ['/personal/payer-contracts']],

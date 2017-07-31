@@ -229,6 +229,12 @@ $config = [
                         'allow' => true,
                     ]
                 ],
+                'monitor' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['payers'],
+                    ]
+                ],
             ]
     ],
 

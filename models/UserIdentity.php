@@ -31,6 +31,7 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
     const ROLE_PAYER = 'payer';
     const ROLE_ORGANIZATION = 'organizations';
     const ROLE_OPERATOR = 'operators';
+    const ROLE_MONITOR = 'monitor';
 
     /**
      * @inheritdoc
@@ -184,6 +185,14 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMonitors()
+    {
+        return $this->hasMany(User::className(), ['id' => 'monitor_id'])->viaTable('user_monitor_assignment', ['user_id' => 'id']);
+    }
+
+    /**
      * @param $tableName
      * @return array|\yii\db\ActiveQuery|ActiveRecord
      */
@@ -208,6 +217,7 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
             self::ROLE_PAYER => 'Плательщик',
             self::ROLE_ORGANIZATION => 'Организация',
             self::ROLE_OPERATOR => 'Оператор',
+            self::ROLE_MONITOR => 'Монитор',
         ];
     }
 }
