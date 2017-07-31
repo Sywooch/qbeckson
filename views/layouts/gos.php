@@ -40,7 +40,7 @@ $user = Yii::$app->user->getIdentity();
                                 'options' => ['class' => 'navbar-nav navbar-right header-nav'],
                                 'items' => [
                                     [
-                                        'label' => 'Выйти(' .  $user->username . ')',
+                                        'label' => 'Выйти(' .  ($user->isMonitored ? $user->monitor->username : $user->username) . ')',
                                         'url' => ['/site/logout'],
                                         'linkOptions' => [
                                             'data-method' => 'post',
@@ -131,7 +131,7 @@ $user = Yii::$app->user->getIdentity();
                                     'items' => [
                                         ['label' => 'Информация', 'items' => [
                                             ['label' => 'Общая статистика', 'url' => ['/personal/payer-statistic']],
-                                            ['label' => 'Наблюдатели', 'url' => ['/monitor/index']],
+                                            ['label' => 'Наблюдатели', 'url' => ['/monitor/index'], 'visible' => !$user->isMonitored],
                                         ]],
                                         ['label' => 'Номиналы групп', 'url' => ['/cert-group/index']],
                                         ['label' => 'Сертификаты', 'url' => ['/personal/payer-certificates']],

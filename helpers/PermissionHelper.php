@@ -4,6 +4,7 @@ namespace app\helpers;
 
 use Yii;
 use app\models\Organization;
+use yii\helpers\Url;
 
 /**
  * Class PermissionHelper
@@ -46,4 +47,28 @@ class PermissionHelper
 
         return $url;
 	}
+
+    public static function checkMonitorUrl()
+    {
+        if (Yii::$app->user->isGuest) {
+            return true;
+        }
+
+        $urls = [
+            '/certificates/create',
+            '/certificates/allnominal',
+            'monitor',
+        ];
+        $currentUrl = Url::toRoute(parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH));
+
+        $matches = array_filter($urls, function ($haystack) use ($currentUrl) {
+            return (strpos($haystack, $currentUrl) !== false) ? true : false;
+        });
+
+        if (empty($matches)) {
+            return true;
+        }
+
+        return false;
+    }
 }

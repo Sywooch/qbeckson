@@ -5,6 +5,7 @@ namespace app\models;
 use Yii;
 use yii\db\ActiveRecord;
 use developeruz\db_rbac\interfaces\UserRbacInterface;
+use yii\web\BadRequestHttpException;
 use yii\web\IdentityInterface;
 
 /**
@@ -189,7 +190,33 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
      */
     public function getMonitors()
     {
-        return $this->hasMany(User::className(), ['id' => 'monitor_id'])->viaTable('user_monitor_assignment', ['user_id' => 'id']);
+        return $this->hasMany(UserIdentity::className(), ['id' => 'monitor_id'])->viaTable('user_monitor_assignment', ['user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDonor()
+    {
+        return $this->hasOne(UserIdentity::className(), ['id' => 'user_id'])->viaTable('user_monitor_assignment', ['monitor_id' => 'id']);
+    }
+
+    public function getIsMonitored()
+    {
+        $monitor = Yii::$app->session->get('user.monitor');
+
+        return (isset($monitor) && $monitor instanceof UserIdentity) ? true : false;
+    }
+
+    public function getMonitor()
+    {
+        $monitor = Yii::$app->session->get('user.monitor');
+
+        if (isset($monitor) && $monitor instanceof UserIdentity) {
+            return $monitor;
+        }
+
+        throw new BadRequestHttpException('Ошибка обращения к монитору.');
     }
 
     /**

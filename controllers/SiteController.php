@@ -58,7 +58,13 @@ class SiteController extends Controller
 
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
+            // Переключаем identity, если пользователь создан как монитор
+            if (!empty(Yii::$app->user->identity->donor)) {
+                Yii::$app->session->set('user.monitor', Yii::$app->user->identity);
+                Yii::$app->user->switchIdentity(Yii::$app->user->identity->donor);
+            }
+
+            return $this->refresh();
         }
 
         return $this->render('index', [

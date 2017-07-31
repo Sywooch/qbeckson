@@ -71,6 +71,7 @@ $columns = [
     'data' => GridviewHelper::prepareColumns('certificates', $columns, 'searchFilter', null),
 ]); ?>
 
+<?php if (!Yii::$app->user->identity->isMonitored): ?>
 <div class="pull-right">
     <?= Html::a('Обновить номиналы', Url::to(['/certificates/allnominal', 'id' => $payer_id]), ['class' => 'btn btn-success']) ?>
 </div>
@@ -78,6 +79,8 @@ $columns = [
 <p>
     <?= Html::a('Добавить сертификат', ['certificates/create'], ['class' => 'btn btn-success']) ?>
 </p>
+<?php endif; ?>
+
 <?= GridView::widget([
     'dataProvider' => $certificatesProvider,
     'filterModel' => null,
