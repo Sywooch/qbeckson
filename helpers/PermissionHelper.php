@@ -61,9 +61,11 @@ class PermissionHelper
         ];
         $currentUrl = Url::toRoute(parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH));
 
-        $matches = array_filter($urls, function ($haystack) use ($currentUrl) {
-            return (strpos($haystack, $currentUrl) !== false) ? true : false;
+        $matches = array_filter($urls, function ($url) use ($currentUrl) {
+            return (strpos($currentUrl, $url) !== false) ? true : false;
         });
+
+        //print_r($matches);exit;
 
         if (empty($matches)) {
             return true;
