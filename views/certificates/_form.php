@@ -76,10 +76,6 @@ use app\models\Payers;
             'onClick' => 'return selectGroup(this);',
             'id' => 'select-cert-group',
         ]);
-    } elseif (Yii::$app->user->can('certificate') && $model->canChangeGroup && !empty($model->getCertificateGroupQueues($model->id)->count())) {
-        echo '<div class="well">Вы находитесь в очереди на смену группы сертификата. Пожалуйста, подождите.</div>';
-    } elseif (Yii::$app->user->can('certificate') && $model->canChangeGroup) {
-        echo $form->field($model, 'cert_group')->dropDownList(ArrayHelper::map($model->possibleGroupList, 'id', 'group'), ['prompt' => 'Выберите группу...']);
     }
     ?>
 

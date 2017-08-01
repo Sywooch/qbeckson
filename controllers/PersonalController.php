@@ -60,6 +60,7 @@ use app\models\Payer0ContractsSearch;
 use app\models\Payer4ContractsSearch;
 use app\models\Payer3ContractsSearch;
 use yii\filters\VerbFilter;
+use yii\helpers\Url;
 use yii\web\NotFoundHttpException;
 
 class PersonalController extends \yii\web\Controller
@@ -646,33 +647,36 @@ class PersonalController extends \yii\web\Controller
 
     public function actionCertificateInfo()
     {
-        $certificates = new Certificates();
-        $certificate = $certificates->getCertificates();
+        $model = Yii::$app->user->identity->certificate;
+        $model->scenario = Certificates::SCENARIO_CERTIFICATE;
 
-        $informsProvider = new ActiveDataProvider([
-            'query' => Informs::find()->where(['read' => 0])->andwhere(['from' => 4])->andwhere(['prof_id' => $certificate['id']]),
-        ]);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $flagGroupHasBeenChanged = false;
+            if ($model->canChangeGroup && $model->oldAttributes['cert_group'] != $model->cert_group) {
+                if ($model->changeCertGroup() == Certificates::FLAG_GROUP_HAS_BEEN_CHANGED) {
+                    $flagGroupHasBeenChanged = true;
+                }
+            }
 
-        $programcertModel = new ProgramsfromcertSearch();
-        $programcertProvider = $programcertModel->search(Yii::$app->request->queryParams);
-        $count_programs = $programcertProvider->getTotalCount();
+            if ($model->save()) {
+                if ($flagGroupHasBeenChanged === true) {
+                    Yii::$app->session->setFlash('success', 'Вы успешно сменили тип сертификата. Теперь вам нужно передать заявление вышестоящей организации <a href="' . Url::to(['certificates/group-pdf']) . '" class="btn btn-primary">Открыть заявление (PDF)</a>');
+                }
 
-        $searchContracts1 = new ContractsoSearch();
-        $Contracts1Provider = $searchContracts1->search(Yii::$app->request->queryParams);
-        $count_organizations = $Contracts1Provider->getTotalCount();
+                return $this->redirect(['/personal/certificate-statistic', 'id' => $model->id]);
+            }
+        } elseif (Yii::$app->request->isPost) {
+            print_r($model->errors);exit;
+        }
 
         return $this->render('certificate-info', [
-            'informsProvider' => $informsProvider,
-            'count_organizations' => $count_organizations,
-            'count_programs' => $count_programs,
-            'certificate' => $certificate,
+            'certificate' => $model,
         ]);
     }
 
     public function actionCertificateWaitContract()
     {
-        $certificates = new Certificates();
-        $certificate = $certificates->getCertificates();
+        $certificate = Yii::$app->user->identity->certificate;
 
         $Contracts3Search = new Contracts3Search();
         $Contracts3Search->certificate_id = $certificate['id'];
@@ -686,8 +690,8 @@ class PersonalController extends \yii\web\Controller
 
     public function actionCertificateWaitRequest()
     {
-        $certificates = new Certificates();
-        $certificate = $certificates->getCertificates();
+        $certificate = Yii::$app->user->identity->certificate;
+
         $ContractsnSearch = new ContractsnSearch();
         $ContractsnSearch->certificate_id = $certificate['id'];
         $ContractsnProvider = $ContractsnSearch->search(Yii::$app->request->queryParams);

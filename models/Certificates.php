@@ -38,6 +38,8 @@ class Certificates extends \yii\db\ActiveRecord
 
     const TYPE_ACCOUNTING = 20;
 
+    const SCENARIO_CERTIFICATE = 10;
+
     public $birthday;
 
     public $address;
@@ -62,6 +64,14 @@ class Certificates extends \yii\db\ActiveRecord
         return 'certificates';
     }
 
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_CERTIFICATE] = ['cert_group'];
+
+        return $scenarios;
+    }
+
     /**
      * @inheritdoc
      */
@@ -80,7 +90,7 @@ class Certificates extends \yii\db\ActiveRecord
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
             [['payer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payers::className(), 'targetAttribute' => ['payer_id' => 'id']],
             [['contractCount'], 'safe'],
-            [['selectCertGroup', 'possible_cert_group'], 'required'],
+            [['selectCertGroup', 'possible_cert_group'], 'required', 'on' => self::SCENARIO_DEFAULT],
             ['selectCertGroup', 'in', 'range' => [self::TYPE_PF, self::TYPE_ACCOUNTING]],
         ];
     }
@@ -126,9 +136,9 @@ class Certificates extends \yii\db\ActiveRecord
 
     public function beforeSave($insert)
     {
-        if ($this->selectCertGroup == self::TYPE_PF) {
+        if (!empty($this->selectCertGroup) && $this->selectCertGroup == self::TYPE_PF) {
             $this->cert_group = $this->possible_cert_group;
-        } elseif ($certGroup = $this->payers->getCertGroups(1)->one()) {
+        } elseif (!empty($this->selectCertGroup) && $certGroup = $this->payers->getCertGroups(1)->one()) {
             $this->cert_group = $certGroup->id;
         }
 

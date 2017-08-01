@@ -191,17 +191,9 @@ class CertificatesController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
-            $flagGroupHasBeenChanged = false;
-            if ($model->canChangeGroup && $model->oldAttributes['cert_group'] != $model->cert_group) {
-                if ($model->changeCertGroup() == Certificates::FLAG_GROUP_HAS_BEEN_CHANGED) {
-                    $flagGroupHasBeenChanged = true;
-                }
-            }
 
             if ($model->save()) {
-                if ($flagGroupHasBeenChanged === true) {
-                    Yii::$app->session->setFlash('success', 'Вы успешно сменили тип сертификата. Теперь вам нужно передать заявление вышестоящей организации <a href="' . Url::to(['certificates/group-pdf']) . '" class="btn btn-primary">Открыть заявление (PDF)</a>');
-                }
+                Yii::$app->session->setFlash('success', 'Информация сохранена успешно.');
 
                 return $this->redirect(['/personal/certificate-statistic', 'id' => $model->id]);
             }
@@ -226,7 +218,7 @@ class CertificatesController extends Controller
             'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
             'options' => ['title' => 'Заявление на смену группы сертификата'],
             'methods' => [
-                'SetHeader'=>['Заявление на смену группы сертификата'],
+                'SetHeader' => ['Заявление на смену группы сертификата'],
             ]
         ]);
 
