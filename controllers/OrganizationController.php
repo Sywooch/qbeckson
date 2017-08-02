@@ -302,6 +302,17 @@ class OrganizationController extends Controller
         ]);
     }
 
+    public function actionSetAsSubordinated($id)
+    {
+        $model = $this->findModel($id);
+        if (!Yii::$app->user->identity->payer->getOrganizations($model->id)->count()) {
+            $model->link('payers', Yii::$app->user->identity->payer);
+            Yii::$app->session->setFlash('success', 'Запрос на указание подведомственности успешно послан организации. Пожалуйста, дождитесь подтверждения!');
+        }
+
+        $this->redirect(['organization/view', 'id' => $id]);
+    }
+
     public function actionEdit()
     {
         $organizations = new Organization();

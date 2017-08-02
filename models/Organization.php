@@ -405,6 +405,22 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrganizationPayerAssignment()
+    {
+         return $this->hasOne(OrganizationPayerAssignment::className(), ['organization_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSuborderPayer()
+    {
+        return $this->hasOne(Payers::className(), ['id' => 'payer_id'])->viaTable('organization_payer_assignment', ['organization_id' => 'id']);
+    }
+
+    /**
      * DEPRECATED
      * Use relation in app\models\User instead
      */

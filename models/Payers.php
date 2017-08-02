@@ -43,6 +43,7 @@ class Payers extends \yii\db\ActiveRecord
     public $directionality_4;
     public $directionality_5;
     public $directionality_6;
+
     /**
      * @inheritdoc
      */
@@ -62,7 +63,7 @@ class Payers extends \yii\db\ActiveRecord
             ['operator_id', 'integer'],
             [['code'], 'string', 'length' => [2, 2]],
             [['directionality'], 'safe'],
-             [['directionality_1rob', 'directionality_1', 'directionality_2', 'directionality_3', 'directionality_4', 'directionality_5', 'directionality_6'], 'string'],
+            [['directionality_1rob', 'directionality_1', 'directionality_2', 'directionality_3', 'directionality_4', 'directionality_5', 'directionality_6'], 'string'],
             [['email'], 'email'],
             [['name', 'name_dat', 'address_legal', 'address_actual', 'phone', 'position', 'fio'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
@@ -101,161 +102,162 @@ class Payers extends \yii\db\ActiveRecord
             'directionality_6_count' => 'Максимальное число детей в "Социально-педагогической" направленности',
         ];
     }
-    
-    public function munName($data) {
-         $rows = (new \yii\db\Query())
-                ->select(['name'])
-                ->from('mun')
-                ->where(['id'=> $data])
-                ->one();
-        
+
+    public function munName($data)
+    {
+        $rows = (new \yii\db\Query())
+            ->select(['name'])
+            ->from('mun')
+            ->where(['id' => $data])
+            ->one();
+
         return $rows['name'];
     }
-    
-    public function directionality1rob($data) {
+
+    public function directionality1rob($data)
+    {
         $rows = (new \yii\db\Query())
-                ->select(['directionality', 'directionality_1rob_count'])
-                ->from('payers')
-                ->where(['id'=> $data])
-                ->one();
-    $directionality = explode(',', $rows['directionality']);
+            ->select(['directionality', 'directionality_1rob_count'])
+            ->from('payers')
+            ->where(['id' => $data])
+            ->one();
+        $directionality = explode(',', $rows['directionality']);
         if (in_array('Техническая (робототехника)', $directionality)) {
             if ($rows['directionality_1rob_count'] > 0) {
                 $display = $rows['directionality_1rob_count'];
-            }
-            else {
+            } else {
                 $display = 'без ограничений';
-            } 
-        }
-        else {
+            }
+        } else {
             $display = 'не оплачивает';
         }
+
         return $display;
     }
-    
-    public function directionality1($data) {     
+
+    public function directionality1($data)
+    {
         $rows = (new \yii\db\Query())
-                ->select(['directionality', 'directionality_1_count'])
-                ->from('payers')
-                ->where(['id'=> $data])
-                ->one();
-    $directionality = explode(',', $rows['directionality']);
+            ->select(['directionality', 'directionality_1_count'])
+            ->from('payers')
+            ->where(['id' => $data])
+            ->one();
+        $directionality = explode(',', $rows['directionality']);
         if (in_array('Техническая (иная)', $directionality)) {
             if ($rows['directionality_1_count'] > 0) {
                 $display = $rows['directionality_1_count'];
-            }
-            else {
+            } else {
                 $display = 'без ограничений';
-            } 
-        }
-        else {
+            }
+        } else {
             $display = 'не оплачивает';
         }
+
         return $display;
     }
-    
-    public function directionality2($data) {     
+
+    public function directionality2($data)
+    {
         $rows = (new \yii\db\Query())
-                ->select(['directionality', 'directionality_2_count'])
-                ->from('payers')
-                ->where(['id'=> $data])
-                ->one();
-    $directionality = explode(',', $rows['directionality']);
+            ->select(['directionality', 'directionality_2_count'])
+            ->from('payers')
+            ->where(['id' => $data])
+            ->one();
+        $directionality = explode(',', $rows['directionality']);
         if (in_array('Естественнонаучная', $directionality)) {
             if ($rows['directionality_2_count'] > 0) {
                 $display = $rows['directionality_2_count'];
-            }
-            else {
+            } else {
                 $display = 'без ограничений';
-            } 
-        }
-        else {
+            }
+        } else {
             $display = 'не оплачивает';
         }
+
         return $display;
     }
-    
-    public function directionality3($data) {
+
+    public function directionality3($data)
+    {
         $rows = (new \yii\db\Query())
-                ->select(['directionality', 'directionality_3_count'])
-                ->from('payers')
-                ->where(['id'=> $data])
-                ->one();
-    $directionality = explode(',', $rows['directionality']);
+            ->select(['directionality', 'directionality_3_count'])
+            ->from('payers')
+            ->where(['id' => $data])
+            ->one();
+        $directionality = explode(',', $rows['directionality']);
         if (in_array('Физкультурно-спортивная', $directionality)) {
             if ($rows['directionality_3_count'] > 0) {
                 $display = $rows['directionality_3_count'];
-            }
-            else {
+            } else {
                 $display = 'без ограничений';
-            } 
-        }
-        else {
+            }
+        } else {
             $display = 'не оплачивает';
         }
+
         return $display;
     }
-    
-    public function directionality4($data) {     
+
+    public function directionality4($data)
+    {
         $rows = (new \yii\db\Query())
-                ->select(['directionality', 'directionality_4_count'])
-                ->from('payers')
-                ->where(['id'=> $data])
-                ->one();
-    $directionality = explode(',', $rows['directionality']);
+            ->select(['directionality', 'directionality_4_count'])
+            ->from('payers')
+            ->where(['id' => $data])
+            ->one();
+        $directionality = explode(',', $rows['directionality']);
         if (in_array('Художественная', $directionality)) {
             if ($rows['directionality_4_count'] > 0) {
                 $display = $rows['directionality_4_count'];
-            }
-            else {
+            } else {
                 $display = 'без ограничений';
-            } 
-        }
-        else {
+            }
+        } else {
             $display = 'не оплачивает';
         }
+
         return $display;
     }
-    
-    public function directionality5($data) {     
+
+    public function directionality5($data)
+    {
         $rows = (new \yii\db\Query())
-                ->select(['directionality', 'directionality_5_count'])
-                ->from('payers')
-                ->where(['id'=> $data])
-                ->one();
-    $directionality = explode(',', $rows['directionality']);
+            ->select(['directionality', 'directionality_5_count'])
+            ->from('payers')
+            ->where(['id' => $data])
+            ->one();
+        $directionality = explode(',', $rows['directionality']);
         if (in_array('Туристско-краеведческая', $directionality)) {
             if ($rows['directionality_5_count'] > 0) {
                 $display = $rows['directionality_5_count'];
-            }
-            else {
+            } else {
                 $display = 'без ограничений';
-            } 
-        }
-        else {
+            }
+        } else {
             $display = 'не оплачивает';
         }
+
         return $display;
     }
-    
-    public function directionality6($data) {     
+
+    public function directionality6($data)
+    {
         $rows = (new \yii\db\Query())
-                ->select(['directionality', 'directionality_6_count'])
-                ->from('payers')
-                ->where(['id'=> $data])
-                ->one();
-    $directionality = explode(',', $rows['directionality']);
+            ->select(['directionality', 'directionality_6_count'])
+            ->from('payers')
+            ->where(['id' => $data])
+            ->one();
+        $directionality = explode(',', $rows['directionality']);
         if (in_array('Социально-педагогическая', $directionality)) {
             if ($rows['directionality_6_count'] > 0) {
                 $display = $rows['directionality_6_count'];
-            }
-            else {
+            } else {
                 $display = 'без ограничений';
-            } 
-        }
-        else {
+            }
+        } else {
             $display = 'не оплачивает';
         }
+
         return $display;
     }
 
@@ -278,6 +280,36 @@ class Payers extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getOrganizationPayerAssignments($organizationId = null, $status = null)
+    {
+        $relation = $this->hasMany(OrganizationPayerAssignment::className(), ['payer_id' => 'id'])
+            ->andFilterWhere([
+                'organization_id' => $organizationId,
+                'status' => $status,
+            ]);
+
+        return $relation;
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrganizations($organizationId = null, $status = null)
+    {
+        $relation = $this->hasMany(Organization::className(), ['id' => 'organization_id'])->viaTable('organization_payer_assignment', ['payer_id' => 'id'], function ($query) use ($organizationId, $status) {
+            /* @var $query \yii\db\ActiveQuery */
+            $query->andFilterWhere([
+                'organization_id' => $organizationId,
+                'status' => $status,
+            ]);
+        });
+
+        return $relation;
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getUser()
     {
         return $this->hasOne(User::className(), ['id' => 'user_id']);
@@ -287,22 +319,24 @@ class Payers extends \yii\db\ActiveRecord
      * DEPRECATED
      * Use UserIdentity::payer instead
      */
-    public function getPayer() {
+    public function getPayer()
+    {
 
         $query = Payers::find();
 
-        if(!Yii::$app->user->isGuest) {
+        if (!Yii::$app->user->isGuest) {
             $query->where(['user_id' => Yii::$app->user->id]);
         }
 
         return $query->one();
     }
 
-    public function getNoCooperatePayer() {
+    public function getNoCooperatePayer()
+    {
 
         $query = Payers::find();
 
-        if(!Yii::$app->user->isGuest) {
+        if (!Yii::$app->user->isGuest) {
 
             //$query->Where(['!=', 'directionality', false]);
 
@@ -310,7 +344,7 @@ class Payers extends \yii\db\ActiveRecord
             $cooperate = $cooperates->getCooperateallPayers();
 
             foreach ($cooperate as $value) {
-            $query->andWhere(['!=', 'id', $value]);
+                $query->andWhere(['!=', 'id', $value]);
             }
 
         }

@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Mun;
+use app\models\OrganizationPayerAssignment;
 use app\models\User;
 use app\models\UserIdentity;
 use Yii;
@@ -60,6 +61,7 @@ use app\models\Payer0ContractsSearch;
 use app\models\Payer4ContractsSearch;
 use app\models\Payer3ContractsSearch;
 use yii\filters\VerbFilter;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 
 class PersonalController extends \yii\web\Controller
@@ -544,10 +546,35 @@ class PersonalController extends \yii\web\Controller
         ]);
     }
 
+    public function actionOrganizationSuborder()
+    {
+        $model = Yii::$app->user->identity->organization;
+
+        return $this->render('organization-suborder', [
+            'model' => $model,
+        ]);
+    }
+
+    public function actionOrganizationSetSuborderStatus($refuse = 0)
+    {
+        $model = Yii::$app->user->identity->organization->organizationPayerAssignment;
+        if ($model->status != OrganizationPayerAssignment::STATUS_PENDING) {
+            throw new BadRequestHttpException('Невозможно выполнить действие.');
+        }
+
+        if (!$refuse) {
+            $model->status = OrganizationPayerAssignment::STATUS_ACTIVE;
+        } else {
+            $model->status = OrganizationPayerAssignment::STATUS_REFUSED;
+        }
+        $model->save();
+
+        $this->redirect(['organization-suborder']);
+    }
+
     public function actionOrganizationPayers()
     {
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
+        $organization = Yii::$app->user->identity->organization;
 
         $searchPayers = new PayersmySearch();
         $PayersProvider = $searchPayers->search(Yii::$app->request->queryParams);

@@ -140,6 +140,11 @@ $config = [
                         'allow' => true,
                         'roles' => ['certificate']
                     ],
+                    [
+                        'actions' => ['organization-suborder', 'organization-set-suborder-status'],
+                        'allow' => true,
+                        'roles' => ['organizations']
+                    ],
                 ],
                 'file-storage' => [
                     [
@@ -164,6 +169,11 @@ $config = [
                         [
                             'actions' => ['request', 'request-update', 'check-status'],
                             'allow' => true,
+                        ],
+                        [
+                            'actions' => ['set-as-subordinated'],
+                            'allow' => true,
+                            'roles' => ['payers'],
                         ],
                     ],
                 'operators' =>
