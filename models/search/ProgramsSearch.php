@@ -176,7 +176,7 @@ class ProgramsSearch extends Programs
             ]);
         }
 
-        if (!empty($this->hours) && $this->hours !== '-1,150000') {
+        if (!empty($this->hours) && $this->hours !== '0,2000') {
             $hours = explode(',', $this->hours);
             $query->andHaving([
                 'AND',
@@ -185,7 +185,7 @@ class ProgramsSearch extends Programs
             ]);
         }
 
-        if (!empty($this->rating) && $this->rating !== '-1,150000') {
+        if (!empty($this->rating) && $this->rating !== '0,100') {
             $rating = explode(',', $this->rating);
             $query->andWhere([
                 'AND',
@@ -194,7 +194,7 @@ class ProgramsSearch extends Programs
             ]);
         }
 
-        if (!empty($this->limit) && $this->limit !== '-1,150000') {
+        if (!empty($this->limit) && $this->limit !== '0,10000') {
             $limit = explode(',', $this->limit);
             $query->andWhere([
                 'AND',

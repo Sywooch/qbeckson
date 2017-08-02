@@ -8,9 +8,9 @@ use kartik\slider\Slider;
         'template' => "{label} <div class=\"row\"><div class=\"col-sm-4\">{input}{error}{hint}</div></div>"
     ])->widget(Slider::classname(), [
         'pluginOptions' => [
-            'min' => -1,
-            'max' => 150000,
-            'step' => 10,
+            'min' => isset($row['pluginOptions']['min']) ? $row['pluginOptions']['min'] : 0,
+            'max' => isset($row['pluginOptions']['max']) ? $row['pluginOptions']['max'] : 150000,
+            'step' => 5,
             'range' => true,
         ],
         'options' => [

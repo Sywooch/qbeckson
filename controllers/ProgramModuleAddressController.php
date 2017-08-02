@@ -117,7 +117,7 @@ class ProgramModuleAddressController extends Controller
         $model->setModule($programModuleModel);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->refresh();
+            return $this->redirect(['programs/view', 'id' => $programModuleModel->program_id]);
         }
 
         return $this->render('select', [

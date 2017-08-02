@@ -11,7 +11,7 @@ class m170726_102021_add_organization_settings_search_filters extends Migration
             'table_name' => 'contracts',
             'table_columns' =>
                 'number,date,rezerv,paid,start_edu_contract,stop_edu_contract,group_id,programMunicipality,childFullName,moduleName,certificateNumber,programName,payerName',
-            'inaccessible_columns' => 'number,certificateNumber,childFullName,programMunicipality',
+            'inaccessible_columns' => 'number,certificateNumber,childFullName,programMunicipality,payer_id',
             'is_active' => 1,
             'role' => UserIdentity::ROLE_ORGANIZATION,
             'type' => 'active'

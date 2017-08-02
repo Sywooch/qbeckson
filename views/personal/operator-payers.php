@@ -19,7 +19,6 @@ $this->params['breadcrumbs'][] = 'Плательщики';
 ?>
 <?php
 $columns = [
-
     [
         'attribute' => 'name',
     ],
@@ -59,6 +58,9 @@ $columns = [
             return $cooperatesCount > 0 ? $cooperatesCount : '-';
         },
         'type' => SearchFilter::TYPE_RANGE_SLIDER,
+        'pluginOptions' => [
+            'max' => 100,
+        ],
     ],
     [
         'attribute' => 'certificates',

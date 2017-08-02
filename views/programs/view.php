@@ -24,6 +24,14 @@ if (Yii::$app->user->can('operators')) {
 }
 
 $this->params['breadcrumbs'][] = $this->title;
+
+$js = <<<'JS'
+    $(".show-module-description").on('click', function(e) {
+        e.preventDefault();
+        $(this).next('div').slideToggle();
+    })
+JS;
+$this->registerJs($js, $this::POS_END);
 ?>
 
 <style>
@@ -53,11 +61,30 @@ $this->params['breadcrumbs'][] = $this->title;
         }
         ?>
         <h3><?= Html::encode($this->title) ?></h3>
+        <br>
     </div>
+    <?php if (Yii::$app->user->can('organizations') && $model->verification === 2) : ?>
+        <div class="row">
+            <div class="col-md-12">
+                <?php if ($model->getPhoto()) : ?>
+                    <div class="center-block text-center">
+                        <img style="max-width: 600px; max-height: 300px;" src="<?= $model->getPhoto(); ?>" alt="">
+                    </div>
+                    <br>
+                    <br>
+                    <?= Html::a('Изменить фото', ['add-photo', 'id' => $model->id], ['class' => 'btn btn-success']); ?>
+                <?php else : ?>
+                    <?= Html::a('Добавить фото', ['add-photo', 'id' => $model->id], ['class' => 'btn btn-success']); ?>
+                <?php endif; ?>
+            </div>
+        </div>
+        <br>
+        <br>
+    <?php endif; ?>
     <div class="row">
         <div class="col-md-4">
             <div class="row">
-                <div class="affix-top col-md-12" data-spy="affix" data-offset-top="205">
+                <div class="affix-top col-md-12" data-spy="affix" data-offset-top="<?= $model->getPhoto() ? '650' : '250' ?>">
                     <?php $items = []; ?>
                     <?php if (Yii::$app->user->can('organizations')) : ?>
                         <?php foreach ($model->modules as $key => $module) : ?>
@@ -170,7 +197,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         'format' => 'raw',
                                         'value' => function ($model) {
                                             /** @var \app\models\ProgrammeModule $model */
-                                            if (count($model->addresses) > 0 && $model->mainAddress->address) {
+                                            if (count($model->addresses) > 0 && null !== $model->mainAddress) {
                                                 return Html::a(
                                                     $model->mainAddress->address,
                                                     ['program-module-address/select', 'moduleId' => $model->id]
@@ -399,7 +426,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 [
                                     'attribute' => 'organization.name',
                                     'format' => 'raw',
-                                    'value' => Html::a($model->organization->name, Url::to(['/organization/view', 'id' => $model->organization->id]), ['class' => 'blue']),
+                                    'value' => Html::a($model->organization->name, Url::to(['/organization/view', 'id' => $model->organization->id]), ['class' => 'blue', 'target' => '_blank']),
                                 ],
                                 'directivity',
                                 [
@@ -459,7 +486,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 [
                                     'attribute' => 'organization.name',
                                     'format' => 'raw',
-                                    'value' => Html::a($model->organization->name, Url::to(['/organization/view', 'id' => $model->organization->id]), ['class' => 'blue']),
+                                    'value' => Html::a($model->organization->name, Url::to(['/organization/view', 'id' => $model->organization->id]), ['class' => 'blue', 'target' => '_blank']),
                                 ],
                                 'directivity',
                                 [
@@ -521,7 +548,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             [
                                 'attribute' => 'organization.name',
                                 'format' => 'raw',
-                                'value' => Html::a($model->organization->name, Url::to(['/organization/view', 'id' => $model->organization->id]), ['class' => 'blue']),
+                                'value' => Html::a($model->organization->name, Url::to(['/organization/view', 'id' => $model->organization->id]), ['class' => 'blue', 'target' => '_blank']),
                             ],
                             'directivity',
                             [
@@ -684,7 +711,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
 
                     if ($countyears > 1) {
-                        echo '<a ng-click="collapsed' . $i . ' = !collapsed' . $i . '" ng-model="collapsed' . $i . '" href="javascript:void(0);">' . $value->fullname . '<span ng-class="{\'glyphicon glyphicon-menu-right pull-right\': !collapsed' . $i . ', \'glyphicon glyphicon-menu-down pull-right\': collapsed' . $i . '}"><span/></a>';
+                        echo '<a class="show-module-description" href="#">' . $value->fullname . '</a>';
                     }
 
                     $group = [
@@ -732,7 +759,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
 
                     if ($countyears > 1) {
-                        echo '<div ng-init="collapsed' . $i . ' = false" ng-show="collapsed' . $i . '"><br />';
+                        echo '<div><br/>';
                     }
 
                     echo DetailView::widget([

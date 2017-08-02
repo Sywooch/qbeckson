@@ -39,6 +39,6 @@ class m170731_134302_create_module_address_table extends Migration
             'fk-program_module_address-program_module_id-program_module-id',
             'program_module_address'
         );
-        $this->dropTable('module_address');
+        $this->dropTable('program_module_address');
     }
 }

@@ -33,10 +33,16 @@ $phone = [
 $max_child = [
     'attribute' => 'max_child',
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    'pluginOptions' => [
+        'max' => 10000
+    ]
 ];
 $raiting = [
     'attribute' => 'raiting',
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    'pluginOptions' => [
+        'max' => 100
+    ]
 ];
 $type = [
     'attribute' => 'type',
@@ -60,6 +66,9 @@ $programs = [
         return $model->getPrograms()->andWhere(['programs.verification' => 2])->count();
     },
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    'pluginOptions' => [
+        'max' => 1000
+    ]
 ];
 $children = [
     'attribute' => 'children',
@@ -70,10 +79,16 @@ $children = [
         )));
     },
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    'pluginOptions' => [
+        'max' => 10000
+    ]
 ];
 $amount_child = [
     'attribute' => 'amount_child',
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    'pluginOptions' => [
+        'max' => 10000
+    ]
 ];
 $actual = [
     'attribute' => 'actual',

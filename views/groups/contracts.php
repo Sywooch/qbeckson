@@ -51,7 +51,7 @@ $this->params['breadcrumbs'][] = $this->title;
              [
                 'attribute'=>'program.name',
                 'format' => 'raw',
-                'value'=> Html::a($model->program->name, Url::to(['/programs/view', 'id' => $model->program->id]), ['class' => 'blue']),
+                'value'=> Html::a($model->program->name, Url::to(['/programs/view', 'id' => $model->program->id]), ['class' => 'blue', 'target' => '_blank']),
             ],
             'address',
             'schedule',

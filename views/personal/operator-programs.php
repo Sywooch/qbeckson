@@ -70,7 +70,7 @@ $organization = [
         return Html::a(
             $model->organization->name,
             Url::to(['organization/view', 'id' => $model->organization_id]),
-            ['class' => 'blue', 'target' => '_blank']
+            ['target' => '_blank', 'data-pjax' => '0']
         );
     },
 ];
@@ -98,6 +98,9 @@ $hours = [
     'value' => 'countHours',
     'label' => 'Кол-во часов',
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    'pluginOptions' => [
+        'max' => 2000
+    ]
 ];
 $directivity = [
     'attribute' => 'directivity',
@@ -117,11 +120,17 @@ $rating = [
     'attribute' => 'rating',
     'label' => 'Рейтинг',
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    'pluginOptions' => [
+        'max' => 100
+    ]
 ];
 $limit = [
     'attribute' => 'limit',
     'label' => 'Лимит',
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    'pluginOptions' => [
+        'max' => 10000
+    ]
 ];
 $actions = [
     'class' => ActionColumn::class,
@@ -142,6 +151,10 @@ $openColumns = [
     $limit,
     $organization,
     $municipality,
+    [
+        'attribute' => 'organization_id',
+        'type' => SearchFilter::TYPE_HIDDEN,
+    ],
     $actions,
 ];
 $waitColumns = [
@@ -220,6 +233,9 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
 <br>
 <div class="tab-content">
     <div id="panel1" class="tab-pane fade in active">
+        <?php if ($searchOpenPrograms->organization_id) : ?>
+            <p class="lead">Показаны результаты для организации: <?= $searchOpenPrograms->organization; ?></p>
+        <?php endif; ?>
         <?= SearchFilter::widget([
             'model' => $searchOpenPrograms,
             'action' => ['personal/operator-programs'],

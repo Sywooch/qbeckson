@@ -95,7 +95,7 @@ class InvoicesSearch extends Invoices
             ->andFilterWhere(['like', 'organization.name', $this->organization])
             ->andFilterWhere(['like', 'payers.name', $this->payer]);
 
-        if (!empty($this->sum) && $this->sum !== '0,150000') {
+        if (!empty($this->sum) && $this->sum !== '0,10000000') {
             $sum = explode(',', $this->sum);
             $query->andWhere([
                 'AND',

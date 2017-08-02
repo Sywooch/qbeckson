@@ -1,5 +1,6 @@
 <?php
 
+use yii\grid\ActionColumn;
 use app\helpers\GridviewHelper;
 use app\models\Mun;
 use app\models\UserIdentity;
@@ -50,7 +51,7 @@ $columns = [
             return Html::a(
                 $model->payer->name,
                 Url::to(['payers/view', 'id' => $model->payer->id]),
-                ['class' => 'blue', 'target' => '_blank']
+                ['target' => '_blank', 'data-pjax' => '0']
             );
         },
         'format' => 'raw'
@@ -98,13 +99,16 @@ $columns = [
         'data' => [1 => 'Активен', 0 => 'Приостановлен'],
     ],
     [
-        'class' => 'yii\grid\ActionColumn',
+        'class' => ActionColumn::class,
         'controller' => 'certificates',
         'template' => '{view}',
         'searchFilter' => false,
     ],
 ];
 ?>
+<?php if ($searchCertificates->payer_id) : ?>
+    <p class="lead">Показаны результаты для плательщика: <?= $searchCertificates->payer; ?></p>
+<?php endif; ?>
 <?= SearchFilter::widget([
     'model' => $searchCertificates,
     'action' => ['personal/operator-certificates'],

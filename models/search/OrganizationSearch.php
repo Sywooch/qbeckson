@@ -143,7 +143,7 @@ class OrganizationSearch extends Organization
             }
         }
 
-        if (!empty($this->programs) && $this->programs !== '0,150000') {
+        if (!empty($this->programs) && $this->programs !== '0,1000') {
             $programsCount = explode(',', $this->programs);
             $query->andHaving([
                 'AND',
@@ -152,7 +152,7 @@ class OrganizationSearch extends Organization
             ]);
         }
 
-        if (!empty($this->children) && $this->children !== '0,150000') {
+        if (!empty($this->children) && $this->children !== '0,10000') {
             $childrenCount = explode(',', $this->children);
             $query->andHaving([
                 'AND',
@@ -161,7 +161,7 @@ class OrganizationSearch extends Organization
             ]);
         }
 
-        if (!empty($this->amount_child) && $this->amount_child !== '0,150000') {
+        if (!empty($this->amount_child) && $this->amount_child !== '0,10000') {
             $childCount = explode(',', $this->amount_child);
             $query->andHaving([
                 'AND',
@@ -170,7 +170,7 @@ class OrganizationSearch extends Organization
             ]);
         }
 
-        if (!empty($this->max_child) && $this->max_child !== '0,150000') {
+        if (!empty($this->max_child) && $this->max_child !== '0,10000') {
             $max_child = explode(',', $this->max_child);
             $query->andWhere([
                 'AND',
@@ -179,7 +179,7 @@ class OrganizationSearch extends Organization
             ]);
         }
 
-        if (!empty($this->raiting) && $this->raiting !== '0,150000') {
+        if (!empty($this->raiting) && $this->raiting !== '0,100') {
             $raiting = explode(',', $this->raiting);
             $query->andWhere([
                 'AND',

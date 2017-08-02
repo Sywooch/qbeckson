@@ -107,7 +107,7 @@ class PayersSearch extends Payers
             $query->andHaving(['and', ['>=', 'certCount', (int)$certCount[0]], ['<=', 'certCount', (int)$certCount[1]]]);
         }
 
-        if (!empty($this->cooperates) && $this->cooperates !== '0,150000') {
+        if (!empty($this->cooperates) && $this->cooperates !== '0,100') {
             $coopCount = explode(',', $this->cooperates);
             if ($coopCount[0] > 0) {
                 $query->andWhere(['cooperate.status' => 1]);

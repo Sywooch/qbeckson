@@ -25,7 +25,7 @@ class GridviewHelper
         array $columns,
         $type = null,
         $excludeType = 'gridView',
-        $excludeAttributes = ['type', 'data', 'searchFilter', 'gridView']
+        $excludeAttributes = ['type', 'data', 'searchFilter', 'gridView', 'pluginOptions']
     ) {
         /** @var UserIdentity $user */
         $user = Yii::$app->user->identity;
@@ -35,7 +35,7 @@ class GridviewHelper
         }
 
         foreach ($columns as $index => $column) {
-            if (isset($column['type']) && $column['type'] === SearchFilter::TYPE_HIDDEN) {
+            if (isset($column['type']) && $column['type'] === SearchFilter::TYPE_HIDDEN && null !== $excludeAttributes) {
                 unset($columns[$index]);
                 continue;
             }
@@ -73,7 +73,7 @@ class GridviewHelper
      */
     public static function prepareExportColumns(
         array $columns,
-        array $excludeAttributes = ['type', 'data', 'searchFilter', 'gridView']
+        array $excludeAttributes = ['type', 'data', 'searchFilter', 'gridView', 'pluginOptions']
     ) {
         foreach ($columns as $index => $column) {
             if (isset($column['type']) && $column['type'] === SearchFilter::TYPE_HIDDEN) {

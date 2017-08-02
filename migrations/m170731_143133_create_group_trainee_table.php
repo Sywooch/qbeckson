@@ -15,21 +15,13 @@ class m170731_143133_create_group_trainee_table extends Migration
         $this->createTable('group_class', [
             'id' => $this->primaryKey(),
             'group_id' => $this->integer(11),
-            'address_id' => $this->integer(11),
+            'address' => $this->string(255),
             'classroom' => $this->integer(5),
             'week_day' => $this->string(20),
             'hours_count' => $this->integer(20),
             'time_from' => $this->string(10),
             'time_to' => $this->string(10),
         ]);
-
-        $this->addForeignKey(
-            'fk-group_class-address_id-program_module_address-id',
-            'group_class',
-            'address_id',
-            'program_module_address',
-            'id'
-        );
 
         $this->addForeignKey(
             'fk-group_class-group_id-groups-id',
@@ -45,10 +37,6 @@ class m170731_143133_create_group_trainee_table extends Migration
      */
     public function down()
     {
-        $this->dropForeignKey(
-            'fk-group_class-address_id-program_module_address-id',
-            'group_class'
-        );
         $this->dropForeignKey(
             'fk-group_class-group_id-groups-id',
             'group_class'

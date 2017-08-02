@@ -41,7 +41,7 @@ $columns = [
             return Html::a(
                 $model->organization->name,
                 Url::to(['organization/view', 'id' => $model->organization->id]),
-                ['class' => 'blue', 'target' => '_blank']
+                ['target' => '_blank', 'data-pjax' => '0']
             );
         },
     ],
@@ -72,6 +72,9 @@ $columns = [
     [
         'attribute' => 'sum',
         'type' => SearchFilter::TYPE_RANGE_SLIDER,
+        'pluginOptions' => [
+            'max' => 10000000
+        ]
     ],
     [
         'attribute' => 'link',
@@ -101,7 +104,11 @@ $columns = [
 ];
 
 $preparedColumns = GridviewHelper::prepareColumns('invoices', $columns);
-
+?>
+<?php if ($searchInvoices->organization_id) : ?>
+    <p class="lead">Показаны результаты для организации: <?= $searchInvoices->organization; ?></p>
+<?php endif; ?>
+<?php
 echo SearchFilter::widget([
     'model' => $searchInvoices,
     'action' => ['personal/payer-invoices'],

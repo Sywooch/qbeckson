@@ -43,7 +43,7 @@ $columns = [
             return Html::a(
                 $model->payer->name,
                 Url::to(['payers/view', 'id' => $model->payer->id]),
-                ['class' => 'blue', 'target' => '_blank']
+                ['target' => '_blank', 'data-pjax' => '0']
             );
         },
     ],
@@ -74,6 +74,9 @@ $columns = [
     [
         'attribute' => 'sum',
         'type' => SearchFilter::TYPE_RANGE_SLIDER,
+        'pluginOptions' => [
+            'max' => 10000000
+        ]
     ],
     [
         'attribute' => 'link',

@@ -72,6 +72,9 @@ $hours = [
     'value' => 'countHours',
     'label' => 'Кол-во часов',
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    'pluginOptions' => [
+        'max' => 2000
+    ]
 ];
 $directivity = [
     'attribute' => 'directivity',
@@ -91,11 +94,17 @@ $rating = [
     'attribute' => 'rating',
     'label' => 'Рейтинг',
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    'pluginOptions' => [
+        'max' => 100
+    ]
 ];
 $limit = [
     'attribute' => 'limit',
     'label' => 'Лимит',
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    'pluginOptions' => [
+        'max' => 10000
+    ]
 ];
 $actions = [
     'class' => ActionColumn::class,

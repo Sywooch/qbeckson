@@ -213,7 +213,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => $amount,
             ],
             [
-                'label' => Html::a('Сертифицированных программ', Url::to(['/programs/search', 'org' => $model->id]), ['class' => 'blue']),
+                'label' => Html::a(
+                    'Сертифицированных программ',
+                    Url::to(['/programs/search', 'org' => $model->id]),
+                    ['class' => 'blue', 'target' => '_blank']
+                ),
                 'value'=>$model->getCertprogram(),
             ],
         ],
@@ -234,7 +238,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             'Число договоров',
                             Url::to([
                                 'personal/payer-contracts',
-                                'SearchActiveContracts[organizationName]' => $model->name
+                                'SearchActiveContracts[organizationName]' => $model->name,
+                                'SearchActiveContracts[organization_id]' => $model->id,
                             ]),
                             ['class' => 'blue', 'target' => '_blank']
                         ),
@@ -245,7 +250,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             'Сертифицированных программ',
                             Url::to([
                                 'personal/payer-programs',
-                                'SearchPrograms[organization]' => $model->name
+                                'SearchPrograms[organization]' => $model->name,
+                                'SearchPrograms[organization_id]' => $model->id
                             ]),
                             ['class' => 'blue', 'target' => '_blank']
                         ),
@@ -281,7 +287,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             'Сертифицированных программ',
                             [
                                 'personal/operator-programs',
-                                'SearchOpenPrograms[organization]' => $model->name
+                                'SearchOpenPrograms[organization]' => $model->name,
+                                'SearchOpenPrograms[organization_id]' => $model->id,
                             ],
                             ['class' => 'blue', 'target' => '_blank']
                         ),
@@ -305,7 +312,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         'Выставлено счетов и авансов',
                         [
                             '/personal/payer-invoices',
-                            'InvoicesSearch[organization]' => $model->name
+                            'InvoicesSearch[organization]' => $model->name,
+                            'InvoicesSearch[organization_id]' => $model->id
                         ],
                         ['class' => 'blue', 'target' => '_blank']
                     ),

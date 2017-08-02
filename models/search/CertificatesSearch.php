@@ -142,17 +142,17 @@ class CertificatesSearch extends Certificates
             $query->andFilterWhere(['payer_id' => $this->payer_id]);
         }
 
-        if (!empty($this->nominal)) {
+        if (!empty($this->nominal) && $this->nominal !== '0,150000') {
             $nominal = explode(',', $this->nominal);
             $query->andWhere(['and', ['>=', 'nominal', (int)$nominal[0]], ['<=', 'nominal', (int)$nominal[1]]]);
         }
 
-        if (!empty($this->rezerv)) {
+        if (!empty($this->rezerv) && $this->rezerv !== '0,150000') {
             $rezerv = explode(',', $this->rezerv);
             $query->andWhere(['and', ['>=', 'rezerv', (int)$rezerv[0]], ['<=', 'rezerv', (int)$rezerv[1]]]);
         }
 
-        if (!empty($this->balance)) {
+        if (!empty($this->balance) && $this->balance !== '0,150000') {
             $balance = explode(',', $this->balance);
             $query->andWhere(['and', ['>=', 'balance', (int)$balance[0]], ['<=', 'balance', (int)$balance[1]]]);
         }

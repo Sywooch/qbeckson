@@ -21,7 +21,15 @@ $columns = [
     ],
     [
         'attribute' => 'programName',
-        'value' => 'program.name',
+        'value' => function ($model) {
+            return Html::a(
+                $model->program->name,
+                ['programs/view', 'id' => $model->program->id],
+                ['target' => '_blank', 'data-pjax' => '0']
+            );
+        },
+        'label' => 'Программа',
+        'format' => 'raw'
     ],
     [
         'attribute' => 'address',

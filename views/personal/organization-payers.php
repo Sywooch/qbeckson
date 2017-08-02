@@ -46,6 +46,9 @@ $cooperates = [
         return $model->getCooperates()->andWhere(['status' => 1])->count();
     },
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    'pluginOptions' => [
+        'max' => 100
+    ]
 ];
 $certificates = [
     'attribute' => 'certificates',

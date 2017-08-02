@@ -2,6 +2,7 @@
 
 namespace app\models\forms;
 
+use app\components\GoogleCoordinates;
 use app\models\Model;
 use app\models\ProgrammeModule;
 use app\models\ProgramModuleAddress;
@@ -17,7 +18,7 @@ class SelectModuleMainAddressForm extends Model
     private $module;
     /** @var ProgramModuleAddress */
     private $moduleAddress;
-    private $yandexMapsComponent;
+    private $googleCoordinatesComponent;
 
     /**
      * @return array
@@ -75,10 +76,11 @@ class SelectModuleMainAddressForm extends Model
                 $oldAddress->lat = null;
                 $oldAddress->save(false);
             }
+            $this->setGoogleCoordinatesComponent($this->moduleAddress->address);
 
             $this->moduleAddress->status = 1;
-            $this->moduleAddress->lat = 999;
-            $this->moduleAddress->lng = 999;
+            $this->moduleAddress->lat = $this->getGoogleCoordinatesComponent()->getLat();
+            $this->moduleAddress->lng = $this->getGoogleCoordinatesComponent()->getLng();
 
             return $this->moduleAddress->save(false);
         }
@@ -101,5 +103,21 @@ class SelectModuleMainAddressForm extends Model
     {
         $this->module = $module;
         $this->addressId = $module->mainAddress ? $module->mainAddress->id : null;
+    }
+
+    /**
+     * @return GoogleCoordinates
+     */
+    public function getGoogleCoordinatesComponent()
+    {
+        return $this->googleCoordinatesComponent;
+    }
+
+    /**
+     * @param string $address
+     */
+    public function setGoogleCoordinatesComponent($address)
+    {
+        $this->googleCoordinatesComponent = new GoogleCoordinates($address);
     }
 }

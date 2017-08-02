@@ -32,11 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'value' => function ($model) {
                     /** @var \app\models\Payers $model */
-                    return Html::a(
-                        $model->municipality->name,
-                        ['mun/view', 'id' => $model->municipality->id],
-                        ['target' => '_blank', 'data-pjax' => '0']
-                    );
+                    return $model->municipality->name;
                 },
             ],
             'phone',
@@ -123,7 +119,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         'Число заключенных соглашений',
                         Url::to([
                             'cooperate/index',
-                            'CooperateSearch[payerName]' => $model->name
+                            'CooperateSearch[payerName]' => $model->name,
+                            'CooperateSearch[payer_id]' => $model->id
                         ]),
                         ['class' => 'blue', 'target' => '_blank']
                     ),

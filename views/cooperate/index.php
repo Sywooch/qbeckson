@@ -83,16 +83,25 @@ $columns = [
                 [
                     'personal/operator-contracts',
                     'SearchActiveContracts[organizationName]' => $data->organization->name,
-                    'SearchActiveContracts[payerName]' => $data->payers->name
+                    'SearchActiveContracts[organization_id]' => $data->organization->id,
+                    'SearchActiveContracts[payerName]' => $data->payers->name,
+                    'SearchActiveContracts[payer_id]' => $data->payers->id,
                 ],
                 ['class' => 'blue', 'target' => '_blank', 'data-pjax' => '0']
             );
         },
     ],
+    [
+        'attribute' => 'payer_id',
+        'type' => SearchFilter::TYPE_HIDDEN,
+    ],
 ];
 
 ?>
 <div class="cooperate-index">
+    <?php if ($searchModel->payer_id) : ?>
+        <p class="lead">Показаны результаты для плательщика: <?= $searchModel->payerName; ?></p>
+    <?php endif; ?>
     <?= SearchFilter::widget([
         'model' => $searchModel,
         'action' => ['cooperate/index'],

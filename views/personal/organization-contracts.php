@@ -78,7 +78,7 @@ $certificateNumber = [
         return Html::a(
             $data->certificate->number,
             Url::to(['certificates/view', 'id' => $data->certificate->id]),
-            ['class' => 'blue', 'target' => '_blank']
+            ['target' => '_blank', 'data-pjax' => '0']
         );
     }
 ];
@@ -90,7 +90,7 @@ $programName = [
         return Html::a(
             $data->program->name,
             Url::to(['programs/view', 'id' => $data->program->id]),
-            ['class' => 'blue', 'target' => '_blank']
+            ['target' => '_blank', 'data-pjax' => '0']
         );
     },
 ];
@@ -102,7 +102,7 @@ $payerName = [
         return Html::a(
             $data->payers->name,
             Url::to(['payers/view', 'id' => $data->payer->name]),
-            ['class' => 'blue', 'target' => '_blank']
+            ['target' => '_blank', 'data-pjax' => '0']
         );
     }
 ];
@@ -135,6 +135,10 @@ $actions = [
 ];
 
 $activeColumns = $endsColumns = [
+    [
+        'attribute' => 'payer_id',
+        'type' => SearchFilter::TYPE_HIDDEN
+    ],
     $number,
     $date,
     $rezerv,
@@ -259,9 +263,12 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
     }
     ?>
     <div id="panel1" class="tab-pane fade in active">
+        <?php if ($searchActiveContracts->payer_id) : ?>
+            <p class="lead">Показаны результаты для программы: <?= $searchActiveContracts->programName; ?></p>
+        <?php endif; ?>
         <?= SearchFilter::widget([
             'model' => $searchActiveContracts,
-            'action' => ['personal/operator-contracts'],
+            'action' => ['personal/organization-contracts'],
             'data' => GridviewHelper::prepareColumns(
                 'contracts',
                 $activeColumns,
@@ -288,7 +295,7 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
     <div id="panel2" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchConfirmedContracts,
-            'action' => ['personal/operator-contracts'],
+            'action' => ['personal/organization-contracts'],
             'data' => GridviewHelper::prepareColumns(
                 'contracts',
                 $confirmedColumns,
@@ -315,7 +322,7 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
     <div id="panel3" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchPendingContracts,
-            'action' => ['personal/operator-contracts'],
+            'action' => ['personal/organization-contracts'],
             'data' => GridviewHelper::prepareColumns(
                 'contracts',
                 $pendingColumns,
@@ -337,7 +344,7 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
     <div id="panel5" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchDissolvedContracts,
-            'action' => ['personal/operator-contracts'],
+            'action' => ['personal/organization-contracts'],
             'data' => GridviewHelper::prepareColumns(
                 'contracts',
                 $dissolvedColumns,

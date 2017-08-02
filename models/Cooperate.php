@@ -71,7 +71,7 @@ class Cooperate extends ActiveRecord
             'number' => 'Номер соглашения',
             'date' => ' Дата заключения соглашения',
             'date_dissolution' => 'Дата расторжения соглашения',
-            'status' => 'Cтатус соглашения',
+            'status' => 'Статус соглашения',
         ];
     }
 

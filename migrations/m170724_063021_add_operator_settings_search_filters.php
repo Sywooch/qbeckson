@@ -21,7 +21,7 @@ class m170724_063021_add_operator_settings_search_filters extends Migration
         $this->insert('settings_search_filters', [
             'table_name' => 'programs',
             'table_columns' => 'year,hours,directivity,zab,age_group_min,age_group_max,rating,limit,organization',
-            'inaccessible_columns' => 'name,mun',
+            'inaccessible_columns' => 'name,mun,organization_id',
             'is_active' => 1,
             'role' => UserIdentity::ROLE_OPERATOR,
             'type' => 'open'

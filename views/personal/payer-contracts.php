@@ -79,7 +79,7 @@ $certificateNumber = [
         return Html::a(
             $data->certificate->number,
             Url::to(['certificates/view', 'id' => $data->certificate->id]),
-            ['class' => 'blue', 'target' => '_blank']
+            ['target' => '_blank', 'data-pjax' => '0']
         );
     }
 ];
@@ -103,7 +103,7 @@ $organizationName = [
         return Html::a(
             $data->organization->name,
             Url::to(['/organization/view', 'id' => $data->organization->id]),
-            ['class' => 'blue', 'target' => '_blank']
+            ['target' => '_blank', 'data-pjax' => '0']
         );
     },
 ];
@@ -246,6 +246,15 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
 <br>
 <div class="tab-content">
     <div id="panel1" class="tab-pane fade in active">
+        <?php if ($searchActiveContracts->payer_id) : ?>
+            <p class="lead">Показаны результаты для программы: <?= $searchActiveContracts->programName; ?></p>
+        <?php endif; ?>
+        <?php if ($searchActiveContracts->certificate_id) : ?>
+            <p class="lead">Показаны результаты для сертификата: <?= $searchActiveContracts->certificateNumber; ?></p>
+        <?php endif; ?>
+        <?php if ($searchActiveContracts->organization_id) : ?>
+            <p class="lead">Показаны результаты для организации: <?= $searchActiveContracts->organizationName; ?></p>
+        <?php endif; ?>
         <?= SearchFilter::widget([
             'model' => $searchActiveContracts,
             'action' => ['personal/payer-contracts'],

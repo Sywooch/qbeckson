@@ -14,13 +14,13 @@ use yii\db\ActiveRecord;
  * @property string $time_from
  * @property string $time_to
  * @property integer $classroom
- * @property integer $address_id
+ * @property string $address
  *
  * @property Groups $group
  */
 class GroupClass extends ActiveRecord
 {
-    public $dateStatus;
+    public $status;
 
     /**
      * @inheritdoc
@@ -36,16 +36,13 @@ class GroupClass extends ActiveRecord
     public function rules()
     {
         return [
-            [['group_id', 'hours_count', 'dateStatus', 'address_id', 'classroom'], 'integer'],
+            [['group_id', 'hours_count', 'status', 'classroom'], 'integer'],
             [['week_day'], 'string', 'max' => 20],
+            [['address'], 'string', 'max' => 255],
             [['time_from', 'time_to'], 'string', 'max' => 10],
             [
                 ['group_id'], 'exist', 'skipOnError' => true,
                 'targetClass' => Groups::class, 'targetAttribute' => ['group_id' => 'id']
-            ],
-            [
-                ['address_id'], 'exist', 'skipOnError' => true,
-                'targetClass' => ProgramModuleAddress::class, 'targetAttribute' => ['address_id' => 'id']
             ],
         ];
     }
@@ -62,6 +59,9 @@ class GroupClass extends ActiveRecord
             'hours_count' => 'Количество часов',
             'time_from' => 'Время с',
             'time_to' => 'Время до',
+            'status' => 'Статус',
+            'classroom' => 'Номер кабинета',
+            'address' => 'Адрес',
         ];
     }
 
@@ -71,13 +71,13 @@ class GroupClass extends ActiveRecord
     public static function weekDays()
     {
         return [
-            'Понедельник' => 'Понедельник',
-            'Вторник' => 'Вторник',
-            'Среда' => 'Среда',
-            'Четверг' => 'Четверг',
-            'Пятница' => 'Пятница',
-            'Суббота' => 'Суббота',
-            'Воскресенье' => 'Воскресенье',
+            1 => 'Понедельник',
+            2 => 'Вторник',
+            3 => 'Среда',
+            4 => 'Четверг',
+            5 => 'Пятница',
+            6 => 'Суббота',
+            7 => 'Воскресенье',
         ];
     }
 
@@ -87,13 +87,5 @@ class GroupClass extends ActiveRecord
     public function getGroup()
     {
         return $this->hasOne(Groups::class, ['id' => 'group_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getAddress()
-    {
-        return $this->hasOne(ProgramModuleAddress::class, ['id' => 'address_id']);
     }
 }

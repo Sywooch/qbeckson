@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
@@ -61,7 +62,8 @@ class CooperateSearch extends Cooperate
             ->joinWith([
                 'payers',
                 'organization'
-            ]);
+            ])
+            ->andWhere(['organization.mun' => Yii::$app->operator->identity->id]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
