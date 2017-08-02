@@ -72,12 +72,11 @@ class CertGroup extends \yii\db\ActiveRecord
         ];
     }
 
-    public static function hasVacancy($model)
+    public function hasVacancy()
     {
-        $query = Certificates::find()
-            ->where(['cert_group' => $model->id]);
+        $certGroupCount = Certificates::getCountCertGroup($this->id);
 
-        if ($model->amount - $query->count() > 0) {
+        if ($this->amount - $certGroupCount > 0) {
             return true;
         }
 

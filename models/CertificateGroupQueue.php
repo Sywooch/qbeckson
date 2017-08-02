@@ -47,6 +47,34 @@ class CertificateGroupQueue extends \yii\db\ActiveRecord
         ];
     }
 
+    public static function getByCertGroup($certGroupId, $limit = null)
+    {
+        $query = static::find()
+            ->where(['cert_group_id' => $certGroupId]);
+
+        if (!empty($limit)) {
+            $query->limit($limit);
+        }
+
+        return $query->all();
+    }
+
+    public function removeFromCertQueue()
+    {
+        $certificate = $this->certificate;
+        $certificate->scenario = Certificates::SCENARIO_CERTIFICATE;
+        $certificate->nominal = $this->certGroup->nominal;
+        $certificate->balance = $this->certGroup->nominal;
+        $certificate->cert_group = $this->certGroup->id;
+        if ($certificate->save()) {
+            $this->delete();
+
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */

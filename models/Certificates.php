@@ -131,6 +131,7 @@ class Certificates extends \yii\db\ActiveRecord
             'rezerv' => 'Зарезервированно на оплату программ',
             'cert_group' => 'Группа сертификата',
             'selectCertGroup' => 'Группа сертификата',
+            'possible_cert_group' => 'Тип сертификата',
         ];
     }
 
@@ -257,7 +258,7 @@ class Certificates extends \yii\db\ActiveRecord
             return self::FLAG_GROUP_HAS_NOT_BEEN_CHANGED;
         }
 
-        if (CertGroup::hasVacancy($this->certGroup)) {
+        if ($this->certGroup->hasVacancy()) {
             $this->nominal = $this->certGroup->nominal;
             $this->balance = $this->nominal;
 
@@ -270,23 +271,16 @@ class Certificates extends \yii\db\ActiveRecord
         return self::FLAG_GROUP_HAS_NOT_BEEN_CHANGED;
     }
 
-    public static function updateGroupQueue($certGroup) {
+    public static function updateGroupQueue($certGroup)
+    {
         $model = CertificateGroupQueue::find()
             ->where([
                 'cert_group_id' => $certGroup->id,
             ])
-        ->one();
+            ->one();
 
         if ($model) {
-            $certificate = $model->certificate;
-            $certificate->nominal = $certGroup->nominal;
-            $certificate->balance = $certGroup->nominal;
-            $certificate->cert_group = $certGroup->id;
-            if ($certificate->save()) {
-                $model->delete();
-
-                return true;
-            }
+            return $model->removeFromCertQueue();
         }
 
         return false;
@@ -296,11 +290,20 @@ class Certificates extends \yii\db\ActiveRecord
     {
         if (!$this->getCertificateGroupQueues($this->id, $this->cert_group)->count()) {
             $this->link('certGroupsQueue', $this->certGroup);
-            Yii::$app->session->setFlash('warning', 'Свободных мест в группе нет, поэтому вы успешно поставлены в очередь на зачисление.');
+            Yii::$app->session->setFlash('danger', 'Свободных мест в группе нет, поэтому вы успешно поставлены в очередь на зачисление.');
         }
     }
 
-    public static function getCountCertificates($payerId = null) {
+    public static function getCountCertGroup($certGroupId)
+    {
+        $query = static::find()
+            ->where(['cert_group' => $certGroupId]);
+
+        return $query->count();
+    }
+
+    public static function getCountCertificates($payerId = null)
+    {
         $query = static::find()
             ->joinWith(['payers'])
             ->where(['actual' => 1])
@@ -311,7 +314,8 @@ class Certificates extends \yii\db\ActiveRecord
         return $query->count();
     }
 
-    public static function getSumCertificates($payerId = null) {
+    public static function getSumCertificates($payerId = null)
+    {
         $query = static::find()
             ->joinWith(['payers'])
             ->where(['actual' => 1])
@@ -327,7 +331,8 @@ class Certificates extends \yii\db\ActiveRecord
     /**
      * DEPRECATED
      */
-    public function getSumContractes($payer_id) {
+    public function getSumContractes($payer_id)
+    {
         $query = Certificates::find();
 
         $query->where(['payer_id' => $payer_id]);
@@ -339,11 +344,12 @@ class Certificates extends \yii\db\ActiveRecord
      * DEPRECATED
      * Use relation in app\models\UserIdentity instead
      */
-    public function getCertificates() {
+    public function getCertificates()
+    {
 
         $query = Certificates::find();
 
-        if(!Yii::$app->user->isGuest) {
+        if (!Yii::$app->user->isGuest) {
             $query->where(['user_id' => Yii::$app->user->id]);
         }
 

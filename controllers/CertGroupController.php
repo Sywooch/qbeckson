@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\models\CertificateGroupQueue;
+use app\models\Certificates;
 use Yii;
 use yii\web\Response;
 use yii\web\Controller;
@@ -37,6 +39,16 @@ class CertGroupController extends Controller
                     return ['output' => '', 'message' => 'Неверный пароль.'];
                 }
 
+                if ($model->oldAttributes['amount'] != $model->amount) {
+                    $certGroupCount = Certificates::getCountCertGroup($model->id);
+                    $vacancies = $model->amount - $certGroupCount;
+                    if ($vacancies > 0 && $queue = CertificateGroupQueue::getByCertGroup($model->id, $vacancies)) {
+                        foreach ($queue as $item) {
+                            $item->removeFromCertQueue();
+                        }
+                    }
+                }
+
                 $model->save(false);
             } else {
                 $out = ['output' => $output, 'message' => 'Ошибка при сохранении.'];
@@ -58,8 +70,10 @@ class CertGroupController extends Controller
      */
     public function actionView($id)
     {
+        $model = $this->findModel($id);
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
         ]);
     }
 

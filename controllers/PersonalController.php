@@ -658,7 +658,7 @@ class PersonalController extends \yii\web\Controller
                 }
             }
 
-            if ($model->save()) {
+            if ($model->save(false)) {
                 if ($flagGroupHasBeenChanged === true) {
                     Yii::$app->session->setFlash('success', 'Вы успешно сменили тип сертификата. Теперь вам нужно передать заявление вышестоящей организации <a href="' . Url::to(['certificates/group-pdf']) . '" class="btn btn-primary">Открыть заявление (PDF)</a>');
                 }
