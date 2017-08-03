@@ -15,6 +15,9 @@ $config = [
     'layout' => 'gos',
     'defaultRoute' => 'site/index',
     'components' => [
+        'yandexMapsApi' => [
+            'class' => 'mirocow\yandexmaps\Api',
+        ],
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'BiX8pOuGw7eu1QX9cP19jptOtNg9vYA7',
@@ -248,18 +251,18 @@ $config = [
     'params' => $params,
 ];
 
-//if (YII_ENV_DEV || YII_ENV_TEST) {
+if (YII_ENV_DEV) {
     // configuration adjustments for 'dev' environment
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',
-        'allowedIPs' => ['95.183.108.6', '127.0.0.1'],
+        'allowedIPs' => ['*'],
     ];
 
     $config['bootstrap'][] = 'gii';
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
     ];
-//}
+}
 
 return $config;

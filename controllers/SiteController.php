@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\models\CertificateInformation;
+use app\models\Mun;
 use app\models\SettingsSearchFilters;
 use app\models\UserSearchFiltersAssignment;
 use Yii;
@@ -48,6 +50,20 @@ class SiteController extends Controller
                 'fixedVerifyCode' => YII_ENV_DEV ? 'test' : null,
             ],
         ];
+    }
+
+    public function actionInformation($municipalityId = null)
+    {
+        if ($municipalityId) {
+            $result = CertificateInformation::findOneByMunicipality($municipalityId);
+        } else {
+            $municipalities = Mun::find()->all();
+        }
+
+        return $this->render('information', [
+            'result' => $result ?: null,
+            'municipalities' => $municipalities ?: [],
+        ]);
     }
 
     public function actionIndex()

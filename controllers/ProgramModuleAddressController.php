@@ -78,7 +78,7 @@ class ProgramModuleAddressController extends Controller
             if (Model::validateMultiple($addressModels)) {
                 $transaction = Yii::$app->db->beginTransaction();
                 try {
-                    if (! empty($deletedIDs)) {
+                    if (!empty($deletedIDs)) {
                         ProgramModuleAddress::deleteAll(['id' => $deletedIDs]);
                     }
                     foreach ($addressModels as $addressModel) {
@@ -117,7 +117,8 @@ class ProgramModuleAddressController extends Controller
         $model->setModule($programModuleModel);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['programs/view', 'id' => $programModuleModel->program_id]);
+            //return $this->redirect(['programs/view', 'id' => $programModuleModel->program_id]);
+            return $this->refresh();
         }
 
         return $this->render('select', [

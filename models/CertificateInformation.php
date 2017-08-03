@@ -67,8 +67,10 @@ class CertificateInformation extends ActiveRecord
                     ActiveRecord::EVENT_BEFORE_INSERT => 'payer_id',
                     ActiveRecord::EVENT_BEFORE_UPDATE => 'payer_id',
                 ],
-                'value' => function ($event) {
-                    return Yii::$app->user->getIdentity()->payer->id;
+                'value' => function () {
+                    /** @var UserIdentity $user */
+                    $user = Yii::$app->user->getIdentity();
+                    return $user->payer->id;
                 },
             ],
             [
@@ -114,5 +116,21 @@ class CertificateInformation extends ActiveRecord
     public function getPayer()
     {
         return $this->hasOne(Payers::className(), ['id' => 'payer_id']);
+    }
+
+    /**
+     * @param null $municipalityId
+     * @return CertificateInformation[]|array|ActiveRecord[]
+     */
+    public static function findOneByMunicipality($municipalityId)
+    {
+        return CertificateInformation::find()
+            ->joinWith([
+                'payer'
+            ])
+            ->andWhere([
+                'payers.mun' => $municipalityId
+            ])
+            ->one();
     }
 }

@@ -21,19 +21,28 @@ $this->title = 'Портал сопровождения персонифицир
             <div class="col-md-4 col-md-offset-4">
                 <?php $form = ActiveForm::begin([
                     'id' => 'login-form',
-                ]); ?>                    
-
+                ]); ?>
                     <?= $form->field($model, 'username')->textInput(['autofocus' => true]) ?>
-
                     <?= $form->field($model, 'password')->passwordInput() ?>
-
                     <div class="form-group">
                         <?= Html::submitButton('Войти', ['class' => 'btn btn-primary', 'name' => 'login-button']) ?>
                     </div>
-
                 <?php ActiveForm::end(); ?>
-
-                <a href="javascript:void(0);" data-toggle="modal" data-target="#create-organization-modal">Отправить заявку на регистрацию организации</a>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <?= Html::a(
+                            'Узнать, как получить сертификат',
+                            ['site/information']
+                        ) ?>
+                        <br>
+                        <br>
+                        <a href="javascript:void(0);"
+                           data-toggle="modal"
+                           data-target="#create-organization-modal">
+                                Отправить заявку на регистрацию организации
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
 

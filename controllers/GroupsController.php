@@ -74,21 +74,9 @@ class GroupsController extends Controller
     {
         $model = $this->findModel($id);
 
-        /* $rows = (new \yii\db\Query())
-                 ->select(['id'])
-                 ->from('contracts')
-                 ->where(['group_id' => $id])
-                 ->andWhere(['status' => 1])
-                 ->column();
-
-         if (empty($rows)) { $rows = 0; }*/
-
-
         $Contracts1Search = new ContractsStatus1onlySearch();
         $Contracts1Search->group_id = $id;
         $ContractsProvider = $Contracts1Search->search(Yii::$app->request->queryParams);
-
-        //return var_dump($rows);
 
         return $this->render('contracts', [
             'model' => $model,
@@ -265,19 +253,40 @@ class GroupsController extends Controller
             'address'
         );
 
+        $groupClasses = [];
+        foreach (GroupClass::weekDays() as $key => $day) {
+            foreach ($model->classes as $class) {
+                if ($class->week_day === $day) {
+                    $class->status = 1;
+                    $groupClasses[$key] = $class;
+                }
+            }
+            if (null === $groupClasses[$key]) {
+                $groupClasses[$key] = new GroupClass([
+                    'week_day' => $day
+                ]);
+            }
+        }
+
         if (Yii::$app->request->post()) {
             $model->load(Yii::$app->request->post());
-            Model::loadMultiple($model->classes, Yii::$app->request->post());
-            if ($model->validate() && Model::validateMultiple($model->classes)) {
+            Model::loadMultiple($groupClasses, Yii::$app->request->post());
+            if ($model->validate() && Model::validateMultiple($groupClasses)) {
                 $transaction = Yii::$app->db->beginTransaction();
                 try {
-                    if ($model->save()) {
-                        foreach ($model->classes as $classModel) {
+                    if ($model->save(false)) {
+                        foreach ($groupClasses as $classModel) {
                             /** @var GroupClass $classModel */
-                            $classModel->group_id = $model->id;
-                            if (!($flag = $classModel->save(false))) {
-                                $transaction->rollBack();
-                                break;
+                            if ($classModel->status) {
+                                $classModel->group_id = $model->id;
+                                if (!($flag = $classModel->save(false))) {
+                                    $transaction->rollBack();
+                                    break;
+                                }
+                            } else {
+                                if (!$classModel->isNewRecord) {
+                                    $classModel->delete();
+                                }
                             }
                         }
                     }
@@ -295,6 +304,7 @@ class GroupsController extends Controller
         return $this->render('update', [
             'model' => $model,
             'programModuleAddresses' => $programModuleAddresses,
+            'groupClasses' => $groupClasses,
         ]);
     }
 

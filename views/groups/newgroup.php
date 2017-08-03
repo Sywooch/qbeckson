@@ -30,11 +30,11 @@ $this->registerJs($js, $this::POS_READY);
     <?php $form = ActiveForm::begin(); ?>
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
     <hr>
-    <?php foreach (GroupClass::weekDays() as $i => $week) : ?>
+    <?php foreach ($groupClasses as $i => $class) : ?>
         <div class="form-checker">
             <?= $form->field($groupClasses[$i], "[{$i}]status")
                 ->checkbox([
-                    'label' => $week,
+                    'label' => $class->week_day,
                     'class' => 'checkbox show-form-options'
                 ])->label(false); ?>
         </div>
@@ -75,7 +75,6 @@ $this->registerJs($js, $this::POS_READY);
             </div>
             <hr>
         </div>
-
     <?php endforeach; ?>
     <?= $form->field($model, 'datestart')->widget(DateControl::class, [
         'type' => DateControl::FORMAT_DATE,

@@ -3,6 +3,8 @@
 /* @var $this \yii\web\View */
 /* @var $content string */
 
+use app\widgets\Alert;
+use app\widgets\MainFooter;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\bootstrap\Nav;
@@ -28,12 +30,14 @@ $user = Yii::$app->user->getIdentity();
     <body>
         <?php $this->beginBody() ?>
         <div class="wrap">
-           <div class="container-fluid">
-               <div class="top-line row">
-                   <div class="col-md-10 col-md-offset-1 text-center">
-                       <a href="<?= Url::home() ?>">Портал персонифицированного финансирования дополнительного образования детей</a>
-                   </div>
-                   <div class="col-md-1">
+            <div class="container-fluid">
+                <div class="top-line row">
+                    <div class="col-md-10 col-md-offset-1 text-center">
+                        <a href="<?= Url::home() ?>">
+                            Портал персонифицированного финансирования дополнительного образования детей
+                        </a>
+                    </div>
+                    <div class="col-md-1">
                         <?php
                         if (!Yii::$app->user->isGuest) {
                             echo Nav::widget([
@@ -119,7 +123,10 @@ $user = Yii::$app->user->getIdentity();
                                         [
                                             'label' => 'Плательщики',
                                             'items' => [
-                                                ['label' => 'Уполномоченные Организации', 'url' => ['personal/operator-payers']],
+                                                [
+                                                    'label' => 'Уполномоченные Организации',
+                                                    'url' => ['personal/operator-payers']
+                                                ],
                                                 ['label' => 'Соглащения', 'url' => ['cooperate/index']]
                                             ]
                                         ],
@@ -151,13 +158,28 @@ $user = Yii::$app->user->getIdentity();
                                     'options' => ['class' => 'navbar-nav inner-nav'],
                                     'items' => [
                                         ['label' => 'Информация', 'items' => [
-                                            ['label' => 'Статистическая информация', 'url' => ['/personal/organization-statistic']],
-                                            ['label' => 'Сведения об организации', 'url' => ['/personal/organization-info']],
-                                            ['label' => 'Предварительные записи', 'url' => ['/personal/organization-favorites']],
+                                            [
+                                                'label' => 'Статистическая информация',
+                                                'url' => ['/personal/organization-statistic']
+                                            ],
+                                            [
+                                                'label' => 'Сведения об организации',
+                                                'url' => ['/personal/organization-info']
+                                            ],
+                                            [
+                                                'label' => 'Предварительные записи',
+                                                'url' => ['/personal/organization-favorites']
+                                            ],
                                         ]],
                                         ['label' => 'Программы', 'items' => [
-                                            ['label' => 'Реестр программ', 'url' => ['personal/organization-programs']],
-                                            ['label' => 'Муниципальное задание', 'url' => ['maintenance/index']],
+                                            [
+                                                'label' => 'Реестр программ',
+                                                'url' => ['personal/organization-programs']
+                                            ],
+                                            [
+                                                'label' => 'Муниципальное задание',
+                                                'url' => ['maintenance/index']
+                                            ],
                                         ]],
                                         ['label' => 'Договоры', 'url' => ['/personal/organization-contracts']],
                                         ['label' => 'Счета', 'url' => ['/personal/organization-invoices']],
@@ -177,15 +199,17 @@ $user = Yii::$app->user->getIdentity();
                                         ['label' => 'Организации', 'url' => ['/personal/certificate-organizations']],
                                     ],
                                 ]);
-                                echo "</div>";
-
+                                echo '</div>';
                                 $certificate = Yii::$app->user->identity->certificate;
-                                if ($certificate->actual == 0) {
+                                if ($certificate->actual === 0) {
                                     echo Nav::widget([
                                         'options' => ['class' => 'navbar-nav navbar-right balancefield'],
                                         'encodeLabels' => false,
                                         'items' => [
-                                            ['label' => 'Заморожен <span class="glyphicon glyphicon-user"></span>', 'url' => ['/personal/certificate-info']],
+                                            [
+                                                'label' => 'Заморожен <span class="glyphicon glyphicon-user"></span>',
+                                                'url' => ['/personal/certificate-info']
+                                            ],
                                         ],
                                     ]);
                                 } else {
@@ -193,11 +217,15 @@ $user = Yii::$app->user->getIdentity();
                                         'options' => ['class' => 'navbar-nav navbar-right balancefield'],
                                         'encodeLabels' => false,
                                         'items' => [
-                                            ['label' => $certificate['balance'].' руб. <span class="glyphicon glyphicon-user"></span>', 'url' => ['/personal/certificate-info']],
+                                            [
+                                                'label' => $certificate['balance'] .
+                                                    ' руб. <span class="glyphicon glyphicon-user"></span>',
+                                                'url' => ['/personal/certificate-info']
+                                            ],
                                         ],
                                     ]);
                                 }
-                                echo "</div>";
+                                echo '</div>';
                             }
                             NavBar::end();
                         ?>
@@ -211,38 +239,44 @@ $user = Yii::$app->user->getIdentity();
                         $links = array_merge($links, [[
                             'label' => 'Видео-уроки',
                             'url' => ['controller/action'],
-                            'template' => "<li class=\"breadcrumbs-help-icon\"><a href=\"" . Url::to(['site/help']) . "\"><span class=\"glyphicon glyphicon-film\"></span> Видео-уроки</a></li>\n"
+                            'template' =>
+                                '<li class="breadcrumbs-help-icon"><a href="' .
+                                Url::to(['site/help']) .
+                                '"><span class="glyphicon glyphicon-film"></span> Видео-уроки</a></li>'
                         ]]);
                         echo Breadcrumbs::widget([
-                            'homeLink' => ['label' => 'Главная', 'url' => '/', 'template' => '<span class="glyphicon glyphicon-home"></span> <li>{link}</li>'],
+                            'homeLink' => [
+                                'label' => 'Главная',
+                                'url' => ['site/index'],
+                                'template' => '<span class="glyphicon glyphicon-home"></span> <li>{link}</li>'
+                            ],
                             'links' => $links,
                         ])
                         ?>
                     </div>
                     <div class="col-md-12 col-md-8 col-md-offset-2">
-                         <?php
-                            // TODO: Убрать всё это говно
-                            $organizations = new Organization();
-                            $organization = $organizations->getOrganization();
+                        <?php
+                        // TODO: Убрать всё это говно, ага ;)
+                        $organizations = new Organization();
+                        $organization = $organizations->getOrganization();
 
-                            if (isset($roles['organizations']) and $organization['actual'] == 0) {
-                                Yii::$app->session->setFlash('warning', 'Ваша деятельность приостановлена, обратитесь к оператору');
+                        if (isset($roles['organizations']) and $organization['actual'] == 0) {
+                            Yii::$app->session->setFlash('warning', 'Ваша деятельность приостановлена, обратитесь к оператору');
+                        }
+
+                        if (isset($roles['operators'])) {
+                            $coef = (new \yii\db\Query())
+                                ->select(['p21v', 'p21s', 'p21o', 'p22v', 'p22s', 'p22o', 'p3v', 'p3s', 'p3n', 'blimrob', 'blimtex', 'blimest', 'blimfiz', 'blimxud', 'blimtur', 'blimsoc', 'minraiting', 'weekyear', 'weekmonth', 'pk', 'norm', 'potenc', 'ngr', 'sgr', 'vgr', 'chr1', 'zmr1', 'chr2', 'zmr2', 'ngrp', 'sgrp', 'vgrp', 'ppchr1', 'ppzm1', 'ppchr2', 'ppzm2', 'ocsootv', 'ocku', 'ocmt', 'obsh', 'ktob', 'vgs', 'sgs', 'pchsrd', 'pzmsrd'])
+                                ->from('coefficient')
+                                ->where(['operator_id' => Yii::$app->operator->identity->id])
+                                ->one();
+                            $res = array_search(0, $coef);
+                            if ($res === true) {
+                                Yii::$app->session->setFlash('warning', 'Необходимо выставить корректные коэффициенты');
                             }
-
-                            if (isset($roles['operators'])) {
-                                $coef = (new \yii\db\Query())
-                                    ->select(['p21v', 'p21s', 'p21o', 'p22v', 'p22s', 'p22o', 'p3v', 'p3s', 'p3n', 'blimrob', 'blimtex', 'blimest', 'blimfiz', 'blimxud', 'blimtur', 'blimsoc', 'minraiting', 'weekyear', 'weekmonth', 'pk', 'norm', 'potenc', 'ngr', 'sgr', 'vgr', 'chr1', 'zmr1', 'chr2', 'zmr2', 'ngrp', 'sgrp', 'vgrp', 'ppchr1', 'ppzm1', 'ppchr2', 'ppzm2', 'ocsootv', 'ocku', 'ocmt', 'obsh', 'ktob', 'vgs', 'sgs', 'pchsrd', 'pzmsrd'])
-                                    ->from('coefficient')
-                                    ->where(['operator_id' => Yii::$app->operator->identity->id])
-                                    ->one();
-                                $res = array_search(0, $coef);
-                                if ($res == true) {
-                                    Yii::$app->session->setFlash('warning', 'Необходимо выставить корректные коэффициенты');
-                                }
-                            }
-                         ?>
-
-                         <?= app\widgets\Alert::widget() ?>
+                        }
+                        ?>
+                        <?= Alert::widget() ?>
                     </div>
                     <div class="col-md-12">
                         <?= $content ?>
@@ -250,9 +284,7 @@ $user = Yii::$app->user->getIdentity();
                 </div>
             </div>
         </div>
-
-        <?= app\widgets\MainFooter::widget(); ?>
-
+        <?= MainFooter::widget(); ?>
 <?php $this->endBody() ?>
 </body>
 </html>
