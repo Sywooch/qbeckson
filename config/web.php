@@ -145,6 +145,11 @@ $config = [
                         'allow' => true,
                         'roles' => ['organizations']
                     ],
+                    [
+                        'actions' => ['payer-suborder-organizations', 'payer-all-organizations'],
+                        'allow' => true,
+                        'roles' => ['payers']
+                    ],
                 ],
                 'file-storage' => [
                     [
@@ -171,7 +176,7 @@ $config = [
                             'allow' => true,
                         ],
                         [
-                            'actions' => ['set-as-subordinated'],
+                            'actions' => ['set-as-subordinated', 'cancel-subording'],
                             'allow' => true,
                             'roles' => ['payers'],
                         ],

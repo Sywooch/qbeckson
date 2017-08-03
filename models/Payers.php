@@ -316,6 +316,14 @@ class Payers extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMunicipality()
+    {
+        return $this->hasOne(Mun::className(), ['id' => 'mun']);
+    }
+
+    /**
      * DEPRECATED
      * Use UserIdentity::payer instead
      */

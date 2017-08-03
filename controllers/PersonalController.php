@@ -360,10 +360,6 @@ class PersonalController extends \yii\web\Controller
     {
         $payer = Yii::$app->user->identity->payer;
 
-        $InformsProvider = new ActiveDataProvider([
-            'query' => Informs::find()->where(['read' => 0])->andwhere(['from' => 2]),
-        ]);
-
         $CooperateProvider = new ActiveDataProvider([
             'query' => Cooperate::find()->where(['status' => 0])->andWhere(['reade' => 0])->andwhere(['payer_id' => $payer['id']]),
         ]);
@@ -375,12 +371,33 @@ class PersonalController extends \yii\web\Controller
         $Organization0Provider = $searchOrganization0->search(Yii::$app->request->queryParams);
 
         return $this->render('payer-organizations', [
-            'InformsProvider' => $InformsProvider,
             'CooperateProvider' => $CooperateProvider,
             'searchOrganization1' => $searchOrganization1,
             'Organization1Provider' => $Organization1Provider,
             'searchOrganization0' => $searchOrganization0,
             'Organization0Provider' => $Organization0Provider,
+        ]);
+    }
+
+    public function actionPayerSuborderOrganizations()
+    {
+        $searchModel = new OrganizationSearch(['subordered' => true]);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('payer-suborder-organizations', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionPayerAllOrganizations()
+    {
+        $searchModel = new OrganizationSearch(['municipality' => Yii::$app->user->identity->payer->municipality]);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('payer-all-organizations', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 

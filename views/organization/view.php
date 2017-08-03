@@ -350,8 +350,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     echo Html::a('Указать как подведомственную', Url::to(['/organization/set-as-subordinated', 'id' => $model->id]), ['class' => 'btn btn-warning']);
                     echo '</div>';
                 } else {
-                    echo '<div class="pull-right"><p class="text-primary">';
+                    echo '<div class="pull-right"><p class="text-default">';
                     echo $suborder->statuses[$suborder->status];
+                    if ($suborder->status === \app\models\OrganizationPayerAssignment::STATUS_PENDING) {
+                        echo '&nbsp;&nbsp;' . Html::a('Отменить', ['cancel-subording', 'id' => $model->id]);
+                    }
                     echo '</p></div>';
                 }
                 echo Html::a('Назад', '/personal/payer-organizations', ['class' => 'btn btn-primary']);

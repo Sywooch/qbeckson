@@ -2,6 +2,7 @@
 
 namespace app\models\search;
 
+use app\models\OrganizationPayerAssignment;
 use app\models\UserIdentity;
 use Yii;
 use yii\base\Model;
@@ -17,6 +18,10 @@ class OrganizationSearch extends Organization
 
     public $certprogram;
 
+    public $municipality = null;
+
+    public $subordered = false;
+
     public $statusArray = [];
 
     /**
@@ -26,7 +31,7 @@ class OrganizationSearch extends Organization
     {
         return [
             [['id', 'user_id', 'actual', 'type', 'license_number', 'bank_bik', 'korr_invoice', 'max_child', 'amount_child', 'inn', 'KPP', 'OGRN', 'okopo', 'certprogram'], 'integer'],
-            [['name', 'license_date', 'license_issued', 'bank_name', 'bank_sity', 'rass_invoice', 'fio', 'position', 'address_legal', 'address_actual', 'geocode', 'raiting', 'ground', 'orgtype', 'statusArray'], 'safe'],
+            [['name', 'license_date', 'license_issued', 'bank_name', 'bank_sity', 'rass_invoice', 'fio', 'position', 'address_legal', 'address_actual', 'geocode', 'raiting', 'ground', 'orgtype', 'statusArray', 'municipality', 'subordered'], 'safe'],
         ];
     }
 
@@ -52,6 +57,16 @@ class OrganizationSearch extends Organization
             ->joinWith(['municipality'])
             ->where('`mun`.operator_id = ' . Yii::$app->operator->identity->id);
 
+        if (!empty($this->municipality)) {
+            $query->andWhere('`mun`.id = ' . $this->municipality->id);
+        }
+
+        if ($this->subordered === true) {
+            $query->innerJoinWith('suborderPayer')
+                ->andWhere('`organization_payer_assignment`.payer_id = ' . Yii::$app->user->identity->payer->id)
+                ->andWhere('`organization_payer_assignment`.status = ' . OrganizationPayerAssignment::STATUS_ACTIVE . ' OR `organization_payer_assignment`.status = ' . OrganizationPayerAssignment::STATUS_PENDING);
+        }
+        
         // add conditions that should always apply here
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

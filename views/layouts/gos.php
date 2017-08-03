@@ -134,7 +134,10 @@ $user = Yii::$app->user->getIdentity();
                                         ['label' => 'Сертификаты', 'url' => ['/personal/payer-certificates']],
                                         ['label' => 'Договоры', 'url' => ['/personal/payer-contracts']],
                                         ['label' => 'Счета', 'url' => ['/personal/payer-invoices']],
-                                        ['label' => 'Организации', 'url' => ['/personal/payer-organizations']],
+                                        ['label' => 'Организации', 'items' => [
+                                            ['label' => 'Все организации', 'url' => ['/personal/payer-organizations']],
+                                            ['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
+                                        ]],
                                         ['label' => 'Программы', 'url' => ['/personal/payer-programs']],
                                     ],
                                 ]);
