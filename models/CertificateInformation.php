@@ -97,8 +97,8 @@ class CertificateInformation extends ActiveRecord
         return [
             'id' => 'ID',
             'payer_id' => 'Плательщик',
-            'children_category' => 'Категория детей, получающих снртификаты',
-            'organization_name' => 'Наименования организации/органа',
+            'children_category' => 'Категория детей, получающих сертификаты',
+            'organization_name' => 'Наименование организации/органа',
             'work_time' => 'Режима работы',
             'full_name' => 'ФИО ответственного лица',
             'rules' => 'Для получения сертификата необходимо(описание процедуры и документов)',

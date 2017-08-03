@@ -12,7 +12,7 @@
         "irc": "irc://irc.freenode.net/yii",
         "source": "https://github.com/yiisoft/yii2"
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "require": {
         "php": ">=5.4.0",
         "yiisoft/yii2": ">=2.0.5",
@@ -48,7 +48,8 @@
         "kartik-v/yii2-export": "*",
         "kartik-v/yii2-tabs-x": "*",
         "moonlandsoft/yii2-phpexcel": "*",
-        "kartik-v/yii2-widget-timepicker": "*"
+        "kartik-v/yii2-widget-timepicker": "*",
+        "mirocow/yii2-yandex-maps": "dev-master"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

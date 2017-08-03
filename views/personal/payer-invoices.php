@@ -105,7 +105,7 @@ $columns = [
 
 $preparedColumns = GridviewHelper::prepareColumns('invoices', $columns);
 ?>
-<?php if ($searchInvoices->organization_id) : ?>
+<?php if ($searchInvoices->organization_id && $searchInvoices->organization) : ?>
     <p class="lead">Показаны результаты для организации: <?= $searchInvoices->organization; ?></p>
 <?php endif; ?>
 <?php

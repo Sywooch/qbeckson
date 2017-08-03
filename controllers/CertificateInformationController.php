@@ -6,7 +6,6 @@ use app\models\UserIdentity;
 use Yii;
 use app\models\CertificateInformation;
 use yii\web\Controller;
-use yii\web\NotFoundHttpException;
 
 /**
  * Class CertificateInformationController

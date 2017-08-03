@@ -104,13 +104,19 @@ class GroupsController extends Controller
     public function actionCreate()
     {
         $model = new Groups();
-
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
 
-        if ($model->load(Yii::$app->request->post())) {
+        $groupClasses = [];
+        foreach (GroupClass::weekDays() as $key => $day) {
+            $groupClasses[$key] = new GroupClass([
+                'week_day' => $day
+            ]);
+        }
+
+        if (Yii::$app->request->post()) {
+            $model->load(Yii::$app->request->post());
             $model->organization_id = $organization['id'];
-            //$model->program_id = (int) $model->program_id;
 
             $rows = (new \yii\db\Query())
                 ->select(['month'])
@@ -125,43 +131,61 @@ class GroupsController extends Controller
             $month = floor($diff);
 
             if ($rows['month'] < $month - 1 or $rows['month'] > $month + 1) {
-                Yii::$app->session->setFlash('error', 'Продолжительность программы должна быть ' . $rows['month'] . ' месяцев.');
+                Yii::$app->session->setFlash(
+                    'error',
+                    'Продолжительность программы должна быть ' . $rows['month'] . ' месяцев.'
+                );
+            } else {
+                Model::loadMultiple($groupClasses, Yii::$app->request->post());
+                if ($model->validate() && Model::validateMultiple($groupClasses)) {
+                    $transaction = Yii::$app->db->beginTransaction();
+                    try {
+                        if ($model->save(false)) {
+                            foreach ($groupClasses as $classModel) {
+                                /** @var GroupClass $classModel */
+                                if ($classModel->status) {
+                                    $classModel->group_id = $model->id;
+                                    if (!($flag = $classModel->save(false))) {
+                                        $transaction->rollBack();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if ($flag) {
+                            $transaction->commit();
 
-                return $this->render('create', [
-                    'model' => $model,
-                ]);
+                            return $this->redirect(['personal/organization-groups']);
+                        }
+                    } catch (Exception $e) {
+                        $transaction->rollBack();
+                    }
+                }
             }
-
-            if ($model->save()) {
-                /* $completeness = new Completeness();
-                 $completeness->group_id = $model->id;
-
-                 if (date(m) == 1) {
-                     $completeness->month = 12;
-                     $completeness->year = date(Y) - 1;
-                 } else {
-                     $completeness->month = date(m) - 1;
-                     $completeness->year = date(Y);
-                 }
-                 $completeness->preinvoice = 0;
-                 $completeness->completeness = 100;
-                 if ($completeness->save()) {
-                     $preinvoice = new Completeness();
-                     $preinvoice->group_id = $model->id;
-                     $preinvoice->month = date(m);
-                     $preinvoice->year = date(Y);
-                     $preinvoice->preinvoice = 1;
-                     $preinvoice->completeness = 80;
-                     if ($preinvoice->save()) { */
-                return $this->redirect(['/personal/organization-groups']);
-                //  }
-                // }
-            }
-        } else {
-            return $this->render('create', [
-                'model' => $model,
-            ]);
         }
+
+        return $this->render('create', [
+            'groupClasses' => $groupClasses,
+            'model' => $model,
+        ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function actionSelectAddresses()
+    {
+        $out = '';
+        if ($parents = Yii::$app->request->post('depdrop_parents')) {
+            $moduleId = $parents[0];
+            $programModuleAddresses = ProgramModuleAddress::find()->andWhere(['program_module_id' => $moduleId])->all();
+            $out = [];
+            foreach ($programModuleAddresses as $key => $value) {
+                $out[] = ['id' => $value->address, 'name' => $value->address];
+            }
+        }
+
+        return Json::encode(['output' => $out, 'selected' => '']);
     }
 
     public function actionNewgroup($id)

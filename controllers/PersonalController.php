@@ -318,7 +318,6 @@ class PersonalController extends Controller
         /** @var UserIdentity $user */
         $user = Yii::$app->user->getIdentity();
         $payer = $user->payer;
-
         $searchActiveContracts = new ContractsSearch([
             'payer_id' => $payer->id,
             'status' => Contracts::STATUS_ACTIVE,

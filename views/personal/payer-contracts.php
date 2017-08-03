@@ -246,7 +246,7 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
 <br>
 <div class="tab-content">
     <div id="panel1" class="tab-pane fade in active">
-        <?php if ($searchActiveContracts->payer_id) : ?>
+        <?php if ($searchActiveContracts->payer_id && $searchActiveContracts->programName) : ?>
             <p class="lead">Показаны результаты для программы: <?= $searchActiveContracts->programName; ?></p>
         <?php endif; ?>
         <?php if ($searchActiveContracts->certificate_id) : ?>
