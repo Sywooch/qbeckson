@@ -236,6 +236,12 @@ $config = [
                         'allow' => true,
                     ]
                 ],
+                'certificate-information' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['payer'],
+                    ]
+                ]
             ]
     ],
 

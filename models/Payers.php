@@ -37,6 +37,7 @@ use app\models\Cooperate;
  * @property Mun $municipality
  * @property Cooperate[] $cooperates
  * @property User $user
+ * @property CertificateInformation $certificateInformation
  */
 class Payers extends \yii\db\ActiveRecord
 {
@@ -106,6 +107,14 @@ class Payers extends \yii\db\ActiveRecord
             'cooperates' => 'Число заключенных соглашений',
             'certificates' => 'Число выданных сертификатов'
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCertificateInformation()
+    {
+        return $this->hasOne(CertificateInformation::class, ['payer_id' => 'id']);
     }
     
     public function munName($data) {
