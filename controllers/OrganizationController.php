@@ -170,6 +170,7 @@ class OrganizationController extends Controller
                 $model->max_child = floor((($model->municipality->deystv / ($model->municipality->countdet * 0.7)) * Yii::$app->coefficient->data->potenc) * $model->last);
 
                 if ($model->save(false)) {
+                    $model->link('operators', Yii::$app->operator->identity);
                     $model->sendRequestEmail();
                     Yii::$app->session->setFlash('success', 'Вы успешно отправили заявку на регистрацию поставщика образовательных услуг!');
 
