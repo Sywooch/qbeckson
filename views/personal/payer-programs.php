@@ -83,10 +83,7 @@ $hours = [
         'max' => 2000
     ]
 ];
-$directivity = [
-    'attribute' => 'directivity',
-    'label' => 'Направленность',
-];
+
 $ageGroupMin = [
     'attribute' => 'age_group_min',
     'label' => 'Возраст от',
@@ -113,6 +110,20 @@ $limit = [
         'max' => 10000
     ]
 ];
+$directivity = [
+    'attribute' => 'directivity',
+    'label' => 'Направленность',
+    'type' => SearchFilter::TYPE_DROPDOWN,
+    'data' => $searchPrograms::directivities(),
+];
+$form = [
+    'attribute' => 'form',
+    'value' => function ($model) {
+        return $model::forms()[$model->form];
+    },
+    'type' => SearchFilter::TYPE_DROPDOWN,
+    'data' => $searchPrograms::forms(),
+];
 $actions = [
     'class' => ActionColumn::class,
     'controller' => 'programs',
@@ -123,6 +134,7 @@ $columns = [
     $name,
     $year,
     $hours,
+    $form,
     $directivity,
     $zab,
     $ageGroupMin,
@@ -139,7 +151,7 @@ $columns = [
 ];
 $preparedColumns = GridviewHelper::prepareColumns('programs', $columns, 'open');
 ?>
-<?php if ($searchPrograms->organization_id) : ?>
+<?php if ($searchPrograms->organization_id && $searchPrograms->organization) : ?>
     <p class="lead">Показаны результаты для организации: <?= $searchPrograms->organization; ?></p>
 <?php endif; ?>
 <?php

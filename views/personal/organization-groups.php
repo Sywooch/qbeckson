@@ -32,10 +32,13 @@ $columns = [
         'format' => 'raw'
     ],
     [
-        'attribute' => 'address',
-    ],
-    [
         'attribute' => 'schedule',
+        'label' => 'Расписание',
+        'value' => function ($model) {
+            /** @var \app\models\Groups $model */
+            return $model->formatClasses();
+        },
+        'format' => 'raw'
     ],
     [
         'attribute' => 'datestart',
@@ -102,7 +105,7 @@ if ($roles['organizations'] and $organization['actual'] !== 0) {
 
 <?= SearchFilter::widget([
     'model' => $searchGroups,
-    'action' => ['personal/operator-groups'],
+    'action' => ['personal/organization-groups'],
     'data' => GridviewHelper::prepareColumns(
         'groups',
         $columns,

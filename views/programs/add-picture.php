@@ -15,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="programs-add-picture">
     <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]); ?>
     <?php $fileUploadAttributes = [
-        'url' => ['file-storage/upload'],
+        'url' => ['file-storage/program-upload'],
         'maxFileSize' => 10 * 1024 * 1024,
         'multiple' => false,
         'acceptFileTypes' => new JsExpression('/(\.|\/)(jpg|jpeg|png|gif)$/i'),

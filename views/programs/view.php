@@ -200,7 +200,7 @@ $this->registerJs($js, $this::POS_END);
                                             if (count($model->addresses) > 0 && null !== $model->mainAddress) {
                                                 return Html::a(
                                                     $model->mainAddress->address,
-                                                    ['program-module-address/select', 'moduleId' => $model->id]
+                                                    ['program-module-address/update', 'moduleId' => $model->id]
                                                 );
                                             }
 
@@ -874,8 +874,15 @@ $this->registerJs($js, $this::POS_END);
                                                                 'columns' => [
 
                                                                     'name',
-                                                                    'address',
-                                                                    'schedule',
+                                                                    [
+                                                                        'attribute' => 'schedule',
+                                                                        'label' => 'Расписание',
+                                                                        'value' => function ($model) {
+                                                                            /** @var \app\models\Groups $model */
+                                                                            return $model->formatClasses();
+                                                                        },
+                                                                        'format' => 'raw'
+                                                                    ],
                                                                     [
                                                                         'attribute' => 'datestart',
                                                                         'format' => 'date',
@@ -962,8 +969,15 @@ $this->registerJs($js, $this::POS_END);
                                 'columns' => [
 
                                     'name',
-                                    'address',
-                                    'schedule',
+                                    [
+                                        'attribute' => 'schedule',
+                                        'label' => 'Расписание',
+                                        'value' => function ($model) {
+                                            /** @var \app\models\Groups $model */
+                                            return $model->formatClasses();
+                                        },
+                                        'format' => 'raw'
+                                    ],
                                     [
                                         'attribute' => 'datestart',
                                         'format' => 'date',

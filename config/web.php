@@ -57,7 +57,6 @@ $config = [
             ],
         ],
         'db' => require(__DIR__ . '/db.php'),
-
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
@@ -67,11 +66,9 @@ $config = [
                 '<module:\w+>/<controller:\w+>/<action:(\w|-)+>/<id:\d+>' => '<module>/<controller>/<action>',
             ],
         ],
-
         'authManager' => [
             'class' => 'yii\rbac\DbManager',
         ],
-
         'formatter' => [
             'class' => 'yii\i18n\Formatter',
             'dateFormat' => 'php:d.m.Y',

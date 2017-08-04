@@ -79,6 +79,23 @@ class Groups extends ActiveRecord
     }
 
     /**
+     * @return string
+     */
+    public function formatClasses()
+    {
+        if ($this->classes) {
+            $result = '';
+            foreach ($this->classes as $class) {
+                $result .= '<p>' .
+                        $class->week_day . ': '. $class->time_from . ' - ' . $class->time_to . ' ' . $class->address .
+                    '</p>';
+            }
+            return $result;
+        }
+        return '<p>Адрес: ' . $this->address . '</p><p>' . 'Расписание: ' . $this->schedule . '</p>';
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getOrganization()

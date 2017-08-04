@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\GoogleCoordinates;
 use app\models\forms\SelectModuleMainAddressForm;
 use app\models\Model;
 use app\models\ProgrammeModule;
@@ -38,6 +39,11 @@ class ProgramModuleAddressController extends Controller
                     foreach ($addressModels as $addressModel) {
                         /** @var ProgramModuleAddress $addressModel */
                         $addressModel->program_module_id = $programModuleModel->id;
+                        if ($addressModel->status) {
+                            $googleCoordinatesComponent = new GoogleCoordinates($addressModel->address);
+                            $addressModel->lat = $googleCoordinatesComponent->getLat();
+                            $addressModel->lng = $googleCoordinatesComponent->getLng();
+                        }
                         if (!($flag = $addressModel->save(false))) {
                             $transaction->rollBack();
                             break;
@@ -46,7 +52,7 @@ class ProgramModuleAddressController extends Controller
                     if ($flag) {
                         $transaction->commit();
 
-                        return $this->redirect(['select', 'moduleId' => $moduleId]);
+                        return $this->redirect(['update', 'moduleId' => $moduleId]);
                     }
                 } catch (Exception $e) {
                     $transaction->rollBack();
@@ -84,6 +90,11 @@ class ProgramModuleAddressController extends Controller
                     foreach ($addressModels as $addressModel) {
                         /** @var ProgramModuleAddress $addressModel */
                         $addressModel->program_module_id = $programModuleModel->id;
+                        if ($addressModel->status) {
+                            $googleCoordinatesComponent = new GoogleCoordinates($addressModel->address);
+                            $addressModel->lat = $googleCoordinatesComponent->getLat();
+                            $addressModel->lng = $googleCoordinatesComponent->getLng();
+                        }
                         if (!($flag = $addressModel->save(false))) {
                             $transaction->rollBack();
                             break;
@@ -92,7 +103,7 @@ class ProgramModuleAddressController extends Controller
                     if ($flag) {
                         $transaction->commit();
 
-                        return $this->redirect(['select', 'moduleId' => $moduleId]);
+                        return $this->refresh();
                     }
                 } catch (Exception $e) {
                     $transaction->rollBack();
@@ -102,27 +113,6 @@ class ProgramModuleAddressController extends Controller
 
         return $this->render('update', [
             'addressModels' => $addressModels,
-            'programModuleModel' => $programModuleModel,
-        ]);
-    }
-
-    /**
-     * @param $moduleId
-     * @return string
-     */
-    public function actionSelect($moduleId)
-    {
-        $programModuleModel = $this->findModuleModel($moduleId);
-        $model = new SelectModuleMainAddressForm();
-        $model->setModule($programModuleModel);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            //return $this->redirect(['programs/view', 'id' => $programModuleModel->program_id]);
-            return $this->refresh();
-        }
-
-        return $this->render('select', [
-            'model' => $model,
             'programModuleModel' => $programModuleModel,
         ]);
     }

@@ -105,6 +105,16 @@ $hours = [
 $directivity = [
     'attribute' => 'directivity',
     'label' => 'Направленность',
+    'type' => SearchFilter::TYPE_DROPDOWN,
+    'data' => $searchOpenPrograms::directivities(),
+];
+$form = [
+    'attribute' => 'form',
+    'value' => function ($model) {
+        return $model::forms()[$model->form];
+    },
+    'type' => SearchFilter::TYPE_DROPDOWN,
+    'data' => $searchOpenPrograms::forms(),
 ];
 $ageGroupMin = [
     'attribute' => 'age_group_min',
@@ -144,6 +154,7 @@ $openColumns = [
     $year,
     $hours,
     $directivity,
+    $form,
     $zab,
     $ageGroupMin,
     $ageGroupMax,
@@ -162,6 +173,7 @@ $waitColumns = [
     $year,
     $hours,
     $directivity,
+    $form,
     $zab,
     $ageGroupMin,
     $ageGroupMax,
@@ -203,6 +215,7 @@ $closedPrograms = [
     $year,
     $hours,
     $directivity,
+    $form,
     $zab,
     $ageGroupMin,
     $ageGroupMax,

@@ -52,17 +52,16 @@ class SiteController extends Controller
         ];
     }
 
-    public function actionInformation($municipalityId = null)
+    /**
+     * @param $municipalityId
+     * @return string
+     */
+    public function actionInformation($municipalityId)
     {
-        if ($municipalityId) {
-            $result = CertificateInformation::findOneByMunicipality($municipalityId);
-        } else {
-            $municipalities = Mun::find()->all();
-        }
+        $result = CertificateInformation::findOneByMunicipality($municipalityId);
 
         return $this->render('information', [
-            'result' => $result ?: null,
-            'municipalities' => $municipalities ?: [],
+            'result' => $result,
         ]);
     }
 
@@ -77,8 +76,15 @@ class SiteController extends Controller
             return $this->goBack();
         }
 
+        $municipalities = Mun::find()
+            ->andWhere([
+                'operator_id' => Yii::$app->operator->identity->id
+            ])
+            ->all();
+
         return $this->render('index', [
             'model' => $model,
+            'municipalities' => $municipalities
         ]);
     }
 

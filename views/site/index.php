@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 
 /* @var $this yii\web\View */
+/* @var $municipalities \app\models\Mun[] */
 
 $this->title = 'Портал сопровождения персонифицированного финансирования дополнительного образования детей';
 ?>
@@ -30,16 +31,13 @@ $this->title = 'Портал сопровождения персонифицир
                 <?php ActiveForm::end(); ?>
                 <div class="panel panel-default">
                     <div class="panel-body">
-                        <?= Html::a(
-                            'Узнать, как получить сертификат',
-                            ['site/information']
-                        ) ?>
+                        <a href="javascript:void(0);" data-toggle="modal" data-target="#information-modal">
+                            Узнать, как получить сертификат
+                        </a>
                         <br>
                         <br>
-                        <a href="javascript:void(0);"
-                           data-toggle="modal"
-                           data-target="#create-organization-modal">
-                                Отправить заявку на регистрацию организации
+                        <a href="javascript:void(0);" data-toggle="modal" data-target="#create-organization-modal">
+                            Отправить заявку на регистрацию организации
                         </a>
                     </div>
                 </div>
@@ -49,7 +47,30 @@ $this->title = 'Портал сопровождения персонифицир
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal 2 -->
+<div class="modal fade" id="information-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть"><span aria-hidden="true">&times;</span></button>
+                <h4>Узнать, как получить сертификат</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <?php foreach ($municipalities as $municipality) : ?>
+                        <div class="col-md-6">
+                            <a href="<?= Url::to(['site/information', 'municipalityId' => $municipality->id]) ?>">
+                                <?= $municipality->name ?>
+                            </a>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 1 -->
 <div class="modal fade" id="create-organization-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">

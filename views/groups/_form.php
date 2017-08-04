@@ -70,7 +70,7 @@ $this->registerJs($js, $this::POS_READY);
         </div>
         <div class="form-options" style="display: none">
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <?= $form->field($groupClasses[$i], "[{$i}]address")->widget(DepDrop::class, [
                         'pluginOptions' => [
                             'depends' => ['module-id'],
@@ -79,17 +79,13 @@ $this->registerJs($js, $this::POS_READY);
                         ]
                     ]) ?>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <?= $form->field($groupClasses[$i], "[{$i}]classroom")
-                        ->textInput(['maxlength' => true]) ?>
-                </div>
-                <div class="col-md-4">
-                    <?= $form->field($groupClasses[$i], "[{$i}]hours_count")
                         ->textInput(['maxlength' => true]) ?>
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-5">
                     <?= $form->field($groupClasses[$i], "[{$i}]time_from")
                         ->widget(TimePicker::class, [
                             'pluginOptions' => [
@@ -98,7 +94,7 @@ $this->registerJs($js, $this::POS_READY);
                             ]
                         ]) ?>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-5">
                     <?= $form->field($groupClasses[$i], "[{$i}]time_to")
                         ->widget(TimePicker::class, [
                             'pluginOptions' => [
@@ -107,30 +103,40 @@ $this->registerJs($js, $this::POS_READY);
                             ]
                         ]) ?>
                 </div>
+                <div class="col-md-2">
+                    <?= $form->field($groupClasses[$i], "[{$i}]hours_count")
+                        ->textInput(['maxlength' => true]) ?>
+                </div>
             </div>
             <hr>
         </div>
     <?php endforeach; ?>
 
 
-    <?= $form->field($model, 'datestart')->widget(DateControl::class, [
-        'type'=>DateControl::FORMAT_DATE,
-        'ajaxConversion'=>false,
-        'options' => [
-            'pluginOptions' => [
-                'autoclose' => true
-            ]
-        ]
-    ]) ?>
-    <?= $form->field($model, 'datestop')->widget(DateControl::class, [
-        'type' => DateControl::FORMAT_DATE,
-        'ajaxConversion' => false,
-        'options' => [
-            'pluginOptions' => [
-                'autoclose' => true
-            ]
-        ]
-    ]) ?>
+    <div class="row">
+        <div class="col-md-6">
+            <?= $form->field($model, 'datestart')->widget(DateControl::class, [
+                'type'=>DateControl::FORMAT_DATE,
+                'ajaxConversion'=>false,
+                'options' => [
+                    'pluginOptions' => [
+                        'autoclose' => true
+                    ]
+                ]
+            ]) ?>
+        </div>
+        <div class="col-md-6">
+            <?= $form->field($model, 'datestop')->widget(DateControl::class, [
+                'type' => DateControl::FORMAT_DATE,
+                'ajaxConversion' => false,
+                'options' => [
+                    'pluginOptions' => [
+                        'autoclose' => true
+                    ]
+                ]
+            ]) ?>
+        </div>
+    </div>
     <div class="form-group">
         <?= Html::a('Отмена', ['personal/organization-groups'], ['class' => 'btn btn-danger']) ?>
         <?= Html::submitButton('Создать', ['class' => 'btn btn-success']) ?>

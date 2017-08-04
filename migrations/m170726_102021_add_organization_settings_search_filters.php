@@ -55,7 +55,7 @@ class m170726_102021_add_organization_settings_search_filters extends Migration
 
         $this->insert('settings_search_filters', [
             'table_name' => 'programs',
-            'table_columns' => 'year,hours,directivity,zab,age_group_min,age_group_max,rating,limit',
+            'table_columns' => 'form,year,hours,directivity,zab,age_group_min,age_group_max,rating,limit',
             'inaccessible_columns' => 'name,mun',
             'is_active' => 1,
             'role' => UserIdentity::ROLE_ORGANIZATION,
@@ -63,7 +63,7 @@ class m170726_102021_add_organization_settings_search_filters extends Migration
         ]);
         $this->insert('settings_search_filters', [
             'table_name' => 'programs',
-            'table_columns' => 'year,hours,directivity,zab,age_group_min,age_group_max',
+            'table_columns' => 'form,year,hours,directivity,zab,age_group_min,age_group_max',
             'inaccessible_columns' => 'name,mun',
             'is_active' => 1,
             'role' => UserIdentity::ROLE_ORGANIZATION,
@@ -71,7 +71,7 @@ class m170726_102021_add_organization_settings_search_filters extends Migration
         ]);
         $this->insert('settings_search_filters', [
             'table_name' => 'programs',
-            'table_columns' => 'year,hours,directivity,zab,age_group_min,age_group_max',
+            'table_columns' => 'form,year,hours,directivity,zab,age_group_min,age_group_max',
             'inaccessible_columns' => 'name,mun',
             'is_active' => 1,
             'role' => UserIdentity::ROLE_ORGANIZATION,
@@ -93,6 +93,7 @@ class m170726_102021_add_organization_settings_search_filters extends Migration
             'role' => UserIdentity::ROLE_ORGANIZATION,
             'type' => 'open',
         ]);
+
         $this->insert('settings_search_filters', [
             'table_name' => 'payers',
             'table_columns' => 'name,mun,phone,email,fio,directionality,certificates,cooperates',

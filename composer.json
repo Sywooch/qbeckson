@@ -49,7 +49,8 @@
         "kartik-v/yii2-tabs-x": "*",
         "moonlandsoft/yii2-phpexcel": "*",
         "kartik-v/yii2-widget-timepicker": "*",
-        "mirocow/yii2-yandex-maps": "dev-master"
+        "mirocow/yii2-yandex-maps": "dev-master",
+        "intervention/image": "^2.3"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",
