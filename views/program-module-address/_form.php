@@ -19,12 +19,22 @@ $js = <<<'JS'
         if($this.is(":checked")) {
             boxes.prop('checked', false);
             $this.prop('checked', true);
-        } 
-    })
+        }
+    });
+    /**
+    * Не работает почему-то
+    * 
+    * $(".dynamicform_wrapper").on("beforeDelete", function () {
+    *     if (!confirm("Вы уверенны, что хотите удалить этот элемент?")) {
+    *         return false;
+    *     }
+    *     return true;
+    * });
+    * 
+    */
 JS;
 $this->registerJs($js, $this::POS_READY);
 ?>
-
 <div class="program-module-address-form">
     <?php $form = ActiveForm::begin(['id' => 'dynamic-form']); ?>
     <?php DynamicFormWidget::begin([
@@ -67,7 +77,9 @@ $this->registerJs($js, $this::POS_READY);
                                     echo Html::activeHiddenInput($addressModel, "[{$i}]id");
                                 }
                                 ?>
-                                <?= $form->field($addressModel, "[{$i}]address")->textInput(['maxlength' => true])->label(false) ?>
+                                <?= $form->field($addressModel, "[{$i}]address")
+                                    ->textInput(['maxlength' => true])
+                                    ->label(false) ?>
                             </div>
                             <div class="col-md-1">
                                 <button style="margin-top: 5px;" type="button" class="remove-item btn btn-danger btn-xs">
@@ -81,6 +93,7 @@ $this->registerJs($js, $this::POS_READY);
         </div>
     </div>
     <?php DynamicFormWidget::end(); ?>
+    <p><strong>*</strong> Для того, чтобы убедиться, что адрес верно будет отображаться на карте нажмите кнопку сохранить и проверьте туда ли поставлен ориентир.</p>
     <?php if (null !== $programModuleModel->mainAddress) : ?>
         <?= Canvas::widget([
             'htmlOptions' => [
@@ -120,6 +133,7 @@ $this->registerJs($js, $this::POS_READY);
     <?php endif; ?>
     <br>
     <div class="form-group">
+        <?= Html::a('Назад', ['programs/view', 'id' => $programModuleModel->program_id], ['class' => 'btn btn-primary']) ?>
         <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
     </div>
     <?php ActiveForm::end(); ?>
