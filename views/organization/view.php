@@ -334,7 +334,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ->andWhere(['<', 'status', 2])
                 ->one();
 
-            if ($cooperate['status'] == 0) {
+            if (!empty($cooperate) && $cooperate['status'] == 0) {
                 echo '<div class="pull-right">';
                 echo '&nbsp;';
                 echo Html::a('Отказать', Url::to(['/cooperate/nopayer', 'id' => $model->id]), ['class' => 'btn btn-danger']);
@@ -345,7 +345,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             } else {
                 $suborder = Yii::$app->user->identity->payer->getOrganizationPayerAssignments($model->id)->one();
-                if (empty($suborder)) {
+                if ($model->canBeSubordered(Yii::$app->user->identity->payer)) {
                     echo '<div class="pull-right">';
                     echo Html::a('Указать как подведомственную', Url::to(['/organization/set-as-subordinated', 'id' => $model->id]), ['class' => 'btn btn-warning']);
                     echo '</div>';

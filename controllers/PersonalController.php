@@ -392,7 +392,7 @@ class PersonalController extends \yii\web\Controller
 
     public function actionPayerAllOrganizations()
     {
-        $searchModel = new OrganizationSearch(['municipality' => Yii::$app->user->identity->payer->municipality]);
+        $searchModel = new OrganizationSearch(['possibleForSuborder' => true]);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('payer-all-organizations', [

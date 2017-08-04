@@ -18,7 +18,7 @@ class OrganizationSearch extends Organization
 
     public $certprogram;
 
-    public $municipality = null;
+    public $possibleForSuborder = false;
 
     public $subordered = false;
 
@@ -57,8 +57,10 @@ class OrganizationSearch extends Organization
             ->joinWith(['municipality'])
             ->where('`mun`.operator_id = ' . Yii::$app->operator->identity->id);
 
-        if (!empty($this->municipality)) {
-            $query->andWhere('`mun`.id = ' . $this->municipality->id);
+        if ($this->possibleForSuborder === true) {
+            $query->andWhere('`mun`.id = ' . Yii::$app->user->identity->payer->municipality->id)
+                ->joinWith('suborderPayer')
+                ->andWhere('(`organization_payer_assignment`.payer_id IS NULL) OR (`organization_payer_assignment`.status = ' . OrganizationPayerAssignment::STATUS_REFUSED . ' AND `organization_payer_assignment`.payer_id != ' . Yii::$app->user->identity->payer->id . ')');
         }
 
         if ($this->subordered === true) {

@@ -317,7 +317,7 @@ class OrganizationController extends Controller
     public function actionSetAsSubordinated($id)
     {
         $model = $this->findModel($id);
-        if (!Yii::$app->user->identity->payer->getOrganizations($model->id)->count()) {
+        if ($model->canBeSubordered(Yii::$app->user->identity->payer)) {
             $model->link('suborderPayer', Yii::$app->user->identity->payer);
             Yii::$app->session->setFlash('success', 'Запрос на указание подведомственности успешно послан организации. Пожалуйста, дождитесь подтверждения!');
         }
