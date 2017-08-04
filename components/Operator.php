@@ -24,8 +24,6 @@ class Operator extends Component
 
     private function getOperator()
     {
-        $operatorId = GLOBAL_OPERATOR;
-
         if (Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
             $operatorId = Yii::$app->user->identity->operator->id;
         } elseif (Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
@@ -34,6 +32,10 @@ class Operator extends Component
             $operatorId = Yii::$app->user->identity->organization->operator->id;
         } elseif (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
             $operatorId = Yii::$app->user->identity->certificate->payers->operator_id;
+        }
+
+        if (empty($operatorId)) {
+            $operatorId = GLOBAL_OPERATOR;
         }
 
         return $operatorId;
