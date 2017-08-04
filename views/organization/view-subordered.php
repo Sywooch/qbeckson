@@ -13,7 +13,6 @@ use app\models\Cooperate;
 
 $this->title = $model->name;
 
-
 $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
 if (isset($roles['operators'])) {
     $this->params['breadcrumbs'][] = ['label' => 'Организации', 'url' => ['/personal/operator-organizations']];
@@ -343,6 +342,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 echo '&nbsp;';
                 echo Html::a('Одобрить', Url::to(['/cooperate/okpayer', 'id' => $model->id]), ['class' => 'btn btn-primary']);
 
+            } else {
+                $suborder = Yii::$app->user->identity->payer->getOrganizationPayerAssignments($model->id)->one();
+                if ($model->canBeSubordered(Yii::$app->user->identity->payer)) {
+                    echo '<div class="pull-right">';
+                    echo Html::a('Указать как подведомственную', Url::to(['/organization/set-as-subordinated', 'id' => $model->id]), ['class' => 'btn btn-warning']);
+                    echo '</div>';
+                } else {
+                    echo '<div class="pull-right"><p class="text-default">';
+                    echo $suborder->statuses[$suborder->status];
+                    if ($suborder->status === \app\models\OrganizationPayerAssignment::STATUS_PENDING) {
+                        echo '&nbsp;&nbsp;' . Html::a('Отменить', ['cancel-subording', 'id' => $model->id]);
+                    }
+                    echo '</p></div>';
+                }
+                echo Html::a('Назад', '/personal/payer-organizations', ['class' => 'btn btn-primary']);
             }
         }
 

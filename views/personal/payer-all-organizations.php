@@ -82,6 +82,11 @@ $this->title = 'Выберите организацию';
         ['class' => 'yii\grid\ActionColumn',
             'controller' => 'organization',
             'template' => '{view}',
+            'buttons' => [
+                'view' => function ($url, $model, $key) {
+                    return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', ['/organization/view-subordered', 'id' => $model->id]);
+                },
+            ],
         ],
     ],
 ]); ?>

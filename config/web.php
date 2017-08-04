@@ -176,7 +176,7 @@ $config = [
                             'allow' => true,
                         ],
                         [
-                            'actions' => ['set-as-subordinated', 'cancel-subording'],
+                            'actions' => ['set-as-subordinated', 'cancel-subording', 'view-subordered'],
                             'allow' => true,
                             'roles' => ['payers'],
                         ],

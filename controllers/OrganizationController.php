@@ -88,6 +88,20 @@ class OrganizationController extends Controller
     }
 
     /**
+     * Displays a single Organization model.
+     * @param integer $id
+     * @return mixed
+     */
+    public function actionViewSubordered($id)
+    {
+        $model = $this->findModel($id);
+
+        return $this->render('view-subordered', [
+            'model' => $model,
+        ]);
+    }
+
+    /**
      * Creates a new Organization model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
@@ -311,7 +325,7 @@ class OrganizationController extends Controller
             $model->unlink('suborderPayer', Yii::$app->user->identity->payer, true);
         }
 
-        $this->redirect(['organization/view', 'id' => $id]);
+        $this->redirect(['organization/view-subordered', 'id' => $id]);
     }
 
     public function actionSetAsSubordinated($id)
@@ -322,7 +336,7 @@ class OrganizationController extends Controller
             Yii::$app->session->setFlash('success', 'Запрос на указание подведомственности успешно послан организации. Пожалуйста, дождитесь подтверждения!');
         }
 
-        $this->redirect(['organization/view', 'id' => $id]);
+        $this->redirect(['organization/view-subordered', 'id' => $id]);
     }
 
     public function actionEdit()
