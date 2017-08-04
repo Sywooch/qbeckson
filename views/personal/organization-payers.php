@@ -82,7 +82,7 @@ $preparedWaitColumns = GridviewHelper::prepareColumns('payers', $waitColumns, 'w
 
 ?>
 <ul class="nav nav-tabs">
-    <li>
+    <li class="active">
         <a data-toggle="tab" href="#panel1">Действующие
             <span class="badge"><?= $openPayersProvider->getTotalCount() ?></span>
         </a>
