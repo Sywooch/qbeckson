@@ -38,7 +38,7 @@ class SettingsSearchFilters extends ActiveRecord
             [['table_columns', 'inaccessible_columns'], 'safe'],
             [['is_active'], 'integer'],
             [['table_name'], 'string', 'max' => 255],
-            [['table_name'], 'unique'],
+            //[['table_name'], 'unique'],
             ['role', 'in', 'range' => array_keys(UserIdentity::roles())],
         ];
     }
@@ -89,7 +89,7 @@ class SettingsSearchFilters extends ActiveRecord
     public static function findByTable($tableName)
     {
         $query = static::find()
-            ->where(['>', 'is_active', 0])
+            ->andWhere(['>', 'is_active', 0])
             ->andWhere(['table_name' => $tableName]);
 
         return $query->one();

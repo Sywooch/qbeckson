@@ -14,9 +14,10 @@ use app\models\Certificates;
 class CertificatesSearch extends Certificates
 {
     public $onlyPayerIds;
-    public $payers;
+    public $payer;
     public $enableContractsCount = false;
     public $cert_group = [];
+    public $payerMunicipality;
 
     /**
      * @inheritdoc
@@ -24,10 +25,23 @@ class CertificatesSearch extends Certificates
     public function rules()
     {
         return [
-            [['id', 'user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'contractCount'], 'integer', 'message' => 'Неверное значение.'],
-            [['fio_child', 'number'], 'string'],
-            [['fio_parent', 'payers', 'nominal', 'rezerv', 'balance', 'cert_group'], 'safe'],
+            [[
+                'id', 'user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2',
+                'directivity3', 'directivity4', 'directivity5', 'directivity6', 'contractCount', 'payerMunicipality'
+            ], 'integer', 'message' => 'Неверное значение.'],
+            [['fio_child', 'number', 'name', 'soname', 'phname'], 'string'],
+            [['fio_parent', 'payer', 'nominal', 'rezerv', 'balance', 'cert_group'], 'safe'],
         ];
+    }
+
+    /**
+     * @return array
+     */
+    public function attributeLabels()
+    {
+        return array_merge(parent::attributeLabels(), [
+            'payerMunicipality' => 'Муниципалитет'
+        ]);
     }
 
     /**
@@ -41,16 +55,16 @@ class CertificatesSearch extends Certificates
 
     /**
      * Creates data provider instance with search query applied
-     *
      * @param array $params
-     *
+     * @param int $pageSize
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $pageSize = 50)
     {
         $query = Certificates::find()
-            ->joinWith(['payers'])
-            ->where('`payers`.operator_id = ' . Yii::$app->operator->identity->id);
+            ->joinWith(['payers']);
+
+        $query->andWhere(['payers.operator_id' => Yii::$app->operator->identity->id]);
 
         if ($this->enableContractsCount === true) {
             $subQuery = Contracts::find()
@@ -59,24 +73,27 @@ class CertificatesSearch extends Certificates
                 ->groupBy('certificate_id');
 
             $query->select(['certificates.*', 'tableContractsCount.contractCount'])
-                ->leftJoin(['tableContractsCount' => $subQuery], 'tableContractsCount.certificate_id = `certificates`.id');
+                ->leftJoin(
+                    ['tableContractsCount' => $subQuery],
+                    'tableContractsCount.certificate_id = `certificates`.id'
+                );
         }
-
-        // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
-                'pageSize' => 50,
+                'pageSizeLimit' => false,
+                'pageSize' => $pageSize,
             ],
         ]);
 
-        if (!empty($this->payers)) {
-            $dataProvider->sort->attributes['payers'] = [
+        if (!empty($this->payer)) {
+            $dataProvider->sort->attributes['payer'] = [
                 'asc' => ['payers.name' => SORT_ASC],
                 'desc' => ['payers.name' => SORT_DESC],
             ];
         }
+
         if ($this->enableContractsCount === true) {
             $dataProvider->sort->attributes['contractCount'] = [
                 'asc' => ['tableContractsCount.contractCount' => SORT_ASC],
@@ -92,21 +109,28 @@ class CertificatesSearch extends Certificates
             return $dataProvider;
         }
 
-        //print_r($this);exit;
-
-        // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
-            'user_id' => $this->user_id,
-            'actual' => $this->actual,
-            'contracts' => $this->contracts,
-            'directivity1' => $this->directivity1,
-            'directivity2' => $this->directivity2,
-            'directivity3' => $this->directivity3,
-            'directivity4' => $this->directivity4,
-            'directivity5' => $this->directivity5,
-            'directivity6' => $this->directivity6,
+            'certificates.id' => $this->id,
+            'certificates.user_id' => $this->user_id,
+            'certificates.actual' => $this->actual,
+            'certificates.contracts' => $this->contracts,
+            'certificates.directivity1' => $this->directivity1,
+            'certificates.directivity2' => $this->directivity2,
+            'certificates.directivity3' => $this->directivity3,
+            'certificates.directivity4' => $this->directivity4,
+            'certificates.directivity5' => $this->directivity5,
+            'certificates.directivity6' => $this->directivity6,
+            'payers.mun' => $this->payerMunicipality,
         ]);
+
+        $query->andFilterWhere(['like', 'number', $this->number])
+            ->andFilterWhere(['like', 'fio_child', $this->fio_child])
+            ->andFilterWhere(['like', 'fio_parent', $this->fio_parent])
+            ->andFilterWhere(['like', 'certificates.name', $this->name])
+            ->andFilterWhere(['like', 'certificates.soname', $this->soname])
+            ->andFilterWhere(['like', 'certificates.phname', $this->phname])
+            ->andFilterWhere(['like', 'payers.name', $this->payer])
+            ->andFilterWhere(['tableContractsCount.contractCount' => $this->contractCount]);
 
         if (!empty($this->cert_group)) {
             $query->andFilterWhere(['cert_group' => $this->cert_group]);
@@ -118,26 +142,20 @@ class CertificatesSearch extends Certificates
             $query->andFilterWhere(['payer_id' => $this->payer_id]);
         }
 
-        if (!empty($this->nominal)) {
+        if (!empty($this->nominal) && $this->nominal !== '0,150000') {
             $nominal = explode(',', $this->nominal);
             $query->andWhere(['and', ['>=', 'nominal', (int)$nominal[0]], ['<=', 'nominal', (int)$nominal[1]]]);
         }
 
-        if (!empty($this->rezerv)) {
+        if (!empty($this->rezerv) && $this->rezerv !== '0,150000') {
             $rezerv = explode(',', $this->rezerv);
             $query->andWhere(['and', ['>=', 'rezerv', (int)$rezerv[0]], ['<=', 'rezerv', (int)$rezerv[1]]]);
         }
 
-        if (!empty($this->balance)) {
+        if (!empty($this->balance) && $this->balance !== '0,150000') {
             $balance = explode(',', $this->balance);
             $query->andWhere(['and', ['>=', 'balance', (int)$balance[0]], ['<=', 'balance', (int)$balance[1]]]);
         }
-
-        $query->andFilterWhere(['like', 'number', $this->number])
-            ->andFilterWhere(['like', 'fio_child', $this->fio_child])
-            ->andFilterWhere(['like', 'fio_parent', $this->fio_parent])
-            ->andFilterWhere(['like', 'payers.name', $this->payers])
-            ->andFilterWhere(['tableContractsCount.contractCount' => $this->contractCount]);
 
         return $dataProvider;
     }

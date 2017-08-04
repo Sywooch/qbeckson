@@ -10,27 +10,78 @@ use yii\helpers\Url;
  * This is the model class for table "contracts".
  *
  * @property integer $id
- * @property integer $number
+ * @property string $number
  * @property string $date
  * @property integer $certificate_id
+ * @property integer $payer_id
  * @property integer $program_id
+ * @property integer $year_id
  * @property integer $organization_id
+ * @property integer $group_id
  * @property integer $status
  * @property string $status_termination
  * @property string $status_comment
  * @property integer $status_year
  * @property string $link_doc
  * @property string $link_ofer
+ * @property double $all_funds
+ * @property double $funds_cert
+ * @property double $all_parents_funds
  * @property string $start_edu_programm
- * @property string $start_edu_contract
+ * @property integer $funds_gone
  * @property string $stop_edu_contract
- * @property string $group
+ * @property string $start_edu_contract
+ * @property integer $sposob
+ * @property integer $prodolj_d
+ * @property integer $prodolj_m
+ * @property integer $prodolj_m_user
+ * @property double $first_m_price
+ * @property double $other_m_price
+ * @property double $first_m_nprice
+ * @property double $other_m_nprice
+ * @property string $change1
+ * @property string $change2
+ * @property string $change_org_fio
+ * @property string $org_position
+ * @property string $org_position_min
+ * @property string $change_doctype
+ * @property string $change_fioparent
+ * @property string $change6
+ * @property string $change_fiochild
+ * @property string $change8
+ * @property string $change9
+ * @property string $change10
+ * @property integer $ocen_fact
+ * @property integer $ocen_kadr
+ * @property integer $ocen_mat
+ * @property integer $ocen_obch
+ * @property integer $ocenka
+ * @property integer $wait_termnate
+ * @property string $date_termnate
+ * @property double $cert_dol
+ * @property double $payer_dol
+ * @property double $rezerv
+ * @property double $paid
+ * @property integer $terminator_user
+ * @property double $fontsize
+
+ * @property Disputes[] $disputes
+ * @property string $statusName
+ * @property mixed $organizationname
+ * @property mixed $invoices
+ * @property string $yearyear
+ * @property mixed $payers
+ * @property mixed $certificatenumber
+ * @property mixed $contracts
+ * @property mixed $payersname
+ * @property mixed $programname
+ * @property mixed $year
+ * @property Informs[] $informs
  *
  * @property Certificates $certificate
  * @property Organization $organization
+ * @property Payers $payer
  * @property Programs $program
- * @property Disputes[] $disputes
- * @property Informs[] $informs
  */
 class Contracts extends \yii\db\ActiveRecord
 {
@@ -150,6 +201,11 @@ class Contracts extends \yii\db\ActiveRecord
             'certificatenumber' => 'Номер сертификата',
         ];
     }
+
+    public function getPayer()
+    {
+        return $this->hasOne(Payers::className(), ['id' => 'payer_id']);
+    }
     
     public function getPayers()
     {
@@ -234,6 +290,11 @@ class Contracts extends \yii\db\ActiveRecord
     
     
     public function getYear()
+    {
+        return $this->hasOne(ProgrammeModule::className(), ['id' => 'year_id']);
+    }
+
+    public function getModule()
     {
         return $this->hasOne(ProgrammeModule::className(), ['id' => 'year_id']);
     }
@@ -420,5 +481,19 @@ class Contracts extends \yii\db\ActiveRecord
         $query->andFilterWhere(['organization_id' => $params['organizationId']]);
 
         return $query->count();
+    }
+
+    /**
+     * @return array
+     */
+    public static function statuses()
+    {
+        return [
+            self::STATUS_CREATED => 'Ожидает',
+            self::STATUS_ACTIVE => 'Действующий',
+            self::STATUS_REFUSED => 'Отклонён',
+            self::STATUS_ACCEPTED => 'Подтверждён',
+            self::STATUS_CLOSED => 'Расторгнут',
+        ];
     }
 }

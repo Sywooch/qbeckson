@@ -48,6 +48,22 @@ class ProgramsController extends Controller
     }
 
     /**
+     * @param $id
+     * @return string
+     */
+    public function actionAddPhoto($id)
+    {
+        $model = $this->findModel($id);
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $id]);
+        }
+
+        return $this->render('add-picture', [
+            'model' => $model
+        ]);
+    }
+
+    /**
      * Lists all Programs models.
      * @return mixed
      */
@@ -98,6 +114,7 @@ class ProgramsController extends Controller
      * Displays a single Programs model.
      * @param integer $id
      * @return mixed
+     * @throws ForbiddenHttpException
      */
     public function actionView($id)
     {

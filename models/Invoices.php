@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "invoices".
@@ -17,13 +17,33 @@ use Yii;
  * @property string $date
  * @property string $link
  * @property integer $prepayment
+ * @property integer $status
  *
  * @property Contracts $contract
  * @property Organization $organization
  * @property Payers $payers
+ * @property Payers $payer
  */
-class Invoices extends \yii\db\ActiveRecord
+class Invoices extends ActiveRecord
 {
+    const STATUS_NOT_VIEWED = 0;
+    const STATUS_IN_THE_WORK = 1;
+    const STATUS_PAID = 2;
+    const STATUS_REMOVED = 3;
+
+    /**
+     * @return array
+     */
+    public static function statuses()
+    {
+        return [
+            self::STATUS_NOT_VIEWED => 'Не просмотрен',
+            self::STATUS_IN_THE_WORK => 'В работе',
+            self::STATUS_PAID => 'Оплачен',
+            self::STATUS_REMOVED => 'Удален',
+        ];
+    }
+
     /**
      * @inheritdoc
      */
@@ -81,10 +101,16 @@ class Invoices extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getPayer()
+    {
+        return $this->hasOne(Payers::className(), ['id' => 'payers_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getPayers()
     {
         return $this->hasOne(Payers::className(), ['id' => 'payers_id']);
     }
-    
-    
 }

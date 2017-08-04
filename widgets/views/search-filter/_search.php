@@ -9,7 +9,6 @@ use kartik\widgets\Select2;
 ?>
 
 <div class="data-search search-form well">
-
     <div class="row">
         <?php $form = ActiveForm::begin([
             'action' => !empty($action) ? $action : ['index'],
@@ -33,14 +32,12 @@ use kartik\widgets\Select2;
             }
             ?>
         <?php endforeach; ?>
-
         <?= $inaccessibleRows ?>
         <div class="col-md-12 additional-params collapse">
             <div class="row">
                 <?= $otherRows ?>
             </div>
         </div>
-
         <div class="col-md-12">
             <?= Html::submitButton('Начать поиск', ['class' => 'btn btn-primary']) ?>&nbsp;&nbsp;
             <?= Html::a('Сбросить', !empty($action) ? $action : ['index'], ['class' => 'btn btn-default']) ?>&nbsp;&nbsp;
@@ -62,7 +59,10 @@ use kartik\widgets\Select2;
             <?= $form->field($userFilter, 'filter_id')->hiddenInput()->label(false) ?>
             <?= $form->field($userFilter, 'columns')->widget(Select2::class, [
                 'data' => array_combine($userFilter->filter->columnsForUser, $columnLabels),
-                'options' => ['placeholder' => 'Выберите..'],
+                'options' => [
+                    'placeholder' => 'Выберите..',
+                    'id' => Yii::$app->security->generateRandomString(6)
+                ],
                 'pluginOptions' => [
                     'allowClear' => true,
                     'multiple' => true,

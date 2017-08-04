@@ -10,6 +10,9 @@ use Yii;
  * @property integer $id
  * @property integer $user_id
  * @property string $number
+ * @property string $name
+ * @property string $soname
+ * @property string $phname
  * @property integer $payer_id
  * @property integer $actual
  * @property string $fio_child
@@ -23,6 +26,7 @@ use Yii;
  * @property integer $directivity4
  * @property integer $directivity5
  * @property integer $directivity6
+ * @property integer $rezerv
  *
  * @property User $user
  * @property Payers $payers
@@ -108,6 +112,7 @@ class Certificates extends \yii\db\ActiveRecord
             'phone' => 'Телефон',
             'rezerv' => 'Зарезервированно на оплату программ',
             'cert_group' => 'Группа сертификата',
+            'payer' => 'Плательщик'
         ];
     }
 
@@ -117,6 +122,14 @@ class Certificates extends \yii\db\ActiveRecord
     public function getUser()
     {
         return $this->hasOne(User::className(), ['id' => 'user_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPayer()
+    {
+        return $this->hasOne(Payers::className(), ['id' => 'payer_id']);
     }
 
     /**

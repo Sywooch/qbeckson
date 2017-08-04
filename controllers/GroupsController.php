@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\models\GroupClass;
+use app\models\ProgramModuleAddress;
 use Yii;
 use app\models\Groups;
 use app\models\ProgrammeModule;
@@ -10,6 +12,7 @@ use app\models\User;
 use app\models\GroupsSearch;
 use app\models\GroupsInvoiceSearch;
 use app\models\Completeness;
+use yii\base\Model;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -71,21 +74,9 @@ class GroupsController extends Controller
     {
         $model = $this->findModel($id);
 
-        /* $rows = (new \yii\db\Query())
-                 ->select(['id'])
-                 ->from('contracts')
-                 ->where(['group_id' => $id])
-                 ->andWhere(['status' => 1])
-                 ->column();
-
-         if (empty($rows)) { $rows = 0; }*/
-
-
         $Contracts1Search = new ContractsStatus1onlySearch();
         $Contracts1Search->group_id = $id;
         $ContractsProvider = $Contracts1Search->search(Yii::$app->request->queryParams);
-
-        //return var_dump($rows);
 
         return $this->render('contracts', [
             'model' => $model,
@@ -101,13 +92,19 @@ class GroupsController extends Controller
     public function actionCreate()
     {
         $model = new Groups();
-
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
 
-        if ($model->load(Yii::$app->request->post())) {
+        $groupClasses = [];
+        foreach (GroupClass::weekDays() as $key => $day) {
+            $groupClasses[$key] = new GroupClass([
+                'week_day' => $day
+            ]);
+        }
+
+        if (Yii::$app->request->post()) {
+            $model->load(Yii::$app->request->post());
             $model->organization_id = $organization['id'];
-            //$model->program_id = (int) $model->program_id;
 
             $rows = (new \yii\db\Query())
                 ->select(['month'])
@@ -122,75 +119,123 @@ class GroupsController extends Controller
             $month = floor($diff);
 
             if ($rows['month'] < $month - 1 or $rows['month'] > $month + 1) {
-                Yii::$app->session->setFlash('error', 'Продолжительность программы должна быть ' . $rows['month'] . ' месяцев.');
+                Yii::$app->session->setFlash(
+                    'error',
+                    'Продолжительность программы должна быть ' . $rows['month'] . ' месяцев.'
+                );
+            } else {
+                Model::loadMultiple($groupClasses, Yii::$app->request->post());
+                if ($model->validate() && Model::validateMultiple($groupClasses)) {
+                    $transaction = Yii::$app->db->beginTransaction();
+                    try {
+                        if ($model->save(false)) {
+                            foreach ($groupClasses as $classModel) {
+                                /** @var GroupClass $classModel */
+                                if ($classModel->status) {
+                                    $classModel->group_id = $model->id;
+                                    if (!($flag = $classModel->save(false))) {
+                                        $transaction->rollBack();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if ($flag) {
+                            $transaction->commit();
 
-                return $this->render('create', [
-                    'model' => $model,
-                ]);
+                            return $this->redirect(['personal/organization-groups']);
+                        }
+                    } catch (Exception $e) {
+                        $transaction->rollBack();
+                    }
+                }
             }
-
-            if ($model->save()) {
-                /* $completeness = new Completeness();
-                 $completeness->group_id = $model->id;
-
-                 if (date(m) == 1) {
-                     $completeness->month = 12;
-                     $completeness->year = date(Y) - 1;
-                 } else {
-                     $completeness->month = date(m) - 1;
-                     $completeness->year = date(Y);
-                 }
-                 $completeness->preinvoice = 0;
-                 $completeness->completeness = 100;
-                 if ($completeness->save()) {
-                     $preinvoice = new Completeness();
-                     $preinvoice->group_id = $model->id;
-                     $preinvoice->month = date(m);
-                     $preinvoice->year = date(Y);
-                     $preinvoice->preinvoice = 1;
-                     $preinvoice->completeness = 80;
-                     if ($preinvoice->save()) { */
-                return $this->redirect(['/personal/organization-groups']);
-                //  }
-                // }
-            }
-        } else {
-            return $this->render('create', [
-                'model' => $model,
-            ]);
         }
+
+        return $this->render('create', [
+            'groupClasses' => $groupClasses,
+            'model' => $model,
+        ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function actionSelectAddresses()
+    {
+        $out = '';
+        if ($parents = Yii::$app->request->post('depdrop_parents')) {
+            $moduleId = $parents[0];
+            $programModuleAddresses = ProgramModuleAddress::find()->andWhere(['program_module_id' => $moduleId])->all();
+            $out = [];
+            foreach ($programModuleAddresses as $key => $value) {
+                $out[] = ['id' => $value->address, 'name' => $value->address];
+            }
+        }
+
+        return Json::encode(['output' => $out, 'selected' => '']);
     }
 
     public function actionNewgroup($id)
     {
-        $modelsGroups = new Groups();
-        $modelsGroups->year_id = $id;
-
+        $model = new Groups();
+        $model->year_id = $id;
         $rows = (new \yii\db\Query())
             ->select(['program_id'])
             ->from('years')
             ->where(['id' => $id])
             ->one();
-
-        $modelsGroups->program_id = $rows['program_id'];
-
+        $model->program_id = $rows['program_id'];
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
+        $model->organization_id = $organization['id'];
 
-        $modelsGroups->organization_id = $organization['id'];
-
-        if ($modelsGroups->load(Yii::$app->request->post())) {
-
-            if ($modelsGroups->save()) {
-
-                return $this->redirect(['programs/view', 'id' => $modelsGroups->program_id]);
-
-            }
-        } else {
-            return $this->render('newgroup', [
-                'modelsGroups' => $modelsGroups,
+        $groupClasses = [];
+        foreach (GroupClass::weekDays() as $key => $day) {
+            $groupClasses[$key] = new GroupClass([
+                'week_day' => $day
             ]);
         }
+        $programModuleAddresses = ArrayHelper::map(
+            ProgramModuleAddress::find()->andWhere(['program_module_id' => $id])->all(),
+            'address',
+            'address'
+        );
+
+        if (Yii::$app->request->post()) {
+            $model->load(Yii::$app->request->post());
+            Model::loadMultiple($groupClasses, Yii::$app->request->post());
+            if ($model->validate() && Model::validateMultiple($groupClasses)) {
+                $transaction = Yii::$app->db->beginTransaction();
+                try {
+                    if ($model->save()) {
+                        foreach ($groupClasses as $classModel) {
+                            /** @var GroupClass $classModel */
+                            if ($classModel->status) {
+                                $classModel->group_id = $model->id;
+                                if (!($flag = $classModel->save(false))) {
+                                    $transaction->rollBack();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if ($flag) {
+                        $transaction->commit();
+
+                        return $this->redirect(['programs/view', 'id' => $model->program_id]);
+                    }
+                } catch (Exception $e) {
+                    $transaction->rollBack();
+                }
+            }
+        }
+
+        return $this->render('newgroup', [
+            'model' => $model,
+            'groupClasses' => $groupClasses,
+            'programModuleAddresses' => $programModuleAddresses
+        ]);
     }
 
     /**
@@ -202,14 +247,65 @@ class GroupsController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $programModuleAddresses = ArrayHelper::map(
+            ProgramModuleAddress::find()->andWhere(['program_module_id' => $model->module->id])->all(),
+            'address',
+            'address'
+        );
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['/personal/organization-groups']);
-        } else {
-            return $this->render('update', [
-                'model' => $model,
-            ]);
+        $groupClasses = [];
+        foreach (GroupClass::weekDays() as $key => $day) {
+            foreach ($model->classes as $class) {
+                if ($class->week_day === $day) {
+                    $class->status = 1;
+                    $groupClasses[$key] = $class;
+                }
+            }
+            if (null === $groupClasses[$key]) {
+                $groupClasses[$key] = new GroupClass([
+                    'week_day' => $day
+                ]);
+            }
         }
+
+        if (Yii::$app->request->post()) {
+            $model->load(Yii::$app->request->post());
+            Model::loadMultiple($groupClasses, Yii::$app->request->post());
+            if ($model->validate() && Model::validateMultiple($groupClasses)) {
+                $transaction = Yii::$app->db->beginTransaction();
+                try {
+                    if ($model->save(false)) {
+                        foreach ($groupClasses as $classModel) {
+                            /** @var GroupClass $classModel */
+                            if ($classModel->status) {
+                                $classModel->group_id = $model->id;
+                                if (!($flag = $classModel->save(false))) {
+                                    $transaction->rollBack();
+                                    break;
+                                }
+                            } else {
+                                if (!$classModel->isNewRecord) {
+                                    $classModel->delete();
+                                }
+                            }
+                        }
+                    }
+                    if ($flag) {
+                        $transaction->commit();
+
+                        return $this->redirect(['personal/organization-groups']);
+                    }
+                } catch (Exception $e) {
+                    $transaction->rollBack();
+                }
+            }
+        }
+
+        return $this->render('update', [
+            'model' => $model,
+            'programModuleAddresses' => $programModuleAddresses,
+            'groupClasses' => $groupClasses,
+        ]);
     }
 
     public function actionYear()

@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Плательщик',
                 'format' => 'raw',
-                'value'=> Html::a($model->payers->name, Url::to(['/payers/view', 'id' => $model->payers->id]), ['class' => 'blue']),
+                'value'=> Html::a($model->payers->name, Url::to(['/payers/view', 'id' => $model->payers->id]), ['class' => 'blue', 'target' => '_blank']),
                 'visible' => !Yii::$app->user->can('payer')
             ],
             [
@@ -48,7 +48,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 'rezerv',
                 'balance',
                 [
-                    'label'=> Html::a('Число заключенных договоров', Url::to([Yii::$app->user->can('operators') ? '/personal/operator-contracts' : '/personal/payer-contracts', 'cert' => $model->number]), ['class' => 'blue', 'target' => '_blank']),
+                    'label'=> Html::a(
+                        'Число заключенных договоров',
+                        Yii::$app->user->can('operators') ?
+                            [
+                                'personal/operator-contracts',
+                                'SearchActiveContracts[certificateNumber]' => $model->number,
+                                'SearchActiveContracts[certificate_id]' => $model->id,
+                            ] :
+                            [
+                                'personal/payer-contracts',
+                                'SearchActiveContracts[certificateNumber]' => $model->number,
+                                'SearchActiveContracts[certificate_id]' => $model->id,
+                            ],
+                        ['class' => 'blue', 'target' => '_blank']
+                    ),
                     'value' => Contracts::getCountContracts(['certificateId' => $model->id]),
                 ],
             ],

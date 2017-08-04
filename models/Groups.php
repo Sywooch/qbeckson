@@ -4,6 +4,7 @@ namespace app\models;
 
 use Yii;
 use yii\base\Model;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "groups".
@@ -11,12 +12,17 @@ use yii\base\Model;
  * @property integer $id
  * @property integer $organization_id
  * @property integer $program_id
+ * @property integer $year_id
  * @property string $name
  *
  * @property Organization $organization
+ * @property Contracts[] $contracts
+ * @property Years $module
+ * @property mixed $year
  * @property Programs $program
+ * @property GroupClass[] $classes
  */
-class Groups extends \yii\db\ActiveRecord
+class Groups extends ActiveRecord
 {
     /**
      * @inheritdoc
@@ -67,6 +73,31 @@ class Groups extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getClasses()
+    {
+        return $this->hasMany(GroupClass::class, ['group_id' => 'id']);
+    }
+
+    /**
+     * @return string
+     */
+    public function formatClasses()
+    {
+        if ($this->classes) {
+            $result = '';
+            foreach ($this->classes as $class) {
+                $result .= '<p>' .
+                        $class->week_day . ': '. $class->time_from . ' - ' . $class->time_to . ' ' . $class->address .
+                    '</p>';
+            }
+            return $result;
+        }
+        return '<p>Адрес: ' . $this->address . '</p><p>' . 'Расписание: ' . $this->schedule . '</p>';
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getOrganization()
     {
         return $this->hasOne(Organization::className(), ['id' => 'organization_id']);
@@ -79,6 +110,22 @@ class Groups extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Programs::className(), ['id' => 'program_id']);
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getModule()
+    {
+        return $this->hasOne(ProgrammeModule::className(), ['id' => 'year_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getContracts()
+    {
+        return $this->hasMany(Contracts::class, ['group_id' => 'id']);
+    }
     
     public function getGroup($id)
     {
@@ -89,7 +136,7 @@ class Groups extends \yii\db\ActiveRecord
         return $query->one();
     }
     
-        public function getYear()
+    public function getYear()
     {
         return $this->hasOne(ProgrammeModule::className(), ['id' => 'year_id']);
     }

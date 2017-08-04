@@ -1,10 +1,12 @@
 <?php
 
-use yii\helpers\Html;
-use yii\helpers\Url;
-use yii\grid\GridView;
-use yii\helpers\ArrayHelper;
+use app\helpers\GridviewHelper;
 use app\models\Mun;
+use app\models\UserIdentity;
+use app\widgets\SearchFilter;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
+use yii\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\CooperateSearch */
@@ -12,89 +14,109 @@ use app\models\Mun;
 
 $this->title = 'Соглашения';
 $this->params['breadcrumbs'][] = $this->title;
+
+$columns = [
+    [
+        'attribute' => 'number',
+    ],
+    [
+        'attribute' => 'date',
+        'format' => 'date',
+        'label' => 'Дата соглашения',
+    ],
+    [
+        'attribute' => 'organizationName',
+        'label' => 'Организация',
+        'format' => 'raw',
+        'value' => function ($model) {
+            /** @var \app\models\Cooperate $model */
+            return Html::a(
+                $model->organization->name,
+                ['organization/view', 'id' => $model->organization->id],
+                ['class' => 'blue', 'target' => '_blank']
+            );
+        },
+    ],
+    [
+        'attribute' => 'payerName',
+        'label' => 'Плательщик',
+        'format' => 'raw',
+        'value' => function ($model) {
+            /** @var \app\models\Cooperate $model */
+            return Html::a(
+                $model->payer->name,
+                ['payers/view', 'id' => $model->payer->id],
+                ['class' => 'blue', 'target' => '_blank']
+            );
+        },
+        'label'=> 'Плательщик',
+    ],
+    [
+        'attribute' => 'payerMunicipality',
+        'label' => 'Муниципалитет',
+        'format' => 'raw',
+        'data' => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
+        'type' => SearchFilter::TYPE_DROPDOWN,
+        'value' => function ($model) {
+            /** @var \app\models\Cooperate $model */
+            return Html::a(
+                $model->payer->municipality->name,
+                ['mun/view', 'id' => $model->payer->municipality->id],
+                ['class' => 'blue', 'target' => '_blank']
+            );
+        },
+    ],
+    [
+        'label' => 'Число договоров',
+        'attribute' => 'contractsCount',
+        'format'=> 'raw',
+        'value' => function ($data) {
+            $contracts = (new \yii\db\Query())
+                ->select(['id'])
+                ->from('contracts')
+                ->where(['payer_id' => $data->payers->id])
+                ->andWhere(['organization_id' => $data->organization->id])
+                ->count();
+
+            return Html::a(
+                $contracts,
+                [
+                    'personal/operator-contracts',
+                    'SearchActiveContracts[organizationName]' => $data->organization->name,
+                    'SearchActiveContracts[organization_id]' => $data->organization->id,
+                    'SearchActiveContracts[payerName]' => $data->payers->name,
+                    'SearchActiveContracts[payer_id]' => $data->payers->id,
+                ],
+                ['class' => 'blue', 'target' => '_blank', 'data-pjax' => '0']
+            );
+        },
+    ],
+    [
+        'attribute' => 'payer_id',
+        'type' => SearchFilter::TYPE_HIDDEN,
+    ],
+];
+
 ?>
 <div class="cooperate-index">
-   
+    <?php if ($searchModel->payer_id) : ?>
+        <p class="lead">Показаны результаты для плательщика: <?= $searchModel->payerName; ?></p>
+    <?php endif; ?>
+    <?= SearchFilter::widget([
+        'model' => $searchModel,
+        'action' => ['cooperate/index'],
+        'data' => GridviewHelper::prepareColumns(
+            'cooperate',
+            $columns,
+            null,
+            'searchFilter',
+            null
+        ),
+        'role' => UserIdentity::ROLE_OPERATOR,
+    ]); ?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
-           // ['class' => 'yii\grid\SerialColumn'],
-
-            //'id',
-            'number',
-            [
-              'attribute' => 'date',  
-                'format' => 'date',
-                'label' => 'Дата соглашения',
-            ],
-            
-            [
-                    'attribute' => 'organization',
-                    'label' => 'Организация',
-                    'format' => 'raw',
-                    'value'=> function($data){
-                        
-                        $organization = (new \yii\db\Query())
-                            ->select(['id'])
-                            ->from('organization')
-                            ->where(['name' => $data->organization->name])
-                            ->one();
-                        
-                        
-                    return Html::a($data->organization->name, Url::to(['/organization/view', 'id' => $organization['id']]), ['class' => 'blue', 'target' => '_blank']);
-                    },
-                ],         
-                [
-                    'attribute' => 'payers',
-                    'label' => 'Плательщик',
-                    'format' => 'raw',
-                    'value'=> function($data){
-                        
-                        $payer = (new \yii\db\Query())
-                            ->select(['id'])
-                            ->from('payers')
-                            ->where(['name' => $data->payers->name])
-                            ->one();
-                        
-                        
-                    return Html::a($data->payers->name, Url::to(['/payers/view', 'id' => $payer['id']]), ['class' => 'blue', 'target' => '_blank']);
-                    },
-                    'label'=> 'Плательщик',
-                ],
-                [
-              'attribute' => 'payersmun',  
-                'label' => 'Район (округ)',
-                'filter'=>ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
-                 'value' => function ($data) { 
-                    $mun = (new \yii\db\Query())
-                        ->select(['name'])
-                        ->from('mun')
-                        ->where(['id' => $data->payers->mun])
-                        ->one();
-                     return $mun['name'];
-                 },
-            ],
-            [  
-                'label' => 'Число договоров',
-                'format'=> 'raw',
-                'value' => function ($data) { 
-                    $contracts = (new \yii\db\Query())
-                        ->select(['id'])
-                        ->from('contracts')
-                        ->where(['payer_id' => $data->payers->id])
-                        ->andWhere(['organization_id' => $data->organization->id])
-                        ->count();
-                    
-                      return Html::a($contracts, Url::to(['/personal/operator-contracts', 'org' => $data->organization->name, 'payer' => $data->payers->name]), ['class' => 'blue', 'target' => '_blank']);
-                 },
-            ],
-            
-            // 'date_dissolution',
-            // 'status',
-            // 'reade',
-
-            //['class' => 'yii\grid\ActionColumn'],
-        ],
+        'filterModel' => null,
+        'columns' => GridviewHelper::prepareColumns('cooperate', $columns),
     ]); ?>
 </div>

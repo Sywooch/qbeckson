@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\models\statics\DirectoryProgramActivity;
 use app\models\statics\DirectoryProgramDirection;
+use trntv\filekit\behaviors\UploadBehavior;
 use voskobovich\linker\LinkerBehavior;
 use Yii;
 use app\models\Cooperate;
@@ -35,6 +36,8 @@ use yii\helpers\ArrayHelper;
  * @property integer $minchild
  * @property integer $both_teachers
  * @property string $fullness
+ * @property string $photo_base_url
+ * @property string $photo_path
  * @property string $complexity
  * @property string $norm_providing
  * @property integer $ovz
@@ -55,6 +58,14 @@ use yii\helpers\ArrayHelper;
  * @property DirectoryProgramActivity[]|null $activities
  * @property DirectoryProgramDirection|null $direction
  * @property string $directivity
+ * @property mixed $countMonths
+ * @property mixed $organizationProgram
+ * @property mixed $organizationWaitProgram
+ * @property mixed $organizationNoProgram
+ * @property Mun $municipality
+ * @property mixed $cooperateProgram
+ * @property mixed $countHours
+ * @property string $commonActivities
  * @property ProgrammeModule[] $modules
  */
 class Programs extends \yii\db\ActiveRecord
@@ -62,6 +73,7 @@ class Programs extends \yii\db\ActiveRecord
     public $file;
     public $edit;
     public $search;
+    public $programPhoto;
 
     /**
      * @inheritdoc
@@ -80,7 +92,7 @@ class Programs extends \yii\db\ActiveRecord
             [['direction_id', 'name', 'task', 'annotation', 'ovz', 'norm_providing', 'age_group_min', 'age_group_max', 'ground'], 'required'],
             [['organization_id', 'ovz', 'mun', 'year', 'ground', 'age_group_min', 'age_group_max', 'verification', 'form', 'p3z', 'study', 'last_contracts', 'limit', 'last_s_contracts', 'quality_control', 'last_s_contracts_rod', 'direction_id'], 'integer'],
             [['rating', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch'], 'number'],
-            [['task', 'annotation', 'vid', 'norm_providing', 'search'], 'string'],
+            [['task', 'annotation', 'vid', 'norm_providing', 'search', 'photo_path', 'photo_base_url'], 'string'],
             [['name', 'zab'], 'string', 'max' => 255],
             [['link'], 'string', 'max' => 45],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
@@ -92,7 +104,8 @@ class Programs extends \yii\db\ActiveRecord
                 'direction_id', 'exist', 'skipOnError' => true,
                 'targetClass' => DirectoryProgramDirection::class,
                 'targetAttribute' => ['direction_id' => 'id']
-            ]
+            ],
+            [['programPhoto'], 'safe'],
         ];
     }
 
@@ -108,7 +121,22 @@ class Programs extends \yii\db\ActiveRecord
                     'activity_ids' => 'activities',
                 ],
             ],
+            [
+                'class' => UploadBehavior::class,
+                'multiple' => false,
+                'pathAttribute' => 'photo_path',
+                'baseUrlAttribute' => 'photo_base_url',
+                'attribute' => 'programPhoto',
+            ]
         ];
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getPhoto()
+    {
+        return $this->photo_base_url ? $this->photo_base_url . '/' . $this->photo_path : null;
     }
 
     /**
@@ -204,6 +232,7 @@ class Programs extends \yii\db\ActiveRecord
             'ocen_obch' => 'Оценка общей удовлетворенности программой',
             'selectyear' => 'Выберите год обучения по программе для просмотра подробной информации',
             'activities' => 'Виды деятельности',
+            'programPhoto' => 'Картинка программы'
         ];
     }
 
@@ -262,7 +291,6 @@ class Programs extends \yii\db\ActiveRecord
     {
         return $this->hasMany(ProgrammeModule::className(), ['program_id' => 'id']);
     }
-
 
     public static function getCountPrograms($organization_id = null, $verification = null)
     {
@@ -520,5 +548,55 @@ class Programs extends \yii\db\ActiveRecord
         $result = $command->queryOne();
 
         return $result['summa'];
+    }
+
+    /**
+     * @return array
+     */
+    public static function forms()
+    {
+        return [
+            1 => 'Очная',
+            2 => 'Очно-заочная',
+            3 => 'Заочная',
+            4 => 'Очная с применением дистанционных технологий и/или электронного обучения',
+            5 => 'Очно-заочная с применением дистанционных технологий и/или электронного обучения',
+            6 => 'Заочная с применением дистанционных технологий и/или электронного обучения',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public static function directivities()
+    {
+        return [
+            'Техническая (робототехника)' => 'Техническая (робототехника)',
+            'Техническая (иная)' => 'Техническая (иная)',
+            'Естественнонаучная' => 'Естественнонаучная',
+            'Физкультурно-спортивная' => 'Физкультурно-спортивная',
+            'Художественная' => 'Художественная',
+            'Туристско-краеведческая' => 'Туристско-краеведческая',
+            'Социально-педагогическая' => 'Социально-педагогическая'
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public static function illnesses()
+    {
+        return [
+            1 => 'глухие',
+            2 => 'слабослышащие и позднооглохшие',
+            3 => 'слепые',
+            4 => 'слабовидящие',
+            5 => 'нарушения речи',
+            6 => 'фонетико-фонематическое нарушение речи',
+            7 => 'нарушение опорно-двигательного аппарата',
+            8 => 'задержка психического развития',
+            9 => 'расстройство аутистического спектра',
+            10 => 'нарушение интеллекта',
+        ];
     }
 }

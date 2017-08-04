@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\models\CertificateInformation;
+use app\models\Mun;
 use app\models\SettingsSearchFilters;
 use app\models\UserSearchFiltersAssignment;
 use Yii;
@@ -50,6 +52,19 @@ class SiteController extends Controller
         ];
     }
 
+    /**
+     * @param $municipalityId
+     * @return string
+     */
+    public function actionInformation($municipalityId)
+    {
+        $result = CertificateInformation::findOneByMunicipality($municipalityId);
+
+        return $this->render('information', [
+            'result' => $result,
+        ]);
+    }
+
     public function actionIndex()
     {
         if (!Yii::$app->user->isGuest) {
@@ -61,8 +76,15 @@ class SiteController extends Controller
             return $this->goBack();
         }
 
+        $municipalities = Mun::find()
+            ->andWhere([
+                'operator_id' => Yii::$app->operator->identity->id
+            ])
+            ->all();
+
         return $this->render('index', [
             'model' => $model,
+            'municipalities' => $municipalities
         ]);
     }
 

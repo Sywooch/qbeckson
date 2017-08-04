@@ -10,6 +10,17 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="container-fluid">
     <div class="row">
+        <div class="col-md-12">
+            <p class="lead">
+                <?= Html::a(
+                    'Информация о получении сертификата',
+                    ['certificate-information/update'],
+                    ['class' => 'btn btn-success']
+                ) ?>
+            </p>
+        </div>
+    </div>
+    <div class="row">
         <div class="col-md-4 col-md-offset-1 well">
             <p><label class="control-label">Наименование организации</label> - <?= $payer['name'] ?></p>
             <p><label class="control-label">ИНН</label> - <?= $payer['INN'] ?></p>

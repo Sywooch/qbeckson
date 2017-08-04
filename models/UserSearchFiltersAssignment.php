@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "user_search_filters_assignment".
@@ -12,9 +13,10 @@ use Yii;
  * @property string $user_columns
  *
  * @property SettingsSearchFilters $filter
+ * @property mixed $columns
  * @property User $user
  */
-class UserSearchFiltersAssignment extends \yii\db\ActiveRecord
+class UserSearchFiltersAssignment extends ActiveRecord
 {
     /**
      * @inheritdoc
@@ -33,8 +35,16 @@ class UserSearchFiltersAssignment extends \yii\db\ActiveRecord
             [['user_id', 'filter_id'], 'required'],
             [['user_id', 'filter_id'], 'integer'],
             [['user_columns'], 'safe'],
-            [['filter_id'], 'exist', 'skipOnError' => true, 'targetClass' => SettingsSearchFilters::className(), 'targetAttribute' => ['filter_id' => 'id']],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
+            [
+                ['filter_id'],
+                'exist', 'skipOnError' => true, 'targetClass' => SettingsSearchFilters::className(),
+                'targetAttribute' => ['filter_id' => 'id']
+            ],
+            [
+                ['user_id'],
+                'exist', 'skipOnError' => true, 'targetClass' => User::className(),
+                'targetAttribute' => ['user_id' => 'id']
+            ],
         ];
     }
 
@@ -49,12 +59,6 @@ class UserSearchFiltersAssignment extends \yii\db\ActiveRecord
             'user_columns' => 'Отображаемые данные',
             'columns' => 'Отображаемые данные',
         ];
-    }
-
-    public function beforeValidate()
-    {
-        //if (!empty)
-        return parent::beforeValidate();
     }
 
     /**
@@ -73,6 +77,9 @@ class UserSearchFiltersAssignment extends \yii\db\ActiveRecord
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 
+    /**
+     * @return array
+     */
     public function getColumns()
     {
         $arrayColumns = preg_split('/[\s*,\s*]*,+[\s*,\s*]*/', $this->user_columns);
@@ -80,32 +87,42 @@ class UserSearchFiltersAssignment extends \yii\db\ActiveRecord
         return array_combine($arrayColumns, $arrayColumns);
     }
 
+    /**
+     * @param $data
+     */
     public function setColumns($data)
     {
+        $this->user_columns = '';
         if (is_array($data)) {
-            $this->user_columns = join(',', $data);
-        } else {
-            $this->user_columns = '';
+            $this->user_columns = implode(',', $data);
         }
     }
 
+    /**
+     * @param $filter
+     * @return array|null|ActiveRecord|static
+     */
     public static function findByFilter($filter)
     {
+        if (null === $filter) {
+            throw new \DomainException('Filter must be not empty!');
+        }
+
         $query = static::find()
             ->andWhere([
                 'filter_id' => $filter->id,
                 'user_id' => Yii::$app->user->id,
             ]);
 
-        if (!$userfilter = $query->one()) {
-            $userfilter = new static([
+        if (!$userFilter = $query->one()) {
+            $userFilter = new static([
                 'filter_id' => $filter->id,
                 'user_id' => Yii::$app->user->id,
-                'user_columns' => join(',', $filter->columnsForUser),
+                'user_columns' => implode(',', $filter->columnsForUser),
             ]);
-            $userfilter->save();
+            $userFilter->save();
         }
 
-        return $userfilter;
+        return $userFilter;
     }
 }

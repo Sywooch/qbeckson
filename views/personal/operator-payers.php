@@ -1,144 +1,117 @@
 <?php
+
+use app\helpers\GridviewHelper;
+use app\models\Mun;
+use app\models\UserIdentity;
+use app\widgets\SearchFilter;
+use yii\grid\ActionColumn;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use kartik\grid\GridView;
-use app\models\Informs;
-use yii\helpers\Url;
 use kartik\export\ExportMenu;
-use yii\helpers\ArrayHelper;
-use app\models\Mun;
-
-//use kartik\grid\GridView;
 
 $this->title = 'Плательщики';
-   $this->params['breadcrumbs'][] = 'Плательщики';
+$this->params['breadcrumbs'][] = 'Плательщики';
 /* @var $this yii\web\View */
+/* @var $searchPayers \app\models\PayersSearch */
+/* @var $payersProvider \yii\data\ActiveDataProvider */
+/* @var $allPayersProvider \yii\data\ActiveDataProvider */
 ?>
-
-<?php /* if ($InformsProvider->getTotalCount() > 0) { ?>
-    <div class="modal fade">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title">Оповещения</h4>
-          </div>
-          <div class="modal-body">
-            <?= GridView::widget([
-                'dataProvider' => $InformsProvider,
-                'summary' => false,
-                'showHeader' => false,
-                'columns' => [
-                    // 'id',
-                    // 'contract_id',
-                    // 'from',
-                    'date',
-                    'text:ntext',
-                    'program_id',
-                    // 'read',
-
-                    ['class' => 'yii\grid\ActionColumn',
-                        'template' => '{permit} {view}',
-                         'buttons' =>
-                             [
-                                 'permit' => function ($url, $model) {
-                                     return Html::a('<span class="glyphicon glyphicon-ok"></span>', Url::to(['/informs/read', 'id' => $model->id]), [
-                                         'title' => Yii::t('yii', 'Отметить как прочитанное'),
-                                        'data-toggle' => 'tooltip',
-                                        'data-placement' => 'top'
-                                     ]); },
-
-                                'view' => function ($url, $model) {
-                                     return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', Url::to(['/programs/view', 'id' => $model->program_id]), [
-                                         'title' => Yii::t('yii', 'Просмотреть программу'),
-                                        'data-toggle' => 'tooltip',
-                                        'data-placement' => 'top'
-                                     ]); },
-                             ]
-                     ],
-                ],
-            ]); ?>
-          </div>
-        </div><!-- /.modal-content -->
-      </div><!-- /.modal-dialog -->
-    </div>
-<?php }  */
-$col = [
-//['class' => 'yii\grid\SerialColumn'],
-    //'id',
-    //'user.username',
-    'name',
-    //'OGRN',
-    //'INN',
-    //'KPP',
-    //'OKPO',
+<?php
+$columns = [
     [
-        'attribute'=>'mun',
-        'filter'=>ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
-         'value' => function ($data) { 
-            $mun = (new \yii\db\Query())
-                ->select(['name'])
-                ->from('mun')
-                ->where(['id' => $data->mun])
-                ->one();
-             return $mun['name'];
-         },
+        'attribute' => 'name',
     ],
-    //'address_legal',
-    // 'address_actual',
-    'phone',
-    'email:email',
-     //'position',
-    'fio',
-    'directionality',
-    // 'directionality_1_count',
-    // 'directionality_2_count',
-    // 'directionality_3_count',
-    // 'directionality_4_count',
-    // 'directionality_5_count',
-    // 'directionality_6_count',
-    ['class' => 'yii\grid\ActionColumn',
+    [
+        'attribute' => 'phone',
+    ],
+    [
+        'attribute' => 'email',
+        'format' => 'email',
+    ],
+    [
+        'attribute' => 'fio',
+    ],
+    [
+        'attribute' => 'directionality',
+    ],
+    [
+        'attribute' => 'mun',
+        'value' => function ($model) {
+            /** @var \app\models\Payers $model */
+            return Html::a(
+                $model->municipality->name,
+                ['mun/view', 'id' => $model->municipality->id],
+                ['target' => '_blank', 'data-pjax' => '0']
+            );
+        },
+        'format' => 'raw',
+        'type' => SearchFilter::TYPE_DROPDOWN,
+        'data' => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
+    ],
+    [
+        'attribute' => 'cooperates',
+        'value' => function ($model) {
+            /** @var \app\models\Payers $model */
+            $cooperatesCount = $model->getCooperates()->andWhere(['status' => 1])->count();
+
+            return $cooperatesCount > 0 ? $cooperatesCount : '-';
+        },
+        'type' => SearchFilter::TYPE_RANGE_SLIDER,
+        'pluginOptions' => [
+            'max' => 100,
+        ],
+    ],
+    [
+        'attribute' => 'certificates',
+        'value' => function ($model) {
+            /** @var \app\models\Payers $model */
+            $certificatesCount = $model->getCertificates()->count();
+
+            return $certificatesCount > 0 ? $certificatesCount : '-';
+        },
+        'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    ],
+    [
+        'class' => ActionColumn::class,
         'controller' => 'payers',
         'template' => '{view}',
+        'searchFilter' => false,
     ],
 ];
+$preparedColumns = GridviewHelper::prepareColumns('payers', $columns);
 ?>
-
-<p>
-   
-    <!-- <div class="btn-group">
-      <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle"><span class="glyphicon glyphicon-cog"></span> <span class="caret"></span></button>
-        <ul class="dropdown-menu">
-        <?php 
-        //    $form = ActiveForm::begin();
-            
-          /*  foreach ($col as $value => $label) {    
-                echo '<li>'. Html::checkbox($label, ['data-key' => $value]).' '.$label.'</li>';
-                
-            } */
-            
-          //  ActiveForm::end();
-        ?>
-       </ul>
-    </div> -->
-   
-    <?= Html::a('Добавить плательщика', ['payers/create'], ['class' => 'btn btn-success']) ?>
-</p>
- 
-
-
- <?= GridView::widget([
-    'dataProvider' => $PayersProvider,
-    'filterModel' => $searchPayers,
-    'pjax'=>true,
-    'summary' => false,
-    'columns' => $col,
+<?= SearchFilter::widget([
+    'model' => $searchPayers,
+    'action' => ['personal/operator-payers'],
+    'data' => GridviewHelper::prepareColumns(
+        'payers',
+        $columns,
+        null,
+        'searchFilter',
+        null
+    ),
+    'role' => UserIdentity::ROLE_OPERATOR,
+    'type' => null
 ]); ?>
-
+<p><?= Html::a('Добавить плательщика', ['payers/create'], ['class' => 'btn btn-success']) ?></p>
+<?= GridView::widget([
+    'dataProvider' => $payersProvider,
+    'filterModel' => null,
+    'pjax' => true,
+    'summary' => false,
+    'columns' => $preparedColumns,
+]); ?>
+<p class="lead">Экспорт данных:</p>
 <?= ExportMenu::widget([
-    'dataProvider' => $PayersProvider,
-    'target' => '_self',
+    'dataProvider' => $allPayersProvider,
     'exportConfig' => [
         ExportMenu::FORMAT_EXCEL => false,
     ],
-    'columns' => $col,
+    'target' => ExportMenu::TARGET_BLANK,
+    'columns' => GridviewHelper::prepareExportColumns($columns),
+    'showColumnSelector' => false
 ]); ?>
+<br>
+<br>
+<p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>

@@ -20,6 +20,7 @@ use app\behaviors\UploadBehavior;
  * @property integer $bank_bik
  * @property string $bank_sity
  * @property integer $korr_invoice
+ * @property integer $mun
  * @property string $rass_invoice
  * @property string $fio
  * @property string $position
@@ -37,12 +38,32 @@ use app\behaviors\UploadBehavior;
  * @property string $raiting
  * @property string $ground
  * @property string $about
+ * @property string $fio_contact
+ * @property string $email
  *
  * @property Contracts[] $contracts
  * @property Cooperate[] $cooperates
  * @property Invoices[] $invoices
  * @property Payers $payer
  * @property User $user
+ * @property mixed $certprogram
+ * @property mixed $actualOrganization
+ * @property \yii\db\ActiveQuery $statement
+ * @property string $statusName
+ * @property mixed $organization
+ * @property bool $isModerating
+ * @property \yii\db\ActiveQuery $children
+ * @property \yii\db\ActiveQuery $operators
+ * @property \yii\db\ActiveQuery $license
+ * @property \yii\db\ActiveQuery $operator
+ * @property string $userName
+ * @property \yii\db\ActiveQuery $groups
+ * @property Mun $municipality
+ * @property \yii\db\ActiveQuery $charter
+ * @property \yii\db\ActiveQuery $documents
+ * @property bool $requestCanBeUpdated
+ * @property bool $isRefused
+ * @property \yii\db\ActiveQuery $favorites
  * @property Programs[] $programs
  */
 class Organization extends \yii\db\ActiveRecord
@@ -211,9 +232,17 @@ class Organization extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getChildren()
+    {
+        return $this->hasMany(Contracts::class, ['organization_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getCharter()
     {
-        return $this->hasMany(OrganizationDocument::className(), ['organization_id' => 'id'])
+        return $this->hasMany(OrganizationDocument::class, ['organization_id' => 'id'])
             ->andWhere(['type' => OrganizationDocument::TYPE_CHARTER]);
     }
 
@@ -269,7 +298,6 @@ class Organization extends \yii\db\ActiveRecord
             'address_legal' => 'Юридический адрес',
             'address_actual' => 'Фактический адрес',
             'geocode' => 'Геокод',
-            //'max_child' => 'Максимальное число детей для обучения (лимит обучения) в текущем году',
             'max_child' => 'Лимит обучения',
             'amount_child' => 'Число договоров',
             'last_year_contract' => 'Число обучающихся за прошлый год',
@@ -294,6 +322,8 @@ class Organization extends \yii\db\ActiveRecord
             'statementDocument' => 'Выписка из ЕГРЮЛ/ЕГРИП',
             'commonDocuments' => 'Иные документы (не более трёх)',
             'verifyCode' => 'Проверочный код',
+            'children' => 'Число обучающихся',
+            'programs' => 'Количество програм'
         ];
     }
 
@@ -350,7 +380,6 @@ class Organization extends \yii\db\ActiveRecord
         return $this->hasMany(Groups::className(), ['organization_id' => 'id']);
     }
 
-
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -375,6 +404,9 @@ class Organization extends \yii\db\ActiveRecord
         return $this->hasOne(Mun::className(), ['id' => 'mun']);
     }
 
+    /**
+     * @return string
+     */
     public function getUserName()
     {
         return $this->user->username;
@@ -385,7 +417,7 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getPrograms()
     {
-        return $this->hasMany(Programs::className(), ['organization_id' => 'id']);
+        return $this->hasMany(Programs::class, ['organization_id' => 'id']);
     }
 
     /**
@@ -393,7 +425,8 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getOperators()
     {
-        return $this->hasMany(Operators::className(), ['id' => 'operator_id'])->viaTable('organization_operator_assignment', ['organization_id' => 'id']);
+        return $this->hasMany(Operators::className(), ['id' => 'operator_id'])
+            ->viaTable('organization_operator_assignment', ['organization_id' => 'id']);
     }
 
     /**
@@ -401,7 +434,8 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getOperator()
     {
-        return $this->hasOne(Operators::className(), ['id' => 'operator_id'])->viaTable('organization_operator_assignment', ['organization_id' => 'id']);
+        return $this->hasOne(Operators::className(), ['id' => 'operator_id'])
+            ->viaTable('organization_operator_assignment', ['organization_id' => 'id']);
     }
 
     /**
@@ -441,24 +475,14 @@ class Organization extends \yii\db\ActiveRecord
         return $query->column();
     }
 
-    public function getTypeLabel()
+    public static function types()
     {
-        $title = '';
-        switch ($this->type) {
-            case self::TYPE_EDUCATION:
-                $title = 'Образовательная организация';
-                break;
-            case self::TYPE_TRAINING:
-                $title = 'Организация, осуществляющая обучение';
-                break;
-            case self::TYPE_IP_WITH_WORKERS:
-                $title = 'Индивидуальный предприниматель, оказывающий услуги с наймом работников';
-                break;
-            case self::TYPE_IP_WITHOUT_WORKERS:
-                $title = 'Индивидуальный предприниматель, оказывающий услуги без найма работников';
-        }
-
-        return $title;
+        return [
+            self::TYPE_EDUCATION => 'Образовательная организация',
+            self::TYPE_TRAINING => 'Организация, осуществляющая обучение',
+            self::TYPE_IP_WITH_WORKERS => 'Индивидуальный предприниматель, оказывающий услуги с наймом работников',
+            self::TYPE_IP_WITHOUT_WORKERS => 'Индивидуальный предприниматель, оказывающий услуги без найма работников',
+        ];
     }
 
     public function getCertprogram()

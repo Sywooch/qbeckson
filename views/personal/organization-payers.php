@@ -1,178 +1,152 @@
 <?php
+
+use yii\grid\ActionColumn;
 use yii\helpers\Html;
-use yii\grid\GridView;
-use yii\widgets\ActiveForm;
-use yii\helpers\Url;
-use app\models\Organization;
+use app\helpers\GridviewHelper;
 use app\models\Mun;
+use app\models\UserIdentity;
+use app\widgets\SearchFilter;
 use yii\helpers\ArrayHelper;
+use kartik\grid\GridView;
+use app\models\Organization;
 
 $this->title = 'Плательщики';
-   $this->params['breadcrumbs'][] = 'Плательщики';
+$this->params['breadcrumbs'][] = 'Плательщики';
 /* @var $this yii\web\View */
+/* @var $searchOpenPayers \app\models\PayersSearch */
+/* @var $openPayersProvider \yii\data\ActiveDataProvider */
+/* @var $searchWaitPayers \app\models\PayersSearch */
+/* @var $waitPayersProvider \yii\data\ActiveDataProvider */
+
+$name = [
+    'attribute' => 'name',
+];
+$phone = [
+    'attribute' => 'phone',
+];
+$email = [
+    'attribute' => 'email',
+];
+$fio = [
+    'attribute' => 'fio',
+];
+$directionality = [
+    'attribute' => 'directionality',
+];
+$mun = [
+    'attribute' => 'mun',
+    'value' => 'municipality.name',
+    'type' => SearchFilter::TYPE_DROPDOWN,
+    'data' => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
+];
+$cooperates = [
+    'attribute' => 'cooperates',
+    'value' => function ($model) {
+        /** @var \app\models\Payers $model */
+        return $model->getCooperates()->andWhere(['status' => 1])->count();
+    },
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    'pluginOptions' => [
+        'max' => 100
+    ]
+];
+$certificates = [
+    'attribute' => 'certificates',
+    'value' => function ($model) {
+        /** @var \app\models\Payers $model */
+        return $model->getCertificates()->count();
+    },
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
+];
+$actions = [
+    'class' => ActionColumn::class,
+    'controller' => 'payers',
+    'template' => '{view}',
+    'searchFilter' => false,
+];
+
+$openColumns = $waitColumns = [
+    $name,
+    $phone,
+    $email,
+    $fio,
+    $directionality,
+    $mun,
+    $cooperates,
+    $certificates,
+    $actions
+];
+
+$preparedOpenColumns = GridviewHelper::prepareColumns('payers', $openColumns, 'open');
+$preparedWaitColumns = GridviewHelper::prepareColumns('payers', $waitColumns, 'wait');
+
 ?>
-
-<?php /* if ($informsProvider->getTotalCount() > 0) { ?>
-    <div class="modal fade">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title">Оповещения</h4>
-          </div>
-          <div class="modal-body">
-            <?= GridView::widget([
-                'dataProvider' => $informsProvider,
-                'summary' => false,
-                'showHeader' => false,
-                'columns' => [
-                    // 'id',
-                    // 'contract_id',
-                    // 'from',
-                    'date',
-                    'text:ntext',
-                    'program_id',
-                    // 'read',
-
-                    ['class' => 'yii\grid\ActionColumn',
-                        'template' => '{permit} {view}',
-                         'buttons' =>
-                             [
-                                 'permit' => function ($url, $model) {
-                                     return Html::a('<span class="glyphicon glyphicon-ok"></span>', Url::to(['/informs/read', 'id' => $model->id]), [
-                                         'title' => Yii::t('yii', 'Отметить как прочитанное'),
-                                        'data-toggle' => 'tooltip',
-                                        'data-placement' => 'top'
-                                     ]); },
-                                'view' => function ($url, $model) {
-                                     return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', Url::to(['/programs/view', 'id' => $model->program_id]), [
-                                         'title' => Yii::t('yii', 'Просмотреть программу'),
-                                        'data-toggle' => 'tooltip',
-                                        'data-placement' => 'top'
-                                     ]); },
-                             ]
-                     ],
-                ],
-            ]); ?>
-          </div>
-        </div><!-- /.modal-content -->
-      </div><!-- /.modal-dialog -->
-    </div>
-<?php } */ ?>
-
-
 <ul class="nav nav-tabs">
-    <li class="active"><a data-toggle="tab" href="#panel1">Действующие соглашения</a></li>
-    <li><a data-toggle="tab" href="#panel2">Ожидается подтверждение <span class="badge"><?= $PayersWaitProvider->getTotalCount() ?></span></a></li>
+    <li>
+        <a data-toggle="tab" href="#panel1">Действующие
+            <span class="badge"><?= $openPayersProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel2">Ожидается подтверждение
+            <span class="badge"><?= $waitPayersProvider->getTotalCount() ?></span>
+        </a>
+    </li>
 </ul>
 <br>
 <?php
-    $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-    $organizations = new Organization();
-    $organization = $organizations->getOrganization();
-    if ($roles['organizations'] and $organization['actual'] != 0) {
-        echo "<p>";
-        echo Html::a('Зарегистрировать новое соглашение', ['payers/index'], ['class' => 'btn btn-success']); 
-        echo "</p>";
-    }
-    ?>
-
+$roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
+$organizations = new Organization();
+$organization = $organizations->getOrganization();
+if ($roles['organizations'] and $organization['actual'] !== 0) {
+    echo '<p>';
+    echo Html::a('Зарегистрировать новое соглашение', ['payers/index'], ['class' => 'btn btn-success']);
+    echo '</p>';
+}
+?>
 <div class="tab-content">
     <div id="panel1" class="tab-pane fade in active">
+        <?= SearchFilter::widget([
+            'model' => $searchOpenPayers,
+            'action' => ['personal/operator-payers'],
+            'data' => GridviewHelper::prepareColumns(
+                'payers',
+                $openColumns,
+                'open',
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_ORGANIZATION,
+            'type' => 'open'
+        ]); ?>
         <?= GridView::widget([
-            'dataProvider' => $PayersProvider,
-            'filterModel' => $searchPayers,
+            'dataProvider' => $openPayersProvider,
+            'filterModel' => null,
+            'pjax' => true,
             'summary' => false,
-            'columns' => [
-               // ['class' => 'yii\grid\SerialColumn'],
-
-                //'id',
-                //'user_id',
-                'name',
-                //'mun',
-                 [
-                    'attribute'=>'mun',
-                    'filter'=>ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
-                     'value' => function ($data) { 
-                        $mun = (new \yii\db\Query())
-                            ->select(['name'])
-                            ->from('mun')
-                            ->where(['id' => $data->mun])
-                            ->one();
-                         return $mun['name'];
-                     },
-                ],
-                //'OGRN',
-                //'INN',
-                // 'KPP',
-                // 'OKPO',
-                // 'address_legal',
-                // 'address_actual',
-                 'phone',
-                 'email:email',
-                // 'position',
-                 'fio',
-                 'directionality',
-                // 'directionality_1_count',
-                // 'directionality_2_count',
-                // 'directionality_3_count',
-                // 'directionality_4_count',
-                // 'directionality_5_count',
-                // 'directionality_6_count',
-
-                ['class' => 'yii\grid\ActionColumn',
-                'controller' => 'payers',
-                 'template' => '{view}',
-                 'buttons' => [
-                        'terminate' => function ($url, $model) {
-                        return Html::a('<span class="glyphicon glyphicon-trash"></span>', Url::to(['/cooperate/decooperate', 'id' => $model->id]), [
-                             'title' => Yii::t('yii', 'Расторгнуть соглашение')
-                         ]); },
-                    ],
-                ],
-            ],
+            'columns' => $preparedOpenColumns,
         ]); ?>
     </div>
     <div id="panel2" class="tab-pane fade">
+        <?= SearchFilter::widget([
+            'model' => $searchWaitPayers,
+            'action' => ['personal/operator-payers'],
+            'data' => GridviewHelper::prepareColumns(
+                'payers',
+                $waitColumns,
+                'wait',
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_ORGANIZATION,
+            'type' => 'wait'
+        ]); ?>
         <?= GridView::widget([
-            'dataProvider' => $PayersWaitProvider,
-            'filterModel' => $searchPayersWait,
-            'columns' => [
-               // ['class' => 'yii\grid\SerialColumn'],
-
-                //'id',
-                //'user_id',
-                'name',
-                'mun',
-                //'OGRN',
-                //'INN',
-                // 'KPP',
-                // 'OKPO',
-                // 'address_legal',
-                // 'address_actual',
-                 'phone',
-                 'email:email',
-                // 'position',
-                 'fio',
-                 'directionality',
-                // 'directionality_1_count',
-                // 'directionality_2_count',
-                // 'directionality_3_count',
-                // 'directionality_4_count',
-                // 'directionality_5_count',
-                // 'directionality_6_count',
-
-                ['class' => 'yii\grid\ActionColumn',
-                'controller' => 'payers',
-                 'template' => '{view}',
-                 'buttons' => [
-                        'terminate' => function ($url, $model) {
-                        return Html::a('<span class="glyphicon glyphicon-trash"></span>', Url::to(['/cooperate/decooperate', 'id' => $model->id]), [
-                             'title' => Yii::t('yii', 'Расторгнуть соглашение')
-                         ]); },
-                    ],
-                ],
-            ],
+            'dataProvider' => $waitPayersProvider,
+            'filterModel' => null,
+            'pjax' => true,
+            'summary' => false,
+            'columns' => $preparedWaitColumns,
         ]); ?>
     </div>
 </div>

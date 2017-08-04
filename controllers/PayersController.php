@@ -2,15 +2,14 @@
 
 namespace app\controllers;
 
+use app\models\PayersSearch;
 use Yii;
 use app\models\Payers;
-use app\models\PayersCooperateSearch;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use app\models\User;
-use app\models\Cooperate;
-use app\models\Organization;
 use app\models\CertGroup;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
@@ -41,7 +40,16 @@ class PayersController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new PayersCooperateSearch();
+        /** @var UserIdentity $user */
+        $user = Yii::$app->user->getIdentity();
+        $allPayers = ArrayHelper::getColumn(Payers::find()->asArray()->all(), 'id');
+        $currentPayers = ArrayHelper::getColumn($user->organization->cooperates, 'payer_id');
+
+        $searchModel = new PayersSearch([
+            'certificates' => '0,150000',
+            'cooperates' => '0,100',
+            'id' => array_diff($allPayers, $currentPayers),
+        ]);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [

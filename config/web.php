@@ -15,6 +15,9 @@ $config = [
     'layout' => 'gos',
     'defaultRoute' => 'site/index',
     'components' => [
+        'yandexMapsApi' => [
+            'class' => 'mirocow\yandexmaps\Api',
+        ],
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'BiX8pOuGw7eu1QX9cP19jptOtNg9vYA7',
@@ -54,7 +57,6 @@ $config = [
             ],
         ],
         'db' => require(__DIR__ . '/db.php'),
-
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
@@ -64,11 +66,9 @@ $config = [
                 '<module:\w+>/<controller:\w+>/<action:(\w|-)+>/<id:\d+>' => '<module>/<controller>/<action>',
             ],
         ],
-
         'authManager' => [
             'class' => 'yii\rbac\DbManager',
         ],
-
         'formatter' => [
             'class' => 'yii\i18n\Formatter',
             'dateFormat' => 'php:d.m.Y',
@@ -201,6 +201,13 @@ $config = [
                         'roles' => ['organizations'],
                     ]
                 ],
+                'program-module-address' => [
+                    [
+                        'actions' => ['create', 'update', 'select'],
+                        'allow' => true,
+                        'roles' => ['organizations'],
+                    ]
+                ],
                 'admin/directory-program-direction' => [
                     [
                         'allow' => true,
@@ -229,6 +236,12 @@ $config = [
                         'allow' => true,
                     ]
                 ],
+                'certificate-information' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['payer'],
+                    ]
+                ]
             ]
     ],
 
@@ -240,6 +253,7 @@ if (YII_ENV_DEV) {
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',
+        'allowedIPs' => ['*'],
     ];
 
     $config['bootstrap'][] = 'gii';

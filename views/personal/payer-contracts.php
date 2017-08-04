@@ -1,370 +1,373 @@
 <?php
+
+use app\helpers\GridviewHelper;
+use app\models\Contracts;
+use app\models\Mun;
+use app\models\UserIdentity;
+use app\widgets\SearchFilter;
+use yii\grid\ActionColumn;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 use yii\helpers\Url;
 use kartik\export\ExportMenu;
-use kartik\dialog\DialogAsset;
 use app\models\ContractsPayerInvoiceSearch;
 use app\models\Payers;
 
 /* @var $this yii\web\View */
+/* @var $activeContractsProvider \yii\data\ActiveDataProvider */
+/* @var $confirmedContractsProvider \yii\data\ActiveDataProvider */
+/* @var $pendingContractsProvider \yii\data\ActiveDataProvider */
+/* @var $dissolvedContractsProvider \yii\data\ActiveDataProvider */
+/* @var $ContractsallProvider \yii\data\ActiveDataProvider */
+/* @var $searchActiveContracts \app\models\search\ContractsSearch */
+/* @var $searchConfirmedContracts \app\models\search\ContractsSearch */
+/* @var $searchPendingContracts \app\models\search\ContractsSearch */
+/* @var $searchDissolvedContracts \app\models\search\ContractsSearch */
 
 $this->title = 'Договоры';
 $this->params['breadcrumbs'][] = $this->title;
-?>
 
+$number = [
+    'attribute' => 'number',
+];
+$date = [
+    'attribute' => 'date',
+    'format' => 'date',
+];
+$rezerv = [
+    'attribute' => 'rezerv',
+    'label' => 'Резерв',
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
+];
+$start_edu_contract = [
+    'attribute' => 'start_edu_contract',
+    'format' => 'date',
+    'label' => 'Действует с',
+];
+$stop_edu_contract = [
+    'attribute' => 'stop_edu_contract',
+    'format' => 'date',
+    'label' => 'Действует до',
+];
+$group_id = [
+    'attribute' => 'group_id',
+    'value' => 'group.name',
+];
+$programMunicipality = [
+    'attribute' => 'programMunicipality',
+    'value' => 'program.municipality.name',
+    'label' => 'Муниципалитет',
+    'type' => SearchFilter::TYPE_DROPDOWN,
+    'data' => ArrayHelper::map(Mun::find()->all(), 'id', 'name'),
+];
+$childFullName = [
+    'attribute' => 'childFullName',
+    'value' => 'certificate.fio_child',
+    'label' => 'ФИО ребёнка'
+];
+$moduleName = [
+    'attribute' => 'moduleName',
+    'value' => 'year.fullname',
+    'label' => 'Модуль'
+];
+$certificateNumber = [
+    'attribute' => 'certificateNumber',
+    'format' => 'raw',
+    'label' => 'Сертификат',
+    'value' => function ($data) {
+        return Html::a(
+            $data->certificate->number,
+            Url::to(['certificates/view', 'id' => $data->certificate->id]),
+            ['target' => '_blank', 'data-pjax' => '0']
+        );
+    }
+];
+$programName = [
+    'attribute' => 'programName',
+    'label' => 'Программа',
+    'format' => 'raw',
+    'value' => function ($data) {
+        return Html::a(
+            $data->program->name,
+            Url::to(['programs/view', 'id' => $data->program->id]),
+            ['class' => 'blue', 'target' => '_blank']
+        );
+    },
+];
+$organizationName = [
+    'attribute' => 'organizationName',
+    'label' => 'Организация',
+    'format' => 'raw',
+    'value' => function ($data) {
+        return Html::a(
+            $data->organization->name,
+            Url::to(['/organization/view', 'id' => $data->organization->id]),
+            ['target' => '_blank', 'data-pjax' => '0']
+        );
+    },
+];
+$status = [
+    'attribute' => 'status',
+    'value' => function ($data) {
+        if ($data->status === 0) {
+            return 'Заявка ожидает подтверждения';
+        }
+        if ($data->status === 3) {
+            return 'Договор ожидает подписания';
+        }
+    },
+    'type' => SearchFilter::TYPE_DROPDOWN,
+    'data' => Contracts::statuses(),
+];
+$date_termnate = [
+    'attribute' => 'date_termnate',
+    'format' => 'date',
+];
+$paid = [
+    'attribute' => 'paid',
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
+];
+$actions = [
+    'class' => ActionColumn::class,
+    'controller' => 'contracts',
+    'template' => '{view}',
+    'searchFilter' => false,
+];
+
+$activeColumns = [
+    $number,
+    $date,
+    $rezerv,
+    $paid,
+    $start_edu_contract,
+    $stop_edu_contract,
+    $group_id,
+    $programMunicipality,
+    $childFullName,
+    $moduleName,
+    $certificateNumber,
+    $programName,
+    $organizationName,
+    [
+        'attribute' => 'payer_id',
+        'type' => SearchFilter::TYPE_HIDDEN,
+    ],
+    $actions,
+];
+$confirmedColumns = [
+    $certificateNumber,
+    $childFullName,
+    $moduleName,
+    $programMunicipality,
+    $programName,
+    $start_edu_contract,
+    $stop_edu_contract,
+    [
+        'class' => ActionColumn::class,
+        'template' => '{dobr}',
+        'buttons' => [
+            'dobr' => function ($url, $model) {
+                return Html::a(
+                    '<span class="glyphicon glyphicon-check"></span>',
+                    Url::to(['contracts/verificate', 'id' => $model->id]),
+                    ['title' => 'Ok']
+                );
+            },
+        ],
+        'searchFilter' => false,
+    ],
+];
+$pendingColumns = [
+    $certificateNumber,
+    $programName,
+    $organizationName,
+    $start_edu_contract,
+    $stop_edu_contract,
+    $status,
+    $programMunicipality,
+    $moduleName,
+    [
+        'class' => ActionColumn::class,
+        'controller' => 'contracts',
+        'template' => '{view}',
+        'buttons' => [
+            'permit' => function ($url, $model) {
+                return Html::a(
+                    '<span class="glyphicon glyphicon-ok"></span>',
+                    Url::to(['contracts/ok', 'id' => $model->id]),
+                    ['title' => 'Подтвердить создание договора']
+                );
+            },
+        ],
+        'searchFilter' => false,
+    ],
+];
+$dissolvedColumns = [
+    $number,
+    $date,
+    $certificateNumber,
+    $programName,
+    $moduleName,
+    $date_termnate,
+    $programMunicipality,
+    $paid,
+    $actions,
+];
+
+$preparedActiveColumns = GridviewHelper::prepareColumns('contracts', $activeColumns, 'active');
+$preparedConfirmedColumns = GridviewHelper::prepareColumns('contracts', $confirmedColumns, 'confirmed');
+$preparedPendingColumns = GridviewHelper::prepareColumns('contracts', $pendingColumns, 'pending');
+$preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolvedColumns, 'dissolved');
+
+?>
 <ul class="nav nav-tabs">
-    <li class="active"><a data-toggle="tab" href="#panel1">Действующие <span
-                    class="badge"><?= $Contracts1Provider->getTotalCount() ?></span></a></li>
-    <li><a data-toggle="tab" href="#panel2">Подтвержденные <span
-                    class="badge"><?= $Contracts3Provider->getTotalCount() ?></span></a></li>
-    <li><a data-toggle="tab" href="#panel3">Ожидающие подтверждения <span
-                    class="badge"><?= $Contracts0Provider->getTotalCount() ?></span></a></li>
-    <li><a data-toggle="tab" href="#panel4">Расторгнутые <span
-                    class="badge"><?= $Contracts5Provider->getTotalCount() ?></span></a></li>
+    <li class="active">
+        <a data-toggle="tab" href="#panel1">Действующие
+            <span class="badge"><?= $activeContractsProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel2">Подтвержденные
+            <span class="badge"><?= $confirmedContractsProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel3">Ожидающие подтверждения
+            <span class="badge"><?= $pendingContractsProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel4">Расторгнутые
+            <span class="badge"><?= $dissolvedContractsProvider->getTotalCount() ?></span>
+        </a>
+    </li>
 </ul>
 <br>
-
-
-<p>
-    <?php
-    $payers = new Payers();
-    $payer = $payers->getPayer();
-
-    $searchContracts = new ContractsPayerInvoiceSearch();
-    $searchContracts->payer_id = $payer->id;
-    $InvoiceProvider = $searchContracts->search(Yii::$app->request->queryParams);
-
-    echo ExportMenu::widget([
-        'dataProvider' => $InvoiceProvider,
-        'target' => '_self',
-        'showColumnSelector' => false,
-        'filename' => date('d-m-Y'),
-        'dropdownOptions' => [
-            'class' => 'btn btn-success',
-            'label' => 'Сформировать реестр договоров для субсидии',
-            'icon' => false,
-        ],
-        'exportConfig' => [
-            ExportMenu::FORMAT_TEXT => false,
-            ExportMenu::FORMAT_CSV => false,
-            ExportMenu::FORMAT_HTML => false,
-            ExportMenu::FORMAT_EXCEL => false,
-        ],
-        'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-            'number',
-            'date:date',
-            [
-                'attribute' => 'certificatenumber',
-                'label' => 'Сертификат',
-                'format' => 'raw',
-            ],
-            [
-                'attribute' => 'organizationname',
-                'label' => 'Организация',
-                'format' => 'raw',
-            ],
-            [
-                'label' => 'К оплате',
-                'value' => function ($model) {
-
-                    $start_edu_contract = explode("-", $model->start_edu_contract);
-                    $month = $start_edu_contract[1];
-
-                    if ($month == date('m')) {
-                        $price = $model->first_m_price * $model->payer_dol;
-                    } else {
-                        $price = $model->other_m_price * $model->payer_dol;
-                    }
-
-                    return $price;
-                }
-            ],
-        ],
-    ]);
-    ?>
-<p>
-
 <div class="tab-content">
     <div id="panel1" class="tab-pane fade in active">
+        <?php if ($searchActiveContracts->payer_id && $searchActiveContracts->programName) : ?>
+            <p class="lead">Показаны результаты для программы: <?= $searchActiveContracts->programName; ?></p>
+        <?php endif; ?>
+        <?php if ($searchActiveContracts->certificate_id) : ?>
+            <p class="lead">Показаны результаты для сертификата: <?= $searchActiveContracts->certificateNumber; ?></p>
+        <?php endif; ?>
+        <?php if ($searchActiveContracts->organization_id) : ?>
+            <p class="lead">Показаны результаты для организации: <?= $searchActiveContracts->organizationName; ?></p>
+        <?php endif; ?>
+        <?= SearchFilter::widget([
+            'model' => $searchActiveContracts,
+            'action' => ['personal/payer-contracts'],
+            'data' => GridviewHelper::prepareColumns(
+                'contracts',
+                $activeColumns,
+                'active',
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_PAYER,
+            'type' => 'active'
+        ]); ?>
         <?= GridView::widget([
-            'dataProvider' => $Contracts1Provider,
-            'filterModel' => $searchContracts1,
+            'dataProvider' => $activeContractsProvider,
+            'filterModel' => null,
             'pjax' => true,
             'summary' => false,
             'rowOptions' => function ($model, $index, $widget, $grid) {
-                if ($model->wait_termnate == 1) {
+                if ($model->wait_termnate === 1) {
                     return ['class' => 'danger'];
                 }
             },
-            'columns' => [
-                [
-                    'attribute' => 'number',
-                    'label' => 'Номер',
-                ],
-                [
-                    'attribute' => 'date',
-                    'format' => 'date',
-                    'label' => 'Дата',
-                ],
-                [
-                    'attribute' => 'certificatenumber',
-                    'label' => 'Сертификат',
-                    'format' => 'raw',
-                ],
-                [
-                    'attribute' => 'programname',
-                    'label' => 'Программа',
-                    'format' => 'raw',
-                ],
-                [
-                    'attribute' => 'organizationname',
-                    'label' => 'Организация',
-                    'format' => 'raw',
-                ],
-                [
-                    'attribute' => 'rezerv',
-                    'label' => 'Резерв',
-                    'value' => function ($data) {
-                        return abs(round($data->rezerv));
-                    },
-                ],
-                [
-                    'attribute' => 'paid',
-                    'label' => 'Списано',
-                    'value' => function ($data) {
-                        return round($data->paid);
-                    },
-                ],
-
-                [
-                    'attribute' => 'stop_edu_contract',
-                    'format' => 'date',
-                    'label' => 'Действует до',
-                ],
-                ['class' => 'yii\grid\ActionColumn',
-                    'controller' => 'contracts',
-                    'template' => '{view}',
-                ],
-            ],
+            'columns' => $preparedActiveColumns,
         ]); ?>
     </div>
-
     <div id="panel2" class="tab-pane fade">
+        <?= SearchFilter::widget([
+            'model' => $searchConfirmedContracts,
+            'action' => ['personal/payer-contracts'],
+            'data' => GridviewHelper::prepareColumns(
+                'contracts',
+                $confirmedColumns,
+                'confirmed',
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_PAYER,
+            'type' => 'confirmed'
+        ]); ?>
         <?= GridView::widget([
-            'dataProvider' => $Contracts3Provider,
-            'filterModel' => $search3Contracts,
+            'dataProvider' => $confirmedContractsProvider,
+            'filterModel' => null,
             'rowOptions' => function ($model, $index, $widget, $grid) {
-                if ($model->wait_termnate == 1) {
+                if ($model->wait_termnate === 1) {
                     return ['class' => 'danger'];
                 }
             },
             'pjax' => true,
             'summary' => false,
-            'columns' => [
-                [
-                    'attribute' => 'certificatenumber',
-                    'label' => 'Сертификат',
-                    'format' => 'raw',
-                ],
-                [
-                    'attribute' => 'programname',
-                    'label' => 'Программа',
-                    'format' => 'raw',
-                ],
-                [
-                    'attribute' => 'organizationname',
-                    'label' => 'Организация',
-                    'format' => 'raw',
-                ],
-                [
-                    'attribute' => 'start_edu_contract',
-                    'format' => 'date',
-                    'label' => 'Начало обучения',
-                ],
-                [
-                    'attribute' => 'stop_edu_contract',
-                    'format' => 'date',
-                    'label' => 'Конец обучения',
-                ],
-
-
-                ['class' => 'yii\grid\ActionColumn',
-                    'template' => '{dobr}',
-                    'buttons' =>
-                        [
-                            'dobr' => function ($url, $model) {
-                                return Html::a('<span class="glyphicon glyphicon-check"></span>', Url::to(['/contracts/verificate', 'id' => $model->id]), [
-                                    'title' => Yii::t('yii', 'Ok')
-                                ]);
-                            },
-                        ]
-                ],
-            ],
+            'columns' => $preparedConfirmedColumns,
         ]); ?>
     </div>
-
     <div id="panel3" class="tab-pane fade">
+        <?= SearchFilter::widget([
+            'model' => $searchPendingContracts,
+            'action' => ['personal/payer-contracts'],
+            'data' => GridviewHelper::prepareColumns(
+                'contracts',
+                $pendingColumns,
+                'pending',
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_PAYER,
+            'type' => 'pending'
+        ]); ?>
         <?= GridView::widget([
-            'dataProvider' => $Contracts0Provider,
-            'filterModel' => $searchContracts0,
+            'dataProvider' => $pendingContractsProvider,
+            'filterModel' => null,
             'pjax' => true,
-            'columns' => [
-                [
-                    'attribute' => 'certificatenumber',
-                    'label' => 'Сертификат',
-                    'format' => 'raw',
-                ],
-                [
-                    'attribute' => 'programname',
-                    'label' => 'Программа',
-                    'format' => 'raw',
-                ],
-                [
-                    'attribute' => 'organizationname',
-                    'label' => 'Организация',
-                    'format' => 'raw',
-                ],
-                [
-                    'attribute' => 'start_edu_contract',
-                    'format' => 'date',
-                    'label' => 'Начало обучения',
-                ],
-                [
-                    'attribute' => 'stop_edu_contract',
-                    'format' => 'date',
-                    'label' => 'Конец обучения',
-                ],
-
-                [
-                    'attribute' => 'status',
-                    'value' => function ($data) {
-                        if ($data->status == 0) {
-                            return 'Заявка ожидает подтверждения';
-                        }
-                        if ($data->status == 3) {
-                            return 'Договор ожидает подписания';
-                        }
-                    },
-                ],
-
-                ['class' => 'yii\grid\ActionColumn',
-                    'controller' => 'contracts',
-                    'template' => '{view}',
-                    'buttons' =>
-                        [
-                            'permit' => function ($url, $model) {
-                                return Html::a('<span class="glyphicon glyphicon-ok"></span>', Url::to(['/contracts/ok', 'id' => $model->id]), [
-                                    'title' => Yii::t('yii', 'Подтвердить создание договора')
-                                ]);
-                            },
-                        ]
-                ],
-            ],
+            'summary' => false,
+            'columns' => $preparedPendingColumns,
         ]); ?>
     </div>
     <div id="panel4" class="tab-pane fade">
+        <?= SearchFilter::widget([
+            'model' => $searchDissolvedContracts,
+            'action' => ['personal/payer-contracts'],
+            'data' => GridviewHelper::prepareColumns(
+                'contracts',
+                $dissolvedColumns,
+                'dissolved',
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_PAYER,
+            'type' => 'dissolved'
+        ]); ?>
         <?= GridView::widget([
-            'dataProvider' => $Contracts5Provider,
-            'filterModel' => $searchContracts5,
+            'dataProvider' => $dissolvedContractsProvider,
+            'filterModel' => null,
             'rowOptions' => function ($model, $index, $widget, $grid) {
-                if ($model->wait_termnate == 1) {
+                if ($model->wait_termnate === 1) {
                     return ['class' => 'danger'];
                 }
             },
             'pjax' => true,
             'summary' => false,
-            'columns' => [
-                [
-                    'attribute' => 'number',
-                    'label' => 'Номер',
-                ],
-                [
-                    'attribute' => 'date',
-                    'format' => 'date',
-                    'label' => 'Дата',
-                ],
-                [
-                    'attribute' => 'certificate',
-                    'label' => 'Сертификат',
-                    'format' => 'raw',
-                    'value' => function ($data) {
-
-                        $certificate = (new \yii\db\Query())
-                            ->select(['id'])
-                            ->from('certificates')
-                            ->where(['number' => $data->certificate->number])
-                            ->one();
-
-
-                        return Html::a($data->certificate->number, Url::to(['/certificates/view', 'id' => $certificate['id']]), ['class' => 'blue', 'target' => '_blank']);
-                    }
-                ],
-                [
-                    'attribute' => 'program',
-                    'label' => 'Программа',
-                    'format' => 'raw',
-                    'value' => function ($data) {
-
-                        $program = (new \yii\db\Query())
-                            ->select(['id'])
-                            ->from('programs')
-                            ->where(['name' => $data->program->name])
-                            ->one();
-
-
-                        return Html::a($data->program->name, Url::to(['/programs/view', 'id' => $program['id']]), ['class' => 'blue', 'target' => '_blank']);
-                    },
-                ],
-                [
-                    'attribute' => 'payers',
-                    'label' => 'Плательщик',
-                    'format' => 'raw',
-                    'value' => function ($data) {
-
-                        $payer = (new \yii\db\Query())
-                            ->select(['id'])
-                            ->from('payers')
-                            ->where(['name' => $data->payers->name])
-                            ->one();
-
-
-                        return Html::a($data->payers->name, Url::to(['/payers/view', 'id' => $payer['id']]), ['class' => 'blue', 'target' => '_blank']);
-                    },
-                    'label' => 'Плательщик',
-                ],
-                [
-                    'attribute' => 'year.year',
-                    'value' => function ($data) {
-                        return $data->year->fullname;
-                    }
-                ],
-                'date_termnate:date',
-                ['class' => 'yii\grid\ActionColumn',
-                    'controller' => 'contracts',
-                    'template' => '{view}',
-                ],
-            ],
+            'columns' => $preparedDissolvedColumns,
         ]); ?>
     </div>
-    <?php
-    echo ExportMenu::widget([
+    <p class="lead">Экспорт данных:</p>
+    <?= ExportMenu::widget([
         'dataProvider' => $ContractsallProvider,
-        'target' => '_self',
-        //'showConfirmAlert' => false,
-        //'enableFormatter' => false,
+        'filename' => 'all-contracts',
+        'target' => ExportMenu::TARGET_BLANK,
         'showColumnSelector' => false,
-        //'contentBefore' => [
-        //    'value' => 123,
-        //],
-        'filename' => 'contracts',
         'dropdownOptions' => [
             'class' => 'btn btn-success',
             'label' => 'Договоры',
             'icon' => false,
         ],
-        //'asDropdown' => false,
         'exportConfig' => [
             ExportMenu::FORMAT_TEXT => false,
             ExportMenu::FORMAT_PDF => false,
@@ -433,6 +436,66 @@ $this->params['breadcrumbs'][] = $this->title;
             'fontsize',
             'certificatenumber',
         ],
-
     ]); ?>
+    <p>
+        <?php
+        $payers = new Payers();
+        $payer = $payers->getPayer();
+
+        $searchContracts = new ContractsPayerInvoiceSearch();
+        $searchContracts->payer_id = $payer->id;
+        $InvoiceProvider = $searchContracts->search(Yii::$app->request->queryParams);
+
+        echo ExportMenu::widget([
+            'dataProvider' => $InvoiceProvider,
+            'target' => ExportMenu::TARGET_BLANK,
+            'showColumnSelector' => false,
+            'filename' => date('d-m-Y'),
+            'dropdownOptions' => [
+                'class' => 'btn btn-success',
+                'label' => 'Сформировать реестр договоров для субсидии',
+                'icon' => false,
+            ],
+            'exportConfig' => [
+                ExportMenu::FORMAT_TEXT => false,
+                ExportMenu::FORMAT_CSV => false,
+                ExportMenu::FORMAT_HTML => false,
+                ExportMenu::FORMAT_EXCEL => false,
+            ],
+            'columns' => [
+                ['class' => 'yii\grid\SerialColumn'],
+                'number',
+                'date:date',
+                [
+                    'attribute' => 'certificatenumber',
+                    'label' => 'Сертификат',
+                    'format' => 'raw',
+                ],
+                [
+                    'attribute' => 'organizationname',
+                    'label' => 'Организация',
+                    'format' => 'raw',
+                ],
+                [
+                    'label' => 'К оплате',
+                    'value' => function ($model) {
+
+                        $start_edu_contract = explode("-", $model->start_edu_contract);
+                        $month = $start_edu_contract[1];
+
+                        if ($month == date('m')) {
+                            $price = $model->first_m_price * $model->payer_dol;
+                        } else {
+                            $price = $model->other_m_price * $model->payer_dol;
+                        }
+
+                        return $price;
+                    }
+                ],
+            ],
+        ]);
+        ?>
+    <p>
+    <br>
+    <p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>
 </div>
