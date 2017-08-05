@@ -149,7 +149,7 @@ $user = Yii::$app->user->getIdentity();
                                         ['label' => 'Счета', 'url' => ['/personal/payer-invoices']],
                                         ['label' => 'Организации', 'items' => [
                                             ['label' => 'Реестр ПФДО', 'url' => ['/personal/payer-organizations']],
-                                            ['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
+                                            //['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
                                         ]],
                                         ['label' => 'Программы', 'url' => ['/personal/payer-programs']],
                                     ],
@@ -188,7 +188,7 @@ $user = Yii::$app->user->getIdentity();
                                         ['label' => 'Счета', 'url' => ['/personal/organization-invoices']],
                                         ['label' => 'Плательщики', 'items' => [
                                             ['label' => 'Плательщики', 'url' => ['/personal/organization-payers']],
-                                            ['label' => 'Подведомственность', 'url' => ['/personal/organization-suborder']],
+                                            //['label' => 'Подведомственность', 'url' => ['/personal/organization-suborder']],
                                         ]],
                                         ['label' => 'Группы', 'url' => ['/personal/organization-groups']],
                                     ],
