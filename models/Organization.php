@@ -439,6 +439,40 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrganizationPayerAssignment()
+    {
+         return $this->hasOne(OrganizationPayerAssignment::className(), ['organization_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSuborderPayer()
+    {
+        return $this->hasOne(Payers::className(), ['id' => 'payer_id'])->viaTable('organization_payer_assignment', ['organization_id' => 'id']);
+    }
+
+    public function canBeSubordered($payer)
+    {
+        $query = self::find()
+            ->joinWith([
+                'municipality',
+                'suborderPayer',
+            ])
+            ->andWhere('`organization`.id = ' . $this->id)
+            ->andWhere('`mun`.id = ' . $payer->municipality->id)
+            ->andWhere('(`organization_payer_assignment`.payer_id IS NOT NULL) OR (`organization_payer_assignment`.status = ' . OrganizationPayerAssignment::STATUS_ACTIVE . ' AND `organization_payer_assignment`.payer_id = ' . Yii::$app->user->identity->payer->id . ') OR (`organization_payer_assignment`.status = ' . OrganizationPayerAssignment::STATUS_PENDING . ' AND `organization_payer_assignment`.payer_id = ' . Yii::$app->user->identity->payer->id . ')');
+
+        if (!$query->count()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * DEPRECATED
      * Use relation in app\models\User instead
      */

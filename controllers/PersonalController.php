@@ -5,6 +5,8 @@ namespace app\controllers;
 use app\models\Mun;
 use app\models\search\ContractsSearch;
 use app\models\search\InvoicesSearch;
+use app\models\OrganizationPayerAssignment;
+use app\models\User;
 use app\models\UserIdentity;
 use Yii;
 use app\models\Programs;
@@ -33,6 +35,7 @@ use app\models\PreviusSearch;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 
 /**
@@ -396,6 +399,28 @@ class PersonalController extends Controller
         ]);
     }
 
+    public function actionPayerSuborderOrganizations()
+    {
+        $searchModel = new OrganizationSearch(['subordered' => true]);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('payer-suborder-organizations', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionPayerAllOrganizations()
+    {
+        $searchModel = new OrganizationSearch(['possibleForSuborder' => true]);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('payer-all-organizations', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
     /**
      * @return string
      */
@@ -628,6 +653,32 @@ class PersonalController extends Controller
             'searchInvoices' => $searchInvoices,
             'invoicesProvider' => $invoicesProvider,
         ]);
+    }
+
+    public function actionOrganizationSuborder()
+    {
+        $model = Yii::$app->user->identity->organization;
+
+        return $this->render('organization-suborder', [
+            'model' => $model,
+        ]);
+    }
+
+    public function actionOrganizationSetSuborderStatus($refuse = 0)
+    {
+        $model = Yii::$app->user->identity->organization->organizationPayerAssignment;
+        if ($model->status != OrganizationPayerAssignment::STATUS_PENDING) {
+            throw new BadRequestHttpException('Невозможно выполнить действие.');
+        }
+
+        if (!$refuse) {
+            $model->status = OrganizationPayerAssignment::STATUS_ACTIVE;
+        } else {
+            $model->status = OrganizationPayerAssignment::STATUS_REFUSED;
+        }
+        $model->save();
+
+        $this->redirect(['organization-suborder']);
     }
 
     /**

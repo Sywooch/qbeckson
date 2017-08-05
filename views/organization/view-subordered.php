@@ -13,7 +13,6 @@ use app\models\Cooperate;
 
 $this->title = $model->name;
 
-
 $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
 if (isset($roles['operators'])) {
     $this->params['breadcrumbs'][] = ['label' => 'Организации', 'url' => ['/personal/operator-organizations']];
@@ -69,76 +68,68 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
 
     <?= DetailView::widget([
-            'model' => $model,
-            'attributes' => [
-                'full_name',
-                [
-                    'attribute'=>'type',
-                    'value' => $model::types()[$model->type],
-                ],
-                'address_actual',
-                [
-                    'attribute' => 'mun',
-                    'label' => 'Основной район (округ)',
-                    'value' => function ($model) {
-                        /** @var \app\models\Organization $model */
-                        return Html::a(
-                            $model->municipality->name,
-                            ['mun/view', 'id' => $model->municipality->id],
-                            ['target' => '_blank', 'data-pjax' => '0']
-                        );
-                    },
-                    'format' => 'raw',
-                ],
-                'phone',
-                [
-                    'attribute' => 'email',
-                    'format' => 'email',
-                ],
-                [
-                    'attribute' => 'site',
-                    'format' => 'url',
-                ],
-                'fio_contact',
-                [
-                  'label' => 'Лицензия',
-                    'value' => 'Лицензия от '.$license_date[2].'.'.$license_date[1].'.'.$license_date[0].' №'.$model->license_number.' выдана '.$model->license_issued.'.',
-                ],
-                [
-                    'attribute'=>'actual',
-                    'value'=>$model->actual == 1 ? 'Осуществляет деятельность в рамках системы' : 'Деятельность в рамках системы приостановлена',
+        'model' => $model,
+        'attributes' => [
+            'full_name',
+            [
+                'attribute' => 'type',
+                'value' => $model->typeLabel,
+            ],
+            'address_actual',
+            [
+                'attribute' => 'mun',
+                'label' => 'Основной район (округ)',
+                'value' => $model->munName($model->mun),
+            ],
+            'phone',
+            'email',
+            [
+                'attribute' => 'site',
+                'format' => 'raw',
+                'value' => '<a href="http://' . $model->site . '">' . $model->site . '</a>',
+            ],
+            'fio_contact',
+
+            [
+                'label' => 'Лицензия',
+                'value' => 'Лицензия от ' . $license_date[2] . '.' . $license_date[1] . '.' . $license_date[0] . ' №' . $model->license_number . ' выдана ' . $model->license_issued . '.',
+            ],
+            [
+                'attribute' => 'actual',
+                'value' => $model->actual == 1 ? 'Осуществляет деятельность в рамках системы' : 'Деятельность в рамках системы приостановлена',
             ],
         ],
     ])
     ?>
-    
+
     <?php
     if (isset($roles['operators'])) {
-        
-    echo DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'inn',
-            'KPP',
-            'OGRN',
-            'okopo',
-            'address_legal',
-            'last_year_contract',
-            'cratedate:date',
-        ],
-    ]);
-            
-        
-    echo DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'bank_name',
-            'bank_bik',
-            'bank_sity',
-            'korr_invoice',
-            'rass_invoice',
-        ],
-    ]);
+
+        echo DetailView::widget([
+            'model' => $model,
+            'attributes' => [
+                'inn',
+                'KPP',
+                'OGRN',
+                'okopo',
+                'address_legal',
+                'last_year_contract',
+                'cratedate:date',
+            ],
+        ]);
+
+
+        echo DetailView::widget([
+            'model' => $model,
+            'attributes' => [
+                'bank_name',
+                'bank_bik',
+                'bank_sity',
+                'korr_invoice',
+                'rass_invoice',
+            ],
+        ]);
+
     }
     ?>
 
@@ -204,99 +195,62 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php
     if (isset($roles['certificate'])) {
         echo DetailView::widget([
-        'model' => $model,
-        'attributes' => [   
-            'max_child',
-            [
-                'label' => 'Число обучающихся',
-                'value' => $amount,
-            ],
-            [
-                'label' => Html::a(
-                    'Сертифицированных программ',
-                    Url::to(['/programs/search', 'org' => $model->id]),
-                    ['class' => 'blue', 'target' => '_blank']
-                ),
-                'value'=>$model->getCertprogram(),
-            ],
-        ],
-    ]);
-        }
-        if (isset($roles['payer'])) {
-            echo DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    'max_child',
-                    [
-                        'label' => 'Число обучающихся',
-                        'value' => $amount,
-                    ],
-                    [
-                        'value' => $contracts,
-                        'label'=> Html::a(
-                            'Число договоров',
-                            Url::to([
-                                'personal/payer-contracts',
-                                'SearchActiveContracts[organizationName]' => $model->name,
-                                'SearchActiveContracts[organization_id]' => $model->id,
-                            ]),
-                            ['class' => 'blue', 'target' => '_blank']
-                        ),
-                    ],
-                    [
-                        'value' => $model->getCertprogram(),
-                        'label' => Html::a(
-                            'Сертифицированных программ',
-                            Url::to([
-                                'personal/payer-programs',
-                                'SearchPrograms[organization]' => $model->name,
-                                'SearchPrograms[organization_id]' => $model->id
-                            ]),
-                            ['class' => 'blue', 'target' => '_blank']
-                        ),
-                    ],
+            'model' => $model,
+            'attributes' => [
+                'max_child',
+                [
+                    'label' => 'Число обучающихся',
+                    'value' => $amount,
                 ],
-            ]);
-        }
-    
-        if (isset($roles['operators'])) {
-            echo DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    'max_child',
-                    [
-                        'label' => 'Число обучающихся',
-                        'value' => $amount,
-                    ],
-                    [
-                        'value' => $contracts,
-                        'label'=> Html::a(
-                            'Число договоров',
-                            [
-                                'personal/operator-contracts',
-                                'SearchActiveContracts[organizationName]' => $model->name,
-                                'SearchActiveContracts[organization_id]' => $model->id
-                            ],
-                            ['class' => 'blue', 'target' => '_blank']
-                        ),
-                    ],
-                    [
-                        'value' => $model->getCertprogram(),
-                        'label' => Html::a(
-                            'Сертифицированных программ',
-                            [
-                                'personal/operator-programs',
-                                'SearchOpenPrograms[organization]' => $model->name,
-                                'SearchOpenPrograms[organization_id]' => $model->id,
-                            ],
-                            ['class' => 'blue', 'target' => '_blank']
-                        ),
-                    ],
+                [
+                    'label' => Html::a('Сертифицированных программ', Url::to(['/programs/search', 'org' => $model->id]), ['class' => 'blue']),
+                    'value' => $model->getCertprogram(),
                 ],
-            ]);
-        }
-        ?>
-    
+            ],
+        ]);
+    }
+    if (isset($roles['payer'])) {
+        echo DetailView::widget([
+            'model' => $model,
+            'attributes' => [
+                'max_child',
+                [
+                    'label' => 'Число обучающихся',
+                    'value' => $amount,
+                ],
+                [
+                    'value' => $contracts,
+                    'label' => Html::a('Число договоров', Url::to(['/personal/payer-contracts', 'org' => $model->name]), ['class' => 'blue']),
+                ],
+                [
+                    'label' => Html::a('Сертифицированных программ', Url::to(['/personal/payer-programs', 'org' => $model->name]), ['class' => 'blue']),
+                    'value' => $model->getCertprogram(),
+                ],
+            ],
+        ]);
+    }
+
+    if (isset($roles['operators'])) {
+        echo DetailView::widget([
+            'model' => $model,
+            'attributes' => [
+                'max_child',
+                [
+                    'label' => 'Число обучающихся',
+                    'value' => $amount,
+                ],
+                [
+                    'value' => $contracts,
+                    'label' => Html::a('Число договоров', Url::to(['/personal/operator-contracts', 'org' => $model->name]), ['class' => 'blue']),
+                ],
+                [
+                    'label' => Html::a('Сертифицированных программ', Url::to(['/personal/operator-programs', 'org' => $model->name]), ['class' => 'blue']),
+                    'value' => $model->getCertprogram(),
+                ],
+            ],
+        ]);
+    } ?>
+
     <?php
     if (isset($roles['payer'])) {
 
@@ -307,15 +261,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $model,
             'attributes' => [
                 [
-                    'label' => Html::a(
-                        'Выставлено счетов и авансов',
-                        [
-                            '/personal/payer-invoices',
-                            'InvoicesSearch[organization]' => $model->name,
-                            'InvoicesSearch[organization_id]' => $model->id
-                        ],
-                        ['class' => 'blue', 'target' => '_blank']
-                    ),
+                    'label' => Html::a('Выставлено счетов и авансов', Url::to(['/personal/payer-invoices', 'org' => $model->name]), ['class' => 'blue']),
                     'value' => $model->invoiceCount($model->id, $payer->id),
                 ],
             ],
@@ -395,7 +341,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 echo Html::a('Назад', '/personal/payer-organizations', ['class' => 'btn btn-primary']);
                 echo '&nbsp;';
                 echo Html::a('Одобрить', Url::to(['/cooperate/okpayer', 'id' => $model->id]), ['class' => 'btn btn-primary']);
+
             } else {
+                $suborder = Yii::$app->user->identity->payer->getOrganizationPayerAssignments($model->id)->one();
+                if ($model->canBeSubordered(Yii::$app->user->identity->payer)) {
+                    echo '<div class="pull-right">';
+                    echo Html::a('Указать как подведомственную', Url::to(['/organization/set-as-subordinated', 'id' => $model->id]), ['class' => 'btn btn-warning']);
+                    echo '</div>';
+                } else {
+                    echo '<div class="pull-right"><p class="text-default">';
+                    echo $suborder->statuses[$suborder->status];
+                    if ($suborder->status === \app\models\OrganizationPayerAssignment::STATUS_PENDING) {
+                        echo '&nbsp;&nbsp;' . Html::a('Отменить', ['cancel-subording', 'id' => $model->id]);
+                    }
+                    echo '</p></div>';
+                }
                 echo Html::a('Назад', '/personal/payer-organizations', ['class' => 'btn btn-primary']);
             }
         }

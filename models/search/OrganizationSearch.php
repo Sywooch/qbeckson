@@ -2,6 +2,7 @@
 
 namespace app\models\search;
 
+use app\models\OrganizationPayerAssignment;
 use app\models\UserIdentity;
 use Yii;
 use yii\base\Model;
@@ -14,11 +15,18 @@ use app\models\Organization;
 class OrganizationSearch extends Organization
 {
     public $orgtype;
+
     public $programs;
-    public $statusArray = [];
+    
     public $children;
 
     public $modelName;
+
+    public $possibleForSuborder = false;
+
+    public $subordered = false;
+
+    public $statusArray = [];
 
     /**
      * @return string
@@ -41,7 +49,7 @@ class OrganizationSearch extends Organization
             [[
                 'name', 'license_date', 'license_issued', 'bank_name', 'bank_sity', 'rass_invoice', 'fio',
                 'position', 'address_legal', 'address_actual', 'geocode', 'raiting', 'ground', 'orgtype', 'statusArray',
-                'children', 'programs', 'amount_child', 'fio_contact', 'email', 'max_child'
+                'children', 'programs', 'amount_child', 'fio_contact', 'email', 'max_child', 'subordered'
             ], 'safe'],
         ];
     }
@@ -77,6 +85,19 @@ class OrganizationSearch extends Organization
             ->groupBy(['organization.id']);
 
         $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
+
+        if ($this->possibleForSuborder === true) {
+            $query->andWhere('`mun`.id = ' . Yii::$app->user->identity->payer->municipality->id)
+                ->joinWith('suborderPayer')
+                ->andWhere('(`organization_payer_assignment`.payer_id IS NULL) OR (`organization_payer_assignment`.status = ' . OrganizationPayerAssignment::STATUS_REFUSED . ' AND `organization_payer_assignment`.payer_id != ' . Yii::$app->user->identity->payer->id . ')');
+        }
+
+        if ($this->subordered === true) {
+            $query->innerJoinWith('suborderPayer')
+                ->andWhere('`organization_payer_assignment`.payer_id = ' . Yii::$app->user->identity->payer->id)
+                ->andWhere('`organization_payer_assignment`.status = ' . OrganizationPayerAssignment::STATUS_ACTIVE . ' OR `organization_payer_assignment`.status = ' . OrganizationPayerAssignment::STATUS_PENDING);
+        }
+        // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

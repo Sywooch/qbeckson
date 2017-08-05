@@ -147,7 +147,10 @@ $user = Yii::$app->user->getIdentity();
                                         ['label' => 'Сертификаты', 'url' => ['/personal/payer-certificates']],
                                         ['label' => 'Договоры', 'url' => ['/personal/payer-contracts']],
                                         ['label' => 'Счета', 'url' => ['/personal/payer-invoices']],
-                                        ['label' => 'Организации', 'url' => ['/personal/payer-organizations']],
+                                        ['label' => 'Организации', 'items' => [
+                                            ['label' => 'Реестр ПФДО', 'url' => ['/personal/payer-organizations']],
+                                            ['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
+                                        ]],
                                         ['label' => 'Программы', 'url' => ['/personal/payer-programs']],
                                     ],
                                 ]);
@@ -183,7 +186,10 @@ $user = Yii::$app->user->getIdentity();
                                         ]],
                                         ['label' => 'Договоры', 'url' => ['/personal/organization-contracts']],
                                         ['label' => 'Счета', 'url' => ['/personal/organization-invoices']],
-                                        ['label' => 'Плательщики', 'url' => ['/personal/organization-payers']],
+                                        ['label' => 'Плательщики', 'items' => [
+                                            ['label' => 'Плательщики', 'url' => ['/personal/organization-payers']],
+                                            ['label' => 'Подведомственность', 'url' => ['/personal/organization-suborder']],
+                                        ]],
                                         ['label' => 'Группы', 'url' => ['/personal/organization-groups']],
                                     ],
                                 ]);
