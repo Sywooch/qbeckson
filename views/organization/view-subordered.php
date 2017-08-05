@@ -71,10 +71,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'full_name',
-            [
-                'attribute' => 'type',
-                'value' => $model->typeLabel,
-            ],
             'address_actual',
             [
                 'attribute' => 'mun',

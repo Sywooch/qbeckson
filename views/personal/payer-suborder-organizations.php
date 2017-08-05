@@ -19,7 +19,13 @@ $this->title = 'Подведомственные организации';
     'summary' => false,
     'columns' => [
         'name',
-        'typeLabel',
+        [
+            'attribute' => 'type',
+            'value' => function ($model) {
+                /** @var \app\models\Organization $model */
+                return $model::types()[$model->type];
+            },
+        ],
         [
             'label' => 'Число программ',
             'value' => function ($data) {
