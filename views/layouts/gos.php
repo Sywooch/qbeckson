@@ -134,26 +134,46 @@ $user = Yii::$app->user->getIdentity();
                                         ['label' => 'Сертификаты', 'url' => ['/personal/operator-certificates']],
                                         ['label' => 'Договоры', 'url' => ['/personal/operator-contracts']],
                                         ['label' => 'Программы', 'url' => ['/personal/operator-programs']],
+                                        ['label' => 'Соглашения', 'url' => ['personal/operator-cooperates']]
                                     ],
                                 ]);
                             }
 
                             if (Yii::$app->user->can('payer')) {
-                                echo Nav::widget([
-                                    'options' => ['class' => 'navbar-nav inner-nav'],
-                                    'items' => [
-                                        ['label' => 'Информация', 'url' => ['/personal/payer-statistic']],
-                                        ['label' => 'Номиналы групп', 'url' => ['/cert-group/index']],
-                                        ['label' => 'Сертификаты', 'url' => ['/personal/payer-certificates']],
-                                        ['label' => 'Договоры', 'url' => ['/personal/payer-contracts']],
-                                        ['label' => 'Счета', 'url' => ['/personal/payer-invoices']],
-                                        ['label' => 'Организации', 'items' => [
-                                            ['label' => 'Реестр ПФДО', 'url' => ['/personal/payer-organizations']],
-                                            //['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
-                                        ]],
-                                        ['label' => 'Программы', 'url' => ['/personal/payer-programs']],
-                                    ],
-                                ]);
+                                /** @var \app\models\UserIdentity $user */
+                                $user = Yii::$app->user->getIdentity();
+                                if ($user->payer->findUnconfirmedCooperates()) {
+                                    Yii::$app->session->setFlash(
+                                        'error',
+                                        'Необходимо подтвердить или отклонить заявку на заключение соглашения! ' .
+                                        Html::a('Организации', ['personal/payer-organizations'])
+                                    );
+                                    echo Nav::widget([
+                                        'options' => ['class' => 'navbar-nav inner-nav'],
+                                        'items' => [
+                                            ['label' => 'Организации', 'items' => [
+                                                ['label' => 'Реестр ПФДО', 'url' => ['/personal/payer-organizations']],
+                                                //['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
+                                            ]],
+                                        ],
+                                    ]);
+                                } else {
+                                    echo Nav::widget([
+                                        'options' => ['class' => 'navbar-nav inner-nav'],
+                                        'items' => [
+                                            ['label' => 'Информация', 'url' => ['/personal/payer-statistic']],
+                                            ['label' => 'Номиналы групп', 'url' => ['/cert-group/index']],
+                                            ['label' => 'Сертификаты', 'url' => ['/personal/payer-certificates']],
+                                            ['label' => 'Договоры', 'url' => ['/personal/payer-contracts']],
+                                            ['label' => 'Счета', 'url' => ['/personal/payer-invoices']],
+                                            ['label' => 'Организации', 'items' => [
+                                                ['label' => 'Реестр ПФДО', 'url' => ['/personal/payer-organizations']],
+                                                //['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
+                                            ]],
+                                            ['label' => 'Программы', 'url' => ['/personal/payer-programs']],
+                                        ],
+                                    ]);
+                                }
                             }
 
                             if (Yii::$app->user->can('organizations')) {

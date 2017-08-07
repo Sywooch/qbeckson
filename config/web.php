@@ -131,10 +131,15 @@ $config = [
     ],
 
     'as AccessBehavior' => [
-        'class' => AccessBehavior::className(),
+        'class' => AccessBehavior::class,
         'rules' =>
             [
                 'personal' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['operator-cooperates'],
+                        'roles' => ['operators']
+                    ],
                     [
                         'actions' => ['update-municipality'],
                         'allow' => true,
@@ -255,6 +260,23 @@ $config = [
                     [
                         'allow' => true,
                         'roles' => ['payer'],
+                    ]
+                ],
+                'cooperate' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['request', 'appeal-request', 'requisites'],
+                        'roles' => ['organizations'],
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['confirm-request', 'reject-request', 'reject-contract', 'confirm-contract'],
+                        'roles' => ['payer'],
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['view', 'reject-appeal', 'confirm-appeal'],
+                        'roles' => ['operators'],
                     ]
                 ]
             ]

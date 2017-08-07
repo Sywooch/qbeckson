@@ -69,13 +69,16 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute'=> 'directionality_3_count',
                 'value'=> $model->directionality3($model->id),
-            ],[
+            ],
+            [
                 'attribute'=> 'directionality_4_count',
                 'value'=> $model->directionality4($model->id),
-            ],[
+            ],
+            [
                 'attribute'=> 'directionality_5_count',
                 'value'=> $model->directionality5($model->id),
-            ],[
+            ],
+            [
                 'attribute'=> 'directionality_6_count',
                 'value'=> $model->directionality6($model->id),
             ],
@@ -181,13 +184,35 @@ $this->params['breadcrumbs'][] = $this->title;
             
             if ($status2) {
                 echo '&nbsp';
-                echo Html::a('Удалить соглашение', Url::to(['/cooperate/delete', 'id' => $model->id]), ['class' => 'btn btn-danger', 'data' => [
+                echo Html::a('Удалить соглашение', Url::to(['cooperate/delete', 'id' => $model->id]), ['class' => 'btn btn-danger', 'data' => [
                 'confirm' => 'Вы действительно хотите удалить соглашение с этим плательщиком?', 'method' => 'post'], 'title' => Yii::t('yii', 'Расторгнуть соглашение')]);
             }
-            else {
-                echo '&nbsp;';
-                echo Html::a('Ввести сведения о заключенном соглашении', Url::to(['/cooperate/create', 'id' => $model->id]), ['class' => 'btn btn-primary']);
+        }
+
+        if (null !== ($cooperation = $model->getCooperation())) {
+            if ($cooperation->status === \app\models\Cooperate::STATUS_REJECTED) {
+                echo '&nbsp';
+                echo Html::a(
+                    'Подать жалобу',
+                    Url::to(['cooperate/appeal-request', 'payerId' => $model->id]),
+                    ['class' => 'btn btn-danger']
+                );
             }
+            if ($cooperation->status === \app\models\Cooperate::STATUS_CONFIRMED) {
+                echo '&nbsp';
+                echo Html::a(
+                    'Ввести реквизиты',
+                    Url::to(['cooperate/requisites', 'payerId' => $model->id]),
+                    ['class' => 'btn btn-primary']
+                );
+            }
+        } else {
+            echo '&nbsp';
+            echo Html::a(
+                'Направить заявку на заключение соглашения с уполномоченной организацией',
+                Url::to(['cooperate/request', 'payerId' => $model->id]),
+                ['class' => 'btn btn-primary']
+            );
         }
     }
     ?>

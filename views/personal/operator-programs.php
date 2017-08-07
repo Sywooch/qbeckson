@@ -219,6 +219,7 @@ $closedPrograms = [
     $zab,
     $ageGroupMin,
     $ageGroupMax,
+    $organization,
     $actions
 ];
 

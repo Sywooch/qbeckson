@@ -380,26 +380,29 @@ $this->params['breadcrumbs'][] = $this->title;
             $payer = $payers->getPayer();
 
             $cooperate = (new \yii\db\Query())
-                ->select(['status'])
+                ->select(['*'])
                 ->from('cooperate')
                 ->where(['organization_id' => $model->id])
                 ->andWhere(['payer_id' => $payer['id']])
-                ->andWhere(['<', 'status', 2])
+                ->andWhere(['<', 'status', 4])
                 ->one();
 
             if (!empty($cooperate) && $cooperate['status'] == 0) {
                 echo '<div class="pull-right">';
                 echo '&nbsp;';
-                echo Html::a('Отказать', Url::to(['/cooperate/nopayer', 'id' => $model->id]), ['class' => 'btn btn-danger']);
+                echo Html::a('Отказать', ['cooperate/reject-request', 'organizationId' => $model->id], ['class' => 'btn btn-danger']);
                 echo '</div>';
-                echo Html::a('Назад', '/personal/payer-organizations', ['class' => 'btn btn-primary']);
+                echo Html::a('Назад', ['personal/payer-organizations'], ['class' => 'btn btn-primary']);
                 echo '&nbsp;';
-                echo Html::a('Одобрить', Url::to(['/cooperate/okpayer', 'id' => $model->id]), ['class' => 'btn btn-primary']);
+                echo Html::a('Одобрить', ['cooperate/confirm-request', 'organizationId' => $model->id], ['class' => 'btn btn-primary']);
+            } elseif ($cooperate['status'] == 3 && $cooperate['number'] && $cooperate['date']) {
+                echo Html::a('Назад', ['personal/payer-organizations'], ['class' => 'btn btn-primary']);
+                echo ' ';
+                echo Html::a('Одобрить', ['cooperate/confirm-contract', 'id' => $cooperate['id']], ['class' => 'btn btn-primary']);
             } else {
-                echo Html::a('Назад', '/personal/payer-organizations', ['class' => 'btn btn-primary']);
+                echo Html::a('Назад', ['personal/payer-organizations'], ['class' => 'btn btn-primary']);
             }
         }
-
         ?>
     </p>
 </div>

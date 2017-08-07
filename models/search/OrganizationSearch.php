@@ -75,9 +75,8 @@ class OrganizationSearch extends Organization
             ->joinWith([
                 'municipality',
                 'programs',
-                'contracts'
-            ])
-            ->groupBy(['organization.id']);
+                'contracts',
+            ]);
 
         $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
 
@@ -124,12 +123,15 @@ class OrganizationSearch extends Organization
             'organization.OGRN' => $this->OGRN,
             'organization.okopo' => $this->okopo,
             'organization.mun' => $this->mun,
-            'organization.status' => $this->statusArray,
+            'organization.status' => $this->statusArray
         ]);
 
         if (null !== $this->cooperateStatus) {
             $query->joinWith(['cooperates'])
-                ->andWhere(['cooperate.status' => $this->cooperateStatus]);
+                ->andWhere(['cooperate.status' => $this->cooperateStatus])
+                ->groupBy(['cooperate.id']);
+        } else {
+            $query->groupBy(['organization.id']);
         }
 
         $query

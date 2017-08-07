@@ -11,9 +11,13 @@ $this->title = 'Организации';
 $this->params['breadcrumbs'][] = $this->title;
 /* @var $this yii\web\View */
 /* @var $searchRequest \app\models\search\OrganizationSearch */
+/* @var $searchReject \app\models\search\OrganizationSearch */
 /* @var $searchRegistry \app\models\search\OrganizationSearch */
+/* @var $searchConfirm \app\models\search\OrganizationSearch */
 /* @var $registryProvider \yii\data\ActiveDataProvider */
 /* @var $requestProvider \yii\data\ActiveDataProvider */
+/* @var $confirmProvider \yii\data\ActiveDataProvider */
+/* @var $rejectProvider \yii\data\ActiveDataProvider */
 
 $name = [
     'attribute' => 'name',
@@ -149,8 +153,18 @@ $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $reques
         </a>
     </li>
     <li>
-        <a data-toggle="tab" href="#panel2">Заявки
+        <a data-toggle="tab" href="#panel2">Подтверждённые
+            <span class="badge"><?= $confirmProvider->totalCount ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel3">Заявки
             <span class="badge"><?= $requestProvider->totalCount ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel4">Отклонены
+            <span class="badge"><?= $rejectProvider->totalCount ?></span>
         </a>
     </li>
 </ul>
@@ -180,6 +194,28 @@ $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $reques
     </div>
     <div id="panel2" class="tab-pane fade">
         <?= SearchFilter::widget([
+            'model' => $searchConfirm,
+            'action' => ['personal/payer-organizations'],
+            'data' => GridviewHelper::prepareColumns(
+                'organization',
+                $requestColumns,
+                'request',
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_PAYER,
+            'type' => 'request'
+        ]); ?>
+        <?= GridView::widget([
+            'dataProvider' => $confirmProvider,
+            'filterModel' => null,
+            'pjax' => true,
+            'summary' => false,
+            'columns' => $preparedRequestColumns
+        ]); ?>
+    </div>
+    <div id="panel3" class="tab-pane fade">
+        <?= SearchFilter::widget([
             'model' => $searchRequest,
             'action' => ['personal/payer-organizations'],
             'data' => GridviewHelper::prepareColumns(
@@ -194,6 +230,38 @@ $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $reques
         ]); ?>
         <?= GridView::widget([
             'dataProvider' => $requestProvider,
+            'rowOptions' => function ($model) {
+                /** @var \app\models\Cooperate $cooperate */
+                $cooperate = \app\models\Cooperate::findOne([
+                    'organization_id' => $model->id,
+                    'payer_id' => Yii::$app->user->identity->payer->id
+                ]);
+                if (null !== $cooperate->appeal_reason) {
+                    return ['class' => 'danger'];
+                }
+            },
+            'filterModel' => null,
+            'pjax' => true,
+            'summary' => false,
+            'columns' => $preparedRequestColumns
+        ]); ?>
+    </div>
+    <div id="panel4" class="tab-pane fade">
+        <?= SearchFilter::widget([
+            'model' => $searchReject,
+            'action' => ['personal/payer-organizations'],
+            'data' => GridviewHelper::prepareColumns(
+                'organization',
+                $requestColumns,
+                'request',
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_PAYER,
+            'type' => 'request'
+        ]); ?>
+        <?= GridView::widget([
+            'dataProvider' => $rejectProvider,
             'filterModel' => null,
             'pjax' => true,
             'summary' => false,

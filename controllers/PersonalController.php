@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\Cooperate;
 use app\models\Mun;
 use app\models\search\ContractsSearch;
+use app\models\search\CooperateSearch;
 use app\models\search\InvoicesSearch;
 use app\models\OrganizationPayerAssignment;
 use app\models\User;
@@ -58,6 +59,29 @@ class PersonalController extends Controller
                 ],
             ],
         ];
+    }
+
+    /**
+     * @return string
+     */
+    public function actionOperatorCooperates()
+    {
+        $searchAppealed = new CooperateSearch([
+            'status' => Cooperate::STATUS_APPEALED
+        ]);
+        $appealedProvider = $searchAppealed->search(Yii::$app->request->queryParams);
+
+        $searchActive = new CooperateSearch([
+            'status' => Cooperate::STATUS_ACTIVE
+        ]);
+        $activeProvider = $searchActive->search(Yii::$app->request->queryParams);
+
+        return $this->render('operator-cooperates', [
+            'searchAppealed' => $searchAppealed,
+            'appealedProvider' => $appealedProvider,
+            'searchActive' => $searchActive,
+            'activeProvider' => $activeProvider,
+        ]);
     }
 
     /**
@@ -394,11 +418,29 @@ class PersonalController extends Controller
         ]);
         $requestProvider = $searchRequest->search(Yii::$app->request->queryParams);
 
+        $searchReject = new OrganizationSearch([
+            'statusArray' => [Organization::STATUS_ACTIVE],
+            'cooperateStatus' => Cooperate::STATUS_REJECTED,
+            'modelName' => 'SearchReject',
+        ]);
+        $rejectProvider = $searchReject->search(Yii::$app->request->queryParams);
+
+        $searchConfirm = new OrganizationSearch([
+            'statusArray' => [Organization::STATUS_ACTIVE],
+            'cooperateStatus' => Cooperate::STATUS_CONFIRMED,
+            'modelName' => 'SearchConfirm',
+        ]);
+        $confirmProvider = $searchConfirm->search(Yii::$app->request->queryParams);
+
         return $this->render('payer-organizations', [
             'searchRegistry' => $searchRegistry,
             'registryProvider' => $registryProvider,
             'searchRequest' => $searchRequest,
             'requestProvider' => $requestProvider,
+            'searchReject' => $searchReject,
+            'rejectProvider' => $rejectProvider,
+            'searchConfirm' => $searchConfirm,
+            'confirmProvider' => $confirmProvider,
         ]);
     }
 
@@ -695,24 +737,48 @@ class PersonalController extends Controller
         $searchOpenPayers = new PayersSearch([
             'certificates' => '0,150000',
             'cooperates' => '0,100',
-            'cooperateStatus' => 1,
+            'cooperateStatus' => Cooperate::STATUS_ACTIVE,
             'id' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
+            'modelName' => 'SearchOpenPayers',
         ]);
         $openPayersProvider = $searchOpenPayers->search(Yii::$app->request->queryParams);
 
         $searchWaitPayers = new PayersSearch([
             'certificates' => '0,150000',
             'cooperates' => '0,100',
-            'cooperateStatus' => 0,
+            'cooperateStatus' => Cooperate::STATUS_NEW,
             'id' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
+            'modelName' => 'SearchWaitPayers',
         ]);
         $waitPayersProvider = $searchWaitPayers->search(Yii::$app->request->queryParams);
+
+        $searchRejectPayers = new PayersSearch([
+            'certificates' => '0,150000',
+            'cooperates' => '0,100',
+            'cooperateStatus' => Cooperate::STATUS_REJECTED,
+            'id' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
+            'modelName' => 'SearchRejectPayers',
+        ]);
+        $rejectPayersProvider = $searchRejectPayers->search(Yii::$app->request->queryParams);
+
+        $searchConfirmPayers = new PayersSearch([
+            'certificates' => '0,150000',
+            'cooperates' => '0,100',
+            'cooperateStatus' => Cooperate::STATUS_CONFIRMED,
+            'id' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
+            'modelName' => 'SearchConfirmPayers',
+        ]);
+        $confirmPayersProvider = $searchConfirmPayers->search(Yii::$app->request->queryParams);
 
         return $this->render('organization-payers', [
             'searchOpenPayers' => $searchOpenPayers,
             'openPayersProvider' => $openPayersProvider,
             'searchWaitPayers' => $searchWaitPayers,
             'waitPayersProvider' => $waitPayersProvider,
+            'searchRejectPayers' => $searchRejectPayers,
+            'rejectPayersProvider' => $rejectPayersProvider,
+            'searchConfirmPayers' => $searchConfirmPayers,
+            'confirmPayersProvider' => $confirmPayersProvider,
         ]);
     }
 
