@@ -15,18 +15,13 @@ use app\models\Organization;
 class OrganizationSearch extends Organization
 {
     public $orgtype;
-
     public $programs;
-    
     public $children;
-
     public $modelName;
-
     public $possibleForSuborder = false;
-
     public $subordered = false;
-
     public $statusArray = [];
+    public $cooperateStatus;
 
     /**
      * @return string
@@ -44,7 +39,7 @@ class OrganizationSearch extends Organization
         return [
             [[
                 'id', 'user_id', 'actual', 'type', 'license_number', 'bank_bik', 'korr_invoice',
-                'inn', 'KPP', 'OGRN', 'okopo', 'mun'
+                'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'cooperateStatus'
             ], 'integer'],
             [[
                 'name', 'license_date', 'license_issued', 'bank_name', 'bank_sity', 'rass_invoice', 'fio',
@@ -87,15 +82,15 @@ class OrganizationSearch extends Organization
         $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
 
         if ($this->possibleForSuborder === true) {
-            $query->andWhere('`mun`.id = ' . Yii::$app->user->identity->payer->municipality->id)
+            $query->andWhere('mun.id = ' . Yii::$app->user->identity->payer->municipality->id)
                 ->joinWith('suborderPayer')
-                ->andWhere('(`organization_payer_assignment`.payer_id IS NULL) OR (`organization_payer_assignment`.status = ' . OrganizationPayerAssignment::STATUS_REFUSED . ' AND `organization_payer_assignment`.payer_id != ' . Yii::$app->user->identity->payer->id . ')');
+                ->andWhere('(organization_payer_assignment.payer_id IS NULL) OR (organization_payer_assignment.status = ' . OrganizationPayerAssignment::STATUS_REFUSED . ' AND organization_payer_assignment.payer_id != ' . Yii::$app->user->identity->payer->id . ')');
         }
 
         if ($this->subordered === true) {
             $query->innerJoinWith('suborderPayer')
-                ->andWhere('`organization_payer_assignment`.payer_id = ' . Yii::$app->user->identity->payer->id)
-                ->andWhere('`organization_payer_assignment`.status = ' . OrganizationPayerAssignment::STATUS_ACTIVE . ' OR `organization_payer_assignment`.status = ' . OrganizationPayerAssignment::STATUS_PENDING);
+                ->andWhere('organization_payer_assignment.payer_id = ' . Yii::$app->user->identity->payer->id)
+                ->andWhere('organization_payer_assignment.status = ' . OrganizationPayerAssignment::STATUS_ACTIVE . ' OR organization_payer_assignment.status = ' . OrganizationPayerAssignment::STATUS_PENDING);
         }
         // add conditions that should always apply here
 
@@ -131,6 +126,11 @@ class OrganizationSearch extends Organization
             'organization.mun' => $this->mun,
             'organization.status' => $this->statusArray,
         ]);
+
+        if (null !== $this->cooperateStatus) {
+            $query->joinWith(['cooperates'])
+                ->andWhere(['cooperate.status' => $this->cooperateStatus]);
+        }
 
         $query
             ->andFilterWhere(['like', 'organization.name', $this->name])

@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Cooperate;
 use app\models\Mun;
 use app\models\search\ContractsSearch;
 use app\models\search\InvoicesSearch;
@@ -375,7 +376,8 @@ class PersonalController extends Controller
     public function actionPayerOrganizations()
     {
         $searchRegistry = new OrganizationSearch([
-            'statusArray' => [Organization::STATUS_ACTIVE, Organization::STATUS_BANNED],
+            'statusArray' => [Organization::STATUS_ACTIVE],
+            'cooperateStatus' => Cooperate::STATUS_ACTIVE,
             'programs' => '0,1000',
             'children' => '0,10000',
             'amount_child' => '0,10000',
@@ -386,7 +388,8 @@ class PersonalController extends Controller
         $registryProvider = $searchRegistry->search(Yii::$app->request->queryParams);
 
         $searchRequest = new OrganizationSearch([
-            'statusArray' => [Organization::STATUS_NEW],
+            'statusArray' => [Organization::STATUS_ACTIVE],
+            'cooperateStatus' => Cooperate::STATUS_NEW,
             'modelName' => 'SearchRequest',
         ]);
         $requestProvider = $searchRequest->search(Yii::$app->request->queryParams);
