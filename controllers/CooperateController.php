@@ -206,7 +206,7 @@ class CooperateController extends Controller
     public function actionConfirmAppeal($id)
     {
         $model = $this->findModel($id);
-        $model->create();
+        $model->setNew();
         if ($model->save()) {
             Yii::$app->session->setFlash('success', 'Заявка отправлена в ожидающие подтверждения.');
         } else {
@@ -270,23 +270,6 @@ class CooperateController extends Controller
         }
 
         return $model->one();
-    }
-
-    /**
-     * Lists all Cooperate models.
-     * @return mixed
-     */
-    public function actionIndex()
-    {
-        $searchModel = new CooperateSearch([
-            'status' => 1
-        ]);
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
     }
 
     /**

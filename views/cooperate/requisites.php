@@ -19,7 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php $form = ActiveForm::begin(['id' => 'cooperate-requisites-form']); ?>
         <?= $form->field($model, 'number')->textInput(['maxlength' => true]) ?>
         <?= $form->field($model, 'date')->widget(DateControl::class, [
-            'type' => DateControl::FORMAT_DATETIME,
+            'type' => DateControl::FORMAT_DATE,
             'ajaxConversion' => false,
             'options' => [
                 'pluginOptions' => [

@@ -72,7 +72,7 @@ class CooperateSearch extends Cooperate
             ],
         ]);
         
-        $dataProvider->sort->attributes['payers'] = [
+        $dataProvider->sort->attributes['payerName'] = [
             'asc' => ['payers.name' => SORT_ASC],
             'desc' => ['payers.name' => SORT_DESC],
         ];
@@ -82,7 +82,7 @@ class CooperateSearch extends Cooperate
             'desc' => ['payers.mun' => SORT_DESC],
         ];
                  
-        $dataProvider->sort->attributes['organization'] = [
+        $dataProvider->sort->attributes['organizationName'] = [
             'asc' => ['organization.name' => SORT_ASC],
             'desc' => ['organization.name' => SORT_DESC],
         ];

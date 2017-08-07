@@ -39,7 +39,7 @@ class PayersSearch extends Payers
      */
     public function formName()
     {
-        return $this->modelName;
+        return $this->modelName ?: '';
     }
 
     /**

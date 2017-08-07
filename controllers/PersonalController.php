@@ -67,12 +67,14 @@ class PersonalController extends Controller
     public function actionOperatorCooperates()
     {
         $searchAppealed = new CooperateSearch([
-            'status' => Cooperate::STATUS_APPEALED
+            'status' => Cooperate::STATUS_APPEALED,
+            'modelName' => 'SearchAppealed',
         ]);
         $appealedProvider = $searchAppealed->search(Yii::$app->request->queryParams);
 
         $searchActive = new CooperateSearch([
-            'status' => Cooperate::STATUS_ACTIVE
+            'status' => Cooperate::STATUS_ACTIVE,
+            'modelName' => 'SearchActive',
         ]);
         $activeProvider = $searchActive->search(Yii::$app->request->queryParams);
 
@@ -402,6 +404,7 @@ class PersonalController extends Controller
         $searchRegistry = new OrganizationSearch([
             'statusArray' => [Organization::STATUS_ACTIVE],
             'cooperateStatus' => Cooperate::STATUS_ACTIVE,
+            'cooperatePayerId' => Yii::$app->user->getIdentity()->payer->id,
             'programs' => '0,1000',
             'children' => '0,10000',
             'amount_child' => '0,10000',
@@ -414,6 +417,7 @@ class PersonalController extends Controller
         $searchRequest = new OrganizationSearch([
             'statusArray' => [Organization::STATUS_ACTIVE],
             'cooperateStatus' => Cooperate::STATUS_NEW,
+            'cooperatePayerId' => Yii::$app->user->getIdentity()->payer->id,
             'modelName' => 'SearchRequest',
         ]);
         $requestProvider = $searchRequest->search(Yii::$app->request->queryParams);
@@ -421,6 +425,7 @@ class PersonalController extends Controller
         $searchReject = new OrganizationSearch([
             'statusArray' => [Organization::STATUS_ACTIVE],
             'cooperateStatus' => Cooperate::STATUS_REJECTED,
+            'cooperatePayerId' => Yii::$app->user->getIdentity()->payer->id,
             'modelName' => 'SearchReject',
         ]);
         $rejectProvider = $searchReject->search(Yii::$app->request->queryParams);
@@ -428,6 +433,7 @@ class PersonalController extends Controller
         $searchConfirm = new OrganizationSearch([
             'statusArray' => [Organization::STATUS_ACTIVE],
             'cooperateStatus' => Cooperate::STATUS_CONFIRMED,
+            'cooperatePayerId' => Yii::$app->user->getIdentity()->payer->id,
             'modelName' => 'SearchConfirm',
         ]);
         $confirmProvider = $searchConfirm->search(Yii::$app->request->queryParams);

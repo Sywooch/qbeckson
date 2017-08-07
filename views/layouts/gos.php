@@ -127,14 +127,13 @@ $user = Yii::$app->user->getIdentity();
                                                     'label' => 'Уполномоченные Организации',
                                                     'url' => ['personal/operator-payers']
                                                 ],
-                                                ['label' => 'Соглащения', 'url' => ['cooperate/index']]
+                                                ['label' => 'Соглашения', 'url' => ['personal/operator-cooperates']]
                                             ]
                                         ],
                                         ['label' => 'Организации', 'url' => ['/personal/operator-organizations']],
                                         ['label' => 'Сертификаты', 'url' => ['/personal/operator-certificates']],
                                         ['label' => 'Договоры', 'url' => ['/personal/operator-contracts']],
                                         ['label' => 'Программы', 'url' => ['/personal/operator-programs']],
-                                        ['label' => 'Соглашения', 'url' => ['personal/operator-cooperates']]
                                     ],
                                 ]);
                             }
@@ -145,8 +144,7 @@ $user = Yii::$app->user->getIdentity();
                                 if ($user->payer->findUnconfirmedCooperates()) {
                                     Yii::$app->session->setFlash(
                                         'error',
-                                        'Необходимо подтвердить или отклонить заявку на заключение соглашения! ' .
-                                        Html::a('Организации', ['personal/payer-organizations'])
+                                        'У Вас есть просроченные заявки на заключение соглашения/договора с поставщиком образовательных услуг. Пожалуйста, отработайте заявку для получения доступа к полному функционалу системы.'
                                     );
                                     echo Nav::widget([
                                         'options' => ['class' => 'navbar-nav inner-nav'],

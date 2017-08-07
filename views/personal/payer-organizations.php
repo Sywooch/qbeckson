@@ -144,7 +144,6 @@ $requestColumns = [
 
 $preparedRegistryColumns = GridviewHelper::prepareColumns('organization', $registryColumns, 'register');
 $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $requestColumns, 'request');
-
 ?>
 <ul class="nav nav-tabs">
     <li class="active">

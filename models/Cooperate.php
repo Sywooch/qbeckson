@@ -73,6 +73,14 @@ class Cooperate extends ActiveRecord
     }
 
     /**
+     * Set status to new
+     */
+    public function setNew()
+    {
+        $this->status = self::STATUS_NEW;
+    }
+
+    /**
      * Confirm request
      */
     public function confirm()
