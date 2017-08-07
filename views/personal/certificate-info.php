@@ -38,12 +38,17 @@ $this->params['breadcrumbs'][] = $this->title;
                     echo '<div class="alert alert-danger" role="alert">Вы находитесь в очереди на смену группы сертификата. Пожалуйста, подождите.</div>';
                 } elseif (Yii::$app->user->can('certificate') && $certificate->canChangeGroup) {
                     echo '<br />';
-                    echo '<a href="javascropt:void(0);" onClick="$(this).hide();$(\'#cert-form-container\').slideToggle(\'slow\');" class="btn btn-primary">Сменить сертификат</a><div style="display:none;" id="cert-form-container">';
                     $form = ActiveForm::begin();
-                    echo $form->field($certificate, 'cert_group')->dropDownList(ArrayHelper::map($certificate->possibleGroupList, 'id', 'group'), ['prompt' => 'Выберите группу...']);
-                    echo Html::submitButton('Обновить', ['class' => 'btn btn-primary']);
+                    if ($certificate->certGroup->is_special > 0) {
+                        $certificateType = $certificate->possibleCertGroup->group;
+                        $certificate->cert_group = $certificate->possibleCertGroup->id;
+                    } else {
+                        $certificateType = 'сертификат учёта';
+                        $certificate->cert_group = $certificate->payers->getCertGroups(1)->one()->id;
+                    }
+                    echo $form->field($certificate, 'cert_group')->hiddenInput()->label(false);
+                    echo '<p>Сменить тип сертификата на ' . Html::submitButton($certificateType, ['class' => 'btn btn-primary']) . '</p>';
                     ActiveForm::end();
-                    echo '</div>';
                 }
                 ?>
             </div>

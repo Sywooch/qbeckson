@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "certificate_group_queue".
@@ -21,6 +22,16 @@ class CertificateGroupQueue extends \yii\db\ActiveRecord
     public static function tableName()
     {
         return 'certificate_group_queue';
+    }
+
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => TimestampBehavior::className(),
+                'updatedAtAttribute' => false,
+            ],
+        ];
     }
 
     /**
