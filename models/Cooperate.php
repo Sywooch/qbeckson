@@ -2,10 +2,8 @@
 
 namespace app\models;
 
+use trntv\filekit\behaviors\UploadBehavior;
 use Yii;
-use app\models\Organization;
-use app\models\Certificates;
-use yii\behaviors\AttributeBehavior;
 use yii\db\ActiveRecord;
 
 /**
@@ -22,6 +20,9 @@ use yii\db\ActiveRecord;
  * @property string $number
  * @property string $reject_reason
  * @property string $appeal_reason
+ * @property integer $document_type
+ * @property string $document_path
+ * @property string $document_base_url
  *
  * @property mixed $cooperateOrganization
  * @property array $decinvoiceCooperatePayers
@@ -35,6 +36,7 @@ use yii\db\ActiveRecord;
  *
  * @property Organization $organization
  * @property Payers $payers
+ * @property null|string $documentUrl
  * @property Payers $payer
  */
 class Cooperate extends ActiveRecord
@@ -48,6 +50,24 @@ class Cooperate extends ActiveRecord
     const SCENARIO_REJECT = 'reject';
     const SCENARIO_APPEAL = 'appeal';
     const SCENARIO_REQUISITES = 'requisites';
+
+    const DOCUMENT_TYPE_GENERAL = 1;
+    const DOCUMENT_TYPE_EXTEND = 2;
+    const DOCUMENT_TYPE_CUSTOM = 3;
+
+    public $document;
+
+    /**
+     * @return array
+     */
+    public static function documentTypes()
+    {
+        return [
+            self::DOCUMENT_TYPE_GENERAL => 'Стандартный',
+            self::DOCUMENT_TYPE_EXTEND => 'Расширенный (с суммой)',
+            self::DOCUMENT_TYPE_CUSTOM => 'Свой',
+        ];
+    }
 
     /**
      * @return array
@@ -122,14 +142,16 @@ class Cooperate extends ActiveRecord
     }
 
     /**
+     * Касталь, никогда так не делать.
+     *
      * @return array
      */
     public function scenarios()
     {
         $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_REJECT] = $scenarios[self::SCENARIO_DEFAULT];
-        $scenarios[self::SCENARIO_APPEAL] = $scenarios[self::SCENARIO_DEFAULT];
-        $scenarios[self::SCENARIO_REQUISITES] = $scenarios[self::SCENARIO_DEFAULT];
+        $scenarios[self::SCENARIO_REJECT] = $scenarios[self::SCENARIO_APPEAL] =
+        $scenarios[self::SCENARIO_REQUISITES] =
+            $scenarios[self::SCENARIO_DEFAULT];
 
         return $scenarios;
     }
@@ -139,16 +161,17 @@ class Cooperate extends ActiveRecord
      */
     public function rules()
     {
-        $rules = [
+        return [
             [['organization_id', 'payer_id', 'status', 'created_date'], 'required'],
+
             [['reject_reason'], 'required', 'on' => self::SCENARIO_REJECT],
             [['appeal_reason'], 'required', 'on' => self::SCENARIO_APPEAL],
             [['date', 'number'], 'required', 'on' => self::SCENARIO_REQUISITES],
 
-            [['organization_id', 'payer_id', 'status'], 'integer'],
+            [['organization_id', 'payer_id', 'status', 'document_type'], 'integer'],
             [['date', 'date_dissolution'], 'safe'],
             [['reject_reason', 'appeal_reason'], 'string'],
-            [['number'], 'string', 'max' => 255],
+            [['number', 'document_path', 'document_base_url'], 'string', 'max' => 255],
             [
                 ['organization_id'], 'exist', 'skipOnError' => true,
                 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']
@@ -157,9 +180,23 @@ class Cooperate extends ActiveRecord
                 ['payer_id'], 'exist', 'skipOnError' => true,
                 'targetClass' => Payers::className(), 'targetAttribute' => ['payer_id' => 'id']
             ],
+            [['document'], 'safe'],
         ];
+    }
 
-        return $rules;
+    /**
+     * @return array
+     */
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => UploadBehavior::class,
+                'pathAttribute' => 'document_path',
+                'baseUrlAttribute' => 'document_base_url',
+                'attribute' => 'document',
+            ],
+        ];
     }
 
     /**
@@ -179,6 +216,14 @@ class Cooperate extends ActiveRecord
             'appeal_reason' => 'Жалоба',
             'created_date' => 'Дата подачи заявки',
         ];
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getDocumentUrl()
+    {
+        return (null !== $this->document_path) ? $this->document_base_url . '/' . $this->document_path : null;
     }
 
     /**
@@ -205,6 +250,9 @@ class Cooperate extends ActiveRecord
         return $this->hasOne(Payers::className(), ['id' => 'payer_id']);
     }
 
+
+
+    //TODO всё убрать
     public function getInvoiceCooperatePayers()
     {
         if(!Yii::$app->user->isGuest) {

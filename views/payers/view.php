@@ -205,6 +205,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
         if (null !== ($cooperation = $model->getCooperation())) {
+            if (null !== $cooperation->getDocumentUrl()) {
+                echo '<hr><div class="panel panel-default">
+                        <div class="panel-body">' .
+                    Html::a('Текст договора/соглашения', [$cooperation->getDocumentUrl()])
+                    . ' </div>
+                    </div>';
+            }
             if ($cooperation->status === Cooperate::STATUS_REJECTED) {
                 echo ' ';
                 echo $this->render(

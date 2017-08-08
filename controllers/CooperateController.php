@@ -2,7 +2,9 @@
 
 namespace app\controllers;
 
+use app\models\forms\ConfirmRequestForm;
 use app\models\UserIdentity;
+use app\traits\AjaxValidationTrait;
 use Yii;
 use app\models\Cooperate;
 use yii\web\Controller;
@@ -17,6 +19,8 @@ use app\models\User;
  */
 class CooperateController extends Controller
 {
+    use AjaxValidationTrait;
+
     /**
      * @inheritdoc
      */
@@ -30,6 +34,40 @@ class CooperateController extends Controller
                 ],
             ],
         ];
+    }
+
+    /**
+     * Подтверждение заявки на заключение договора плательщиком.
+     *
+     * @param integer $id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     */
+    public function actionConfirmRequest($id)
+    {
+        $model = $this->findCurrentModel(
+            $id,
+            Yii::$app->user->getIdentity()->payer->id,
+            null,
+            Cooperate::STATUS_NEW
+        );
+        if (null === $model) {
+            throw new NotFoundHttpException('Model not found');
+        }
+        $form = new ConfirmRequestForm();
+        $this->performAjaxValidation($form);
+        if (Yii::$app->request->post() && $form->load(Yii::$app->request->post())) {
+            $form->setModel($model);
+            if ($form->save()) {
+                Yii::$app->session->setFlash('success', 'Вы успешно подтвердили заявку.');
+            } else {
+                Yii::$app->session->setFlash('error', 'Возникла ошибка при подтверждении заявки.');
+            }
+
+            return $this->redirect(['organization/view', 'id' => $model->organization_id]);
+        }
+
+        return $this->goBack();
     }
 
     /**
@@ -58,36 +96,6 @@ class CooperateController extends Controller
         Yii::$app->session->setFlash('error', 'Возникла ошибка при подаче заявки на подключение.');
 
         return $this->redirect(['payers/view', 'id' => $payerId]);
-    }
-
-    /**
-     * Подтверждение заявки на заключение договора плательщиком.
-     *
-     * @param integer $id
-     * @return \yii\web\Response
-     * @throws NotFoundHttpException
-     */
-    public function actionConfirmRequest($id)
-    {
-        $model = $this->findCurrentModel(
-            $id,
-            Yii::$app->user->getIdentity()->payer->id,
-            null,
-            Cooperate::STATUS_NEW
-        );
-
-        if (null === $model) {
-            throw new NotFoundHttpException('Model not found');
-        }
-        $model->confirm();
-        if ($model->save()) {
-            Yii::$app->session->setFlash('success', 'Вы успешно подтвердили заявку.');
-
-            return $this->redirect(['personal/payer-organizations']);
-        }
-        Yii::$app->session->setFlash('error', 'Возникла ошибка при подтверждении заявки.');
-
-        return $this->redirect(['organization/view', 'id' => $model->organization_id]);
     }
 
     /**
@@ -152,9 +160,7 @@ class CooperateController extends Controller
             Yii::$app->session->setFlash('error', 'Возникла ошибка при подаче жалобы.');
         }
 
-        return $this->render('appeal-request', [
-            'model' => $model
-        ]);
+        return $this->goBack();
     }
 
     /**

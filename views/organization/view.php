@@ -387,14 +387,19 @@ $this->params['breadcrumbs'][] = $this->title;
 
             echo Html::a('Назад', ['personal/payer-organizations'], ['class' => 'btn btn-primary']);
             if (null !== ($cooperation = $model->getCooperation())) {
+                if (null !== $cooperation->getDocumentUrl()) {
+                    echo '<hr><div class="panel panel-default">
+                        <div class="panel-body">' .
+                        Html::a('Текст договора/соглашения', $cooperation->getDocumentUrl())
+                        . ' </div>
+                    </div>';
+                }
                 if ($cooperation->status === Cooperate::STATUS_NEW) {
                     echo ' ';
-                    echo Html::a(
-                        'Одобрить',
-                        ['cooperate/confirm-request', 'id' => $cooperation->id],
-                        ['class' => 'btn btn-primary']
+                    echo $this->render(
+                        '../cooperate/confirm-request',
+                        ['cooperation' => $cooperation]
                     );
-
                     echo $this->render(
                         '../cooperate/reject-request',
                         ['model' => $cooperation]
