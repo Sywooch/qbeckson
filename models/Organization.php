@@ -349,6 +349,16 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return Cooperate
+     */
+    public function getCooperation()
+    {
+        return $this->hasOne(Cooperate::class, ['organization_id' => 'id'])
+            ->andWhere(['cooperate.payer_id' => Yii::$app->user->getIdentity()->payer->id])
+            ->one();
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getContracts()

@@ -2,9 +2,9 @@
 
 namespace app\controllers;
 
+use app\models\UserIdentity;
 use Yii;
 use app\models\Cooperate;
-use app\models\CooperateSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -41,7 +41,7 @@ class CooperateController extends Controller
      */
     public function actionRequest($payerId)
     {
-        if (null !== $this->findCurrentModel($payerId)) {
+        if (null !== $this->findCurrentModel(null, $payerId)) {
             throw new NotFoundHttpException('Model already exist!');
         }
         $model = new Cooperate([
@@ -63,17 +63,19 @@ class CooperateController extends Controller
     /**
      * Подтверждение заявки на заключение договора плательщиком.
      *
-     * @param integer $organizationId
+     * @param integer $id
      * @return \yii\web\Response
      * @throws NotFoundHttpException
      */
-    public function actionConfirmRequest($organizationId)
+    public function actionConfirmRequest($id)
     {
-        $model = Cooperate::findOne([
-            'organization_id' => $organizationId,
-            'payer_id' => Yii::$app->user->getIdentity()->payer->id,
-            'status' => Cooperate::STATUS_NEW,
-        ]);
+        $model = $this->findCurrentModel(
+            $id,
+            Yii::$app->user->getIdentity()->payer->id,
+            null,
+            Cooperate::STATUS_NEW
+        );
+
         if (null === $model) {
             throw new NotFoundHttpException('Model not found');
         }
@@ -85,23 +87,24 @@ class CooperateController extends Controller
         }
         Yii::$app->session->setFlash('error', 'Возникла ошибка при подтверждении заявки.');
 
-        return $this->redirect(['organization/view', 'id' => $organizationId]);
+        return $this->redirect(['organization/view', 'id' => $model->organization_id]);
     }
 
     /**
      * Отклонение заявки на заключение договора плательщиком с указанием причины.
      *
-     * @param integer $organizationId
-     * @return \yii\web\Response
+     * @param integer $id
+     * @return \yii\web\Response|string
      * @throws NotFoundHttpException
      */
-    public function actionRejectRequest($organizationId)
+    public function actionRejectRequest($id)
     {
-        $model = Cooperate::findOne([
-            'organization_id' => $organizationId,
-            'payer_id' => Yii::$app->user->getIdentity()->payer->id,
-            'status' => Cooperate::STATUS_NEW,
-        ]);
+        $model = $this->findCurrentModel(
+            $id,
+            Yii::$app->user->getIdentity()->payer->id,
+            null,
+            Cooperate::STATUS_NEW
+        );
         if (null === $model) {
             throw new NotFoundHttpException('Model not found');
         }
@@ -116,21 +119,25 @@ class CooperateController extends Controller
             Yii::$app->session->setFlash('error', 'Возникла ошибка при отклонении заявки.');
         }
 
-        return $this->render('reject-request', [
-            'model' => $model,
-        ]);
+        return $this->goBack();
     }
 
     /**
      * Обжалование заявки на заключение договора организацией в случае отказа.
      *
-     * @param integer $payerId
+     * @param integer $id
      * @return string
      * @throws NotFoundHttpException
      */
-    public function actionAppealRequest($payerId)
+    public function actionAppealRequest($id)
     {
-        if (null === ($model = $this->findCurrentModel($payerId, Cooperate::STATUS_REJECTED))) {
+        $model = $this->findCurrentModel(
+            $id,
+            null,
+            Yii::$app->user->getIdentity()->organization->id,
+            Cooperate::STATUS_REJECTED
+        );
+        if (null === $model) {
             throw new NotFoundHttpException('Model not found');
         }
 
@@ -153,13 +160,19 @@ class CooperateController extends Controller
     /**
      * Ввод реквизитов органзацией
      *
-     * @param integer $payerId
+     * @param integer $id
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException
      */
-    public function actionRequisites($payerId)
+    public function actionRequisites($id)
     {
-        if (null === ($model = $this->findCurrentModel($payerId, Cooperate::STATUS_CONFIRMED))) {
+        $model = $this->findCurrentModel(
+            $id,
+            null,
+            Yii::$app->user->getIdentity()->organization->id,
+            Cooperate::STATUS_CONFIRMED
+        );
+        if (null === $model) {
             throw new NotFoundHttpException('Model not found');
         }
         $model->scenario = Cooperate::SCENARIO_REQUISITES;
@@ -167,15 +180,16 @@ class CooperateController extends Controller
             if ($model->save()) {
                 Yii::$app->session->setFlash('success', 'Вы успешно заполнили реквизиты.');
 
-                return $this->redirect(['personal/organization-payers']);
-            } else {
-                Yii::$app->session->setFlash('error', 'Возникла ошибка при заполнении реквизитов.');
+                if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+                    return $this->redirect(['personal/organization-payers']);
+                } else if (Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
+                    return $this->redirect(['organization/view', 'id' => $model->organization_id]);
+                }
             }
+            Yii::$app->session->setFlash('error', 'Возникла ошибка при заполнении реквизитов.');
         }
 
-        return $this->render('requisites', [
-            'model' => $model
-        ]);
+        return $this->goBack();
     }
 
     /**
@@ -235,11 +249,12 @@ class CooperateController extends Controller
      */
     public function actionConfirmContract($id)
     {
-        $model = Cooperate::findOne([
-            'id' => $id,
-            'status' => Cooperate::STATUS_CONFIRMED,
-            'payer_id' => Yii::$app->user->getIdentity()->payer->id
-        ]);
+        $model = $this->findCurrentModel(
+            $id,
+            Yii::$app->user->getIdentity()->payer->id,
+            null,
+            Cooperate::STATUS_CONFIRMED
+        );
         if (null === $model) {
             throw new NotFoundHttpException('Model not found');
         }
@@ -254,22 +269,39 @@ class CooperateController extends Controller
     }
 
     /**
-     * @param integer $payerId
+     * @param null|integer $id
+     * @param null|integer $payerId
+     * @param null|integer $organizationId
      * @param null|integer $status
      * @return Cooperate
+     * @throws \DomainException
      */
-    protected function findCurrentModel($payerId, $status = null)
+    protected function findCurrentModel($id = null, $payerId = null, $organizationId = null, $status = null)
     {
-        $model = Cooperate::find()->andWhere([
-            'payer_id' => $payerId,
-            'organization_id' => Yii::$app->user->getIdentity()->organization->id,
-        ]);
-
-        if (null !== $status) {
-            $model->andWhere(['status' => $status]);
+        if (null === $id && null === $payerId && null === $organizationId && null === $status) {
+            throw new \DomainException('Something wrong');
         }
+        $query = Cooperate::find();
+        $query = null !== $id ? $query->andWhere(['id' => $id]) : $query;
+        $query = null !== $payerId ? $query->andWhere(['payer_id' => $payerId]) : $query;
+        $query = null !== $organizationId ? $query->andWhere(['organization_id' => $organizationId]) : $query;
+        $query = null !== $status ? $query->andWhere(['status' => $status]) : $query;
 
-        return $model->one();
+        return $query->one();
+    }
+
+    /**
+     * @param integer $id
+     * @return Cooperate the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = Cooperate::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
     }
 
     /**
@@ -395,22 +427,6 @@ class CooperateController extends Controller
 
         if ($model->save()) {
             return $this->redirect('/personal/payer-organizations');
-        }
-    }
-
-    /**
-     * Finds the Cooperate model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Cooperate the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Cooperate::findOne($id)) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
 }

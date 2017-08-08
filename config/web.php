@@ -270,7 +270,7 @@ $config = [
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['confirm-request', 'reject-request', 'reject-contract', 'confirm-contract'],
+                        'actions' => ['confirm-request', 'reject-request', 'reject-contract', 'confirm-contract', 'requisites'],
                         'roles' => ['payer'],
                     ],
                     [

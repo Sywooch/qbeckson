@@ -1,22 +1,30 @@
 <?php
 
+use app\models\Cooperate;
 use kartik\datecontrol\DateControl;
+use yii\bootstrap\Modal;
 use yii\helpers\Html;
-use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Cooperate */
-/* @var $payer app\models\Payers */
 /* @var $form yii\widgets\ActiveForm */
-
-$this->title = 'Заполнение реквизитов на заключение соглашения с уполномоченной организацией: ' . $model->payer->name;
-$this->params['breadcrumbs'][] = $this->title;
+$model->scenario = Cooperate::SCENARIO_REQUISITES;
 ?>
-<div class="cooperate-requisites col-md-10 col-md-offset-1">
-    <h1><?= Html::encode($this->title) ?></h1>
-    <div class="cooperate-requisites">
-        <?php $form = ActiveForm::begin(['id' => 'cooperate-requisites-form']); ?>
+<?php
+Modal::begin([
+    'header' => '<h2>Заявка на регистрацию организации</h2>',
+    'toggleButton' => [
+        'tag' => 'a',
+        'class' => 'btn btn-primary',
+        'label' => 'Изменить',
+    ],
+]);
+?>
+    <?php $form = ActiveForm::begin([
+        'id' => 'cooperate-requisites-form',
+        'action' => ['cooperate/requisites', 'id' => $model->id]
+    ]); ?>
         <?= $form->field($model, 'number')->textInput(['maxlength' => true]) ?>
         <?= $form->field($model, 'date')->widget(DateControl::class, [
             'type' => DateControl::FORMAT_DATE,
@@ -27,10 +35,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]
             ]
         ]) ?>
-        <div class="form-group">
-            <?= Html::a('Назад', Url::to(['payers/view', 'id' => $model->payer->id]), ['class' => 'btn btn-primary']) ?>
-            <?= Html::submitButton('Отправить', ['class' => 'btn btn-success']) ?>
+        <div class="form-group clearfix">
+            <?= Html::submitButton('Отправить', ['class' => 'btn btn-success pull-right']) ?>
         </div>
-        <?php ActiveForm::end(); ?>
-    </div>
-</div>
+    <?php ActiveForm::end(); ?>
+<?php Modal::end(); ?>
