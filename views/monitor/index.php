@@ -7,7 +7,7 @@ use yii\grid\GridView;
 /* @var $searchModel app\models\search\MonitorSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Наблюдатели';
+$this->title = 'Уполномоченные организации';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="user-identity-index">
@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?= Html::a('Создать наблюдателя', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Добавить организацию', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

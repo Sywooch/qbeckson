@@ -54,7 +54,7 @@ class PermissionHelper
         $items = [
             ['label' => 'Информация', 'items' => [
                 ['label' => 'Общая статистика', 'url' => ['/personal/payer-statistic']],
-                ['label' => 'Наблюдатели', 'url' => ['/monitor/index']],
+                ['label' => 'Уполномоченные организации', 'url' => ['/monitor/index']],
             ]],
             ['label' => 'Номиналы групп', 'url' => ['/cert-group/index']],
             ['label' => 'Сертификаты', 'url' => ['/personal/payer-certificates']],
@@ -95,6 +95,10 @@ class PermissionHelper
             ['index' => 'Организации', 'value' => '/personal/payer-organizations'],
             ['index' => 'Программы', 'value' => '/personal/payer-programs'],
             ['index' => 'Создание сертификата', 'value' => '/certificates/create'],
+            ['index' => 'Просмотр сертификата', 'value' => '/certificates/view'],
+            ['index' => 'Редактирование сертификата', 'value' => '/certificates/update'],
+            ['index' => 'Удаление сертификата', 'value' => '/certificates/delete'],
+            ['index' => 'Активация / заморозка сертификата', 'value' => '/certificates/actual'],
             ['index' => 'Обновление номиналов', 'value' => '/certificates/allnominal'],
         ];
 
@@ -103,18 +107,22 @@ class PermissionHelper
 
     public static function checkMonitorUrl($requestUrl = null)
     {
-        if (Yii::$app->user->isGuest || !Yii::$app->user->identity->isMonitored) {
+        if (Yii::$app->user->isGuest || !Yii::$app->user->identity->isMonitored ) {
             return true;
         }
 
         $urls = Yii::$app->user->identity->monitor->userMonitorAssignment->access_rights;
         $currentUrl = empty($requestUrl) ? Url::toRoute(parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH)) : $requestUrl;
 
+        if ($currentUrl == '/' || strpos($currentUrl, 'site/') || strpos($currentUrl, 'debug/')) {
+            return true;
+        }
+
         $matches = array_filter($urls, function ($url) use ($currentUrl) {
             return (strpos($currentUrl, $url) !== false) ? true : false;
         });
 
-        if (empty($matches)) {
+        if (!empty($matches)) {
             return true;
         }
 

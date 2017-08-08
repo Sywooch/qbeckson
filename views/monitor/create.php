@@ -6,8 +6,8 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\UserIdentity */
 
-$this->title = 'Новый наблюдатель';
-$this->params['breadcrumbs'][] = ['label' => 'User Identities', 'url' => ['index']];
+$this->title = 'Новая организация';
+$this->params['breadcrumbs'][] = ['label' => 'Уполномоченные организации', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="user-identity-create">
