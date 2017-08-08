@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\UserMonitorAssignment;
 use Yii;
 use app\models\UserIdentity;
 use app\models\search\MonitorSearch;
@@ -57,7 +58,12 @@ class MonitorController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             if ($user = $model->create()) {
                 Yii::$app->authManager->assign(Yii::$app->authManager->getRole(UserIdentity::ROLE_MONITOR), $user->id);
-                Yii::$app->user->identity->link('monitors', $user);
+                $um = new UserMonitorAssignment([
+                    'user_id' => Yii::$app->user->id,
+                    'monitor_id' => $user->id,
+                    'access_rights' => $model->accessRights,
+                ]);
+                $um->save();
             }
 
             return $this->redirect(['index']);
@@ -79,7 +85,10 @@ class MonitorController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            $model->model->userMonitorAssignment->access_rights = $model->accessRights;
+            $model->model->userMonitorAssignment->save();
+
+            return $this->redirect(['index']);
         } else {
             return $this->render('update', [
                 'model' => $model,
@@ -110,7 +119,9 @@ class MonitorController extends Controller
     protected function findModel($id)
     {
         if (($model = UserIdentity::findOne($id)) !== null) {
-            return $model;
+            $userModel = new UserForm(['model' => $model]);
+
+            return $userModel;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }

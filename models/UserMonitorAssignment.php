@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use app\behaviors\ArrayOrStringBehavior;
 
 /**
  * This is the model class for table "user_monitor_assignment".
@@ -23,6 +24,17 @@ class UserMonitorAssignment extends \yii\db\ActiveRecord
         return 'user_monitor_assignment';
     }
 
+    public function behaviors()
+    {
+        return [
+            'array2string' => [
+                'class' => ArrayOrStringBehavior::className(),
+                'attributes1' => ['access_rights'],
+                'attributes2' => ['access_rights'],
+            ],
+        ];
+    }
+
     /**
      * @inheritdoc
      */
@@ -33,6 +45,7 @@ class UserMonitorAssignment extends \yii\db\ActiveRecord
             [['user_id', 'monitor_id'], 'integer'],
             [['monitor_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['monitor_id' => 'id']],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
+            ['access_rights', 'string'],
         ];
     }
 

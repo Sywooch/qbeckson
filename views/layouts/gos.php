@@ -128,18 +128,7 @@ $user = Yii::$app->user->getIdentity();
                             if (Yii::$app->user->can('payer')) {
                                 echo Nav::widget([
                                     'options' => ['class' => 'navbar-nav inner-nav'],
-                                    'items' => [
-                                        ['label' => 'Информация', 'items' => [
-                                            ['label' => 'Общая статистика', 'url' => ['/personal/payer-statistic']],
-                                            ['label' => 'Наблюдатели', 'url' => ['/monitor/index'], 'visible' => !$user->isMonitored],
-                                        ]],
-                                        ['label' => 'Номиналы групп', 'url' => ['/cert-group/index']],
-                                        ['label' => 'Сертификаты', 'url' => ['/personal/payer-certificates']],
-                                        ['label' => 'Договоры', 'url' => ['/personal/payer-contracts']],
-                                        ['label' => 'Счета', 'url' => ['/personal/payer-invoices']],
-                                        ['label' => 'Организации', 'url' => ['/personal/payer-organizations']],
-                                        ['label' => 'Программы', 'url' => ['/personal/payer-programs']],
-                                    ],
+                                    'items' => \app\helpers\PermissionHelper::getMenuItems(),
                                 ]);
                             }
 

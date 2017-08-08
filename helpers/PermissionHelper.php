@@ -4,6 +4,7 @@ namespace app\helpers;
 
 use Yii;
 use app\models\Organization;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 
 /**
@@ -12,8 +13,8 @@ use yii\helpers\Url;
  */
 class PermissionHelper
 {
-	public static function redirectUrlByRole()
-	{
+    public static function redirectUrlByRole()
+    {
         $url = ['site/error'];
         if (Yii::$app->user->can('admins')) {
             $url = ['/personal/index'];
@@ -39,33 +40,79 @@ class PermissionHelper
                         Yii::$app->session->setFlash('warning', 'Заполните информацию "Для договора"');
                         $url = ['/personal/organization-info'];
                     }
-                 }
+                }
             }
         } elseif (Yii::$app->user->can('certificate')) {
             $url = ['/personal/certificate-statistic'];
         }
 
         return $url;
-	}
+    }
 
-    public static function checkMonitorUrl()
+    public static function getMenuItems()
     {
-        if (Yii::$app->user->isGuest) {
+        $items = [
+            ['label' => 'Информация', 'items' => [
+                ['label' => 'Общая статистика', 'url' => ['/personal/payer-statistic']],
+                ['label' => 'Наблюдатели', 'url' => ['/monitor/index']],
+            ]],
+            ['label' => 'Номиналы групп', 'url' => ['/cert-group/index']],
+            ['label' => 'Сертификаты', 'url' => ['/personal/payer-certificates']],
+            ['label' => 'Договоры', 'url' => ['/personal/payer-contracts']],
+            ['label' => 'Счета', 'url' => ['/personal/payer-invoices']],
+            ['label' => 'Организации', 'url' => ['/personal/payer-organizations']],
+            ['label' => 'Программы', 'url' => ['/personal/payer-programs']],
+        ];
+
+        return static::checkMenuAccess($items);
+    }
+
+    public static function checkMenuAccess($items)
+    {
+        foreach ($items as $index => $item) {
+            if (isset($item['items'])) {
+                $items[$index]['items'] = static::checkMenuAccess($item['items']);
+                continue;
+            }
+
+            if (!static::checkMonitorUrl($item['url'][0])) {
+                $items[$index]['visible'] = false;
+            }
+        }
+
+        return $items;
+    }
+
+    public static function getAccessUrls()
+    {
+        $items = [
+            ['index' => 'Общая статистика', 'value' => '/personal/payer-statistic'],
+            ['index' => 'Наблюдатели', 'value' => '/monitor/index'],
+            ['index' => 'Номиналы групп', 'value' => '/cert-group/index'],
+            ['index' => 'Сертификаты', 'value' => '/personal/payer-certificates'],
+            ['index' => 'Договоры', 'value' => '/personal/payer-contracts'],
+            ['index' => 'Счета', 'value' => '/personal/payer-invoices'],
+            ['index' => 'Организации', 'value' => '/personal/payer-organizations'],
+            ['index' => 'Программы', 'value' => '/personal/payer-programs'],
+            ['index' => 'Создание сертификата', 'value' => '/certificates/create'],
+            ['index' => 'Обновление номиналов', 'value' => '/certificates/allnominal'],
+        ];
+
+        return ArrayHelper::map($items, 'value', 'index');
+    }
+
+    public static function checkMonitorUrl($requestUrl = null)
+    {
+        if (Yii::$app->user->isGuest || !Yii::$app->user->identity->isMonitored) {
             return true;
         }
 
-        $urls = [
-            '/certificates/create',
-            '/certificates/allnominal',
-            'monitor',
-        ];
-        $currentUrl = Url::toRoute(parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH));
+        $urls = Yii::$app->user->identity->monitor->userMonitorAssignment->access_rights;
+        $currentUrl = empty($requestUrl) ? Url::toRoute(parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH)) : $requestUrl;
 
         $matches = array_filter($urls, function ($url) use ($currentUrl) {
             return (strpos($currentUrl, $url) !== false) ? true : false;
         });
-
-        //print_r($matches);exit;
 
         if (empty($matches)) {
             return true;

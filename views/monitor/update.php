@@ -5,10 +5,9 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\UserIdentity */
 
-$this->title = 'Update User Identity: ' . $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'User Identities', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
-$this->params['breadcrumbs'][] = 'Update';
+$this->title = 'Редактирование наблюдателя';
+$this->params['breadcrumbs'][] = ['label' => 'Наблюдатели', 'url' => ['index']];
+$this->params['breadcrumbs'][] = 'Обновление';
 ?>
 <div class="user-identity-update">
 

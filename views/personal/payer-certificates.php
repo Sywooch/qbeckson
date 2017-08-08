@@ -4,6 +4,7 @@ use kartik\grid\GridView;
 use yii\helpers\Url;
 use app\widgets\SearchFilter;
 use app\helpers\GridviewHelper;
+use app\helpers\PermissionHelper;
 
 $this->title = 'Сертификаты';
 $this->params['breadcrumbs'][] = $this->title;
@@ -71,15 +72,20 @@ $columns = [
     'data' => GridviewHelper::prepareColumns('certificates', $columns, 'searchFilter', null),
 ]); ?>
 
-<?php if (!Yii::$app->user->identity->isMonitored): ?>
+<?php if (PermissionHelper::checkMonitorUrl('/certificates/allnominal')): ?>
 <div class="pull-right">
     <?= Html::a('Обновить номиналы', Url::to(['/certificates/allnominal', 'id' => $payer_id]), ['class' => 'btn btn-success']) ?>
 </div>
+<?php endif; ?>
 
 <p>
-    <?= Html::a('Добавить сертификат', ['certificates/create'], ['class' => 'btn btn-success']) ?>
+    <?php if (PermissionHelper::checkMonitorUrl('/certificates/create')): ?>
+    <?= Html::a('Добавить сертификат', ['/certificates/create'], ['class' => 'btn btn-success']) ?>
+    <?php elseif (PermissionHelper::checkMonitorUrl('/certificates/allnominal')): ?>
+        <br />
+        <br />
+    <?php endif; ?>
 </p>
-<?php endif; ?>
 
 <?= GridView::widget([
     'dataProvider' => $certificatesProvider,

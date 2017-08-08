@@ -188,6 +188,14 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getUserMonitorAssignment()
+    {
+        return $this->hasOne(UserMonitorAssignment::className(), ['monitor_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getMonitors()
     {
         return $this->hasMany(UserIdentity::className(), ['id' => 'monitor_id'])->viaTable('user_monitor_assignment', ['user_id' => 'id']);
