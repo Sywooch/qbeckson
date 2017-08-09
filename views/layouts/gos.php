@@ -44,7 +44,7 @@ $user = Yii::$app->user->getIdentity();
                                 'options' => ['class' => 'navbar-nav navbar-right header-nav'],
                                 'items' => [
                                     [
-                                        'label' => 'Выйти(' .  $user->username . ')',
+                                        'label' => 'Выйти(' .  ($user->isMonitored ? $user->monitor->username : $user->username) . ')',
                                         'url' => ['/site/logout'],
                                         'linkOptions' => [
                                             'data-method' => 'post',
@@ -141,18 +141,7 @@ $user = Yii::$app->user->getIdentity();
                             if (Yii::$app->user->can('payer')) {
                                 echo Nav::widget([
                                     'options' => ['class' => 'navbar-nav inner-nav'],
-                                    'items' => [
-                                        ['label' => 'Информация', 'url' => ['/personal/payer-statistic']],
-                                        ['label' => 'Номиналы групп', 'url' => ['/cert-group/index']],
-                                        ['label' => 'Сертификаты', 'url' => ['/personal/payer-certificates']],
-                                        ['label' => 'Договоры', 'url' => ['/personal/payer-contracts']],
-                                        ['label' => 'Счета', 'url' => ['/personal/payer-invoices']],
-                                        ['label' => 'Организации', 'items' => [
-                                            ['label' => 'Реестр ПФДО', 'url' => ['/personal/payer-organizations']],
-                                            //['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
-                                        ]],
-                                        ['label' => 'Программы', 'url' => ['/personal/payer-programs']],
-                                    ],
+                                    'items' => \app\helpers\PermissionHelper::getMenuItems(),
                                 ]);
                             }
 

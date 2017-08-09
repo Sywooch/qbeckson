@@ -11,7 +11,7 @@ $config = [
     'language' => 'ru-RU',
     'sourceLanguage' => 'ru-RU',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log', 'MonitorAccess'],
     'layout' => 'gos',
     'defaultRoute' => 'site/index',
     'components' => [
@@ -25,6 +25,9 @@ $config = [
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
+        ],
+        'MonitorAccess' => [
+            'class' => 'app\components\MonitorAccess',
         ],
         'operator' => [
             'class' => 'app\components\Operator',
@@ -254,10 +257,16 @@ $config = [
                 'certificate-information' => [
                     [
                         'allow' => true,
-                        'roles' => ['payer'],
+                        'roles' => ['payers'],
                     ]
-                ]
-            ]
+                ],
+                'monitor' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['payers'],
+                    ]
+                ],
+           ]
     ],
 
     'params' => $params,

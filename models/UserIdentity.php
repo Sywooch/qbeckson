@@ -5,6 +5,7 @@ namespace app\models;
 use Yii;
 use yii\db\ActiveRecord;
 use developeruz\db_rbac\interfaces\UserRbacInterface;
+use yii\web\BadRequestHttpException;
 use yii\web\IdentityInterface;
 
 /**
@@ -31,6 +32,7 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
     const ROLE_PAYER = 'payer';
     const ROLE_ORGANIZATION = 'organizations';
     const ROLE_OPERATOR = 'operators';
+    const ROLE_MONITOR = 'monitor';
 
     /**
      * @inheritdoc
@@ -184,6 +186,48 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUserMonitorAssignment()
+    {
+        return $this->hasOne(UserMonitorAssignment::className(), ['monitor_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMonitors()
+    {
+        return $this->hasMany(UserIdentity::className(), ['id' => 'monitor_id'])->viaTable('user_monitor_assignment', ['user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDonor()
+    {
+        return $this->hasOne(UserIdentity::className(), ['id' => 'user_id'])->viaTable('user_monitor_assignment', ['monitor_id' => 'id']);
+    }
+
+    public function getIsMonitored()
+    {
+        $monitor = Yii::$app->session->get('user.monitor');
+
+        return (isset($monitor) && $monitor instanceof UserIdentity) ? true : false;
+    }
+
+    public function getMonitor()
+    {
+        $monitor = Yii::$app->session->get('user.monitor');
+
+        if (isset($monitor) && $monitor instanceof UserIdentity) {
+            return $monitor;
+        }
+
+        throw new BadRequestHttpException('Ошибка обращения к монитору.');
+    }
+
+    /**
      * @param $tableName
      * @param null $type
      * @return array|\yii\db\ActiveQuery|ActiveRecord
@@ -212,6 +256,7 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
             self::ROLE_PAYER => 'Плательщик',
             self::ROLE_ORGANIZATION => 'Организация',
             self::ROLE_OPERATOR => 'Оператор',
+            self::ROLE_MONITOR => 'Монитор',
         ];
     }
 }

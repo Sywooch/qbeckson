@@ -1,0 +1,75 @@
+<?php
+
+namespace app\models\search;
+
+use Yii;
+use yii\base\Model;
+use yii\data\ActiveDataProvider;
+use app\models\UserIdentity;
+
+/**
+ * MonitorSearch represents the model behind the search form about `app\models\UserIdentity`.
+ */
+class MonitorSearch extends UserIdentity
+{
+    /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+        return [
+            [['id', 'mun_id'], 'integer'],
+            [['username', 'password', 'access_token', 'auth_key'], 'safe'],
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function scenarios()
+    {
+        // bypass scenarios() implementation in the parent class
+        return Model::scenarios();
+    }
+
+    /**
+     * Creates data provider instance with search query applied
+     *
+     * @param array $params
+     *
+     * @return ActiveDataProvider
+     */
+    public function search($params)
+    {
+        $query = UserIdentity::find()
+            ->innerJoin('user_monitor_assignment', '`user_monitor_assignment`.monitor_id = `user`.id')
+            ->andWhere(['`user_monitor_assignment`.user_id' => Yii::$app->user->id]);
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'id' => $this->id,
+            'mun_id' => $this->mun_id,
+        ]);
+
+        $query->andFilterWhere(['like', 'username', $this->username])
+            ->andFilterWhere(['like', 'password', $this->password])
+            ->andFilterWhere(['like', 'access_token', $this->access_token])
+            ->andFilterWhere(['like', 'auth_key', $this->auth_key]);
+
+        return $dataProvider;
+    }
+}

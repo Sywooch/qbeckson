@@ -9,6 +9,7 @@ use kartik\grid\GridView;
 use yii\helpers\Url;
 use app\widgets\SearchFilter;
 use app\helpers\GridviewHelper;
+use app\helpers\PermissionHelper;
 
 $this->title = 'Сертификаты';
 $this->params['breadcrumbs'][] = $this->title;
@@ -93,14 +94,22 @@ $columns = [
     ),
     'role' => UserIdentity::ROLE_PAYER
 ]); ?>
+
+<?php if (PermissionHelper::checkMonitorUrl('/certificates/allnominal')): ?>
 <div class="pull-right">
-    <?= Html::a(
-        'Обновить номиналы',
-        Url::to(['certificates/allnominal', 'id' => Yii::$app->user->identity->payer->id]),
-        ['class' => 'btn btn-success']
-    ) ?>
+    <?= Html::a('Обновить номиналы', Url::to(['/certificates/allnominal', 'id' => $payer_id]), ['class' => 'btn btn-success']) ?>
 </div>
-<p><?= Html::a('Добавить сертификат', ['certificates/create'], ['class' => 'btn btn-success']) ?></p>
+<?php endif; ?>
+
+<p>
+    <?php if (PermissionHelper::checkMonitorUrl('/certificates/create')): ?>
+    <?= Html::a('Добавить сертификат', ['/certificates/create'], ['class' => 'btn btn-success']) ?>
+    <?php elseif (PermissionHelper::checkMonitorUrl('/certificates/allnominal')): ?>
+        <br />
+        <br />
+    <?php endif; ?>
+</p>
+
 <?= GridView::widget([
     'dataProvider' => $certificatesProvider,
     'filterModel' => null,
