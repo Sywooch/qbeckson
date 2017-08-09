@@ -60,6 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return false;
                 },
             ],
+            'countCertificates',
             [
                 'class' => 'kartik\grid\EditableColumn',
                 'attribute' => 'amount',

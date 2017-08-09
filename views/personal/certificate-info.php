@@ -23,6 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= Html::a('Изменить пароль', ['/certificates/password'], ['class' => 'btn btn-success']) ?>
             </p>
         </div>
+        <div class="well col-md-5 text-center">Текущий сертификат: <b><?= $certificate->textType ?></b></div>
         <div class="well col-md-5 text-center">
             <div>
                 <p class="biglabel">Номинал сертификата<br><strong
@@ -40,14 +41,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     echo '<br />';
                     $form = ActiveForm::begin();
                     if ($certificate->certGroup->is_special > 0) {
-                        $certificateType = $certificate->possibleCertGroup->group;
                         $certificate->cert_group = $certificate->possibleCertGroup->id;
                     } else {
-                        $certificateType = 'сертификат учёта';
                         $certificate->cert_group = $certificate->payers->getCertGroups(1)->one()->id;
                     }
                     echo $form->field($certificate, 'cert_group')->hiddenInput()->label(false);
-                    echo '<p>Сменить тип сертификата на ' . Html::submitButton($certificateType, ['class' => 'btn btn-primary']) . '</p>';
+                    echo '<p>Сменить тип сертификата на ' . Html::submitButton($certificate->getTextType(true), ['class' => 'btn btn-primary', 'onClick' => 'if (!confirm("Уверены?")) return false;']) . '</p>';
                     ActiveForm::end();
                 }
                 ?>

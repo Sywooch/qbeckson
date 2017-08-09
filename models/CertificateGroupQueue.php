@@ -61,13 +61,27 @@ class CertificateGroupQueue extends \yii\db\ActiveRecord
     public static function getByCertGroup($certGroupId, $limit = null)
     {
         $query = static::find()
-            ->where(['cert_group_id' => $certGroupId]);
+            ->where(['cert_group_id' => $certGroupId])
+            ->orderBy('created_at ASC');
 
         if (!empty($limit)) {
             $query->limit($limit);
         }
 
         return $query->all();
+    }
+
+    public static function getCountByCertGroup($certGroupId, $createdAt = null)
+    {
+        $query = static::find()
+            ->where(['cert_group_id' => $certGroupId])
+            ->orderBy('created_at ASC');
+
+        if (!empty($createdAt)) {
+            $query->andWhere('created_at < ' . $createdAt);
+        }
+
+        return $query->count();
     }
 
     public function removeFromCertQueue()

@@ -68,6 +68,7 @@ class CertGroup extends \yii\db\ActiveRecord
             'payer_id' => 'Payer ID',
             'group' => 'Группа',
             'nominal' => 'Номинал',
+            'countCertificates' => 'Количество используемых сертификатов',
             'amount' => 'Лимит',
         ];
     }
@@ -81,6 +82,14 @@ class CertGroup extends \yii\db\ActiveRecord
         }
 
         return false;
+    }
+
+    public function getCountCertificates()
+    {
+        $query = Certificates::find()
+            ->where(['cert_group' => $this->id]);
+
+        return $query->count();
     }
 
     /**

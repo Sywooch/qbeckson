@@ -80,7 +80,7 @@ class Certificates extends \yii\db\ActiveRecord
         return [
             [['name', 'soname'], 'required'],
             [['fio_parent'], 'required'],
-            [['user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'cert_group', 'pasport_s', 'pasport_n', 'pasport_v', 'phone', 'possible_cert_group'], 'integer'],
+            [['user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'cert_group', 'pasport_s', 'pasport_n', 'pasport_v', 'phone', 'possible_cert_group', 'updated_cert_group'], 'integer'],
             [['nominal'], 'number', 'max' => 100000],
             [['number'], 'string', 'length' => [10, 10]],
             [['balance', 'rezerv'], 'number'],
@@ -152,6 +152,15 @@ class Certificates extends \yii\db\ActiveRecord
             self::TYPE_PF => 'Сертификат ПФ',
             self::TYPE_ACCOUNTING => 'Сертификат учёта',
         ];
+    }
+
+    public function getCountActiveContracts()
+    {
+        $query = Contracts::find()
+            ->where(['certificate_id' => $this->id])
+            ->andWhere(['=', 'status', Contracts::STATUS_ACTIVE]);
+
+        return $query->count();
     }
 
     /**
@@ -247,6 +256,16 @@ class Certificates extends \yii\db\ActiveRecord
         return [$this->possibleCertGroup, $this->payers->getCertGroups(1)->one()];
     }
 
+    public function getTextType($viceVersa = false)
+    {
+        $arrayTypes = ['Сертификат учёта', $this->possibleCertGroup->group];
+        if ($viceVersa === true) {
+            $arrayTypes = array_reverse($arrayTypes);
+        }
+
+        return $this->certGroup->is_special > 0 ? $arrayTypes[0] : $arrayTypes[1];
+    }
+
     public function changeCertGroup()
     {
         if ($this->certGroup->is_special > 0) {
@@ -261,6 +280,7 @@ class Certificates extends \yii\db\ActiveRecord
         if ($this->certGroup->hasVacancy()) {
             $this->nominal = $this->certGroup->nominal;
             $this->balance = $this->nominal;
+            $this->updated_cert_group = time();
 
             return self::FLAG_GROUP_HAS_BEEN_CHANGED;
         } else {
@@ -277,6 +297,7 @@ class Certificates extends \yii\db\ActiveRecord
             ->where([
                 'cert_group_id' => $certGroup->id,
             ])
+            ->orderBy('created_at ASC')
             ->one();
 
         if ($model) {
@@ -289,8 +310,9 @@ class Certificates extends \yii\db\ActiveRecord
     public function insertIntoGroupQueue()
     {
         if (!$this->getCertificateGroupQueues($this->id, $this->cert_group)->count()) {
-            $this->link('certGroupsQueue', $this->certGroup);
-            Yii::$app->session->setFlash('danger', 'Свободных мест в группе нет, поэтому вы успешно поставлены в очередь на зачисление.');
+            $this->link('certGroupsQueue', $this->certGroup, ['created_at' => time()]);
+            $number = CertificateGroupQueue::getCountByCertGroup($this->cert_group, time()) + 1;
+            Yii::$app->session->setFlash('danger', 'К сожалению, на текущий момент достигнут лимит предоставления действующих сертификатов персонифицированного финансирования. Ваш сертификат будет переведен в вид сертификата персонифицированного финансирования в порядке "живой" очереди, после того, как число доступных сертификатов увеличится. Ваш номер в очереди - ' . $number);
         }
     }
 

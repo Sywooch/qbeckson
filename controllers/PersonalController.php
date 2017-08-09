@@ -586,8 +586,7 @@ class PersonalController extends \yii\web\Controller
 
     public function actionCertificateStatistic()
     {
-        $certificates = new Certificates();
-        $certificate = $certificates->getCertificates();
+        $certificate = Yii::$app->user->identity->certificate;
 
         $model = new Programs();
 
@@ -660,13 +659,11 @@ class PersonalController extends \yii\web\Controller
 
             if ($model->save(false)) {
                 if ($flagGroupHasBeenChanged === true) {
-                    Yii::$app->session->setFlash('success', 'Вы успешно сменили тип сертификата. Теперь вам нужно передать заявление вышестоящей организации <a href="' . Url::to(['certificates/group-pdf']) . '" class="btn btn-primary">Открыть заявление (PDF)</a>');
+                    Yii::$app->session->setFlash('success', 'Вам успешно поменяли вид сертификата на сертификат персонифицированного финансирования.');
                 }
 
-                return $this->redirect(['/personal/certificate-statistic', 'id' => $model->id]);
+                return $this->refresh();
             }
-        } elseif (Yii::$app->request->isPost) {
-            print_r($model->errors);exit;
         }
 
         return $this->render('certificate-info', [
