@@ -3,6 +3,9 @@
 namespace app\models\forms;
 
 use app\models\Cooperate;
+use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\PhpWord;
+use Yii;
 use yii\base\Model;
 
 /**
@@ -14,7 +17,9 @@ class ConfirmRequestForm extends Model
     public $type;
     public $value;
     public $document;
+
     private $model;
+    private $phpWord;
 
     /**
      * @return string
@@ -54,7 +59,7 @@ class ConfirmRequestForm extends Model
     public function attributeLabels()
     {
         return [
-            'type' => 'Тип документа',
+            'type' => 'Тип документа (генерируется в формате Word 2007)',
             'document' => 'Документ',
             'value' => 'Укажите сумму средств по договору на ' . date('Y') . ' год'
         ];
@@ -67,11 +72,23 @@ class ConfirmRequestForm extends Model
     {
         if (null !== ($model = $this->getModel()) && $this->validate()) {
             $model->document_type = $this->type;
-            if ((int)$this->type === Cooperate::DOCUMENT_TYPE_EXTEND) {
-                //TODO гененируем docx файл
-            }
             if ((int)$this->type === Cooperate::DOCUMENT_TYPE_CUSTOM) {
                 $model->document = $this->document;
+            } else {
+                if ((int)$this->type === Cooperate::DOCUMENT_TYPE_EXTEND) {
+
+                } else {
+
+                }
+
+
+                /*if ((int)$this->type === Cooperate::DOCUMENT_TYPE_EXTEND) {
+                    $phpWord = $this->generateExtendDocx();
+                } else {
+                    $phpWord = $this->generateGeneralDocx();
+                }
+                $objWriter = IOFactory::createWriter($phpWord);
+                $objWriter->save(Yii::getAlias('@runtime/new.docx'));*/
             }
             $model->confirm();
 
@@ -79,6 +96,46 @@ class ConfirmRequestForm extends Model
         }
 
         return false;
+    }
+
+    /**
+     * @return PhpWord
+     * @deprecated
+     */
+    private function generateGeneralDocx()
+    {
+        $phpWord = $this->getPhpWord();
+        $section = $phpWord->addSection();
+        $section->addText(
+            '"Learn from yesterday, live for today, hope for tomorrow. '
+            . 'The important thing is not to stop questioning." '
+            . '(Albert Einstein)'
+        );
+
+        return $phpWord;
+    }
+
+    /**
+     * @return PhpWord
+     * @deprecated
+     */
+    private function generateExtendDocx()
+    {
+        $phpWord = $this->getPhpWord();
+        $section = $phpWord->addSection();
+        $section->addText(
+            '"Learn from yesterday, live for today, hope for tomorrow. '
+            . 'The important thing is not to stop questioning." '
+            . '(Albert Einstein)'
+        );
+        $section->addText(
+            '"Great achievement is usually born of great sacrifice, '
+            . 'and is never the result of selfishness." '
+            . '(Napoleon Hill)',
+            ['name' => 'Tahoma', 'size' => 10]
+        );
+
+        return $phpWord;
     }
 
     /**
@@ -95,5 +152,17 @@ class ConfirmRequestForm extends Model
     public function setModel($model)
     {
         $this->model = $model;
+    }
+
+    /**
+     * @return PhpWord
+     */
+    public function getPhpWord()
+    {
+        if (null === $this->phpWord) {
+            $this->phpWord = new PhpWord();
+        }
+
+        return $this->phpWord;
     }
 }

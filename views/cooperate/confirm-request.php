@@ -18,13 +18,13 @@ $model = new ConfirmRequestForm();
 //Мини кастыль для UI
 $typeExtend = Cooperate::DOCUMENT_TYPE_EXTEND;
 $typeCustom = Cooperate::DOCUMENT_TYPE_CUSTOM;
-$js = <<<'JS'
+$js = <<<JS
     $('#type').change(function() {
         var val = $(this).val();
-        if (val == {$typeExtend}) {
+        if (val === '{$typeExtend}') {
             $('.item').hide();
             $('.extend').show();
-        } else if (val == {$typeCustom}) {
+        } else if (val === '{$typeCustom}') {
             $('.item').hide();
             $('.custom').show();
         } else {

@@ -1,8 +1,9 @@
 <?php
 use app\components\LocalFlysystemBuilder;
 use developeruz\db_rbac\behaviors\AccessBehavior;
-use \kartik\datecontrol\Module;
+use kartik\datecontrol\Module;
 use trntv\filekit\Storage;
+use app\components\KeyStorage;
 
 $params = require(__DIR__ . '/params.php');
 
@@ -15,6 +16,9 @@ $config = [
     'layout' => 'gos',
     'defaultRoute' => 'site/index',
     'components' => [
+        'keyStorage' => [
+            'class' => KeyStorage::class
+        ],
         'yandexMapsApi' => [
             'class' => 'mirocow\yandexmaps\Api',
         ],
@@ -277,8 +281,14 @@ $config = [
                         'allow' => true,
                         'actions' => ['view', 'reject-appeal', 'confirm-appeal'],
                         'roles' => ['operators'],
-                    ]
-                ]
+                    ],
+                ],
+                'operator/key-storage' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['operators'],
+                    ],
+                ],
             ]
     ],
 
