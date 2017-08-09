@@ -30,7 +30,10 @@ JS;
 $this->registerJs($js, $this::POS_READY);
 ?>
 <div class="key-storage-item-form">
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ActiveForm::begin([
+        'enableClientValidation' => false,
+        'enableAjaxValidation' => true,
+    ]); ?>
     <?= $form->field($model, 'type')->dropDownList(array_merge(['' => 'Выберите тип значения'], $model::types())) ?>
     <?= $form->field($model, 'key')->textInput() ?>
     <div class="item value" style="<?= (!$model->isNewRecord && $model->type === KeyStorageItem::TYPE_STRING) ? '' : 'display: none' ?>">

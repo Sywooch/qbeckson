@@ -79,7 +79,7 @@ class CooperateController extends Controller
      */
     public function actionRequest($payerId)
     {
-        if (null !== $this->findCurrentModel(null, $payerId)) {
+        if (null !== $this->findCurrentModel(null, $payerId, Yii::$app->user->getIdentity()->organization->id)) {
             throw new NotFoundHttpException('Model already exist!');
         }
         $model = new Cooperate([
