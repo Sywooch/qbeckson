@@ -60,7 +60,11 @@ class PermissionHelper
             ['label' => 'Сертификаты', 'url' => ['/personal/payer-certificates']],
             ['label' => 'Договоры', 'url' => ['/personal/payer-contracts']],
             ['label' => 'Счета', 'url' => ['/personal/payer-invoices']],
-            ['label' => 'Организации', 'url' => ['/personal/payer-organizations']],
+            ['label' => 'Организации', 'items' => [
+                ['label' => 'Реестр ПФДО', 'url' => ['/personal/payer-
+organizations']],
+                //['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
+            ]],
             ['label' => 'Программы', 'url' => ['/personal/payer-programs']],
         ];
 
@@ -107,7 +111,7 @@ class PermissionHelper
 
     public static function checkMonitorUrl($requestUrl = null)
     {
-        if (Yii::$app->user->isGuest || !Yii::$app->user->identity->isMonitored ) {
+        if (Yii::$app->user->isGuest || !Yii::$app->user->identity->isMonitored) {
             return true;
         }
 
