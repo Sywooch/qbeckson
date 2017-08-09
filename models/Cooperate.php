@@ -20,13 +20,22 @@ use yii\db\ActiveRecord;
  * @property string $number
  * @property string $reject_reason
  * @property string $appeal_reason
- * @property integer $document_type
+ * @property string $document_type
  * @property string $document_path
  * @property string $document_base_url
+ * @property float current_year_payment
+ * @property float total_payment
+ * @property float current_year_payment_limit
+ * @property float total_payment_limit
+ * @property string additional_number
+ * @property string additional_date
+ * @property string additional_document_base_url
+ * @property string additional_document_path
  *
  * @property Organization $organization
  * @property Payers $payers
  * @property null|string $documentUrl
+ * @property null|string $additionalDocumentUrl
  * @property Payers $payer
  */
 class Cooperate extends ActiveRecord
@@ -44,6 +53,9 @@ class Cooperate extends ActiveRecord
     const DOCUMENT_TYPE_GENERAL = 'general';
     const DOCUMENT_TYPE_EXTEND = 'extend';
     const DOCUMENT_TYPE_CUSTOM = 'custom';
+
+    const DOCUMENT_NAME_FIRST = 'cooperateFirstDocumentName';
+    const DOCUMENT_NAME_SECOND = 'cooperateSecondDocumentName';
 
     public $document;
     public $additionalDocument;
@@ -82,10 +94,13 @@ class Cooperate extends ActiveRecord
             [['appeal_reason'], 'required', 'on' => self::SCENARIO_APPEAL],
             [['date', 'number'], 'required', 'on' => self::SCENARIO_REQUISITES],
 
-            [['organization_id', 'payer_id', 'status', 'document_type'], 'integer'],
+            [['organization_id', 'payer_id', 'status'], 'integer'],
             [['date', 'date_dissolution'], 'safe'],
-            [['reject_reason', 'appeal_reason'], 'string'],
-            [['number', 'document_path', 'document_base_url'], 'string', 'max' => 255],
+            [['reject_reason', 'appeal_reason', 'document_type'], 'string'],
+            [[
+                'number', 'document_path', 'document_base_url', 'additional_number', 'additional_date',
+                'additional_document_base_url', 'additional_document_path'
+            ], 'string', 'max' => 255],
             [
                 ['organization_id'], 'exist', 'skipOnError' => true,
                 'targetClass' => Organization::class, 'targetAttribute' => ['organization_id' => 'id']
@@ -94,7 +109,8 @@ class Cooperate extends ActiveRecord
                 ['payer_id'], 'exist', 'skipOnError' => true,
                 'targetClass' => Payers::class, 'targetAttribute' => ['payer_id' => 'id']
             ],
-            [['document'], 'safe'],
+            [['current_year_payment', 'total_payment', 'current_year_payment_limit', 'total_payment_limit'], 'number'],
+            [['document', 'additionalDocument'], 'safe'],
         ];
     }
 
@@ -109,6 +125,12 @@ class Cooperate extends ActiveRecord
                 'pathAttribute' => 'document_path',
                 'baseUrlAttribute' => 'document_base_url',
                 'attribute' => 'document',
+            ],
+            [
+                'class' => UploadBehavior::class,
+                'pathAttribute' => 'additional_document_path',
+                'baseUrlAttribute' => 'additional_document_base_url',
+                'attribute' => 'additionalDocument',
             ],
         ];
     }
@@ -168,7 +190,17 @@ class Cooperate extends ActiveRecord
      */
     public function getDocumentUrl()
     {
-        return (null !== $this->document_path) ? $this->document_base_url . '/' . $this->document_path : null;
+        return (null !== $this->document_path) ?
+            $this->document_base_url . '/' . $this->document_path : null;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getAdditionalDocumentUrl()
+    {
+        return (null !== $this->additional_document_path) ?
+            $this->additional_document_base_url . '/' . $this->additional_document_path : null;
     }
 
     /**
@@ -229,6 +261,17 @@ class Cooperate extends ActiveRecord
             self::STATUS_REJECTED => 'Отклонена',
             self::STATUS_CONFIRMED => 'Подтверждён',
             self::STATUS_APPEALED => 'Обжалована',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function documentNames()
+    {
+        return [
+            self::DOCUMENT_NAME_FIRST => 'Договор о возмещении затрат',
+            self::DOCUMENT_NAME_SECOND => 'Договор об оплате дополнительного образования',
         ];
     }
 

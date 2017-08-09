@@ -53,8 +53,10 @@ Modal::begin([
             <p class="text <?= Cooperate::DOCUMENT_TYPE_GENERAL ?>Text">
                 <small>* Рекомендуется заключать в случае если для расходования средств не требуется постановки расходного обязательства в казначействе (подходит для СОНКО)</small>
                 <br>
-                <?= Yii::$app->keyStorage->get(Cooperate::DOCUMENT_TYPE_GENERAL) ?
-                    Html::a('Просмотр договора', Yii::$app->keyStorage->get(Cooperate::DOCUMENT_TYPE_GENERAL)) : '' ?>
+                <?php
+                $generalDocument = Yii::$app->keyStorage->get(Cooperate::DOCUMENT_TYPE_GENERAL, true);
+                echo $generalDocument ? Html::a('Просмотр договора', $generalDocument->base_url . '/' . $generalDocument->path) : '';
+                ?>
             </p>
         </div>
         <div class="item <?= Cooperate::DOCUMENT_TYPE_CUSTOM ?>" style="display: none">
@@ -72,8 +74,10 @@ Modal::begin([
             <p class="text <?= Cooperate::DOCUMENT_TYPE_EXTEND ?>Text" style="display: none;">
                 <small>* Рекомендуется заключать в случае если для постановки расходного обязательства на исполнение необходимо зафиксировать сумму договора (подходит для АУ). Использование данного договора предполагает необходимость регулярного заключения дополнительных соглашений (информационная система будет давать подсказки)</small>
                 <br>
-                <?= Yii::$app->keyStorage->get(Cooperate::DOCUMENT_TYPE_EXTEND) ?
-                    Html::a('Просмотр договора', Yii::$app->keyStorage->get(Cooperate::DOCUMENT_TYPE_EXTEND)) : '' ?>
+                <?php
+                $extendDocument = Yii::$app->keyStorage->get(Cooperate::DOCUMENT_TYPE_EXTEND, true);
+                echo $extendDocument ? Html::a('Просмотр договора', $extendDocument->base_url . '/' . $extendDocument->path) : '';
+                ?>
             </p>
             <?= $form->field($model, 'value')->textInput() ?>
         </div>

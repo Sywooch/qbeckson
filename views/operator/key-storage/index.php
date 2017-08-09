@@ -1,5 +1,6 @@
 <?php
 
+use app\models\KeyStorageItem;
 use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -22,14 +23,23 @@ $this->params['breadcrumbs'][] = $this->title;
             'class' => 'grid-view table-responsive'
         ],
         'columns' => [
-            'comment',
-            'key',
-            'value',
             [
-                'attribute' => 'type',
+                'attribute' => 'comment',
                 'value' => function ($model) {
-                    return $model::types()[$model->type];
+                    return $model::names()[$model->comment];
                 }
+            ],
+            [
+                'attribute' => 'value',
+                'value' => function ($model) {
+                    /** @var KeyStorageItem $model */
+                    if (KeyStorageItem::TYPE_FILE === $model->type) {
+                        return Html::a('Скачать файл', $model->getFileUrl());
+                    }
+
+                    return $model->value;
+                },
+                'format' => 'raw',
             ],
             [
                 'class' => ActionColumn::class,

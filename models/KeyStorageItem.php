@@ -36,7 +36,8 @@ class KeyStorageItem extends ActiveRecord
     public static function types()
     {
         return [
-            self::TYPE_STRING => 'Текст',
+            //self::TYPE_STRING => 'Текст',
+            //self::TYPE_JSON => 'Json',
             self::TYPE_FILE => 'Файл',
         ];
     }
@@ -72,6 +73,7 @@ class KeyStorageItem extends ActiveRecord
     }
 
     /**
+     * Кастыльнём
      * @param bool $insert
      * @return bool
      */
@@ -79,8 +81,7 @@ class KeyStorageItem extends ActiveRecord
     {
         if (parent::beforeSave($insert)) {
             if ($this->type === self::TYPE_FILE) {
-                $this->value = !empty($this->file['base_url']) ?
-                    $this->file['base_url'] . '/' . $this->file['path'] : $this->file['path'];
+                $this->value = json_encode($this->file);
             }
 
             return true;
@@ -95,10 +96,20 @@ class KeyStorageItem extends ActiveRecord
     public function afterFind()
     {
         if ($this->type === self::TYPE_FILE) {
-            $this->file['base_url'] = '';
-            $this->file['path'] = $this->value;
-            $this->file['type'] = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+            $this->file = json_decode($this->value);
         }
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getFileUrl()
+    {
+        if (self::TYPE_FILE === $this->type) {
+            return $this->file->base_url . '/' . $this->file->path;
+        }
+
+        return null;
     }
 
     /**
@@ -148,5 +159,24 @@ class KeyStorageItem extends ActiveRecord
             'comment' => 'Название',
             'file' => 'Загрузите файл',
         ];
+    }
+
+    /**
+     * @return array
+     */
+    public static function names()
+    {
+        return array_merge(Cooperate::documentNames());
+    }
+
+    /**
+     * @return array
+     */
+    public static function keys()
+    {
+        $types = Cooperate::documentTypes();
+        array_pop($types);
+
+        return array_merge($types);
     }
 }

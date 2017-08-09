@@ -69,19 +69,20 @@ class KeyStorage extends Component
 
     /**
      * @param $key
+     * @param bool $isJson
      * @param null $default
      * @param bool $cache
      * @param int|bool $cachingDuration
-     * @return mixed|null
+     * @return KeyStorageItem|mixed|null
      */
-    public function get($key, $default = null, $cache = true, $cachingDuration = false)
+    public function get($key, $isJson = false, $default = null, $cache = true, $cachingDuration = false)
     {
         if ($cache) {
             $cacheKey = $this->getCacheKey($key);
             $value = ArrayHelper::getValue($this->values, $key, false) ?: Yii::$app->cache->get($cacheKey);
             if ($value === false) {
                 if ($model = $this->getModel($key)) {
-                    $value = $model->value;
+                    $value = $isJson ? json_decode($model->value) : $model->value;
                     $this->values[$key] = $value;
                     Yii::$app->cache->set(
                         $cacheKey,
@@ -93,8 +94,9 @@ class KeyStorage extends Component
                 }
             }
         } else {
-            $model = $this->getModel($key);
-            $value = $model ? $model->value : $default;
+            if ($model = $this->getModel($key)) {
+                $value = $isJson ? json_decode($model->value) : $model->value;
+            }
         }
 
         return $value;
@@ -165,17 +167,18 @@ class KeyStorage extends Component
 
     /**
      * @param $key
-     * @return mixed
+     * @return mixed|KeyStorageItem
      */
     protected function getModel($key)
     {
         /** @var ActiveQuery $query */
         $query = call_user_func($this->modelClass.'::find');
-        $result = $query->andWhere([
-            'key' => $key,
-            'operator_id' => Yii::$app->operator->identity->id
-        ])
-        ->one();
+        $result = $query
+            ->andWhere([
+                'key' => $key,
+                'operator_id' => Yii::$app->operator->identity->id
+            ])
+            ->one();
 
         return $result;
     }

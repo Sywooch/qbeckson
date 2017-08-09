@@ -20,7 +20,6 @@ class ConfirmRequestForm extends Model
     public $isCustomValue;
 
     private $model;
-    private $phpWord;
 
     /**
      * @return string
@@ -81,15 +80,12 @@ class ConfirmRequestForm extends Model
     {
         if (null !== ($model = $this->getModel()) && $this->validate()) {
             $model->document_type = $this->type;
-            if ((int)$this->type === Cooperate::DOCUMENT_TYPE_CUSTOM) {
+            if ($this->type === Cooperate::DOCUMENT_TYPE_CUSTOM) {
                 $model->document = $this->document;
             } else {
-                if ((int)$this->type === Cooperate::DOCUMENT_TYPE_EXTEND) {
-
-                } else {
-
-                }
+                $model->document = Yii::$app->keyStorage->get($this->type, true);
             }
+            $model->total_payment_limit = $this->value;
             $model->confirm();
 
             return $model->save();
@@ -113,65 +109,4 @@ class ConfirmRequestForm extends Model
     {
         $this->model = $model;
     }
-
-    /**
-     * @return PhpWord
-     */
-    public function getPhpWord()
-    {
-        if (null === $this->phpWord) {
-            $this->phpWord = new PhpWord();
-        }
-
-        return $this->phpWord;
-    }
-
-
-
-
-    /*if ((int)$this->type === Cooperate::DOCUMENT_TYPE_EXTEND) {
-        $phpWord = $this->generateExtendDocx();
-    } else {
-        $phpWord = $this->generateGeneralDocx();
-    }
-    $objWriter = IOFactory::createWriter($phpWord);
-    $objWriter->save(Yii::getAlias('@runtime/new.docx'));*/
-    /**
-     * @return PhpWord
-     * @deprecated
-     */
-    /*private function generateGeneralDocx()
-    {
-        $phpWord = $this->getPhpWord();
-        $section = $phpWord->addSection();
-        $section->addText(
-            '"Learn from yesterday, live for today, hope for tomorrow. '
-            . 'The important thing is not to stop questioning." '
-            . '(Albert Einstein)'
-        );
-
-        return $phpWord;
-    }*/
-    /**
-     * @return PhpWord
-     * @deprecated
-     */
-    /*private function generateExtendDocx()
-    {
-        $phpWord = $this->getPhpWord();
-        $section = $phpWord->addSection();
-        $section->addText(
-            '"Learn from yesterday, live for today, hope for tomorrow. '
-            . 'The important thing is not to stop questioning." '
-            . '(Albert Einstein)'
-        );
-        $section->addText(
-            '"Great achievement is usually born of great sacrifice, '
-            . 'and is never the result of selfishness." '
-            . '(Napoleon Hill)',
-            ['name' => 'Tahoma', 'size' => 10]
-        );
-
-        return $phpWord;
-    }*/
 }

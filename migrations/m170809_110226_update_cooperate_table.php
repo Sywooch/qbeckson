@@ -21,6 +21,7 @@ class m170809_110226_update_cooperate_table extends Migration
         $this->addColumn('cooperate', 'additional_date', 'DATE DEFAULT NULL');
         $this->addColumn('cooperate', 'additional_document_base_url', 'VARCHAR(255) DEFAULT NULL');
         $this->addColumn('cooperate', 'additional_document_path', 'VARCHAR(255) DEFAULT NULL');
+        $this->alterColumn('cooperate', 'document_type', 'VARCHAR(255) DEFAULT NULL');
     }
 
     public function safeDown()
