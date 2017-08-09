@@ -17,7 +17,7 @@ class KeyStorageItemSearch extends KeyStorageItem
     public function rules()
     {
         return [
-            [['key', 'value', 'type'], 'string'],
+            [['key', 'value', 'type', 'comment'], 'string'],
             [['operator_id', 'type'], 'integer'],
         ];
     }
@@ -50,6 +50,7 @@ class KeyStorageItemSearch extends KeyStorageItem
         $query
             ->andFilterWhere(['like', 'key', $this->key])
             ->andFilterWhere(['like', 'value', $this->value])
+            ->andFilterWhere(['like', 'comment', $this->comment])
             ->andFilterWhere(['operator_id' => $this->operator_id])
             ->andFilterWhere(['type' => $this->type])
         ;

@@ -113,7 +113,11 @@ class KeyStorageController extends Controller
      */
     protected function findModel($id)
     {
-        if (($model = KeyStorageItem::findOne($id)) !== null) {
+        $model = KeyStorageItem::findOne([
+            'id' => $id,
+            'operator_id' => Yii::$app->user->identity->operator->id
+        ]);
+        if ($model !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

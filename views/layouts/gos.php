@@ -115,7 +115,13 @@ $user = Yii::$app->user->getIdentity();
                                 echo Nav::widget([
                                     'options' => ['class' => 'navbar-nav inner-nav'],
                                     'items' => [
-                                        ['label' => 'Информация', 'url' => ['/personal/operator-statistic']],
+                                        [
+                                            'label' => 'Система',
+                                            'items' => [
+                                                ['label' => 'Информация', 'url' => ['personal/operator-statistic']],
+                                                ['label' => 'Праметры системы', 'url' => ['operator/key-storage']]
+                                            ]
+                                        ],
                                         ['label' => 'Коэффициенты', 'items' => [
                                             ['label' => 'Муниципалитеты', 'url' => ['/mun/index']],
                                             ['label' => 'Общие параметры', 'url' => ['/coefficient/update']],

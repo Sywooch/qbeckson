@@ -17,6 +17,7 @@ class ConfirmRequestForm extends Model
     public $type;
     public $value;
     public $document;
+    public $isCustomValue;
 
     private $model;
     private $phpWord;
@@ -39,17 +40,24 @@ class ConfirmRequestForm extends Model
             [
                 'value', 'required', 'when' => function ($model) {
                     /** @var self $model */
-                    return (int)$model->type === Cooperate::DOCUMENT_TYPE_EXTEND;
+                    return $model->type === Cooperate::DOCUMENT_TYPE_EXTEND;
+                }
+            ],
+            [
+                'value', 'required', 'when' => function ($model) {
+                    /** @var self $model */
+                    return (int)$model->isCustomValue === 1;
                 }
             ],
             [
                 'document', 'required', 'when' => function ($model) {
                     /** @var self $model */
-                    return (int)$model->type === Cooperate::DOCUMENT_TYPE_CUSTOM;
+                    return $model->type === Cooperate::DOCUMENT_TYPE_CUSTOM;
                 }
             ],
-            ['value', 'in', 'range' => array_keys(Cooperate::documentTypes())],
-            ['document', 'safe'],
+            ['type', 'in', 'range' => array_keys(Cooperate::documentTypes())],
+            [['value'], 'integer'],
+            [['document', 'isCustomValue'], 'safe'],
         ];
     }
 
@@ -61,7 +69,8 @@ class ConfirmRequestForm extends Model
         return [
             'type' => 'Тип документа (генерируется в формате Word 2007)',
             'document' => 'Документ',
-            'value' => 'Укажите сумму средств по договору на ' . date('Y') . ' год'
+            'value' => 'Укажите сумму средств по договору на ' . date('Y') . ' год',
+            'isCustomValue' => 'В договоре устанавливается максимальная сумма',
         ];
     }
 
@@ -80,15 +89,6 @@ class ConfirmRequestForm extends Model
                 } else {
 
                 }
-
-
-                /*if ((int)$this->type === Cooperate::DOCUMENT_TYPE_EXTEND) {
-                    $phpWord = $this->generateExtendDocx();
-                } else {
-                    $phpWord = $this->generateGeneralDocx();
-                }
-                $objWriter = IOFactory::createWriter($phpWord);
-                $objWriter->save(Yii::getAlias('@runtime/new.docx'));*/
             }
             $model->confirm();
 
@@ -96,46 +96,6 @@ class ConfirmRequestForm extends Model
         }
 
         return false;
-    }
-
-    /**
-     * @return PhpWord
-     * @deprecated
-     */
-    private function generateGeneralDocx()
-    {
-        $phpWord = $this->getPhpWord();
-        $section = $phpWord->addSection();
-        $section->addText(
-            '"Learn from yesterday, live for today, hope for tomorrow. '
-            . 'The important thing is not to stop questioning." '
-            . '(Albert Einstein)'
-        );
-
-        return $phpWord;
-    }
-
-    /**
-     * @return PhpWord
-     * @deprecated
-     */
-    private function generateExtendDocx()
-    {
-        $phpWord = $this->getPhpWord();
-        $section = $phpWord->addSection();
-        $section->addText(
-            '"Learn from yesterday, live for today, hope for tomorrow. '
-            . 'The important thing is not to stop questioning." '
-            . '(Albert Einstein)'
-        );
-        $section->addText(
-            '"Great achievement is usually born of great sacrifice, '
-            . 'and is never the result of selfishness." '
-            . '(Napoleon Hill)',
-            ['name' => 'Tahoma', 'size' => 10]
-        );
-
-        return $phpWord;
     }
 
     /**
@@ -165,4 +125,53 @@ class ConfirmRequestForm extends Model
 
         return $this->phpWord;
     }
+
+
+
+
+    /*if ((int)$this->type === Cooperate::DOCUMENT_TYPE_EXTEND) {
+        $phpWord = $this->generateExtendDocx();
+    } else {
+        $phpWord = $this->generateGeneralDocx();
+    }
+    $objWriter = IOFactory::createWriter($phpWord);
+    $objWriter->save(Yii::getAlias('@runtime/new.docx'));*/
+    /**
+     * @return PhpWord
+     * @deprecated
+     */
+    /*private function generateGeneralDocx()
+    {
+        $phpWord = $this->getPhpWord();
+        $section = $phpWord->addSection();
+        $section->addText(
+            '"Learn from yesterday, live for today, hope for tomorrow. '
+            . 'The important thing is not to stop questioning." '
+            . '(Albert Einstein)'
+        );
+
+        return $phpWord;
+    }*/
+    /**
+     * @return PhpWord
+     * @deprecated
+     */
+    /*private function generateExtendDocx()
+    {
+        $phpWord = $this->getPhpWord();
+        $section = $phpWord->addSection();
+        $section->addText(
+            '"Learn from yesterday, live for today, hope for tomorrow. '
+            . 'The important thing is not to stop questioning." '
+            . '(Albert Einstein)'
+        );
+        $section->addText(
+            '"Great achievement is usually born of great sacrifice, '
+            . 'and is never the result of selfishness." '
+            . '(Napoleon Hill)',
+            ['name' => 'Tahoma', 'size' => 10]
+        );
+
+        return $phpWord;
+    }*/
 }

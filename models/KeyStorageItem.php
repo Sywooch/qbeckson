@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use trntv\filekit\behaviors\UploadBehavior;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -57,17 +58,47 @@ class KeyStorageItem extends ActiveRecord
             [['key', 'type'], 'required'],
             ['value', 'required', 'when' => function ($model) {
                 /** @var self $model */
-                return (string)$model->type === self::TYPE_STRING;
+                return $model->type === self::TYPE_STRING;
             }],
             ['file', 'required', 'when' => function ($model) {
                 /** @var self $model */
-                return (string)$model->type === self::TYPE_FILE;
+                return $model->type === self::TYPE_FILE;
             }],
             [['key', 'type'], 'string', 'max' => 128],
             [['value', 'comment', 'file'], 'safe'],
             [['key'], 'unique'],
             [['operator_id'], 'integer'],
         ];
+    }
+
+    /**
+     * @param bool $insert
+     * @return bool
+     */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if ($this->type === self::TYPE_FILE) {
+                $this->value = !empty($this->file['base_url']) ?
+                    $this->file['base_url'] . '/' . $this->file['path'] : $this->file['path'];
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Кастыльнём
+     */
+    public function afterFind()
+    {
+        if ($this->type === self::TYPE_FILE) {
+            $this->file['base_url'] = '';
+            $this->file['path'] = $this->value;
+            $this->file['type'] = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        }
     }
 
     /**
@@ -93,7 +124,7 @@ class KeyStorageItem extends ActiveRecord
                     ActiveRecord::EVENT_BEFORE_INSERT => 'operator_id'
                 ],
                 'value' => Yii::$app->user->getIdentity()->operator->id,
-            ]
+            ],
         ];
     }
 
@@ -114,7 +145,7 @@ class KeyStorageItem extends ActiveRecord
             'type' => 'Тип',
             'key' => 'Ключ',
             'value' => 'Значение',
-            'comment' => 'Комментарий',
+            'comment' => 'Название',
             'file' => 'Загрузите файл',
         ];
     }

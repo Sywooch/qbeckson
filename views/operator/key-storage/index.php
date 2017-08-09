@@ -22,6 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'class' => 'grid-view table-responsive'
         ],
         'columns' => [
+            'comment',
             'key',
             'value',
             [

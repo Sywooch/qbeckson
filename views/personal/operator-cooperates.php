@@ -145,7 +145,7 @@ $columns = [
             <?php endif; ?>
             <?= SearchFilter::widget([
                 'model' => $searchActive,
-                'action' => ['cooperate/index'],
+                'action' => ['personal/operator-cooperates'],
                 'data' => GridviewHelper::prepareColumns(
                     'cooperate',
                     $columns,

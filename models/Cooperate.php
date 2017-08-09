@@ -24,16 +24,6 @@ use yii\db\ActiveRecord;
  * @property string $document_path
  * @property string $document_base_url
  *
- * @property mixed $cooperateOrganization
- * @property array $decinvoiceCooperatePayers
- * @property mixed $cooperatePayers
- * @property mixed $waitCooperatePayers
- * @property mixed $cooperateOrg
- * @property array $preInvoiceCooperatePayers
- * @property array $invoiceCooperatePayers
- * @property mixed $cooperateallPayers
- * @property mixed $cooperateWaitOrganization
- *
  * @property Organization $organization
  * @property Payers $payers
  * @property null|string $documentUrl
@@ -51,35 +41,75 @@ class Cooperate extends ActiveRecord
     const SCENARIO_APPEAL = 'appeal';
     const SCENARIO_REQUISITES = 'requisites';
 
-    const DOCUMENT_TYPE_GENERAL = 1;
-    const DOCUMENT_TYPE_EXTEND = 2;
-    const DOCUMENT_TYPE_CUSTOM = 3;
+    const DOCUMENT_TYPE_GENERAL = 'general';
+    const DOCUMENT_TYPE_EXTEND = 'extend';
+    const DOCUMENT_TYPE_CUSTOM = 'custom';
 
     public $document;
+    public $additionalDocument;
 
     /**
+     * @inheritdoc
+     */
+    public static function tableName()
+    {
+        return 'cooperate';
+    }
+
+    /**
+     * Касталь, никогда так не делать.
      * @return array
      */
-    public static function documentTypes()
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_REJECT] = $scenarios[self::SCENARIO_APPEAL] =
+        $scenarios[self::SCENARIO_REQUISITES] =
+            $scenarios[self::SCENARIO_DEFAULT];
+
+        return $scenarios;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function rules()
     {
         return [
-            self::DOCUMENT_TYPE_GENERAL => 'Стандартный',
-            self::DOCUMENT_TYPE_EXTEND => 'Расширенный (с суммой)',
-            self::DOCUMENT_TYPE_CUSTOM => 'Свой',
+            [['organization_id', 'payer_id', 'status', 'created_date'], 'required'],
+
+            [['reject_reason'], 'required', 'on' => self::SCENARIO_REJECT],
+            [['appeal_reason'], 'required', 'on' => self::SCENARIO_APPEAL],
+            [['date', 'number'], 'required', 'on' => self::SCENARIO_REQUISITES],
+
+            [['organization_id', 'payer_id', 'status', 'document_type'], 'integer'],
+            [['date', 'date_dissolution'], 'safe'],
+            [['reject_reason', 'appeal_reason'], 'string'],
+            [['number', 'document_path', 'document_base_url'], 'string', 'max' => 255],
+            [
+                ['organization_id'], 'exist', 'skipOnError' => true,
+                'targetClass' => Organization::class, 'targetAttribute' => ['organization_id' => 'id']
+            ],
+            [
+                ['payer_id'], 'exist', 'skipOnError' => true,
+                'targetClass' => Payers::class, 'targetAttribute' => ['payer_id' => 'id']
+            ],
+            [['document'], 'safe'],
         ];
     }
 
     /**
      * @return array
      */
-    public static function statuses()
+    public function behaviors()
     {
         return [
-            self::STATUS_NEW => 'Новая',
-            self::STATUS_ACTIVE => 'Активная',
-            self::STATUS_REJECTED => 'Отклонена',
-            self::STATUS_CONFIRMED => 'Подтверждён',
-            self::STATUS_APPEALED => 'Обжалована',
+            [
+                'class' => UploadBehavior::class,
+                'pathAttribute' => 'document_path',
+                'baseUrlAttribute' => 'document_base_url',
+                'attribute' => 'document',
+            ],
         ];
     }
 
@@ -134,69 +164,27 @@ class Cooperate extends ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * @return null|string
      */
-    public static function tableName()
+    public function getDocumentUrl()
     {
-        return 'cooperate';
+        return (null !== $this->document_path) ? $this->document_base_url . '/' . $this->document_path : null;
     }
 
     /**
-     * Касталь, никогда так не делать.
-     *
-     * @return array
+     * @return \yii\db\ActiveQuery
      */
-    public function scenarios()
+    public function getOrganization()
     {
-        $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_REJECT] = $scenarios[self::SCENARIO_APPEAL] =
-        $scenarios[self::SCENARIO_REQUISITES] =
-            $scenarios[self::SCENARIO_DEFAULT];
-
-        return $scenarios;
+        return $this->hasOne(Organization::class, ['id' => 'organization_id']);
     }
 
     /**
-     * @inheritdoc
+     * @return \yii\db\ActiveQuery
      */
-    public function rules()
+    public function getPayer()
     {
-        return [
-            [['organization_id', 'payer_id', 'status', 'created_date'], 'required'],
-
-            [['reject_reason'], 'required', 'on' => self::SCENARIO_REJECT],
-            [['appeal_reason'], 'required', 'on' => self::SCENARIO_APPEAL],
-            [['date', 'number'], 'required', 'on' => self::SCENARIO_REQUISITES],
-
-            [['organization_id', 'payer_id', 'status', 'document_type'], 'integer'],
-            [['date', 'date_dissolution'], 'safe'],
-            [['reject_reason', 'appeal_reason'], 'string'],
-            [['number', 'document_path', 'document_base_url'], 'string', 'max' => 255],
-            [
-                ['organization_id'], 'exist', 'skipOnError' => true,
-                'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']
-            ],
-            [
-                ['payer_id'], 'exist', 'skipOnError' => true,
-                'targetClass' => Payers::className(), 'targetAttribute' => ['payer_id' => 'id']
-            ],
-            [['document'], 'safe'],
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    public function behaviors()
-    {
-        return [
-            [
-                'class' => UploadBehavior::class,
-                'pathAttribute' => 'document_path',
-                'baseUrlAttribute' => 'document_base_url',
-                'attribute' => 'document',
-            ],
-        ];
+        return $this->hasOne(Payers::class, ['id' => 'payer_id']);
     }
 
     /**
@@ -219,36 +207,49 @@ class Cooperate extends ActiveRecord
     }
 
     /**
-     * @return null|string
+     * @return array
      */
-    public function getDocumentUrl()
+    public static function documentTypes()
     {
-        return (null !== $this->document_path) ? $this->document_base_url . '/' . $this->document_path : null;
+        return [
+            self::DOCUMENT_TYPE_GENERAL => 'Договор без указания максимальной суммы',
+            self::DOCUMENT_TYPE_EXTEND => 'Договор с указанием максимальной суммы',
+            self::DOCUMENT_TYPE_CUSTOM => 'Свой',
+        ];
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return array
      */
-    public function getOrganization()
+    public static function statuses()
     {
-        return $this->hasOne(Organization::className(), ['id' => 'organization_id']);
+        return [
+            self::STATUS_NEW => 'Новая',
+            self::STATUS_ACTIVE => 'Активная',
+            self::STATUS_REJECTED => 'Отклонена',
+            self::STATUS_CONFIRMED => 'Подтверждён',
+            self::STATUS_APPEALED => 'Обжалована',
+        ];
     }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getPayer()
-    {
-        return $this->hasOne(Payers::className(), ['id' => 'payer_id']);
-    }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getPayers()
-    {
-        return $this->hasOne(Payers::className(), ['id' => 'payer_id']);
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -354,23 +355,6 @@ class Cooperate extends ActiveRecord
             }
 
             return $result;
-        }
-    }
-
-     public function getCooperateOrganization()
-     {
-        if (!Yii::$app->user->isGuest) {
-            $payers = new Payers();
-            $payer = $payers->getPayer();
-
-            $rows = (new \yii\db\Query())
-                ->select(['organization_id'])
-                ->from('cooperate')
-                ->where(['payer_id' => $payer['id']])
-                ->andWhere(['status' => 1])
-                ->column();
-
-            return $rows;
         }
     }
     
