@@ -377,7 +377,7 @@ class PersonalController extends Controller
     {
         $searchRegistry = new OrganizationSearch([
             'statusArray' => [Organization::STATUS_ACTIVE],
-            'cooperateStatus' => Cooperate::STATUS_ACTIVE,
+            'cooperateStatus' => 1,
             'programs' => '0,1000',
             'children' => '0,10000',
             'amount_child' => '0,10000',
@@ -389,7 +389,7 @@ class PersonalController extends Controller
 
         $searchRequest = new OrganizationSearch([
             'statusArray' => [Organization::STATUS_ACTIVE],
-            'cooperateStatus' => Cooperate::STATUS_NEW,
+            'cooperateStatus' => 0,
             'modelName' => 'SearchRequest',
         ]);
         $requestProvider = $searchRequest->search(Yii::$app->request->queryParams);

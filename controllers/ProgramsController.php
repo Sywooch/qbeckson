@@ -1301,20 +1301,18 @@ class ProgramsController extends Controller
         $user = User::findOne(Yii::$app->user->id);
 
         if ($user->load(Yii::$app->request->post())) {
-
             if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
                 $model = $this->findModel($id);
 
-                $contarcts = (new \yii\db\Query())
-                    ->select(['id'])
-                    ->from('contracts')
-                    ->where(['program_id' => $model->id])
-                    ->andWhere(['status' => [0, 2, 3, 4]])
-                    ->column();
+                $contracts = Contracts::find()
+                    ->where([
+                        'program_id' => $model->id,
+                        'status' => [0, 2, 3, 4],
+                    ])
+                    ->all();
 
-                foreach ($contarcts as $contarct) {
-                    $cont = Contracts::findOne($contarct);
-                    $cont->delete();
+                foreach ($contracts as $contract) {
+                    $contract->delete();
                 }
 
                 $model->delete();
@@ -1323,7 +1321,7 @@ class ProgramsController extends Controller
             } else {
                 Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
 
-                return $this->redirect(['/personal/operator-payers']);
+                return $this->redirect(['/personal/organization-programs']);
             }
         }
 
