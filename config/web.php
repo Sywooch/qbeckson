@@ -149,7 +149,7 @@ $config = [
                         'roles' => ['organizations']
                     ],
                     [
-                        'actions' => ['payer-suborder-organizations', 'payer-all-organizations'],
+                        'actions' => ['payer-suborder-organizations', 'payer-all-organizations', 'payer-municipal-task'],
                         'allow' => true,
                         'roles' => ['payers']
                     ],
