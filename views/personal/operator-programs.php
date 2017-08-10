@@ -252,7 +252,7 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
         <?php endif; ?>
         <?= SearchFilter::widget([
             'model' => $searchOpenPrograms,
-            'action' => ['personal/operator-programs'],
+            'action' => ['personal/operator-programs#panel1'],
             'data' => GridviewHelper::prepareColumns(
                 'programs',
                 $openColumns,
@@ -295,7 +295,7 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
     <div id="panel2" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchWaitPrograms,
-            'action' => ['personal/operator-programs'],
+            'action' => ['personal/operator-programs#panel2'],
             'data' => GridviewHelper::prepareColumns(
                 'programs',
                 $waitColumns,
@@ -338,7 +338,7 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
     <div id="panel3" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchClosedPrograms,
-            'action' => ['personal/operator-programs'],
+            'action' => ['personal/operator-programs#panel3'],
             'data' => GridviewHelper::prepareColumns(
                 'programs',
                 $closedPrograms,

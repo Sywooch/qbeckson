@@ -121,7 +121,7 @@ if ($roles['organizations'] and $organization['actual'] !== 0) {
     <div id="panel1" class="tab-pane fade in active">
         <?= SearchFilter::widget([
             'model' => $searchOpenPayers,
-            'action' => ['personal/organization-payers'],
+            'action' => ['personal/organization-payers#panel1'],
             'data' => GridviewHelper::prepareColumns(
                 'payers',
                 $columns,
@@ -142,7 +142,7 @@ if ($roles['organizations'] and $organization['actual'] !== 0) {
     <div id="panel2" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchConfirmPayers,
-            'action' => ['personal/organization-payers'],
+            'action' => ['personal/organization-payers#panel2'],
             'data' => GridviewHelper::prepareColumns(
                 'payers',
                 $columns,
@@ -163,7 +163,7 @@ if ($roles['organizations'] and $organization['actual'] !== 0) {
     <div id="panel3" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchWaitPayers,
-            'action' => ['personal/organization-payers'],
+            'action' => ['personal/organization-payers#panel3'],
             'data' => GridviewHelper::prepareColumns(
                 'payers',
                 $columns,
@@ -184,7 +184,7 @@ if ($roles['organizations'] and $organization['actual'] !== 0) {
     <div id="panel4" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchRejectPayers,
-            'action' => ['personal/organization-payers'],
+            'action' => ['personal/organization-payers#panel4'],
             'data' => GridviewHelper::prepareColumns(
                 'payers',
                 $columns,

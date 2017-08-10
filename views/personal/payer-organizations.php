@@ -172,7 +172,7 @@ $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $reques
     <div id="panel1" class="tab-pane fade in active">
         <?= SearchFilter::widget([
             'model' => $searchRegistry,
-            'action' => ['personal/payer-organizations'],
+            'action' => ['personal/payer-organizations#panel1'],
             'data' => GridviewHelper::prepareColumns(
                 'organization',
                 $registryColumns,
@@ -194,7 +194,7 @@ $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $reques
     <div id="panel2" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchConfirm,
-            'action' => ['personal/payer-organizations'],
+            'action' => ['personal/payer-organizations#panel2'],
             'data' => GridviewHelper::prepareColumns(
                 'organization',
                 $requestColumns,
@@ -216,7 +216,7 @@ $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $reques
     <div id="panel3" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchRequest,
-            'action' => ['personal/payer-organizations'],
+            'action' => ['personal/payer-organizations#panel3'],
             'data' => GridviewHelper::prepareColumns(
                 'organization',
                 $requestColumns,
@@ -248,7 +248,7 @@ $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $reques
     <div id="panel4" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchReject,
-            'action' => ['personal/payer-organizations'],
+            'action' => ['personal/payer-organizations#panel4'],
             'data' => GridviewHelper::prepareColumns(
                 'organization',
                 $requestColumns,

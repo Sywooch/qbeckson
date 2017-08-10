@@ -3,8 +3,6 @@
 namespace app\models\forms;
 
 use app\models\Cooperate;
-use PhpOffice\PhpWord\IOFactory;
-use PhpOffice\PhpWord\PhpWord;
 use Yii;
 use yii\base\Model;
 
