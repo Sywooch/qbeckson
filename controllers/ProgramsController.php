@@ -188,9 +188,12 @@ class ProgramsController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate()
+    public function actionCreate($isTask = null)
     {
-        $model = new Programs();
+        $model = new Programs([
+            'is_municipal_task' => empty($isTask) ? null : 1,
+        ]);
+
         $file = new ProgramsFile();
         $modelsYears = [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])];
 
@@ -356,7 +359,7 @@ class ProgramsController extends Controller
                                 $informs->read = 0;
                                 $informs->save();
 
-                                return $this->redirect(['/personal/organization-programs']);
+                                return $this->redirect($model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']);
                             }
                         } catch (Exception $e) {
                             $transaction->rollBack();

@@ -144,7 +144,7 @@ $config = [
                         'roles' => ['certificate']
                     ],
                     [
-                        'actions' => ['organization-suborder', 'organization-set-suborder-status'],
+                        'actions' => ['organization-suborder', 'organization-set-suborder-status', 'organization-municipal-task'],
                         'allow' => true,
                         'roles' => ['organizations']
                     ],

@@ -15,6 +15,7 @@ class ProgramsSearch extends Programs
     public $organization;
     public $municipality;
     public $hours;
+    public $isMunicipalTask = false;
 
     public $modelName;
 
@@ -76,12 +77,18 @@ class ProgramsSearch extends Programs
             'programs.*',
             'SUM(years.hours) as countHours'
         ])
-        ->joinWith([
-            'municipality',
-            'organization',
-            'modules'
-        ])
+            ->joinWith([
+                'municipality',
+                'organization',
+                'modules'
+            ])
             ->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
+
+        if ($this->isMunicipalTask !== true) {
+            $query->andWhere('is_municipal_task < 1');
+        } else {
+            $query->andWhere('is_municipal_task > 0');
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

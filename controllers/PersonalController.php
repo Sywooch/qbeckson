@@ -451,6 +451,28 @@ class PersonalController extends Controller
     /**
      * @return string
      */
+    public function actionPayerInvoices()
+    {
+        /** @var UserIdentity $user */
+        $user = Yii::$app->user->getIdentity();
+
+        $searchInvoices = new InvoicesSearch([
+            //'status' => [0, 1, 2],
+            'payers_id' => $user->payer->id,
+            'organization_id' => ArrayHelper::getColumn($user->payer->cooperates, 'organization_id'),
+            'sum' => '0,10000000',
+        ]);
+        $invoicesProvider = $searchInvoices->search(Yii::$app->request->queryParams);
+
+        return $this->render('payer-invoices', [
+            'searchInvoices' => $searchInvoices,
+            'invoicesProvider' => $invoicesProvider,
+        ]);
+    }
+
+    /**
+     * @return string
+     */
     public function actionOrganizationStatistic()
     {
         return $this->render('organization-statistic', [
@@ -473,28 +495,6 @@ class PersonalController extends Controller
 
         return $this->render('organization-info', [
             'organization' => $organization,
-        ]);
-    }
-
-    /**
-     * @return string
-     */
-    public function actionPayerInvoices()
-    {
-        /** @var UserIdentity $user */
-        $user = Yii::$app->user->getIdentity();
-
-        $searchInvoices = new InvoicesSearch([
-            //'status' => [0, 1, 2],
-            'payers_id' => $user->payer->id,
-            'organization_id' => ArrayHelper::getColumn($user->payer->cooperates, 'organization_id'),
-            'sum' => '0,10000000',
-        ]);
-        $invoicesProvider = $searchInvoices->search(Yii::$app->request->queryParams);
-
-        return $this->render('payer-invoices', [
-            'searchInvoices' => $searchInvoices,
-            'invoicesProvider' => $invoicesProvider,
         ]);
     }
 
@@ -565,6 +565,27 @@ class PersonalController extends Controller
             'waitProgramsProvider' => $waitProgramsProvider,
             'searchClosedPrograms' => $searchClosedPrograms,
             'closedProgramsProvider' => $closedProgramsProvider,
+        ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function actionOrganizationMunicipalTask()
+    {
+        $searchPrograms = new ProgramsSearch([
+            'organization_id' => Yii::$app->user->identity->organization->id,
+            'hours' => '0,2000',
+            'limit' => '0,10000',
+            'rating' => '0,100',
+            'modelName' => 'SearchOpenPrograms',
+            'isMunicipalTask' => true,
+        ]);
+        $programsProvider = $searchPrograms->search(Yii::$app->request->queryParams);
+
+        return $this->render('organization-municipal-task', [
+            'searchPrograms' => $searchPrograms,
+            'programsProvider' => $programsProvider,
         ]);
     }
 

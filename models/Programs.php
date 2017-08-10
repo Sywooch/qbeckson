@@ -90,7 +90,7 @@ class Programs extends \yii\db\ActiveRecord
     {
         return [
             [['direction_id', 'name', 'task', 'annotation', 'ovz', 'norm_providing', 'age_group_min', 'age_group_max', 'ground'], 'required'],
-            [['organization_id', 'ovz', 'mun', 'year', 'ground', 'age_group_min', 'age_group_max', 'verification', 'form', 'p3z', 'study', 'last_contracts', 'limit', 'last_s_contracts', 'quality_control', 'last_s_contracts_rod', 'direction_id'], 'integer'],
+            [['organization_id', 'ovz', 'mun', 'year', 'ground', 'age_group_min', 'age_group_max', 'verification', 'form', 'p3z', 'study', 'last_contracts', 'limit', 'last_s_contracts', 'quality_control', 'last_s_contracts_rod', 'direction_id', 'is_municipal_task', 'certificate_accounting_limit'], 'integer'],
             [['rating', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch'], 'number'],
             [['task', 'annotation', 'vid', 'norm_providing', 'search', 'photo_path', 'photo_base_url'], 'string'],
             [['name', 'zab'], 'string', 'max' => 255],
@@ -232,7 +232,8 @@ class Programs extends \yii\db\ActiveRecord
             'ocen_obch' => 'Оценка общей удовлетворенности программой',
             'selectyear' => 'Выберите год обучения по программе для просмотра подробной информации',
             'activities' => 'Виды деятельности',
-            'programPhoto' => 'Картинка программы'
+            'programPhoto' => 'Картинка программы',
+            'certificate_accounting_limit' => 'Лимит зачисления',
         ];
     }
 
@@ -548,6 +549,15 @@ class Programs extends \yii\db\ActiveRecord
         $result = $command->queryOne();
 
         return $result['summa'];
+    }
+
+    public function getIsMunicipalTask()
+    {
+        if ($this->is_municipal_task > 0) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
