@@ -169,7 +169,7 @@ class KeyStorage extends Component
      * @param $key
      * @return mixed|KeyStorageItem
      */
-    protected function getModel($key)
+    public function getModel($key)
     {
         /** @var ActiveQuery $query */
         $query = call_user_func($this->modelClass.'::find');

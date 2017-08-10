@@ -60,7 +60,7 @@ class CooperateSearch extends Cooperate
     {
         $query = Cooperate::find()
             ->joinWith([
-                'payers',
+                'payer',
                 'organization'
             ])
             ->andWhere(['organization.mun' => Yii::$app->operator->identity->id]);
