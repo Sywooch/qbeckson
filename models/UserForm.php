@@ -2,18 +2,20 @@
 
 namespace app\models;
 
+use app\helpers\PermissionHelper;
 use Yii;
 use app\models\UserIdentity;
 use yii\base\Model;
 
 /**
- * Class UserCreateForm
+ * Class UserForm
  * @package app\forms
  */
 class UserForm extends Model
 {
     public $password;
     public $username;
+    public $accessRights;
 
     private $model;
 
@@ -34,6 +36,7 @@ class UserForm extends Model
                     }
                 }
             ],
+            ['accessRights', 'safe'],
         ];
     }
 
@@ -45,7 +48,13 @@ class UserForm extends Model
         return [
             'username' => 'Имя пользователя',
             'password' => 'Пароль',
+            'accessRights' => 'Права доступа',
         ];
+    }
+
+    public function getRightsList()
+    {
+        return PermissionHelper::getAccessUrls();
     }
 
     /**
@@ -118,6 +127,7 @@ class UserForm extends Model
     {
         $this->model = $model;
         $this->username = $model->username;
+        $this->accessRights = $model->userMonitorAssignment->access_rights;
     }
 
     /**

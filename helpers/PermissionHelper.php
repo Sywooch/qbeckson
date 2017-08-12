@@ -4,6 +4,8 @@ namespace app\helpers;
 
 use Yii;
 use app\models\Organization;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 
 /**
  * Class PermissionHelper
@@ -11,8 +13,8 @@ use app\models\Organization;
  */
 class PermissionHelper
 {
-	public static function redirectUrlByRole()
-	{
+    public static function redirectUrlByRole()
+    {
         $url = ['site/error'];
         if (Yii::$app->user->can('admins')) {
             $url = ['/personal/index'];
@@ -38,12 +40,96 @@ class PermissionHelper
                         Yii::$app->session->setFlash('warning', 'Заполните информацию "Для договора"');
                         $url = ['/personal/organization-info'];
                     }
-                 }
+                }
             }
         } elseif (Yii::$app->user->can('certificate')) {
             $url = ['/personal/certificate-statistic'];
         }
 
         return $url;
-	}
+    }
+
+    public static function getMenuItems()
+    {
+        $items = [
+            ['label' => 'Информация', 'items' => [
+                ['label' => 'Общая статистика', 'url' => ['/personal/payer-statistic']],
+                ['label' => 'Уполномоченные организации', 'url' => ['/monitor/index']],
+            ]],
+            ['label' => 'Номиналы групп', 'url' => ['/cert-group/index']],
+            ['label' => 'Сертификаты', 'url' => ['/personal/payer-certificates']],
+            ['label' => 'Договоры', 'url' => ['/personal/payer-contracts']],
+            ['label' => 'Счета', 'url' => ['/personal/payer-invoices']],
+            ['label' => 'Организации', 'items' => [
+                ['label' => 'Реестр ПФДО', 'url' => ['/personal/payer-
+organizations']],
+                //['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
+            ]],
+            ['label' => 'Программы', 'url' => ['/personal/payer-programs']],
+        ];
+
+        return static::checkMenuAccess($items);
+    }
+
+    public static function checkMenuAccess($items)
+    {
+        foreach ($items as $index => $item) {
+            if (isset($item['items'])) {
+                $items[$index]['items'] = static::checkMenuAccess($item['items']);
+                continue;
+            }
+
+            if (!static::checkMonitorUrl($item['url'][0])) {
+                $items[$index]['visible'] = false;
+            }
+        }
+
+        return $items;
+    }
+
+    public static function getAccessUrls()
+    {
+        $items = [
+            ['index' => 'Общая статистика', 'value' => '/personal/payer-statistic'],
+            ['index' => 'Наблюдатели', 'value' => '/monitor/index'],
+            ['index' => 'Номиналы групп', 'value' => '/cert-group/index'],
+            ['index' => 'Сертификаты', 'value' => '/personal/payer-certificates'],
+            ['index' => 'Договоры', 'value' => 'contracts'],
+            ['index' => 'Счета', 'value' => 'invoices'],
+            ['index' => 'Организации', 'value' => 'organization'],
+            ['index' => 'Программы', 'value' => 'programs'],
+            ['index' => 'Создание сертификата', 'value' => '/certificates/create'],
+            ['index' => 'Просмотр сертификата', 'value' => '/certificates/view'],
+            ['index' => 'Редактирование сертификата', 'value' => '/certificates/update'],
+            ['index' => 'Удаление сертификата', 'value' => '/certificates/delete'],
+            ['index' => 'Активация / заморозка сертификата', 'value' => '/certificates/actual'],
+            ['index' => 'Обновление номиналов', 'value' => '/certificates/allnominal'],
+        ];
+
+        return ArrayHelper::map($items, 'value', 'index');
+    }
+
+    public static function checkMonitorUrl($requestUrl = null)
+    {
+        if (Yii::$app->user->isGuest || !Yii::$app->user->identity->isMonitored) {
+            return true;
+        }
+
+        $urls = Yii::$app->user->identity->monitor->userMonitorAssignment->access_rights;
+        $currentUrl = empty($requestUrl) ? Url::toRoute(parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH)) : $requestUrl;
+
+        if ($currentUrl == '/' || strpos($currentUrl, 'site/') || strpos($currentUrl, 'debug/')) {
+            return true;
+        }
+
+        $matches = array_filter($urls, function ($url) use ($currentUrl) {
+            return (strpos($currentUrl, $url) !== false) ? true : false;
+        });
+
+        if (!empty($matches)) {
+            return true;
+        }
+
+        return false;
+    }
 }

@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
 use app\models\Contracts;
+use app\helpers\PermissionHelper;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Certificates */
@@ -78,23 +79,29 @@ $this->params['breadcrumbs'][] = $this->title;
 
         if (Yii::$app->user->can('payer')) {
             echo '<div class="pull-right">';
-            if ($model->actual == 0) {
-                echo Html::a('Активировать', Url::to(['/certificates/actual', 'id' => $model->id]), ['class' => 'btn btn-success']);
-            } else {
-                echo Html::a('Заморозить', Url::to(['/certificates/noactual', 'id' => $model->id]), ['class' => 'btn btn-danger']);
+            if (PermissionHelper::checkMonitorUrl('/certificates/actual')) {
+                if ($model->actual == 0) {
+                    echo Html::a('Активировать', Url::to(['/certificates/actual', 'id' => $model->id]), ['class' => 'btn btn-success']);
+                } else {
+                    echo Html::a('Заморозить', Url::to(['/certificates/noactual', 'id' => $model->id]), ['class' => 'btn btn-danger']);
+                }
+                echo '&nbsp;';
             }
-            echo '&nbsp;';
-            echo Html::a('Удалить', Url::to(['/certificates/delete', 'id' => $model->id]), ['class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Уверены, что хотите удалить сертификат?',
-                'method' => 'post'
-            ]]);
+            if (PermissionHelper::checkMonitorUrl('/certificates/delete')) {
+                echo Html::a('Удалить', Url::to(['/certificates/delete', 'id' => $model->id]), ['class' => 'btn btn-danger',
+                    'data' => [
+                        'confirm' => 'Уверены, что хотите удалить сертификат?',
+                        'method' => 'post'
+                    ]]);
+            }
             echo '</div>';
 
             echo Html::a('Назад', '/personal/payer-certificates', ['class' => 'btn btn-primary']);
             echo '&nbsp;';
-            echo Html::a('Редактировать', Url::to(['/certificates/update', 'id' => $model->id]), ['class' => 'btn btn-primary']);
-            echo '&nbsp;';
+            if (PermissionHelper::checkMonitorUrl('/certificates/update')) {
+                echo Html::a('Редактировать', Url::to(['/certificates/update', 'id' => $model->id]), ['class' => 'btn btn-primary']);
+                echo '&nbsp;';
+            }
         }
 
         ?>
