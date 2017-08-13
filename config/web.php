@@ -300,6 +300,12 @@ $config = [
                         'allow' => true,
                         'roles' => ['operators']
                     ]
+                ],
+                'organization/address' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['organizations']
+                    ]
                 ]
             ]
     ],

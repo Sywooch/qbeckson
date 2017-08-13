@@ -186,6 +186,10 @@ $user = Yii::$app->user->getIdentity();
                                                 'label' => 'Предварительные записи',
                                                 'url' => ['/personal/organization-favorites']
                                             ],
+                                            [
+                                                'label' => 'Адреса реализации образовательных программ',
+                                                'url' => ['organization/address/index']
+                                            ],
                                         ]],
                                         ['label' => 'Программы', 'items' => [
                                             [

@@ -225,7 +225,7 @@ class GroupsController extends Controller
 
                         return $this->redirect(['programs/view', 'id' => $model->program_id]);
                     }
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     $transaction->rollBack();
                 }
             }

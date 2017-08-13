@@ -7,7 +7,7 @@ use app\models\statics\DirectoryProgramDirection;
 use trntv\filekit\behaviors\UploadBehavior;
 use voskobovich\linker\LinkerBehavior;
 use Yii;
-use app\models\Cooperate;
+use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -67,8 +67,10 @@ use yii\helpers\ArrayHelper;
  * @property mixed $countHours
  * @property string $commonActivities
  * @property ProgrammeModule[] $modules
+ * @property OrganizationAddress[] $addresses
+ * @property ProgramAddressAssignment[] $addressAssignments
  */
-class Programs extends \yii\db\ActiveRecord
+class Programs extends ActiveRecord
 {
     public $file;
     public $edit;
@@ -98,14 +100,13 @@ class Programs extends \yii\db\ActiveRecord
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
             ['age_group_min', 'compare', 'compareAttribute' => 'age_group_max', 'type' => 'number', 'operator' => '<='],
             ['age_group_max', 'compare', 'compareAttribute' => 'age_group_min', 'type' => 'number', 'operator' => '>='],
-
-            [['activity_ids'], 'each', 'rule' => ['integer']],
             [
                 'direction_id', 'exist', 'skipOnError' => true,
                 'targetClass' => DirectoryProgramDirection::class,
                 'targetAttribute' => ['direction_id' => 'id']
             ],
             [['programPhoto'], 'safe'],
+            [['activity_ids'], 'each', 'rule' => ['integer']],
         ];
     }
 
@@ -132,6 +133,32 @@ class Programs extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAddressAssignments()
+    {
+        return $this->hasMany(ProgramAddressAssignment::class, ['program_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAddresses()
+    {
+        return $this->hasMany(OrganizationAddress::class, ['id' => 'organization_address_id'])
+            ->viaTable('{{%program_address_assignment}}', ['program_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getActivities()
+    {
+        return $this->hasMany(DirectoryProgramActivity::class, ['id' => 'activity_id'])
+            ->viaTable('{{%program_activity_assignment}}', ['program_id' => 'id']);
+    }
+
+    /**
      * @return null|string
      */
     public function getPhoto()
@@ -145,15 +172,6 @@ class Programs extends \yii\db\ActiveRecord
     public function getModules()
     {
         return $this->hasMany(ProgrammeModule::class, ['program_id' => 'id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery|DirectoryProgramActivity[]|null
-     */
-    public function getActivities()
-    {
-        return $this->hasMany(DirectoryProgramActivity::class, ['id' => 'activity_id'])
-            ->viaTable('{{%program_activity_assignment}}', ['program_id' => 'id']);
     }
 
     /**
@@ -232,7 +250,8 @@ class Programs extends \yii\db\ActiveRecord
             'ocen_obch' => 'Оценка общей удовлетворенности программой',
             'selectyear' => 'Выберите год обучения по программе для просмотра подробной информации',
             'activities' => 'Виды деятельности',
-            'programPhoto' => 'Картинка программы'
+            'programPhoto' => 'Картинка программы',
+            'address_ids' => 'Адресы',
         ];
     }
 
