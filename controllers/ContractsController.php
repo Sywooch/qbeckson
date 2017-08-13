@@ -159,6 +159,7 @@ class ContractsController extends Controller
             }
 
             if ($userprice <= $nuserprice) {
+
                 if ($userprice <= $certificate->balance) {
                     $pay = "Полная стоимость";
                     $dop = "отсутствует";

@@ -17,7 +17,7 @@ Modal::begin([
     'toggleButton' => [
         'tag' => 'a',
         'class' => 'btn btn-primary',
-        'label' => 'Изменить',
+        'label' => $label,
     ],
 ]);
 ?>

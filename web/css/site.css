@@ -642,3 +642,7 @@ li.breadcrumbs-help-icon:before {
         padding-left: 10px;
     }
 }
+
+.margin-bottom-0 {
+    margin-bottom: 0;
+}

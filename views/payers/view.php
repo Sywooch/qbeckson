@@ -226,7 +226,22 @@ $this->params['breadcrumbs'][] = $this->title;
                 echo '<hr><p class="lead">Реквизиты договора/соглашения не указаны</p>';
                 echo $this->render(
                     '../cooperate/requisites',
-                    ['model' => $cooperation]
+                    [
+                        'model' => $cooperation,
+                        'label' => 'Сведения о реквизитах соглашения/договора не внесены',
+                    ]
+                );
+            } else if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
+                null !== $cooperation->number &&
+                null !== $cooperation->date
+            ) {
+                echo '<hr><p class="lead">Реквизиты договора/соглашения не указаны</p>';
+                echo $this->render(
+                    '../cooperate/requisites',
+                    [
+                        'model' => $cooperation,
+                        'label' => 'Реквизиты соглашения: от ' . $cooperation->date . ' №' . $cooperation->number,
+                    ]
                 );
             }
         } else {

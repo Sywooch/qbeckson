@@ -17,8 +17,12 @@ use Yii;
  * @property integer $actual
  * @property string $fio_child
  * @property string $fio_parent
+ * @property integer $nominal_f
+ * @property integer $balance_f
+ * @property integer $rezerv_f
  * @property integer $nominal
  * @property integer $balance
+ * @property integer $rezerv
  * @property integer $contracts
  * @property integer $directivity1
  * @property integer $directivity2
@@ -26,7 +30,6 @@ use Yii;
  * @property integer $directivity4
  * @property integer $directivity5
  * @property integer $directivity6
- * @property integer $rezerv
  *
  * @property User $user
  * @property Payers $payers
@@ -65,9 +68,9 @@ class Certificates extends \yii\db\ActiveRecord
             [['nominal', 'cert_group', 'name', 'soname'], 'required'],
             [['fio_parent'], 'required'],
             [['user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'cert_group', 'pasport_s', 'pasport_n', 'pasport_v', 'phone'], 'integer'],
-            [['nominal'], 'number', 'max' => 100000],
+            [['nominal', 'nominal_f'], 'number', 'max' => 100000],
             [['number'], 'string', 'length' => [10, 10]],
-            [['balance', 'rezerv'], 'number'],
+            [['balance', 'balance_f', 'rezerv', 'rezerv_f'], 'number'],
             [['number'], 'unique'],
             [['fio_child', 'fio_parent', 'birthday', 'address'], 'string', 'max' => 255],
             [['name', 'soname', 'phname'], 'string', 'max' => 50],
@@ -94,7 +97,9 @@ class Certificates extends \yii\db\ActiveRecord
             'phname' => 'Отчество',
             'fio_parent' => 'ФИО родителя (законного представителя)',
             'nominal' => 'Номинал сертификата',
-            'balance' => 'Остаток сертификата ',
+            'nominal' => 'Номинал сертификата на будущий период',
+            'balance' => 'Остаток сертификата',
+            'balance_а' => 'Остаток сертификата на будущий период',
             'contracts' => 'Число заключенных договоров',
             'contractCount' => 'Число заключенных договоров',
             'directivity1' => 'Программ в "Техническая" направленность',
@@ -111,6 +116,7 @@ class Certificates extends \yii\db\ActiveRecord
             'pasport_v' => 'выдан',
             'phone' => 'Телефон',
             'rezerv' => 'Зарезервированно на оплату программ',
+            'rezerv_f' => 'Зарезервированно на оплату программ на будущий период',
             'cert_group' => 'Группа сертификата',
             'payer' => 'Плательщик'
         ];
@@ -197,9 +203,10 @@ class Certificates extends \yii\db\ActiveRecord
     }
 
     /**
-     * DEPRECATED
+     * @deprecated
      */
-    public function getSumContractes($payer_id) {
+    public function getSumContractes($payer_id)
+    {
         $query = Certificates::find();
 
         $query->where(['payer_id' => $payer_id]);
@@ -208,10 +215,11 @@ class Certificates extends \yii\db\ActiveRecord
     }
 
     /**
-     * DEPRECATED
+     * @deprecated
      * Use relation in app\models\UserIdentity instead
      */
-    public function getCertificates() {
+    public function getCertificates()
+    {
 
         $query = Certificates::find();
 

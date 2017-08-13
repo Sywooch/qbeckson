@@ -119,7 +119,7 @@ $user = Yii::$app->user->getIdentity();
                                             'label' => 'Система',
                                             'items' => [
                                                 ['label' => 'Информация', 'url' => ['personal/operator-statistic']],
-                                                ['label' => 'Праметры системы', 'url' => ['operator/key-storage']]
+                                                ['label' => 'Праметры системы', 'url' => ['operator/operator-settings']]
                                             ]
                                         ],
                                         ['label' => 'Коэффициенты', 'items' => [
@@ -164,18 +164,7 @@ $user = Yii::$app->user->getIdentity();
                                 } else {
                                     echo Nav::widget([
                                         'options' => ['class' => 'navbar-nav inner-nav'],
-                                        'items' => [
-                                            ['label' => 'Информация', 'url' => ['/personal/payer-statistic']],
-                                            ['label' => 'Номиналы групп', 'url' => ['/cert-group/index']],
-                                            ['label' => 'Сертификаты', 'url' => ['/personal/payer-certificates']],
-                                            ['label' => 'Договоры', 'url' => ['/personal/payer-contracts']],
-                                            ['label' => 'Счета', 'url' => ['/personal/payer-invoices']],
-                                            ['label' => 'Организации', 'items' => [
-                                                ['label' => 'Реестр ПФДО', 'url' => ['/personal/payer-organizations']],
-                                                //['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
-                                            ]],
-                                            ['label' => 'Программы', 'url' => ['/personal/payer-programs']],
-                                        ],
+                                        'items' => \app\helpers\PermissionHelper::getMenuItems(),
                                     ]);
                                 }
                             }

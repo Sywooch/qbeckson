@@ -886,25 +886,9 @@ class PersonalController extends Controller
 
     public function actionCertificateInfo()
     {
-        $certificates = new Certificates();
-        $certificate = $certificates->getCertificates();
-
-        $informsProvider = new ActiveDataProvider([
-            'query' => Informs::find()->where(['read' => 0])->andwhere(['from' => 4])->andwhere(['prof_id' => $certificate['id']]),
-        ]);
-
-        $programcertModel = new ProgramsfromcertSearch();
-        $programcertProvider = $programcertModel->search(Yii::$app->request->queryParams);
-        $count_programs = $programcertProvider->getTotalCount();
-
-        $searchContracts1 = new ContractsoSearch();
-        $Contracts1Provider = $searchContracts1->search(Yii::$app->request->queryParams);
-        $count_organizations = $Contracts1Provider->getTotalCount();
+        $certificate = Yii::$app->user->getIdentity()->certificate;
 
         return $this->render('certificate-info', [
-            'informsProvider' => $informsProvider,
-            'count_organizations' => $count_organizations,
-            'count_programs' => $count_programs,
             'certificate' => $certificate,
         ]);
     }

@@ -176,7 +176,10 @@ class CooperateController extends Controller
             $id,
             null,
             Yii::$app->user->getIdentity()->organization->id,
-            Cooperate::STATUS_CONFIRMED
+            [
+                Cooperate::STATUS_CONFIRMED,
+                Cooperate::STATUS_ACTIVE
+            ]
         );
         if (null === $model) {
             throw new NotFoundHttpException('Model not found');
@@ -350,11 +353,11 @@ class CooperateController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['/personal/organization-payers']);
-        } else {
-            return $this->render('update', [
-                'model' => $model,
-            ]);
         }
+
+        return $this->render('update', [
+            'model' => $model,
+        ]);
     }
 
     /**
@@ -381,8 +384,7 @@ class CooperateController extends Controller
                 $this->findModel($cooperate['id'])->delete();
 
                 return $this->redirect(['/personal/organization-payers#panel2']);
-            }
-            else {
+            } else {
                 Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
                  return $this->redirect(['/personal/organization-payers#panel2']);
             }
@@ -415,8 +417,7 @@ class CooperateController extends Controller
                 if ($model->save()) {
                     return $this->redirect('/personal/organization-payers');
                 }
-            }
-            else {
+            } else {
                 Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
                  return $this->redirect(['/personal/organization-payers']);
             }

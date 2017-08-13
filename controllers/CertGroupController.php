@@ -25,24 +25,25 @@ class CertGroupController extends Controller
 
         if (Yii::$app->request->isAjax && Yii::$app->request->post('hasEditable')) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            $model = $this->findModel(Yii::$app->request->post('editableKey'));
             $post = Yii::$app->request->post();
-
-            $out = ['output' => '', 'message' => ''];
+            $model = $this->findModel($post['editableKey']);
             $data = ['CertGroup' => current($post['CertGroup'])];
 
-            $output = '';
             if ($model->load($data) && $model->validate()) {
-                if (isset($data['CertGroup']['nominal']) && (empty($post['password']) || !Yii::$app->security->validatePassword($post['password'], Yii::$app->user->identity->password))) {
+                if ((isset($data['CertGroup']['nominal']) || isset($data['CertGroup']['nominal_f'])) &&
+                    (
+                        empty($post['password']) ||
+                        !Yii::$app->security->validatePassword($post['password'], Yii::$app->user->identity->password)
+                    )
+                ) {
                     return ['output' => '', 'message' => 'Неверный пароль.'];
                 }
 
-                $model->save(false);
-            } else {
-                $out = ['output' => $output, 'message' => 'Ошибка при сохранении.'];
+                return $model->save(false) ?
+                    ['output' => '', 'message' => ''] : ['output' => '', 'message' => 'Ошибка при сохранении.'];
             }
 
-            return $out;
+            return ['output' => '', 'message' => 'Ошибка валидации'];
         }
 
         return $this->render('index', [
@@ -72,14 +73,13 @@ class CertGroupController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
-        } else {
-            return $this->render('update', [
-                'model' => $model,
-            ]);
         }
+
+        return $this->render('update', [
+            'model' => $model,
+        ]);
     }
 
     /**
@@ -93,8 +93,7 @@ class CertGroupController extends Controller
     {
         if (($model = CertGroup::findOne($id)) !== null) {
             return $model;
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
         }
+        throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

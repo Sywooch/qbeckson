@@ -3,6 +3,7 @@
 namespace app\models\forms;
 
 use app\models\Cooperate;
+use app\models\OperatorSettings;
 use Yii;
 use yii\base\Model;
 
@@ -18,6 +19,7 @@ class ConfirmRequestForm extends Model
     public $isCustomValue;
 
     private $model;
+    private $operatorSettings;
 
     /**
      * @return string
@@ -81,7 +83,18 @@ class ConfirmRequestForm extends Model
             if ($this->type === Cooperate::DOCUMENT_TYPE_CUSTOM) {
                 $model->document = $this->document;
             } else {
-                $model->document = Yii::$app->keyStorage->get($this->type, true);
+                if ($this->type === Cooperate::DOCUMENT_TYPE_GENERAL) {
+                    $model->document = [
+                        'path' => $this->getOperatorSettings()->general_document_path,
+                        'base_url' => $this->getOperatorSettings()->general_document_base_url,
+                    ];
+                }
+                if ($this->type === Cooperate::DOCUMENT_TYPE_EXTEND) {
+                    $model->document = [
+                        'path' => $this->getOperatorSettings()->extend_document_path,
+                        'base_url' => $this->getOperatorSettings()->extend_document_base_url,
+                    ];
+                }
             }
             $model->total_payment_limit = $this->value;
             $model->confirm();
@@ -90,6 +103,17 @@ class ConfirmRequestForm extends Model
         }
 
         return false;
+    }
+
+    /**
+     * @return OperatorSettings
+     */
+    public function getOperatorSettings()
+    {
+        if (null === $this->operatorSettings) {
+            $this->operatorSettings = Yii::$app->operator->identity->settings;
+        }
+        return $this->operatorSettings;
     }
 
     /**

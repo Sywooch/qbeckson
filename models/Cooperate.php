@@ -267,7 +267,7 @@ class Cooperate extends ActiveRecord
     /**
      * @return array
      */
-    public function documentNames()
+    public static function documentNames()
     {
         return [
             self::DOCUMENT_NAME_FIRST => 'Договор о возмещении затрат',

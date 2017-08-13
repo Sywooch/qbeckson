@@ -289,6 +289,18 @@ $config = [
                         'roles' => ['operators'],
                     ],
                 ],
+                'monitor' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['payers'],
+                    ]
+                ],
+                'operator/operator-settings' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['operators']
+                    ]
+                ]
             ]
     ],
 
