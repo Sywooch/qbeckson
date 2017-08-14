@@ -1,6 +1,6 @@
 <?php
 use yii\helpers\Html;
-use yii\grid\GridView;
+use kartik\grid\GridView;
 use yii\helpers\Url;
 
 
@@ -86,6 +86,18 @@ $this->title = 'Подведомственные организации';
                     return '+';
                 }
             }
+        ],
+        [
+            'class' => 'kartik\grid\EditableColumn',
+            'attribute' => 'certificate_accounting_limit',
+            'pageSummary' => false,
+            'editableOptions' => [
+                'asPopover' => false,
+                'submitButton' => [
+                    'icon' => '<i class="glyphicon glyphicon-ok"></i>',
+                    'class' => 'btn btn-sm btn-success',
+                ],
+            ],
         ],
         ['class' => 'yii\grid\ActionColumn',
             'controller' => 'organization',

@@ -38,6 +38,7 @@ use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 /**
  * Class PersonalController
@@ -407,6 +408,25 @@ class PersonalController extends Controller
         $searchModel = new OrganizationSearch(['subordered' => true]);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
+        if (Yii::$app->request->isAjax && Yii::$app->request->post('hasEditable')) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $model = Organization::findOne(Yii::$app->request->post('editableKey'));
+            $model->scenario = Organization::SCENARIO_PAYER;
+            $post = Yii::$app->request->post();
+
+            $out = ['output' => '', 'message' => ''];
+            $data = ['Organization' => current($post['Organization'])];
+
+            $output = '';
+            if ($model->load($data) && $model->validate()) {
+                $model->save(false);
+            } else {
+                $out = ['output' => $output, 'message' => 'Ошибка при сохранении.'];
+            }
+
+            return $out;
+        }
+
         return $this->render('payer-suborder-organizations', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
@@ -451,28 +471,43 @@ class PersonalController extends Controller
     /**
      * @return string
      */
-    public function actionOrganizationStatistic()
+    public function actionPayerMunicipalTask()
     {
-        return $this->render('organization-statistic', [
-            'organization' => Yii::$app->user->identity->organization,
+        /** @var UserIdentity $user */
+        $user = Yii::$app->user->getIdentity();
+
+        $searchPrograms = new ProgramsSearch([
+            'organization_id' => ArrayHelper::getColumn($user->payer->organizations, 'id'),
+            'hours' => '0,2000',
+            'limit' => '0,10000',
+            'rating' => '0,100',
+            'modelName' => 'SearchPrograms',
+            'isMunicipalTask' => true,
         ]);
-    }
+        $programsProvider = $searchPrograms->search(Yii::$app->request->queryParams);
 
-    /**
-     * @return string
-     */
-    public function actionOrganizationInfo()
-    {
-        $organization = Yii::$app->user->identity->organization;
+        if (Yii::$app->request->isAjax && Yii::$app->request->post('hasEditable')) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $model = Programs::findOne(Yii::$app->request->post('editableKey'));
+            //$model->scenario = Organization::SCENARIO_PAYER;
+            $post = Yii::$app->request->post();
 
-        if ($organization->load(Yii::$app->request->post()) && $organization->save()) {
-            Yii::$app->session->setFlash('success', 'Информация успешно сохранена.');
+            $out = ['output' => '', 'message' => ''];
+            $data = ['Programs' => current($post['Programs'])];
 
-            return $this->refresh();
+            $output = '';
+            if ($model->load($data) && $model->validate()) {
+                $model->save(false);
+            } else {
+                $out = ['output' => $output, 'message' => 'Ошибка при сохранении.'];
+            }
+
+            return $out;
         }
 
-        return $this->render('organization-info', [
-            'organization' => $organization,
+        return $this->render('payer-municipal-task', [
+            'searchPrograms' => $searchPrograms,
+            'programsProvider' => $programsProvider,
         ]);
     }
 
@@ -495,6 +530,34 @@ class PersonalController extends Controller
         return $this->render('payer-invoices', [
             'searchInvoices' => $searchInvoices,
             'invoicesProvider' => $invoicesProvider,
+        ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function actionOrganizationStatistic()
+    {
+        return $this->render('organization-statistic', [
+            'organization' => Yii::$app->user->identity->organization,
+        ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function actionOrganizationInfo()
+    {
+        $organization = Yii::$app->user->identity->organization;
+
+        if ($organization->load(Yii::$app->request->post()) && $organization->save()) {
+            Yii::$app->session->setFlash('success', 'Информация успешно сохранена.');
+
+            return $this->refresh();
+        }
+
+        return $this->render('organization-info', [
+            'organization' => $organization,
         ]);
     }
 
@@ -565,6 +628,27 @@ class PersonalController extends Controller
             'waitProgramsProvider' => $waitProgramsProvider,
             'searchClosedPrograms' => $searchClosedPrograms,
             'closedProgramsProvider' => $closedProgramsProvider,
+        ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function actionOrganizationMunicipalTask()
+    {
+        $searchPrograms = new ProgramsSearch([
+            'organization_id' => Yii::$app->user->identity->organization->id,
+            'hours' => '0,2000',
+            'limit' => '0,10000',
+            'rating' => '0,100',
+            'modelName' => 'SearchOpenPrograms',
+            'isMunicipalTask' => true,
+        ]);
+        $programsProvider = $searchPrograms->search(Yii::$app->request->queryParams);
+
+        return $this->render('organization-municipal-task', [
+            'searchPrograms' => $searchPrograms,
+            'programsProvider' => $programsProvider,
         ]);
     }
 

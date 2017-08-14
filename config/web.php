@@ -144,12 +144,12 @@ $config = [
                         'roles' => ['certificate']
                     ],
                     [
-                        'actions' => ['organization-suborder', 'organization-set-suborder-status'],
+                        'actions' => ['organization-suborder', 'organization-set-suborder-status', 'organization-municipal-task'],
                         'allow' => true,
                         'roles' => ['organizations']
                     ],
                     [
-                        'actions' => ['payer-suborder-organizations', 'payer-all-organizations'],
+                        'actions' => ['payer-suborder-organizations', 'payer-all-organizations', 'payer-municipal-task'],
                         'allow' => true,
                         'roles' => ['payers']
                     ],

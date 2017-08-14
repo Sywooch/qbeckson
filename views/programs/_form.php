@@ -214,6 +214,10 @@ $this->registerJs($js);
     <?= $form->field($model, 'norm_providing')->textarea(['rows' => 5]) ?>
 
     <?php
+    if ($model->isMunicipalTask && 0) {
+        echo $form->field($model, 'certificate_accounting_limit');
+    }
+
     $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
 
     if (!$model->isNewRecord && !isset($roles['operators'])) {
@@ -227,7 +231,7 @@ $this->registerJs($js);
         echo '<div class="form-group">';
         echo Html::a('Отменить', '/personal/organization-programs', ['class' => 'btn btn-danger']);
         echo '&nbsp';
-        echo Html::submitButton($model->isNewRecord ? 'Отправить программу на сертификацию' : 'Обновить программу', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
+        echo Html::submitButton($model->isNewRecord ? ($model->isMunicipalTask ? 'Создать муниципальное задание' : 'Отправить программу на сертификацию') : 'Обновить программу', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
         echo '</div>';
     }
     ?>

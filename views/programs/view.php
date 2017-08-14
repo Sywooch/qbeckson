@@ -20,7 +20,7 @@ $this->title = $model->name;
 if (Yii::$app->user->can('operators')) {
     $this->params['breadcrumbs'][] = ['label' => 'Программы', 'url' => ['/personal/operator-programs']];
 } elseif (Yii::$app->user->can('organizations')) {
-    $this->params['breadcrumbs'][] = ['label' => 'Программы', 'url' => ['/personal/organization-programs']];
+    $this->params['breadcrumbs'][] = ['label' => $model->isMunicipalTask ? 'Муниципальные задания' : 'Программы', 'url' => $model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']];
 }
 
 $this->params['breadcrumbs'][] = $this->title;
@@ -212,7 +212,7 @@ $this->registerJs($js, $this::POS_END);
                                             }
 
                                             return Html::a(
-                                                'Добавить адресы',
+                                                'Добавить адреса',
                                                 ['program-module-address/create', 'moduleId' => $model->id]
                                             );
                                         }

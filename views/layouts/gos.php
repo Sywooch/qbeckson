@@ -170,7 +170,7 @@ $user = Yii::$app->user->getIdentity();
                                             ],
                                             [
                                                 'label' => 'Муниципальное задание',
-                                                'url' => ['maintenance/index']
+                                                'url' => ['personal/organization-municipal-task']
                                             ],
                                         ]],
                                         ['label' => 'Договоры', 'url' => ['/personal/organization-contracts']],

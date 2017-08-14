@@ -42,7 +42,8 @@ class ProgramsfromnocertSearch extends Programs
      */
     public function search($params)
     {
-        $query = Programs::find();
+        $query = Programs::find()
+            ->andWhere('is_municipal_task < 1');
 
         // add conditions that should always apply here
 

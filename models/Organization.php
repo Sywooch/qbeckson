@@ -72,6 +72,8 @@ class Organization extends \yii\db\ActiveRecord
 
     const SCENARIO_MODERATOR = 'moderator';
 
+    const SCENARIO_PAYER = 'payer';
+
     const TYPE_EDUCATION = 1;
 
     const TYPE_TRAINING = 2;
@@ -122,6 +124,7 @@ class Organization extends \yii\db\ActiveRecord
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_MODERATOR] = $scenarios[self::SCENARIO_DEFAULT];
         $scenarios[self::SCENARIO_GUEST] = ['charterDocument', 'statementDocument', 'name', 'full_name', 'organizational_form', 'type', 'license_date', 'license_number', 'license_issued', 'svidet', 'bank_name', 'bank_sity', 'bank_bik', 'korr_invoice', 'rass_invoice', 'phone', 'email', 'site', 'fio_contact', 'address_actual', 'address_legal', 'inn', 'KPP', 'OGRN', 'last', 'mun', 'licenseDocument', 'commonDocuments', 'anonymous_update_token', 'verifyCode'];
+        $scenarios[self::SCENARIO_PAYER] = ['certificate_accounting_limit'];
 
         return $scenarios;
     }
@@ -148,7 +151,7 @@ class Organization extends \yii\db\ActiveRecord
              'whenClient' => "function (attribute, value) {
                  return $('#organization-type').val() != 4;
             }"],
-            [['user_id', 'actual', 'type', 'bank_bik', 'korr_invoice', 'doc_type', 'max_child', 'amount_child', 'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'last', 'last_year_contract', 'certprogram', 'status', 'organizational_form'], 'integer'],
+            [['user_id', 'actual', 'type', 'bank_bik', 'korr_invoice', 'doc_type', 'max_child', 'amount_child', 'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'last', 'last_year_contract', 'certprogram', 'status', 'organizational_form', 'certificate_accounting_limit'], 'integer'],
             [['license_date', 'date_proxy', 'cratedate', 'accepted_date'], 'safe'],
             [['raiting'], 'number'],
             [['about', 'site', 'phone', 'refuse_reason', 'anonymous_update_token'], 'string'],
@@ -323,7 +326,8 @@ class Organization extends \yii\db\ActiveRecord
             'commonDocuments' => 'Иные документы (не более трёх)',
             'verifyCode' => 'Проверочный код',
             'children' => 'Число обучающихся',
-            'programs' => 'Количество програм'
+            'programs' => 'Количество программ',
+            'certificate_accounting_limit' => 'Лимит зачисления',
         ];
     }
 
