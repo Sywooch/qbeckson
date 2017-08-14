@@ -4,6 +4,7 @@ namespace app\models;
 
 use Yii;
 use app\models\Programs;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "years".
@@ -20,7 +21,7 @@ use app\models\Programs;
  * @property ProgramModuleAddress $mainAddress
  * @property ProgramModuleAddress[] $addresses
  */
-class ProgrammeModule extends \yii\db\ActiveRecord
+class ProgrammeModule extends ActiveRecord
 {
     const SCENARIO_CREATE = 'create';
 
@@ -88,13 +89,27 @@ class ProgrammeModule extends \yii\db\ActiveRecord
         ];
     }
 
+    public function getModuleAddressAssignments()
+    {
+        return $this->hasMany(ProgramModuleAddressAssignment::class, ['program_module_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProgramAddressesAssignments()
+    {
+        return $this->hasMany(ProgramAddressAssignment::class, ['id' => 'program_id'])
+            ->via('moduleAddressAssignments');
+    }
 
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getAddresses()
     {
-        return $this->hasMany(ProgramModuleAddress::class, ['program_module_id' => 'id']);
+        return $this->hasMany(OrganizationAddress::class, ['id' => 'organization_address_id'])
+            ->via('programAddressesAssignments');
     }
 
     /**
@@ -102,8 +117,7 @@ class ProgrammeModule extends \yii\db\ActiveRecord
      */
     public function getMainAddress()
     {
-        return $this->hasOne(ProgramModuleAddress::class, ['program_module_id' => 'id'])
-            ->andWhere(['program_module_address.status' => 1]);
+
     }
 
     /**
@@ -124,11 +138,18 @@ class ProgrammeModule extends \yii\db\ActiveRecord
         return $this->hasOne(Programs::className(), ['id' => 'program_id']);
     }
 
+    /**
+     * @return string
+     */
     public function getShortName()
     {
         return 'Модуль ' . $this->year;
     }
 
+    /**
+     * @param bool $prefix
+     * @return string
+     */
     public function getFullname($prefix = true)
     {
         return ($prefix === false ?: 'Модуль ' . $this->year . (empty($this->name) ? '' : '. ') . $this->name);

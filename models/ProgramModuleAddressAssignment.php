@@ -39,42 +39,14 @@ class ProgramModuleAddressAssignment extends ActiveRecord
             ],
             [
                 ['program_module_id'], 'exist', 'skipOnError' => true,
-                'targetClass' => Years::className(),
+                'targetClass' => ProgrammeModule::class,
                 'targetAttribute' => ['program_module_id' => 'id']
             ],
             [
                 ['program_address_assignment_id'], 'exist', 'skipOnError' => true,
-                'targetClass' => ProgramAddressAssignment::className(),
+                'targetClass' => ProgramAddressAssignment::class,
                 'targetAttribute' => ['program_address_assignment_id' => 'id']
             ],
         ];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function attributeLabels()
-    {
-        return [
-            'program_address_assignment_id' => 'Program Address Assignment ID',
-            'program_module_id' => 'Program Module ID',
-            'status' => 'Status',
-        ];
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getProgramModule()
-    {
-        return $this->hasOne(Years::className(), ['id' => 'program_module_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getProgramAddressAssignment()
-    {
-        return $this->hasOne(ProgramAddressAssignment::className(), ['id' => 'program_address_assignment_id']);
     }
 }

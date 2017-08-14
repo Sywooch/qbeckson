@@ -146,7 +146,7 @@ class Programs extends ActiveRecord
     public function getAddresses()
     {
         return $this->hasMany(OrganizationAddress::class, ['id' => 'organization_address_id'])
-            ->viaTable('{{%program_address_assignment}}', ['program_id' => 'id']);
+            ->via('addressAssignments');
     }
 
     /**

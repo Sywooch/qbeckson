@@ -77,6 +77,10 @@ $this->registerJs($js, $this::POS_END);
                     <?= Html::a('Добавить фото', ['add-photo', 'id' => $model->id], ['class' => 'btn btn-success']); ?>
                 <?php endif; ?>
             </div>
+            <hr>
+            <div class="col-md-12">
+                <?= Html::a('Изменить адресы программы', ['add-addresses', 'id' => $model->id], ['class' => 'btn btn-success']); ?>
+            </div>
         </div>
         <br>
         <br>
@@ -197,7 +201,11 @@ $this->registerJs($js, $this::POS_END);
                                         'format' => 'raw',
                                         'value' => function ($model) {
                                             /** @var \app\models\ProgrammeModule $model */
-                                            if (count($model->addresses) > 0 && null !== $model->mainAddress) {
+                                            echo $model->programAddressesAssignments[0]->organization_address_id;
+
+
+
+                                            /*if (count($model->addresses) > 0 && null !== $model->mainAddress) {
                                                 return Html::a(
                                                     $model->mainAddress->address,
                                                     ['program-module-address/update', 'moduleId' => $model->id]
@@ -214,7 +222,7 @@ $this->registerJs($js, $this::POS_END);
                                             return Html::a(
                                                 'Добавить адресы',
                                                 ['program-module-address/create', 'moduleId' => $model->id]
-                                            );
+                                            );*/
                                         }
                                     ]
                                 ],

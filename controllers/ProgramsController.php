@@ -56,8 +56,8 @@ class ProgramsController extends Controller
     public function actionAddAddresses($id)
     {
         $program = $this->findModel($id);
-        $form = new ProgramAddressesForm();
-        $form->setModel($program);
+        $form = new ProgramAddressesForm($program);
+
         if ($form->load(Yii::$app->request->post())) {
             if ($form->save()) {
                 Yii::$app->session->setFlash('success', 'Адреса успешно обновлены');

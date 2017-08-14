@@ -20,6 +20,17 @@ class ProgramAddressesForm extends Model
     private $model;
 
     /**
+     * ProgramAddressesForm constructor.
+     * @param Programs $model
+     * @param array $config
+     */
+    public function __construct($model, $config = [])
+    {
+        $this->setModel($model);
+        parent::__construct($config);
+    }
+
+    /**
      * @return array
      */
     public function rules()
@@ -32,7 +43,7 @@ class ProgramAddressesForm extends Model
 
     /**
      * Немного кастыльно. Удаляет все записи перед тем, как записать.
-     * Можено сделать какой-то diff.
+     * Можно сделать какой-то diff.
      *
      * @return bool
      */
@@ -47,7 +58,7 @@ class ProgramAddressesForm extends Model
                         'program_id' => $this->getModel()->id,
                         'status' => $this->statuses[$key],
                     ]);
-                    if (false === $model->save()) {
+                    if (false === $model->save(false)) {
                         return false;
                     }
                     unset($model);
