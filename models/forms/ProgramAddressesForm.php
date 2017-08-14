@@ -42,27 +42,33 @@ class ProgramAddressesForm extends Model
     }
 
     /**
-     * Немного кастыльно. Удаляет все записи перед тем, как записать.
-     * Можно сделать какой-то diff.
-     *
      * @return bool
      */
     public function save()
     {
         if ($this->getModel() && $this->validate()) {
-            ProgramAddressAssignment::deleteAll(['program_id' => $this->getModel()->id]);
             foreach ($this->isChecked as $key => $record) {
+                $model = ProgramAddressAssignment::findOne([
+                    'organization_address_id' => $this->addressIds[$key],
+                    'program_id' => $this->getModel()->id,
+                ]);
                 if ((int)$record === 1) {
-                    $model = new ProgramAddressAssignment([
-                        'organization_address_id' => $this->addressIds[$key],
-                        'program_id' => $this->getModel()->id,
-                        'status' => $this->statuses[$key],
-                    ]);
+                    if (null === $model) {
+                        $model = new ProgramAddressAssignment([
+                           'organization_address_id' => $this->addressIds[$key],
+                           'program_id' => $this->getModel()->id,
+                        ]);
+                    }
+                    $model->status = $this->statuses[$key];
                     if (false === $model->save(false)) {
                         return false;
                     }
-                    unset($model);
+                } else {
+                    if (null !== $model) {
+                        $model->delete();
+                    }
                 }
+                unset($model);
             }
 
             return true;

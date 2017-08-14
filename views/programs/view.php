@@ -201,28 +201,24 @@ $this->registerJs($js, $this::POS_END);
                                         'format' => 'raw',
                                         'value' => function ($model) {
                                             /** @var \app\models\ProgrammeModule $model */
-                                            echo $model->programAddressesAssignments[0]->organization_address_id;
-
-
-
-                                            /*if (count($model->addresses) > 0 && null !== $model->mainAddress) {
+                                            if (count($model->addresses) > 0 && null !== $model->mainAddress) {
                                                 return Html::a(
                                                     $model->mainAddress->address,
-                                                    ['program-module-address/update', 'moduleId' => $model->id]
+                                                    ['years/add-addresses', 'id' => $model->id]
                                                 );
                                             }
 
                                             if (count($model->addresses)) {
                                                 return Html::a(
                                                     'Редактирование адресов',
-                                                    ['program-module-address/update', 'moduleId' => $model->id]
+                                                    ['years/add-addresses', 'id' => $model->id]
                                                 );
                                             }
 
                                             return Html::a(
                                                 'Добавить адреса',
-                                                ['program-module-address/create', 'moduleId' => $model->id]
-                                            );*/
+                                                ['years/add-addresses', 'id' => $model->id]
+                                            );
                                         }
                                     ]
                                 ],

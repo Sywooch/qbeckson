@@ -2,9 +2,8 @@
 
 namespace app\models;
 
-use Yii;
-use app\models\Programs;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "years".
@@ -18,8 +17,10 @@ use yii\db\ActiveRecord;
  *
  * @property Programs $program
  * @property Contracts[] $activeContracts
- * @property ProgramModuleAddress $mainAddress
- * @property ProgramModuleAddress[] $addresses
+ * @property OrganizationAddress[] $addresses
+ * @property ProgramModuleAddress[] $oldAddresses
+ * @property OrganizationAddress $mainAddress
+ * @property ProgramModuleAddressAssignment[] $moduleAddressAssignments
  */
 class ProgrammeModule extends ActiveRecord
 {
@@ -89,6 +90,17 @@ class ProgrammeModule extends ActiveRecord
         ];
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOldAddresses()
+    {
+        return $this->hasMany(ProgramModuleAddress::class, ['program_module_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getModuleAddressAssignments()
     {
         return $this->hasMany(ProgramModuleAddressAssignment::class, ['program_module_id' => 'id']);
@@ -99,7 +111,7 @@ class ProgrammeModule extends ActiveRecord
      */
     public function getProgramAddressesAssignments()
     {
-        return $this->hasMany(ProgramAddressAssignment::class, ['id' => 'program_id'])
+        return $this->hasMany(ProgramAddressAssignment::class, ['id' => 'program_address_assignment_id'])
             ->via('moduleAddressAssignments');
     }
 
@@ -115,10 +127,30 @@ class ProgrammeModule extends ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getMainModuleAddressAssignments()
+    {
+        return $this->hasOne(ProgramModuleAddressAssignment::class, ['program_module_id' => 'id'])
+            ->andWhere(['program_module_address_assignment.status' => 1]);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMainProgramAddressesAssignments()
+    {
+        return $this->hasOne(ProgramAddressAssignment::class, ['id' => 'program_address_assignment_id'])
+            ->via('mainModuleAddressAssignments');
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getMainAddress()
     {
-
+        return $this->hasOne(OrganizationAddress::class, ['id' => 'organization_address_id'])
+            ->via('mainProgramAddressesAssignments');
     }
+
 
     /**
      * @return \yii\db\ActiveQuery

@@ -1,13 +1,14 @@
 <?php
 
+use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
-use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model \app\models\forms\ProgramAddressesForm */
+/* @var $module \app\models\ProgrammeModule */
+/* @var $model \app\models\forms\ModuleAddressForm */
 
-$this->title = 'Редактировать адресы программы: ' . $program->name;
-$this->params['breadcrumbs'][] = ['label' => 'Программа', 'url' => ['programs/view', 'id' => $program->id]];
+$this->title = 'Редактирование адресов модуля';
+$this->params['breadcrumbs'][] = ['label' => 'Программа', 'url' => ['programs/view', 'id' => $module->program_id]];
 $this->params['breadcrumbs'][] = $this->title;
 
 $js = <<<'JS'
@@ -23,21 +24,21 @@ JS;
 $this->registerJs($js, $this::POS_READY);
 ?>
 <div class="programs-add-picture">
-    <?php if ([] === $model->getModel()->organization->addresses) : ?>
-        <p class="lead">Необходимо добавить адресы реализации образовательных программ</p>
+    <?php if ([] === $model->getModel()->program->addresses) : ?>
+        <p class="lead">Необходимо добавить адресы для программы</p>
     <?php else : ?>
         <?php $form = ActiveForm::begin(); ?>
-            <div class="row">
-                <div class="col-md-6">
-                    <table class="table table-striped">
-                        <thead>
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-striped">
+                    <thead>
                         <tr>
                             <td>Основной адрес</td>
                             <td>Адрес</td>
                             <td>Выбрать</td>
                         </tr>
-                        </thead>
-                        <tbody>
+                    </thead>
+                    <tbody>
                         <?php foreach ($model->addressIds as $key => $address) : ?>
                             <tr>
                                 <td>
@@ -56,11 +57,12 @@ $this->registerJs($js, $this::POS_READY);
                                 </td>
                             </tr>
                         <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+                    </tbody>
+                </table>
             </div>
+        </div>
         <?= Html::submitButton('Обновить', ['class' => 'btn btn-primary']); ?>
         <?php $form::end(); ?>
     <?php endif; ?>
 </div>
+

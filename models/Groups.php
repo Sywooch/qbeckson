@@ -17,7 +17,7 @@ use yii\db\ActiveRecord;
  *
  * @property Organization $organization
  * @property Contracts[] $contracts
- * @property Years $module
+ * @property ProgrammeModule $module
  * @property mixed $year
  * @property Programs $program
  * @property GroupClass[] $classes
