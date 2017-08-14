@@ -171,7 +171,7 @@ $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $reques
     <div id="panel-registry" class="tab-pane fade in active">
         <?= SearchFilter::widget([
             'model' => $searchRegistry,
-            'action' => ['personal/operator-organizations#panel-registry'],
+            'action' => ['personal/operator-organizations'],
             'data' => GridviewHelper::prepareColumns(
                 'organization',
                 $registryColumns,
@@ -215,7 +215,7 @@ $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $reques
     <div id="panel-requests" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchRequest,
-            'action' => ['personal/operator-organizations#panel-requests'],
+            'action' => ['personal/operator-organizations'],
             'data' => GridviewHelper::prepareColumns(
                 'organization',
                 $requestColumns,

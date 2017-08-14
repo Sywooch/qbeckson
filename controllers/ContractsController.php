@@ -159,7 +159,6 @@ class ContractsController extends Controller
             }
 
             if ($userprice <= $nuserprice) {
-
                 if ($userprice <= $certificate->balance) {
                     $pay = "Полная стоимость";
                     $dop = "отсутствует";
@@ -1278,6 +1277,7 @@ class ContractsController extends Controller
 
     public function actionMpdf($id)
     {
+
         ini_set('memory_limit', '-1');
         set_time_limit(0);
 
@@ -1738,6 +1738,7 @@ EOD;
 </div>');
 
         echo $mpdf->Output('contract-' . $model->number . '.pdf', 'D'); // call the mpdf api output as needed
+
     }
 
 

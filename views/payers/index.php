@@ -78,21 +78,22 @@ $columns = [
     $actions
 ];
 
-$preparedColumns = GridviewHelper::prepareColumns('payers', $columns);
+$preparedColumns = GridviewHelper::prepareColumns('payers', $columns, 'open');
 
 ?>
 <div class="payers-index">
     <?= SearchFilter::widget([
         'model' => $searchModel,
-        'action' => ['payers/index'],
+        'action' => ['personal/operator-payers'],
         'data' => GridviewHelper::prepareColumns(
             'payers',
             $columns,
-            null,
+            'all',
             'searchFilter',
             null
         ),
         'role' => UserIdentity::ROLE_ORGANIZATION,
+        'type' => 'all'
     ]); ?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

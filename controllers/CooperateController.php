@@ -2,11 +2,9 @@
 
 namespace app\controllers;
 
-use app\models\forms\ConfirmRequestForm;
-use app\models\UserIdentity;
-use app\traits\AjaxValidationTrait;
 use Yii;
 use app\models\Cooperate;
+use app\models\CooperateSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -19,8 +17,6 @@ use app\models\User;
  */
 class CooperateController extends Controller
 {
-    use AjaxValidationTrait;
-
     /**
      * @inheritdoc
      */
@@ -37,280 +33,20 @@ class CooperateController extends Controller
     }
 
     /**
-     * Подтверждение заявки на заключение договора плательщиком.
-     *
-     * @param integer $id
-     * @return \yii\web\Response
-     * @throws NotFoundHttpException
+     * Lists all Cooperate models.
+     * @return mixed
      */
-    public function actionConfirmRequest($id)
+    public function actionIndex()
     {
-        $model = $this->findCurrentModel(
-            $id,
-            Yii::$app->user->getIdentity()->payer->id,
-            null,
-            Cooperate::STATUS_NEW
-        );
-        if (null === $model) {
-            throw new NotFoundHttpException('Model not found');
-        }
-        $form = new ConfirmRequestForm();
-        $this->performAjaxValidation($form);
-        if (Yii::$app->request->post() && $form->load(Yii::$app->request->post())) {
-            $form->setModel($model);
-            if ($form->save()) {
-                Yii::$app->session->setFlash('success', 'Вы успешно подтвердили заявку.');
-            } else {
-                Yii::$app->session->setFlash('error', 'Возникла ошибка при подтверждении заявки.');
-            }
-
-            return $this->redirect(['organization/view', 'id' => $model->organization_id]);
-        }
-
-        return $this->goBack();
-    }
-
-    /**
-     * Отправка заявки на заключение договора с плательщиком организации.
-     *
-     * @param $payerId
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException
-     */
-    public function actionRequest($payerId)
-    {
-        if (null !== $this->findCurrentModel(null, $payerId, Yii::$app->user->getIdentity()->organization->id)) {
-            throw new NotFoundHttpException('Model already exist!');
-        }
-        $model = new Cooperate([
-            'payer_id' => $payerId,
-            'organization_id' => Yii::$app->user->getIdentity()->organization->id
+        $searchModel = new CooperateSearch([
+            'status' => 1
         ]);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        $model->create();
-        if ($model->save()) {
-            Yii::$app->session->setFlash('success', 'Вы успешно подали заявку на подключение.');
-
-            return $this->redirect(['personal/organization-payers']);
-        }
-        Yii::$app->session->setFlash('error', 'Возникла ошибка при подаче заявки на подключение.');
-
-        return $this->redirect(['payers/view', 'id' => $payerId]);
-    }
-
-    /**
-     * Отклонение заявки на заключение договора плательщиком с указанием причины.
-     *
-     * @param integer $id
-     * @return \yii\web\Response|string
-     * @throws NotFoundHttpException
-     */
-    public function actionRejectRequest($id)
-    {
-        $model = $this->findCurrentModel(
-            $id,
-            Yii::$app->user->getIdentity()->payer->id,
-            null,
-            Cooperate::STATUS_NEW
-        );
-        if (null === $model) {
-            throw new NotFoundHttpException('Model not found');
-        }
-        $model->scenario = Cooperate::SCENARIO_REJECT;
-        if ($model->load(Yii::$app->request->post())) {
-            $model->reject();
-            if ($model->save()) {
-                Yii::$app->session->setFlash('success', 'Вы успешно отклонили заявку.');
-
-                return $this->redirect(['personal/payer-organizations']);
-            }
-            Yii::$app->session->setFlash('error', 'Возникла ошибка при отклонении заявки.');
-        }
-
-        return $this->goBack();
-    }
-
-    /**
-     * Обжалование заявки на заключение договора организацией в случае отказа.
-     *
-     * @param integer $id
-     * @return string
-     * @throws NotFoundHttpException
-     */
-    public function actionAppealRequest($id)
-    {
-        $model = $this->findCurrentModel(
-            $id,
-            null,
-            Yii::$app->user->getIdentity()->organization->id,
-            Cooperate::STATUS_REJECTED
-        );
-        if (null === $model) {
-            throw new NotFoundHttpException('Model not found');
-        }
-
-        $model->scenario = Cooperate::SCENARIO_APPEAL;
-        if ($model->load(Yii::$app->request->post())) {
-            $model->appeal();
-            if ($model->save()) {
-                Yii::$app->session->setFlash('success', 'Вы успешно подали жалобу.');
-
-                return $this->redirect(['personal/organization-payers']);
-            }
-            Yii::$app->session->setFlash('error', 'Возникла ошибка при подаче жалобы.');
-        }
-
-        return $this->goBack();
-    }
-
-    /**
-     * Ввод реквизитов органзацией
-     *
-     * @param integer $id
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException
-     */
-    public function actionRequisites($id)
-    {
-        $model = $this->findCurrentModel(
-            $id,
-            null,
-            Yii::$app->user->getIdentity()->organization->id,
-            [
-                Cooperate::STATUS_CONFIRMED,
-                Cooperate::STATUS_ACTIVE
-            ]
-        );
-        if (null === $model) {
-            throw new NotFoundHttpException('Model not found');
-        }
-        $model->scenario = Cooperate::SCENARIO_REQUISITES;
-        if ($model->load(Yii::$app->request->post())) {
-            if ($model->save()) {
-                Yii::$app->session->setFlash('success', 'Вы успешно заполнили реквизиты.');
-
-                if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
-                    return $this->redirect(['personal/organization-payers']);
-                } else if (Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
-                    return $this->redirect(['organization/view', 'id' => $model->organization_id]);
-                }
-            }
-            Yii::$app->session->setFlash('error', 'Возникла ошибка при заполнении реквизитов.');
-        }
-
-        return $this->goBack();
-    }
-
-    /**
-     * Отклонение заявки на заключение договора с жалобой оператором.
-     *
-     * @param integer $id
-     * @return \yii\web\Response
-     */
-    public function actionRejectAppeal($id)
-    {
-        $model = $this->findModel($id);
-        $model->reject();
-        if ($model->save()) {
-            Yii::$app->session->setFlash('success', 'Заявка отклонена.');
-        } else {
-            Yii::$app->session->setFlash('error', 'Возникла ошибка при отклонении заявки.');
-        }
-
-        return $this->redirect(['personal/operator-cooperates']);
-    }
-
-    /**
-     * Рассмотрение и подтверждение обжалования оператором.
-     *
-     * @param integer $id
-     * @return \yii\web\Response
-     */
-    public function actionConfirmAppeal($id)
-    {
-        $model = $this->findModel($id);
-        $model->setNew();
-        if ($model->save()) {
-            Yii::$app->session->setFlash('success', 'Заявка отправлена в ожидающие подтверждения.');
-        } else {
-            Yii::$app->session->setFlash('error', 'Возникла ошибка при изменении статуса заявки заявки.');
-        }
-
-        return $this->redirect(['personal/operator-cooperates']);
-    }
-
-    /**
-     * Не работает
-     * Финальное отклонение заявки плательщиком по каким-либо причинам.
-     *
-     * @param $id
-     */
-    public function actionRejectContract($id)
-    {
-    }
-
-    /**
-     * Финальное подтверждение заявки плательщиком.
-     *
-     * @param integer $id
-     * @return \yii\web\Response
-     * @throws NotFoundHttpException
-     */
-    public function actionConfirmContract($id)
-    {
-        $model = $this->findCurrentModel(
-            $id,
-            Yii::$app->user->getIdentity()->payer->id,
-            null,
-            Cooperate::STATUS_CONFIRMED
-        );
-        if (null === $model) {
-            throw new NotFoundHttpException('Model not found');
-        }
-        $model->activate();
-        if ($model->save()) {
-            Yii::$app->session->setFlash('success', 'Заявка успешно подтверждена.');
-        } else {
-            Yii::$app->session->setFlash('error', 'Возникла ошибка при подтверждении заявки.');
-        }
-
-        return $this->redirect(['personal/payer-organizations']);
-    }
-
-    /**
-     * @param null|integer $id
-     * @param null|integer $payerId
-     * @param null|integer $organizationId
-     * @param null|integer $status
-     * @return Cooperate
-     * @throws \DomainException
-     */
-    protected function findCurrentModel($id = null, $payerId = null, $organizationId = null, $status = null)
-    {
-        if (null === $id && null === $payerId && null === $organizationId && null === $status) {
-            throw new \DomainException('Something wrong');
-        }
-        $query = Cooperate::find();
-        $query = null !== $id ? $query->andWhere(['id' => $id]) : $query;
-        $query = null !== $payerId ? $query->andWhere(['payer_id' => $payerId]) : $query;
-        $query = null !== $organizationId ? $query->andWhere(['organization_id' => $organizationId]) : $query;
-        $query = null !== $status ? $query->andWhere(['status' => $status]) : $query;
-
-        return $query->one();
-    }
-
-    /**
-     * @param integer $id
-     * @return Cooperate the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Cooperate::findOne($id)) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
+        return $this->render('index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
     }
 
     /**
@@ -344,6 +80,37 @@ class CooperateController extends Controller
     }
 
     /**
+     * Creates a new Cooperate model.
+     * If creation is successful, the browser will be redirected to the 'view' page.
+     * @return mixed
+     */
+    public function actionCreate($id)
+    {
+        $model = new Cooperate();
+
+        if ($model->load(Yii::$app->request->post())) {
+            $organizations = new Organization();
+            $organization = $organizations->getOrganization();
+
+            $model->payer_id = $id;
+            $model->organization_id = $organization['id'];
+            $model->status = 0;
+
+            if ($model->validate() && $model->save()) {
+                return $this->redirect('/personal/organization-payers#panel2');
+            }
+
+        } else {
+            return $this->render('create', [
+                'model' => $model,
+                'id' => $id,
+            ]);
+        }
+    }
+
+    /**
+     * Updates an existing Cooperate model.
+     * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
      */
@@ -353,14 +120,16 @@ class CooperateController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['/personal/organization-payers']);
+        } else {
+            return $this->render('update', [
+                'model' => $model,
+            ]);
         }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
     }
 
     /**
+     * Deletes an existing Cooperate model.
+     * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
      */
@@ -368,7 +137,8 @@ class CooperateController extends Controller
     {
          $user = User::findOne(Yii::$app->user->id);
 
-        if ($user->load(Yii::$app->request->post())) {
+        if($user->load(Yii::$app->request->post())) {
+
             if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
                 $organizations = new Organization();
                 $organization = $organizations->getOrganization();
@@ -384,7 +154,8 @@ class CooperateController extends Controller
                 $this->findModel($cooperate['id'])->delete();
 
                 return $this->redirect(['/personal/organization-payers#panel2']);
-            } else {
+            }
+            else {
                 Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
                  return $this->redirect(['/personal/organization-payers#panel2']);
             }
@@ -397,7 +168,9 @@ class CooperateController extends Controller
     public function actionDecooperate($id)
     {
         $user = User::findOne(Yii::$app->user->id);
-        if ($user->load(Yii::$app->request->post())) {
+
+        if($user->load(Yii::$app->request->post())) {
+
             if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
                 $organizations = new Organization();
                 $organization = $organizations->getOrganization();
@@ -417,7 +190,8 @@ class CooperateController extends Controller
                 if ($model->save()) {
                     return $this->redirect('/personal/organization-payers');
                 }
-            } else {
+            }
+            else {
                 Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
                  return $this->redirect(['/personal/organization-payers']);
             }
@@ -434,6 +208,81 @@ class CooperateController extends Controller
 
         if ($model->save()) {
             return $this->redirect('/personal/payer-organizations');
+        }
+    }
+
+    public function actionOkpayer($id)
+    {
+        $payers = new Payers();
+        $payer = $payers->getPayer();
+
+        $cooperate = (new \yii\db\Query())
+            ->select(['id'])
+            ->from('cooperate')
+            ->where(['organization_id' => $id])
+            ->andWhere(['payer_id' => $payer['id']])
+            ->andWhere(['status' => 0])
+            ->one();
+
+        $model = Cooperate::findOne($cooperate['id']);
+        $model->status = 1;
+
+        if ($model->save()) {
+            return $this->redirect('/personal/payer-organizations');
+        }
+    }
+
+    public function actionNopayer($id)
+    {
+     $user = User::findOne(Yii::$app->user->id);
+
+        if($user->load(Yii::$app->request->post())) {
+
+            if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
+                
+        $payers = new Payers();
+        $payer = $payers->getPayer();
+
+        $cooperate = (new \yii\db\Query())
+            ->select(['id'])
+            ->from('cooperate')
+            ->where(['organization_id' => $id])
+            ->andWhere(['payer_id' => $payer['id']])
+            ->andWhere([ '<', 'status', 2])
+            ->one();
+
+        $model = Cooperate::findOne($cooperate['id']);
+        $model->status = 2;
+
+        if ($model->save()) {
+            return $this->redirect('/personal/payer-organizations');
+        }
+                 }
+            else {
+                Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
+                 return $this->redirect(['/personal/organization-payers#panel2']);
+            }
+        }
+        return $this->render('/user/delete', [
+            'user' => $user,
+            'title' => 'Расторгнуть соглашение',
+        ]);
+    }
+    
+
+    /**
+     * Finds the Cooperate model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     * @param integer $id
+     * @return Cooperate the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = Cooperate::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
 }

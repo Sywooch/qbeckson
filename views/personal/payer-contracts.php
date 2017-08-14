@@ -257,7 +257,7 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
         <?php endif; ?>
         <?= SearchFilter::widget([
             'model' => $searchActiveContracts,
-            'action' => ['personal/payer-contracts#panel1'],
+            'action' => ['personal/payer-contracts'],
             'data' => GridviewHelper::prepareColumns(
                 'contracts',
                 $activeColumns,
@@ -284,7 +284,7 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
     <div id="panel2" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchConfirmedContracts,
-            'action' => ['personal/payer-contracts#panel2'],
+            'action' => ['personal/payer-contracts'],
             'data' => GridviewHelper::prepareColumns(
                 'contracts',
                 $confirmedColumns,
@@ -311,7 +311,7 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
     <div id="panel3" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchPendingContracts,
-            'action' => ['personal/payer-contracts#panel3'],
+            'action' => ['personal/payer-contracts'],
             'data' => GridviewHelper::prepareColumns(
                 'contracts',
                 $pendingColumns,
@@ -333,7 +333,7 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
     <div id="panel4" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchDissolvedContracts,
-            'action' => ['personal/payer-contracts#panel4'],
+            'action' => ['personal/payer-contracts'],
             'data' => GridviewHelper::prepareColumns(
                 'contracts',
                 $dissolvedColumns,

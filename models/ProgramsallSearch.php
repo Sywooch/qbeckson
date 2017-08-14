@@ -44,7 +44,8 @@ class ProgramsallSearch extends Programs
     {
         $query = Programs::find()
             ->joinWith(['municipality'])
-            ->where('mun.operator_id = ' . Yii::$app->operator->identity->id);
+            ->where('`mun`.operator_id = ' . Yii::$app->operator->identity->id)
+            ->andWhere('is_municipal_task < 1');
 
         // add conditions that should always apply here
 
@@ -75,23 +76,24 @@ class ProgramsallSearch extends Programs
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'programs.id' => $year,
-            'programs.organization_id' => $organization,
-            'programs.verification' => 2,
-            'programs.rating' => $this->rating,
-            'programs.limit' => $this->limit,
-            'programs.study' => $this->study,
-            'programs.ovz' => $this->ovz,
-            'programs.quality_control' => $this->quality_control,
-            'programs.certification_date' => $this->certification_date,
+            'id' => $year,
+            'organization_id' => $organization,
+            'verification' => 2,
+            'rating' => $this->rating,
+            'limit' => $this->limit,
+            'study' => $this->study,
+            //'open' => 1,
+            'ovz' => $this->ovz,
+            'quality_control' => $this->quality_control,
+            'certification_date' => $this->certification_date,
         ]);
 
-        $query->andFilterWhere(['like', 'programs.name', $this->name])
-            ->andFilterWhere(['like', 'programs.direction_id', $this->direction_id])
-            ->andFilterWhere(['like', 'programs.task', $this->task])
-            ->andFilterWhere(['like', 'programs.annotation', $this->annotation])
-            ->andFilterWhere(['like', 'programs.link', $this->link])
-            ->andFilterWhere(['like', 'programs.vid', $this->vid]);
+        $query->andFilterWhere(['like', '`programs`.name', $this->name])
+            ->andFilterWhere(['like', 'direction_id', $this->direction_id])
+            ->andFilterWhere(['like', 'task', $this->task])
+            ->andFilterWhere(['like', 'annotation', $this->annotation])
+            ->andFilterWhere(['like', 'link', $this->link])
+            ->andFilterWhere(['like', 'vid', $this->vid]);
         
 
         return $dataProvider;

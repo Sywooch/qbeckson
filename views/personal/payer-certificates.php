@@ -6,13 +6,13 @@ use app\models\UserIdentity;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use kartik\grid\GridView;
+use yii\helpers\Url;
 use app\widgets\SearchFilter;
 use app\helpers\GridviewHelper;
 use app\helpers\PermissionHelper;
 
 $this->title = 'Сертификаты';
 $this->params['breadcrumbs'][] = $this->title;
-
 /* @var $this yii\web\View */
 /* @var $searchCertificates \app\models\search\CertificatesSearch */
 /* @var $certificatesProvider \yii\data\ActiveDataProvider */
@@ -95,12 +95,18 @@ $columns = [
     'role' => UserIdentity::ROLE_PAYER
 ]); ?>
 
+<?php if (PermissionHelper::checkMonitorUrl('/certificates/allnominal')): ?>
+<div class="pull-right">
+    <?= Html::a('Обновить номиналы', Url::to(['/certificates/allnominal', 'id' => $payer_id]), ['class' => 'btn btn-success']) ?>
+</div>
+<?php endif; ?>
+
 <p>
-    <?php if (PermissionHelper::checkMonitorUrl('/certificates/create')) : ?>
+    <?php if (PermissionHelper::checkMonitorUrl('/certificates/create')): ?>
     <?= Html::a('Добавить сертификат', ['/certificates/create'], ['class' => 'btn btn-success']) ?>
-    <?php elseif (PermissionHelper::checkMonitorUrl('/certificates/allnominal')) : ?>
-        <br>
-        <br>
+    <?php elseif (PermissionHelper::checkMonitorUrl('/certificates/allnominal')): ?>
+        <br />
+        <br />
     <?php endif; ?>
 </p>
 

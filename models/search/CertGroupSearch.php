@@ -20,7 +20,7 @@ class CertGroupSearch extends CertGroup
     public function rules()
     {
         return [
-            [['id', 'payer_id', 'payerId', 'nominal', 'nominal_f'], 'integer'],
+            [['id', 'payer_id', 'payerId', 'nominal'], 'integer'],
             [['group'], 'safe'],
         ];
     }
@@ -65,7 +65,6 @@ class CertGroupSearch extends CertGroup
             'id' => $this->id,
             'payer_id' => $this->payer_id,
             'nominal' => $this->nominal,
-            'nominal_f' => $this->nominal_f,
         ]);
 
         $query->andFilterWhere(['like', 'group', $this->group]);

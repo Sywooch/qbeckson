@@ -17,10 +17,6 @@ $this->params['breadcrumbs'][] = 'Плательщики';
 /* @var $openPayersProvider \yii\data\ActiveDataProvider */
 /* @var $searchWaitPayers \app\models\PayersSearch */
 /* @var $waitPayersProvider \yii\data\ActiveDataProvider */
-/* @var $searchRejectPayers \app\models\PayersSearch */
-/* @var $rejectPayersProvider \yii\data\ActiveDataProvider */
-/* @var $searchConfirmPayers \app\models\PayersSearch */
-/* @var $confirmPayersProvider \yii\data\ActiveDataProvider */
 
 $name = [
     'attribute' => 'name',
@@ -69,7 +65,7 @@ $actions = [
     'searchFilter' => false,
 ];
 
-$columns = [
+$openColumns = $waitColumns = [
     $name,
     $phone,
     $email,
@@ -81,7 +77,8 @@ $columns = [
     $actions
 ];
 
-$preparedColumns = GridviewHelper::prepareColumns('payers', $columns);
+$preparedOpenColumns = GridviewHelper::prepareColumns('payers', $openColumns, 'open');
+$preparedWaitColumns = GridviewHelper::prepareColumns('payers', $waitColumns, 'wait');
 
 ?>
 <ul class="nav nav-tabs">
@@ -91,18 +88,8 @@ $preparedColumns = GridviewHelper::prepareColumns('payers', $columns);
         </a>
     </li>
     <li>
-        <a data-toggle="tab" href="#panel2">Подтверждённые
-            <span class="badge"><?= $confirmPayersProvider->getTotalCount() ?></span>
-        </a>
-    </li>
-    <li>
-        <a data-toggle="tab" href="#panel3">Ожидается подтверждение
+        <a data-toggle="tab" href="#panel2">Ожидается подтверждение
             <span class="badge"><?= $waitPayersProvider->getTotalCount() ?></span>
-        </a>
-    </li>
-    <li>
-        <a data-toggle="tab" href="#panel4">Отклонены
-            <span class="badge"><?= $rejectPayersProvider->getTotalCount() ?></span>
         </a>
     </li>
 </ul>
@@ -121,85 +108,45 @@ if ($roles['organizations'] and $organization['actual'] !== 0) {
     <div id="panel1" class="tab-pane fade in active">
         <?= SearchFilter::widget([
             'model' => $searchOpenPayers,
-            'action' => ['personal/organization-payers#panel1'],
+            'action' => ['personal/operator-payers'],
             'data' => GridviewHelper::prepareColumns(
                 'payers',
-                $columns,
-                null,
+                $openColumns,
+                'open',
                 'searchFilter',
                 null
             ),
             'role' => UserIdentity::ROLE_ORGANIZATION,
+            'type' => 'open'
         ]); ?>
         <?= GridView::widget([
             'dataProvider' => $openPayersProvider,
             'filterModel' => null,
             'pjax' => true,
             'summary' => false,
-            'columns' => $preparedColumns,
+            'columns' => $preparedOpenColumns,
         ]); ?>
     </div>
     <div id="panel2" class="tab-pane fade">
         <?= SearchFilter::widget([
-            'model' => $searchConfirmPayers,
-            'action' => ['personal/organization-payers#panel2'],
-            'data' => GridviewHelper::prepareColumns(
-                'payers',
-                $columns,
-                null,
-                'searchFilter',
-                null
-            ),
-            'role' => UserIdentity::ROLE_ORGANIZATION,
-        ]); ?>
-        <?= GridView::widget([
-            'dataProvider' => $confirmPayersProvider,
-            'filterModel' => null,
-            'pjax' => true,
-            'summary' => false,
-            'columns' => $preparedColumns,
-        ]); ?>
-    </div>
-    <div id="panel3" class="tab-pane fade">
-        <?= SearchFilter::widget([
             'model' => $searchWaitPayers,
-            'action' => ['personal/organization-payers#panel3'],
+            'action' => ['personal/operator-payers'],
             'data' => GridviewHelper::prepareColumns(
                 'payers',
-                $columns,
-                null,
+                $waitColumns,
+                'wait',
                 'searchFilter',
                 null
             ),
             'role' => UserIdentity::ROLE_ORGANIZATION,
+            'type' => 'wait'
         ]); ?>
         <?= GridView::widget([
             'dataProvider' => $waitPayersProvider,
             'filterModel' => null,
             'pjax' => true,
             'summary' => false,
-            'columns' => $preparedColumns,
-        ]); ?>
-    </div>
-    <div id="panel4" class="tab-pane fade">
-        <?= SearchFilter::widget([
-            'model' => $searchRejectPayers,
-            'action' => ['personal/organization-payers#panel4'],
-            'data' => GridviewHelper::prepareColumns(
-                'payers',
-                $columns,
-                null,
-                'searchFilter',
-                null
-            ),
-            'role' => UserIdentity::ROLE_ORGANIZATION,
-        ]); ?>
-        <?= GridView::widget([
-            'dataProvider' => $rejectPayersProvider,
-            'filterModel' => null,
-            'pjax' => true,
-            'summary' => false,
-            'columns' => $preparedColumns,
+            'columns' => $preparedWaitColumns,
         ]); ?>
     </div>
 </div>

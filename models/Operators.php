@@ -3,7 +3,6 @@
 namespace app\models;
 
 use Yii;
-use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "operators".
@@ -22,10 +21,9 @@ use yii\db\ActiveRecord;
  * @property string $position
  * @property string $fio
  *
- * @property OperatorSettings $settings
  * @property User $user
  */
-class Operators extends ActiveRecord
+class Operators extends \yii\db\ActiveRecord
 {
     /**
      * @inheritdoc
@@ -44,7 +42,7 @@ class Operators extends ActiveRecord
             [['user_id', 'name', 'OGRN', 'INN', 'KPP', 'OKPO', 'address_legal', 'address_actual', 'phone', 'email', 'position', 'fio'], 'required'],
             [['user_id', 'OGRN', 'INN', 'KPP', 'OKPO', 'region'], 'integer'],
             [['name', 'address_legal', 'address_actual', 'phone', 'email', 'position', 'fio'], 'string', 'max' => 255],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
+            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
 
@@ -73,23 +71,11 @@ class Operators extends ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getSettings()
-    {
-        return $this->hasOne(OperatorSettings::class, ['operator_id' => 'id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
     public function getUser()
     {
-        return $this->hasOne(User::class, ['id' => 'user_id']);
+        return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 
-    /**
-     * @param string $region
-     * @return bool
-     */
     public function setRegion($region)
     {
         $this->region = $region;
@@ -102,19 +88,18 @@ class Operators extends ActiveRecord
      */
     public function getOrganizations()
     {
-        return $this->hasMany(Organization::class, ['id' => 'organization_id'])
-            ->viaTable('organization_operator_assignment', ['operator_id' => 'id']);
+        return $this->hasMany(Organization::className(), ['id' => 'organization_id'])->viaTable('organization_operator_assignment', ['operator_id' => 'id']);
     }
 
     /**
-     * Use UserIdentity()->operator instead
-     *
-     * @deprecated
+     * DEPRECATED
+     * Use UserIdentity::operator instead
      */
     public function getOperators()
     {
-        $query = self::find();
-        if (!Yii::$app->user->isGuest) {
+        $query = Operators::find();
+
+        if(!Yii::$app->user->isGuest) {
             $query->where(['user_id' => Yii::$app->user->id]);
         }
 

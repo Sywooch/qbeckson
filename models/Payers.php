@@ -111,38 +111,6 @@ class Payers extends \yii\db\ActiveRecord
     }
 
     /**
-     * Better to use repository.
-     * @return null|Cooperate
-     */
-    public function findUnconfirmedCooperates()
-    {
-        return $this->hasMany(Cooperate::class, ['payer_id' => 'id'])
-            ->orWhere([
-                'AND',
-                ['cooperate.status' => Cooperate::STATUS_NEW],
-                ['<', 'cooperate.created_date', date('Y-m-d H:i:s', strtotime('-3 day'))]
-            ])
-            ->orWhere([
-                'AND',
-                ['cooperate.status' => Cooperate::STATUS_CONFIRMED],
-                ['<', 'cooperate.created_date', date('Y-m-d H:i:s', strtotime('-11 day'))],
-                ['is not', 'cooperate.number', null],
-                ['is not', 'cooperate.date', null]
-            ])
-            ->all();
-    }
-
-    /**
-     * @return Cooperate
-     */
-    public function getCooperation()
-    {
-        return $this->hasOne(Cooperate::class, ['payer_id' => 'id'])
-            ->andWhere(['cooperate.organization_id' => Yii::$app->user->getIdentity()->organization->id])
-            ->one();
-    }
-
-    /**
      * @return \yii\db\ActiveQuery
      */
     public function getCertificateInformation()
@@ -391,5 +359,26 @@ class Payers extends \yii\db\ActiveRecord
         }
 
         return $query->one();
+    }
+
+    public function getNoCooperatePayer()
+    {
+
+        $query = Payers::find();
+
+        if (!Yii::$app->user->isGuest) {
+
+            //$query->Where(['!=', 'directionality', false]);
+
+            $cooperates = new Cooperate();
+            $cooperate = $cooperates->getCooperateallPayers();
+
+            foreach ($cooperate as $value) {
+                $query->andWhere(['!=', 'id', $value]);
+            }
+
+        }
+
+        return $query->column();
     }
 }

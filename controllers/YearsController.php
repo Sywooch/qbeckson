@@ -34,15 +34,6 @@ class YearsController extends Controller
         ];
     }
 
-    public function actionAddAddresses($id)
-    {
-        $module = $this->findModel($id);
-
-
-
-    }
-
-
     /**
      * Lists all ProgrammeModule models.
      * @return mixed

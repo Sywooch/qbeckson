@@ -60,7 +60,7 @@ class CooperateSearch extends Cooperate
     {
         $query = Cooperate::find()
             ->joinWith([
-                'payer',
+                'payers',
                 'organization'
             ])
             ->andWhere(['organization.mun' => Yii::$app->operator->identity->id]);
@@ -72,7 +72,7 @@ class CooperateSearch extends Cooperate
             ],
         ]);
         
-        $dataProvider->sort->attributes['payerName'] = [
+        $dataProvider->sort->attributes['payers'] = [
             'asc' => ['payers.name' => SORT_ASC],
             'desc' => ['payers.name' => SORT_DESC],
         ];
@@ -82,7 +82,7 @@ class CooperateSearch extends Cooperate
             'desc' => ['payers.mun' => SORT_DESC],
         ];
                  
-        $dataProvider->sort->attributes['organizationName'] = [
+        $dataProvider->sort->attributes['organization'] = [
             'asc' => ['organization.name' => SORT_ASC],
             'desc' => ['organization.name' => SORT_DESC],
         ];

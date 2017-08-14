@@ -8,16 +8,15 @@ namespace app\components;
  */
 class GoogleCoordinates
 {
-    const DEFAULT_URL = 'http://maps.google.com/maps/api/geocode/json?address={{ADDRESS}}&sensor=false';
-
     private $address;
     private $response;
+    const DEFAULT_URL = 'http://maps.google.com/maps/api/geocode/json?address={{ADDRESS}}&sensor=false';
 
     /**
      * GoogleCoordinates constructor.
      * @param string $address
      */
-    public function __construct($address = null)
+    public function __construct($address)
     {
         $this->address = $address;
     }
@@ -53,33 +52,27 @@ class GoogleCoordinates
      */
     private function getResponse()
     {
-        $ch = curl_init();
-        $options = [
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_URL => $this->getPreparedUrl(),
-            CURLOPT_HEADER => false,
-        ];
-        curl_setopt_array($ch, $options);
-        $response = curl_exec($ch);
-        curl_close($ch);
-        if (!$response) {
-            return false;
-        }
-        $response = json_decode($response);
-        $this->response = $response;
-        if ($response->status !== 'OK') {
-            $this->response = false;
+        if (null === $this->response) {
+            $ch = curl_init();
+            $options = [
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_URL => $this->getPreparedUrl(),
+                CURLOPT_HEADER => false,
+            ];
+            curl_setopt_array($ch, $options);
+            $response = curl_exec($ch);
+            curl_close($ch);
+            if (!$response) {
+                return false;
+            }
+            $response = json_decode($response);
+            $this->response = $response;
+            if ($response->status !== 'OK') {
+                $this->response = false;
+            }
         }
 
         return $this->response;
-    }
-
-    /**
-     * @param null|string $address
-     */
-    public function setAddress($address)
-    {
-        $this->address = $address;
     }
 }

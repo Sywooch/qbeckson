@@ -1,6 +1,4 @@
 <?php
-use app\models\Cooperate;
-use yii\db\Query;
 use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
@@ -71,31 +69,27 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute'=> 'directionality_3_count',
                 'value'=> $model->directionality3($model->id),
-            ],
-            [
+            ],[
                 'attribute'=> 'directionality_4_count',
                 'value'=> $model->directionality4($model->id),
-            ],
-            [
+            ],[
                 'attribute'=> 'directionality_5_count',
                 'value'=> $model->directionality5($model->id),
-            ],
-            [
+            ],[
                 'attribute'=> 'directionality_6_count',
                 'value'=> $model->directionality6($model->id),
             ],
         ],
     ]) ?>
     <p>
-    <?php
-    if (isset($roles['operators'])) {
-        $previus = (new Query())
+    <?php if (isset($roles['operators'])) {
+        $previus = (new \yii\db\Query())
             ->select(['id'])
             ->from('certificates')
             ->where(['payer_id' => $model->id])
             ->count();
     
-        $cooperate = (new Query())
+        $cooperate = (new \yii\db\Query())
             ->select(['id'])
             ->from('cooperate')
             ->where(['payer_id' => $model->id])
@@ -148,7 +142,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ]);
         }
     }
-
     if (isset($roles['payer'])) {
         echo Html::a('Назад', '/personal/payer-info', ['class' => 'btn btn-primary']);
     }
@@ -158,7 +151,7 @@ $this->params['breadcrumbs'][] = $this->title;
          $organizations = new Organization();
         $organization = $organizations->getOrganization();
         
-        $status = (new Query())
+        $status = (new \yii\db\Query())
                     ->select(['status'])
                     ->from('cooperate')
                     ->where(['payer_id' => $model->id])
@@ -166,19 +159,19 @@ $this->params['breadcrumbs'][] = $this->title;
                     ->andWhere(['status' => 1])
                     ->column();
         if ($status) {
-            $contracts = (new Query())
+            $contracts = (new \yii\db\Query())
                     ->select(['id'])
                     ->from('contracts')
                     ->where(['payer_id' => $model->id])
                     ->andWhere(['organization_id' => $organization['id']])
                     ->count();
-            if ($contracts === 0) {
+            if ($contracts == 0) {
                 echo '&nbsp';
                 echo Html::a('Расторгнуть соглашение', Url::to(['/cooperate/decooperate', 'id' => $model->id]), ['class' => 'btn btn-danger', 'data' => [
                 'confirm' => 'Вы действительно хотите расторгнуть соглашение с этим плательщиком?'], 'title' => Yii::t('yii', 'Расторгнуть соглашение')]);
             }
         } else {
-            $status2 = (new Query())
+            $status2 = (new \yii\db\Query())
                     ->select(['status'])
                     ->from('cooperate')
                     ->where(['payer_id' => $model->id])
@@ -188,78 +181,14 @@ $this->params['breadcrumbs'][] = $this->title;
             
             if ($status2) {
                 echo '&nbsp';
-                echo Html::a('Удалить соглашение', Url::to(['cooperate/delete', 'id' => $model->id]), ['class' => 'btn btn-danger', 'data' => [
+                echo Html::a('Удалить соглашение', Url::to(['/cooperate/delete', 'id' => $model->id]), ['class' => 'btn btn-danger', 'data' => [
                 'confirm' => 'Вы действительно хотите удалить соглашение с этим плательщиком?', 'method' => 'post'], 'title' => Yii::t('yii', 'Расторгнуть соглашение')]);
             }
+            else {
+                echo '&nbsp;';
+                echo Html::a('Ввести сведения о заключенном соглашении', Url::to(['/cooperate/create', 'id' => $model->id]), ['class' => 'btn btn-primary']);
+            }
         }
-
-
-
-
-
-
-
-
-
-
-
-
-        if (null !== ($cooperation = $model->getCooperation())) {
-            if (null !== $cooperation->getDocumentUrl()) {
-                echo '<hr><div class="panel panel-default">
-                        <div class="panel-body">' .
-                    Html::a('Текст договора/соглашения', [$cooperation->getDocumentUrl()])
-                    . ' </div>
-                    </div>';
-            }
-            if ($cooperation->status === Cooperate::STATUS_REJECTED) {
-                echo ' ';
-                echo $this->render(
-                    '../cooperate/appeal-request',
-                    ['model' => $cooperation]
-                );
-            }
-            if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
-                null === $cooperation->number &&
-                null === $cooperation->date
-            ) {
-                echo '<hr><p class="lead">Реквизиты договора/соглашения не указаны</p>';
-                echo $this->render(
-                    '../cooperate/requisites',
-                    [
-                        'model' => $cooperation,
-                        'label' => 'Сведения о реквизитах соглашения/договора не внесены',
-                    ]
-                );
-            } else if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
-                null !== $cooperation->number &&
-                null !== $cooperation->date
-            ) {
-                echo '<hr><p class="lead">Реквизиты договора/соглашения не указаны</p>';
-                echo $this->render(
-                    '../cooperate/requisites',
-                    [
-                        'model' => $cooperation,
-                        'label' => 'Реквизиты соглашения: от ' . $cooperation->date . ' №' . $cooperation->number,
-                    ]
-                );
-            }
-        } else {
-            echo ' ';
-            echo Html::a(
-                'Направить заявку на заключение соглашения с уполномоченной организацией',
-                Url::to(['cooperate/request', 'payerId' => $model->id]),
-                ['class' => 'btn btn-primary']
-            );
-        }
-
-
-
-
-
-
-
-
     }
     ?>
     </p>
