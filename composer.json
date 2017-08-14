@@ -36,7 +36,7 @@
         "kartik-v/yii2-helpers": "*",
         "kartik-v/yii2-slider": "*",
         "kartik-v/yii2-editable": "*",
-        "phpoffice/phpword": "^0.13.0",
+        "phpoffice/phpword": "dev-develop",
         "arius/number-formatter": "1.*",
         "2amigos/yii2-ckeditor-widget" : "2.0",
         "trntv/yii2-file-kit": "^1.2",

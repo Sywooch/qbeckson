@@ -22,6 +22,7 @@ class OrganizationSearch extends Organization
     public $subordered = false;
     public $statusArray = [];
     public $cooperateStatus;
+    public $cooperatePayerId;
 
     /**
      * @return string
@@ -39,7 +40,7 @@ class OrganizationSearch extends Organization
         return [
             [[
                 'id', 'user_id', 'actual', 'type', 'license_number', 'bank_bik', 'korr_invoice',
-                'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'cooperateStatus'
+                'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'cooperateStatus', 'cooperatePayerId'
             ], 'integer'],
             [[
                 'name', 'license_date', 'license_issued', 'bank_name', 'bank_sity', 'rass_invoice', 'fio',
@@ -75,9 +76,8 @@ class OrganizationSearch extends Organization
             ->joinWith([
                 'municipality',
                 'programs',
-                'contracts'
-            ])
-            ->groupBy(['organization.id']);
+                'contracts',
+            ]);
 
         $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
 
@@ -124,12 +124,16 @@ class OrganizationSearch extends Organization
             'organization.OGRN' => $this->OGRN,
             'organization.okopo' => $this->okopo,
             'organization.mun' => $this->mun,
-            'organization.status' => $this->statusArray,
+            'organization.status' => $this->statusArray
         ]);
 
         if (null !== $this->cooperateStatus) {
             $query->joinWith(['cooperates'])
-                ->andWhere(['cooperate.status' => $this->cooperateStatus]);
+                ->andWhere(['cooperate.status' => $this->cooperateStatus])
+                ->andWhere(['cooperate.payer_id' => $this->cooperatePayerId])
+                ->groupBy(['cooperate.id']);
+        } else {
+            $query->groupBy(['organization.id']);
         }
 
         $query
