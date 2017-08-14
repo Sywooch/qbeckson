@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\models\forms\ProgramAddressesForm;
+use app\models\ProgramAddressAssignment;
 use Yii;
 use app\models\Programs;
 use app\models\ProgramsallSearch;
@@ -48,8 +50,33 @@ class ProgramsController extends Controller
     }
 
     /**
-     * @param $id
-     * @return string
+     * @param integer $id
+     * @return string|Response
+     */
+    public function actionAddAddresses($id)
+    {
+        $program = $this->findModel($id);
+        $form = new ProgramAddressesForm($program);
+
+        if ($form->load(Yii::$app->request->post())) {
+            if ($form->save()) {
+                Yii::$app->session->setFlash('success', 'Адреса успешно обновлены');
+
+                return $this->refresh();
+            } else {
+                Yii::$app->session->setFlash('error', 'Что-то не так');
+            }
+        }
+
+        return $this->render('add-addresses', [
+            'model' => $form,
+            'program' => $program,
+        ]);
+    }
+
+    /**
+     * @param integer $id
+     * @return string|Response
      */
     public function actionAddPhoto($id)
     {

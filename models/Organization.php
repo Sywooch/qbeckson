@@ -65,6 +65,7 @@ use app\behaviors\UploadBehavior;
  * @property bool $isRefused
  * @property \yii\db\ActiveQuery $favorites
  * @property Programs[] $programs
+ * @property OrganizationAddress[] $addresses
  */
 class Organization extends \yii\db\ActiveRecord
 {
@@ -226,9 +227,17 @@ class Organization extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getAddresses()
+    {
+        return $this->hasMany(OrganizationAddress::class, ['organization_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getLicense()
     {
-        return $this->hasMany(OrganizationDocument::className(), ['organization_id' => 'id'])
+        return $this->hasMany(OrganizationDocument::class, ['organization_id' => 'id'])
             ->andWhere(['type' => OrganizationDocument::TYPE_LICENSE]);
     }
 
@@ -350,6 +359,16 @@ class Organization extends \yii\db\ActiveRecord
         }
 
         return $title;
+    }
+
+    /**
+     * @return Cooperate
+     */
+    public function getCooperation()
+    {
+        return $this->hasOne(Cooperate::class, ['organization_id' => 'id'])
+            ->andWhere(['cooperate.payer_id' => Yii::$app->user->getIdentity()->payer->id])
+            ->one();
     }
 
     /**

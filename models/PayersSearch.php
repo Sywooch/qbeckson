@@ -14,6 +14,7 @@ class PayersSearch extends Payers
     public $certificates;
     public $cooperates;
     public $cooperateStatus;
+    public $modelName;
 
     /**
      * @inheritdoc
@@ -31,6 +32,14 @@ class PayersSearch extends Payers
                 'certificates', 'cooperates', 'cooperateStatus'
             ], 'safe'],
         ];
+    }
+
+    /**
+     * @return string
+     */
+    public function formName()
+    {
+        return $this->modelName ?: '';
     }
 
     /**

@@ -1,8 +1,9 @@
 <?php
 use app\components\LocalFlysystemBuilder;
 use developeruz\db_rbac\behaviors\AccessBehavior;
-use \kartik\datecontrol\Module;
+use kartik\datecontrol\Module;
 use trntv\filekit\Storage;
+use app\components\KeyStorage;
 
 $params = require(__DIR__ . '/params.php');
 
@@ -11,10 +12,13 @@ $config = [
     'language' => 'ru-RU',
     'sourceLanguage' => 'ru-RU',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log', 'MonitorAccess'],
+    'bootstrap' => ['log'],
     'layout' => 'gos',
     'defaultRoute' => 'site/index',
     'components' => [
+        'keyStorage' => [
+            'class' => KeyStorage::class
+        ],
         'yandexMapsApi' => [
             'class' => 'mirocow\yandexmaps\Api',
         ],
@@ -25,9 +29,6 @@ $config = [
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
-        ],
-        'MonitorAccess' => [
-            'class' => 'app\components\MonitorAccess',
         ],
         'operator' => [
             'class' => 'app\components\Operator',
@@ -134,10 +135,15 @@ $config = [
     ],
 
     'as AccessBehavior' => [
-        'class' => AccessBehavior::className(),
+        'class' => AccessBehavior::class,
         'rules' =>
             [
                 'personal' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['operator-cooperates'],
+                        'roles' => ['operators']
+                    ],
                     [
                         'actions' => ['update-municipality'],
                         'allow' => true,
@@ -257,8 +263,31 @@ $config = [
                 'certificate-information' => [
                     [
                         'allow' => true,
-                        'roles' => ['payers'],
+                        'roles' => ['payer'],
                     ]
+                ],
+                'cooperate' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['request', 'appeal-request', 'requisites'],
+                        'roles' => ['organizations'],
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['confirm-request', 'reject-request', 'reject-contract', 'confirm-contract', 'requisites'],
+                        'roles' => ['payer'],
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['view', 'reject-appeal', 'confirm-appeal'],
+                        'roles' => ['operators'],
+                    ],
+                ],
+                'operator/key-storage' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['operators'],
+                    ],
                 ],
                 'monitor' => [
                     [
@@ -266,7 +295,19 @@ $config = [
                         'roles' => ['payers'],
                     ]
                 ],
-           ]
+                'operator/operator-settings' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['operators']
+                    ]
+                ],
+                'organization/address' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['organizations']
+                    ]
+                ]
+            ]
     ],
 
     'params' => $params,
