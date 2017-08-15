@@ -190,6 +190,9 @@ class ContractRequestForm extends Model
             $normativePrice = CalculationHelper::roundTo(
                 $realizationPeriodInDays / $groupRealizationPeriod * $group->module->normative_price
             );
+            $price = CalculationHelper::roundTo(
+                $realizationPeriodInDays / $groupRealizationPeriod * $group->module->price
+            );
 
             if ($realizationPeriodInMonthes === 1) {
 
@@ -198,17 +201,23 @@ class ContractRequestForm extends Model
                     $this->dateFrom,
                     date('Y-m-t', strtotime($this->dateFrom))
                 );
-
                 $firstMonthNormativePrice = CalculationHelper::roundTo(
                     $daysInFirstMonth / $groupRealizationPeriod * $group->module->normative_price,
+                    CalculationHelper::TO_DOWN
+                );
+                $firstMonthPrice = CalculationHelper::roundTo(
+                    $daysInFirstMonth / $groupRealizationPeriod * $group->module->price,
                     CalculationHelper::TO_DOWN
                 );
 
                 $otherMonthesNormativePrice = ($realizationPeriodInDays - $daysInFirstMonth) /
                     $groupRealizationPeriod * $group->module->normative_price / ($realizationPeriodInMonthes - 1);
+                $otherMonthesPrice = ($realizationPeriodInDays - $daysInFirstMonth) /
+                    $groupRealizationPeriod * $group->module->price / ($realizationPeriodInMonthes - 1);
 
 
-                $otherMonthesNormativePrice = CalculationHelper::roundTo($otherMonthesNormativePrice);
+
+                //$otherMonthesNormativePrice = CalculationHelper::roundTo($otherMonthesNormativePrice);
             }
 
             /*$contract = new Contracts([

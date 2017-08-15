@@ -119,7 +119,7 @@ $user = Yii::$app->user->getIdentity();
                                             'label' => 'Система',
                                             'items' => [
                                                 ['label' => 'Информация', 'url' => ['personal/operator-statistic']],
-                                                ['label' => 'Праметры системы', 'url' => ['operator/operator-settings']]
+                                                ['label' => 'Параметры системы', 'url' => ['operator/operator-settings']]
                                             ]
                                         ],
                                         ['label' => 'Коэффициенты', 'items' => [
