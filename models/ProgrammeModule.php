@@ -14,6 +14,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $month
  * @property integer $previus
  * @property integer $open
+ * @property integer $normative_price
  *
  * @property Programs $program
  * @property Contracts[] $activeContracts

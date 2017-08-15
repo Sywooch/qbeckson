@@ -306,6 +306,12 @@ $config = [
                         'allow' => true,
                         'roles' => ['organizations']
                     ]
+                ],
+                'contracts' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['certificate']
+                    ]
                 ]
             ]
     ],
