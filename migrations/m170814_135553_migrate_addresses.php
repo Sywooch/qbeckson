@@ -10,7 +10,7 @@ use yii\helpers\ArrayHelper;
 class m170814_135553_migrate_addresses extends Migration
 {
     /**
-     *
+     * Обновление адресов организаций
      */
     public function safeUp()
     {

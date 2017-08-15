@@ -71,7 +71,8 @@ use app\models\Payers;
     ?>
 
     <?= $form->field($model, 'nominal')->textInput(!isset($roles['payer']) ? ['readOnly'=>true] : ['maxlength' => true, 'id' => 'nominalField']) ?>
-    
+    <?= $form->field($model, 'nominal_f')->textInput(!isset($roles['payer']) ? ['readOnly'=>true] : ['maxlength' => true, 'id' => 'nominalFField']) ?>
+
      <?php if (!$model->isNewRecord) { 
           echo  $form->field($model, 'balance')->textInput(!isset($roles['payer']) ? ['readOnly'=>true] : ['maxlength' => true, 'id' => 'nom']);
     } ?>

@@ -100,6 +100,8 @@ class CertificatesController extends Controller
                 $model->number = $username;
                 $model->actual = 1;
                 $model->balance = $model->nominal;
+                $model->balance_f = $model->nominal_f;
+                $model->rezerv_f = 0;
                 $model->rezerv = 0;
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
 
@@ -144,6 +146,7 @@ class CertificatesController extends Controller
             // TODO: дублирование кода, избавиться
             if ($model->load(Yii::$app->request->post())) {
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
+                $model->balance_f = $model->nominal_f;
 
                 $model->save();
             }
