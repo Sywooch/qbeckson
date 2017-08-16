@@ -250,6 +250,13 @@ $config = [
                         'roles' => ['admins'],
                     ]
                 ],
+                'certificates' => [
+                    [
+                        'actions' => ['group-pdf', 'password'],
+                        'allow' => true,
+                        'roles' => ['certificate'],
+                    ]
+                ],
                 'site/save-filter' => [
                     [
                         'allow' => true,

@@ -369,6 +369,15 @@ class Payers extends \yii\db\ActiveRecord
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 
+    public function getCertGroups($isSpecial = null)
+    {
+        $relation = $this->hasMany(CertGroup::className(), ['payer_id' => 'id']);
+
+        $relation->andFilterWhere(['is_special' => $isSpecial]);
+
+        return $relation;
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -376,6 +385,8 @@ class Payers extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Mun::className(), ['id' => 'mun']);
     }
+
+
 
     /**
      * DEPRECATED

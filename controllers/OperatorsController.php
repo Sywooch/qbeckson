@@ -82,7 +82,7 @@ class OperatorsController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $model = $this->findModel(Yii::$app->user->identity->operator->id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['/personal/operator-statistic']);
@@ -93,17 +93,19 @@ class OperatorsController extends Controller
         }
     }
 
-    /**
-     * Deletes an existing Operators model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     */
-    public function actionDelete($id)
+    public function actionParams()
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel(Yii::$app->user->identity->operator->id);
 
-        return $this->redirect(['index']);
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', 'Параметры успешно обновлены.');
+
+            return $this->refresh();
+        } else {
+            return $this->render('params', [
+                'model' => $model,
+            ]);
+        }
     }
 
     /**

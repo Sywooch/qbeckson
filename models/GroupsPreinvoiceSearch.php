@@ -12,7 +12,7 @@ use app\models\Organization;
 /**
  * GroupsSearch represents the model behind the search form about `app\models\Groups`.
  */
-class GroupsInvoiceSearch extends Groups
+class GroupsPreinvoiceSearch extends Groups
 {
     /**
      * @inheritdoc
