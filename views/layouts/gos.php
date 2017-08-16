@@ -198,10 +198,10 @@ $user = Yii::$app->user->getIdentity();
                                                 'label' => 'Реестр программ',
                                                 'url' => ['personal/organization-programs']
                                             ],
-                                            [
+                                            /*[
                                                 'label' => 'Муниципальное задание',
                                                 'url' => ['personal/organization-municipal-task']
-                                            ],
+                                            ],*/
                                         ]],
                                         ['label' => 'Договоры', 'url' => ['/personal/organization-contracts']],
                                         ['label' => 'Счета', 'url' => ['/personal/organization-invoices']],
@@ -288,7 +288,7 @@ $user = Yii::$app->user->getIdentity();
                     <div class="col-md-12 col-md-8 col-md-offset-2">
                         <?php
                         if (Yii::$app->user->can('certificate') && $certificate->certGroup->is_special < 1 && Yii::$app->user->identity->certificate->countActiveContracts < 1) {
-                            Yii::$app->session->setFlash('warning', 'Ваш сертификат не активирован. Необходимо в срок до ' . date('d.m.Y', Yii::$app->user->identity->certificate->updated_cert_group + 20*24*60*60) . ' заключить хотя бы один договор на обучение по сертификату ПФ и подать заявление о смене вида сертификата в организацию, с которой такой договор будет заключен. <a target="_blank" href="' . Url::to(['certificates/group-pdf']) . '"">Открыть заявление (PDF)</a>');
+                            //Yii::$app->session->setFlash('warning', 'Ваш сертификат не активирован. Необходимо в срок до ' . date('d.m.Y', Yii::$app->user->identity->certificate->updated_cert_group + 20*24*60*60) . ' заключить хотя бы один договор на обучение по сертификату ПФ и подать заявление о смене вида сертификата в организацию, с которой такой договор будет заключен. <a target="_blank" href="' . Url::to(['certificates/group-pdf']) . '"">Открыть заявление (PDF)</a>');
                         }
 
                         // TODO: Убрать всё это говно, ага ;)
