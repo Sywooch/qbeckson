@@ -119,12 +119,14 @@ $user = Yii::$app->user->getIdentity();
                                             'label' => 'Система',
                                             'items' => [
                                                 ['label' => 'Информация', 'url' => ['personal/operator-statistic']],
-                                                ['label' => 'Параметры системы', 'url' => ['operator/operator-settings']]
+                                                ['label' => 'Параметры системы', 'url' => ['operator/operator-settings']],
+
                                             ]
                                         ],
                                         ['label' => 'Коэффициенты', 'items' => [
                                             ['label' => 'Муниципалитеты', 'url' => ['/mun/index']],
                                             ['label' => 'Общие параметры', 'url' => ['/coefficient/update']],
+                                            ['label' => 'Настройки системы', 'url' => ['/operators/params']],
                                         ]],
                                         [
                                             'label' => 'Плательщики',
@@ -235,6 +237,12 @@ $user = Yii::$app->user->getIdentity();
                                             ],
                                         ],
                                     ]);
+                    } elseif ($certificate->certGroup->is_special > 0) {
+                        $items = [
+                            ['label' => 'Сертификат учёта <span class="glyphicon glyphicon-user"></span>',
+
+'url' => ['/personal/certificate-info']],
+                        ];
                                 } else {
                                     echo Nav::widget([
                                         'options' => ['class' => 'navbar-nav navbar-right balancefield'],
@@ -279,6 +287,10 @@ $user = Yii::$app->user->getIdentity();
                     </div>
                     <div class="col-md-12 col-md-8 col-md-offset-2">
                         <?php
+                        if (Yii::$app->user->can('certificate') && $certificate->certGroup->is_special < 1 && Yii::$app->user->identity->certificate->countActiveContracts < 1) {
+                            Yii::$app->session->setFlash('warning', 'Ваш сертификат не активирован. Необходимо в срок до ' . date('d.m.Y', Yii::$app->user->identity->certificate->updated_cert_group + 20*24*60*60) . ' заключить хотя бы один договор на обучение по сертификату ПФ и подать заявление о смене вида сертификата в организацию, с которой такой договор будет заключен. <a target="_blank" href="' . Url::to(['certificates/group-pdf']) . '"">Открыть заявление (PDF)</a>');
+                        }
+
                         // TODO: Убрать всё это говно, ага ;)
                         $organizations = new Organization();
                         $organization = $organizations->getOrganization();
