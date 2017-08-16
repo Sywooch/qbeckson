@@ -79,7 +79,7 @@ $this->registerJs($js, $this::POS_END);
             </div>
             <hr>
             <div class="col-md-12">
-                <?= Html::a('Изменить адресы программы', ['add-addresses', 'id' => $model->id], ['class' => 'btn btn-success']); ?>
+                <?= Html::a('Изменить адреса программы', ['add-addresses', 'id' => $model->id], ['class' => 'btn btn-success']); ?>
             </div>
         </div>
         <br>

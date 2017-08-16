@@ -29,6 +29,7 @@ class CertGroupController extends Controller
             Yii::$app->response->format = Response::FORMAT_JSON;
             $post = Yii::$app->request->post();
             $model = $this->findModel($post['editableKey']);
+            $out = ['output' => '', 'message' => ''];
             $data = ['CertGroup' => current($post['CertGroup'])];
 
             if ($model->load($data) && $model->validate()) {
@@ -56,7 +57,7 @@ class CertGroupController extends Controller
                 $out = ['output' => $output, 'message' => 'Ошибка при сохранении.'];
             }
 
-            return ['output' => '', 'message' => 'Ошибка валидации'];
+            return $out;
         }
 
         return $this->render('index', [

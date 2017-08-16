@@ -141,9 +141,8 @@ class Certificates extends \yii\db\ActiveRecord
             'rezerv_f' => 'Зарезервированно на оплату программ на будущий период',
             'cert_group' => 'Группа сертификата',
             'payer' => 'Плательщик',
-            'selectCertGrounnnp' => 'Группа сертификата',
-            'possible_cert_group' => 'Тип сертификата',
-
+            'selectCertGroup' => 'Тип сертификата',
+            'possible_cert_group' => 'Группа сертификата',
         ];
     }
 

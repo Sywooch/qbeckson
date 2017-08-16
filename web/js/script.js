@@ -60,7 +60,7 @@ $(document).ready(function () {
 function selectGroup(obj) {
     nominal = $("#possible-cert-group").find("option:selected").attr("data-nominal");
     if (!nominal || nominal < 1) {
-        alert('Выберите группу сертификата.');
+        krajeeDialog.alert("Пожалуйста, выберите сначала группу сертификата.")
         return false;
     }
 

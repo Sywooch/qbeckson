@@ -6,7 +6,7 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model \app\models\forms\ProgramAddressesForm */
 
-$this->title = 'Редактировать адресы программы: ' . $program->name;
+$this->title = 'Редактировать адреса программы: ' . $program->name;
 $this->params['breadcrumbs'][] = ['label' => 'Программа', 'url' => ['programs/view', 'id' => $program->id]];
 $this->params['breadcrumbs'][] = $this->title;
 
@@ -24,7 +24,7 @@ $this->registerJs($js, $this::POS_READY);
 ?>
 <div class="programs-add-picture">
     <?php if ([] === $model->getModel()->organization->addresses) : ?>
-        <p class="lead">Необходимо добавить адресы реализации образовательных программ</p>
+        <p class="lead">Сперва необходимо внести все возможные места реализации программ в разделе меню "Информация" - "Адреса реализации образовательных программ".</p>
     <?php else : ?>
         <?php $form = ActiveForm::begin(); ?>
             <div class="row">

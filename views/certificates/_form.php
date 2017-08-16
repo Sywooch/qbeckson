@@ -5,10 +5,13 @@ use kartik\form\ActiveForm;
 use yii\helpers\ArrayHelper;
 use app\models\CertGroup;
 use app\models\Payers;
+use kartik\dialog\Dialog;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Certificates */
 /* @var $form yii\widgets\ActiveForm */
+
+echo Dialog::widget(['options' => ['title' => 'Предупреждение',]]);
 ?>
 
 <div class="certificates-form" ng-app>
@@ -65,7 +68,7 @@ use app\models\Payers;
             $dataOptions[$index] = ['data-nominal' => $value];
         }
 
-        echo $form->field($model, 'possible_cert_group')->dropDownList(ArrayHelper::map(CertGroup::getPossibleList($payer->id), 'id', 'group'), ['options' => $dataOptions, 'prompt' => 'Выберите группу...', 'id' => 'possible-cert-group'])->label('Тип сертификата');
+        echo $form->field($model, 'possible_cert_group')->dropDownList(ArrayHelper::map(CertGroup::getPossibleList($payer->id), 'id', 'group'), ['options' => $dataOptions, 'prompt' => 'Выберите группу...', 'id' => 'possible-cert-group']);
 
         echo $form->field($model, 'selectCertGroup')->radioList($model->getCertGroupTypes(), [
             'item' => function ($index, $label, $name, $checked, $value) use ($dataOptions) {
@@ -79,11 +82,11 @@ use app\models\Payers;
     }
     ?>
 
-    <?= $form->field($model, 'nominal')->textInput(!isset($roles['payer']) ? ['readOnly'=>true] : ['maxlength' => true, 'id' => 'nominalField']) ?>
-    <?= $form->field($model, 'nominal_f')->textInput(!isset($roles['payer']) ? ['readOnly'=>true] : ['maxlength' => true, 'id' => 'nominalFField']) ?>
+    <?= $form->field($model, 'nominal')->textInput(!isset($roles['payer']) ? ['readOnly' => true] : ['maxlength' => true, 'id' => 'nominalField']) ?>
+    <?= $form->field($model, 'nominal_f')->textInput(!isset($roles['payer']) ? ['readOnly' => true] : ['maxlength' => true, 'id' => 'nominalFField']) ?>
 
-     <?php if (!$model->isNewRecord) { 
-          echo  $form->field($model, 'balance')->textInput(!isset($roles['payer']) ? ['readOnly'=>true] : ['maxlength' => true, 'id' => 'nom']);
+    <?php if (!$model->isNewRecord) {
+        echo $form->field($model, 'balance')->textInput(!isset($roles['payer']) ? ['readOnly' => true] : ['maxlength' => true, 'id' => 'nom']);
     } ?>
 
     <div class="form-group">
