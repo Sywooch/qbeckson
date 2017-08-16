@@ -173,9 +173,16 @@ $this->params['breadcrumbs'][] = $this->title;
                     ->andWhere(['organization_id' => $organization['id']])
                     ->count();
             if ($contracts === 0) {
-                echo '&nbsp';
-                echo Html::a('Расторгнуть соглашение', Url::to(['/cooperate/decooperate', 'id' => $model->id]), ['class' => 'btn btn-danger', 'data' => [
-                'confirm' => 'Вы действительно хотите расторгнуть соглашение с этим плательщиком?'], 'title' => Yii::t('yii', 'Расторгнуть соглашение')]);
+                echo ' ';
+                echo Html::a(
+                    'Расторгнуть соглашение',
+                    Url::to(['/cooperate/decooperate', 'id' => $model->id]),
+                    [
+                        'class' => 'btn btn-danger',
+                        'data' => ['confirm' => 'Вы действительно хотите расторгнуть соглашение с этим плательщиком?'],
+                        'title' => 'Расторгнуть соглашение'
+                    ]
+                );
             }
         } else {
             $status2 = (new Query())
@@ -187,22 +194,21 @@ $this->params['breadcrumbs'][] = $this->title;
                     ->column();
             
             if ($status2) {
-                echo '&nbsp';
-                echo Html::a('Удалить соглашение', Url::to(['cooperate/delete', 'id' => $model->id]), ['class' => 'btn btn-danger', 'data' => [
-                'confirm' => 'Вы действительно хотите удалить соглашение с этим плательщиком?', 'method' => 'post'], 'title' => Yii::t('yii', 'Расторгнуть соглашение')]);
+                echo ' ';
+                echo Html::a(
+                    'Удалить соглашение',
+                    Url::to(['cooperate/delete', 'id' => $model->id]),
+                    [
+                        'class' => 'btn btn-danger',
+                        'data' => [
+                            'confirm' => 'Вы действительно хотите удалить соглашение с этим плательщиком?',
+                            'method' => 'post'
+                        ],
+                        'title' => 'Расторгнуть соглашение'
+                    ]
+                );
             }
         }
-
-
-
-
-
-
-
-
-
-
-
 
         if (null !== ($cooperation = $model->getCooperation())) {
             if (null !== $cooperation->getDocumentUrl()) {
@@ -231,7 +237,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'label' => 'Сведения о реквизитах соглашения/договора не внесены',
                     ]
                 );
-            } else if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
+            } elseif ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
                 null !== $cooperation->number &&
                 null !== $cooperation->date
             ) {
@@ -252,14 +258,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 ['class' => 'btn btn-primary']
             );
         }
-
-
-
-
-
-
-
-
     }
     ?>
     </p>

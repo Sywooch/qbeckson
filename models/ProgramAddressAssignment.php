@@ -12,10 +12,7 @@ use yii\db\ActiveRecord;
  * @property integer $program_id
  * @property integer $status
  *
- * @property OrganizationAddress $organizationAddress
- * @property Programs $program
- * @property ProgramModuleAddressAssignment[] $programModuleAddressAssignments
- * @property Years[] $programModules
+ * @property OrganizationAddress $address
  */
 class ProgramAddressAssignment extends ActiveRecord
 {
@@ -51,5 +48,13 @@ class ProgramAddressAssignment extends ActiveRecord
                 'targetAttribute' => ['program_id' => 'id']
             ],
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAddress()
+    {
+        return $this->hasOne(OrganizationAddress::class, ['id' => 'organization_address_id']);
     }
 }

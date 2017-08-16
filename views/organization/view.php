@@ -4,8 +4,6 @@ use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 use app\models\Payers;
-use yii\helpers\ArrayHelper;
-use app\models\Mun;
 use app\models\Cooperate;
 
 /* @var $this yii\web\View */
@@ -377,14 +375,6 @@ $this->params['breadcrumbs'][] = $this->title;
         }
 
         if (isset($roles['payer'])) {
-
-
-
-
-
-
-
-
             echo Html::a('Назад', ['personal/payer-organizations'], ['class' => 'btn btn-primary']);
             if (null !== ($cooperation = $model->getCooperation())) {
                 if (null !== $cooperation->getDocumentUrl()) {
@@ -405,7 +395,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         ['model' => $cooperation]
                     );
                 }
-
                 if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
                     null === $cooperation->number &&
                     null === $cooperation->date
@@ -423,7 +412,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     null !== $cooperation->date) ||
                     $cooperation->status === Cooperate::STATUS_ACTIVE
                 ) {
-                    echo '<hr><p class="lead">Реквизиты договора/соглашения не указаны</p>';
+                    echo '<hr>';
                     echo $this->render(
                         '../cooperate/requisites',
                         [
@@ -432,7 +421,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]
                     );
                 }
-
                 if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
                     null !== $cooperation->number &&
                     null !== $cooperation->date
@@ -445,12 +433,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     );
                 }
             }
-
-
-
-
-
-
         }
         ?>
     </p>

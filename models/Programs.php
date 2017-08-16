@@ -251,7 +251,7 @@ class Programs extends ActiveRecord
             'selectyear' => 'Выберите год обучения по программе для просмотра подробной информации',
             'activities' => 'Виды деятельности',
             'programPhoto' => 'Картинка программы',
-            'address_ids' => 'Адресы',
+            'certificate_accounting_limit' => 'Лимит зачисления',
         ];
     }
 
