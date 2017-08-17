@@ -96,13 +96,9 @@ class CertificatesController extends Controller
                 Yii::$app->authManager->assign($userRole, $user->id);
 
                 $model->user_id = $user->id;
-                //$payers = new Payers();
-                //$payer = $payers->getPayer();
                 $model->payer_id = $payer->id;
                 $model->number = $username;
                 $model->actual = 1;
-                $model->balance = $model->nominal;
-                $model->balance_f = $model->nominal_f;
                 $model->rezerv_f = 0;
                 $model->rezerv = 0;
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
@@ -116,7 +112,9 @@ class CertificatesController extends Controller
                     $user->delete();
                 }
             }
-
+        } elseif (Yii::$app->request->isPost) {
+            print_r(Yii::$app->request->post());exit;
+            print_r($model->errors);exit;
         }
 
         return $this->render('create', [
