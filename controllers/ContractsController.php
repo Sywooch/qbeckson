@@ -57,8 +57,6 @@ class ContractsController extends Controller
     public function actionRequest($groupId)
     {
         $model = new ContractRequestForm($groupId);
-        //$this->performAjaxValidation($model);
-
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $result = $model->save();
         }

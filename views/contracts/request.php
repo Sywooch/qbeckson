@@ -1,6 +1,7 @@
 <?php
 
 use kartik\widgets\DatePicker;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
@@ -14,23 +15,16 @@ $this->params['breadcrumbs'][] = ['label' => 'Поиск программ', 'url
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <?php $pjax = Pjax::begin() ?>
-
-<pre>
-    <?php print_r($result) ?>
-</pre>
-
 <div class="contract-request">
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ActiveForm::begin([
+        'options' => [
+            'data-pjax' => '',
+        ]
+    ]); ?>
     <div class="row">
-        <div class="col-md-offset-1 col-md-5">
+        <div class="col-md-offset-1 col-md-10">
+            <p class="lead">Realization period: <?= $model->dateFrom; ?> <?= $model->dateTo; ?></p>
             <?= $form->field($model, 'dateFrom')->widget(DatePicker::class, [
-                'pluginOptions' => [
-                    'format' => 'yyyy-mm-dd'
-                ]
-            ]) ?>
-        </div>
-        <div class="col-md-5">
-            <?= $form->field($model, 'dateTo')->widget(DatePicker::class, [
                 'pluginOptions' => [
                     'format' => 'yyyy-mm-dd'
                 ]
