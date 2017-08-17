@@ -94,7 +94,6 @@ $this->registerJs($js, $this::POS_READY);
         </div>
     </div>
     <?php DynamicFormWidget::end(); ?>
-    <p><strong>*</strong> Для того, чтобы убедиться, что адрес верно будет отображаться на карте нажмите кнопку сохранить и проверьте туда ли поставлен ориентир.</p>
     <?php if (null !== $models[0]->address) : ?>
         <?php
         $marks = [];

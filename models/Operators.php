@@ -44,7 +44,8 @@ class Operators extends ActiveRecord
             [['user_id', 'name', 'OGRN', 'INN', 'KPP', 'OKPO', 'address_legal', 'address_actual', 'phone', 'email', 'position', 'fio'], 'required'],
             [['user_id', 'OGRN', 'INN', 'KPP', 'OKPO', 'region'], 'integer'],
             [['name', 'address_legal', 'address_actual', 'phone', 'email', 'position', 'fio'], 'string', 'max' => 255],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
+            [['date_year_start', 'date_year_end'], 'date', 'format' => 'php:Y-m-d'],
+            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
 
@@ -67,6 +68,8 @@ class Operators extends ActiveRecord
             'email' => 'Email',
             'position' => 'Должность ответственного лица',
             'fio' => 'ФИО ответственного лица',
+            'date_year_start' => 'Дата начала года',
+            'date_year_end' => 'Дата конца года',
         ];
     }
 

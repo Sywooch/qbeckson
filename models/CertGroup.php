@@ -12,6 +12,7 @@ use yii\db\ActiveRecord;
  * @property string $group
  * @property integer $nominal
  * @property float $nominal_f
+ * @property integer $amount
  *
  * @property Payers $payer
  * @property Certificates[] $certificates
@@ -32,7 +33,7 @@ class CertGroup extends ActiveRecord
     public function rules()
     {
         return [
-            [['payer_id', 'group', 'nominal', 'nominal_f'], 'required'],
+            [['payer_id', 'group', 'nominal', 'nominal_f', 'amount'], 'required'],
             [['payer_id', 'is_special'], 'integer'],
             [['nominal', 'nominal_f'], 'number', 'max' => 100000],
             [['group'], 'string', 'max' => 255],
@@ -56,6 +57,16 @@ class CertGroup extends ActiveRecord
         return $query->all();
     }
 
+    public static function getPossibleList($payerId)
+    {
+        $query = static::find()
+            ->where(['payer_id' => $payerId])
+            ->andWhere(['>', 'nominal', 0]);
+
+        return $query->all();
+    }
+
+
     /**
      * @inheritdoc
      */
@@ -67,7 +78,28 @@ class CertGroup extends ActiveRecord
             'group' => 'Группа',
             'nominal' => 'Номинал',
             'nominal_f' => 'Номинал будущего периода',
+            'countCertificates' => 'Количество используемых сертификатов',
+            'amount' => 'Лимит',
         ];
+    }
+
+    public function hasVacancy()
+    {
+        $certGroupCount = Certificates::getCountCertGroup($this->id);
+
+        if ($this->amount - $certGroupCount > 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function getCountCertificates()
+    {
+        $query = Certificates::find()
+            ->where(['cert_group' => $this->id]);
+
+        return $query->count();
     }
 
     /**
@@ -84,5 +116,13 @@ class CertGroup extends ActiveRecord
     public function getCertificates()
     {
         return $this->hasMany(Certificates::class, ['cert_group' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCertificateGroupQueues()
+    {
+        return $this->hasMany(CertificateGroupQueue::className(), ['cert_group_id' => 'id']);
     }
 }

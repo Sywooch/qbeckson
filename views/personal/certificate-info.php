@@ -1,6 +1,7 @@
 <?php
 
 use yii\helpers\Html;
+use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $certificate \app\models\Certificates */
@@ -37,6 +38,7 @@ $this->registerJs($js, $this::POS_READY);
                 ) ?>
             </p>
         </div>
+        <!--<div class="well col-md-5 text-center">Текущий сертификат: <b><?= $certificate->textType ?></b></div>-->
         <div class="well col-md-5 text-center">
             <div id="current" class="tab">
                 <p class="lead">Номинал сертификата<br>
@@ -66,6 +68,25 @@ $this->registerJs($js, $this::POS_READY);
                     <i class="glyphicon glyphicon-menu-left"></i>
                 </a>
             </div>
+            <div>
+                <?php
+                /*if (Yii::$app->user->can('certificate') && $certificate->canChangeGroup && !empty($certificate->getCertificateGroupQueues($certificate->id)->count())) {
+                    echo '<div class="alert alert-danger" role="alert">Вы находитесь в очереди на смену группы сертификата. Пожалуйста, подождите.</div>';
+                } elseif (Yii::$app->user->can('certificate') && $certificate->canChangeGroup) {
+                    echo '<br />';
+                    $form = ActiveForm::begin();
+                    if ($certificate->certGroup->is_special > 0) {
+                        $certificate->cert_group = $certificate->possibleCertGroup->id;
+                    } else {
+                        $certificate->cert_group = $certificate->payers->getCertGroups(1)->one()->id;
+                    }
+                    echo $form->field($certificate, 'cert_group')->hiddenInput()->label(false);
+                    echo '<p>Сменить тип сертификата на ' . Html::submitButton($certificate->getTextType(true), ['class' => 'btn btn-primary', 'onClick' => 'if (!confirm("Уверены?")) return false;']) . '</p>';
+                    ActiveForm::end();
+                }*/
+                ?>
+            </div>
+
         </div>
     </div>
 </div>

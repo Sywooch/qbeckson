@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\models\CertificateGroupQueue;
+use app\models\Certificates;
 use Yii;
 use yii\web\Response;
 use yii\web\Controller;
@@ -27,6 +29,7 @@ class CertGroupController extends Controller
             Yii::$app->response->format = Response::FORMAT_JSON;
             $post = Yii::$app->request->post();
             $model = $this->findModel($post['editableKey']);
+            $out = ['output' => '', 'message' => ''];
             $data = ['CertGroup' => current($post['CertGroup'])];
 
             if ($model->load($data) && $model->validate()) {
@@ -39,11 +42,22 @@ class CertGroupController extends Controller
                     return ['output' => '', 'message' => 'Неверный пароль.'];
                 }
 
-                return $model->save(false) ?
-                    ['output' => '', 'message' => ''] : ['output' => '', 'message' => 'Ошибка при сохранении.'];
+                if ($model->oldAttributes['amount'] != $model->amount) {
+                    $certGroupCount = Certificates::getCountCertGroup($model->id);
+                    $vacancies = $model->amount - $certGroupCount;
+                    if ($vacancies > 0 && $queue = CertificateGroupQueue::getByCertGroup($model->id, $vacancies)) {
+                        foreach ($queue as $item) {
+                            $item->removeFromCertQueue();
+                        }
+                    }
+                }
+
+                $model->save(false);
+            } else {
+                $out = ['output' => $output, 'message' => 'Ошибка при сохранении.'];
             }
 
-            return ['output' => '', 'message' => 'Ошибка валидации'];
+            return $out;
         }
 
         return $this->render('index', [
@@ -59,8 +73,10 @@ class CertGroupController extends Controller
      */
     public function actionView($id)
     {
+        $model = $this->findModel($id);
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
         ]);
     }
 

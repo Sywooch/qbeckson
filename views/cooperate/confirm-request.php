@@ -32,7 +32,7 @@ $js = <<<JS
 JS;
 $this->registerJs($js, $this::POS_READY);
 /** @var \app\models\Operators $operator */
-$operator = Yii::$app->user->getIdentity()->operator ?: Yii::$app->operator->identity;
+$operator = Yii::$app->operator->identity;
 ?>
 <?php
 Modal::begin([

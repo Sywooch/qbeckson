@@ -58,8 +58,20 @@ $(document).ready(function () {
 });
 
 function selectGroup(obj) {
-    value = $(obj).find("option:selected").attr("data-nominal");
+    nominal = $("#possible-cert-group").find("option:selected").attr("data-nominal");
+    if (!nominal || nominal < 1) {
+        krajeeDialog.alert("Пожалуйста, выберите сначала группу сертификата.")
+        return false;
+    }
+
+    if ($(obj).find(":checked").attr("data-force-nominal") > 0) {
+        value = nominal;
+    } else {
+        value = 0;
+    }
     $("#nominalField").val(value);
+
+    return true;
 }
 
 

@@ -38,6 +38,7 @@ use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\BadRequestHttpException;
+use yii\helpers\Url;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -909,8 +910,7 @@ class PersonalController extends Controller
 
     public function actionCertificateStatistic()
     {
-        $certificates = new Certificates();
-        $certificate = $certificates->getCertificates();
+        $certificate = Yii::$app->user->identity->certificate;
 
         $model = new Programs();
 
@@ -970,17 +970,34 @@ class PersonalController extends Controller
 
     public function actionCertificateInfo()
     {
-        $certificate = Yii::$app->user->getIdentity()->certificate;
+        $model = Yii::$app->user->identity->certificate;
+        $model->scenario = Certificates::SCENARIO_CERTIFICATE;
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $flagGroupHasBeenChanged = false;
+            if ($model->canChangeGroup && $model->oldAttributes['cert_group'] != $model->cert_group) {
+                if ($model->changeCertGroup() == Certificates::FLAG_GROUP_HAS_BEEN_CHANGED) {
+                    $flagGroupHasBeenChanged = true;
+                }
+            }
+
+            if ($model->save(false)) {
+                if ($flagGroupHasBeenChanged === true) {
+                    Yii::$app->session->setFlash('success', 'Вам успешно поменяли вид сертификата на сертификат персонифицированного финансирования.');
+                }
+
+                return $this->refresh();
+            }
+        }
 
         return $this->render('certificate-info', [
-            'certificate' => $certificate,
+            'certificate' => $model,
         ]);
     }
 
     public function actionCertificateWaitContract()
     {
-        $certificates = new Certificates();
-        $certificate = $certificates->getCertificates();
+        $certificate = Yii::$app->user->identity->certificate;
 
         $Contracts3Search = new Contracts3Search();
         $Contracts3Search->certificate_id = $certificate['id'];
@@ -994,8 +1011,8 @@ class PersonalController extends Controller
 
     public function actionCertificateWaitRequest()
     {
-        $certificates = new Certificates();
-        $certificate = $certificates->getCertificates();
+        $certificate = Yii::$app->user->identity->certificate;
+
         $ContractsnSearch = new ContractsnSearch();
         $ContractsnSearch->certificate_id = $certificate['id'];
         $ContractsnProvider = $ContractsnSearch->search(Yii::$app->request->queryParams);
