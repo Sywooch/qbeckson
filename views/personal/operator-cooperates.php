@@ -72,10 +72,11 @@ $contractsCount = [
     'attribute' => 'contractsCount',
     'format'=> 'raw',
     'value' => function ($data) {
+        /** @var \app\models\Cooperate $data */
         $contracts = (new \yii\db\Query())
             ->select(['id'])
             ->from('contracts')
-            ->where(['payer_id' => $data->payers->id])
+            ->where(['payer_id' => $data->payer->id])
             ->andWhere(['organization_id' => $data->organization->id])
             ->count();
 
@@ -85,8 +86,8 @@ $contractsCount = [
                 'personal/operator-contracts',
                 'SearchActiveContracts[organizationName]' => $data->organization->name,
                 'SearchActiveContracts[organization_id]' => $data->organization->id,
-                'SearchActiveContracts[payerName]' => $data->payers->name,
-                'SearchActiveContracts[payer_id]' => $data->payers->id,
+                'SearchActiveContracts[payerName]' => $data->payer->name,
+                'SearchActiveContracts[payer_id]' => $data->payer->id,
             ],
             ['class' => 'blue', 'target' => '_blank', 'data-pjax' => '0']
         );

@@ -11,7 +11,6 @@ use app\models\Cooperate;
 
 $this->title = $model->name;
 
-
 $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
 if (isset($roles['operators'])) {
     $this->params['breadcrumbs'][] = ['label' => 'Организации', 'url' => ['/personal/operator-organizations']];
@@ -27,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
     if ($model->raiting) {
         echo '<h1 class="pull-right">' . $model->raiting . '%</h1>';
     } else {
-        echo '<h4 class="pull-right">Рейтинга нет</h4>';
+        echo '<h3 class="pull-right">Рейтинга нет</h3>';
     }
     ?>
 
@@ -51,15 +50,17 @@ $this->params['breadcrumbs'][] = $this->title;
             $cooperate = Cooperate::findOne($cooperates['id']);
             $cooperatedate = explode('-', $cooperate->date);
 
-            echo DetailView::widget([
-                'model' => $cooperate,
-                'attributes' => [
-                    [
-                        'label' => 'Соглашение',
-                        'value' => 'от ' . $cooperatedate[2] . '.' . $cooperatedate[1] . '.' . $cooperatedate[0] . ' № ' . $cooperate->number,
+            if (!empty($cooperate->date)) {
+                echo DetailView::widget([
+                    'model' => $cooperate,
+                    'attributes' => [
+                        [
+                            'label' => 'Соглашение',
+                            'value' => 'от ' . $cooperatedate[2] . '.' . $cooperatedate[1] . '.' . $cooperatedate[0] . ' № ' . $cooperate->number,
+                        ],
                     ],
-                ],
-            ]);
+                ]);
+            }
         }
     }
 
@@ -327,7 +328,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'about:ntext',
         ],
     ]) ?>
-    <p>
+
+    <div>
         <?php
         if (isset($roles['operators'])) {
             if ($model->actual === 0) {
@@ -387,12 +389,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 if ($cooperation->status === Cooperate::STATUS_NEW) {
                     echo ' ';
                     echo $this->render(
-                        '../cooperate/confirm-request',
-                        ['cooperation' => $cooperation]
-                    );
-                    echo $this->render(
                         '../cooperate/reject-request',
                         ['model' => $cooperation]
+                    );
+                    echo $this->render(
+                        '../cooperate/confirm-request',
+                        ['cooperation' => $cooperation]
                     );
                 }
                 if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
@@ -435,5 +437,5 @@ $this->params['breadcrumbs'][] = $this->title;
             }
         }
         ?>
-    </p>
+    </div>
 </div>

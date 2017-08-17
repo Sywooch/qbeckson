@@ -829,7 +829,8 @@ class PersonalController extends Controller
             'certificates' => '0,150000',
             'cooperates' => '0,100',
             'cooperateStatus' => Cooperate::STATUS_ACTIVE,
-            'id' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
+            'cooperateOrganization' => $user->organization->id,
+            'onlyPayers' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
             'modelName' => 'SearchOpenPayers',
         ]);
         $openPayersProvider = $searchOpenPayers->search(Yii::$app->request->queryParams);
@@ -838,7 +839,8 @@ class PersonalController extends Controller
             'certificates' => '0,150000',
             'cooperates' => '0,100',
             'cooperateStatus' => Cooperate::STATUS_NEW,
-            'id' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
+            'cooperateOrganization' => $user->organization->id,
+            'onlyPayers' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
             'modelName' => 'SearchWaitPayers',
         ]);
         $waitPayersProvider = $searchWaitPayers->search(Yii::$app->request->queryParams);
@@ -847,7 +849,8 @@ class PersonalController extends Controller
             'certificates' => '0,150000',
             'cooperates' => '0,100',
             'cooperateStatus' => Cooperate::STATUS_REJECTED,
-            'id' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
+            'cooperateOrganization' => $user->organization->id,
+            'onlyPayers' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
             'modelName' => 'SearchRejectPayers',
         ]);
         $rejectPayersProvider = $searchRejectPayers->search(Yii::$app->request->queryParams);
@@ -856,7 +859,8 @@ class PersonalController extends Controller
             'certificates' => '0,150000',
             'cooperates' => '0,100',
             'cooperateStatus' => Cooperate::STATUS_CONFIRMED,
-            'id' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
+            'cooperateOrganization' => $user->organization->id,
+            'onlyPayers' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
             'modelName' => 'SearchConfirmPayers',
         ]);
         $confirmPayersProvider = $searchConfirmPayers->search(Yii::$app->request->queryParams);

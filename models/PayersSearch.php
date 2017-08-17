@@ -14,7 +14,9 @@ class PayersSearch extends Payers
     public $certificates;
     public $cooperates;
     public $cooperateStatus;
+    public $cooperateOrganization;
     public $modelName;
+    public $onlyPayers = null;
 
     /**
      * @inheritdoc
@@ -29,7 +31,7 @@ class PayersSearch extends Payers
             ], 'integer'],
             [[
                 'id', 'name', 'address_legal', 'address_actual', 'phone', 'email', 'position', 'fio', 'directionality',
-                'certificates', 'cooperates', 'cooperateStatus'
+                'certificates', 'cooperates', 'cooperateStatus', 'cooperateOrganization', 'onlyPayers',
             ], 'safe'],
         ];
     }
@@ -82,6 +84,7 @@ class PayersSearch extends Payers
 
         if (!$this->validate()) {
             $query->where('0=1');
+
             return $dataProvider;
         }
 
@@ -100,6 +103,7 @@ class PayersSearch extends Payers
                 'payers.directionality_5_count' => $this->directionality_5_count,
                 'payers.directionality_6_count' => $this->directionality_6_count,
                 'cooperate.status' => $this->cooperateStatus,
+                'cooperate.organization_id' => $this->cooperateOrganization,
             ]);
 
         $query->andFilterWhere(['like', 'payers.name', $this->name])
@@ -110,6 +114,10 @@ class PayersSearch extends Payers
             ->andFilterWhere(['like', 'payers.position', $this->position])
             ->andFilterWhere(['like', 'payers.fio', $this->fio])
             ->andFilterWhere(['like', 'payers.directionality', $this->directionality]);
+
+        if ($this->onlyPayers !== null) {
+            $query->andWhere(['payers.id' => $this->onlyPayers]);
+        }
 
         if (!empty($this->certificates) && $this->certificates !== '0,150000') {
             $certCount = explode(',', $this->certificates);
