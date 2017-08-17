@@ -82,46 +82,47 @@ class PayersController extends Controller
 
         if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
+
             return ActiveForm::validate($user);
         }
 
-       if($user->load(Yii::$app->request->post()) && $user->validate() && $model->load(Yii::$app->request->post()) && $model->validate()) {
+        if ($user->load(Yii::$app->request->post()) && $user->validate() && $model->load(Yii::$app->request->post()) && $model->validate()) {
 
-           //return var_dump($user->password);
+            //return var_dump($user->password);
 
-           if (!$user->password) {
-               $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
-               $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
-           }
-           else {
-               $password = $user->password;
-               $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
-           }
+            if (!$user->password) {
+                $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
+                $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+            } else {
+                $password = $user->password;
+                $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+            }
 
-           if ($user->save()) {
-               $userRole = Yii::$app->authManager->getRole('payer');
-               Yii::$app->authManager->assign($userRole, $user->id);
-           
-               $model->user_id = $user->id;
-               //$model->mun = implode(",", $model->mun);
-               $model->directionality = $model->directionality_1rob.",".$model->directionality_1.",".$model->directionality_2.",".$model->directionality_3.",".$model->directionality_4.",".$model->directionality_5.",".$model->directionality_6;
+            if ($user->save()) {
+                $userRole = Yii::$app->authManager->getRole('payer');
+                Yii::$app->authManager->assign($userRole, $user->id);
 
-               if ($model->save()) {
-                   foreach (Yii::$app->params['groups'] as $value) {
-                       $group = new CertGroup();
-                       $group->payer_id = $model->id;
-                       $group->group = $value[0];
-                       $group->nominal = $value[1];
-                       $group->is_special = !empty($value[2]) ? 1 : null;
-                       $group->save();
+                $model->user_id = $user->id;
+                //$model->mun = implode(",", $model->mun);
+                $model->directionality = $model->directionality_1rob . "," . $model->directionality_1 . "," . $model->directionality_2 . "," . $model->directionality_3 . "," . $model->directionality_4 . "," . $model->directionality_5 . "," . $model->directionality_6;
+
+                if ($model->save()) {
+                    foreach (Yii::$app->params['groups'] as $value) {
+                        $group = new CertGroup();
+                        $group->payer_id = $model->id;
+                        $group->group = $value[0];
+                        $group->nominal = $value[1];
+                        $group->nominal_f = $value[1];
+                        $group->is_special = !empty($value[2]) ? 1 : null;
+                        $group->save();
                     }
+
                     return $this->render('/user/view', [
                         'model' => $user,
                         'password' => $password,
                     ]);
                 }
-           }
-           else {
+            } else {
                 return $this->render('create', [
                     'model' => $model,
                     'user' => $user,
@@ -130,8 +131,8 @@ class PayersController extends Controller
         }
 
         return $this->render('create', [
-                'model' => $model,
-                'user' => $user,
+            'model' => $model,
+            'user' => $user,
         ]);
     }
 
@@ -148,15 +149,16 @@ class PayersController extends Controller
 
         if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
+
             return ActiveForm::validate($user);
         }
 
-        if($user->load(Yii::$app->request->post())) {
-            if($model->load(Yii::$app->request->post())) {
+        if ($user->load(Yii::$app->request->post())) {
+            if ($model->load(Yii::$app->request->post())) {
 
                 //$model->mun = implode(",", $model->mun);
 
-                $model->directionality = $model->directionality_1.",".$model->directionality_2.",".$model->directionality_3.",".$model->directionality_4.",".$model->directionality_5.",".$model->directionality_6;
+                $model->directionality = $model->directionality_1 . "," . $model->directionality_2 . "," . $model->directionality_3 . "," . $model->directionality_4 . "," . $model->directionality_5 . "," . $model->directionality_6;
 
                 $model->validate();
                 $model->save();
@@ -165,18 +167,18 @@ class PayersController extends Controller
             if ($user->newlogin == 1 || $user->newpass == 1) {
 
                 if ($user->newpass == 1) {
-                   if (!$user->password) {
-                       $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
-                       $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
-                   }
-                   else {
-                       $password = $user->password;
-                       $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
-                   }
+                    if (!$user->password) {
+                        $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
+                        $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+                    } else {
+                        $password = $user->password;
+                        $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+                    }
                 }
 
                 if ($user->validate() && $user->save()) {
                     $user->password = $password;
+
                     return $this->render('/user/view', [
                         'model' => $user,
                     ]);
@@ -184,11 +186,11 @@ class PayersController extends Controller
             }
         }
 
-        if($model->load(Yii::$app->request->post())) {
+        if ($model->load(Yii::$app->request->post())) {
 
             //$model->mun = implode(",", $model->mun);
 
-            $model->directionality = $model->directionality_1rob.",".$model->directionality_1.",".$model->directionality_2.",".$model->directionality_3.",".$model->directionality_4.",".$model->directionality_5.",".$model->directionality_6;
+            $model->directionality = $model->directionality_1rob . "," . $model->directionality_1 . "," . $model->directionality_2 . "," . $model->directionality_3 . "," . $model->directionality_4 . "," . $model->directionality_5 . "," . $model->directionality_6;
 
             if ($model->validate() && $model->save()) {
                 return $this->redirect(['/payers/view', 'id' => $model->id]);
@@ -198,13 +200,27 @@ class PayersController extends Controller
         //$model->mun = explode(',', $model->mun);
 
         $model->directionality = explode(',', $model->directionality);
-        if (in_array('Техническая (робототехника)', $model->directionality)) { $model->directionality_1rob = 'Техническая (робототехника)'; }
-        if (in_array('Техническая (иная)', $model->directionality)) { $model->directionality_1 = 'Техническая (иная)'; }
-        if (in_array('Естественнонаучная', $model->directionality)) { $model->directionality_2 = 'Естественнонаучная'; }
-        if (in_array('Физкультурно-спортивная', $model->directionality)) { $model->directionality_3 = 'Физкультурно-спортивная'; }
-        if (in_array('Художественная', $model->directionality)) { $model->directionality_4 = 'Художественная'; }
-        if (in_array('Туристско-краеведческая', $model->directionality)) { $model->directionality_5 = 'Туристско-краеведческая'; }
-        if (in_array('Социально-педагогическая', $model->directionality)) { $model->directionality_6 = 'Социально-педагогическая'; }
+        if (in_array('Техническая (робототехника)', $model->directionality)) {
+            $model->directionality_1rob = 'Техническая (робототехника)';
+        }
+        if (in_array('Техническая (иная)', $model->directionality)) {
+            $model->directionality_1 = 'Техническая (иная)';
+        }
+        if (in_array('Естественнонаучная', $model->directionality)) {
+            $model->directionality_2 = 'Естественнонаучная';
+        }
+        if (in_array('Физкультурно-спортивная', $model->directionality)) {
+            $model->directionality_3 = 'Физкультурно-спортивная';
+        }
+        if (in_array('Художественная', $model->directionality)) {
+            $model->directionality_4 = 'Художественная';
+        }
+        if (in_array('Туристско-краеведческая', $model->directionality)) {
+            $model->directionality_5 = 'Туристско-краеведческая';
+        }
+        if (in_array('Социально-педагогическая', $model->directionality)) {
+            $model->directionality_6 = 'Социально-педагогическая';
+        }
 
 
         return $this->render('update', [
@@ -218,24 +234,39 @@ class PayersController extends Controller
     {
         $model = $this->findModel($id);
 
-        if($model->load(Yii::$app->request->post())) {
+        if ($model->load(Yii::$app->request->post())) {
+            $model->directionality = $model->directionality_1rob . "," . $model->directionality_1 . "," . $model->directionality_2 . "," . $model->directionality_3 . "," . $model->directionality_4 . "," . $model->directionality_5 . "," . $model->directionality_6;
 
-            //$model->mun = implode(",", $model->mun);
+            if ($model->save()) {
+                Yii::$app->session->setFlash('success', 'Данные успешно сохранены.');
 
-            $model->directionality = $model->directionality_1.",".$model->directionality_2.",".$model->directionality_3.",".$model->directionality_4.",".$model->directionality_5.",".$model->directionality_6;
-
-            if ($model->validate() && $model->save()) {
                 return $this->redirect('/personal/payer-statistic');
             }
         }
 
         $model->directionality = explode(',', $model->directionality);
-        if (in_array('Техническая', $model->directionality)) { $model->directionality_1 = 'Техническая'; }
-        if (in_array('Естественнонаучная', $model->directionality)) { $model->directionality_2 = 'Естественнонаучная'; }
-        if (in_array('Физкультурно-спортивная', $model->directionality)) { $model->directionality_3 = 'Физкультурно-спортивная'; }
-        if (in_array('Художественная', $model->directionality)) { $model->directionality_4 = 'Художественная'; }
-        if (in_array('Туристско-краеведческая', $model->directionality)) { $model->directionality_5 = 'Туристско-краеведческая'; }
-        if (in_array('Социально-педагогическая', $model->directionality)) { $model->directionality_6 = 'Социально-педагогическая'; }
+
+        if (in_array('Техническая (робототехника)', $model->directionality)) {
+            $model->directionality_1rob = 'Техническая (робототехника)';
+        }
+        if (in_array('Техническая (иная)', $model->directionality)) {
+            $model->directionality_1 = 'Техническая (иная)';
+        }
+        if (in_array('Естественнонаучная', $model->directionality)) {
+            $model->directionality_2 = 'Естественнонаучная';
+        }
+        if (in_array('Физкультурно-спортивная', $model->directionality)) {
+            $model->directionality_3 = 'Физкультурно-спортивная';
+        }
+        if (in_array('Художественная', $model->directionality)) {
+            $model->directionality_4 = 'Художественная';
+        }
+        if (in_array('Туристско-краеведческая', $model->directionality)) {
+            $model->directionality_5 = 'Туристско-краеведческая';
+        }
+        if (in_array('Социально-педагогическая', $model->directionality)) {
+            $model->directionality_6 = 'Социально-педагогическая';
+        }
 
         return $this->render('edit', [
             'model' => $model,
@@ -243,7 +274,7 @@ class PayersController extends Controller
 
     }
 
-        /**
+    /**
      * Deletes an existing Payers model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
@@ -253,7 +284,7 @@ class PayersController extends Controller
     {
         $user = User::findOne(Yii::$app->user->id);
 
-        if($user->load(Yii::$app->request->post())) {
+        if ($user->load(Yii::$app->request->post())) {
 
             if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
                 $model = $this->findModel($id);
@@ -261,10 +292,10 @@ class PayersController extends Controller
                 User::findOne($model['user_id'])->delete();
 
                 return $this->redirect(['/personal/operator-payers']);
-            }
-            else {
+            } else {
                 Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
-                 return $this->redirect(['/personal/operator-payers']);
+
+                return $this->redirect(['/personal/operator-payers']);
             }
         }
 
