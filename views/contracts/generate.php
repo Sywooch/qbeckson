@@ -47,9 +47,10 @@ $this->params['breadcrumbs'][] = $this->title;
         $model->change_fioparent = $cert->fio_parent;
         $model->change_fiochild = $cert->fio_child;
         $model->org_position = $organization->position;
-        
-        
+
         echo $organization->full_name.', осуществляющ'.
+
+
             $form->field($model, 'change1')->textInput(['style' => 'width:4em'])->label(false)
             .' образовательную  деятельность на основании лицензии от '.$license_date[2].'.'.$license_date[1].'.'.$license_date[0].' г. № '.$organization->license_number.', выданной '.$organization->license_issued_dat.', <br>именуем'.
             $form->field($model, 'change2')->textInput(['style' => 'width:4em'])->label(false)
@@ -59,6 +60,8 @@ $this->params['breadcrumbs'][] = $this->title;
             $form->field($model, 'change10')->textInput(['style' => 'width:4em'])->label(false)
             .' на основании '.
             $form->field($model, 'change_doctype')->textInput(['style' => 'width:20em'])->label(false)
+
+
             .', и '.
             $form->field($model, 'change_fioparent')->textInput(['style' => 'width:20em'])->label(false)
             .', именуем'.

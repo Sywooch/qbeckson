@@ -1007,7 +1007,6 @@ class ContractsController extends Controller
             if ($model->save()) {
                 return $this->redirect(['/contracts/preview', 'id' => $model->id]);
             }
-
         }
 
         return $this->render('/contracts/generate', [
