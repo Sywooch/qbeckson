@@ -26,8 +26,8 @@ $this->params['breadcrumbs'][] = $this->title;
         'maxFileSize' => 1 * 1024 * 1024,
         'acceptFileTypes' => new JsExpression('/(\.|\/)(doc|docx)$/i'),
     ]); ?>
-    <hr>
     <?= $form->field($model, 'document_name')->dropDownList(Cooperate::documentNames()) ?>
+    <hr />
     <div class="row">
         <div class="col-md-12">
             <p><strong>Текущий период реализации программы ПФ</strong></p>
