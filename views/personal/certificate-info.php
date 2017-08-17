@@ -33,10 +33,10 @@ $this->params['breadcrumbs'][] = ['label' => 'Персональная инфо�
         </div>
         <!--<div class="well col-md-5 text-center">Текущий сертификат: <b><?= $certificate->textType ?></b></div>-->
         <div class="col-md-5">
-            <ul class="nav nav-tabs" role="tablist">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
                 <li role="presentation"><a href="#past" aria-controls="profile" role="tab" data-toggle="tab">Прошлый</a></li>
-                <li role="presentation" class="active"><a href="#current" aria-controls="home" role="tab" data-toggle="tab">Текущий</a></li>
-                <li role="presentation"><a href="#future" aria-controls="messages" role="tab" data-toggle="tab">Будущий</a></li>
+                <li role="presentation" class="active"><a href="#current" aria-controls="home" role="tab" data-toggle="tab" title="Текущий баланс: с <?= Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_from) ?> до <?= Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_to) ?>">Текущий</a></li>
+                <li role="presentation"><a href="#future" aria-controls="messages" role="tab" data-toggle="tab" title="Будущий баланс: с <?= Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_from) ?> до <?= Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_to) ?>">Будущий</a></li>
             </ul>
             <div class="well text-center tab-content">
             <div role="tabpanel" class="tab-pane" id="past">
