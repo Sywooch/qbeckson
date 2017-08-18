@@ -39,6 +39,8 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => EditableColumn::class,
                 'attribute' => 'nominal',
+                'label' => '<span title="Текущий период: с ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_from) . ' до ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_to) . '">Номинал</span>',
+                'encodeLabel' => false,
                 'pageSummary' => true,
                 'editableOptions' => [
                     'submitButton' => [
@@ -65,6 +67,8 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => EditableColumn::class,
                 'attribute' => 'nominal_f',
+                'label' => '<span title="Будущий период: с ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_from) . ' до ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_to) . '">Номинал будущего периода</span>',
+                'encodeLabel' => false,
                 'pageSummary' => true,
                 'editableOptions' => [
                     'submitButton' => [
