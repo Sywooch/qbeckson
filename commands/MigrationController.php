@@ -15,6 +15,11 @@ use yii\helpers\ArrayHelper;
  */
 class MigrationController extends Controller
 {
+    public function actionTest()
+    {
+        return 'test';
+    }
+
     /**
      * Удаляет все адреса организаций.
      * УБРАТЬ ПОСЛЕ УСПЕШНОЙ МИГРАЦИИ АДРЕСОВ.
