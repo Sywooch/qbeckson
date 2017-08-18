@@ -40,12 +40,12 @@ class OrganizationSearch extends Organization
         return [
             [[
                 'id', 'user_id', 'actual', 'type', 'license_number', 'bank_bik', 'korr_invoice',
-                'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'cooperateStatus', 'cooperatePayerId'
+                'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'cooperatePayerId'
             ], 'integer'],
             [[
                 'name', 'license_date', 'license_issued', 'bank_name', 'bank_sity', 'rass_invoice', 'fio',
                 'position', 'address_legal', 'address_actual', 'geocode', 'raiting', 'ground', 'orgtype', 'statusArray',
-                'children', 'programs', 'amount_child', 'fio_contact', 'email', 'max_child', 'subordered'
+                'children', 'programs', 'amount_child', 'fio_contact', 'email', 'max_child', 'subordered', 'cooperateStatus'
             ], 'safe'],
         ];
     }

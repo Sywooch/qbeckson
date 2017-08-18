@@ -85,7 +85,7 @@ class Certificates extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['nominal', 'cert_group', 'name', 'soname'], 'required'],
+            [['name', 'soname', 'possible_cert_group',], 'required'],
             [['fio_parent'], 'required'],
             [['user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'cert_group', 'pasport_s', 'pasport_n', 'pasport_v', 'phone', 'possible_cert_group', 'updated_cert_group'], 'integer'],
             [['nominal', 'nominal_f'], 'number', 'max' => 100000],
@@ -120,8 +120,10 @@ class Certificates extends \yii\db\ActiveRecord
             'fio_parent' => 'ФИО родителя (законного представителя)',
             'nominal' => 'Номинал сертификата',
             'nominal_f' => 'Номинал сертификата на будущий период',
+            'nominal_p' => 'Номинал сертификата на прошлый период',
             'balance' => 'Остаток сертификата',
             'balance_f' => 'Остаток сертификата на будущий период',
+            'balance_p' => 'Остаток сертификата на прошлый период',
             'contracts' => 'Число заключенных договоров',
             'contractCount' => 'Число заключенных договоров',
             'directivity1' => 'Программ в "Техническая" направленность',
@@ -139,6 +141,7 @@ class Certificates extends \yii\db\ActiveRecord
             'phone' => 'Телефон',
             'rezerv' => 'Зарезервированно на оплату программ',
             'rezerv_f' => 'Зарезервированно на оплату программ на будущий период',
+            'rezerv_p' => 'Зарезервированно на оплату программ на прошлый период',
             'cert_group' => 'Группа сертификата',
             'payer' => 'Плательщик',
             'selectCertGroup' => 'Тип сертификата',
@@ -150,8 +153,16 @@ class Certificates extends \yii\db\ActiveRecord
     {
         if (!empty($this->selectCertGroup) && $this->selectCertGroup == self::TYPE_PF) {
             $this->cert_group = $this->possible_cert_group;
+            $this->nominal = $this->certGroup->nominal;
+            $this->nominal_f = $this->nominal;
+            $this->balance = $this->nominal;
+            $this->balance_f = $this->nominal_f;
         } elseif (!empty($this->selectCertGroup) && $certGroup = $this->payers->getCertGroups(1)->one()) {
             $this->cert_group = $certGroup->id;
+            $this->nominal = 0;
+            $this->nominal_f = 0;
+            $this->balance = 0;
+            $this->balance_f = 0;
         }
 
         return parent::beforeSave($insert);

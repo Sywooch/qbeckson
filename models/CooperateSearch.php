@@ -63,7 +63,7 @@ class CooperateSearch extends Cooperate
                 'payer',
                 'organization'
             ])
-            ->andWhere(['organization.mun' => Yii::$app->operator->identity->id]);
+            ->andWhere(['`payers`.operator_id' => Yii::$app->operator->identity->id]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

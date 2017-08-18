@@ -401,7 +401,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     null === $cooperation->number &&
                     null === $cooperation->date
                 ) {
-                    echo '<hr><p class="lead">Реквизиты договора/соглашения не указаны</p>';
                     echo $this->render(
                         '../cooperate/requisites',
                         [
@@ -409,6 +408,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'label' => 'Сведения о реквизитах соглашения/договора не внесены',
                         ]
                     );
+                    echo '<br /><br />';
                 } else if (($cooperation->status === Cooperate::STATUS_CONFIRMED &&
                     null !== $cooperation->number &&
                     null !== $cooperation->date) ||

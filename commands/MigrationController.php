@@ -1,18 +1,42 @@
 <?php
 
+namespace app\commands;
+
+use app\components\GoogleCoordinates;
 use app\models\Organization;
 use app\models\OrganizationAddress;
 use app\models\ProgramAddressAssignment;
 use app\models\ProgramModuleAddressAssignment;
-use yii\db\Migration;
+use yii\console\Controller;
 use yii\helpers\ArrayHelper;
 
-class m170814_135553_migrate_addresses extends Migration
+/**
+ *
+ */
+class MigrationController extends Controller
 {
     /**
-     * Обновление адресов организаций
+     * Test
      */
-    public function safeUp()
+    public function actionTest()
+    {
+        echo self::class . PHP_EOL;
+    }
+
+    /**
+     * Удаляет все адреса организаций.
+     * УБРАТЬ ПОСЛЕ УСПЕШНОЙ МИГРАЦИИ АДРЕСОВ.
+     */
+    public function actionRemoveAddresses()
+    {
+        OrganizationAddress::deleteAll();
+    }
+
+    /**
+     * Выполняет миграцию адресов из модулей в новую структуру:
+     * Адреса организации -> адреса программ -> адреса модулей -> адреса групп.
+     */
+    public function actionAddress()
     {
         $organizations = Organization::find()->all();
         $addresses = [];
@@ -37,7 +61,7 @@ class m170814_135553_migrate_addresses extends Migration
         }
 
         //Добавляем в базу
-        $googleGeoComponent = new \app\components\GoogleCoordinates();
+        $googleGeoComponent = new GoogleCoordinates();
         /**
          * @var integer $organizationId
          * @var array $organization
@@ -62,7 +86,15 @@ class m170814_135553_migrate_addresses extends Migration
                      */
                     foreach ($module as $address) {
                         $googleGeoComponent->setAddress($address['address']);
-                        $organizationAddress = new OrganizationAddress([
+
+                        echo $address['address'] . PHP_EOL;
+                        echo $googleGeoComponent->getLat() . ' ' . $googleGeoComponent->getLng() . PHP_EOL;
+
+                        //print_r($googleGeoComponent->sessionValues[$address['address']]);
+
+                        echo '-------------------------------' . PHP_EOL;
+
+                        /*$organizationAddress = new OrganizationAddress([
                             'organization_id' => $organizationId,
                             'address' => $address['address'],
                             'lat' => $googleGeoComponent->getLat(),
@@ -109,17 +141,12 @@ class m170814_135553_migrate_addresses extends Migration
                         try {
                             $moduleAddress->save(false);
                         } catch (\Exception $e) {
-                        }
+                        }*/
 
                         unset($organizationAddress, $programAddress, $moduleAddress);
                     }
                 }
             }
         }
-    }
-
-    public function safeDown()
-    {
-        return true;
     }
 }

@@ -184,10 +184,10 @@ $user = Yii::$app->user->getIdentity();
                                                 'label' => 'Сведения об организации',
                                                 'url' => ['/personal/organization-info']
                                             ],
-                                            [
+                                            /*[
                                                 'label' => 'Предварительные записи',
                                                 'url' => ['/personal/organization-favorites']
-                                            ],
+                                            ],*/
                                             [
                                                 'label' => 'Адреса реализации образовательных программ',
                                                 'url' => ['organization/address/index']

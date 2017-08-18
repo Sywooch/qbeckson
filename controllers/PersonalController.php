@@ -427,7 +427,7 @@ class PersonalController extends Controller
 
         $searchReject = new OrganizationSearch([
             'statusArray' => [Organization::STATUS_ACTIVE],
-            'cooperateStatus' => Cooperate::STATUS_REJECTED,
+            'cooperateStatus' => [Cooperate::STATUS_REJECTED, Cooperate::STATUS_APPEALED],
             'cooperatePayerId' => Yii::$app->user->getIdentity()->payer->id,
             'modelName' => 'SearchReject',
         ]);
@@ -858,7 +858,7 @@ class PersonalController extends Controller
         $searchRejectPayers = new PayersSearch([
             'certificates' => '0,150000',
             'cooperates' => '0,100',
-            'cooperateStatus' => Cooperate::STATUS_REJECTED,
+            'cooperateStatus' => [Cooperate::STATUS_REJECTED, Cooperate::STATUS_APPEALED],
             'cooperateOrganization' => $user->organization->id,
             'onlyPayers' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
             'modelName' => 'SearchRejectPayers',
