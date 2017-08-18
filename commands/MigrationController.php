@@ -17,7 +17,7 @@ class MigrationController extends Controller
 {
     public function actionTest()
     {
-        return 'test';
+        echo 'test';
     }
 
     /**
@@ -83,7 +83,10 @@ class MigrationController extends Controller
                      */
                     foreach ($module as $address) {
                         $googleGeoComponent->setAddress($address['address']);
-                        $organizationAddress = new OrganizationAddress([
+
+                        echo $googleGeoComponent->getLat() . ' ' . $googleGeoComponent->getLng() . PHP_EOL;
+
+                        /*$organizationAddress = new OrganizationAddress([
                             'organization_id' => $organizationId,
                             'address' => $address['address'],
                             'lat' => $googleGeoComponent->getLat(),
@@ -130,7 +133,7 @@ class MigrationController extends Controller
                         try {
                             $moduleAddress->save(false);
                         } catch (\Exception $e) {
-                        }
+                        }*/
 
                         unset($organizationAddress, $programAddress, $moduleAddress);
                     }
