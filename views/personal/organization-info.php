@@ -1,21 +1,32 @@
 <?php
+use app\models\DirectoryOrganizationForm;
+use app\models\Organization;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii\grid\GridView;
 use yii\widgets\ActiveForm;
-use yii\helpers\Url;
 use kartik\datecontrol\DateControl;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 
 $this->title = 'Сведения об организации';
 $this->params['breadcrumbs'][] = $this->title;
-?>
 
+$js = <<<'JS'
+$('body').on('click', '#submit-organization-form', function(e) {
+    e.preventDefault();
+    $('form#organization-form').submit();
+});
+$("#organization-form-pjax").on("pjax:end", function() {
+    $('#open-document-form-modal').click();
+});
+JS;
+$this->registerJs($js, $this::POS_READY);
+?>
 <div class="col-md-10 col-md-offset-1">
-    <div class="container-fluid" ng-app>
+    <div class="container-fluid">
         <div class="row">
-            <div class="col-md-<?= $organization->type == \app\models\Organization::TYPE_IP_WITHOUT_WORKERS ? "12" : "4" ?> well">
+            <div class="col-md-<?= $organization->type === Organization::TYPE_IP_WITHOUT_WORKERS ? "12" : "4" ?> well">
                 <p><label class="control-label">Наименование организации</label> - <?= $organization['name'] ?></p>
                 <p><label class="control-label">ИНН</label> - <?= $organization['inn'] ?></p>
                 <p><label class="control-label">КПП</label> - <?= $organization['KPP'] ?></p>
@@ -33,84 +44,54 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?= Html::a('Редактировать', ['/organization/edit', 'id' => $organization['id']], ['class' => 'btn btn-success']) ?>
                 </p>
             </div>
+            <?php Pjax::begin([
+                'id' => 'organization-form-pjax'
+            ]); ?>
             <div class="col-md-8">
-                <?php $form = ActiveForm::begin(); ?>
-
-
+                <?php $form = ActiveForm::begin([
+                    'id' => 'organization-form',
+                    'options' => [
+                        'data-pjax' => true
+                    ]
+                ]); ?>
                 <?php
-                if ($organization->type != 4) {
-                    if ($organization->doc_type == 1) {
+                if ($organization->type !== 4) {
+                    $doc_type = 'none';
+                    if ($organization->doc_type === 1) {
                         $doc_type = 'block';
-                    } else {
-                        $doc_type = 'none';
                     }
-                    if ($organization->doc_type == 3) {
+                    $doc_types = 'none';
+                    if ($organization->doc_type === 3) {
                         $doc_types = 'block';
-                    } else {
-                        $doc_types = 'none';
                     }
+                    echo $form->errorSummary($organization);
                     echo '
-                   <div class="well">
-                   <h3 class="text-center">Для договора</h3>
-                   <div class="form-group field-organization-license">
-                        <label class="control-label" for="organization-type">Сведения о лицензии</label>
+                    <div class="well">
+                    <h3 class="text-center">Для договора</h3>
+                    <div class="form-group field-organization-license">
+                        <label class="control-label" for="organization-type">
+                        Сведения о лицензии от ' . date('m.d.Y', strtotime($organization->license_date)) .
+                        ' №'.$organization->license_number . ':</label>
                         <div class="container-fluid">
                             <div class="row">
-                                <div class="col-md-3 license">
-                                    <p>(от </p>' .
-                        $form->field($organization, 'license_date')->textInput(['readOnly' => true])->label(false)
-                        . '</div>
-                                <div class="col-md-3 license">
-                                    <p>№</p>' .
-                        $form->field($organization, 'license_number')->textInput(['readOnly' => true])->label(false)
-                        . '</div>
-                                <div class="col-md-6 license">
-                                    <p>,&nbsp;выдана</p>' .
+                                <div class="col-md-12 license">
+                                    <p>выдана</p><div style="width: 100%">' .
                         $form->field($organization, 'license_issued_dat', ['template' => "{label}\n{hint}\n{input}\n<small>(в творительном падеже)</small>\n{error}"])->textInput(['maxlength' => true])->label(false)
-                        . '<p>).</p>
+                        . '</div>
                                 </div>
                             </div>
                         </div>
-                   </div>';
-
-
+                    </div>';
                     echo $form->field($organization, 'fio', ['template' => "{label}\n{hint}\n{input}\n<small>(в родительном падеже)</small>\n{error}"])->textInput(['maxlength' => true]);
-
                     echo $form->field($organization, 'position_min', ['template' => "{label}\n{hint}\n{input}\n<small>(кратко)</small>\n{error}"])->textInput(['maxlength' => true])->label('Должность представителя поставщика');
-
                     echo $form->field($organization, 'position', ['template' => "{label}\n{hint}\n{input}\n<small>(в родительном падеже)</small>\n{error}"])->textInput(['maxlength' => true]);
 
-                    if ($organization->type == \app\models\Organization::TYPE_IP_WITH_WORKERS) {
-
-                        echo $form->field($organization, 'doc_type')->dropDownList([1 => 'Доверенности', 3 => 'Cвидетельства о государственной регистрации'], ['onChange' => 'selectType(this.value);']);
-
-                        echo '<div id="svidet" style="display: ' . $doc_types . '">' .
-                            $form->field($organization, 'svidet')->textInput(['readOnly' => true])
-                            . '</div>';
-
-                        echo '<div class="row" id="proxy" style="display: ' . $doc_type . '">
-                           <div class="col-md-6">' .
-                            $form->field($organization, 'date_proxy')->widget(DateControl::classname(), [
-                                'type' => DateControl::FORMAT_DATE,
-                                'ajaxConversion' => false,
-                                'options' => [
-                                    'pluginOptions' => [
-                                        'autoclose' => true
-                                    ]
-                                ]
-                            ])
-                            . '</div>
-                           <div class="col-md-6">' .
-                            $form->field($organization, 'number_proxy')->textInput(['id' => 'number_proxy', 'maxlength' => true])
-                            . '</div>
-                        </div>';
-
+                    if ($organization->type === Organization::TYPE_IP_WITH_WORKERS) {
                     } else {
                         echo $form->field($organization, 'doc_type')->dropDownList([1 => 'Доверенности', 2 => 'Устава'], ['onChange' => 'selectType(this.value);']);
-
                         echo '<div class="row" id="proxy" style="display: ' . $doc_type . '">
                            <div class="col-md-6">' .
-                            $form->field($organization, 'date_proxy')->widget(DateControl::classname(), [
+                            $form->field($organization, 'date_proxy')->widget(DateControl::class, [
                                 'type' => DateControl::FORMAT_DATE,
                                 'ajaxConversion' => false,
                                 'options' => [
@@ -126,30 +107,35 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>';
                     }
                     if (empty($organization->organizational_form)) {
-                        echo $form->field($organization, 'organizational_form')->dropDownList(ArrayHelper::map(app\models\DirectoryOrganizationForm::getList(), 'id', 'name'), ['prompt' => 'Выберите..', 'options' => [5 => ['disabled' => true]]]);
+                        echo $form->field($organization, 'organizational_form')
+                            ->dropDownList(
+                                ArrayHelper::map(DirectoryOrganizationForm::getList(), 'id', 'name'),
+                                ['prompt' => 'Выберите..', 'options' => [5 => ['disabled' => true]]]
+                            );
                     }
-
-                    echo '<div class="form-group">' .
-                        Html::submitButton('Сохранить', ['class' => $organization->isNewRecord ? 'btn btn-success' : 'btn btn-primary'])
-                        . '</div>
-                    </div>';
+                    ActiveForm::end();
+                    echo Html::a('Сохранить', ['#'], [
+                        'class' => 'btn btn-primary',
+                        'id' => 'submit-organization-form',
+                    ]);
+                    echo '</div>';
                 }
                 ?>
-
-
-                <?php ActiveForm::end(); ?>
             </div>
+            <?php Pjax::end(); ?>
+            <?php echo $this->render('../organization/contract-settings/change-settings', [
+                'organization' => $organization,
+                'model' => $organizationSettings,
+            ]);
+            ?>
         </div>
         <div class="row">
             <div class="col-md-12">
                 <?php $form = ActiveForm::begin(); ?>
-
                 <?= $form->field($organization, 'about')->textarea(['rows' => 6]) ?>
-
                 <div class="form-group">
                     <?= Html::submitButton($organization->isNewRecord ? 'Добавить "Почему выбирают нас"' : 'Сохранить "Почему выбирают нас"', ['class' => $organization->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
                 </div>
-
                 <?php ActiveForm::end(); ?>
             </div>
         </div>

@@ -64,6 +64,11 @@ use yii\helpers\Url;
  * @property double $paid
  * @property integer $terminator_user
  * @property double $fontsize
+ * @property float $parents_first_month_payment
+ * @property float $parents_other_month_payment
+ * @property float $payer_first_month_payment
+ * @property float $payer_other_month_payment
+ * @property integer $payment_order
 
  * @property Disputes[] $disputes
  * @property string $statusName
@@ -82,6 +87,7 @@ use yii\helpers\Url;
  * @property Organization $organization
  * @property Payers $payer
  * @property Programs $program
+ * @property ProgrammeModule $module
  */
 class Contracts extends \yii\db\ActiveRecord
 {
@@ -115,11 +121,10 @@ class Contracts extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['certificate_id', 'program_id', 'organization_id', 'status', 'status_year', 'funds_gone', 'group_id', 'year_id', 'sposob', 'prodolj_d', 'prodolj_m', 'prodolj_m_user', 'ocenka', 'wait_termnate', 'terminator_user'], 'integer'],
+            [['certificate_id', 'program_id', 'organization_id', 'status', 'status_year', 'funds_gone', 'group_id', 'year_id', 'sposob', 'prodolj_d', 'prodolj_m', 'prodolj_m_user', 'ocenka', 'wait_termnate', 'terminator_user', 'payment_order'], 'integer'],
             [['all_funds', 'funds_cert', 'all_parents_funds', 'first_m_price', 'other_m_price', 'first_m_nprice', 'other_m_nprice', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch', 'cert_dol', 'payer_dol', 'rezerv', 'paid', 'fontsize'], 'number'],
             [['date', 'status_termination', 'start_edu_programm', 'stop_edu_contract', 'start_edu_contract', 'date_termnate'], 'safe'],
             [['status_comment', 'number', 'certnumber', 'certfio', 'change1', 'change2', 'change_org_fio', 'org_position', 'org_position_min', 'change_doctype', 'change_fioparent', 'change6', 'change_fiochild', 'change8', 'change9', 'change10', 'month_start_edu_contract'], 'string'],
-           // [['certificatenumber'], 'safe'],
             [['certificate_id', 'program_id', 'organization_id'], 'required'],
             [['link_doc', 'link_ofer'], 'string', 'max' => 255],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
@@ -128,9 +133,6 @@ class Contracts extends \yii\db\ActiveRecord
             [['certificate_id'], 'exist', 'skipOnError' => true, 'targetClass' => Certificates::className(), 'targetAttribute' => ['certificate_id' => 'id']],
             [['group_id'], 'exist', 'skipOnError' => true, 'targetClass' => Groups::className(), 'targetAttribute' => ['group_id' => 'id']],
             [['year_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProgrammeModule::className(), 'targetAttribute' => ['year_id' => 'id']],
-            /*[['date'], 'required', 'when' => function($model) {
-                return $model->status == 3;
-            }] */
         ];
     }
 
@@ -294,6 +296,9 @@ class Contracts extends \yii\db\ActiveRecord
         return $this->hasOne(ProgrammeModule::className(), ['id' => 'year_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getModule()
     {
         return $this->hasOne(ProgrammeModule::className(), ['id' => 'year_id']);
@@ -494,6 +499,28 @@ class Contracts extends \yii\db\ActiveRecord
             self::STATUS_REFUSED => 'Отклонён',
             self::STATUS_ACCEPTED => 'Подтверждён',
             self::STATUS_CLOSED => 'Расторгнут',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public static function sposobs()
+    {
+        return [
+            1 => 'за наличный расчет',
+            2 => 'в безналичном порядке на счет Исполнителя'
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public static function paymentOrders()
+    {
+        return [
+            1 => 'Оплата Заказчиком осуществляется вне зависимости от посещения занятий ребёнком за каждый месяц действия договора',
+            2 => 'Оплата за месяц действия договора Заказчиком осуществляется пропорционально доле посещённых ребёнком занятий'
         ];
     }
 }

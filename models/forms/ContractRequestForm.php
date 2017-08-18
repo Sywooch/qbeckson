@@ -219,7 +219,7 @@ class ContractRequestForm extends Model
                     ($realizationPeriodInMonthes - 1);
             }
 
-            $contract = [
+            $contractData = [
                 'certificate_id' => $this->getCertificate()->id,
                 'payer_id' => $this->getCertificate()->payer_id,
                 'group_id' => $group->id,
@@ -245,8 +245,19 @@ class ContractRequestForm extends Model
                 'payer_first_month_payment' => isset($payer_first_month_payment) ? $payer_first_month_payment : $funds_cert,
                 'payer_other_month_payment' => isset($payer_other_month_payment) ? $payer_other_month_payment : 0,
             ];
+            $contract = new Contracts($contractData);
 
-            return $contract;
+            //TODO обернуть в транзакцию
+            if ($contract->save()) {
+                /** @var Organization $organization */
+                $organization = Yii::$app->user->getIdentity()->organization;
+                $organization->contracts_count++;
+                $organization->save();
+                $contract->number = $organization->contracts_count . ' - ПФ';
+                $contract->save();
+            }
+
+            return true;
         }
 
         return false;

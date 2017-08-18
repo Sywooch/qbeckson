@@ -40,6 +40,8 @@ use app\behaviors\UploadBehavior;
  * @property string $about
  * @property string $fio_contact
  * @property string $email
+ * @property string $full_name
+ * @property integer $contracts_count
  *
  * @property Contracts[] $contracts
  * @property Cooperate[] $cooperates
@@ -152,7 +154,7 @@ class Organization extends \yii\db\ActiveRecord
              'whenClient' => "function (attribute, value) {
                  return $('#organization-type').val() != 4;
             }"],
-            [['user_id', 'actual', 'type', 'bank_bik', 'korr_invoice', 'doc_type', 'max_child', 'amount_child', 'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'last', 'last_year_contract', 'certprogram', 'status', 'organizational_form', 'certificate_accounting_limit'], 'integer'],
+            [['user_id', 'actual', 'type', 'bank_bik', 'korr_invoice', 'doc_type', 'max_child', 'amount_child', 'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'last', 'last_year_contract', 'certprogram', 'status', 'organizational_form', 'certificate_accounting_limit', 'contracts_count'], 'integer'],
             [['license_date', 'date_proxy', 'cratedate', 'accepted_date'], 'safe'],
             [['raiting'], 'number'],
             [['about', 'site', 'phone', 'refuse_reason', 'anonymous_update_token'], 'string'],
@@ -222,6 +224,14 @@ class Organization extends \yii\db\ActiveRecord
         }
 
         return parent::beforeValidate();
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getContractSettings()
+    {
+        return $this->hasOne(OrganizationContractSettings::class, ['organization_id' => 'id']);
     }
 
     /**
@@ -657,5 +667,16 @@ class Organization extends \yii\db\ActiveRecord
     public function getIsRefused()
     {
         return $this->status == self::STATUS_REFUSED;
+    }
+
+    const DOC_TYPE_CHARTER = 2;
+    const DOC_TYPE_PROXY = 1;
+
+    public static function docTypes()
+    {
+        return [
+            self::DOC_TYPE_PROXY => 'доверенности',
+            self::DOC_TYPE_CHARTER => 'Устава'
+        ];
     }
 }
