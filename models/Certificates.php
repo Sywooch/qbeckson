@@ -149,6 +149,16 @@ class Certificates extends \yii\db\ActiveRecord
         ];
     }
 
+    public function afterFind()
+    {
+        parent::afterFind();
+        if ($this->certGroup->is_special > 0) {
+            $this->selectCertGroup = self::TYPE_ACCOUNTING;
+        } else {
+            $this->selectCertGroup = self::TYPE_PF;
+        }
+    }
+
     public function beforeSave($insert)
     {
         if (!empty($this->selectCertGroup) && $this->selectCertGroup == self::TYPE_PF) {
