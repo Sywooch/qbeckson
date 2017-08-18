@@ -64,22 +64,22 @@ class OrganizationSettingsForm extends Model
         if (null === $this->header) {
             $organization = $this->getOrganization();
             if (3 > $organization->type) {
-                if ($organization->doc_type === 1) {
+                if ($organization->doc_type == 1) {
                     $doc_type = 'доверенности от ' .
                         date('d.m.Y', strtotime($organization->date_proxy)) . ' № ' .
                         $organization->number_proxy;
                 }
-                if ($organization->doc_type === 2) {
-                    $doc_type = 'устава';
+                if ($organization->doc_type == 2) {
+                    $doc_type = 'Устава';
                 }
                 $text = $organization->full_name . ', осуществляющ';
                 $text .= '{{organization_first_ending}} ';
                 $text .= 'образовательную  деятельность на основании лицензии от ';
                 $text .= date('d.m.Y', strtotime($organization->license_date)) . ' г. № ';
-                $text .= $organization->license_number . ', выданной ' . $organization->license_issued_dat . ', <br>именуем';
+                $text .= $organization->license_number . ', выданной ' . $organization->license_issued_dat . ', именуем';
                 $text .= '{{organization_second_ending}} ';
                 $text .= 'в дальнейшем "Исполнитель", в лице '. $organization->position;
-                $text .= ' ' . $organization->name  . ', действующ';
+                $text .= ' ' . $organization->fio  . ', действующ';
                 $text .= '{{director_name_ending}} ';
                 $text .= 'на основании ';
                 $text .= $doc_type;
@@ -90,10 +90,10 @@ class OrganizationSettingsForm extends Model
                     $text .= '{{organization_second_ending}} ';
                     $text .= 'образовательную  деятельность на основании лицензии от ';
                     $text .= date('d.m.Y', strtotime($organization->license_date)) . ' г. № ';
-                    $text .= $organization->license_number . ', выданной ' . $organization->license_issued_dat . ', <br>именуем';
+                    $text .= $organization->license_number . ', выданной ' . $organization->license_issued_dat . ', именуем';
                 }
                 if (4 === $organization->type) {
-                    $text = $organization->full_name . ', <br>именуем';
+                    $text = $organization->full_name . ', именуем';
                 }
                 $text .= '{{organization_second_ending}} ';
                 $text .= 'в дальнейшем "Исполнитель", предлагает физическому лицу, являющемуся родителем (законным представителем) несовершеннолетнего, включенного в систему персонифицированного финансирования дополнительного образования на основании сертификата №0000000000, именуемого в дальнейшем "Обучающийся", именуемому в дальнейшем "Заказчик" заключить Договор-оферту';

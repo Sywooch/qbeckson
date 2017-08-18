@@ -244,6 +244,7 @@ class ContractRequestForm extends Model
                 'parents_other_month_payment' => isset($parents_other_month_payment) ? $parents_other_month_payment : 0,
                 'payer_first_month_payment' => isset($payer_first_month_payment) ? $payer_first_month_payment : $funds_cert,
                 'payer_other_month_payment' => isset($payer_other_month_payment) ? $payer_other_month_payment : 0,
+                'url' => $this->getCertificate()->number . '-' . Yii::$app->security->generateRandomString(6),
             ];
             $contract = new Contracts($contractData);
 

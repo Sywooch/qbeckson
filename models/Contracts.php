@@ -58,6 +58,7 @@ use yii\helpers\Url;
  * @property integer $ocenka
  * @property integer $wait_termnate
  * @property string $date_termnate
+ * @property string $url
  * @property double $cert_dol
  * @property double $payer_dol
  * @property double $rezerv
@@ -124,7 +125,7 @@ class Contracts extends \yii\db\ActiveRecord
             [['certificate_id', 'program_id', 'organization_id', 'status', 'status_year', 'funds_gone', 'group_id', 'year_id', 'sposob', 'prodolj_d', 'prodolj_m', 'prodolj_m_user', 'ocenka', 'wait_termnate', 'terminator_user', 'payment_order'], 'integer'],
             [['all_funds', 'funds_cert', 'all_parents_funds', 'first_m_price', 'other_m_price', 'first_m_nprice', 'other_m_nprice', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch', 'cert_dol', 'payer_dol', 'rezerv', 'paid', 'fontsize'], 'number'],
             [['date', 'status_termination', 'start_edu_programm', 'stop_edu_contract', 'start_edu_contract', 'date_termnate'], 'safe'],
-            [['status_comment', 'number', 'certnumber', 'certfio', 'change1', 'change2', 'change_org_fio', 'org_position', 'org_position_min', 'change_doctype', 'change_fioparent', 'change6', 'change_fiochild', 'change8', 'change9', 'change10', 'month_start_edu_contract'], 'string'],
+            [['status_comment', 'number', 'certnumber', 'certfio', 'change1', 'change2', 'change_org_fio', 'org_position', 'org_position_min', 'change_doctype', 'change_fioparent', 'change6', 'change_fiochild', 'change8', 'change9', 'change10', 'month_start_edu_contract', 'url'], 'string'],
             [['certificate_id', 'program_id', 'organization_id'], 'required'],
             [['link_doc', 'link_ofer'], 'string', 'max' => 255],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],

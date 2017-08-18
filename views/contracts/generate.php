@@ -1,6 +1,7 @@
 <?php
 
 use app\models\Cooperate;
+use yii\bootstrap\Modal;
 use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -88,7 +89,21 @@ $operatorSettings = Yii::$app->operator->identity->settings;
     <div class="form-group">
         <?= Html::a('Отмена', Url::to(['contracts/verificate', 'id' => $model->id]), ['class' => 'btn btn-danger']); ?>
         <?= Html::a('Предпросмотр договора', Url::to(['contracts/mpdf', 'id' => $model->id]), ['class' => 'btn btn-primary']); ?>
-        <?= Html::submitButton('Направить договор заказчику', ['class' => 'btn btn-success']) ?>
+        <?php Modal::begin([
+            'header' => false,
+            'toggleButton' => [
+                'tag' => 'a',
+                'label' => 'Направить договор заказчику',
+                'class' => 'btn btn-success'
+            ],
+        ]) ?>
+            <p>
+                Вы действительно хотите направить оферту на заключение договора? Заявка будет переведена в раздел "подтвержденные",
+                будет сформирован договор-оферта, который будет храниться по адресу:
+                <?= Url::to('/', true) . 'uploads/contracts/' . $model->url ?>
+            </p>
+            <?= Html::submitButton('Подтвердить', ['class' => 'btn btn-success']) ?>
+        <?php Modal::end() ?>
     </div>
     <?php ActiveForm::end(); ?>
 </div>

@@ -124,7 +124,6 @@ $this->registerJs($js, $this::POS_READY);
                 ?>
             </div>
             <?= $this->render('../organization/contract-settings/change-settings', [
-                'organization' => $organization,
                 'model' => $organizationSettings,
             ]); ?>
             <?php Pjax::end(); ?>

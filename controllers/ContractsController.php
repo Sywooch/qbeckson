@@ -1006,62 +1006,13 @@ class ContractsController extends Controller
             $model->org_position_min = $organization->position_min;
 
             if ($model->save()) {
-                return $this->redirect(['/contracts/preview', 'id' => $model->id]);
+                return $this->redirect(['contracts/ok', 'id' => $model->id]);
             }
         }
 
         return $this->render('/contracts/generate', [
             'model' => $model
         ]);
-    }
-
-    public function actionPreview($id)
-    {
-        $model = $this->findModel($id);
-
-        return $this->render('/contracts/preview', [
-            'model' => $model,
-        ]);
-    }
-
-    public function actionOk($id)
-    {
-        $model = $this->findModel($id);
-
-        //if ($model->load(Yii::$app->request->post())) {        
-
-        $model->status = 3;
-        if ($model->save()) {
-            $cert = Certificates::findOne($model->certificate_id);
-
-            $informs = new Informs();
-            $informs->program_id = $model->program_id;
-            $informs->contract_id = $model->id;
-            $informs->prof_id = $cert->payer_id;
-            $informs->text = 'Подтверждено создание договора';
-            $informs->from = 2;
-            $informs->date = date("Y-m-d");
-            $informs->read = 0;
-
-            if ($informs->save()) {
-                $inform = new Informs();
-                $inform->program_id = $model->program_id;
-                $inform->contract_id = $model->id;
-                $inform->prof_id = $model->certificate_id;
-                $inform->text = 'Подтверждено создание договора';
-                $inform->from = 4;
-                $inform->date = date("Y-m-d");
-                $inform->read = 0;
-
-                if ($inform->save()) {
-                    return $this->redirect('/personal/organization-contracts#panel2');
-                }
-            }
-        }
-        // }
-        // return $this->render('/contracts/make', [
-        //     'model' => $model,
-        // ]);
     }
 
     public function actionNo($id)
@@ -1283,23 +1234,19 @@ class ContractsController extends Controller
     }
 
 
-    public function actionMpdf($id)
+    public function actionMpdf($id, $ok = null)
     {
         ini_set('memory_limit', '-1');
         set_time_limit(0);
 
         $model = $this->findModel($id);
-        $cert = Certificates::findOne($model->certificate_id);
         $organization = Organization::findOne($model->organization_id);
         $program = Programs::findOne($model->program_id);
         $group = Groups::findOne($model->group_id);
         $year = ProgrammeModule::findOne($model->year_id);
         $payer = Payers::findOne($model->payer_id);
 
-
-        $license_date = explode("-", $organization->license_date);
         $date_elements_user = explode("-", $model->start_edu_contract);
-
 
         $cooperate = (new \yii\db\Query())
             ->select(['number', 'date'])
@@ -1329,13 +1276,18 @@ class ContractsController extends Controller
             $programform = 'Заочная с применением дистанционных технологий и/или электронного обучения';
         }
 
-
+        $headerText = $organization->contractSettings->header_text;
+        $headerText = str_replace(
+            '№0000000000',
+            '№' . $model->certificate->number . ' (обладатель сертификата - ' . $model->certificate->fio_child . ')',
+            $headerText
+        );
             $html = <<<EOD
 <div style="font-size: $model->fontsize" > 
 <p style="text-align: center;">Договор об образовании №$model->number</p>
 <p>_______________________________</p>
 <br>
-<div align="justify">$organization->contractSettings->header_text</div>
+<div align="justify">$headerText</div>
 </div>
 EOD;
 
@@ -1521,8 +1473,6 @@ EOD;
 
         $start_edu_contract = explode("-", $model->start_edu_contract);
         $datestop = explode("-", $group->datestop);
-        //TODO save document
-        $fileName = $model->certificate->number . '_' . Yii::$app->security->generateRandomString(6);
 
         $text = '
         <div style="font-size: ' . $model->fontsize . '" >
@@ -1698,7 +1648,45 @@ EOD;
 </table>
 </div>');
 
-        echo $mpdf->Output('contract-' . $model->number . '.pdf', 'D'); // call the mpdf api output as needed
+        if ($ok) {
+            $mpdf->Output(Yii::getAlias('@webroot/uploads/contracts/') . $model->url, 'F');
+            return $this->redirect(['/personal/organization-contracts#panel2']);
+        }
+        $mpdf->Output($model->url, 'D');
+    }
+
+    public function actionOk($id)
+    {
+        $model = $this->findModel($id);
+
+        $model->status = 3;
+        if ($model->save()) {
+            $cert = Certificates::findOne($model->certificate_id);
+
+            $informs = new Informs();
+            $informs->program_id = $model->program_id;
+            $informs->contract_id = $model->id;
+            $informs->prof_id = $cert->payer_id;
+            $informs->text = 'Подтверждено создание договора';
+            $informs->from = 2;
+            $informs->date = date('Y-m-d');
+            $informs->read = 0;
+
+            if ($informs->save()) {
+                $inform = new Informs();
+                $inform->program_id = $model->program_id;
+                $inform->contract_id = $model->id;
+                $inform->prof_id = $model->certificate_id;
+                $inform->text = 'Подтверждено создание договора';
+                $inform->from = 4;
+                $inform->date = date('Y-m-d');
+                $inform->read = 0;
+
+                if ($inform->save()) {
+                    return $this->redirect(['mpdf', 'id' => $id, 'ok' => true]);
+                }
+            }
+        }
     }
 
 
