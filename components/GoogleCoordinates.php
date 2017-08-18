@@ -27,7 +27,7 @@ class GoogleCoordinates
      */
     public function getLat()
     {
-        return isset($this->getResponse()->results[0]->geometry->location) ?
+        return isset($this->getResponse()->results[0]->geometry->location->lat) ?
             $this->getResponse()->results[0]->geometry->location->lat : '';
     }
 
@@ -36,7 +36,7 @@ class GoogleCoordinates
      */
     public function getLng()
     {
-        return isset($this->getResponse()->results[0]->geometry->location) ?
+        return isset($this->getResponse()->results[0]->geometry->location->lng) ?
             $this->getResponse()->results[0]->geometry->location->lng : '';
     }
 

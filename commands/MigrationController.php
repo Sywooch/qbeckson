@@ -84,6 +84,7 @@ class MigrationController extends Controller
                     foreach ($module as $address) {
                         $googleGeoComponent->setAddress($address['address']);
 
+                        echo $address['address'] . PHP_EOL;
                         echo $googleGeoComponent->getLat() . ' ' . $googleGeoComponent->getLng() . PHP_EOL;
 
                         /*$organizationAddress = new OrganizationAddress([
