@@ -34,7 +34,7 @@ class OrganizationAddress extends ActiveRecord
     public function rules()
     {
         return [
-            [['address', 'organization_id', 'lat', 'lng'], 'required'],
+            [['address', 'organization_id'], 'required'],
             [['organization_id', 'status'], 'integer'],
             [['address'], 'string', 'max' => 255],
             [['lat', 'lng'], 'safe'],
