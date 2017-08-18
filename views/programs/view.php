@@ -20,7 +20,7 @@ $this->title = $model->name;
 if (Yii::$app->user->can('operators')) {
     $this->params['breadcrumbs'][] = ['label' => 'Программы', 'url' => ['/personal/operator-programs']];
 } elseif (Yii::$app->user->can('organizations')) {
-    $this->params['breadcrumbs'][] = ['label' => 'Программы', 'url' => ['/personal/organization-programs']];
+    $this->params['breadcrumbs'][] = ['label' => $model->isMunicipalTask ? 'Муниципальные задания' : 'Программы', 'url' => $model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']];
 }
 
 $this->params['breadcrumbs'][] = $this->title;
@@ -76,6 +76,10 @@ $this->registerJs($js, $this::POS_END);
                 <?php else : ?>
                     <?= Html::a('Добавить фото', ['add-photo', 'id' => $model->id], ['class' => 'btn btn-success']); ?>
                 <?php endif; ?>
+            </div>
+            <hr>
+            <div class="col-md-12">
+                <?= Html::a('Изменить адреса программы', ['add-addresses', 'id' => $model->id], ['class' => 'btn btn-success']); ?>
             </div>
         </div>
         <br>
@@ -200,20 +204,20 @@ $this->registerJs($js, $this::POS_END);
                                             if (count($model->addresses) > 0 && null !== $model->mainAddress) {
                                                 return Html::a(
                                                     $model->mainAddress->address,
-                                                    ['program-module-address/update', 'moduleId' => $model->id]
+                                                    ['years/add-addresses', 'id' => $model->id]
                                                 );
                                             }
 
                                             if (count($model->addresses)) {
                                                 return Html::a(
                                                     'Редактирование адресов',
-                                                    ['program-module-address/update', 'moduleId' => $model->id]
+                                                    ['years/add-addresses', 'id' => $model->id]
                                                 );
                                             }
 
                                             return Html::a(
-                                                'Добавить адресы',
-                                                ['program-module-address/create', 'moduleId' => $model->id]
+                                                'Добавить адреса',
+                                                ['years/add-addresses', 'id' => $model->id]
                                             );
                                         }
                                     ]

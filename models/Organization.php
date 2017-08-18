@@ -65,12 +65,15 @@ use app\behaviors\UploadBehavior;
  * @property bool $isRefused
  * @property \yii\db\ActiveQuery $favorites
  * @property Programs[] $programs
+ * @property OrganizationAddress[] $addresses
  */
 class Organization extends \yii\db\ActiveRecord
 {
     const SCENARIO_GUEST = 'guest';
 
     const SCENARIO_MODERATOR = 'moderator';
+
+    const SCENARIO_PAYER = 'payer';
 
     const TYPE_EDUCATION = 1;
 
@@ -122,6 +125,7 @@ class Organization extends \yii\db\ActiveRecord
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_MODERATOR] = $scenarios[self::SCENARIO_DEFAULT];
         $scenarios[self::SCENARIO_GUEST] = ['charterDocument', 'statementDocument', 'name', 'full_name', 'organizational_form', 'type', 'license_date', 'license_number', 'license_issued', 'svidet', 'bank_name', 'bank_sity', 'bank_bik', 'korr_invoice', 'rass_invoice', 'phone', 'email', 'site', 'fio_contact', 'address_actual', 'address_legal', 'inn', 'KPP', 'OGRN', 'last', 'mun', 'licenseDocument', 'commonDocuments', 'anonymous_update_token', 'verifyCode'];
+        $scenarios[self::SCENARIO_PAYER] = ['certificate_accounting_limit'];
 
         return $scenarios;
     }
@@ -148,7 +152,7 @@ class Organization extends \yii\db\ActiveRecord
              'whenClient' => "function (attribute, value) {
                  return $('#organization-type').val() != 4;
             }"],
-            [['user_id', 'actual', 'type', 'bank_bik', 'korr_invoice', 'doc_type', 'max_child', 'amount_child', 'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'last', 'last_year_contract', 'certprogram', 'status', 'organizational_form'], 'integer'],
+            [['user_id', 'actual', 'type', 'bank_bik', 'korr_invoice', 'doc_type', 'max_child', 'amount_child', 'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'last', 'last_year_contract', 'certprogram', 'status', 'organizational_form', 'certificate_accounting_limit'], 'integer'],
             [['license_date', 'date_proxy', 'cratedate', 'accepted_date'], 'safe'],
             [['raiting'], 'number'],
             [['about', 'site', 'phone', 'refuse_reason', 'anonymous_update_token'], 'string'],
@@ -223,9 +227,17 @@ class Organization extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getAddresses()
+    {
+        return $this->hasMany(OrganizationAddress::class, ['organization_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getLicense()
     {
-        return $this->hasMany(OrganizationDocument::className(), ['organization_id' => 'id'])
+        return $this->hasMany(OrganizationDocument::class, ['organization_id' => 'id'])
             ->andWhere(['type' => OrganizationDocument::TYPE_LICENSE]);
     }
 
@@ -323,7 +335,8 @@ class Organization extends \yii\db\ActiveRecord
             'commonDocuments' => 'Иные документы (не более трёх)',
             'verifyCode' => 'Проверочный код',
             'children' => 'Число обучающихся',
-            'programs' => 'Количество програм'
+            'programs' => 'Количество программ',
+            'certificate_accounting_limit' => 'Лимит зачисления',
         ];
     }
 
@@ -346,6 +359,16 @@ class Organization extends \yii\db\ActiveRecord
         }
 
         return $title;
+    }
+
+    /**
+     * @return Cooperate
+     */
+    public function getCooperation()
+    {
+        return $this->hasOne(Cooperate::class, ['organization_id' => 'id'])
+            ->andWhere(['cooperate.payer_id' => Yii::$app->user->getIdentity()->payer->id])
+            ->one();
     }
 
     /**

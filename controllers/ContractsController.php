@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\models\forms\ContractRequestForm;
+use app\traits\AjaxValidationTrait;
 use Yii;
 use app\models\Contracts;
 use app\models\User;
@@ -31,6 +33,8 @@ use app\models\Completeness;
  */
 class ContractsController extends Controller
 {
+    use AjaxValidationTrait;
+
     /**
      * @inheritdoc
      */
@@ -47,19 +51,25 @@ class ContractsController extends Controller
     }
 
     /**
-     * Lists all Contracts models.
-     * @return mixed
+     * @param integer $groupId
+     * @return string
      */
-    /* public function actionIndex()
-     {
-         $searchModel = new ContractsSearch();
-         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+    public function actionRequest($groupId)
+    {
+        $model = new ContractRequestForm($groupId);
+        //$this->performAjaxValidation($model);
 
-         return $this->render('index', [
-             'searchModel' => $searchModel,
-             'dataProvider' => $dataProvider,
-         ]);
-     } */
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $result = $model->save();
+        }
+
+        return $this->render('request', [
+            'model' => $model,
+            'result' => $result ?: [],
+        ]);
+    }
+
+
 
     /**
      * Displays a single Contracts model.
@@ -159,6 +169,7 @@ class ContractsController extends Controller
             }
 
             if ($userprice <= $nuserprice) {
+
                 if ($userprice <= $certificate->balance) {
                     $pay = "Полная стоимость";
                     $dop = "отсутствует";
@@ -1277,7 +1288,6 @@ class ContractsController extends Controller
 
     public function actionMpdf($id)
     {
-
         ini_set('memory_limit', '-1');
         set_time_limit(0);
 
@@ -1738,7 +1748,6 @@ EOD;
 </div>');
 
         echo $mpdf->Output('contract-' . $model->number . '.pdf', 'D'); // call the mpdf api output as needed
-
     }
 
 

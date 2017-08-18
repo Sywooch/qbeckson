@@ -14,10 +14,12 @@ use yii\db\ActiveRecord;
  * @property integer $program_id
  * @property integer $year_id
  * @property string $name
+ * @property string $datestart
+ * @property string $datestop
  *
  * @property Organization $organization
  * @property Contracts[] $contracts
- * @property Years $module
+ * @property ProgrammeModule $module
  * @property mixed $year
  * @property Programs $program
  * @property GroupClass[] $classes

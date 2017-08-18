@@ -10,7 +10,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-4 col-md-offset-1" style="padding:0;">
             <p class="lead">
                 <?= Html::a(
                     'Информация о получении сертификата',

@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\forms\ModuleAddressForm;
 use Yii;
 use app\models\ProgrammeModule;
 use app\models\ProgrammeModuleSearch;
@@ -9,9 +10,7 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use app\models\Groups;
-use app\models\Model;
 use app\models\Organization;
-use app\models\Completeness;
 use app\models\Programs;
 
 /**
@@ -33,6 +32,28 @@ class YearsController extends Controller
             ],
         ];
     }
+
+    public function actionAddAddresses($id)
+    {
+        $module = $this->findModel($id);
+        $model = new ModuleAddressForm($module);
+
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->save()) {
+                Yii::$app->session->setFlash('success', 'Адреса успешно обновлены');
+
+                return $this->refresh();
+            } else {
+                Yii::$app->session->setFlash('error', 'Что-то не так');
+            }
+        }
+
+        return $this->render('add-addresses', [
+            'module' => $module,
+            'model' => $model,
+        ]);
+    }
+
 
     /**
      * Lists all ProgrammeModule models.

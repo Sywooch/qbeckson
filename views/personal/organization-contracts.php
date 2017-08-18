@@ -268,7 +268,7 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
         <?php endif; ?>
         <?= SearchFilter::widget([
             'model' => $searchActiveContracts,
-            'action' => ['personal/organization-contracts'],
+            'action' => ['personal/organization-contracts#panel1'],
             'data' => GridviewHelper::prepareColumns(
                 'contracts',
                 $activeColumns,
@@ -295,7 +295,7 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
     <div id="panel2" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchConfirmedContracts,
-            'action' => ['personal/organization-contracts'],
+            'action' => ['personal/organization-contracts#panel2'],
             'data' => GridviewHelper::prepareColumns(
                 'contracts',
                 $confirmedColumns,
@@ -322,7 +322,7 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
     <div id="panel3" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchPendingContracts,
-            'action' => ['personal/organization-contracts'],
+            'action' => ['personal/organization-contracts#panel3'],
             'data' => GridviewHelper::prepareColumns(
                 'contracts',
                 $pendingColumns,
@@ -344,7 +344,7 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
     <div id="panel5" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchDissolvedContracts,
-            'action' => ['personal/organization-contracts'],
+            'action' => ['personal/organization-contracts#panel5'],
             'data' => GridviewHelper::prepareColumns(
                 'contracts',
                 $dissolvedColumns,
@@ -371,7 +371,7 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
     <div id="panel4" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchEndsContracts,
-            'action' => ['personal/operator-contracts'],
+            'action' => ['personal/operator-contracts#panel4'],
             'data' => GridviewHelper::prepareColumns(
                 'contracts',
                 $endsColumns,

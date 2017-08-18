@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\models\forms\ProgramAddressesForm;
+use app\models\ProgramAddressAssignment;
 use Yii;
 use app\models\Programs;
 use app\models\ProgramsallSearch;
@@ -48,8 +50,33 @@ class ProgramsController extends Controller
     }
 
     /**
-     * @param $id
-     * @return string
+     * @param integer $id
+     * @return string|Response
+     */
+    public function actionAddAddresses($id)
+    {
+        $program = $this->findModel($id);
+        $form = new ProgramAddressesForm($program);
+
+        if ($form->load(Yii::$app->request->post())) {
+            if ($form->save()) {
+                Yii::$app->session->setFlash('success', 'Адреса успешно обновлены');
+
+                return $this->refresh();
+            } else {
+                Yii::$app->session->setFlash('error', 'Что-то не так');
+            }
+        }
+
+        return $this->render('add-addresses', [
+            'model' => $form,
+            'program' => $program,
+        ]);
+    }
+
+    /**
+     * @param integer $id
+     * @return string|Response
      */
     public function actionAddPhoto($id)
     {
@@ -188,9 +215,12 @@ class ProgramsController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate()
+    public function actionCreate($isTask = null)
     {
-        $model = new Programs();
+        $model = new Programs([
+            'is_municipal_task' => empty($isTask) ? null : 1,
+        ]);
+
         $file = new ProgramsFile();
         $modelsYears = [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])];
 
@@ -356,7 +386,7 @@ class ProgramsController extends Controller
                                 $informs->read = 0;
                                 $informs->save();
 
-                                return $this->redirect(['/personal/organization-programs']);
+                                return $this->redirect($model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']);
                             }
                         } catch (Exception $e) {
                             $transaction->rollBack();

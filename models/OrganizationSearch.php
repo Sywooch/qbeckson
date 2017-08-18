@@ -12,7 +12,6 @@ use app\models\Organization;
  */
 class OrganizationSearch extends Organization
 {
-
     public $orgtype;
     public $certprogram;
     

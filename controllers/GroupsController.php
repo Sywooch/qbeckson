@@ -166,7 +166,8 @@ class GroupsController extends Controller
         $out = '';
         if ($parents = Yii::$app->request->post('depdrop_parents')) {
             $moduleId = $parents[0];
-            $programModuleAddresses = ProgramModuleAddress::find()->andWhere(['program_module_id' => $moduleId])->all();
+            $model = ProgrammeModule::findOne($moduleId);
+            $programModuleAddresses = $model->addresses;
             $out = [];
             foreach ($programModuleAddresses as $key => $value) {
                 $out[] = ['id' => $value->address, 'name' => $value->address];
@@ -196,11 +197,7 @@ class GroupsController extends Controller
                 'week_day' => $day
             ]);
         }
-        $programModuleAddresses = ArrayHelper::map(
-            ProgramModuleAddress::find()->andWhere(['program_module_id' => $id])->all(),
-            'address',
-            'address'
-        );
+        $programModuleAddresses = ArrayHelper::map($model->module->addresses, 'address', 'address');
 
         if (Yii::$app->request->post()) {
             $model->load(Yii::$app->request->post());
@@ -225,7 +222,7 @@ class GroupsController extends Controller
 
                         return $this->redirect(['programs/view', 'id' => $model->program_id]);
                     }
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     $transaction->rollBack();
                 }
             }
@@ -247,11 +244,7 @@ class GroupsController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        $programModuleAddresses = ArrayHelper::map(
-            ProgramModuleAddress::find()->andWhere(['program_module_id' => $model->module->id])->all(),
-            'address',
-            'address'
-        );
+        $programModuleAddresses = ArrayHelper::map($model->module->addresses, 'address', 'address');
 
         $groupClasses = [];
         foreach (GroupClass::weekDays() as $key => $day) {

@@ -142,7 +142,7 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
      */
     public function getCertificate()
     {
-        return $this->hasOne(Certificates::className(), ['user_id' => 'id']);
+        return $this->hasOne(Certificates::class, ['user_id' => 'id']);
     }
 
     /**
@@ -158,7 +158,7 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
      */
     public function getOperator()
     {
-        return $this->hasOne(Operators::className(), ['user_id' => 'id']);
+        return $this->hasOne(Operators::class, ['user_id' => 'id']);
     }
 
     /**

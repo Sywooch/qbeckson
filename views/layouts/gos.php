@@ -44,7 +44,7 @@ $user = Yii::$app->user->getIdentity();
                                 'options' => ['class' => 'navbar-nav navbar-right header-nav'],
                                 'items' => [
                                     [
-                                        'label' => 'Выйти(' .  ($user->isMonitored ? $user->monitor->username : $user->username) . ')',
+                                        'label' => 'Выйти(' .  $user->username . ')',
                                         'url' => ['/site/logout'],
                                         'linkOptions' => [
                                             'data-method' => 'post',
@@ -115,10 +115,18 @@ $user = Yii::$app->user->getIdentity();
                                 echo Nav::widget([
                                     'options' => ['class' => 'navbar-nav inner-nav'],
                                     'items' => [
-                                        ['label' => 'Информация', 'url' => ['/personal/operator-statistic']],
+                                        [
+                                            'label' => 'Система',
+                                            'items' => [
+                                                ['label' => 'Информация', 'url' => ['personal/operator-statistic']],
+                                                ['label' => 'Параметры системы', 'url' => ['operator/operator-settings']],
+
+                                            ]
+                                        ],
                                         ['label' => 'Коэффициенты', 'items' => [
                                             ['label' => 'Муниципалитеты', 'url' => ['/mun/index']],
                                             ['label' => 'Общие параметры', 'url' => ['/coefficient/update']],
+                                            ['label' => 'Настройки системы', 'url' => ['/operators/params']],
                                         ]],
                                         [
                                             'label' => 'Плательщики',
@@ -127,7 +135,7 @@ $user = Yii::$app->user->getIdentity();
                                                     'label' => 'Уполномоченные Организации',
                                                     'url' => ['personal/operator-payers']
                                                 ],
-                                                ['label' => 'Соглащения', 'url' => ['cooperate/index']]
+                                                ['label' => 'Соглашения', 'url' => ['personal/operator-cooperates']]
                                             ]
                                         ],
                                         ['label' => 'Организации', 'url' => ['/personal/operator-organizations']],
@@ -139,10 +147,28 @@ $user = Yii::$app->user->getIdentity();
                             }
 
                             if (Yii::$app->user->can('payer')) {
-                                echo Nav::widget([
-                                    'options' => ['class' => 'navbar-nav inner-nav'],
-                                    'items' => \app\helpers\PermissionHelper::getMenuItems(),
-                                ]);
+                                /** @var \app\models\UserIdentity $user */
+                                $user = Yii::$app->user->getIdentity();
+                                if ($user->payer->findUnconfirmedCooperates()) {
+                                    Yii::$app->session->setFlash(
+                                        'error',
+                                        'У Вас есть просроченные заявки на заключение соглашения/договора с поставщиком образовательных услуг. Пожалуйста, отработайте заявку для получения доступа к полному функционалу системы.'
+                                    );
+                                    echo Nav::widget([
+                                        'options' => ['class' => 'navbar-nav inner-nav'],
+                                        'items' => [
+                                            ['label' => 'Организации', 'items' => [
+                                                ['label' => 'Реестр ПФДО', 'url' => ['/personal/payer-organizations']],
+                                                //['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
+                                            ]],
+                                        ],
+                                    ]);
+                                } else {
+                                    echo Nav::widget([
+                                        'options' => ['class' => 'navbar-nav inner-nav'],
+                                        'items' => \app\helpers\PermissionHelper::getMenuItems(),
+                                    ]);
+                                }
                             }
 
                             if (Yii::$app->user->can('organizations')) {
@@ -158,9 +184,13 @@ $user = Yii::$app->user->getIdentity();
                                                 'label' => 'Сведения об организации',
                                                 'url' => ['/personal/organization-info']
                                             ],
-                                            [
+                                            /*[
                                                 'label' => 'Предварительные записи',
                                                 'url' => ['/personal/organization-favorites']
+                                            ],*/
+                                            [
+                                                'label' => 'Адреса реализации образовательных программ',
+                                                'url' => ['organization/address/index']
                                             ],
                                         ]],
                                         ['label' => 'Программы', 'items' => [
@@ -168,10 +198,10 @@ $user = Yii::$app->user->getIdentity();
                                                 'label' => 'Реестр программ',
                                                 'url' => ['personal/organization-programs']
                                             ],
-                                            [
+                                            /*[
                                                 'label' => 'Муниципальное задание',
-                                                'url' => ['maintenance/index']
-                                            ],
+                                                'url' => ['personal/organization-municipal-task']
+                                            ],*/
                                         ]],
                                         ['label' => 'Договоры', 'url' => ['/personal/organization-contracts']],
                                         ['label' => 'Счета', 'url' => ['/personal/organization-invoices']],
@@ -207,6 +237,12 @@ $user = Yii::$app->user->getIdentity();
                                             ],
                                         ],
                                     ]);
+                    } elseif ($certificate->certGroup->is_special > 0) {
+                        $items = [
+                            ['label' => 'Сертификат учёта <span class="glyphicon glyphicon-user"></span>',
+
+'url' => ['/personal/certificate-info']],
+                        ];
                                 } else {
                                     echo Nav::widget([
                                         'options' => ['class' => 'navbar-nav navbar-right balancefield'],
@@ -251,6 +287,10 @@ $user = Yii::$app->user->getIdentity();
                     </div>
                     <div class="col-md-12 col-md-8 col-md-offset-2">
                         <?php
+                        if (Yii::$app->user->can('certificate') && $certificate->certGroup->is_special < 1 && Yii::$app->user->identity->certificate->countActiveContracts < 1) {
+                            //Yii::$app->session->setFlash('warning', 'Ваш сертификат не активирован. Необходимо в срок до ' . date('d.m.Y', Yii::$app->user->identity->certificate->updated_cert_group + 20*24*60*60) . ' заключить хотя бы один договор на обучение по сертификату ПФ и подать заявление о смене вида сертификата в организацию, с которой такой договор будет заключен. <a target="_blank" href="' . Url::to(['certificates/group-pdf']) . '"">Открыть заявление (PDF)</a>');
+                        }
+
                         // TODO: Убрать всё это говно, ага ;)
                         $organizations = new Organization();
                         $organization = $organizations->getOrganization();

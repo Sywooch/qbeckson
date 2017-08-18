@@ -4,15 +4,12 @@ use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 use app\models\Payers;
-use yii\helpers\ArrayHelper;
-use app\models\Mun;
 use app\models\Cooperate;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Organization */
 
 $this->title = $model->name;
-
 
 $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
 if (isset($roles['operators'])) {
@@ -29,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
     if ($model->raiting) {
         echo '<h1 class="pull-right">' . $model->raiting . '%</h1>';
     } else {
-        echo '<h4 class="pull-right">Рейтинга нет</h4>';
+        echo '<h3 class="pull-right">Рейтинга нет</h3>';
     }
     ?>
 
@@ -53,15 +50,17 @@ $this->params['breadcrumbs'][] = $this->title;
             $cooperate = Cooperate::findOne($cooperates['id']);
             $cooperatedate = explode('-', $cooperate->date);
 
-            echo DetailView::widget([
-                'model' => $cooperate,
-                'attributes' => [
-                    [
-                        'label' => 'Соглашение',
-                        'value' => 'от ' . $cooperatedate[2] . '.' . $cooperatedate[1] . '.' . $cooperatedate[0] . ' № ' . $cooperate->number,
+            if (!empty($cooperate->date)) {
+                echo DetailView::widget([
+                    'model' => $cooperate,
+                    'attributes' => [
+                        [
+                            'label' => 'Соглашение',
+                            'value' => 'от ' . $cooperatedate[2] . '.' . $cooperatedate[1] . '.' . $cooperatedate[0] . ' № ' . $cooperate->number,
+                        ],
                     ],
-                ],
-            ]);
+                ]);
+            }
         }
     }
 
@@ -329,10 +328,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'about:ntext',
         ],
     ]) ?>
-    <p>
-        <?php if (isset($roles['operators'])) {
 
-            if ($model->actual == 0) {
+    <div>
+        <?php
+        if (isset($roles['operators'])) {
+            if ($model->actual === 0) {
                 echo '<div class="pull-right">';
                 echo Html::a('Разрешить деятельность', Url::to(['/organization/actual', 'id' => $model->id]), ['class' => 'btn btn-success']);
                 echo '</div>';
@@ -375,31 +375,67 @@ $this->params['breadcrumbs'][] = $this->title;
         if (isset($roles['organizations'])) {
             echo Html::a('Назад', '/personal/organization-info', ['class' => 'btn btn-primary']);
         }
+
         if (isset($roles['payer'])) {
-            $payers = new Payers();
-            $payer = $payers->getPayer();
-
-            $cooperate = (new \yii\db\Query())
-                ->select(['status'])
-                ->from('cooperate')
-                ->where(['organization_id' => $model->id])
-                ->andWhere(['payer_id' => $payer['id']])
-                ->andWhere(['<', 'status', 2])
-                ->one();
-
-            if (!empty($cooperate) && $cooperate['status'] == 0) {
-                echo '<div class="pull-right">';
-                echo '&nbsp;';
-                echo Html::a('Отказать', Url::to(['/cooperate/nopayer', 'id' => $model->id]), ['class' => 'btn btn-danger']);
-                echo '</div>';
-                echo Html::a('Назад', '/personal/payer-organizations', ['class' => 'btn btn-primary']);
-                echo '&nbsp;';
-                echo Html::a('Одобрить', Url::to(['/cooperate/okpayer', 'id' => $model->id]), ['class' => 'btn btn-primary']);
-            } else {
-                echo Html::a('Назад', '/personal/payer-organizations', ['class' => 'btn btn-primary']);
+            echo Html::a('Назад', ['personal/payer-organizations'], ['class' => 'btn btn-primary']);
+            if (null !== ($cooperation = $model->getCooperation())) {
+                if (null !== $cooperation->getDocumentUrl()) {
+                    echo '<hr><div class="panel panel-default">
+                        <div class="panel-body">' .
+                        Html::a('Текст договора/соглашения', $cooperation->getDocumentUrl())
+                        . ' </div>
+                    </div>';
+                }
+                if ($cooperation->status === Cooperate::STATUS_NEW) {
+                    echo ' ';
+                    echo $this->render(
+                        '../cooperate/reject-request',
+                        ['model' => $cooperation]
+                    );
+                    echo $this->render(
+                        '../cooperate/confirm-request',
+                        ['cooperation' => $cooperation]
+                    );
+                }
+                if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
+                    null === $cooperation->number &&
+                    null === $cooperation->date
+                ) {
+                    echo $this->render(
+                        '../cooperate/requisites',
+                        [
+                            'model' => $cooperation,
+                            'label' => 'Сведения о реквизитах соглашения/договора не внесены',
+                        ]
+                    );
+                    echo '<br /><br />';
+                } else if (($cooperation->status === Cooperate::STATUS_CONFIRMED &&
+                    null !== $cooperation->number &&
+                    null !== $cooperation->date) ||
+                    $cooperation->status === Cooperate::STATUS_ACTIVE
+                ) {
+                    echo '<hr>';
+                    echo $this->render(
+                        '../cooperate/requisites',
+                        [
+                            'model' => $cooperation,
+                            'label' => 'Реквизиты соглашения: от ' . $cooperation->date . ' №' . $cooperation->number,
+                        ]
+                    );
+                }
+                if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
+                    null !== $cooperation->number &&
+                    null !== $cooperation->date
+                ) {
+                    echo ' ';
+                    echo Html::a(
+                        'Одобрить',
+                        ['cooperate/confirm-contract', 'id' => $cooperation->id],
+                        ['class' => 'btn btn-primary']
+                    );
+                }
             }
         }
-
         ?>
-    </p>
+    </div>
 </div>

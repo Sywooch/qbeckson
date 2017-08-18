@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use Yii;
+use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -12,6 +13,7 @@ use app\models\Certificates;
 use app\models\Organization;
 use app\models\User;
 use app\models\Payers;
+use kartik\mpdf\Pdf;
 
 /**
  * CertificatesController implements the CRUD actions for Certificates model.
@@ -94,12 +96,10 @@ class CertificatesController extends Controller
                 Yii::$app->authManager->assign($userRole, $user->id);
 
                 $model->user_id = $user->id;
-                //$payers = new Payers();
-                //$payer = $payers->getPayer();
                 $model->payer_id = $payer->id;
                 $model->number = $username;
                 $model->actual = 1;
-                $model->balance = $model->nominal;
+                $model->rezerv_f = 0;
                 $model->rezerv = 0;
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
 
@@ -112,7 +112,9 @@ class CertificatesController extends Controller
                     $user->delete();
                 }
             }
-
+        } elseif (Yii::$app->request->isPost) {
+            print_r(Yii::$app->request->post());exit;
+            print_r($model->errors);exit;
         }
 
         return $this->render('create', [
@@ -144,6 +146,7 @@ class CertificatesController extends Controller
             // TODO: дублирование кода, избавиться
             if ($model->load(Yii::$app->request->post())) {
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
+                $model->balance_f = $model->nominal_f;
 
                 $model->save();
             }
@@ -185,15 +188,14 @@ class CertificatesController extends Controller
 
     public function actionEdit()
     {
-        $certificates = new Certificates();
-        $certificate = $certificates->getCertificates();
-
-        $model = $this->findModel($certificate['id']);
+        $model = Yii::$app->user->identity->certificate;
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
 
             if ($model->save()) {
+                Yii::$app->session->setFlash('success', 'Информация сохранена успешно.');
+
                 return $this->redirect(['/personal/certificate-statistic', 'id' => $model->id]);
             }
         }
@@ -204,10 +206,29 @@ class CertificatesController extends Controller
 
     }
 
+    public function actionGroupPdf()
+    {
+        $content = $this->renderPartial('group-pdf');
+
+        $model = Yii::$app->user->identity->certificate;
+
+        $pdf = new Pdf([
+            'mode' => Pdf::MODE_UTF8,
+            'destination' => Pdf::DEST_BROWSER,
+            'content' => $content,
+            'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
+            'options' => ['title' => 'Заявление на смену группы сертификата'],
+            'methods' => [
+                'SetHeader' => ['Заявление на смену группы сертификата'],
+            ]
+        ]);
+
+        return $pdf->render();
+    }
+
     public function actionPassword()
     {
-        $certificates = new Certificates();
-        $certificate = $certificates->getCertificates();
+        $certificate = Yii::$app->user->identity->certificate;
 
         $user = User::findOne($certificate['user_id']);
 
