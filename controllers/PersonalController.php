@@ -273,7 +273,7 @@ class PersonalController extends Controller
 
         $searchWaitPrograms = new ProgramsSearch([
             'verification' => [0, 1],
-            'open' => 0,
+            //'open' => 0,
             'hours' => '0,2000',
             'modelName' => 'SearchWaitPrograms',
         ]);
