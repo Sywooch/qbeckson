@@ -273,7 +273,6 @@ class PersonalController extends Controller
 
         $searchWaitPrograms = new ProgramsSearch([
             'verification' => [0, 1],
-            //'open' => 0,
             'hours' => '0,2000',
             'modelName' => 'SearchWaitPrograms',
         ]);
@@ -652,7 +651,6 @@ class PersonalController extends Controller
         $searchWaitPrograms = new ProgramsSearch([
             'organization_id' => Yii::$app->user->identity->organization->id,
             'verification' => [0, 1],
-            'open' => 0,
             'hours' => '0,2000',
             'limit' => '0,10000',
             'rating' => '0,100',
