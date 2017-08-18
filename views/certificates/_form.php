@@ -72,7 +72,7 @@ echo Dialog::widget(['options' => ['title' => 'Предупреждение',]])
 
         echo $form->field($model, 'selectCertGroup')->radioList($model->getCertGroupTypes(), [
             'item' => function ($index, $label, $name, $checked, $value) use ($dataOptions) {
-                $return = '<div class="radio"><label><input type="radio" name="' . $name . '" value="' . $value . '" data-force-nominal="' . ($value == \app\models\Certificates::TYPE_ACCOUNTING ? 0 : 1) . '" data-index="' . $index . '" ' . $checked . '> ' . $label . '</label></div>';
+                $return = '<div class="radio"><label><input type="radio" name="' . $name . '" value="' . $value . '" data-force-nominal="' . ($value == \app\models\Certificates::TYPE_ACCOUNTING ? 0 : 1) . '" data-index="' . $index . '" ' . ($checked ? 'checked' : '') . '> ' . $label . '</label></div>';
 
                 return $return;
             },
