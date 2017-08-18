@@ -15,9 +15,12 @@ use yii\helpers\ArrayHelper;
  */
 class MigrationController extends Controller
 {
+    /**
+     * Test
+     */
     public function actionTest()
     {
-        echo 'test';
+        echo self::class . PHP_EOL;
     }
 
     /**
@@ -86,6 +89,10 @@ class MigrationController extends Controller
 
                         echo $address['address'] . PHP_EOL;
                         echo $googleGeoComponent->getLat() . ' ' . $googleGeoComponent->getLng() . PHP_EOL;
+
+                        //print_r($googleGeoComponent->sessionValues[$address['address']]);
+
+                        echo '-------------------------------' . PHP_EOL;
 
                         /*$organizationAddress = new OrganizationAddress([
                             'organization_id' => $organizationId,

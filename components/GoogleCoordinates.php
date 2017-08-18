@@ -8,10 +8,11 @@ namespace app\components;
  */
 class GoogleCoordinates
 {
-    const DEFAULT_URL = 'http://maps.google.com/maps/api/geocode/json?address={{ADDRESS}}&sensor=false';
+    const DEFAULT_URL = 'https://maps.google.com/maps/api/geocode/json?address={{ADDRESS}}';
 
     private $address;
     private $response;
+    public $sessionValues = [];
 
     /**
      * GoogleCoordinates constructor.
@@ -55,9 +56,16 @@ class GoogleCoordinates
      */
     private function getResponse()
     {
+        if (null === $this->address) {
+            throw new \DomainException('Address must be set');
+        }
+
+        if ($this->sessionValues[$this->address]) {
+            return $this->sessionValues[$this->address];
+        }
+
         $ch = curl_init();
         $options = [
-            CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_URL => $this->getPreparedUrl(),
             CURLOPT_HEADER => false,
@@ -73,6 +81,8 @@ class GoogleCoordinates
         if ($response->status !== 'OK') {
             $this->response = false;
         }
+
+        $this->sessionValues[$this->address] = $this->response;
 
         return $this->response;
     }
