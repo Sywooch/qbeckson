@@ -1329,13 +1329,13 @@ class ContractsController extends Controller
             $programform = 'Заочная с применением дистанционных технологий и/или электронного обучения';
         }
 
-        //TODO добавить текст
+
             $html = <<<EOD
 <div style="font-size: $model->fontsize" > 
 <p style="text-align: center;">Договор об образовании №$model->number</p>
 <p>_______________________________</p>
 <br>
-<div align="justify">Шапка</div>
+<div align="justify">$organization->contractSettings->header_text</div>
 </div>
 EOD;
 

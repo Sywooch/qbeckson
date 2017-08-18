@@ -41,6 +41,8 @@ use app\behaviors\UploadBehavior;
  * @property string $fio_contact
  * @property string $email
  * @property string $full_name
+ * @property string $number_proxy
+ * @property string $license_issued_dat
  * @property integer $contracts_count
  *
  * @property Contracts[] $contracts
@@ -68,6 +70,7 @@ use app\behaviors\UploadBehavior;
  * @property \yii\db\ActiveQuery $favorites
  * @property Programs[] $programs
  * @property OrganizationAddress[] $addresses
+ * @property OrganizationContractSettings $contractSettings
  */
 class Organization extends \yii\db\ActiveRecord
 {

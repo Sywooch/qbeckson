@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Cooperate;
+use app\models\forms\OrganizationSettingsForm;
 use app\models\Mun;
 use app\models\OrganizationContractSettings;
 use app\models\search\ContractsSearch;
@@ -599,16 +600,19 @@ class PersonalController extends Controller
     public function actionOrganizationInfo()
     {
         $organization = Yii::$app->user->identity->organization;
-        $organizationSettings = (null !== $organization->contractSettings) ?
+        $organizationSettingsForm = new OrganizationSettingsForm();
+
+        $model = (null !== $organization->contractSettings) ?
             $organization->contractSettings : new OrganizationContractSettings([
                 'organization_id' => $organization->id
             ]);
+        $organizationSettingsForm->setModel($model);
 
         if ($organization->load(Yii::$app->request->post()) &&  $organization->save()) {
             Yii::$app->session->setFlash('success', 'Информация успешно сохранена.');
         }
 
-        if ($organizationSettings->load(Yii::$app->request->post()) && $organizationSettings->save()) {
+        if ($organizationSettingsForm->load(Yii::$app->request->post()) && $organizationSettingsForm->save()) {
             Yii::$app->session->setFlash('success', 'Настройки договора успешно сохранены.');
 
             return $this->refresh();
@@ -616,7 +620,7 @@ class PersonalController extends Controller
 
         return $this->render('organization-info', [
             'organization' => $organization,
-            'organizationSettings' => $organizationSettings,
+            'organizationSettings' => $organizationSettingsForm,
         ]);
     }
 

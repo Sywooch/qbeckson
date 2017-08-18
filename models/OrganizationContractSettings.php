@@ -13,6 +13,7 @@ use yii\db\ActiveRecord;
  * @property string $organization_second_ending
  * @property string $director_name_ending
  * @property string $document_type
+ * @property string $header_text
  */
 class OrganizationContractSettings extends ActiveRecord
 {
@@ -37,6 +38,7 @@ class OrganizationContractSettings extends ActiveRecord
                 'string', 'max' => 10
             ],
             [['document_type'], 'string', 'max' => 20],
+            [['header_text'], 'string'],
         ];
     }
 

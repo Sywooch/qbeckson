@@ -19,6 +19,7 @@ $('body').on('click', '#submit-organization-form', function(e) {
 });
 $("#organization-form-pjax").on("pjax:end", function() {
     $('#open-document-form-modal').click();
+    selectType($('#organization-doc_type').val());
 });
 JS;
 $this->registerJs($js, $this::POS_READY);
@@ -26,7 +27,7 @@ $this->registerJs($js, $this::POS_READY);
 <div class="col-md-10 col-md-offset-1">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-<?= $organization->type === Organization::TYPE_IP_WITHOUT_WORKERS ? "12" : "4" ?> well">
+            <div class="col-md-<?= $organization->type === Organization::TYPE_IP_WITHOUT_WORKERS ? '12' : '4' ?> well">
                 <p><label class="control-label">Наименование организации</label> - <?= $organization['name'] ?></p>
                 <p><label class="control-label">ИНН</label> - <?= $organization['inn'] ?></p>
                 <p><label class="control-label">КПП</label> - <?= $organization['KPP'] ?></p>
@@ -122,12 +123,11 @@ $this->registerJs($js, $this::POS_READY);
                 }
                 ?>
             </div>
-            <?php Pjax::end(); ?>
-            <?php echo $this->render('../organization/contract-settings/change-settings', [
+            <?= $this->render('../organization/contract-settings/change-settings', [
                 'organization' => $organization,
                 'model' => $organizationSettings,
-            ]);
-            ?>
+            ]); ?>
+            <?php Pjax::end(); ?>
         </div>
         <div class="row">
             <div class="col-md-12">
