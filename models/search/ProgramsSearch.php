@@ -84,10 +84,14 @@ class ProgramsSearch extends Programs
             ])
             ->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
 
-        if ($this->isMunicipalTask !== true) {
-            $query->andWhere('is_municipal_task < 1');
+        if ($this->isMunicipalTask) {
+            $query->andWhere(['>', 'programs.is_municipal_task', 0]);
         } else {
-            $query->andWhere('is_municipal_task > 0');
+            $query->andWhere([
+                'OR',
+                ['programs.is_municipal_task' => null],
+                ['programs.is_municipal_task' => 0]
+            ]);
         }
 
         $dataProvider = new ActiveDataProvider([
