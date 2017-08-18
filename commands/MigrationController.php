@@ -36,7 +36,7 @@ class MigrationController extends Controller
      * Выполняет миграцию адресов из модулей в новую структуру:
      * Адреса организации -> адреса программ -> адреса модулей -> адреса групп.
      */
-    public function actionAddress()
+    public function actionAddAddresses()
     {
         $organizations = Organization::find()->all();
         $addresses = [];
@@ -86,15 +86,11 @@ class MigrationController extends Controller
                      */
                     foreach ($module as $address) {
                         $googleGeoComponent->setAddress($address['address']);
-
-                        echo $address['address'] . PHP_EOL;
-                        echo $googleGeoComponent->getLat() . ' ' . $googleGeoComponent->getLng() . PHP_EOL;
-
+                        //echo $address['address'] . PHP_EOL;
+                        //echo $googleGeoComponent->getLat() . ' ' . $googleGeoComponent->getLng() . PHP_EOL;
                         //print_r($googleGeoComponent->sessionValues[$address['address']]);
-
-                        echo '-------------------------------' . PHP_EOL;
-
-                        /*$organizationAddress = new OrganizationAddress([
+                        //echo '-------------------------------' . PHP_EOL;
+                        $organizationAddress = new OrganizationAddress([
                             'organization_id' => $organizationId,
                             'address' => $address['address'],
                             'lat' => $googleGeoComponent->getLat(),
@@ -141,7 +137,7 @@ class MigrationController extends Controller
                         try {
                             $moduleAddress->save(false);
                         } catch (\Exception $e) {
-                        }*/
+                        }
 
                         unset($organizationAddress, $programAddress, $moduleAddress);
                     }

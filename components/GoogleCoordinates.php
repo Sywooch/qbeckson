@@ -13,6 +13,7 @@ class GoogleCoordinates
     private $address;
     private $response;
     public $sessionValues = [];
+    private $key = 0;
 
     /**
      * GoogleCoordinates constructor.
@@ -60,8 +61,10 @@ class GoogleCoordinates
             throw new \DomainException('Address must be set');
         }
 
-        if ($this->sessionValues[$this->address]) {
-            return $this->sessionValues[$this->address];
+        foreach ($this->sessionValues as $record) {
+            if ($record['key'] === $this->address) {
+                return $record['value'];
+            }
         }
 
         $ch = curl_init();
@@ -82,7 +85,9 @@ class GoogleCoordinates
             $this->response = false;
         }
 
-        $this->sessionValues[$this->address] = $this->response;
+        $this->sessionValues[$this->key]['key'] = $this->address;
+        $this->sessionValues[$this->key]['value'] = $this->response;
+        $this->key++;
 
         return $this->response;
     }
