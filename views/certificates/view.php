@@ -33,10 +33,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value'=> Html::a($model->payers->name, Url::to(['/payers/view', 'id' => $model->payers->id]), ['class' => 'blue', 'target' => '_blank']),
                 'visible' => !Yii::$app->user->can('payer')
             ],
-            [
-                'attribute' => 'actual',
-                'value' => $model->actual == 1 ? 'Активен' : 'Приостановлен',
-            ],
         ],
     ]); ?>
 
@@ -90,7 +86,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             echo Html::a('Назад', '/personal/payer-certificates', ['class' => 'btn btn-primary']);
             echo '&nbsp;';
-            if (PermissionHelper::checkMonitorUrl('/certificates/update') && $model->canChangeGroup) {
+            if (PermissionHelper::checkMonitorUrl('/certificates/update')) {
                 echo Html::a('Редактировать', Url::to(['/certificates/update', 'id' => $model->id]), ['class' => 'btn btn-primary']);
                 echo '&nbsp;';
             }

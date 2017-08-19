@@ -136,10 +136,6 @@ class CertificatesController extends Controller
     {
         $model = $this->findModel($id);
 
-        if (!$model->canChangeGroup) {
-            throw new ForbiddenHttpException('Действие недоступно.');
-        }
-
         $user = User::findOne($model->user_id);
 
         if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {

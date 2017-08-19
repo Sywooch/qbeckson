@@ -21,16 +21,17 @@ echo Dialog::widget(['options' => ['title' => 'Предупреждение',]])
     <?php
     $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
     if (isset($roles['payer'])) {
-        echo '<div class="well">';
 
         if ($user->isNewRecord) {
+            echo '<div class="well">';
             echo $form->field($user, 'username', ['enableAjaxValidation' => true, 'addon' => ['prepend' => ['content' => $region . $payer->code]]])->textInput(['id' => 'login', 'maxlength' => true])->label('Номер сертификата');
             echo Html::button('Сгенерировать номер сертификата', ['class' => 'btn btn-success', 'onclick' => '(function () { $("#login").val( Math.round(0 - 0.5 + Math.random() * (9 - 0 + 1)).toString()+Math.round(0 - 0.5 + Math.random() * (9 - 0 + 1)).toString()+Math.round(0 - 0.5 + Math.random() * (9 - 0 + 1)).toString()+Math.round(0 - 0.5 + Math.random() * (9 - 0 + 1)).toString()+Math.round(0 - 0.5 + Math.random() * (9 - 0 + 1)).toString()+Math.round(0 - 0.5 + Math.random() * (9 - 0 + 1)).toString() ); })();']);
             echo '<br><br>';
             echo $form->field($user, 'password')->textInput(['id' => 'pass']);
             echo Html::button('Сгенерировать пароль', ['class' => 'btn btn-success', 'onclick' => '(function () { $("#pass").val(Math.random().toString(36).slice(-8)); })();']);
-
-        } else {
+            echo '</div>';
+        } elseif ($model->canChangeGroup) {
+            echo '<div class="well">';
             echo $form->field($user, 'newlogin')->checkbox(['value' => 1, 'ng-model' => 'newlogin', 'label' => 'Изменить номер сертификата']);
             echo '<div ng-show="newlogin">';
             echo $form->field($user, 'username', ['enableAjaxValidation' => true])->textInput(['id' => 'login', 'maxlength' => true])->label('Номер сертификата');
@@ -42,8 +43,8 @@ echo Dialog::widget(['options' => ['title' => 'Предупреждение',]])
             echo $form->field($user, 'password')->textInput(['id' => 'pass', 'value' => '']);
             echo Html::button('Сгенерировать пароль', ['class' => 'btn btn-success', 'onclick' => '(function () { $("#pass").val(Math.random().toString(36).slice(-8)); })();']);
             echo '</div>';
+            echo '</div>';
         }
-        echo '</div>';
     } ?>
 
     <div class="panel panel-default">
@@ -60,7 +61,7 @@ echo Dialog::widget(['options' => ['title' => 'Предупреждение',]])
     <?= $form->field($model, 'fio_parent')->textInput(['maxlength' => true]) ?>
 
     <?php
-    if (isset($roles['payer'])) {
+    if (isset($roles['payer']) && $model->canChangeGroup) {
         $payer = Yii::$app->user->identity->payer;
         $groupList = CertGroup::getActiveList($payer->id);
         $dataOptions = ArrayHelper::map($groupList, 'id', 'nominal');
@@ -82,11 +83,10 @@ echo Dialog::widget(['options' => ['title' => 'Предупреждение',]])
     }
     ?>
 
-    <?= $form->field($model, 'nominal')->textInput(['readOnly' => true, 'maxlength' => true, 'id' => 'nominalField']) ?>
-
-    <?php if (!$model->isNewRecord) {
-        echo $form->field($model, 'balance')->textInput(!isset($roles['payer']) ? ['readOnly' => true] : ['maxlength' => true, 'id' => 'nom']);
-    } ?>
+    <?php if ($model->canChangeGroup) {
+        echo $form->field($model, 'nominal')->textInput(['readOnly' => true, 'maxlength' => true, 'id' => 'nominalField']);
+    }
+    ?>
 
     <div class="form-group">
         <?php
