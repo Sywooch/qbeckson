@@ -22,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div id="request-box">
         <?php $form = ActiveForm::begin([
             'options' => [
-                'data-pjax' => ''
+                'data-pjax' => true
             ]
         ]); ?>
         <div class="row">
@@ -50,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php if (null !== $contract) : ?>
             <?php $confirm = ActiveForm::begin([
                 'options' => [
-                    'data-pjax' => ''
+                    'data-pjax' => true
                 ]
             ]) ?>
             <div class="row">
