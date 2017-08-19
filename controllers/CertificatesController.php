@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use yii\helpers\Url;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -134,6 +135,11 @@ class CertificatesController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+
+        if (!$model->canChangeGroup) {
+            throw new ForbiddenHttpException('Действие недоступно.');
+        }
+
         $user = User::findOne($model->user_id);
 
         if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {
@@ -191,9 +197,7 @@ class CertificatesController extends Controller
         $model = Yii::$app->user->identity->certificate;
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
-
-            if ($model->save()) {
+            if ($model->save(false, ['fio_parent'])) {
                 Yii::$app->session->setFlash('success', 'Информация сохранена успешно.');
 
                 return $this->redirect(['/personal/certificate-statistic', 'id' => $model->id]);
@@ -319,8 +323,10 @@ class CertificatesController extends Controller
 
     public function actionActual($id)
     {
-        $model = $this->findModel($id);
+        // Недоступно
+        return false;
 
+        $model = $this->findModel($id);
         $model->actual = 1;
 
         if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->save()) {
@@ -334,8 +340,10 @@ class CertificatesController extends Controller
 
     public function actionNoactual($id)
     {
-        $model = $this->findModel($id);
+        // Недоступно
+        return false;
 
+        $model = $this->findModel($id);
         $model->actual = 0;
         $model->nominal = 0;
 

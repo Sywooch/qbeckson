@@ -284,7 +284,7 @@ class Certificates extends \yii\db\ActiveRecord
 
     public function getCanChangeGroup()
     {
-        if ($this->nominal == $this->balance) {
+        if ($this->nominal == $this->balance && $this->nominal_f == $this->balance_f) {
             return true;
         }
 
