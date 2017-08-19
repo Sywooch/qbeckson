@@ -1,0 +1,144 @@
+<?php
+
+namespace app\models\forms;
+
+use app\models\Certificates;
+use app\models\Contracts;
+use Yii;
+use yii\base\Model;
+
+/**
+ * Class ContractConfirmForm
+ * @package app\models\forms
+ */
+class ContractConfirmForm extends Model
+{
+    public $firstConfirmation;
+    public $secondConfirmation;
+    public $thirdConfirmation;
+
+    private $contract;
+    private $certificate;
+
+    /**
+     * ContractConfirmForm constructor.
+     * @param Contracts $contract
+     * @param array $config
+     */
+    public function __construct(Contracts $contract, $config = [])
+    {
+        $this->setContract($contract);
+        parent::__construct($config);
+    }
+
+    /**
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            [
+                ['firstConfirmation', 'thirdConfirmation'],
+                'required', 'requiredValue' => 1,
+                'message' => 'Вы должны подтвердить своё согласие'
+            ],
+            [
+                'secondConfirmation', 'required', 'requiredValue' => 1, 'when' => function () {
+                    return $this->getContract()->all_parents_funds > 0;
+                },
+                'message' => 'Вы должны подтвердить своё согласие'
+            ],
+            ['thirdConfirmation', 'validateConfirmation'],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function attributeLabels(): array
+    {
+        return [
+            'firstConfirmation' => 'Действительно хочу подать заявку',
+            'secondConfirmation' => 'Я осознаю и соглашаюсь, что в соответствии с условиями договора предусмотрено частичное финансирование услуги по дополнительному образованию за счет моих средств',
+            'thirdConfirmation' => 'Я ознакомился с условиями обучения, в том числе со сроками обучения, условиями оплаты за счет средств сертификата и хочу подать заявку',
+        ];
+    }
+
+    /**
+     * @param $attribute
+     */
+    public function validateConfirmation($attribute)
+    {
+        $balance = $this->getCertificate()->balance_f;
+        if ($this->getContract()->period === ContractRequestForm::CURRENT_REALIZATION_PERIOD) {
+            $balance = $this->getCertificate()->balance;
+        }
+
+        if ($this->getContract()->balance !== $balance) {
+            $this->addError(
+                $attribute,
+                'К сожалению заявка не может быть направлена в организацию, поскольку после последнего расчета значение Вашего номинала было изменено. Пересчитайте параметры заявки.'
+            );
+        }
+    }
+
+    /**
+     * @return boolean
+     */
+    public function save(): bool
+    {
+        if (null !== ($contract = $this->getContract()) && null !== ($certificate = $this->getCertificate())) {
+            //TODO Обернуть в транзакцию!!!
+            $organization = $contract->organization;
+            $organization->contracts_count++;
+            $organization->save(false);
+
+            $contract->number = $organization->contracts_count . ' - ПФ';
+            $contract->date = date('Y-m-d');
+            $contract->status = 0;
+            $contract->rezerv = $contract->funds_cert;
+            $contract->save(false);
+
+            if ($contract->period === ContractRequestForm::CURRENT_REALIZATION_PERIOD) {
+                $certificate->balance -= $contract->funds_cert;
+                $certificate->rezerv += $contract->funds_cert;
+            } else {
+                $certificate->balance_f -= $contract->funds_cert;
+                $certificate->rezerv_f += $contract->funds_cert;
+            }
+            $certificate->save(false);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return Contracts
+     */
+    public function getContract(): Contracts
+    {
+        return $this->contract;
+    }
+
+    /**
+     * @return Certificates
+     */
+    public function getCertificate(): Certificates
+    {
+        if (null === $this->certificate) {
+            $this->certificate = Yii::$app->user->identity->certificate;
+        }
+
+        return $this->certificate;
+    }
+
+    /**
+     * @param Contracts $contract
+     */
+    public function setContract(Contracts $contract)
+    {
+        $this->contract = $contract;
+    }
+}

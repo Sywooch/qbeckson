@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Cooperate;
+use app\models\forms\ContractConfirmForm;
 use app\models\forms\ContractRequestForm;
 use app\traits\AjaxValidationTrait;
 use Yii;
@@ -12,6 +13,7 @@ use app\models\ContractsSearch;
 use app\models\ContractsoSearch;
 use app\models\ContractsInvoiceSearch;
 use app\models\ContractsDecInvoiceSearch;
+use yii\base\Response;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -52,23 +54,71 @@ class ContractsController extends Controller
     }
 
     /**
-     * @param integer $groupId
-     * @return string
+     * @param string $groupId
+     * @return string|\yii\web\Response
      */
-    public function actionRequest($groupId)
+    public function actionRequest(string $groupId)
     {
-        $model = new ContractRequestForm($groupId);
-        if ($model->load(Yii::$app->request->post()) && ($result = $model->save())) {
+        $contract = Contracts::findOne([
+            'group_id' => $groupId,
+            'certificate_id' => Yii::$app->user->getIdentity()->certificate->id
+        ]);
+        if (null !== $contract && null !== $contract->status) {
+            throw new \DomainException('Контракт уже заключён!');
+        }
 
+        $model = new ContractRequestForm($groupId, $contract);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            if (false === ($contract = $model->save())) {
+                Yii::$app->session->setFlash('danger', 'Что-то не так.');
+
+                return $this->refresh();
+            }
+        }
+
+        if (null !== $contract) {
+            $confirmForm = new ContractConfirmForm($contract);
+            if ($confirmForm->load(Yii::$app->request->post()) && $confirmForm->validate()) {
+                if ($confirmForm->save()) {
+                    Yii::$app->session->setFlash('success', 'Вы подтвердили заявку на контракт.');
+
+                    return $this->redirect(['programs/search']);
+                } else {
+                    Yii::$app->session->setFlash('danger', 'Что-то не так.');
+
+                    return $this->refresh();
+                }
+            }
         }
 
         return $this->render('request', [
             'model' => $model,
-            'result' => $result ?: [],
+            'contract' => $contract ?: null,
+            'confirmForm' => $confirmForm ?: null,
         ]);
     }
 
+    /**
+     * @param $id
+     * @return Response
+     * @throws NotFoundHttpException|\DomainException
+     */
+    public function actionRejectRequest($id): Response
+    {
+        $contract = Contracts::findOne([
+            'id' => $id,
+            'certificate_id' => Yii::$app->user->getIdentity()->certificate->id
+        ]);
+        if (null === $contract) {
+            throw new NotFoundHttpException('Model not found');
+        }
+        if (null !== $contract->status) {
+            throw new \DomainException('Контракт уже заключён и вы не можете его отменить!');
+        }
+        $contract->delete();
 
+        return $this->redirect(['programs/search']);
+    }
 
     /**
      * Displays a single Contracts model.
@@ -997,17 +1047,8 @@ class ContractsController extends Controller
     public function actionGenerate($id)
     {
         $model = $this->findModel($id);
-        $model->fontsize = 12;
-
-        /** @var Organization $organization */
-        $organization = Yii::$app->user->getIdentity()->organization;
-        if ($model->load(Yii::$app->request->post())) {
-            $model->org_position = $organization->position;
-            $model->org_position_min = $organization->position_min;
-
-            if ($model->save()) {
-                return $this->redirect(['contracts/ok', 'id' => $model->id]);
-            }
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->refresh();
         }
 
         return $this->render('/contracts/generate', [
@@ -1283,7 +1324,7 @@ class ContractsController extends Controller
             $headerText
         );
             $html = <<<EOD
-<div style="font-size: $model->fontsize" > 
+<div style="font-size:12;" > 
 <p style="text-align: center;">Договор об образовании №$model->number</p>
 <p>_______________________________</p>
 <br>

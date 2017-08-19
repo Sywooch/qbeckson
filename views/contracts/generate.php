@@ -18,18 +18,21 @@ $this->params['breadcrumbs'][] = $this->title;
 $operatorSettings = Yii::$app->operator->identity->settings;
 ?>
 <div class="contracts-create col-md-10 col-md-offset-1">
-    <?php $form = ActiveForm::begin(); ?>
+
     <div>
-    <?php if ($model->all_parents_funds > 0) : ?>
-        <div class="well">
-            <p class="lead">
-                В рамках договора предусмотрено софинансирование со стороны Заказчика. Пожалуйста укажите порядок взаимодействия с ним
-            </p>
-            <?= $form->field($model, 'sposob')->dropDownList($model::sposobs()); ?>
-            <p class="lead">Выберите порядок оплаты услуг в увязке с посещаемостью</p>
-            <?= $form->field($model, 'payment_order')->dropDownList($model::paymentOrders()); ?>
-        </div>
-    <?php endif; ?>
+        <?php $form = ActiveForm::begin(); ?>
+            <?php if ($model->all_parents_funds > 0) : ?>
+                <div class="well">
+                    <p class="lead">
+                        В рамках договора предусмотрено софинансирование со стороны Заказчика. Пожалуйста укажите порядок взаимодействия с ним
+                    </p>
+                    <?= $form->field($model, 'sposob')->dropDownList($model::sposobs()); ?>
+                    <p class="lead">Выберите порядок оплаты услуг в увязке с посещаемостью</p>
+                    <?= $form->field($model, 'payment_order')->dropDownList($model::paymentOrders())->label(false); ?>
+                    <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
+                </div>
+            <?php endif; ?>
+        <?php ActiveForm::end(); ?>
     <?php
     $cooperate = (new \yii\db\Query())
         ->select(['number', 'date'])
@@ -97,13 +100,13 @@ $operatorSettings = Yii::$app->operator->identity->settings;
                 'class' => 'btn btn-success'
             ],
         ]) ?>
-            <p>
-                Вы действительно хотите направить оферту на заключение договора? Заявка будет переведена в раздел "подтвержденные",
+            <p class="lead text-justify">
+                Вы действительно готовы направить оферту на заключение договора? Заявка будет переведена в раздел "подтвержденные",
                 будет сформирован договор-оферта, который будет храниться по адресу:
                 <?= Url::to('/', true) . 'uploads/contracts/' . $model->url ?>
             </p>
-            <?= Html::submitButton('Подтвердить', ['class' => 'btn btn-success']) ?>
+            <?= Html::a('Подтвердить', ['contracts/ok', 'id' => $model->id], ['class' => 'btn btn-success btn-block']) ?>
         <?php Modal::end() ?>
     </div>
-    <?php ActiveForm::end(); ?>
+
 </div>
