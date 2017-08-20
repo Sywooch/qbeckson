@@ -75,11 +75,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p class="text-justify">Вами выставлена оферта на заключение договора Заказчику, после получения заявления на зачисление по требуемой <a href="<?= Url::to(['application-pdf', 'id' => $model->id]) ?>"><b>форме</b></a> Вы можете зарегистрировать договор.</p>
 
-    <?php $form = ActiveForm::begin(['action' => ['/contracts/save', 'id' => $model->id]]); ?>
+    <?php $form = ActiveForm::begin(); ?>
 
     <?php if ($model->status == 3): ?>
     <?= $form->field($model, 'applicationIsReceived')->checkbox(['onClick' => 'if ($(this).prop(\'checked\')) $("#vform").show(); else $("#vform").hide();']) ?>
-    <div id="vform" style="display:none;">
+    <div id="vform" style="<?= ($model->applicationIsReceived > 0 ? '' : 'display:none;')?>">
         <?= $form->field($model, 'number')->textInput(['readonly' => true]) ?>
         <?= $form->field($model, 'date')->widget(DateControl::classname(), [
             'type' => DateControl::FORMAT_DATE,
@@ -100,11 +100,10 @@ $this->params['breadcrumbs'][] = $this->title;
     }
     if ($model->status == 3) {
         echo Html::submitButton('Сохранить', ['class' => 'btn btn-primary']);
-        //echo Html::a('Продолжить', Url::to(['/contracts/save', 'id' => $model->id]), ['class' => 'btn btn-primary']);
     }
     ?>
-    <?php ActiveForm::end(); ?>
     <div class="pull-right">
         <?= Html::a('Отказать', Url::to(['/contracts/no', 'id' => $model->id]), ['class' => 'btn btn-danger']) ?>
     </div>
+    <?php ActiveForm::end(); ?>
 </div>

@@ -878,12 +878,151 @@ class ContractsController extends Controller
         $model = $this->findModel($id);
         $model->applicationIsReceived = 0;
 
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            if (empty($model->date)) {
+                Yii::$app->session->setFlash('error', 'Введите дату договора.');
+
+                return $this->render('/contracts/save', [
+                    'model' => $model,
+                ]);
+            }
+
+            $contracts = (new \yii\db\Query())
+                ->select(['id'])
+                ->from('contracts')
+                ->where(['status' => 1])
+                ->andWhere(['organization_id' => $model->organization_id])
+                ->column();
+
+            foreach ($contracts as $contract) {
+                $cont = $this->findModel($contract);
+
+                $date = explode("-", $model->date);
+                $cdate = explode("-", $cont->date);
+
+                if ($date[0] == $cdate[0]) {
+                    if ($model->number == $cont->number) {
+                        Yii::$app->session->setFlash('error', 'Договор с таким номером уже существует!');
+
+                        return $this->render('/contracts/save', [
+                            'model' => $model,
+                            //'display' => 'Договор с таким номером уже существует!';
+                        ]);
+                    }
+                }
+            }
+
+            $cert = Certificates::findOne($model->certificate_id);
+            $program = Programs::findOne($model->program_id);
+
+            $org = Organization::findOne($model->organization_id);
+
+            $org->amount_child = $org->amount_child + 1;
+
+            $org->save();
+
+            $program->last_contracts = $program->last_contracts + 1;
+            $program->save();
+
+            $cert->rezerv = $cert->rezerv - ($model->first_m_price * $model->payer_dol);
+            $cert->save();
+
+            $model->paid = $model->first_m_price * $model->payer_dol;
+            $model->rezerv = $model->rezerv - ($model->first_m_price * $model->payer_dol);
+
+            $model->status = 1;
+
+            if ($model->save()) {
+                $completeness = new Completeness();
+                $completeness->group_id = $model->group_id;
+                $completeness->contract_id = $model->id;
+
+                $start_edu_contract = explode("-", $model->start_edu_contract);
+
+                if (date('m') == 12) {
+                    $completeness->month = date('m');
+                    $completeness->year = $start_edu_contract[0];
+                } else {
+                    $completeness->month = date('m') - 1;
+                    $completeness->year = $start_edu_contract[0];
+                }
+                $completeness->preinvoice = 0;
+                $completeness->completeness = 100;
+
+                $month = $start_edu_contract[1];
+
+                if (date('m') == 12) {
+                    if ($month == 12) {
+                        $price = $model->first_m_price * $model->payer_dol;
+                    } else {
+                        $price = $model->other_m_price * $model->payer_dol;
+                    }
+                } else {
+                    if ($month == date('m') - 1) {
+                        $price = $model->first_m_price * $model->payer_dol;
+                    } else {
+                        $price = $model->other_m_price * $model->payer_dol;
+                    }
+                }
+
+                $completeness->sum = ($price * $completeness->completeness) / 100;
+
+
+                if (date('m') != 1) {
+                    $completeness->save();
+                }
+
+                $preinvoice = new Completeness();
+                $preinvoice->group_id = $model->group_id;
+                $preinvoice->contract_id = $model->id;
+                $preinvoice->month = date('m');
+                $preinvoice->year = $start_edu_contract[0];
+                $preinvoice->preinvoice = 1;
+                $preinvoice->completeness = 80;
+
+                $start_edu_contract = explode("-", $model->start_edu_contract);
+                $month = $start_edu_contract[1];
+
+                if ($month == date('m')) {
+                    $price = $model->first_m_price * $model->payer_dol;
+                } else {
+                    $price = $model->other_m_price * $model->payer_dol;
+                }
+
+                $preinvoice->sum = ($price * $preinvoice->completeness) / 100;
+
+
+                if ($preinvoice->save()) {
+                    $informs = new Informs();
+                    $informs->program_id = $model->program_id;
+                    $informs->contract_id = $model->id;
+                    $informs->prof_id = $cert->payer_id;
+                    $informs->text = 'Заключен договор';
+                    $informs->from = 2;
+                    $informs->date = date("Y-m-d");
+                    $informs->read = 0;
+
+                    if ($informs->save()) {
+                        $inform = new Informs();
+                        $inform->program_id = $model->program_id;
+                        $inform->contract_id = $model->id;
+                        $inform->prof_id = $model->certificate_id;
+                        $inform->text = 'Заключен договор';
+                        $inform->from = 4;
+                        $inform->date = date("Y-m-d");
+                        $inform->read = 0;
+
+                        if ($inform->save()) {
+                            return $this->redirect('/personal/organization-contracts');
+                        }
+                    }
+                }
+            }
+        }
+
         $cert = Certificates::findOne($model->certificate_id);
-
         $group = Groups::findOne($model->group_id);
-
         $program = Programs::findOne($model->program_id);
-
 
         return $this->render('verificate', [
             'model' => $model,
@@ -916,7 +1055,7 @@ class ContractsController extends Controller
         return $pdf->render();
     }
 
-    public function actionSave($id)
+    /*public function actionSave($id)
     {
         $model = $this->findModel($id);
 
@@ -1065,7 +1204,7 @@ class ContractsController extends Controller
         return $this->render('/contracts/save', [
             'model' => $model,
         ]);
-    }
+    }*/
 
     public function actionGenerate($id)
     {
