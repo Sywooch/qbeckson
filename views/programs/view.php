@@ -39,6 +39,7 @@ $this->registerJs($js, $this::POS_END);
         top: 20px;
         max-width: 33.3333333%;
     }
+
     @media only screen and (max-width: 992px) {
         .programs-view .affix-top, .programs-view .affix {
             top: 0;
@@ -88,7 +89,8 @@ $this->registerJs($js, $this::POS_END);
     <div class="row">
         <div class="col-md-4">
             <div class="row">
-                <div class="affix-top col-md-12" data-spy="affix" data-offset-top="<?= $model->getPhoto() ? '650' : '250' ?>">
+                <div class="affix-top col-md-12" data-spy="affix"
+                     data-offset-top="<?= $model->getPhoto() ? '650' : '250' ?>">
                     <?php $items = []; ?>
                     <?php if (Yii::$app->user->can('organizations')) : ?>
                         <?php foreach ($model->modules as $key => $module) : ?>
@@ -941,13 +943,10 @@ $this->registerJs($js, $this::POS_END);
                                                                                     $certificates = new Certificates();
                                                                                     $cert = $certificates->getCertificates();
                                                                                     $free = $years['maxchild'] - $contract;
-
-                                                                                    //return var_dump($free);
-
                                                                                     if ($free != 0 && $cert->actual == 1) {
-                                                                                        return Html::a('Выбрать', Url::to(['/contracts/new', 'id' => $model->id]), [
+                                                                                        return Html::a('Выбрать', Url::to(['/contracts/request', 'groupId' => $model->id]), [
                                                                                             'class' => 'btn btn-success',
-                                                                                            'title' => Yii::t('yii', 'Выбрать')
+                                                                                            'title' => 'Выбрать'
                                                                                         ]);
                                                                                     }
 
