@@ -199,31 +199,49 @@ class GroupsController extends Controller
         }
         $programModuleAddresses = ArrayHelper::map($model->module->addresses, 'address', 'address');
 
-        if (Yii::$app->request->post()) {
-            $model->load(Yii::$app->request->post());
-            Model::loadMultiple($groupClasses, Yii::$app->request->post());
-            if ($model->validate() && Model::validateMultiple($groupClasses)) {
-                $transaction = Yii::$app->db->beginTransaction();
-                try {
-                    if ($model->save()) {
-                        foreach ($groupClasses as $classModel) {
-                            /** @var GroupClass $classModel */
-                            if ($classModel->status) {
-                                $classModel->group_id = $model->id;
-                                if (!($flag = $classModel->save(false))) {
-                                    $transaction->rollBack();
-                                    break;
+        if ($model->load(Yii::$app->request->post())) {
+            $rows2 = (new \yii\db\Query())
+                ->select(['month'])
+                ->from('years')
+                ->where(['id' => $model->year_id])
+                ->one();
+
+            $d1 = strtotime($model->datestart);
+            $d2 = strtotime($model->datestop);
+            $diff = $d2 - $d1;
+            $diff = $diff / (60 * 60 * 24 * 31);
+            $month = floor($diff);
+
+            if ($rows2['month'] < $month - 1 or $rows2['month'] > $month + 1) {
+                Yii::$app->session->setFlash(
+                    'error',
+                    'Продолжительность программы должна быть ' . $rows2['month'] . ' месяцев.'
+                );
+            } else {
+                Model::loadMultiple($groupClasses, Yii::$app->request->post());
+                if ($model->validate() && Model::validateMultiple($groupClasses)) {
+                    $transaction = Yii::$app->db->beginTransaction();
+                    try {
+                        if ($model->save()) {
+                            foreach ($groupClasses as $classModel) {
+                                /** @var GroupClass $classModel */
+                                if ($classModel->status) {
+                                    $classModel->group_id = $model->id;
+                                    if (!($flag = $classModel->save(false))) {
+                                        $transaction->rollBack();
+                                        break;
+                                    }
                                 }
                             }
                         }
-                    }
-                    if ($flag) {
-                        $transaction->commit();
+                        if ($flag) {
+                            $transaction->commit();
 
-                        return $this->redirect(['programs/view', 'id' => $model->program_id]);
+                            return $this->redirect(['programs/view', 'id' => $model->program_id]);
+                        }
+                    } catch (\Exception $e) {
+                        $transaction->rollBack();
                     }
-                } catch (\Exception $e) {
-                    $transaction->rollBack();
                 }
             }
         }
@@ -261,35 +279,53 @@ class GroupsController extends Controller
             }
         }
 
-        if (Yii::$app->request->post()) {
-            $model->load(Yii::$app->request->post());
-            Model::loadMultiple($groupClasses, Yii::$app->request->post());
-            if ($model->validate() && Model::validateMultiple($groupClasses)) {
-                $transaction = Yii::$app->db->beginTransaction();
-                try {
-                    if ($model->save(false)) {
-                        foreach ($groupClasses as $classModel) {
-                            /** @var GroupClass $classModel */
-                            if ($classModel->status) {
-                                $classModel->group_id = $model->id;
-                                if (!($flag = $classModel->save(false))) {
-                                    $transaction->rollBack();
-                                    break;
-                                }
-                            } else {
-                                if (!$classModel->isNewRecord) {
-                                    $classModel->delete();
+        if ($model->load(Yii::$app->request->post())) {
+            $rows = (new \yii\db\Query())
+                ->select(['month'])
+                ->from('years')
+                ->where(['id' => $model->year_id])
+                ->one();
+
+            $d1 = strtotime($model->datestart);
+            $d2 = strtotime($model->datestop);
+            $diff = $d2 - $d1;
+            $diff = $diff / (60 * 60 * 24 * 31);
+            $month = floor($diff);
+
+            if ($rows['month'] < $month - 1 or $rows['month'] > $month + 1) {
+                Yii::$app->session->setFlash(
+                    'error',
+                    'Продолжительность программы должна быть ' . $rows['month'] . ' месяцев.'
+                );
+            } else {
+                Model::loadMultiple($groupClasses, Yii::$app->request->post());
+                if ($model->validate() && Model::validateMultiple($groupClasses)) {
+                    $transaction = Yii::$app->db->beginTransaction();
+                    try {
+                        if ($model->save(false)) {
+                            foreach ($groupClasses as $classModel) {
+                                /** @var GroupClass $classModel */
+                                if ($classModel->status) {
+                                    $classModel->group_id = $model->id;
+                                    if (!($flag = $classModel->save(false))) {
+                                        $transaction->rollBack();
+                                        break;
+                                    }
+                                } else {
+                                    if (!$classModel->isNewRecord) {
+                                        $classModel->delete();
+                                    }
                                 }
                             }
                         }
-                    }
-                    if ($flag) {
-                        $transaction->commit();
+                        if ($flag) {
+                            $transaction->commit();
 
-                        return $this->redirect(['personal/organization-groups']);
+                            return $this->redirect(['personal/organization-groups']);
+                        }
+                    } catch (Exception $e) {
+                        $transaction->rollBack();
                     }
-                } catch (Exception $e) {
-                    $transaction->rollBack();
                 }
             }
         }
