@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\Programs */
 
-$this->title = 'Заявка на обучение';
+$this->title = 'Ожидается подтверждение договора';
 
  $this->params['breadcrumbs'][] = ['label' => 'Договоры', 'url' => ['/personal/organization-contracts']];
 $this->params['breadcrumbs'][] = $this->title;
@@ -64,7 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                     'label' => 'Посмотреть текст договора',
                     'format'=>'raw',
-                    'value'=> Html::a('<span class="glyphicon glyphicon-download-alt"></span>', Url::to(['/contracts/mpdf', 'id' => $model->id])),
+                    'value'=> Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $model->fullUrl),
                     ],
                 ],
             ]);            

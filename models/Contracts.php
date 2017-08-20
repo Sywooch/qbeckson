@@ -416,6 +416,11 @@ class Contracts extends \yii\db\ActiveRecord
         if ($id == 4) { return 'Прекратил действие'; }
     }
 
+    public function getFullUrl()
+    {
+        return Url::to('/', true) . 'uploads/contracts/' . $this->url;
+    }
+
     public function getStatusName()
     {
         $statusName = '';
