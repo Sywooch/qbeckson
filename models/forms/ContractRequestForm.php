@@ -265,7 +265,7 @@ class ContractRequestForm extends Model
                 'parents_other_month_payment' => $parents_other_month_payment ?? 0,
                 'payer_first_month_payment' => $payer_first_month_payment ?? $funds_cert,
                 'payer_other_month_payment' => $payer_other_month_payment ?? 0,
-                'url' => $this->getCertificate()->number . '-' . Yii::$app->security->generateRandomString(4) . '.pfd',
+                'url' => $this->getCertificate()->number . '-' . Yii::$app->security->generateRandomString(4) . '.pdf',
                 'sposob' => 2,
                 'payment_order' => 1,
                 'balance' => $balance,
