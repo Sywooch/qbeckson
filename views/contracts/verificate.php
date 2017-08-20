@@ -9,7 +9,7 @@ use kartik\datecontrol\DateControl;
 /* @var $this yii\web\View */
 /* @var $model app\models\Contracts */
 
-if ($model->status === 1) {
+if ($model->status === 0) {
     $this->title = 'Просмотр заявки';
 }
 if ($model->status === 3) {
