@@ -63,7 +63,7 @@ class ContractsController extends Controller
             'group_id' => $groupId,
             'certificate_id' => Yii::$app->user->getIdentity()->certificate->id
         ]);
-        if (null !== $contract && null !== $contract->status) {
+        if (null !== $contract && null !== $contract->status && $contract->status == Contracts::STATUS_REFUSED) {
             throw new \DomainException('Контракт уже заключён!');
         }
 
