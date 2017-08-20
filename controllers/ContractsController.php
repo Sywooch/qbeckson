@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\helpers\FormattingHelper;
 use app\models\Cooperate;
 use app\models\forms\ContractConfirmForm;
 use app\models\forms\ContractRequestForm;
@@ -27,6 +28,7 @@ use app\models\Groups;
 use app\models\GroupsSearch;
 use app\models\Payers;
 use mPDF;
+use kartik\mpdf\Pdf;
 use yii\helpers\Json;
 use app\models\ContractspreInvoiceSearch;
 use app\models\Completeness;
@@ -891,6 +893,27 @@ class ContractsController extends Controller
 
     }
 
+    public function actionApplicationPdf($id)
+    {
+        $model = $this->findModel($id);
+
+        $content = $this->renderPartial('application-pdf', [
+            'model' => $model,
+        ]);
+
+        $pdf = new Pdf([
+            'mode' => Pdf::MODE_UTF8,
+            'destination' => Pdf::DEST_BROWSER,
+            'content' => $content,
+            'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
+            'options' => ['title' => 'Заявление о приеме на обучение'],
+            'methods' => [
+                'SetHeader' => ['Заявление о приеме на обучение'],
+            ]
+        ]);
+
+        return $pdf->render();
+    }
 
     public function actionSave($id)
     {
@@ -1320,7 +1343,7 @@ class ContractsController extends Controller
         $headerText = $organization->contractSettings->header_text;
         $headerText = str_replace(
             '№0000000000',
-            '№' . $model->certificate->number . ' (обладатель сертификата - ' . $model->certificate->fio_child . ')',
+            '№' . $model->number . ' (обладатель сертификата - ' . $model->certificate->fio_child . ')',
             $headerText
         );
             $html = <<<EOD
@@ -1333,7 +1356,7 @@ class ContractsController extends Controller
 EOD;
 
         if ($program->year > 1) {
-            $chast = ' части';
+            $chast = 'части';
         } else {
             $chast = '';
         }
@@ -1395,25 +1418,7 @@ EOD;
                 round(($model->parents_other_month_payment - floor($model->parents_other_month_payment)) * 100, 0) . ' коп. - за каждый последующий месяц периода обучения по Договору.';
         }
 
-
-        if ($program->directivity == 'Техническая (робототехника)' or $program->directivity == 'Техническая (иная)') {
-            $directivity = 'технической';
-        }
-        if ($program->directivity == 'Естественнонаучная') {
-            $directivity = 'естественнонаучной';
-        }
-        if ($program->directivity == 'Физкультурно-спортивная') {
-            $directivity = 'физкультурно-спортивной';
-        }
-        if ($program->directivity == 'Художественная') {
-            $directivity = 'художественной';
-        }
-        if ($program->directivity == 'Туристско-краеведческая') {
-            $directivity = 'туристско-краеведческой';
-        }
-        if ($program->directivity == 'Социально-педагогическая') {
-            $directivity = 'социально-педагогической';
-        }
+        $directivity = FormattingHelper::directivityForm($program->directivity);
 
         if ($model->all_parents_funds > 0) {
             $text1 = ', а также оплатить часть образовательной услуги в объеме и на условиях, предусмотренных разделом V настоящего Договора ';
@@ -1535,7 +1540,7 @@ EOD;
         <p style="text-align:center">II. Предмет Договора</p>
 
 <div align="justify">
-	2.1. Исполнитель обязуется оказать Обучающемуся образовательную услугу по реализации' . $chast . ' дополнительной общеобразовательной программы ' . $directivity . ' направленности «' . $program->name . '» '. ((null === $model->module->name) ? ('модуля (года) - ' . $model->module->year) : 'модуля: «' . $model->module->name . '»') . ' (далее – Образовательная услуга, Программа), в пределах учебного плана программы, предусмотренного на период обучения по Договору.<br>
+	2.1. Исполнитель обязуется оказать Обучающемуся образовательную услугу по реализации ' . $chast . ' дополнительной общеобразовательной программы ' . $directivity . ' направленности «' . $program->name . '» '. ((null === $model->module->name) ? ('модуля (года) - ' . $model->module->year) : 'модуля: «' . $model->module->name . '»') . ' (далее – Образовательная услуга, Программа), в пределах учебного плана программы, предусмотренного на период обучения по Договору.<br>
     2.2. Форма обучения и используемые образовательные технологии: ' . $programform . '<br>
 	2.3. Заказчик обязуется содействовать получению Обучающимся образовательной услуги' . $text1 . '.<br>
 	2.4. ' . $text144 . ' Период обучения по Договору: с ' . $start_edu_contract[2] . '.' . $start_edu_contract[1] . '.' . $start_edu_contract[0] . ' по ' . $datestop[2] . '.' . $datestop[1] . '.' . $datestop[0] . '.
