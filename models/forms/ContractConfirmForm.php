@@ -23,11 +23,13 @@ class ContractConfirmForm extends Model
     /**
      * ContractConfirmForm constructor.
      * @param Contracts $contract
+     * @param null $certificateId
      * @param array $config
      */
-    public function __construct(Contracts $contract, $config = [])
+    public function __construct(Contracts $contract, $certificateId = null, $config = [])
     {
         $this->setContract($contract);
+        $this->setCertificate($certificateId);
         parent::__construct($config);
     }
 
@@ -70,7 +72,7 @@ class ContractConfirmForm extends Model
     public function validateConfirmation($attribute)
     {
         $balance = $this->getCertificate()->balance_f;
-        if ($this->getContract()->period === ContractRequestForm::CURRENT_REALIZATION_PERIOD) {
+        if ($this->getContract()->period === Contracts::CURRENT_REALIZATION_PERIOD) {
             $balance = $this->getCertificate()->balance;
         }
 
@@ -103,12 +105,12 @@ class ContractConfirmForm extends Model
                 'rezerv',
             ]);
 
-            if ($contract->period === ContractRequestForm::CURRENT_REALIZATION_PERIOD) {
+            if ($contract->period === Contracts::CURRENT_REALIZATION_PERIOD) {
                 $certificate->updateCounters([
                     'balance' => $contract->funds_cert * -1,
                     'rezerv' => $contract->funds_cert,
                 ]);
-            } elseif ($contract->period === ContractRequestForm::FUTURE_REALIZATION_PERIOD) {
+            } elseif ($contract->period === Contracts::FUTURE_REALIZATION_PERIOD) {
                 $certificate->updateCounters([
                     'balance_f' => $contract->funds_cert * -1,
                     'rezerv_f' => $contract->funds_cert,
@@ -132,14 +134,19 @@ class ContractConfirmForm extends Model
     }
 
     /**
+     * @param integer|null $certificateId
+     */
+    public function setCertificate($certificateId)
+    {
+        $this->certificate = (null === $certificateId) ?
+            Yii::$app->user->getIdentity()->certificate : Certificates::findOne($certificateId);
+    }
+
+    /**
      * @return Certificates
      */
     public function getCertificate(): Certificates
     {
-        if (null === $this->certificate) {
-            $this->certificate = Yii::$app->user->identity->certificate;
-        }
-
         return $this->certificate;
     }
 

@@ -25,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // $form->field($model, 'certificate_id')->dropDownList(ArrayHelper::map(app\models\Certificates::find()->all(), 'id', 'number')) ?>
    
    
-   <?php   
+   <?php
     
     $orgs = new Organization();
     $org = $orgs->getOrganization();
@@ -54,20 +54,10 @@ if ($certificate->balance == 0) {
         echo '<h2>Действие организации приостановленно.</h2>';
     }
     else {
-        /*if ($count3 >= $limit_napr) {
-             echo '<h2>Достигнут максимальный предел числа одновременно оплачиваемых вашей уполномоченной организацией услуг по данной направленности.</h2>';
-        }
-        else { */
-
             if ($organization->max_child <= $count2) { 
                 echo '<h2>Достигнут максимальный лимит зачисления в организацию. Свяжитесь с представителем организации.</h2>';
             }
             else {
-                /* if ($program->limit <= $count1) {
-                    echo '<h2>Достигнут максимальный лимит зачисления на обучение по программе. Свяжитесь с представителем организации.</h2>';
-                }
-                else { */
-
                     $programs = \app\models\Programs::find()
                         ->where([
                             'organization_id' => $organization->id,
@@ -84,7 +74,7 @@ if ($certificate->balance == 0) {
                             ->andWhere(['certificate_id' => $certificate->id])
                             ->andWhere(['program_id' => $program['id']])
                             ->count();
-                        if ($count5 == 0) { 
+                        if ($count5 == 0) {
                         
                             $count3 = (new \yii\db\Query())
                                 ->select(['id'])
@@ -94,37 +84,37 @@ if ($certificate->balance == 0) {
                                 ->andWhere(['program_id' => $program['id']])
                                 ->count();
 
-                            if ($program['directivity'] == 'Техническая (робототехника)') { 
+                            if ($program['directivity'] == 'Техническая (робототехника)') {
                                     $directionality = explode(",", $payer->directionality);
                                     //return var_dump($directionality);
                                 if (in_array('Техническая (робототехника)', $directionality)) {
                                     $limit_napr = $payer->directionality_1rob_count;
                                     if ($limit_napr == 0 or empty($limit_napr)) {
-                                           $limit_napr = 'nolimit'; 
+                                           $limit_napr = 'nolimit';
                                         }
                                 }
                                 else {
                                     $limit_napr = 'nolimit';
                                 }
                             }
-                            if ($program['directivity'] == 'Техническая (иная)') {  
+                            if ($program['directivity'] == 'Техническая (иная)') {
                                     $directionality = explode(",", $payer->directionality);
                                     if (in_array('Техническая (иная)', $directionality)) {
                                         $limit_napr = $payer->directionality_1_count;
                                         if ($limit_napr == 0 or empty($limit_napr)) {
-                                           $limit_napr = 'nolimit'; 
+                                           $limit_napr = 'nolimit';
                                         }
                                     }
                                     else {
                                         $limit_napr = 'nolimit';
-                                    }                                                 
+                                    }
                                 }
-                            if ($program['directivity'] == 'Естественнонаучная') { 
+                            if ($program['directivity'] == 'Естественнонаучная') {
                                     $directionality = explode(",", $payer->directionality);
                                     if (in_array('Естественнонаучная', $directionality)) {
-                                        $limit_napr = $payer->directionality_2_count; 
+                                        $limit_napr = $payer->directionality_2_count;
                                         if ($limit_napr == 0 or empty($limit_napr)) {
-                                           $limit_napr = 'nolimit'; 
+                                           $limit_napr = 'nolimit';
                                         }
                                     }
                                     else {
@@ -134,9 +124,9 @@ if ($certificate->balance == 0) {
                             if ($program['directivity'] == 'Физкультурно-спортивная') { 
                                     $directionality = explode(",", $payer->directionality);
                                     if (in_array('Физкультурно-спортивная', $directionality)) {
-                                        $limit_napr = $payer->directionality_3_count; 
+                                        $limit_napr = $payer->directionality_3_count;
                                         if ($limit_napr == 0 or empty($limit_napr)) {
-                                           $limit_napr = 'nolimit'; 
+                                           $limit_napr = 'nolimit';
                                         }
                                     }
                                     else {
@@ -146,9 +136,9 @@ if ($certificate->balance == 0) {
                             if ($program['directivity'] == 'Художественная') { 
                                     $directionality = explode(",", $payer->directionality);
                                     if (in_array('Художественная', $directionality)) {
-                                        $limit_napr = $payer->directionality_4_count; 
+                                        $limit_napr = $payer->directionality_4_count;
                                         if ($limit_napr == 0 or empty($limit_napr)) {
-                                           $limit_napr = 'nolimit'; 
+                                           $limit_napr = 'nolimit';
                                         }
                                     }
                                     else {
@@ -206,7 +196,6 @@ if ($certificate->balance == 0) {
                             }
                         }
                     }
-  
 
                     echo $form->field($model, 'program_id')->dropDownList(ArrayHelper::map($val, 'id', 'name'), ['id'=>'prog-id', 'prompt'=>'-- Не выбрана --',]);
 
@@ -219,7 +208,6 @@ if ($certificate->balance == 0) {
                         ]
                     ])->label('Модуль');
 
-    
                     echo $form->field($model, 'group_id')->widget(DepDrop::classname(), [
                         'options'=>['id'=>'group-id'],
                         'pluginOptions'=>[
@@ -228,9 +216,6 @@ if ($certificate->balance == 0) {
                             'url'=>Url::to(['/contracts/yeargroup'])
                         ]
                     ])->label('Группа');
-
-
-
 
                     echo '<div class="form-group">';
                         echo Html::submitButton($model->isNewRecord ? 'Создать' : 'Обновить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);

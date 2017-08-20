@@ -1,5 +1,6 @@
 <?php
 
+use app\models\Contracts;
 use app\models\forms\ContractRequestForm;
 use kartik\widgets\DatePicker;
 use yii\bootstrap\Modal;
@@ -57,33 +58,58 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="col-md-offset-2 col-md-8">
                     <div class="panel panel-default">
                         <div class="panel-body">
-                            <p>Вы хотите записаться на программу <?= $contract->program->name ?> (<?= $contract->module->getShortName() ?>)</p>
+                            <p>
+                                Вы хотите записаться на программу
+                                <?= $contract->program->name ?> (<?= $contract->module->getShortName() ?>)
+                            </p>
                             <br>
                             <p>Организация: <?= $contract->organization->name ?></p>
                             <p>Место проведения: <?= $contract->module->mainAddress->address ?></p>
                             <p>Дата начала: <?= Yii::$app->formatter->asDate($contract->group->datestart) ?></p>
                             <p>Дата окончания: <?= Yii::$app->formatter->asDate($contract->group->datestop) ?></p>
                             <br>
-                            <p>Договор заключается на период с <?= Yii::$app->formatter->asDate($contract->start_edu_contract) ?> по <?= Yii::$app->formatter->asDate($contract->stop_edu_contract) ?> (будут использованы средства, предусмотренные на период)</p>
+                            <p>
+                                Договор заключается на период с
+                                <?= Yii::$app->formatter->asDate($contract->start_edu_contract) ?> по
+                                <?= Yii::$app->formatter->asDate($contract->stop_edu_contract) ?>
+                                (будут использованы средства, предусмотренные на период)
+                            </p>
                             <br>
-                            <p>В первый месяц с сертификата будет списано <?= $contract->payer_first_month_payment ?> руб.</p>
+                            <p>
+                                В первый месяц с сертификата будет списано
+                                <?= $contract->payer_first_month_payment ?> руб.
+                            </p>
                             <?php if ($contract->prodolj_m > 1) : ?>
-                                <p>В последующие месяцы с сертификата будет производиться ежемесячное списание в размере <?= $contract->payer_other_month_payment ?> руб.</p>
+                                <p>
+                                    В последующие месяцы с сертификата будет производиться
+                                    ежемесячное списание в размере
+                                    <?= $contract->payer_other_month_payment ?> руб.
+                                </p>
                             <?php endif; ?>
                             <p>
-                                Всего с сертификата будет списано <?= $contract->funds_cert ?> руб. Остаток сертификата составит
-                                <?= $contract->period === ContractRequestForm::CURRENT_REALIZATION_PERIOD ?
+                                Всего с сертификата будет списано
+                                <?= $contract->funds_cert ?> руб. Остаток сертификата составит
+                                <?= $contract->period === Contracts::CURRENT_REALIZATION_PERIOD ?
                                     $contract->certificate->balance - $contract->funds_cert :
                                     $contract->certificate->balance_f - $contract->funds_cert;
                                 ?> руб.
                             </p>
                             <br>
                             <?php if ($contract->all_parents_funds > 0) : ?>
-                                <p>В первый месяц потребуется доплата с Вашей стороны в размере <?= $contract->parents_first_month_payment ?> руб.</p>
+                                <p>
+                                    В первый месяц потребуется доплата с Вашей стороны в размере
+                                    <?= $contract->parents_first_month_payment ?> руб.
+                                </p>
                                 <?php if ($contract->prodolj_m > 1) : ?>
-                                    <p>В последующие месяцы потребуется ежемесячная доплата с Вашей стороны в размере <?= $contract->parents_other_month_payment ?> руб.</p>
+                                    <p>
+                                        В последующие месяцы потребуется ежемесячная доплата с Вашей стороны в размере
+                                        <?= $contract->parents_other_month_payment ?> руб.
+                                    </p>
                                 <?php endif; ?>
-                                <p>Оплата за счёт Ваших личных средств составит <?= $contract->all_parents_funds ?> руб.</p>
+                                <p>
+                                    Оплата за счёт Ваших личных средств составит
+                                    <?= $contract->all_parents_funds ?> руб.
+                                </p>
                                 <br>
                             <?php endif; ?>
                             <p>Общая стоимость программы: <?= $contract->all_funds ?> руб.</p>
@@ -93,7 +119,11 @@ $this->params['breadcrumbs'][] = $this->title;
                             <?php endif; ?>
                             <?= $confirm->field($confirmForm, 'thirdConfirmation')->checkbox(); ?>
                             <hr>
-                            <?= Html::a('Отменить', ['reject-request', 'id' => $contract->id], ['class' => 'btn btn-danger']) ?>
+                            <?= Html::a(
+                                'Отменить',
+                                ['reject-request', 'id' => $contract->id],
+                                ['class' => 'btn btn-danger']
+                            ) ?>
                             <?php Modal::begin([
                                 'header' => false,
                                 'id' => 'confirmation-modal',
@@ -105,13 +135,17 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'clientOptions' => ['backdrop' => false]
                             ]) ?>
                             <p>
-                                Вы собираетесь подать заявку на обучение, после чего средства на Вашем сертификате будут зарезервированы для оплаты будущего договора.
+                                Вы собираетесь подать заявку на обучение, после чего средства на Вашем сертификате
+                                будут зарезервированы для оплаты будущего договора.
                                 Пожалуйста подтвердите Ваше информированное согласие с условиями подачи заявки.
                             </p>
                             <?= $confirm->field($confirmForm, 'firstConfirmation')->checkbox(); ?>
                             <hr>
                             <div class="form-group">
-                                <?= Html::submitButton('Направить заявку поставщику образовательных услуг', ['class' => 'btn btn-success btn-block']) ?>
+                                <?= Html::submitButton(
+                                    'Направить заявку поставщику образовательных услуг',
+                                    ['class' => 'btn btn-success btn-block']
+                                ) ?>
                             </div>
                             <?php Modal::end() ?>
                         </div>

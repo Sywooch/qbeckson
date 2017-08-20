@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\db\ActiveRecord;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -92,16 +93,16 @@ use yii\helpers\Url;
  * @property Programs $program
  * @property ProgrammeModule $module
  */
-class Contracts extends \yii\db\ActiveRecord
+class Contracts extends ActiveRecord
 {
+    const CURRENT_REALIZATION_PERIOD = 1;
+    const FUTURE_REALIZATION_PERIOD = 2;
+    const PAST_REALIZATION_PERIOD = 3;
+
     const STATUS_CREATED = 0;
-
     const STATUS_ACTIVE = 1;
-
     const STATUS_REFUSED = 2;
-
     const STATUS_ACCEPTED = 3;
-
     const STATUS_CLOSED = 4;
 
     public $certnumber;

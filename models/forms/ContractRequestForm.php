@@ -16,9 +16,6 @@ use yii\base\Model;
  */
 class ContractRequestForm extends Model
 {
-    const CURRENT_REALIZATION_PERIOD = 1;
-    const FUTURE_REALIZATION_PERIOD = 2;
-
     public $dateFrom;
     public $dateTo;
 
@@ -31,13 +28,15 @@ class ContractRequestForm extends Model
     /**
      * ContractRequestForm constructor.
      * @param integer $groupId
+     * @param null $certificateId
      * @param Contracts|null $contract
      * @param array $config
      */
-    public function __construct($groupId, $contract = null, $config = [])
+    public function __construct($groupId, $certificateId = null, $contract = null, $config = [])
     {
         $this->setGroup($groupId);
         $this->setContract($contract);
+        $this->setCertificate($certificateId);
         if (null === $this->dateFrom) {
             if (time() < strtotime($this->getGroup()->datestart)) {
                 $this->dateFrom = Yii::$app->formatter->asDate($this->getGroup()->datestart);
@@ -98,7 +97,7 @@ class ContractRequestForm extends Model
         if (strtotime($this->dateFrom) >= strtotime($settings->current_program_date_from) &&
             strtotime($this->dateFrom) <= strtotime($settings->current_program_date_to)
         ) {
-            $this->setRealizationPeriod(self::CURRENT_REALIZATION_PERIOD);
+            $this->setRealizationPeriod(Contracts::CURRENT_REALIZATION_PERIOD);
             $this->dateTo = $settings->current_program_date_to;
             if (strtotime($group->datestop) < strtotime($settings->current_program_date_to)) {
                 $this->dateTo = $group->datestop;
@@ -108,7 +107,7 @@ class ContractRequestForm extends Model
         if (strtotime($this->dateFrom) >= strtotime($settings->future_program_date_from) &&
             strtotime($this->dateFrom) <= strtotime($settings->future_program_date_to)
         ) {
-            $this->setRealizationPeriod(self::FUTURE_REALIZATION_PERIOD);
+            $this->setRealizationPeriod(Contracts::FUTURE_REALIZATION_PERIOD);
             $this->dateTo = $settings->future_program_date_to;
             if (strtotime($group->datestop) < strtotime($settings->future_program_date_to)) {
                 $this->dateTo = $group->datestop;
@@ -157,12 +156,15 @@ class ContractRequestForm extends Model
      *
      * В результате мы имеем все параметры договора кроме увязки с остатками сертификата…
      * All_funds = цена первого месяца + цена прочего месяца*число прочих месяцев
-     * Вариант А: funds_cert = min (нормативная стоимость первого месяца + нормативная стоимость прочего месяца*число прочих месяцев; остаток сертификата текущего периода)
-     * Вариант Б: funds_cert = min (нормативная стоимость первого месяца + нормативная стоимость прочего месяца*число прочих месяцев; остаток сертификата будущего периода)
+     * Вариант А: funds_cert = min (нормативная стоимость первого месяца + нормативная стоимость прочего
+     * месяца*число прочих месяцев; остаток сертификата текущего периода)
+     * Вариант Б: funds_cert = min (нормативная стоимость первого месяца + нормативная стоимость прочего
+     * месяца*число прочих месяцев; остаток сертификата будущего периода)
      * all_parents_funds= All_funds - funds_cert
      * first_m_price – цена первого месяца
      * other_m_price – цена прочего месяца (0 – если всего один месяц)
-     * first_m_nprice – нормативная стоимость первого месяца (0 – если всего один месяц) other_m_nprice - нормативная стоимость прочего месяца
+     * first_m_nprice – нормативная стоимость первого месяца (0 – если всего один месяц) other_m_nprice -
+     * нормативная стоимость прочего месяца
      * Подтверждение заявки: вот тут вот будут расчеты влиять на остатки и резервы текущего и будущего периодов
      *
      * @return mixed
@@ -187,7 +189,7 @@ class ContractRequestForm extends Model
                 $realizationPeriodInDays / $groupRealizationPeriod * $group->module->normative_price
             );
             // Меньшее из трёх all_funds / $normativePrice / отсток по сертификату
-            if ($this->getRealizationPeriod() === self::CURRENT_REALIZATION_PERIOD) {
+            if ($this->getRealizationPeriod() === Contracts::CURRENT_REALIZATION_PERIOD) {
                 $balance = $this->getCertificate()->balance;
             } else {
                 $balance = $this->getCertificate()->balance_f;
@@ -336,14 +338,19 @@ class ContractRequestForm extends Model
     }
 
     /**
+     * @param integer|null $certificateId
+     */
+    public function setCertificate($certificateId)
+    {
+        $this->certificate = (null === $certificateId) ?
+            Yii::$app->user->getIdentity()->certificate : Certificates::findOne($certificateId);
+    }
+
+    /**
      * @return Certificates
      */
     public function getCertificate(): Certificates
     {
-        if (null === $this->certificate) {
-            $this->certificate = Yii::$app->user->identity->certificate;
-        }
-
         return $this->certificate;
     }
 

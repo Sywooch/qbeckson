@@ -277,10 +277,8 @@ class CertificatesController extends Controller
                 ->one();
 
             if ($rows['id']) {
-
                 $organizations = new Organization();
                 $organization = $organizations->getOrganization();
-
 
                 $cooperate = (new \yii\db\Query())
                     ->select(['id'])
@@ -316,7 +314,6 @@ class CertificatesController extends Controller
         return $this->render('verificate', [
             'model' => $model,
         ]);
-
     }
 
     public function actionActual($id)

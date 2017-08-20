@@ -6,6 +6,7 @@ use app\helpers\FormattingHelper;
 use app\models\Cooperate;
 use app\models\forms\ContractConfirmForm;
 use app\models\forms\ContractRequestForm;
+use app\models\UserIdentity;
 use app\traits\AjaxValidationTrait;
 use Yii;
 use app\models\Contracts;
@@ -57,19 +58,22 @@ class ContractsController extends Controller
 
     /**
      * @param string $groupId
+     * @param null $certificateId
      * @return string|\yii\web\Response
      */
-    public function actionRequest(string $groupId)
+    public function actionRequest($groupId, $certificateId = null)
     {
-        $contract = Contracts::findOne([
-            'group_id' => $groupId,
-            'certificate_id' => Yii::$app->user->getIdentity()->certificate->id
-        ]);
-        if (null !== $contract && null !== $contract->status && $contract->status != Contracts::STATUS_REFUSED) {
+        if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
+            $certificateId = Yii::$app->user->getIdentity()->certificate->id;
+        }
+
+        $contract = Contracts::findOne(['group_id' => $groupId, 'certificate_id' => $certificateId]);
+
+        if (null !== $contract && null !== $contract->status && $contract->status !== Contracts::STATUS_REFUSED) {
             throw new \DomainException('Контракт уже заключён!');
         }
 
-        $model = new ContractRequestForm($groupId, $contract);
+        $model = new ContractRequestForm($groupId, $certificateId, $contract);
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             if (false === ($contract = $model->save())) {
                 Yii::$app->session->setFlash('danger', 'Что-то не так.');
@@ -79,7 +83,7 @@ class ContractsController extends Controller
         }
 
         if (null !== $contract) {
-            $confirmForm = new ContractConfirmForm($contract);
+            $confirmForm = new ContractConfirmForm($contract, $certificateId);
             if ($confirmForm->load(Yii::$app->request->post()) && $confirmForm->validate()) {
                 if ($confirmForm->save()) {
                     Yii::$app->session->setFlash('success', 'Вы успешно подали заявку на обучение.');
@@ -102,15 +106,16 @@ class ContractsController extends Controller
 
     /**
      * @param $id
+     * @param null|string $certificateId
      * @return Response
-     * @throws NotFoundHttpException|\DomainException
+     * @throws NotFoundHttpException
      */
-    public function actionRejectRequest($id): Response
+    public function actionRejectRequest($id, $certificateId = null): Response
     {
-        $contract = Contracts::findOne([
-            'id' => $id,
-            'certificate_id' => Yii::$app->user->getIdentity()->certificate->id
-        ]);
+        if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
+            $certificateId = Yii::$app->user->getIdentity()->certificate->id;
+        }
+        $contract = Contracts::findOne(['id' => $id, 'certificate_id' => $certificateId]);
         if (null === $contract) {
             throw new NotFoundHttpException('Model not found');
         }
@@ -136,8 +141,6 @@ class ContractsController extends Controller
 
     public function actionGroup($id)
     {
-        $model = new Contracts();
-
         $searchGroups = new GroupsSearch();
         $searchGroups->year_id = $id;
         $GroupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
@@ -171,7 +174,6 @@ class ContractsController extends Controller
         return $this->render('newgroup', [
             'model' => $model,
         ]);
-
     }
 
     public function actionCancel($id)
@@ -232,11 +234,11 @@ class ContractsController extends Controller
             $program->last_contracts = $program->last_contracts + 1;
             $program->save();
 
-            $cert->rezerv = $cert->rezerv - ($model->first_m_price * $model->payer_dol);
+            $cert->rezerv = $cert->rezerv - ($model->payer_first_month_payment);
             $cert->save();
 
-            $model->paid = $model->first_m_price * $model->payer_dol;
-            $model->rezerv = $model->rezerv - ($model->first_m_price * $model->payer_dol);
+            $model->paid = $model->payer_first_month_payment;
+            $model->rezerv = $model->rezerv - ($model->payer_first_month_payment);
 
             $model->status = 1;
 
@@ -261,15 +263,15 @@ class ContractsController extends Controller
 
                 if (date('m') == 12) {
                     if ($month == 12) {
-                        $price = $model->first_m_price * $model->payer_dol;
+                        $price = $model->payer_first_month_payment;
                     } else {
-                        $price = $model->other_m_price * $model->payer_dol;
+                        $price = $model->payer_other_month_payment;
                     }
                 } else {
                     if ($month == date('m') - 1) {
-                        $price = $model->first_m_price * $model->payer_dol;
+                        $price = $model->payer_first_month_payment;
                     } else {
-                        $price = $model->other_m_price * $model->payer_dol;
+                        $price = $model->payer_other_month_payment;
                     }
                 }
 
@@ -292,9 +294,9 @@ class ContractsController extends Controller
                 $month = $start_edu_contract[1];
 
                 if ($month == date('m')) {
-                    $price = $model->first_m_price * $model->payer_dol;
+                    $price = $model->payer_first_month_payment;
                 } else {
-                    $price = $model->other_m_price * $model->payer_dol;
+                    $price = $model->payer_other_month_payment;
                 }
 
                 $preinvoice->sum = ($price * $preinvoice->completeness) / 100;
@@ -382,12 +384,15 @@ class ContractsController extends Controller
         //TODO добавить транзакцию
         if ($informs->load(Yii::$app->request->post())) {
             $cert = Certificates::findOne($model->certificate_id);
-            if ($model->period === ContractRequestForm::CURRENT_REALIZATION_PERIOD) {
+            if ($model->period === Contracts::CURRENT_REALIZATION_PERIOD) {
                 $cert->balance += $model->rezerv;
                 $cert->rezerv -= $model->rezerv;
-            } elseif ($model->period === ContractRequestForm::FUTURE_REALIZATION_PERIOD) {
+            } elseif ($model->period === Contracts::FUTURE_REALIZATION_PERIOD) {
                 $cert->balance_f += $model->rezerv;
                 $cert->rezerv_f -= $model->rezerv;
+            } elseif ($model->period === Contracts::PAST_REALIZATION_PERIOD) {
+                $cert->balance_p += $model->rezerv;
+                $cert->rezerv_p -= $model->rezerv;
             }
             $cert->save();
 
@@ -430,13 +435,17 @@ class ContractsController extends Controller
         $model = $this->findModel($id);
         $cert = Certificates::findOne($model->certificate_id);
         //TODO добавить транзакцию
-        if ($model->period === ContractRequestForm::CURRENT_REALIZATION_PERIOD) {
+        if ($model->period === Contracts::CURRENT_REALIZATION_PERIOD) {
             $cert->balance += $model->rezerv;
             $cert->rezerv -= $model->rezerv;
-        } elseif ($model->period === ContractRequestForm::FUTURE_REALIZATION_PERIOD) {
+        } elseif ($model->period === Contracts::FUTURE_REALIZATION_PERIOD) {
             $cert->balance_f += $model->rezerv;
             $cert->rezerv_f -= $model->rezerv;
+        } elseif ($model->period === Contracts::PAST_REALIZATION_PERIOD) {
+            $cert->balance_p += $model->rezerv;
+            $cert->rezerv_p -= $model->rezerv;
         }
+
         $cert->save();
         $model->rezerv = 0;
         $model->status = 2;
@@ -465,12 +474,15 @@ class ContractsController extends Controller
             $cert = Certificates::findOne($model->certificate_id);
 
             //TODO добавить транзакцию
-            if ($model->period === ContractRequestForm::CURRENT_REALIZATION_PERIOD) {
+            if ($model->period === Contracts::CURRENT_REALIZATION_PERIOD) {
                 $cert->balance += $model->rezerv;
                 $cert->rezerv -= $model->rezerv;
-            } elseif ($model->period === ContractRequestForm::FUTURE_REALIZATION_PERIOD) {
+            } elseif ($model->period === Contracts::FUTURE_REALIZATION_PERIOD) {
                 $cert->balance_f += $model->rezerv;
                 $cert->rezerv_f -= $model->rezerv;
+            } elseif ($model->period === Contracts::PAST_REALIZATION_PERIOD) {
+                $cert->balance_p += $model->rezerv;
+                $cert->rezerv_p -= $model->rezerv;
             }
             $cert->save();
             $model->rezerv = 0;
@@ -714,7 +726,7 @@ EOD;
                 $text4 .= '5.4. Оплата за счет средств сертификата и Заказчика за месяц периода обучения по Договору осуществляется в полном объеме при условии, если по состоянию на первое число соответствующего месяца действие настоящего Договора не прекращено, независимо от фактического посещения Обучающимся занятий, предусмотренных учебным планом Программы в соответствующем месяце.<br>';
                 $text4 .= '5.5. В случае отмены со стороны Исполнителя проведения одного или нескольких занятий в рамках оказания образовательной услуги объем оплаты по договору за месяц, в котором указанные занятия должны были быть проведены, уменьшается пропорционально доле таких занятий в общей продолжительности занятий в указанном месяце.<br>';
             } else {
-                $text4 .= '5.4. Оплата за счет средств сертификата за месяц периода обучения по Договору осуществляется в полном объеме при условии, если по состоянию на первое число соответствующего месяца действие настоящего Договора не прекращено, независимо от фактического посещения Обучающимся занятий, предусмотренных учебным планом Программы в соответствующем месяце.<br />';
+                $text4 .= '5.4. Оплата за счет средств сертификата за месяц периода обучения по Договору осуществляется в полном объеме при условии, если по состоянию на первое число соответствующего месяца действие настоящего Договора не прекращено, независимо от фактического посещения Обучающимся занятий, предусмотренных учебным планом Программы в соответствующем месяце.<br>';
                 $text4 .= '5.5. Оплата за счет средств Заказчика за месяц периода обучения по Договору осуществляется пропорционально фактическому посещению  Обучающимся занятий, предусмотренных учебным планом Программы в соответствующем месяце.<br>';
                 $text4 .= '5.6. В случае отмены со стороны Исполнителя проведения одного или нескольких занятий в рамках оказания образовательной услуги объем оплаты по договору за месяц, в котором указанные занятия должны были быть проведены, уменьшается пропорционально доле таких занятий в общей продолжительности занятий в указанном месяце.<br>';
             }
@@ -722,12 +734,9 @@ EOD;
             $text1 = '';
             $text3 = '4.2.1. Создавать условия для получения Обучающимся образовательной услуги.<br>';
             $text4 = '5.1. Полная стоимость образовательной услуги за период обучения по Договору составляет ' . floor($model->all_funds) . ' руб. ' . round(($model->all_funds - floor($model->all_funds)) * 100, 0) . ' коп.. Вся сумма будет оплачена за счет средств сертификата дополнительного образования Обучающегося.<br>         
-            
             5.2. Оплата за счет средств сертификата осуществляется в рамках договора ' . (Yii::$app->operator->identity->settings->document_name === Cooperate::DOCUMENT_NAME_FIRST ? 'о возмещении затрат' : 'об оплате дополнительного образования') . ' № ' . $cooperate['number'] . ' от ' . $date_cooperate[2] . '.' . $date_cooperate[1] . '.' . $date_cooperate[0] . ', заключенного между Исполнителем и ' . $payer->name_dat . ' (далее – Соглашение, Уполномоченная организация) ежемесячно не позднее 10-го числа месяца, следующего за месяцем оплаты в размере:' . $text88 . '<br>
-            
-            
-            5.3. Оплата за счет средств сертификата за месяц периода обучения по Договору осуществляется в полном объеме при условии, если по состоянию на первое число соответствующего месяца действие настоящего Договора не прекращено, независимо от фактического посещения Обучающимся занятий, предусмотренных учебным планом Программы в соответствующем месяце.';
-            $text4 .= '5.4. В случае отмены со стороны Исполнителя проведения одного или нескольких занятий в рамках оказания образовательной услуги объем оплаты по договору за месяц, в котором указанные занятия должны были быть проведены, уменьшается пропорционально доле таких занятий в общей продолжительности занятий в указанном месяце.';
+            5.3. Оплата за счет средств сертификата за месяц периода обучения по Договору осуществляется в полном объеме при условии, если по состоянию на первое число соответствующего месяца действие настоящего Договора не прекращено, независимо от фактического посещения Обучающимся занятий, предусмотренных учебным планом Программы в соответствующем месяце.<br>';
+            $text4 .= '5.4. В случае отмены со стороны Исполнителя проведения одного или нескольких занятий в рамках оказания образовательной услуги объем оплаты по договору за месяц, в котором указанные занятия должны были быть проведены, уменьшается пропорционально доле таких занятий в общей продолжительности занятий в указанном месяце.<br>';
         }
 
 
@@ -1191,9 +1200,9 @@ EOD;
                         $month = $start_edu_contract[1];
 
                         if ($month == date('m') - 1) {
-                            $price = $model->first_m_price * $model->payer_dol;
+                            $price = $model->payer_first_month_payment;
                         } else {
-                            $price = $model->other_m_price * $model->payer_dol;
+                            $price = $model->payer_other_month_payment;
                         }
 
                         $completeness->sum = ($price * $completeness->completeness) / 100;
@@ -1214,9 +1223,9 @@ EOD;
                         $month = $start_edu_contract[1];
 
                         if ($month == date('m')) {
-                            $price = $model->first_m_price * $model->payer_dol;
+                            $price = $model->payer_first_month_payment;
                         } else {
-                            $price = $model->other_m_price * $model->payer_dol;
+                            $price = $model->payer_other_month_payment;
                         }
 
                         $preinvoice->sum = ($price * $preinvoice->completeness) / 100;
@@ -1241,7 +1250,9 @@ EOD;
 
                     foreach ($certificates as $certificate) {
                         $cert = Certificates::findOne($certificate);
+
                         $cert->balance = $cert->balance + $cont->rezerv;
+
                         $cert->save();
                     }
 
@@ -1325,9 +1336,9 @@ EOD;
                     foreach ($certificates as $certificate) {
                         $cert = Certificates::findOne($certificate);
                         //$cert->balance = $cert->balance - $cert->rezerv;
-                        $model->rezerv = $model->rezerv - ($model->other_m_price * $model->payer_dol);
-                        $model->paid = $model->paid + ($model->other_m_price * $model->payer_dol);
-                        $cert->rezerv = $cert->rezerv - ($model->other_m_price * $model->payer_dol);
+                        $model->rezerv = $model->rezerv - ($model->payer_other_month_payment);
+                        $model->paid = $model->paid + ($model->payer_other_month_payment);
+                        $cert->rezerv = $cert->rezerv - ($model->payer_other_month_payment);
 
                         $model->save();
                         $cert->save();
@@ -1371,9 +1382,9 @@ EOD;
                         $start_edu_contract = explode('-', $contract->start_edu_contract);
 
                         if ($start_edu_contract[1] == $twomonth) {
-                            $certificate->balance = $certificate->balance + (($contract->first_m_price * $contract->payer_dol) / 100) * (100 - $completeness['completeness']);
+                            $certificate->balance = $certificate->balance + (($contract->payer_first_month_payment) / 100) * (100 - $completeness['completeness']);
                         } else {
-                            $certificate->balance = $certificate->balance + (($contract->other_m_price * $contract->payer_dol) / 100) * (100 - $completeness['completeness']);
+                            $certificate->balance = $certificate->balance + (($contract->payer_other_month_payment) / 100) * (100 - $completeness['completeness']);
                         }
 
                         $certificate->save();
@@ -1418,7 +1429,15 @@ EOD;
 
 
                 $cert = Certificates::findOne($certificate->id);
-                $cert->balance = $cert->balance + $cont->rezerv;
+
+                if ($cont->period === Contracts::CURRENT_REALIZATION_PERIOD) {
+                    $cert->balance += $cont->rezerv;
+                } elseif ($cont->period === Contracts::FUTURE_REALIZATION_PERIOD) {
+                    $cert->balance_f += $cont->rezerv;
+                } elseif ($cont->period === Contracts::PAST_REALIZATION_PERIOD) {
+                    $cert->balance_p += $cont->rezerv;
+                }
+
                 $cert->save();
 
                 $cont->delete();
@@ -1523,18 +1542,6 @@ EOD;
                     }
                 }
 
-                /**
-                 * the getProdList function will query the database based on the
-                 * cat_id and sub_cat_id and return an array like below:
-                 *  [
-                 *      'out'=>[
-                 *          ['id'=>'<prod-id-1>', 'name'=>'<prod-name1>'],
-                 *          ['id'=>'<prod_id_2>', 'name'=>'<prod-name2>']
-                 *       ],
-                 *       'selected'=>'<prod-id-1>'
-                 *  ]
-                 */
-
                 echo Json::encode(['output' => $out, 'selected' => '']);
 
                 return;
@@ -1542,634 +1549,6 @@ EOD;
         }
         echo Json::encode(['output' => '', 'selected' => '']);
     }
-
-
-    public function actionNewprice()
-    {
-
-        ini_set('memory_limit', '-1');
-        set_time_limit(0);
-
-        $contracts5 = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('contracts')
-            ->where(['organization_id' => 48])
-            ->andWhere(['all_funds' => 968])
-            ->column();
-
-        foreach ($contracts5 as $contract5) {
-
-            $model = $this->findModel($contract5);
-
-            $model->first_m_price = 968;
-            $model->save();
-
-        }
-
-        echo "OK";
-    }
-
-    /*
-    
-    
-    public function actionDecper3()
-     {
-         
-        ini_set('memory_limit', '-1');
-        set_time_limit(0);
-        
-         $contracts5 = (new \yii\db\Query())
-                            ->select(['id', 'certificate_id'])
-                            ->from('contracts')
-                            ->where(['status' => 1])
-                            ->andWhere(['start_edu_contract' => '2016-12-01'])
-                            ->all();
-
-                 foreach ($contracts5 as $contract5) {
-
-                    $model = $this->findModel($contract5['id']);
-
-                     $com_dec = (new \yii\db\Query())
-                                ->select(['completeness', 'id'])
-                                ->from('completeness')
-                                ->where(['contract_id' => $model->id])
-                                ->andWhere(['month' => 12])
-                                ->andWhere(['preinvoice' => 0])
-                                ->one();
-
-                     if (empty($com_dec)) {
-
-                        $completeness = new Completeness();
-                        $completeness->group_id = $model->group_id;
-                        $completeness->contract_id = $model->id;
-
-                        $start_edu_contract  = explode("-", $model->start_edu_contract);
-
-                            $completeness->month = 12;
-                            $completeness->year = $start_edu_contract[0];
-                        
-                        
-                        $completeness->preinvoice = 0;
-                        $completeness->completeness = 100;
-
-                        $month = $start_edu_contract[1];
-
-                                if ($month == 12) {
-                                    $price = $model->first_m_price * $model->payer_dol;
-                                } else {
-                                    $price = $model->other_m_price * $model->payer_dol;
-                                }
-
-                        $completeness->sum = ($price * $completeness->completeness) / 100;  
-                         
-    
-                            $completeness->save();
-                    }
-                }
-
-                echo "OK";
-     }
-    
-    
-    public function actionDecper2()
-     {
-         
-        ini_set('memory_limit', '-1');
-        set_time_limit(0);
-        
-         $contracts5 = (new \yii\db\Query())
-                            ->select(['id', 'certificate_id'])
-                            ->from('contracts')
-                            ->where(['status' => 1])
-                            ->where(['start_edu_contract' => '2016-11-01'])
-                            ->all();
-
-                 foreach ($contracts5 as $contract5) {
-
-                    $model = $this->findModel($contract5['id']);
-
-                     $com_dec = (new \yii\db\Query())
-                                ->select(['completeness', 'id'])
-                                ->from('completeness')
-                                ->where(['contract_id' => $model->id])
-                                ->andWhere(['month' => 11])
-                                ->andWhere(['preinvoice' => 0])
-                                ->one();
-
-                     if (empty($com_dec)) {
-
-                        $completeness = new Completeness();
-                        $completeness->group_id = $model->group_id;
-                        $completeness->contract_id = $model->id;
-
-                        $start_edu_contract  = explode("-", $model->start_edu_contract);
-
-                            $completeness->month = 11;
-                            $completeness->year = $start_edu_contract[0];
-                        
-                        
-                        $completeness->preinvoice = 0;
-                        $completeness->completeness = 100;
-
-                        $month = $start_edu_contract[1];
-
-                                if ($month == 12) {
-                                    $price = $model->first_m_price * $model->payer_dol;
-                                } else {
-                                    $price = $model->other_m_price * $model->payer_dol;
-                                }
-
-                        $completeness->sum = ($price * $completeness->completeness) / 100;  
-                         
-    
-                            $completeness->save();
-                    }
-                }
-
-                echo "OK";
-     }
-     
-    
-     
-    public function actionSumupd() {
-    
-        $certificates = (new \yii\db\Query())
-                    ->select(['id'])
-                    ->from('certificates')
-                    ->column();     
-        foreach ($certificates as $certificate) {
-            
-            $cert = Certificates::findOne($certificate);
-            
-            $contracts = (new \yii\db\Query())
-                    ->select(['id'])
-                    ->from('contracts')
-                    ->where(['organization_id' => 38])
-                    ->andWhere(['certificate_id' => $certificate])
-                    ->count(); 
-            
-            if ($contracts > 0) {
-                $cert->nominal = 18311.5;
-                $cert->balance = 0.29;
-                $cert->rezerv = 15695.3;
-                
-                $cert->save();
-            }
-        }
-        echo "ok";
-    } 
-    
-    
-    
-    public function actionImport()
-    {
-        ini_set('memory_limit', '-1');
-        set_time_limit(0);
-        
-        $inputFile = "uploads/contracts-3.xlsx";
-        
-            $inputFileType = \PHPExcel_IOFactory::identify($inputFile);
-            $objReader = \PHPExcel_IOFactory::createReader($inputFileType);
-            $objPHPExcel = $objReader->load($inputFile);
-
-        
-        $sheet = $objPHPExcel->getSheet(0);
-        $highestRow = $sheet->getHighestRow(); 
-        $highestColumn = $sheet->getHighestColumn();
-        
-        
-        
-        for ($row = 1; $row <= $highestRow; $row++) {
-            $rowDada = $sheet->rangeToArray('A'.$row.':'.$highestColumn.$row,NULL,TRUE,FALSE);
-            
-            if($row == 1) {
-                continue;
-            }
-            
-            $model = new Contracts();
-            $model->certificate_id = $rowDada[0][0];
-            $model->payer_id = $rowDada[0][1];
-            $model->program_id = $rowDada[0][2];
-            $model->year_id = $rowDada[0][3];
-            $model->organization_id = $rowDada[0][4];
-            $model->group_id = $rowDada[0][5];
-            $model->status = $rowDada[0][6];
-            $model->all_funds = $rowDada[0][7];
-            $model->funds_cert = $rowDada[0][8];
-            $model->all_parents_funds = $rowDada[0][9];
-            //$model->stop_edu_contract = $rowDada[0][10];
-            $model->start_edu_contract = '2016-12-01';
-            $model->stop_edu_contract = '2017-05-31';
-            //$model->start_edu_contract = $rowDada[0][11];
-            $model->sposob = $rowDada[0][12];
-            $model->prodolj_d = $rowDada[0][13];
-            $model->prodolj_m = $rowDada[0][14];
-            $model->prodolj_m_user = $rowDada[0][15];
-            $model->first_m_price = $rowDada[0][16];
-            $model->other_m_price = $rowDada[0][17];
-            $model->first_m_nprice = $rowDada[0][18];
-            $model->other_m_nprice = $rowDada[0][19];
-            $model->change1 = $rowDada[0][20];
-            $model->change2 = $rowDada[0][21];
-            $model->change_org_fio = $rowDada[0][22];
-            $model->change_doctype = $rowDada[0][23];
-            $model->change_fioparent = $rowDada[0][24];
-            $model->change6 = $rowDada[0][25];
-            $model->change_fiochild = $rowDada[0][26];
-            $model->change8 = $rowDada[0][27];
-            $model->change9 = $rowDada[0][28];
-            $model->change10 = $rowDada[0][29];
-            $model->cert_dol = $rowDada[0][30];
-             $model->payer_dol = $rowDada[0][31];
-             $model->rezerv = $rowDada[0][32];
-             $model->paid = $rowDada[0][33];
-             $model->terminator_user = $rowDada[0][34];
-             $model->fontsize = $rowDada[0][35];
-            $model->org_position = $rowDada[0][36];
-            $model->org_position_min = $rowDada[0][37];
-            $model->number = $rowDada[0][38];
-            $model->date = '2016-12-01';
-            
-            $model->save();
-            
-            print_r($model->getErrors());
-            
-            
-            $certificates = Certificates::findOne($rowDada[0][0]);
-            $certificates->balance = $certificates->balance - $rowDada[0][32];
-            $certificates->rezerv = $certificates->rezerv + $rowDada[0][32];
-            $certificates->save();
-            
-            print_r($certificates->getErrors());
-            
-        }
-        echo "OK!";
-        
-    }
-    
-    */
-    /*
-    public function actionAnimport()
-    {
-        ini_set('memory_limit', '-1');
-        set_time_limit(0);
-        
-        
-            $contracts = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('contracts')
-            ->where(['date' => '0000-00-00'])
-            ->column();
-        
-            foreach ($contracts as $contract) {
-                $cont = $this->findModel($contract);
-                 
-            
-                    
-                    
-                    $certificates = Certificates::findOne($cont->certificate_id);
-                    $certificates->balance = $certificates->balance + $cont->rezerv;
-                    $certificates->rezerv = $certificates->rezerv - $cont->rezerv;
-                    $certificates->save();
-
-                        $cont->delete();
-
-                    print_r($certificates->getErrors());
-
-                    echo "ок";
-                
-            }
-           
-        echo "ОК!";
-        
-    }
-    
-    
-    public function actionCertdel()
-    {
-        $users = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('user')
-            ->where(['>=', 'id', 1999])
-            ->column();
-        
-        
-        
-        foreach ($users as $user) {
-              
-            //User::findOne($user)->delete();
-            
-        }
-        
-        echo "ok";
-    }
-    
-    public function actionPositions()
-    {
-        
-        ini_set('memory_limit', '-1');
-        set_time_limit(0);
-        
-        $contracts = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('contracts')
-            ->column();
-        
-        foreach ($contracts as $contract) {
-            
-            $cont = $this->findModel($contract);
-             
-            $org = Organization::findOne($cont->organization_id);
-            
-           // $org->position = 'директора';
-           // $org->position_min = 'Директор';
-            
-          //  $org->save();
-                
-            $cont->org_position = $org->position;
-            $cont->org_position_min = $org->position_min;
-                
-            if ($cont->save()) {
-                echo $cont->org_position.' ';
-                echo $cont->org_position_min.' ';
-                echo '-- ok --<br>';
-            }
-            else {
-                echo $cont->id.'-- error --<br><br><br>';
-            }
-        }
-        
-        echo "OK!";
-    }
-
-    
-    
-    public function actionContorg()
-    {
-        $users = [
- 27,31,36,39,40,45,55,60,63,70,71,72,75,78,84,88,93,94,101,102,105,106,109,115,118,126,131,133,134,136,142,144,145,146,150,151,153,155,162,167,169,170,174,175,176,177,187,190,192,194,196,198,203,205,207,210,212,213,215,224,225,228,232,240,247,248,249,251,259,260,262,266,275,291,298,299,302,303,304,305,308,312,314,315,317,328,329,342,345,347,349,354,362,372,382,387,393,397,416,418,425,437,438,453
-        ];
-        
-        
-        foreach ($users as $user) {
-            
-            $certificates = Certificates::findOne($user);
-            $certificates->rezerv = 4267.51;
-             $certificates->balance = 2485.49;
-            if ($certificates->save()) {
-                echo "ok ";
-            }
-            else {
-                echo "err ";
-            }    
-                
-            $contract = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('contracts')
-            ->where(['certificate_id' => $user])
-            ->one();
-            
-            $cont = $this->findModel($contract['id']);
-            $cont->all_funds = 4267.51;
-            $cont->funds_cert = 4267.51;
-            $cont->first_m_price = 711.25;
-            $cont->other_m_price = 711.25;
-            $cont->first_m_nprice = 711.25;
-            $cont->other_m_nprice = 711.25;
-            $cont->rezerv = 4267.51;
-                
-            if ($cont->save()) {
-                echo "ok<br>";
-            }
-            else {
-                echo "err<br>";
-            }
-            
-        }
-        
-        echo "OK!";
-    }
-    }
-    public function actionDubles()
-    {
-        $contracts = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('contracts')
-            ->column();
-        
-        
-        foreach ($contracts as $contract) {
-            
-            $contrac = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('contracts')
-            ->where(['id' => $contract])
-            ->one();
-            
-            if (isset($contrac) and !empty($contrac)) {
-                $cont = $this->findModel($contract);
-                    
-                $duble = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('contracts')
-                ->where(['certificate_id' => $cont->certificate_id])
-                ->andWhere(['payer_id' => $cont->payer_id])
-                ->andWhere(['program_id' => $cont->program_id])
-                ->andWhere(['year_id' => $cont->year_id])
-                ->andWhere(['organization_id' => $cont->organization_id])
-                ->andWhere(['group_id' => $cont->group_id])
-                ->andWhere(['status' => $cont->status])
-                ->column();
-
-                if (count($duble) > 2) {
-                    echo " --- #3 ----<br>";
-                }
-                else {
-                    if (count($duble) == 2) {
-
-                        array_shift($duble);
-
-                        //array_unique($duble);
-
-                        //unset($duble[0]);
-
-                        //var_dump($duble);
-                        foreach ($duble as $dub) {
-                            echo " ---- $dub ----";
-
-                            $contr = $this->findModel($dub);
-
-                            $certificates = Certificates::findOne($contr->certificate_id);
-                            $certificates->rezerv = $certificates->rezerv - $contr->rezerv;
-                            $certificates->balance = $certificates->balance + $contr->rezerv;
-
-                            if ($certificates->save()) {
-                                if ($contr->delete()) {
-                                    echo "ok";
-                                }
-                                else {
-                                    echo "err";
-                                }
-                            }
-                            else {
-                                echo "ERR";
-                            }
-
-                            //return $this->redirect(['dubles']);
-                        }
-                    }
-                }
-            }
-            
-        }
-        
-        echo "OK!";
-    }
-    */
-    /*
-    public function actionDubles()
-    {
-        $contracts = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('contracts')
-            ->column();
-        
-        
-        foreach ($contracts as $contract) {
-            
-            $cont = $this->findModel($contract);
-            
-            if ($cont->start_edu_contract == '2016-12-01') {
-                
-                $certificates = Certificates::findOne($cont->certificate_id); 
-                
-                $certificates->rezerv = $certificates->rezerv - $cont->rezerv;
-                $certificates->balance = $certificates->balance + $cont->rezerv;
-
-                if ($certificates->save()) {
-                    if ($cont->delete()) {
-                        echo "ok";
-                    }
-                    else {
-                        echo "err";
-                    }
-                }
-                else {
-                    echo "ERR";
-                } 
-            }        
-        }
-        
-        echo "OK!";
-    } 
-    */
-    /*
-    public function actionDubles()
-    {
-        $certificates = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('certificates')
-            ->column();
-        
-        
-        foreach ($certificates as $cert) {
-            
-            $certificates = Certificates::findOne($cert); 
-            
-            if ($certificates->rezerv < 0) {
-                
-                $certificates->rezerv = 0;
-
-                if ($certificates->save()) {
-                        echo "ok";
-
-                }
-                else {
-                    echo "ERR";
-                } 
-            }        
-        }
-        
-        echo "OK!";
-    }
-  
-
-    public function actionDubles2()
-    {
-        $contracts = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('contracts')
-            ->where(['organization_id' => 49])
-            ->column();
-        
-        
-        foreach ($contracts as $contract) {
-            
-            $cont = $this->findModel($contract);
-            
-            //if ($cont->start_edu_contract != '2016-12-01') {
-                
-                $certificates = Certificates::findOne($cont->certificate_id); 
-                
-                $certificates->rezerv = $certificates->rezerv - $cont->rezerv;
-                $certificates->balance = $certificates->balance + $cont->rezerv + $cont->paid;
-
-                if ($certificates->save()) {
-                    echo "ok1 ";
-                    if ($cont->delete()) {
-                        echo "ok2 <br>";
-                    }
-                    else {
-                        echo " --- err --- <br>";
-                    }
-                }
-                else {
-                    echo "ERR <br> ---- <br>";
-                } 
-            //}        
-        }
-        
-        echo "OK!";
-    } 
-      
-   public function actionWaitterm()
-    {
-        $contracts = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('contracts')
-            ->where(['wait_termnate' => 1])
-            ->column();
-        
-        
-        foreach ($contracts as $contract) {
-            
-            $cont = $this->findModel($contract);
-            
-            //if ($cont->start_edu_contract != '2016-12-01') {
-                
-                $certificates = Certificates::findOne($cont->certificate_id); 
-                
-                $certificates->rezerv = $certificates->rezerv - $cont->rezerv;
-                $certificates->balance = $certificates->balance + $cont->rezerv + $cont->paid;
-
-                if ($certificates->save()) {
-                    echo "ok1 ";
-                    if ($cont->delete()) {
-                        echo "ok2 <br>";
-                    }
-                    else {
-                        echo " --- err --- <br>";
-                    }
-                }
-                else {
-                    echo "ERR <br> ---- <br>";
-                } 
-            //}        
-        }
-        
-        echo "OK!";
-    }     
-   */
 
     public function actionUpdatescert()
     {
