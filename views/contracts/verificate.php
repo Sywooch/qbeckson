@@ -71,6 +71,8 @@ $this->params['breadcrumbs'][] = $this->title;
         }
     ?>
 
+    <p>Вами выставлена оферта на заключение договора Заказчику, после получения заявления на зачисление по требуемой форме Вы можете зарегистрировать договор.</p>
+
     <?= Html::a('Назад', Url::to(['/personal/organization-contracts', 'id' => $model->id]), ['class' => 'btn btn-primary']); ?>
     <?php
     if ($model->status == 0) {
