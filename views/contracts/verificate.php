@@ -3,6 +3,8 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
+use yii\widgets\ActiveForm;
+use kartik\datecontrol\DateControl;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Programs */
@@ -71,7 +73,25 @@ $this->params['breadcrumbs'][] = $this->title;
         }
     ?>
 
-    <p>Вами выставлена оферта на заключение договора Заказчику, после получения заявления на зачисление по требуемой <a href="<?= Url::to(['application-pdf', 'id' => $model->id]) ?>"><b>форме</b></a> Вы можете зарегистрировать договор.</p>
+    <p class="text-justify">Вами выставлена оферта на заключение договора Заказчику, после получения заявления на зачисление по требуемой <a href="<?= Url::to(['application-pdf', 'id' => $model->id]) ?>"><b>форме</b></a> Вы можете зарегистрировать договор.</p>
+
+    <?php $form = ActiveForm::begin(['action' => ['/contracts/save', 'id' => $model->id]]); ?>
+
+    <?php if ($model->status == 3): ?>
+    <?= $form->field($model, 'applicationIsReceived')->checkbox(['onClick' => 'if ($(this).prop(\'checked\')) $("#vform").show(); else $("#vform").hide();']) ?>
+    <div id="vform" style="display:none;">
+        <?= $form->field($model, 'number')->textInput(['readonly' => true]) ?>
+        <?= $form->field($model, 'date')->widget(DateControl::classname(), [
+            'type' => DateControl::FORMAT_DATE,
+            'ajaxConversion' => false,
+            'options' => [
+                'pluginOptions' => [
+                    'autoclose' => true
+                ]
+            ]
+        ]) ?>
+    </div>
+    <?php endif; ?>
 
     <?= Html::a('Назад', Url::to(['/personal/organization-contracts', 'id' => $model->id]), ['class' => 'btn btn-primary']); ?>
     <?php
@@ -79,9 +99,11 @@ $this->params['breadcrumbs'][] = $this->title;
         echo Html::a('Продолжить', Url::to(['/contracts/generate', 'id' => $model->id]), ['class' => 'btn btn-primary']);
     }
     if ($model->status == 3) {
-        echo Html::a('Продолжить', Url::to(['/contracts/save', 'id' => $model->id]), ['class' => 'btn btn-primary']);
+        echo Html::submitButton('Сохранить', ['class' => 'btn btn-primary']);
+        //echo Html::a('Продолжить', Url::to(['/contracts/save', 'id' => $model->id]), ['class' => 'btn btn-primary']);
     }
     ?>
+    <?php ActiveForm::end(); ?>
     <div class="pull-right">
         <?= Html::a('Отказать', Url::to(['/contracts/no', 'id' => $model->id]), ['class' => 'btn btn-danger']) ?>
     </div>

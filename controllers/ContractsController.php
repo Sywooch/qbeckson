@@ -876,6 +876,7 @@ class ContractsController extends Controller
     public function actionVerificate($id)
     {
         $model = $this->findModel($id);
+        $model->applicationIsReceived = 0;
 
         $cert = Certificates::findOne($model->certificate_id);
 
@@ -919,8 +920,7 @@ class ContractsController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post())) {
-
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             if (empty($model->date)) {
                 Yii::$app->session->setFlash('error', 'Введите дату договора.');
 

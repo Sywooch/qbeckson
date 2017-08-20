@@ -103,7 +103,7 @@ class CertificatesController extends Controller
                 $model->rezerv_f = 0;
                 $model->rezerv = 0;
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
-
+                $model->setNominals();
                 if ($model->save()) {
                     return $this->render('/user/view', [
                         'model' => $user,
@@ -150,6 +150,7 @@ class CertificatesController extends Controller
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
                 $model->balance_f = $model->nominal_f;
 
+                $model->setNominals();
                 $model->save();
             }
 
@@ -177,6 +178,7 @@ class CertificatesController extends Controller
         if ($model->load(Yii::$app->request->post())) {
             $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
 
+            $model->setNominals();
             if ($model->save()) {
                 return $this->redirect(['/certificates/view', 'id' => $model->id]);
             }

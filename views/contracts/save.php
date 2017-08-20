@@ -23,16 +23,16 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
     <?= $form->field($model, 'number')->textInput() ?>
-    
+
     <?= $form->field($model, 'date')->widget(DateControl::classname(), [
-                                    'type'=>DateControl::FORMAT_DATE,
-                                    'ajaxConversion'=>false,
-                                    'options' => [
-                                        'pluginOptions' => [
-                                            'autoclose' => true
-                                        ]
-                                    ]
-                                ]) ?>
+        'type' => DateControl::FORMAT_DATE,
+        'ajaxConversion' => false,
+        'options' => [
+            'pluginOptions' => [
+                'autoclose' => true
+            ]
+        ]
+    ]) ?>
 
 
     <div class="form-group">
