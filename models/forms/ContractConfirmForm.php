@@ -90,23 +90,30 @@ class ContractConfirmForm extends Model
         if (null !== ($contract = $this->getContract()) && null !== ($certificate = $this->getCertificate())) {
             //TODO Обернуть в транзакцию!!!
             $organization = $contract->organization;
-            $organization->contracts_count++;
-            $organization->save(false);
+            $organization->updateCounters(['contracts_count' => 1]);
 
             $contract->number = $organization->contracts_count . ' - ПФ';
             $contract->date = date('Y-m-d');
             $contract->status = 0;
             $contract->rezerv = $contract->funds_cert;
-            $contract->save(false);
+            $contract->save(false, [
+                'number',
+                'date',
+                'status',
+                'rezerv',
+            ]);
 
             if ($contract->period === ContractRequestForm::CURRENT_REALIZATION_PERIOD) {
-                $certificate->balance -= $contract->funds_cert;
-                $certificate->rezerv += $contract->funds_cert;
+                $certificate->updateCounters([
+                    'balance' => $contract->funds_cert * -1,
+                    'rezerv' => $contract->funds_cert,
+                ]);
             } else {
-                $certificate->balance_f -= $contract->funds_cert;
-                $certificate->rezerv_f += $contract->funds_cert;
+                $certificate->updateCounters([
+                    'balance_f' => $contract->funds_cert * -1,
+                    'rezerv_f' => $contract->funds_cert,
+                ]);
             }
-            $certificate->save(false);
 
             return true;
         }

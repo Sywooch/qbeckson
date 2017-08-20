@@ -7,6 +7,7 @@ use app\models\Programs;
 use app\models\Certificates;
 use app\models\Groups;
 use app\models\Organization;
+use app\models\Contracts;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Contracts */
@@ -14,11 +15,11 @@ use app\models\Organization;
 $contractdate = explode('-', $model->date);
 //if ($model->status == 1 || $model->status == 4 || $model->status == 2 ) { $this->title = 'Просмотр договора от '.$contractdate["2"].'.'.$contractdate[1].'.'.$contractdate[0].' № '.$model->number; }
 
-if ($model->status == 1 || $model->status == 4 || $model->status == 2) {
+if ($model->status == Contracts::STATUS_ACTIVE || $model->status == Contracts::STATUS_CLOSED || $model->status == Contracts::STATUS_REFUSED) {
     $this->title = 'Просмотр договора № ' . $model->number;
 }
 
-if ($model->status == 0 || $model->status == 3) {
+if ($model->status == Contracts::STATUS_CREATED || $model->status == Contracts::STATUS_ACCEPTED) {
     $this->title = 'Просмотр заявки';
 }
 
@@ -40,11 +41,15 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php $cert = Certificates::findOne($model->certificate_id);
+    <?php
+    $cert = Certificates::findOne($model->certificate_id);
     $program = Programs::findOne($model->program_id);
     $groups = Groups::findOne($model->group_id);
     $org = Organization::findOne($model->organization_id);
 
+    if ($model->status == Contracts::STATUS_CREATED) {
+        echo '<div class="alert alert-warning">Ваша заявка находится на рассмотрении поставщика образовательных услуг. Дождитесь оферты от поставщика на заключения договора. Заявка будет переведена в раздел "Ожидающие договоры" автоматически после получения оферты.</div>';
+    }
 
     if (isset($roles['certificate']) or isset($roles['operators']) or isset($roles['payer'])) {
         echo DetailView::widget([
