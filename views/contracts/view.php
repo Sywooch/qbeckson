@@ -167,7 +167,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Посмотреть текст договора',
                 'format' => 'raw',
-                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', Url::to(['/contracts/mpdf', 'id' => $model->id])),
+                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $model->fullUrl),
             ],
             [
                 'attribute' => 'status',
@@ -205,7 +205,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Посмотреть текст договора',
                 'format' => 'raw',
-                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', Url::to(['/contracts/mpdf', 'id' => $model->id])),
+                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $model->fullUrl),
             ],
             [
                 'attribute' => 'status',
@@ -245,7 +245,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Посмотреть текст договора',
                 'format' => 'raw',
-                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', Url::to(['/contracts/mpdf', 'id' => $model->id])),
+                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $model->fullUrl),
             ],
             [
                 'attribute' => 'status',
@@ -263,7 +263,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Посмотреть текст договора',
                 'format' => 'raw',
-                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', Url::to(['/contracts/mpdf', 'id' => $model->id])),
+                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $model->fullUrl),
             ],
             [
                 'attribute' => 'status',
