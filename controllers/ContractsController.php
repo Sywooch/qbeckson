@@ -134,198 +134,6 @@ class ContractsController extends Controller
         ]);
     }
 
-    /**
-     * Creates a new Contracts model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
-    public function actionCreate($id)
-    {
-        $model = new Contracts();
-        $certificate = Certificates::findOne($id);
-
-        $model->certificate_id = $certificate->id;
-        $model->payer_id = $certificate->payer_id;
-
-
-        if ($model->load(Yii::$app->request->post())) {
-
-            if (empty($model->group_id) or !isset($model->group_id)) {
-                Yii::$app->session->setFlash('error', 'Не выбрана группа');
-
-                return $this->render('create', [
-                    'model' => $model,
-                ]);
-            }
-
-            if (empty($model->year_id) or !isset($model->year_id)) {
-                Yii::$app->session->setFlash('error', 'Не выбран год');
-
-                return $this->render('create', [
-                    'model' => $model,
-                ]);
-            }
-
-            $groups = new Groups();
-            $group = $groups->getGroup($model->group_id);
-
-            $model->start_edu_contract = $group['datestart'];
-
-            $year = ProgrammeModule::findOne($group['year_id']);
-
-            $date_elements_start = explode("-", $group['datestart']);
-            $date_elements_stop = explode("-", $group['datestop']);
-            $date_elements_user = explode("-", $model->start_edu_contract);
-
-            $prodolj_d = (intval(abs(strtotime($group['datestart']) - strtotime($group['datestop']))) / (3600 * 24)) + 1;  // поменять на кол-во дней
-
-            $prodolj_d_user = (intval(abs(strtotime($model->start_edu_contract) - strtotime($group['datestop']))) / (3600 * 24)) + 1;  // поменять на кол-во дней
-
-            //return $prodolj_d_user;
-
-            if ($date_elements_stop[0] > $date_elements_start[0]) {
-                $prodolj_m = ($date_elements_stop[1] + 13) - $date_elements_start[1];
-            } else {
-                $prodolj_m = ($date_elements_stop[1] + 1) - $date_elements_start[1];
-            }
-
-            if ($date_elements_stop[0] > $date_elements_user[0]) {
-                $prodolj_m_user = ($date_elements_stop[1] + 13) - $date_elements_user[1];
-            } else {
-                $prodolj_m_user = ($date_elements_stop[1] + 1) - $date_elements_user[1];
-            }
-
-            //$first_m_day = cal_days_in_month(CAL_GREGORIAN, $date_elements_user[1], $date_elements_user[0]);
-
-            $first_m_day = cal_days_in_month(CAL_GREGORIAN, $date_elements_start[1], $date_elements_start[0]);
-
-            //$teach_day = $first_m_day - $date_elements_user[2] + 1;
-
-            $teach_day = $first_m_day - $date_elements_start[2] + 1;
-
-            $year = ProgrammeModule::findOne($group['year_id']);
-
-            $first_m_price = $teach_day / $prodolj_d * $year['price'];
-            $other_m_price = ($year['price'] - $first_m_price) / ($prodolj_m - 1);
-
-            $first_m_nprice = $teach_day / $prodolj_d * $year['normative_price'];
-            $other_m_nprice = ($year['normative_price'] - $first_m_nprice) / ($prodolj_m - 1);
-
-            if ($prodolj_m == $prodolj_m_user) {
-                $userprice = $year['price'];
-                $nuserprice = $year['normative_price'];
-            } else {
-                $userprice = $prodolj_m_user * $other_m_price;
-                $nuserprice = $prodolj_m_user * $other_m_nprice;
-            }
-
-            if ($userprice <= $nuserprice) {
-
-                if ($userprice <= $certificate->balance) {
-                    $pay = "Полная стоимость";
-                    $dop = "отсутствует";
-                } else {
-                    $pay = $certificate->balance;
-                    $dop = $userprice - $certificate->balance;
-                }
-            } else {
-                if ($nuserprice <= $certificate->balance) {
-                    $pay = $nuserprice;
-                    $dop = $userprice - $nuserprice;
-                } else {
-                    $pay = $certificate->balance;
-                    $dop = $userprice - $certificate->balance;
-                }
-            }
-
-            $ost = $certificate->balance - $pay;
-
-            $display['balance'] = round($certificate->balance, 2);
-            $display['userprice'] = round($userprice, 2);
-            $display['pay'] = round($pay, 2);
-            $display['dop'] = round($dop, 2);
-            $display['ost'] = round($ost, 2);
-
-            $model->prodolj_d = $prodolj_d;
-            $model->prodolj_m = $prodolj_m;
-            $model->prodolj_m_user = $prodolj_m_user;
-
-
-            $cert_dol = $dop / $year['price'];
-            $payer_dol = $pay / $year['price'];
-            $model->cert_dol = $cert_dol;
-            $model->payer_dol = $payer_dol;
-
-
-            $model->first_m_nprice = $first_m_nprice;
-            $model->other_m_nprice = $other_m_nprice;
-
-            $model->all_funds = round($userprice, 2);
-            $model->funds_cert = round($pay, 2);
-            $model->all_parents_funds = round($dop, 2);
-
-
-            $model->organization_id = $group['organization_id'];
-            $model->year_id = $group['year_id'];
-            $model->program_id = $group['program_id'];
-
-            if ($date_elements_stop[1] == date('m')) {
-                $model->wait_termnate = 1;
-            }
-
-
-            //$model->date = date("Y-m-d");
-
-            if ($model->save()) {
-                Yii::$app->session->set('param1', $model->id);
-
-                return $this->redirect(['/contracts/complete']);
-            }
-
-
-            /*
-            $organizations = new Organization();
-            $organization = $organizations->getOrganization();
-            $model->organization_id = $organization['id'];
-            $model->status = 0;
-
-            if ($model->validate() && $model->save()) {
-                $informs = new Informs();
-                $informs->program_id = $model->program_id;
-                $informs->contract_id = $model->id;
-                $informs->prof_id = $model->certificate_id;
-                $informs->text = 'Вас записали на программу';
-                $informs->from = 4;
-                $informs->date = date("Y-m-d");
-                $informs->read = 0;
-
-                if ($informs->save()) {
-
-                    $programs = new Programs();
-                    $program = $programs->getPrograms($model->program_id);
-
-                    $inform = new Informs();
-                    $inform->program_id = $model->program_id;
-                    $inform->contract_id = $model->id;
-                    $inform->prof_id = $program['payer_id'];
-                    $inform->text = 'Поступила заявка на обучение';
-                    $inform->from = 2;
-                    $inform->date = date("Y-m-d");
-                    $inform->read = 0;
-
-                    if ($inform->save()) {
-                        return $this->redirect(['/personal/organization#panel4']);
-                    }
-                }
-            }
-            */
-        } else {
-            return $this->render('create', [
-                'model' => $model,
-            ]);
-        }
-    }
-
     public function actionGroup($id)
     {
         $model = new Contracts();
@@ -350,7 +158,6 @@ class ContractsController extends Controller
         ]);
     }
 
-
     public function actionNewgroup($id)
     {
         $model = $this->findModel($id);
@@ -367,510 +174,11 @@ class ContractsController extends Controller
 
     }
 
-    public function actionNew($id)
-    {
-        $model = new Contracts();
-
-        $groups = new Groups();
-        $group = $groups->getGroup($id);
-
-        $start_edu_contract = explode('-', $group['datestart']);
-
-        $model->month_start_edu_contract = $start_edu_contract[1] . '-' . $start_edu_contract[0];
-        $model->program_id = $group['program_id'];
-
-        if ($model->load(Yii::$app->request->post())) {
-            $month_start_edu_contract = explode('-', $model->month_start_edu_contract);
-
-            if ($start_edu_contract[1] == $month_start_edu_contract[0]) {
-                $model->start_edu_contract = $group['datestart'];
-            } else {
-                $model->start_edu_contract = $month_start_edu_contract[1] . '-' . $month_start_edu_contract[0] . '-01';
-            }
-
-            if ($model->start_edu_contract < $group['datestart'] || $model->start_edu_contract > $group['datestop']) {
-                return $this->render('/contracts/new', [
-                    'model' => $model,
-                    'error' => 'Неправильная дата. Дата начала - ' . $group['datestart'] . ', дата окончания - ' . $group['datestop'],
-                ]);
-            }
-
-
-            $model->group_id = $id;
-
-            $model->organization_id = $group['organization_id'];
-            $model->year_id = $group['year_id'];
-
-            $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-            if (isset($roles['certificate'])) {
-
-                $certificates = new Certificates();
-                $certificate = $certificates->getCertificates();
-
-                $model->certificate_id = $certificate->id;
-                $model->payer_id = $certificate->payer_id;
-            } else {
-
-                $certificate = Certificates::findOne(Yii::$app->session->get('param2'));
-
-                $model->certificate_id = $certificate->id;
-                $model->payer_id = $certificate->payer_id;
-            }
-
-            //$model->date = date("Y-m-d");
-
-            if ($model->save()) {
-                Yii::$app->session->set('param1', $model->id);
-
-                return $this->redirect(['/contracts/complete']);
-            }
-        }
-
-        return $this->render('/contracts/new', [
-            'model' => $model,
-        ]);
-    }
-
-
-    public function actionComplete()
-    {
-
-        $model = Contracts::findOne(Yii::$app->session->get('param1'));
-
-        $duble = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('contracts')
-            ->where(['certificate_id' => $model->certificate_id])
-            ->andWhere(['payer_id' => $model->payer_id])
-            ->andWhere(['program_id' => $model->program_id])
-            ->andWhere(['year_id' => $model->year_id])
-            ->andWhere(['organization_id' => $model->organization_id])
-            ->andWhere(['group_id' => $model->group_id])
-            ->andWhere(['status' => [0, 1, 3]])
-            ->count();
-
-        if ($duble > 0) {
-            Yii::$app->session->setFlash('error', 'Вы уже подали заявку на программу/заключили договор на обучение.');
-
-            return $this->redirect(['/programs/view', 'id' => $model->program_id]);
-        }
-
-        //$certificates = new Certificates();
-        //$certificate = $certificates->getCertificates();
-
-        $certificate = Certificates::findOne($model->certificate_id);
-
-        $group = Groups::findOne($model->group_id);
-
-        $date_elements_start = explode("-", $group['datestart']);
-        $date_elements_stop = explode("-", $group['datestop']);
-        $date_elements_user = explode("-", $model->start_edu_contract);
-
-        $prodolj_d = (intval(abs(strtotime($group['datestart']) - strtotime($group['datestop']))) / (3600 * 24)) + 1;  // поменять на кол-во дней
-
-        $prodolj_d_user = (intval(abs(strtotime($model->start_edu_contract) - strtotime($group['datestop']))) / (3600 * 24)) + 1;  // поменять на кол-во дней
-
-        //return $prodolj_d_user;
-
-        if ($date_elements_stop[0] > $date_elements_start[0]) {
-            $prodolj_m = ($date_elements_stop[1] + 13) - $date_elements_start[1];
-        } else {
-            $prodolj_m = ($date_elements_stop[1] + 1) - $date_elements_start[1];
-        }
-
-        if ($date_elements_stop[0] > $date_elements_user[0]) {
-            $prodolj_m_user = ($date_elements_stop[1] + 13) - $date_elements_user[1];
-        } else {
-            $prodolj_m_user = ($date_elements_stop[1] + 1) - $date_elements_user[1];
-        }
-
-        //$first_m_day = cal_days_in_month(CAL_GREGORIAN, $date_elements_user[1], $date_elements_user[0]);
-
-        $first_m_day = cal_days_in_month(CAL_GREGORIAN, $date_elements_start[1], $date_elements_start[0]);
-
-        //$teach_day = $first_m_day - $date_elements_user[2] + 1;
-
-        $teach_day = $first_m_day - $date_elements_start[2] + 1;
-
-        //return $teach_day;
-
-        // return $first_m_day;
-        $year = ProgrammeModule::findOne($group['year_id']);
-
-        $first_m_price = $teach_day / $prodolj_d * $year['price'];
-
-
-        if ($prodolj_m > 1) {
-            $other_m_price = ($year['price'] - $first_m_price) / ($prodolj_m - 1);
-        } else {
-            $other_m_price = 0;
-        }
-
-        $first_m_nprice = $teach_day / $prodolj_d * $year['normative_price'];
-
-
-        if ($prodolj_m > 1) {
-            $other_m_nprice = ($year['normative_price'] - $first_m_nprice) / ($prodolj_m - 1);
-        } else {
-            $other_m_nprice = 0;
-        }
-
-        if ($prodolj_m == $prodolj_m_user) {
-            $userprice = $year['price'];
-            $nuserprice = $year['normative_price'];
-        } else {
-            //$userprice = $prodolj_m_user * $other_m_price;
-
-            $userprice = ($prodolj_d_user / $prodolj_d) * $year['price'];
-
-            $nuserprice = ($prodolj_d_user / $prodolj_d) * $year['normative_price'];
-        }
-
-        if ($userprice <= $nuserprice) {
-            if ($userprice <= $certificate->balance) {
-                $pay = $userprice;
-                $dop = 0;
-            } else {
-                $pay = $certificate->balance;
-                $dop = $userprice - $certificate->balance;
-            }
-        } else {
-            if ($nuserprice <= $certificate->balance) {
-                $pay = $nuserprice;
-                $dop = $userprice - $nuserprice;
-            } else {
-                $pay = $certificate->balance;
-                $dop = $userprice - $certificate->balance;
-            }
-        }
-
-        $ost = $certificate->balance - $pay;
-
-        $display['balance'] = round($certificate->balance, 2);
-        $display['userprice'] = round($userprice, 2);
-        $display['pay'] = round($pay, 2);
-        $display['dop'] = round($dop, 2);
-        $display['ost'] = round($ost, 2);
-
-        if ($prodolj_m == $prodolj_m_user) {
-            $model->prodolj_d = $prodolj_d;
-            $model->prodolj_m = $prodolj_m;
-            $model->prodolj_m_user = $prodolj_m_user;
-        } else {
-            $model->prodolj_d = $prodolj_d_user;
-            $model->prodolj_m = $prodolj_m;
-            $model->prodolj_m_user = $prodolj_m_user;
-        }
-
-        //return var_dump($year['price']);
-
-        // $cert_dol = $dop / $year['price'];
-        // $payer_dol = $pay / $year['price'];
-
-        $cert_dol = $dop / $userprice;
-        $payer_dol = $pay / $userprice;
-
-        $model->cert_dol = $cert_dol;
-        $model->payer_dol = $payer_dol;
-
-
-        if ($prodolj_m == $prodolj_m_user) {
-            if ($date_elements_start[1] == $date_elements_stop[1]) {
-                $model->first_m_price = round($userprice, 2);
-            } else {
-                //$model->first_m_price = $first_m_price;
-                $model->first_m_price = round($userprice, 2) - ($prodolj_m_user - 1) * round($other_m_price, 2);
-            }
-
-            $model->first_m_nprice = round($first_m_nprice, 2);
-
-            $model->other_m_price = round($other_m_price, 2);
-            $model->other_m_nprice = round($other_m_nprice, 2);
-        } else {
-            // $model->first_m_price = $other_m_price;
-            // $model->first_m_nprice = $other_m_price;
-
-            //$model->first_m_price = $userprice / $prodolj_m_user;
-
-            $model->other_m_price = round($userprice / $prodolj_m_user, 2);
-            $model->first_m_price = round($userprice, 2) - ($prodolj_m_user - 1) * round($other_m_price, 2);
-
-            $model->first_m_nprice = round($nuserprice / $prodolj_m_user, 2);
-
-
-            $model->other_m_nprice = round($nuserprice / $prodolj_m_user, 2);
-
-        }
-
-
-        $model->all_funds = round($userprice, 2);
-        $model->funds_cert = round($pay, 2);
-        $model->all_parents_funds = round($dop, 2);
-
-        $display['cert_dol'] = $cert_dol;
-        $display['payer_dol'] = $payer_dol;
-        $display['first_m_price'] = $model->first_m_price;
-        $display['other_m_price'] = $model->other_m_price;
-
-        if ($model->load(Yii::$app->request->post())) {
-
-            $duble = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('contracts')
-                ->where(['certificate_id' => $model->certificate_id])
-                ->andWhere(['payer_id' => $model->payer_id])
-                ->andWhere(['program_id' => $model->program_id])
-                ->andWhere(['year_id' => $model->year_id])
-                ->andWhere(['organization_id' => $model->organization_id])
-                ->andWhere(['group_id' => $model->group_id])
-                ->andWhere(['status' => [0, 1, 3]])
-                ->count();
-
-            if ($duble > 0) {
-                Yii::$app->session->setFlash('error', 'Вы уже подали заявку на программу/заключили договор на обучение.');
-
-                return $this->redirect(['/programs/view', 'id' => $model->program_id]);
-            }
-
-            if ($model->validate() && $model->save()) {
-                return $this->redirect(['/contracts/complete', 'id' => $model->id]);
-            }
-        }
-
-        return $this->render('/contracts/new', [
-            'model' => $model,
-            'display' => $display,
-        ]);
-    }
-
-    public function actionBack($id)
-    {
-        $model = $this->findModel($id);
-        $group = $model->group_id;
-        $cert = $model->certificate_id;
-        $model->delete();
-        Yii::$app->session->set('param2', $cert);
-
-        return $this->redirect(['/contracts/new', 'id' => $group]);
-
-    }
-
     public function actionCancel($id)
     {
         $this->findModel($id)->delete();
 
         return $this->redirect(['/programs/index']);
-
-    }
-
-    public function actionGood($id)
-    {
-        $model = Contracts::findOne($id);
-
-        $duble = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('contracts')
-            ->where(['certificate_id' => $model->certificate_id])
-            ->andWhere(['payer_id' => $model->payer_id])
-            ->andWhere(['program_id' => $model->program_id])
-            ->andWhere(['year_id' => $model->year_id])
-            ->andWhere(['organization_id' => $model->organization_id])
-            ->andWhere(['group_id' => $model->group_id])
-            ->andWhere(['status' => [0, 1, 3]])
-            ->count();
-
-        if ($duble > 0) {
-            Yii::$app->session->setFlash('error', 'Вы уже подали заявку на программу/заключили договор на обучение.');
-
-            return $this->redirect(['/programs/view', 'id' => $model->program_id]);
-        }
-
-        //$certificates = new Certificates();
-        //$certificate = $certificates->getCertificates();
-
-        $certificate = Certificates::findOne($model->certificate_id);
-
-        $group = Groups::findOne($model->group_id);
-
-        $date_elements_start = explode("-", $group['datestart']);
-        $date_elements_stop = explode("-", $group['datestop']);
-        $date_elements_user = explode("-", $model->start_edu_contract);
-
-        $prodolj_d = (intval(abs(strtotime($group['datestart']) - strtotime($group['datestop']))) / (3600 * 24)) + 1;  // поменять на кол-во дней
-
-        $prodolj_d_user = (intval(abs(strtotime($model->start_edu_contract) - strtotime($group['datestop']))) / (3600 * 24)) + 1;  // поменять на кол-во дней
-
-        //return $prodolj_d_user;
-
-        if ($date_elements_stop[0] > $date_elements_start[0]) {
-            $prodolj_m = ($date_elements_stop[1] + 13) - $date_elements_start[1];
-        } else {
-            $prodolj_m = ($date_elements_stop[1] + 1) - $date_elements_start[1];
-        }
-
-        if ($date_elements_stop[0] > $date_elements_user[0]) {
-            $prodolj_m_user = ($date_elements_stop[1] + 13) - $date_elements_user[1];
-        } else {
-            $prodolj_m_user = ($date_elements_stop[1] + 1) - $date_elements_user[1];
-        }
-
-        //$first_m_day = cal_days_in_month(CAL_GREGORIAN, $date_elements_user[1], $date_elements_user[0]);
-
-        $first_m_day = cal_days_in_month(CAL_GREGORIAN, $date_elements_start[1], $date_elements_start[0]);
-
-        //$teach_day = $first_m_day - $date_elements_user[2] + 1;
-
-        $teach_day = $first_m_day - $date_elements_start[2] + 1;
-
-        //return $teach_day;
-
-        // return $first_m_day;
-        $year = ProgrammeModule::findOne($group['year_id']);
-
-        $first_m_price = $teach_day / $prodolj_d * $year['price'];
-
-
-        if ($prodolj_m > 1) {
-            $other_m_price = ($year['price'] - $first_m_price) / ($prodolj_m - 1);
-        } else {
-            $other_m_price = 0;
-        }
-
-        $first_m_nprice = $teach_day / $prodolj_d * $year['normative_price'];
-
-
-        if ($prodolj_m > 1) {
-            $other_m_nprice = ($year['normative_price'] - $first_m_nprice) / ($prodolj_m - 1);
-        } else {
-            $other_m_nprice = 0;
-        }
-
-        if ($prodolj_m == $prodolj_m_user) {
-            $userprice = $year['price'];
-            $nuserprice = $year['normative_price'];
-        } else {
-            //$userprice = $prodolj_m_user * $other_m_price;
-
-            $userprice = ($prodolj_d_user / $prodolj_d) * $year['price'];
-
-            $nuserprice = ($prodolj_d_user / $prodolj_d) * $year['normative_price'];
-        }
-
-        if ($userprice <= $nuserprice) {
-            if ($userprice <= $certificate->balance) {
-                $pay = $userprice;
-                $dop = 0;
-            } else {
-                $pay = $certificate->balance;
-                $dop = $userprice - $certificate->balance;
-            }
-        } else {
-            if ($nuserprice <= $certificate->balance) {
-                $pay = $nuserprice;
-                $dop = $userprice - $nuserprice;
-            } else {
-                $pay = $certificate->balance;
-                $dop = $userprice - $certificate->balance;
-            }
-        }
-
-        $ost = $certificate->balance - $pay;
-
-        $display['balance'] = round($certificate->balance, 2);
-        $display['userprice'] = round($userprice, 2);
-        $display['pay'] = round($pay, 2);
-        $display['dop'] = round($dop, 2);
-        $display['ost'] = round($ost, 2);
-
-        if ($prodolj_m == $prodolj_m_user) {
-            $model->prodolj_d = $prodolj_d;
-            $model->prodolj_m = $prodolj_m;
-            $model->prodolj_m_user = $prodolj_m_user;
-        } else {
-            $model->prodolj_d = $prodolj_d_user;
-            $model->prodolj_m = $prodolj_m;
-            $model->prodolj_m_user = $prodolj_m_user;
-        }
-
-        //return var_dump($year['price']);
-
-        // $cert_dol = $dop / $year['price'];
-        // $payer_dol = $pay / $year['price'];
-
-        $cert_dol = $dop / $userprice;
-        $payer_dol = $pay / $userprice;
-
-        $model->cert_dol = $cert_dol;
-        $model->payer_dol = $payer_dol;
-
-
-        if ($prodolj_m == $prodolj_m_user) {
-            if ($date_elements_start[1] == $date_elements_stop[1]) {
-                $model->first_m_price = round($userprice, 2);
-            } else {
-                $model->first_m_price = $first_m_price;
-            }
-            $model->first_m_nprice = $first_m_nprice;
-
-            $model->other_m_price = $other_m_price;
-            $model->other_m_nprice = $other_m_nprice;
-        } else {
-            // $model->first_m_price = $other_m_price;
-            // $model->first_m_nprice = $other_m_price;
-            $model->first_m_price = $userprice / $prodolj_m_user;
-            $model->first_m_nprice = $nuserprice / $prodolj_m_user;
-
-            $model->other_m_price = $userprice / $prodolj_m_user;
-            $model->other_m_nprice = $nuserprice / $prodolj_m_user;
-
-        }
-
-        $model->stop_edu_contract = $group['datestop'];
-
-        //return var_dump($model->cert_dol);
-
-
-        $model->all_funds = round($userprice, 2);
-        $model->funds_cert = round($pay, 2);
-        $model->all_parents_funds = round($dop, 2);
-        $model->rezerv = round($pay, 2);
-
-        // $org = Organization::findOne($model->organization_id);
-        // return var_dump($org);
-        //$org->amount_child = $org->amount_child + 1;
-        //$org ->save();
-
-        $model->status = 0;
-
-        if ($model->validate() && $model->save()) {
-
-            $cert = Certificates::findOne($certificate->id);
-
-            $cert->balance = round($ost, 2);
-
-            $cert->rezerv = $cert->rezerv + round($pay, 2);
-
-            $cert->save();
-
-            $informs = new Informs();
-            $informs->program_id = $model->program_id;
-            $informs->contract_id = $model->id;
-            $informs->prof_id = $model->organization_id;
-            $informs->text = 'Поступила заявка на обучение';
-            $informs->from = 3;
-            $informs->date = date("Y-m-d");
-            $informs->read = 0;
-
-            if ($informs->save()) {
-                $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-                if (isset($roles['organizations'])) {
-                    return $this->redirect('/personal/organization-contracts');
-                }
-                if (isset($roles['certificate'])) {
-                    return $this->redirect('/personal/certificate-wait-request');
-                }
-            }
-        }
     }
 
     public function actionVerificate($id)
@@ -1055,157 +363,6 @@ class ContractsController extends Controller
         return $pdf->render();
     }
 
-    /*public function actionSave($id)
-    {
-        $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            if (empty($model->date)) {
-                Yii::$app->session->setFlash('error', 'Введите дату договора.');
-
-                return $this->render('/contracts/save', [
-                    'model' => $model,
-                ]);
-            }
-
-            $contracts = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('contracts')
-                ->where(['status' => 1])
-                ->andWhere(['organization_id' => $model->organization_id])
-                ->column();
-
-            foreach ($contracts as $contract) {
-                $cont = $this->findModel($contract);
-
-                $date = explode("-", $model->date);
-                $cdate = explode("-", $cont->date);
-
-                if ($date[0] == $cdate[0]) {
-                    if ($model->number == $cont->number) {
-                        Yii::$app->session->setFlash('error', 'Договор с таким номером уже существует!');
-
-                        return $this->render('/contracts/save', [
-                            'model' => $model,
-                            //'display' => 'Договор с таким номером уже существует!';
-                        ]);
-                    }
-                }
-            }
-
-            $cert = Certificates::findOne($model->certificate_id);
-            $program = Programs::findOne($model->program_id);
-
-            $org = Organization::findOne($model->organization_id);
-
-            $org->amount_child = $org->amount_child + 1;
-
-            $org->save();
-
-            $program->last_contracts = $program->last_contracts + 1;
-            $program->save();
-
-            $cert->rezerv = $cert->rezerv - ($model->first_m_price * $model->payer_dol);
-            $cert->save();
-
-            $model->paid = $model->first_m_price * $model->payer_dol;
-            $model->rezerv = $model->rezerv - ($model->first_m_price * $model->payer_dol);
-
-            $model->status = 1;
-
-            if ($model->save()) {
-                $completeness = new Completeness();
-                $completeness->group_id = $model->group_id;
-                $completeness->contract_id = $model->id;
-
-                $start_edu_contract = explode("-", $model->start_edu_contract);
-
-                if (date('m') == 12) {
-                    $completeness->month = date('m');
-                    $completeness->year = $start_edu_contract[0];
-                } else {
-                    $completeness->month = date('m') - 1;
-                    $completeness->year = $start_edu_contract[0];
-                }
-                $completeness->preinvoice = 0;
-                $completeness->completeness = 100;
-
-                $month = $start_edu_contract[1];
-
-                if (date('m') == 12) {
-                    if ($month == 12) {
-                        $price = $model->first_m_price * $model->payer_dol;
-                    } else {
-                        $price = $model->other_m_price * $model->payer_dol;
-                    }
-                } else {
-                    if ($month == date('m') - 1) {
-                        $price = $model->first_m_price * $model->payer_dol;
-                    } else {
-                        $price = $model->other_m_price * $model->payer_dol;
-                    }
-                }
-
-                $completeness->sum = ($price * $completeness->completeness) / 100;
-
-
-                if (date('m') != 1) {
-                    $completeness->save();
-                }
-
-                $preinvoice = new Completeness();
-                $preinvoice->group_id = $model->group_id;
-                $preinvoice->contract_id = $model->id;
-                $preinvoice->month = date('m');
-                $preinvoice->year = $start_edu_contract[0];
-                $preinvoice->preinvoice = 1;
-                $preinvoice->completeness = 80;
-
-                $start_edu_contract = explode("-", $model->start_edu_contract);
-                $month = $start_edu_contract[1];
-
-                if ($month == date('m')) {
-                    $price = $model->first_m_price * $model->payer_dol;
-                } else {
-                    $price = $model->other_m_price * $model->payer_dol;
-                }
-
-                $preinvoice->sum = ($price * $preinvoice->completeness) / 100;
-
-
-                if ($preinvoice->save()) {
-                    $informs = new Informs();
-                    $informs->program_id = $model->program_id;
-                    $informs->contract_id = $model->id;
-                    $informs->prof_id = $cert->payer_id;
-                    $informs->text = 'Заключен договор';
-                    $informs->from = 2;
-                    $informs->date = date("Y-m-d");
-                    $informs->read = 0;
-
-                    if ($informs->save()) {
-                        $inform = new Informs();
-                        $inform->program_id = $model->program_id;
-                        $inform->contract_id = $model->id;
-                        $inform->prof_id = $model->certificate_id;
-                        $inform->text = 'Заключен договор';
-                        $inform->from = 4;
-                        $inform->date = date("Y-m-d");
-                        $inform->read = 0;
-
-                        if ($inform->save()) {
-                            return $this->redirect('/personal/organization-contracts');
-                        }
-                    }
-                }
-            }
-        }
-
-        return $this->render('/contracts/save', [
-            'model' => $model,
-        ]);
-    }*/
-
     public function actionGenerate($id)
     {
         $model = $this->findModel($id);
@@ -1222,12 +379,16 @@ class ContractsController extends Controller
     {
         $model = $this->findModel($id);
         $informs = new Informs();
-
+        //TODO добавить транзакцию
         if ($informs->load(Yii::$app->request->post())) {
-
             $cert = Certificates::findOne($model->certificate_id);
-            $cert->balance = $cert->balance + $model->rezerv;
-            $cert->rezerv = $cert->rezerv - $model->rezerv;
+            if ($model->period === ContractRequestForm::CURRENT_REALIZATION_PERIOD) {
+                $cert->balance += $model->rezerv;
+                $cert->rezerv -= $model->rezerv;
+            } elseif ($model->period === ContractRequestForm::FUTURE_REALIZATION_PERIOD) {
+                $cert->balance_f += $model->rezerv;
+                $cert->rezerv_f -= $model->rezerv;
+            }
             $cert->save();
 
             $model->rezerv = 0;
@@ -1267,46 +428,21 @@ class ContractsController extends Controller
     public function actionTermrequest($id)
     {
         $model = $this->findModel($id);
-        // $informs = new Informs();
-
-        //if ($informs->load(Yii::$app->request->post())) {
-
         $cert = Certificates::findOne($model->certificate_id);
-        $cert->balance = $cert->balance + $model->rezerv;
-        $cert->rezerv = $cert->rezerv - $model->rezerv;
+        //TODO добавить транзакцию
+        if ($model->period === ContractRequestForm::CURRENT_REALIZATION_PERIOD) {
+            $cert->balance += $model->rezerv;
+            $cert->rezerv -= $model->rezerv;
+        } elseif ($model->period === ContractRequestForm::FUTURE_REALIZATION_PERIOD) {
+            $cert->balance_f += $model->rezerv;
+            $cert->rezerv_f -= $model->rezerv;
+        }
         $cert->save();
-
         $model->rezerv = 0;
         $model->status = 2;
-
         if ($model->save()) {
-            /* $informs->program_id = $model->program_id;
-             $informs->contract_id = $model->id;
-             $informs->prof_id = $model->organization_id;
-             $informs->text = 'Отказано в записи. Причина: '.$informs->dop;
-             $informs->from = 3;
-             $informs->date = date("Y-m-d");
-             $informs->read = 0;
-
-             if ($informs->save()) {
-                 $inform = new Informs();
-                 $inform->program_id = $model->program_id;
-                 $inform->contract_id = $model->id;
-                 $inform->prof_id = $model->certificate_id;
-                 $inform->text = 'Отказано в записи. Причина: '.$informs->dop;
-                 $inform->from = 4;
-                 $inform->date = date("Y-m-d");
-                 $inform->read = 0;
-
-                 if ($inform->save()) { */
             return $this->redirect('/personal/certificate-archive#panel2');
-            //}
-            // }
         }
-        // }
-        // return $this->render('/informs/comment', [
-        //    'informs' => $informs,
-        // ]);
     }
 
     public function actionTerminate($id)
@@ -1316,7 +452,6 @@ class ContractsController extends Controller
         $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
 
         if ($informs->load(Yii::$app->request->post())) {
-
             if (isset($roles['certificate'])) {
                 $model->terminator_user = 1;
             }
@@ -1328,12 +463,17 @@ class ContractsController extends Controller
             $model->status_comment = $informs->dop;
 
             $cert = Certificates::findOne($model->certificate_id);
-            $cert->balance = $cert->balance + $model->rezerv;
-            $cert->rezerv = $cert->rezerv - $model->rezerv;
+
+            //TODO добавить транзакцию
+            if ($model->period === ContractRequestForm::CURRENT_REALIZATION_PERIOD) {
+                $cert->balance += $model->rezerv;
+                $cert->rezerv -= $model->rezerv;
+            } elseif ($model->period === ContractRequestForm::FUTURE_REALIZATION_PERIOD) {
+                $cert->balance_f += $model->rezerv;
+                $cert->rezerv_f -= $model->rezerv;
+            }
             $cert->save();
-
             $model->rezerv = 0;
-
             if ($model->save()) {
                 if (isset($roles['certificate'])) {
                     Yii::$app->session->setFlash('info', 'Пожалуйста, оцените программу.');
@@ -1364,7 +504,6 @@ class ContractsController extends Controller
         $organization = $organizations->getOrganization();
 
         if ($payers->load(Yii::$app->request->post())) {
-
             $searchContracts = new ContractsInvoiceSearch();
             $searchContracts->payer_id = $payers->payer_id;
             $ContractsProvider = $searchContracts->search(Yii::$app->request->queryParams);
@@ -1435,7 +574,6 @@ class ContractsController extends Controller
             'organization' => $organization,
         ]);
     }
-
 
     public function actionMpdf($id, $ok = null)
     {
@@ -1874,7 +1012,6 @@ EOD;
         }
     }
 
-
     /**
      * Updates an existing Contracts model.
      * If update is successful, the browser will be redirected to the 'view' page.
@@ -2084,11 +1221,8 @@ EOD;
 
                         $preinvoice->sum = ($price * $preinvoice->completeness) / 100;
                         $preinvoice->save();
-
-
                     }
                 }
-
 
                 $contracts = (new \yii\db\Query())
                     ->select(['id'])
@@ -2268,8 +1402,6 @@ EOD;
      * @param integer $id
      * @return mixed
      */
-
-
     public function actionDelete($id)
     {
         $user = User::findOne(Yii::$app->user->id);

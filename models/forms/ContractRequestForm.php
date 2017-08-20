@@ -39,8 +39,8 @@ class ContractRequestForm extends Model
         $this->setGroup($groupId);
         $this->setContract($contract);
         if (null === $this->dateFrom) {
-            if (time() < strtotime($this->getSettings()->current_program_date_from)) {
-                $this->dateFrom = $this->getSettings()->current_program_date_from;
+            if (time() < strtotime($this->getGroup()->datestart)) {
+                $this->dateFrom = Yii::$app->formatter->asDate($this->getGroup()->datestart);
             } else {
                 $this->dateFrom = date('d.m.Y', strtotime('first day of next month'));
             }
@@ -220,7 +220,7 @@ class ContractRequestForm extends Model
                 $firstMonthNormativePrice = $normativePrice -
                     $otherMonthesNormativePricePerMonth * ($realizationPeriodInMonthes - 1);
 
-                if ($all_parents_funds) {
+                if ($all_parents_funds > 0) {
                     $parents_other_month_payment = CalculationHelper::roundTo(
                         ($realizationPeriodInDays - $daysInFirstMonth) /
                         $realizationPeriodInDays * $all_parents_funds / ($realizationPeriodInMonthes - 1),
@@ -229,7 +229,7 @@ class ContractRequestForm extends Model
                     $parents_first_month_payment = $all_parents_funds - $parents_other_month_payment *
                         ($realizationPeriodInMonthes - 1);
                 }
-                if ($funds_cert) {
+                if ($funds_cert > 0) {
                     $payer_other_month_payment = CalculationHelper::roundTo(
                         ($realizationPeriodInDays - $daysInFirstMonth) /
                         $realizationPeriodInDays * $funds_cert / ($realizationPeriodInMonthes - 1),

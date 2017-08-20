@@ -108,11 +108,13 @@ class ContractConfirmForm extends Model
                     'balance' => $contract->funds_cert * -1,
                     'rezerv' => $contract->funds_cert,
                 ]);
-            } else {
+            } elseif ($contract->period === ContractRequestForm::FUTURE_REALIZATION_PERIOD) {
                 $certificate->updateCounters([
                     'balance_f' => $contract->funds_cert * -1,
                     'rezerv_f' => $contract->funds_cert,
                 ]);
+            } else {
+                throw new \DomainException('Period not found');
             }
 
             return true;
