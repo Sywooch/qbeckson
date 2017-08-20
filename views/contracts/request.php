@@ -61,10 +61,10 @@ $this->params['breadcrumbs'][] = $this->title;
                             <br>
                             <p>Организация: <?= $contract->organization->name ?></p>
                             <p>Место проведения: <?= $contract->module->mainAddress->address ?></p>
-                            <p>Дата начала: <?= $contract->group->datestart ?></p>
-                            <p>Дата окончания: <?= $contract->group->datestop ?></p>
+                            <p>Дата начала: <?= Yii::$app->formatter->asDate($contract->group->datestart) ?></p>
+                            <p>Дата окончания: <?= Yii::$app->formatter->asDate($contract->group->datestop) ?></p>
                             <br>
-                            <p>Договор заключается на период с <?= $contract->start_edu_contract ?> по <?= $contract->stop_edu_contract ?> (будут использованы средства, предусмотренные на период)</p>
+                            <p>Договор заключается на период с <?= Yii::$app->formatter->asDate($contract->start_edu_contract) ?> по <?= Yii::$app->formatter->asDate($contract->stop_edu_contract) ?> (будут использованы средства, предусмотренные на период)</p>
                             <br>
                             <p>В первый месяц с сертификата будет списано <?= $contract->payer_first_month_payment ?> руб.</p>
                             <?php if ($contract->prodolj_m > 1) : ?>
