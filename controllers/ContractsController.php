@@ -1689,7 +1689,8 @@ EOD;
 
         if ($ok) {
             $mpdf->Output(Yii::getAlias('@webroot/uploads/contracts/') . $model->url, 'F');
-            return $this->redirect(['/personal/organization-contracts#panel2']);
+
+            return $this->redirect(['verificate', 'id' => $model->id]);
         }
         $mpdf->Output($model->url, 'D');
     }
