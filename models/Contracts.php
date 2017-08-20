@@ -104,13 +104,15 @@ class Contracts extends \yii\db\ActiveRecord
 
     const STATUS_CLOSED = 4;
 
+    const SCENARIO_CREATE_DATE = 10;
+
     public $certnumber;
 
     public $certfio;
 
     public $month_start_edu_contract;
 
-    public $applicationIsReceived = 1;
+    public $applicationIsReceived = 0;
     
     /**
      * @inheritdoc
@@ -128,10 +130,11 @@ class Contracts extends \yii\db\ActiveRecord
         return [
             [['certificate_id', 'program_id', 'organization_id', 'status', 'status_year', 'funds_gone', 'group_id', 'year_id', 'sposob', 'prodolj_d', 'prodolj_m', 'prodolj_m_user', 'ocenka', 'wait_termnate', 'terminator_user', 'payment_order', 'period'], 'integer'],
             [['all_funds', 'funds_cert', 'all_parents_funds', 'first_m_price', 'other_m_price', 'first_m_nprice', 'other_m_nprice', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch', 'cert_dol', 'payer_dol', 'rezerv', 'paid', 'fontsize', 'balance', 'payer_first_month_payment', 'payer_other_month_payment', 'parents_other_month_payment', 'parents_first_month_payment'], 'number'],
-            [['date', 'status_termination', 'start_edu_programm', 'stop_edu_contract', 'start_edu_contract', 'date_termnate'], 'safe'],
+            [['date', 'status_termination', 'start_edu_programm', 'stop_edu_contract', 'start_edu_contract', 'date_termnate', 'applicationIsReceived'], 'safe'],
             ['date', 'validateDate'],
+            ['date', 'required', 'on' => self::SCENARIO_CREATE_DATE],
             [['status_comment', 'number', 'certnumber', 'certfio', 'change1', 'change2', 'change_org_fio', 'org_position', 'org_position_min', 'change_doctype', 'change_fioparent', 'change6', 'change_fiochild', 'change8', 'change9', 'change10', 'month_start_edu_contract', 'url'], 'string'],
-            ['applicationIsReceived', 'required', 'requiredValue' => 1, 'message' => false],
+            ['applicationIsReceived', 'required', 'requiredValue' => 1, 'message' => false, 'on' => self::SCENARIO_CREATE_DATE],
             [['certificate_id', 'program_id', 'organization_id'], 'required'],
             [['link_doc', 'link_ofer'], 'string', 'max' => 255],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
@@ -141,6 +144,14 @@ class Contracts extends \yii\db\ActiveRecord
             [['group_id'], 'exist', 'skipOnError' => true, 'targetClass' => Groups::className(), 'targetAttribute' => ['group_id' => 'id']],
             [['year_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProgrammeModule::className(), 'targetAttribute' => ['year_id' => 'id']],
         ];
+    }
+
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_CREATE_DATE] = $scenarios[self::SCENARIO_DEFAULT];
+
+        return $scenarios;
     }
 
     /**

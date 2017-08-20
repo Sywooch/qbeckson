@@ -91,6 +91,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]
             ]
         ]) ?>
+        <?= Html::submitButton('Зарегистрировать договор', ['class' => 'btn btn-success']); ?><br /><br />
     </div>
     <?php endif; ?>
 
@@ -98,9 +99,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php
     if ($model->status === 0) {
         echo Html::a('Продолжить', Url::to(['/contracts/generate', 'id' => $model->id]), ['class' => 'btn btn-primary']);
-    }
-    if ($model->status === 3) {
-        echo Html::submitButton('Сохранить', ['class' => 'btn btn-primary']);
     }
     ?>
     <div class="pull-right">

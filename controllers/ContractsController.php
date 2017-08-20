@@ -184,7 +184,7 @@ class ContractsController extends Controller
     public function actionVerificate($id)
     {
         $model = $this->findModel($id);
-        $model->applicationIsReceived = 0;
+        $model->scenario = Contracts::SCENARIO_CREATE_DATE;
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             if (empty($model->date)) {

@@ -17,10 +17,10 @@ $contractdate = explode('-', $model->date);
 
 if ($model->status == Contracts::STATUS_ACTIVE || $model->status == Contracts::STATUS_CLOSED || $model->status == Contracts::STATUS_REFUSED) {
     $this->title = 'Просмотр договора № ' . $model->number;
-}
-
-if ($model->status == Contracts::STATUS_CREATED || $model->status == Contracts::STATUS_ACCEPTED) {
+} elseif ($model->status == Contracts::STATUS_CREATED) {
     $this->title = 'Просмотр заявки';
+} elseif ($model->status == Contracts::STATUS_ACCEPTED) {
+    $this->title = 'Просмотр оферты';
 }
 
 $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
@@ -49,6 +49,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
     if ($model->status == Contracts::STATUS_CREATED) {
         echo '<div class="alert alert-warning">Ваша заявка находится на рассмотрении поставщика образовательных услуг. Дождитесь оферты от поставщика на заключения договора. Заявка будет переведена в раздел "Ожидающие договоры" автоматически после получения оферты.</div>';
+    } elseif ($model->status == Contracts::STATUS_ACCEPTED) {
+        echo '<div class="alert alert-warning">Для того, чтобы завершить заключение договора напишите заявление на обучение в соответствии с <a href="' . $model->fullUrl . '">представленным образцом заявления</a>. Вы можете распечатать образец или переписать от руки на листе бумаги. После написания заявления отнесите его лично или передайте с ребенком поставщику образовательных услуг.</div>';
     }
 
     if (isset($roles['certificate']) or isset($roles['operators']) or isset($roles['payer'])) {
