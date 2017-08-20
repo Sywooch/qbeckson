@@ -60,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <p>Вы хотите записаться на программу <?= $contract->program->name ?> (<?= $contract->module->getShortName() ?>)</p>
                             <br>
                             <p>Организация: <?= $contract->organization->name ?></p>
-                            <p>Место проведения: <?= $contract->module->mainAddress ?></p>
+                            <p>Место проведения: <?= $contract->module->mainAddress->address ?></p>
                             <p>Дата начала: <?= $contract->group->datestart ?></p>
                             <p>Дата окончания: <?= $contract->group->datestop ?></p>
                             <br>
