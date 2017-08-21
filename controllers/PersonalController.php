@@ -509,8 +509,12 @@ class PersonalController extends Controller
             'hours' => '0,2000',
             'limit' => '0,10000',
             'rating' => '0,100',
-            'modelName' => 'SearchPrograms',
+            'modelName' => '',
         ]);
+        //Кастыль, надо будет его переделать...
+        if (Yii::$app->request->get('organization_id') === 'Array') {
+            unset($_GET['organization_id']);
+        }
         $programsProvider = $searchPrograms->search(Yii::$app->request->queryParams);
 
         return $this->render('payer-programs', [

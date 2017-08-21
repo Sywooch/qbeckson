@@ -216,8 +216,6 @@ class ProgramsSearch extends Programs
 
         $query->groupBy(['programs.id']);
 
-        //var_dump($query->prepare(Yii::$app->db->queryBuilder)->createCommand()->rawSql);exit();
-
         return $dataProvider;
     }
 }
