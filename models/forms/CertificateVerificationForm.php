@@ -8,6 +8,8 @@ use Yii;
 use yii\base\Model;
 
 /**
+ * Форма проверки подходит ли сертификат.
+ *
  * Class CertificateVerificationForm
  * @package app\models\forms
  */
@@ -22,6 +24,12 @@ class CertificateVerificationForm extends Model
     private $cooperation;
 
     /**
+     * Нет, ну я сейчас рефакторил код и там только:
+     * 1) Существует ли вообще этот сртификат
+     * 2) Существует ли соглашение между плательщиком сертификата и организацией
+     * 3) Актулальный ли сертификат
+     * 4) Число детей у организации(max_child) больше (amount_child) При этом я понятия не имею в какой момент amount_child увеличивается.
+     *
      * @return array
      */
     public function rules(): array
@@ -48,6 +56,8 @@ class CertificateVerificationForm extends Model
 
     /**
      * TODO добавить проверку, является ли сертификат типом - ПФ.
+     * Дополнительно бы добавить прверку. Реализована на фронтенде.
+     * TODO Число детей у организации - max_child должно быть больше кол-ва договоров.
      *
      * @param string $attribute
      */

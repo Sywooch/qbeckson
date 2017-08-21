@@ -12,6 +12,8 @@ use Yii;
 use yii\base\Model;
 
 /**
+ * Форма валидации данных.
+ *
  * Class SelectGroupForm
  * @package app\models\forms
  */
@@ -28,6 +30,23 @@ class SelectGroupForm extends Model
     private $group;
 
     /**
+     * Проверка возможности заключения договора:
+     * 1) Сертификат имеет тип сертификата ПФ
+     * 2) Есть средства на текущем балансе (если группа "захватывает" текущий период) или есть средства на будущем
+     * балансе (при условии, что группа захватывает будущий период; дополнительное условие сдеоаем потом: разрешено
+     * заключение договоров в будущем периоде)
+     * 3) число договоров (со статусами 0, 1, 3) в группе не превышает максимальную наполняемость по модулю
+     * 4) число договоров (со статусами 0, 1, 3) по программе не превышает установленный для программы лимит
+     * 5) число договоров (со статусами 0, 1, 3) в организацию не преввшает установленный лимит для организации
+     * 6) число договоров (со статусами 0, 1, 3) по всем программам аналогичной направленности, поданных детьми того
+     * же плательщика, не превышает лимит направленности, установленный для плательщика
+     * 7) у ребенка нет договора (со статусами 0, 1 или 3) на тот же модуль (на программу можно)
+     * Соответственно, сначала проверяетсч ребенок (1), можно ли ему вообще зачислиться и лимит организации (5)
+     * если достигнут лимит вывыдятся для выбора сначала программы, которые вообще могут
+     * быть выбраны (по критериям 4 и 6)
+     * После выбора программы вытягиваются модули, удовлетворяющие критерияю 7
+     * После выбора модуля идёт возможность выбрать группу, исходя из критериев 2 и 3
+     *
      * @return array
      */
     public function rules(): array
@@ -65,25 +84,25 @@ class SelectGroupForm extends Model
         //Как-то переделать кастыль
         switch ($program->direction_id) {
             case 1:
-                $attributeName = 'directionality_1rob_count';
+                $directionName = 'directionality_1rob_count';
                 break;
             case 2:
-                $attributeName = 'directionality_1_count';
+                $directionName = 'directionality_1_count';
                 break;
             case 3:
-                $attributeName = 'directionality_4_count';
+                $directionName = 'directionality_4_count';
                 break;
             case 4:
-                $attributeName = 'directionality_2_count';
+                $directionName = 'directionality_2_count';
                 break;
             case 5:
-                $attributeName = 'directionality_6_count';
+                $directionName = 'directionality_6_count';
                 break;
             case 6:
-                $attributeName = 'directionality_5_count';
+                $directionName = 'directionality_5_count';
                 break;
             case 7:
-                $attributeName = 'directionality_3_count';
+                $directionName = 'directionality_3_count';
                 break;
         }
 
@@ -94,7 +113,7 @@ class SelectGroupForm extends Model
             ])
             ->count();
 
-        if ($payerContractsCount >= $this->getCertificate()->payer->$attributeName) {
+        if ($payerContractsCount >= $this->getCertificate()->payer->$directionName) {
             $this->addError($attribute, 'Превышен лимит на зачисление плательщиком.');
             return;
         }

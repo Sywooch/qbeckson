@@ -14,8 +14,7 @@ use yii\widgets\Pjax;
 /* @var $form ActiveForm */
 /* @var $contract \app\models\Contracts */
 
-$this->title = 'Записаться';
-$this->params['breadcrumbs'][] = ['label' => 'Поиск программ', 'url' => ['programs/search']];
+$this->title = 'Подать заявку на получение образовательных услуг';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <?php Pjax::begin() ?>

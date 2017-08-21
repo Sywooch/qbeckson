@@ -92,6 +92,7 @@ use yii\helpers\Url;
  * @property Payers $payer
  * @property Programs $program
  * @property ProgrammeModule $module
+ * @property Groups $group
  */
 class Contracts extends ActiveRecord
 {
