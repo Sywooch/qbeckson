@@ -256,11 +256,11 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
     $organizations = new Organization();
     $organization = $organizations->getOrganization();
 
-    if ($roles['organizations'] and $organization['actual'] != 0) {
+    /*if ($roles['organizations'] and $organization['actual'] != 0) {
         echo "<p>";
         echo Html::a('Создать новый договор', ['certificates/verificate'], ['class' => 'btn btn-success']);
         echo "</p>";
-    }
+    }*/
     ?>
     <div id="panel1" class="tab-pane fade in active">
         <?php if ($searchActiveContracts->payer_id) : ?>
