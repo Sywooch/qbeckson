@@ -71,7 +71,7 @@ class ContractsController extends Controller
             if ($selectForm->load(Yii::$app->request->post()) && $selectForm->validate()) {
                 return $this->redirect([
                     'request',
-                    'groupId' => $selectForm->group,
+                    'groupId' => $selectForm->groupId,
                     'certificateId' => $selectForm->getCertificate()->id
                 ]);
             }
@@ -112,7 +112,6 @@ class ContractsController extends Controller
         if (isset($_POST['depdrop_parents'])) {
             list($programId, $moduleId) = $_POST['depdrop_parents'];
             if ($programId && $moduleId) {
-
                 $rows = (new \yii\db\Query())
                     ->select(['id', 'name'])
                     ->from('groups')

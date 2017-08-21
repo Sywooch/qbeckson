@@ -46,7 +46,7 @@ class SelectGroupForm extends Model
     public function validateProgram($attribute)
     {
         if (null === ($program = $this->getProgram())) {
-            $this->addError($attribute, 'Программа не найдена');
+            $this->addError($attribute, 'Программа не найдена.');
             return;
         }
 
@@ -55,10 +55,47 @@ class SelectGroupForm extends Model
                 'program_id' => $program->id,
                 'status' => [0, 1, 3]
             ])
-            ->all();
+            ->count();
 
         if ($programContractsCount >= $program->limit) {
-            $this->addError($attribute, 'Превышен лимит на зачисление.');
+            $this->addError($attribute, 'Превышен лимит на зачисление в программу.');
+            return;
+        }
+
+        //Как-то переделать кастыль
+        switch ($program->direction_id) {
+            case 1:
+                $attributeName = 'directionality_1rob_count';
+                break;
+            case 2:
+                $attributeName = 'directionality_1_count';
+                break;
+            case 3:
+                $attributeName = 'directionality_4_count';
+                break;
+            case 4:
+                $attributeName = 'directionality_2_count';
+                break;
+            case 5:
+                $attributeName = 'directionality_6_count';
+                break;
+            case 6:
+                $attributeName = 'directionality_5_count';
+                break;
+            case 7:
+                $attributeName = 'directionality_3_count';
+                break;
+        }
+
+        $payerContractsCount = Contracts::find()
+            ->andWhere([
+                'payer_id' => $this->getCertificate()->payer_id,
+                'status' => [0, 1, 3]
+            ])
+            ->count();
+
+        if ($payerContractsCount >= $this->getCertificate()->payer->$attributeName) {
+            $this->addError($attribute, 'Превышен лимит на зачисление плательщиком.');
             return;
         }
     }
@@ -69,7 +106,21 @@ class SelectGroupForm extends Model
     public function validateModule($attribute)
     {
         if (null === ($module = $this->getModule())) {
-            $this->addError($attribute, 'Модуль не найден');
+            $this->addError($attribute, 'Модуль не найден.');
+            return;
+        }
+
+        $isHasContract = Contracts::find()
+            ->joinWith(['module'])
+            ->andWhere([
+                'certificate_id' => $this->getCertificate()->id,
+                'years.id' => $module->id,
+                'status' => [0, 1, 3],
+            ])
+            ->exists();
+
+        if ($isHasContract) {
+            $this->addError($attribute, 'Ребёнок уже записан на данный модуль.');
             return;
         }
     }
@@ -80,12 +131,12 @@ class SelectGroupForm extends Model
     public function validateGroup($attribute)
     {
         if (null === ($group = $this->getGroup())) {
-            $this->addError($attribute, 'Группа не найдена');
+            $this->addError($attribute, 'Группа не найдена.');
             return;
         }
 
         if ((int)$this->getCertificate()->balance === 0 || (int)$this->getCertificate()->balance_f === 0) {
-            $this->addError($attribute, 'Недостаточно средств на счету сертификата');
+            $this->addError($attribute, 'Недостаточно средств на счету сертификата.');
             return;
         }
 
@@ -94,25 +145,12 @@ class SelectGroupForm extends Model
                 'group_id' => $group->id,
                 'status' => [0, 1, 3]
             ])
-            ->all();
+            ->count();
 
         if ($groupContractsCount >= $this->getModule()->maxchild) {
-            $this->addError($attribute, 'Превышен лимит на зачисление.');
+            $this->addError($attribute, 'Превышен лимит на зачисление в группу.');
             return;
         }
-
-        $payerContractsCount = Contracts::find()
-            ->andWhere([
-                'payer_id' => $this->getCertificate()->payer_id,
-                'status' => [0, 1, 3]
-            ])
-            ->all();
-
-        if ($payerContractsCount >= $this->getCertificate()->payer->li) {
-
-        }
-
-        $this->addError($attribute, 'Заглушка');
     }
 
     /**
