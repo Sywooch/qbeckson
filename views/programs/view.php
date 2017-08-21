@@ -918,7 +918,7 @@ $this->registerJs($js, $this::POS_END);
                                                                         }
                                                                     ],
 
-                                                                    ['class' => 'yii\grid\ActionColumn',
+                                                                    /*['class' => 'yii\grid\ActionColumn',
                                                                         'template' => '{permit}',
                                                                         'buttons' =>
                                                                             [
@@ -954,7 +954,7 @@ $this->registerJs($js, $this::POS_END);
                                                                                 },
 
                                                                             ]
-                                                                    ],
+                                                                    ],*/
                                                                 ],
                                                             ]);
                                                         }
