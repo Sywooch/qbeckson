@@ -2,10 +2,12 @@
 
 namespace app\models\search;
 
+use app\models\UserIdentity;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\Programs;
+use yii\helpers\ArrayHelper;
 
 /**
  * ProgramsSearch represents the model behind the search form about `app\models\Programs`.
@@ -18,6 +20,7 @@ class ProgramsSearch extends Programs
     public $isMunicipalTask = false;
 
     public $modelName;
+    public $payerId;
 
     /**
      * @return string
@@ -36,7 +39,7 @@ class ProgramsSearch extends Programs
             [['id', 'form', 'mun', 'ground', 'price', 'study', 'last_contracts',
                 'last_s_contracts', 'last_s_contracts_rod', 'year', 'both_teachers', 'ovz', 'quality_control', 'p3z', 'municipality'], 'integer'],
             [['name', 'vid', 'colse_date', 'task', 'annotation', 'fullness', 'complexity', 'norm_providing',
-                'zab', 'link', 'certification_date', 'verification', 'organization_id'], 'safe'],
+                'zab', 'link', 'certification_date', 'verification', 'organization_id', 'payerId'], 'safe'],
             [['ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch'], 'number'],
             [['organization', 'hours', 'age_group_min', 'age_group_max', 'limit', 'rating'], 'string'],
             ['open', 'safe'],
@@ -94,6 +97,8 @@ class ProgramsSearch extends Programs
             ]);
         }
 
+
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
@@ -108,6 +113,18 @@ class ProgramsSearch extends Programs
             $query->where('0=1');
 
             return $dataProvider;
+        }
+
+        if ($this->payerId) {
+            /** @var UserIdentity $user */
+            $user = Yii::$app->user->getIdentity();
+            $organizationIds = ArrayHelper::getColumn($user->payer->cooperates, 'organization_id');
+            if ($this->organization_id && $organizationIds && $this->organization_id !== 'Array') {
+                $this->organization_id = ArrayHelper::isIn($this->organization_id, $organizationIds) ?
+                    $this->organization_id : 0;
+            } else {
+                $this->organization_id = $organizationIds ?: 0;
+            }
         }
 
         if (isset($this->open) && $this->open < 1) {
