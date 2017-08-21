@@ -2,6 +2,7 @@
 
 namespace app\models\search;
 
+use app\models\UserIdentity;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -100,7 +101,7 @@ class ProgramsSearch extends Programs
             /** @var UserIdentity $user */
             $user = Yii::$app->user->getIdentity();
             $organizationIds = ArrayHelper::getColumn($user->payer->cooperates, 'organization_id');
-            if ($this->organization_id) {
+            if ($this->organization_id && $organizationIds) {
                 $this->organization_id = ArrayHelper::isIn($this->organization_id, $organizationIds) ?
                     $this->organization_id : 0;
             } else {
