@@ -500,10 +500,11 @@ class PersonalController extends Controller
     {
         /** @var UserIdentity $user */
         $user = Yii::$app->user->getIdentity();
+        $organizationIds = ArrayHelper::getColumn($user->payer->cooperates, 'organization_id');
 
         $searchPrograms = new ProgramsSearch([
             'verification' => [2],
-            'organization_id' => ArrayHelper::getColumn($user->payer->cooperates, 'organization_id'),
+            'organization_id' => $organizationIds ?: [0],
             'hours' => '0,2000',
             'limit' => '0,10000',
             'rating' => '0,100',
