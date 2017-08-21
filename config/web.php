@@ -136,198 +136,204 @@ $config = [
 
     'as AccessBehavior' => [
         'class' => AccessBehavior::class,
-        'rules' =>
+        'rules' => [
+            'personal' => [
+                [
+                    'allow' => true,
+                    'actions' => ['operator-cooperates'],
+                    'roles' => ['operators']
+                ],
+                [
+                    'actions' => ['update-municipality'],
+                    'allow' => true,
+                    'roles' => ['certificate']
+                ],
+                [
+                    'actions' => ['organization-suborder', 'organization-set-suborder-status', 'organization-municipal-task'],
+                    'allow' => true,
+                    'roles' => ['organizations']
+                ],
+                [
+                    'actions' => ['payer-suborder-organizations', 'payer-all-organizations', 'payer-municipal-task'],
+                    'allow' => true,
+                    'roles' => ['payers']
+                ],
+            ],
+            'file-storage' => [
+                [
+                    'allow' => true,
+                ],
+            ],
+            'site' =>
             [
-                'personal' => [
-                    [
-                        'allow' => true,
-                        'actions' => ['operator-cooperates'],
-                        'roles' => ['operators']
-                    ],
-                    [
-                        'actions' => ['update-municipality'],
-                        'allow' => true,
-                        'roles' => ['certificate']
-                    ],
-                    [
-                        'actions' => ['organization-suborder', 'organization-set-suborder-status', 'organization-municipal-task'],
-                        'allow' => true,
-                        'roles' => ['organizations']
-                    ],
-                    [
-                        'actions' => ['payer-suborder-organizations', 'payer-all-organizations', 'payer-municipal-task'],
-                        'allow' => true,
-                        'roles' => ['payers']
-                    ],
+                [
+                    'allow' => true,
                 ],
-                'file-storage' => [
-                    [
-                        'allow' => true,
-                    ],
-                ],
-                'site' =>
+            ],
+            'import' =>
                 [
                     [
                         'allow' => true,
+                        'roles' => ['admins'],
                     ],
                 ],
-                'import' =>
-                    [
-                        [
-                            'allow' => true,
-                            'roles' => ['admins'],
-                        ],
-                    ],
-                'organization' =>
-                    [
-                        [
-                            'actions' => ['request', 'request-update', 'check-status'],
-                            'allow' => true,
-                        ],
-                        [
-                            'actions' => ['set-as-subordinated', 'cancel-subording', 'view-subordered'],
-                            'allow' => true,
-                            'roles' => ['payers'],
-                        ],
-                    ],
-                'operators' =>
-                    [
-                        [
-                            'actions' => ['view'],
-                            'allow' => true,
-                        ],
-                    ],
-                'programs' =>
-                    [
-                        [
-                            'actions' => ['index', 'view'],
-                            'allow' => true,
-                        ],
-                    ],
-                'user' =>
-                    [
-                        [
-                            'actions' => ['view'],
-                            'allow' => true,
-                        ],
-                    ],
-                'debug/default' =>
-                    [
-                        [
-                            'allow' => true,
-                        ],
-                    ],
-                'activity' =>
+            'organization' =>
                 [
                     [
-                        'actions' => ['load-activities', 'add-activity'],
+                        'actions' => ['request', 'request-update', 'check-status'],
                         'allow' => true,
-                        'roles' => ['organizations'],
-                    ]
-                ],
-                'program-module-address' => [
-                    [
-                        'actions' => ['create', 'update', 'select'],
-                        'allow' => true,
-                        'roles' => ['organizations'],
-                    ]
-                ],
-                'admin/directory-program-direction' => [
-                    [
-                        'allow' => true,
-                        'roles' => ['admins'],
-                    ]
-                ],
-                'admin/directory-program-activity' => [
-                    [
-                        'allow' => true,
-                        'roles' => ['admins'],
-                    ]
-                ],
-                'admin/search-filters' => [
-                    [
-                        'allow' => true,
-                        'roles' => ['admins'],
-                    ]
-                ],
-                'certificates' => [
-                    [
-                        'actions' => ['group-pdf', 'password'],
-                        'allow' => true,
-                        'roles' => ['certificate'],
-                    ]
-                ],
-                'site/save-filter' => [
-                    [
-                        'allow' => true,
-                    ]
-                ],
-                'maintenance' => [
-                    [
-                        'allow' => true,
-                    ]
-                ],
-                'certificate-information' => [
-                    [
-                        'allow' => true,
-                        'roles' => ['payer'],
-                    ]
-                ],
-                'cooperate' => [
-                    [
-                        'allow' => true,
-                        'actions' => ['request', 'appeal-request', 'requisites'],
-                        'roles' => ['organizations'],
                     ],
                     [
-                        'allow' => true,
-                        'actions' => ['confirm-request', 'reject-request', 'reject-contract', 'confirm-contract', 'requisites'],
-                        'roles' => ['payer'],
-                    ],
-                    [
-                        'allow' => true,
-                        'actions' => ['view', 'reject-appeal', 'confirm-appeal'],
-                        'roles' => ['operators'],
-                    ],
-                ],
-                'operator/key-storage' => [
-                    [
-                        'allow' => true,
-                        'roles' => ['operators'],
-                    ],
-                ],
-                'monitor' => [
-                    [
+                        'actions' => ['set-as-subordinated', 'cancel-subording', 'view-subordered'],
                         'allow' => true,
                         'roles' => ['payers'],
-                    ]
+                    ],
                 ],
-                'operator/operator-settings' => [
+            'operators' =>
+                [
+                    [
+                        'actions' => ['view'],
+                        'allow' => true,
+                    ],
+                ],
+            'programs' =>
+                [
+                    [
+                        'actions' => ['index', 'view'],
+                        'allow' => true,
+                    ],
+                ],
+            'user' =>
+                [
+                    [
+                        'actions' => ['view'],
+                        'allow' => true,
+                    ],
+                ],
+            'debug/default' =>
+                [
                     [
                         'allow' => true,
-                        'roles' => ['operators']
-                    ]
+                    ],
                 ],
-                'organization/address' => [
-                    [
-                        'allow' => true,
-                        'roles' => ['organizations']
-                    ]
-                ],
-                'contracts' => [
-                    [
-                        'allow' => true,
-                        'roles' => ['certificate']
-                    ]
-                ],
-                'organization/contract-settings' => [
-                    [
-                        'allow' => true,
-                        'actions' => ['change-settings'],
-                        'roles' => ['organizations'],
-                    ]
+            'activity' =>
+            [
+                [
+                    'actions' => ['load-activities', 'add-activity'],
+                    'allow' => true,
+                    'roles' => ['organizations'],
                 ]
-            ]
+            ],
+            'program-module-address' => [
+                [
+                    'actions' => ['create', 'update', 'select'],
+                    'allow' => true,
+                    'roles' => ['organizations'],
+                ]
+            ],
+            'admin/directory-program-direction' => [
+                [
+                    'allow' => true,
+                    'roles' => ['admins'],
+                ]
+            ],
+            'admin/directory-program-activity' => [
+                [
+                    'allow' => true,
+                    'roles' => ['admins'],
+                ]
+            ],
+            'admin/search-filters' => [
+                [
+                    'allow' => true,
+                    'roles' => ['admins'],
+                ]
+            ],
+            'certificates' => [
+                [
+                    'actions' => ['group-pdf', 'password'],
+                    'allow' => true,
+                    'roles' => ['certificate'],
+                ]
+            ],
+            'site/save-filter' => [
+                [
+                    'allow' => true,
+                ]
+            ],
+            'maintenance' => [
+                [
+                    'allow' => true,
+                ]
+            ],
+            'certificate-information' => [
+                [
+                    'allow' => true,
+                    'roles' => ['payer'],
+                ]
+            ],
+            'cooperate' => [
+                [
+                    'allow' => true,
+                    'actions' => ['request', 'appeal-request', 'requisites'],
+                    'roles' => ['organizations'],
+                ],
+                [
+                    'allow' => true,
+                    'actions' => ['confirm-request', 'reject-request', 'reject-contract', 'confirm-contract', 'requisites'],
+                    'roles' => ['payer'],
+                ],
+                [
+                    'allow' => true,
+                    'actions' => ['view', 'reject-appeal', 'confirm-appeal'],
+                    'roles' => ['operators'],
+                ],
+            ],
+            'operator/key-storage' => [
+                [
+                    'allow' => true,
+                    'roles' => ['operators'],
+                ],
+            ],
+            'monitor' => [
+                [
+                    'allow' => true,
+                    'roles' => ['payers'],
+                ]
+            ],
+            'operator/operator-settings' => [
+                [
+                    'allow' => true,
+                    'roles' => ['operators']
+                ]
+            ],
+            'organization/address' => [
+                [
+                    'allow' => true,
+                    'roles' => ['organizations']
+                ]
+            ],
+
+            'organization/contract-settings' => [
+                [
+                    'allow' => true,
+                    'actions' => ['change-settings'],
+                    'roles' => ['organizations'],
+                ]
+            ],
+            'contracts' => [
+                [
+                    'allow' => true,
+                    'roles' => ['certificate'],
+                    'actions' => ['request', 'reject-request']
+                ],
+                [
+                    'allow' => true,
+                    'roles' => ['operators'],
+                    'actions' => ['create', 'request', 'reject-request']
+                ],
+            ],
+        ],
     ],
 
     'params' => $params,
