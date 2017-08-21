@@ -526,7 +526,7 @@ class PersonalController extends Controller
         $user = Yii::$app->user->getIdentity();
 
         $searchPrograms = new ProgramsSearch([
-            'organization_id' => ArrayHelper::getColumn($user->payer->organizations, 'id'),
+            'payerId' => $user->payer->id,
             'hours' => '0,2000',
             'limit' => '0,10000',
             'rating' => '0,100',
