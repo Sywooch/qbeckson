@@ -108,6 +108,10 @@ class SelectGroupForm extends Model
             ])
             ->all();
 
+        if ($payerContractsCount >= $this->getCertificate()->payer->li) {
+
+        }
+
         $this->addError($attribute, 'Заглушка');
     }
 

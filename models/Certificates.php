@@ -33,6 +33,7 @@ use Yii;
  *
  * @property User $user
  * @property Payers $payers
+ * @property Payers $payer
  * @property Contracts[] $contracts0
  */
 class Certificates extends \yii\db\ActiveRecord
