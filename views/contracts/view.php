@@ -122,13 +122,17 @@ $this->params['breadcrumbs'][] = $this->title;
         echo DetailView::widget([
             'model' => $groups,
             'attributes' => [
+                'name',
+                'module.mainAddress.address',
                 [
-                    'attribute' => 'name',
-                    //'format' => 'raw',
-                    //'value' => Html::a($groups->name, Url::to(['/groups/contracts', 'id' => $groups->id]), ['class' => 'blue', //'target' => '_blank']),
+                    'attribute' => 'schedule',
+                    'label' => 'Расписание',
+                    'value' => function ($model) {
+                        /** @var \app\models\Groups $model */
+                        return $model->formatClasses();
+                    },
+                    'format' => 'raw'
                 ],
-                'address',
-                'schedule',
             ],
         ]);
     } else {
@@ -145,10 +149,8 @@ $this->params['breadcrumbs'][] = $this->title;
     } ?>
 
     <?php
-    if ($model->wait_termnate == 1 || $model->status == 2 || $model->status == 4) {
-        if ($model->status != 4) {
-            echo '<h3>Ожидается расторжение договора с первого числа следующего месяца</h3>';
-        }
+    if ($model->wait_termnate == 1 && ($model->status == Contracts::STATUS_REFUSED || $model->status == Contracts::STATUS_CLOSED)) {
+         echo '<h3>Ожидается расторжение договора с первого числа следующего месяца</h3>';
 
         echo DetailView::widget([
             'model' => $model,
