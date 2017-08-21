@@ -97,17 +97,7 @@ class ProgramsSearch extends Programs
             ]);
         }
 
-        if ($this->payerId) {
-            /** @var UserIdentity $user */
-            $user = Yii::$app->user->getIdentity();
-            $organizationIds = ArrayHelper::getColumn($user->payer->cooperates, 'organization_id');
-            if ($this->organization_id && $organizationIds) {
-                $this->organization_id = ArrayHelper::isIn($this->organization_id, $organizationIds) ?
-                    $this->organization_id : 0;
-            } else {
-                $this->organization_id = $organizationIds ?: 0;
-            }
-        }
+
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -123,6 +113,18 @@ class ProgramsSearch extends Programs
             $query->where('0=1');
 
             return $dataProvider;
+        }
+
+        if ($this->payerId) {
+            /** @var UserIdentity $user */
+            $user = Yii::$app->user->getIdentity();
+            $organizationIds = ArrayHelper::getColumn($user->payer->cooperates, 'organization_id');
+            if ($this->organization_id && $organizationIds && $this->organization_id !== 'Array') {
+                $this->organization_id = ArrayHelper::isIn($this->organization_id, $organizationIds) ?
+                    $this->organization_id : 0;
+            } else {
+                $this->organization_id = $organizationIds ?: 0;
+            }
         }
 
         if (isset($this->open) && $this->open < 1) {
