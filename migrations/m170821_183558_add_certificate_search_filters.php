@@ -9,7 +9,7 @@ class m170821_183558_add_certificate_search_filters extends Migration
     {
         $this->insert('settings_search_filters', [
             'table_name' => 'programs',
-            'table_columns' => 'zab,year,hours,directivity,age_group_min,rating,mun,price,normativePrice',
+            'table_columns' => 'zab,year,hours,directivity,age_group_min,age_group_max,rating,mun,price,normativePrice',
             'inaccessible_columns' => 'name',
             'is_active' => 1,
             'role' => UserIdentity::ROLE_CERTIFICATE,
