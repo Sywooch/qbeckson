@@ -319,6 +319,13 @@ $config = [
                         'allow' => true,
                         'roles' => ['certificate']
                     ]
+                ],
+                'organization/contract-settings' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['change-settings'],
+                        'roles' => ['organizations'],
+                    ]
                 ]
             ]
     ],

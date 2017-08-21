@@ -484,9 +484,9 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
                         $month = $start_edu_contract[1];
 
                         if ($month == date('m')) {
-                            $price = $model->first_m_price * $model->payer_dol;
+                            $price = $model->first_month_payer_payment;
                         } else {
-                            $price = $model->other_m_price * $model->payer_dol;
+                            $price = $model->other_month_payer_payment;
                         }
 
                         return $price;

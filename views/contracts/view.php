@@ -7,6 +7,7 @@ use app\models\Programs;
 use app\models\Certificates;
 use app\models\Groups;
 use app\models\Organization;
+use app\models\Contracts;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Contracts */
@@ -14,12 +15,12 @@ use app\models\Organization;
 $contractdate = explode('-', $model->date);
 //if ($model->status == 1 || $model->status == 4 || $model->status == 2 ) { $this->title = 'Просмотр договора от '.$contractdate["2"].'.'.$contractdate[1].'.'.$contractdate[0].' № '.$model->number; }
 
-if ($model->status == 1 || $model->status == 4 || $model->status == 2) {
+if ($model->status == Contracts::STATUS_ACTIVE || $model->status == Contracts::STATUS_CLOSED || $model->status == Contracts::STATUS_REFUSED) {
     $this->title = 'Просмотр договора № ' . $model->number;
-}
-
-if ($model->status == 0 || $model->status == 3) {
+} elseif ($model->status == Contracts::STATUS_CREATED) {
     $this->title = 'Просмотр заявки';
+} elseif ($model->status == Contracts::STATUS_ACCEPTED) {
+    $this->title = 'Просмотр оферты';
 }
 
 $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
@@ -40,11 +41,17 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php $cert = Certificates::findOne($model->certificate_id);
+    <?php
+    $cert = Certificates::findOne($model->certificate_id);
     $program = Programs::findOne($model->program_id);
     $groups = Groups::findOne($model->group_id);
     $org = Organization::findOne($model->organization_id);
 
+    if ($model->status == Contracts::STATUS_CREATED) {
+        echo '<div class="alert alert-warning">Ваша заявка находится на рассмотрении поставщика образовательных услуг. Дождитесь оферты от поставщика на заключения договора. Заявка будет переведена в раздел "Ожидающие договоры" автоматически после получения оферты.</div>';
+    } elseif ($model->status == Contracts::STATUS_ACCEPTED) {
+        echo '<div class="alert alert-warning">Для того, чтобы завершить заключение договора напишите заявление на обучение в соответствии с <a href="' . Url::to(['application-pdf', 'id' => $model->id]) . '">представленным образцом заявления</a>. Вы можете распечатать образец или переписать от руки на листе бумаги. После написания заявления отнесите его лично или передайте с ребенком поставщику образовательных услуг.</div>';
+    }
 
     if (isset($roles['certificate']) or isset($roles['operators']) or isset($roles['payer'])) {
         echo DetailView::widget([
@@ -115,13 +122,17 @@ $this->params['breadcrumbs'][] = $this->title;
         echo DetailView::widget([
             'model' => $groups,
             'attributes' => [
+                'name',
+                'module.mainAddress.address',
                 [
-                    'attribute' => 'name',
-                    //'format' => 'raw',
-                    //'value' => Html::a($groups->name, Url::to(['/groups/contracts', 'id' => $groups->id]), ['class' => 'blue', //'target' => '_blank']),
+                    'attribute' => 'schedule',
+                    'label' => 'Расписание',
+                    'value' => function ($model) {
+                        /** @var \app\models\Groups $model */
+                        return $model->formatClasses();
+                    },
+                    'format' => 'raw'
                 ],
-                'address',
-                'schedule',
             ],
         ]);
     } else {
@@ -138,10 +149,8 @@ $this->params['breadcrumbs'][] = $this->title;
     } ?>
 
     <?php
-    if ($model->wait_termnate == 1 || $model->status == 2 || $model->status == 4) {
-        if ($model->status != 4) {
-            echo '<h3>Ожидается расторжение договора с первого числа следующего месяца</h3>';
-        }
+    if ($model->wait_termnate == 1 && ($model->status == Contracts::STATUS_REFUSED || $model->status == Contracts::STATUS_CLOSED)) {
+         echo '<h3>Ожидается расторжение договора с первого числа следующего месяца</h3>';
 
         echo DetailView::widget([
             'model' => $model,
@@ -160,7 +169,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Посмотреть текст договора',
                 'format' => 'raw',
-                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', Url::to(['/contracts/mpdf', 'id' => $model->id])),
+                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $model->fullUrl),
             ],
             [
                 'attribute' => 'status',
@@ -198,7 +207,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Посмотреть текст договора',
                 'format' => 'raw',
-                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', Url::to(['/contracts/mpdf', 'id' => $model->id])),
+                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $model->fullUrl),
             ],
             [
                 'attribute' => 'status',
@@ -238,7 +247,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Посмотреть текст договора',
                 'format' => 'raw',
-                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', Url::to(['/contracts/mpdf', 'id' => $model->id])),
+                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $model->fullUrl),
             ],
             [
                 'attribute' => 'status',
@@ -256,7 +265,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Посмотреть текст договора',
                 'format' => 'raw',
-                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', Url::to(['/contracts/mpdf', 'id' => $model->id])),
+                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $model->fullUrl),
             ],
             [
                 'attribute' => 'status',

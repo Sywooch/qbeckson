@@ -159,7 +159,7 @@ class Certificates extends \yii\db\ActiveRecord
         }
     }
 
-    public function beforeSave($insert)
+    public function setNominals()
     {
         if (!empty($this->selectCertGroup) && $this->selectCertGroup == self::TYPE_PF) {
             $this->cert_group = $this->possible_cert_group;
@@ -174,8 +174,6 @@ class Certificates extends \yii\db\ActiveRecord
             $this->balance = 0;
             $this->balance_f = 0;
         }
-
-        return parent::beforeSave($insert);
     }
 
     public function getCertGroupTypes()
@@ -284,7 +282,7 @@ class Certificates extends \yii\db\ActiveRecord
 
     public function getCanChangeGroup()
     {
-        if ($this->nominal == $this->balance) {
+        if ($this->nominal == $this->balance && $this->nominal_f == $this->balance_f) {
             return true;
         }
 

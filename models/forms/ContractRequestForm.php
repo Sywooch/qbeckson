@@ -3,6 +3,7 @@
 namespace app\models\forms;
 
 use app\helpers\CalculationHelper;
+use app\models\Certificates;
 use app\models\Contracts;
 use app\models\Groups;
 use app\models\OperatorSettings;
@@ -15,24 +16,34 @@ use yii\base\Model;
  */
 class ContractRequestForm extends Model
 {
-    const CURRENT_REALIZATION_PERIOD = 'current';
-    const FUTURE_REALIZATION_PERIOD = 'future';
-
     public $dateFrom;
     public $dateTo;
 
     private $group;
+    private $contract;
     private $settings;
+    private $certificate;
     private $realizationPeriod;
 
     /**
      * ContractRequestForm constructor.
      * @param integer $groupId
+     * @param null $certificateId
+     * @param Contracts|null $contract
      * @param array $config
      */
-    public function __construct($groupId, $config = [])
+    public function __construct($groupId, $certificateId = null, $contract = null, $config = [])
     {
         $this->setGroup($groupId);
+        $this->setContract($contract);
+        $this->setCertificate($certificateId);
+        if (null === $this->dateFrom) {
+            if (time() < strtotime($this->getGroup()->datestart)) {
+                $this->dateFrom = Yii::$app->formatter->asDate($this->getGroup()->datestart);
+            } else {
+                $this->dateFrom = date('d.m.Y', strtotime('first day of next month'));
+            }
+        }
         parent::__construct($config);
     }
 
@@ -48,55 +59,13 @@ class ContractRequestForm extends Model
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            [['dateFrom', 'dateTo'], 'required'],
-            [['dateFrom', 'dateTo'], 'date', 'format' => 'php:Y-m-d'],
-            [['dateFrom', 'dateTo'], 'validateDate'],
-            [['dateFrom'], 'validateDateFrom'],
-            [['dateTo'], 'validateDateTo'],
-            [['dateFrom', 'dateTo'], 'validateRealizationPeriod'],
+            [['dateFrom'], 'required'],
+            [['dateFrom'], 'date', 'format' => 'php:d.m.Y'],
+            [['dateFrom'], 'validateDate'],
         ];
-    }
-
-    /**
-     * Валидация периода реализации программы.
-     *
-     * @param $attribute
-     */
-    public function validateRealizationPeriod($attribute)
-    {
-        if (null === ($settings = $this->getSettings())) {
-            $this->addError($attribute, 'Должны быть указаны периоды реализации программ в настройках.');
-        }
-        if (strtotime($this->dateFrom) >= strtotime($settings->current_program_date_from) &&
-            strtotime($this->dateFrom) <= strtotime($settings->current_program_date_to)
-        ) {
-            $this->setRealizationPeriod(self::CURRENT_REALIZATION_PERIOD);
-            if (strtotime($this->dateTo) > strtotime($settings->current_program_date_to)) {
-                $this->addError(
-                    'dateTo',
-                    'Дата должна быть в пределах: '.
-                        $settings->current_program_date_from .' ' . $settings->current_program_date_to . '.'
-                );
-            }
-        }
-        if (strtotime($this->dateFrom) >= strtotime($settings->future_program_date_from) &&
-            strtotime($this->dateFrom) <= strtotime($settings->future_program_date_to)
-        ) {
-            $this->setRealizationPeriod(self::FUTURE_REALIZATION_PERIOD);
-            if (strtotime($this->dateTo) > strtotime($settings->future_program_date_to)) {
-                $this->addError(
-                    'dateTo',
-                    'Дата должна быть в пределах: '.
-                    $settings->future_program_date_from .' ' . $settings->future_program_date_to . '.'
-                );
-            }
-        }
-        if (null === $this->getRealizationPeriod()) {
-            $this->addError($attribute, 'В данный период времени реализация программ не выполняется.');
-        }
     }
 
     /**
@@ -106,6 +75,11 @@ class ContractRequestForm extends Model
      */
     public function validateDate($attribute)
     {
+        if (strtotime($this->$attribute) < time()) {
+            $this->addError($attribute, 'Дата начала должна быть больше или равна текущей дате');
+            return;
+        }
+
         $group = $this->getGroup();
         if (strtotime($this->$attribute) < strtotime($group->datestart) ||
             strtotime($this->$attribute) > strtotime($group->datestop)) {
@@ -113,29 +87,41 @@ class ContractRequestForm extends Model
                 $attribute,
                 'Дата должна быть в пределах: '. $group->datestart .' ' . $group->datestop . '.'
             );
+            return;
         }
+        if (null === ($settings = $this->getSettings())) {
+            $this->addError($attribute, 'Должны быть указаны периоды реализации программ в настройках.');
+            return;
+        }
+
+        if (strtotime($this->dateFrom) >= strtotime($settings->current_program_date_from) &&
+            strtotime($this->dateFrom) <= strtotime($settings->current_program_date_to)
+        ) {
+            $this->setRealizationPeriod(Contracts::CURRENT_REALIZATION_PERIOD);
+            $this->dateTo = $settings->current_program_date_to;
+            if (strtotime($group->datestop) < strtotime($settings->current_program_date_to)) {
+                $this->dateTo = $group->datestop;
+            }
+        }
+
+        if (strtotime($this->dateFrom) >= strtotime($settings->future_program_date_from) &&
+            strtotime($this->dateFrom) <= strtotime($settings->future_program_date_to)
+        ) {
+            $this->setRealizationPeriod(Contracts::FUTURE_REALIZATION_PERIOD);
+            $this->dateTo = $settings->future_program_date_to;
+            if (strtotime($group->datestop) < strtotime($settings->future_program_date_to)) {
+                $this->dateTo = $group->datestop;
+            }
+        }
+
+        if (null === $this->getRealizationPeriod()) {
+            $this->addError($attribute, 'В данный период времени реализация программ не выполняется.');
+            return;
+        }
+
         if ($this->dateFrom === $this->dateTo) {
             $this->addError($attribute, 'Даты должны отличаться');
-        }
-    }
-
-    /**
-     * @param $attribute
-     */
-    public function validateDateFrom($attribute)
-    {
-        if ($this->dateTo && strtotime($this->$attribute) > strtotime($this->dateTo)) {
-            $this->addError($attribute, 'Дата начала должна быть меньше даты окончания.');
-        }
-    }
-
-    /**
-     * @param $attribute
-     */
-    public function validateDateTo($attribute)
-    {
-        if ($this->dateFrom && strtotime($this->$attribute) < strtotime($this->dateFrom)) {
-            $this->addError($attribute, 'Дата окончания должна быть больше даты начала.');
+            return;
         }
     }
 
@@ -170,94 +156,143 @@ class ContractRequestForm extends Model
      *
      * В результате мы имеем все параметры договора кроме увязки с остатками сертификата…
      * All_funds = цена первого месяца + цена прочего месяца*число прочих месяцев
-     * Вариант А: funds_cert = min (нормативная стоимость первого месяца + нормативная стоимость прочего месяца*число прочих месяцев; остаток сертификата текущего периода)
-     * Вариант Б: funds_cert = min (нормативная стоимость первого месяца + нормативная стоимость прочего месяца*число прочих месяцев; остаток сертификата будущего периода)
+     * Вариант А: funds_cert = min (нормативная стоимость первого месяца + нормативная стоимость прочего
+     * месяца*число прочих месяцев; остаток сертификата текущего периода)
+     * Вариант Б: funds_cert = min (нормативная стоимость первого месяца + нормативная стоимость прочего
+     * месяца*число прочих месяцев; остаток сертификата будущего периода)
      * all_parents_funds= All_funds - funds_cert
      * first_m_price – цена первого месяца
      * other_m_price – цена прочего месяца (0 – если всего один месяц)
-     * first_m_nprice – нормативная стоимость первого месяца (0 – если всего один месяц) other_m_nprice - нормативная стоимость прочего месяца
+     * first_m_nprice – нормативная стоимость первого месяца (0 – если всего один месяц) other_m_nprice -
+     * нормативная стоимость прочего месяца
      * Подтверждение заявки: вот тут вот будут расчеты влиять на остатки и резервы текущего и будущего периодов
      *
-     * @return array
+     * @return mixed
      */
     public function save()
     {
-        if (null !== ($group = $this->getGroup()) && $this->validate()) {
+        if (null !== ($group = $this->getGroup()) &&
+            null !== ($contract = $this->getContract())
+        ) {
+            // Период реализации в месяцах
             $realizationPeriodInMonthes = CalculationHelper::monthesInPeriod($this->dateFrom, $this->dateTo);
+            // Период реализации в днях
             $realizationPeriodInDays = CalculationHelper::daysBetweenDates($this->dateFrom, $this->dateTo);
+            // Период реализации группы в днях
             $groupRealizationPeriod = CalculationHelper::daysBetweenDates($group->datestart, $group->datestop);
-
+            // Всего необходимо заплатить
+            $all_funds = CalculationHelper::roundTo(
+                $realizationPeriodInDays / $groupRealizationPeriod * $group->module->price
+            );
+            // Нормативная стоимость
             $normativePrice = CalculationHelper::roundTo(
                 $realizationPeriodInDays / $groupRealizationPeriod * $group->module->normative_price
             );
-            $price = CalculationHelper::roundTo(
-                $realizationPeriodInDays / $groupRealizationPeriod * $group->module->price
-            );
-
-            if ($realizationPeriodInMonthes === 1) {
-
+            // Меньшее из трёх all_funds / $normativePrice / отсток по сертификату
+            if ($this->getRealizationPeriod() === Contracts::CURRENT_REALIZATION_PERIOD) {
+                $balance = $this->getCertificate()->balance;
             } else {
+                $balance = $this->getCertificate()->balance_f;
+            }
+            $funds_cert = min($all_funds, $normativePrice, $balance);
+            // Сколько надо заплатить родителям
+            $all_parents_funds = $all_funds - $funds_cert;
+            // Доля сертификата
+            $cert_dol = $all_parents_funds / $all_funds;
+            // Доля плательщика
+            $payer_dol = 1 - $cert_dol;
+            //Если кто-во месяцев реализации > 1
+            if ($realizationPeriodInMonthes > 1) {
+                // Дней в первом месяце
                 $daysInFirstMonth = CalculationHelper::daysBetweenDates(
                     $this->dateFrom,
                     date('Y-m-t', strtotime($this->dateFrom))
                 );
-                $firstMonthNormativePrice = CalculationHelper::roundTo(
-                    $daysInFirstMonth / $groupRealizationPeriod * $group->module->normative_price,
+                $otherMonthesPricePerMonth = CalculationHelper::roundTo(
+                    ($realizationPeriodInDays - $daysInFirstMonth) /
+                    $groupRealizationPeriod * $group->module->price / ($realizationPeriodInMonthes - 1),
                     CalculationHelper::TO_DOWN
                 );
-                $firstMonthPrice = CalculationHelper::roundTo(
-                    $daysInFirstMonth / $groupRealizationPeriod * $group->module->price,
+                $otherMonthesNormativePricePerMonth = CalculationHelper::roundTo(
+                    ($realizationPeriodInDays - $daysInFirstMonth) /
+                        $groupRealizationPeriod * $group->module->normative_price / ($realizationPeriodInMonthes - 1),
                     CalculationHelper::TO_DOWN
                 );
+                $firstMonthPrice = $all_funds - $otherMonthesPricePerMonth * ($realizationPeriodInMonthes - 1);
+                $firstMonthNormativePrice = $normativePrice -
+                    $otherMonthesNormativePricePerMonth * ($realizationPeriodInMonthes - 1);
 
-                $otherMonthesNormativePrice = ($realizationPeriodInDays - $daysInFirstMonth) /
-                    $groupRealizationPeriod * $group->module->normative_price / ($realizationPeriodInMonthes - 1);
-                $otherMonthesPrice = ($realizationPeriodInDays - $daysInFirstMonth) /
-                    $groupRealizationPeriod * $group->module->price / ($realizationPeriodInMonthes - 1);
-
-
-
-                //$otherMonthesNormativePrice = CalculationHelper::roundTo($otherMonthesNormativePrice);
+                if ($all_parents_funds > 0) {
+                    $parents_other_month_payment = CalculationHelper::roundTo(
+                        ($realizationPeriodInDays - $daysInFirstMonth) /
+                        $realizationPeriodInDays * $all_parents_funds / ($realizationPeriodInMonthes - 1),
+                        CalculationHelper::TO_DOWN
+                    );
+                    $parents_first_month_payment = $all_parents_funds - $parents_other_month_payment *
+                        ($realizationPeriodInMonthes - 1);
+                }
+                if ($funds_cert > 0) {
+                    $payer_other_month_payment = CalculationHelper::roundTo(
+                        ($realizationPeriodInDays - $daysInFirstMonth) /
+                        $realizationPeriodInDays * $funds_cert / ($realizationPeriodInMonthes - 1),
+                        CalculationHelper::TO_DOWN
+                    );
+                    $payer_first_month_payment = $funds_cert - $payer_other_month_payment *
+                        ($realizationPeriodInMonthes - 1);
+                }
             }
 
-            /*$contract = new Contracts([
-                'certificate_id' => Yii::$app->user->identity->certificate->id,
-                'payer_id' => Yii::$app->user->identity->certificate->payer_id,
+            $contractData = [
+                'certificate_id' => $this->getCertificate()->id,
+                'payer_id' => $this->getCertificate()->payer_id,
                 'group_id' => $group->id,
                 'program_id' => $group->program_id,
                 'year_id' => $group->year_id,
                 'organization_id' => $group->organization_id,
-                'start_edu_contract' => $this->dateFrom,
-                'stop_edu_contract' => $this->dateTo,
-            ]);
-
-            $contract->prodolj_d = '';
-            $contract->prodolj_m = '';
-            $contract->prodolj_m_user = '';
-
-            $contract->first_m_price = '';
-            $contract->other_m_price = '';
-
-            $contract->first_m_nprice = '';
-            $contract->other_m_nprice = '';*/
-
-            return [
-                'realizationPeriodInMonthes' => $realizationPeriodInMonthes,
-                'realizationPeriodInDays' => $realizationPeriodInDays,
-                'groupRealizationPeriod' => $groupRealizationPeriod,
-                'normativePrice' => $normativePrice,
-                'daysInFirstMonth' => $daysInFirstMonth,
-                'firstMonthNormativePrice' => $firstMonthNormativePrice,
-                'otherMonthesNormativePrice' => $otherMonthesNormativePrice,
-                'moduleNormativePrice' => $group->module->normative_price,
+                'start_edu_contract' => date('Y-m-d', strtotime($this->dateFrom)),
+                'stop_edu_contract' => date('Y-m-d', strtotime($this->dateTo)),
+                'prodolj_d' => $realizationPeriodInDays,
+                'prodolj_m' => $realizationPeriodInMonthes,
+                'prodolj_m_user' => $realizationPeriodInMonthes,
+                'all_funds' => $all_funds,
+                'funds_cert' => $funds_cert,
+                'all_parents_funds' => $all_parents_funds,
+                'cert_dol' => $cert_dol,
+                'payer_dol' => $payer_dol,
+                'first_m_price' => $firstMonthPrice ?? $all_funds,
+                'first_m_nprice' => $firstMonthNormativePrice ?? $normativePrice,
+                'other_m_price' => $otherMonthesPricePerMonth ?? 0,
+                'other_m_nprice' => $otherMonthesNormativePricePerMonth ?? 0,
+                'parents_first_month_payment' => $parents_first_month_payment ?? $all_parents_funds,
+                'parents_other_month_payment' => $parents_other_month_payment ?? 0,
+                'payer_first_month_payment' => $payer_first_month_payment ?? $funds_cert,
+                'payer_other_month_payment' => $payer_other_month_payment ?? 0,
+                'url' => $this->getCertificate()->number . '-' . Yii::$app->security->generateRandomString(4) . '.pdf',
+                'sposob' => 2,
+                'payment_order' => 1,
+                'balance' => $balance,
+                'period' => $this->getRealizationPeriod(),
             ];
+            $contract->setAttributes($contractData);
+
+            return $contract->save() ? $contract : null;
         }
+
+        return false;
+    }
+
+    /**
+     * @return Contracts
+     */
+    public function getContract(): Contracts
+    {
+        return $this->contract;
     }
 
     /**
      * @return OperatorSettings
      */
-    public function getSettings()
+    public function getSettings(): OperatorSettings
     {
         if (null === $this->settings) {
             $this->settings = Yii::$app->operator->identity->settings;
@@ -269,7 +304,7 @@ class ContractRequestForm extends Model
     /**
      * @return Groups
      */
-    public function getGroup()
+    public function getGroup(): Groups
     {
         return $this->group;
     }
@@ -282,14 +317,14 @@ class ContractRequestForm extends Model
     {
         $this->group = Groups::findOne($groupId);
         if (null === $this->group) {
-            throw new \DomainException('Group not found');
+            throw new \DomainException('Group not found!');
         }
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getRealizationPeriod()
+    public function getRealizationPeriod(): string
     {
         return $this->realizationPeriod;
     }
@@ -303,13 +338,36 @@ class ContractRequestForm extends Model
     }
 
     /**
-     * @return array
+     * @param integer|null $certificateId
      */
-    public function attributeLabels()
+    public function setCertificate($certificateId)
     {
-        return [
-            'dateFrom' => 'Дата начала',
-            'dateTo' => 'Дата окончания'
-        ];
+        $this->certificate = (null === $certificateId) ?
+            Yii::$app->user->getIdentity()->certificate : Certificates::findOne($certificateId);
+        if (null === $this->certificate) {
+            throw new \DomainException('Certificate not found!');
+        }
+    }
+
+    /**
+     * @return Certificates
+     */
+    public function getCertificate(): Certificates
+    {
+        return $this->certificate;
+    }
+
+    /**
+     * @param Contracts|null $contract
+     */
+    public function setContract($contract)
+    {
+        if (null !== $contract) {
+            $this->contract = $contract;
+            $this->dateFrom = date('d.m.Y', strtotime($contract->start_edu_contract));
+            $this->dateTo = date('d.m.Y', strtotime($contract->stop_edu_contract));
+        } else {
+            $this->contract = new Contracts();
+        }
     }
 }

@@ -369,6 +369,20 @@ class Payers extends \yii\db\ActiveRecord
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 
+    public function getFirstCertGroup()
+    {
+        return $this->hasOne(CertGroup::className(), ['payer_id' => 'id'])
+            ->from('cert_group cg')
+            ->orderBy('id');
+    }
+
+    public function getAccountingCertGroup()
+    {
+        return $this->hasOne(CertGroup::className(), ['payer_id' => 'id'])
+            ->from('cert_group cg')
+            ->where(['>', 'is_special', 0]);
+    }
+
     public function getCertGroups($isSpecial = null)
     {
         $relation = $this->hasMany(CertGroup::className(), ['payer_id' => 'id']);

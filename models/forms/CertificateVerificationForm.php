@@ -1,0 +1,106 @@
+<?php
+
+namespace app\models\forms;
+
+use app\models\Certificates;
+use app\models\Cooperate;
+use Yii;
+use yii\base\Model;
+
+/**
+ * Class CertificateVerificationForm
+ * @package app\models\forms
+ */
+class CertificateVerificationForm extends Model
+{
+    public $number;
+    public $soname;
+    public $name;
+    public $patronymic;
+
+    private $certificate;
+    private $cooperation;
+
+    /**
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            [['number', 'soname', 'name', 'patronymic'], 'required'],
+            [['number', 'soname', 'name', 'patronymic'], 'string'],
+            ['number', 'validateData']
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function attributeLabels(): array
+    {
+        return [
+            'number' => 'Номер сертификата',
+            'soname' => 'Фамилия',
+            'name' => 'Имя',
+            'patronymic' => 'Отчество',
+        ];
+    }
+
+    /**
+     * TODO добавить проверку, является ли сертификат типом - ПФ.
+     *
+     * @param string $attribute
+     */
+    public function validateData($attribute)
+    {
+        if (null === ($certificate = $this->getCertificate())) {
+            $this->addError($attribute, 'Такого сертификата нет.');
+            return;
+        }
+        if (null === ($cooperation = $this->getCooperation())) {
+            $this->addError($attribute, 'Нет соглашения с плательщиком этого сертификата.');
+            return;
+        }
+        if ($certificate->actual !== 1) {
+            $this->addError($attribute, 'Сертификат заморожен.');
+            return;
+        }
+    }
+
+    /**
+     * @return Cooperate|null
+     */
+    public function getCooperation()
+    {
+        if (null === $this->cooperation) {
+            $this->cooperation = Cooperate::find()
+                ->andWhere([
+                    'organization_id' => Yii::$app->user->identity->organization->id,
+                    'payer_id' => $this->getCertificate()->payer_id,
+                    'status' => 1
+                ])
+                ->one();
+        }
+
+        return $this->cooperation;
+    }
+
+    /**
+     * @return Certificates|null
+     */
+    public function getCertificate()
+    {
+        if (null === $this->certificate) {
+            $this->certificate = Certificates::find()
+                ->andWhere([
+                    'number' => $this->number,
+                    'name' => $this->name,
+                    'soname' => $this->soname,
+                    'phname' => $this->patronymic,
+                ])
+                ->one();
+        }
+
+        return $this->certificate;
+    }
+}
