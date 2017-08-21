@@ -500,20 +500,15 @@ class PersonalController extends Controller
     {
         /** @var UserIdentity $user */
         $user = Yii::$app->user->getIdentity();
-        $organizationIds = ArrayHelper::getColumn($user->payer->cooperates, 'organization_id');
 
         $searchPrograms = new ProgramsSearch([
             'verification' => [2],
-            'organization_id' => $organizationIds ?: [0],
+            'payerId' => $user->payer->id,
             'hours' => '0,2000',
             'limit' => '0,10000',
             'rating' => '0,100',
             'modelName' => '',
         ]);
-        //Кастыль, надо будет его переделать...
-        if (Yii::$app->request->get('organization_id') === 'Array') {
-            unset($_GET['organization_id']);
-        }
         $programsProvider = $searchPrograms->search(Yii::$app->request->queryParams);
 
         return $this->render('payer-programs', [
