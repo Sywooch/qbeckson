@@ -317,7 +317,7 @@ class ContractRequestForm extends Model
     {
         $this->group = Groups::findOne($groupId);
         if (null === $this->group) {
-            throw new \DomainException('Group not found');
+            throw new \DomainException('Group not found!');
         }
     }
 
@@ -344,6 +344,9 @@ class ContractRequestForm extends Model
     {
         $this->certificate = (null === $certificateId) ?
             Yii::$app->user->getIdentity()->certificate : Certificates::findOne($certificateId);
+        if (null === $this->certificate) {
+            throw new \DomainException('Certificate not found!');
+        }
     }
 
     /**

@@ -4,8 +4,10 @@ namespace app\controllers;
 
 use app\helpers\FormattingHelper;
 use app\models\Cooperate;
+use app\models\forms\CertificateVerificationForm;
 use app\models\forms\ContractConfirmForm;
 use app\models\forms\ContractRequestForm;
+use app\models\forms\SelectGroupForm;
 use app\models\UserIdentity;
 use app\traits\AjaxValidationTrait;
 use Yii;
@@ -16,6 +18,7 @@ use app\models\ContractsoSearch;
 use app\models\ContractsInvoiceSearch;
 use app\models\ContractsDecInvoiceSearch;
 use yii\base\Response;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -54,6 +57,97 @@ class ContractsController extends Controller
                 ],
             ],
         ];
+    }
+
+    /**
+     * @return string|Response
+     */
+    public function actionCreate()
+    {
+        $validateForm = new CertificateVerificationForm();
+        if ($validateForm->load(Yii::$app->request->post()) && $validateForm->validate()) {
+            $selectForm = new SelectGroupForm();
+            $selectForm->setCertificate($validateForm->getCertificate());
+            if ($selectForm->load(Yii::$app->request->post()) && $selectForm->validate()) {
+                return $this->redirect([
+                    'request',
+                    'groupId' => $selectForm->group,
+                    'certificateId' => $selectForm->getCertificate()->id
+                ]);
+            }
+        }
+
+        return $this->render('create', [
+            'validateForm' => $validateForm,
+            'selectForm' => $selectForm ?? null,
+        ]);
+    }
+
+    public function actionSelectModule()
+    {
+        $out = [];
+        if (isset($_POST['depdrop_parents'])) {
+            $parents = $_POST['depdrop_parents'];
+            if ($parents) {
+                $programId = $parents[0];
+                $rows = ProgrammeModule::find()
+                    ->andWhere(['program_id' => $programId, 'open' => 1])
+                    ->all();
+
+                foreach ($rows as $value) {
+                    $out[] = ['id' => $value['id'], 'name' => $value['year']];
+                }
+
+                echo Json::encode(['output' => $out, 'selected' => '']);
+
+                return;
+            }
+        }
+        echo Json::encode(['output' => '', 'selected' => '']);
+    }
+
+    public function actionSelectGroup()
+    {
+        $out = [];
+        if (isset($_POST['depdrop_parents'])) {
+            list($programId, $moduleId) = $_POST['depdrop_parents'];
+            if ($programId && $moduleId) {
+
+                $rows = (new \yii\db\Query())
+                    ->select(['id', 'name'])
+                    ->from('groups')
+                    ->where(['program_id' => $programId])
+                    ->andWhere(['year_id' => $moduleId])
+                    ->all();
+
+                $maxchild = (new \yii\db\Query())
+                    ->select(['maxchild'])
+                    ->from('years')
+                    ->where(['id' => $moduleId])
+                    ->one();
+
+                foreach ($rows as $value) {
+
+                    $contract = (new \yii\db\Query())
+                        ->select(['id'])
+                        ->from('contracts')
+                        ->where(['status' => [0, 1, 3]])
+                        ->andWhere(['group_id' => $value['id']])
+                        ->count();
+
+                    $sum = $maxchild['maxchild'] - $contract;
+
+                    if ($sum > 0) {
+                        $out[] = ['id' => $value['id'], 'name' => $value['name']];
+                    }
+                }
+
+                echo Json::encode(['output' => $out, 'selected' => '']);
+
+                return;
+            }
+        }
+        echo Json::encode(['output' => '', 'selected' => '']);
     }
 
     /**
@@ -1455,100 +1549,7 @@ EOD;
         ]);
     }
 
-    public function actionYear()
-    {
-        $out = [];
-        if (isset($_POST['depdrop_parents'])) {
-            $parents = $_POST['depdrop_parents'];
-            if ($parents != null) {
-                $prog_id = $parents[0];
 
-                //$out = ProgrammeModule::find()->where(['program_id' => $prog_id])->asArray()->all();
-
-                $rows = (new \yii\db\Query())
-                    ->select(['id', 'year'])
-                    ->from('years')
-                    ->where(['program_id' => $prog_id])
-                    ->andWhere(['open' => 1])
-                    ->all();
-
-                $out = [];
-                foreach ($rows as $value) {
-
-                    /*$contract = (new \yii\db\Query())
-                        ->select(['id'])
-                        ->from('contracts')
-                        ->where(['status' => [0,1,3]])
-                        ->andWhere(['year_id' => $value['id']])
-                        ->count();
-                    $sum = $value['maxchild'] - $contract; */
-
-                    //if ($sum > 0) {
-                    array_push($out, ['id' => $value['id'], 'name' => $value['year']]);
-                    // }
-                }
-
-
-                //$out = ArrayHelper::map(ProgrammeModule::find()->where(['program_id' => $prog_id])->all(), 'id', 'year');
-                //$out = self::getSubCatList($cat_id); 
-                // the getSubCatList function will query the database based on the
-                // cat_id and return an array like below:
-                //$out = [['id'=>'<sub-cat-id-1>', 'name'=>'<sub-cat-name1>'],['id'=>'<sub-cat_id_2>', 'name'=>'<sub-cat-name2>']];
-                echo Json::encode(['output' => $out, 'selected' => '']);
-
-                return;
-            }
-        }
-        echo Json::encode(['output' => '', 'selected' => '']);
-    }
-
-    public function actionYeargroup()
-    {
-        $out = [];
-        if (isset($_POST['depdrop_parents'])) {
-            $ids = $_POST['depdrop_parents'];
-            $prog_id = empty($ids[0]) ? null : $ids[0];
-            $year_id = empty($ids[1]) ? null : $ids[1];
-            if ($prog_id != null) {
-                //$data = self::getProdList($prog_id, $year_id);
-
-                $rows = (new \yii\db\Query())
-                    ->select(['id', 'name'])
-                    ->from('groups')
-                    ->where(['program_id' => $prog_id])
-                    ->andWhere(['year_id' => $year_id])
-                    ->all();
-
-                $maxchild = (new \yii\db\Query())
-                    ->select(['maxchild'])
-                    ->from('years')
-                    ->where(['id' => $year_id])
-                    ->one();
-
-                $out = [];
-                foreach ($rows as $value) {
-
-                    $contract = (new \yii\db\Query())
-                        ->select(['id'])
-                        ->from('contracts')
-                        ->where(['status' => [0, 1, 3]])
-                        ->andWhere(['group_id' => $value['id']])
-                        ->count();
-
-                    $sum = $maxchild['maxchild'] - $contract;
-
-                    if ($sum > 0) {
-                        array_push($out, ['id' => $value['id'], 'name' => $value['name']]);
-                    }
-                }
-
-                echo Json::encode(['output' => $out, 'selected' => '']);
-
-                return;
-            }
-        }
-        echo Json::encode(['output' => '', 'selected' => '']);
-    }
 
     public function actionUpdatescert()
     {

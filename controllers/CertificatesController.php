@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\models\forms\CertificateVerificationForm;
+use app\traits\AjaxValidationTrait;
 use Yii;
 use yii\helpers\Url;
 use yii\web\Controller;
@@ -21,6 +23,8 @@ use kartik\mpdf\Pdf;
  */
 class CertificatesController extends Controller
 {
+    use AjaxValidationTrait;
+
     /**
      * @inheritdoc
      */
@@ -257,62 +261,6 @@ class CertificatesController extends Controller
 
         return $this->render('password', [
             'user' => $user,
-        ]);
-
-    }
-
-    public function actionVerificate()
-    {
-        $model = new Certificates();
-
-        if ($model->load(Yii::$app->request->post())) {
-
-            $rows = (new \yii\db\Query())
-                ->select(['id', 'actual', 'payer_id'])
-                ->from('certificates')
-                ->where(['number' => $model->number])
-                ->andWhere(['name' => $model->name])
-                ->andWhere(['soname' => $model->soname])
-                ->andWhere(['phname' => $model->phname])
-                ->one();
-
-            if ($rows['id']) {
-                $organizations = new Organization();
-                $organization = $organizations->getOrganization();
-
-                $cooperate = (new \yii\db\Query())
-                    ->select(['id'])
-                    ->from('cooperate')
-                    ->where(['organization_id' => $organization['id']])
-                    ->andWhere(['payer_id' => $rows['payer_id']])
-                    ->andWhere(['status' => 1])
-                    ->one();
-
-                if (isset($cooperate['id']) and !empty($cooperate['id'])) {
-                    if ($rows['actual'] == 1) {
-                        return $this->redirect(['/contracts/create', 'id' => $rows['id']]);
-                    } else {
-                        return $this->render('verificate', [
-                            'model' => $model,
-                            'display' => 'Сертификат заморожен.',
-                        ]);
-                    }
-                } else {
-                    return $this->render('verificate', [
-                        'model' => $model,
-                        'display' => 'Нет соглашения с плательщиком этого сертификата.',
-                    ]);
-                }
-            } else {
-                return $this->render('verificate', [
-                    'model' => $model,
-                    'display' => 'Такого сертификата нет.',
-                ]);
-            }
-        }
-
-        return $this->render('verificate', [
-            'model' => $model,
         ]);
     }
 

@@ -32,8 +32,6 @@ use yii\helpers\ArrayHelper;
  * @property integer $year
  * @property string $kvfirst
  * @property string $kvdop
- * @property integer $maxchild
- * @property integer $minchild
  * @property integer $both_teachers
  * @property string $fullness
  * @property string $photo_base_url
