@@ -20,6 +20,7 @@ use app\models\ContractsDecInvoiceSearch;
 use yii\base\Response;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use app\models\Informs;
@@ -465,6 +466,28 @@ class ContractsController extends Controller
         return $pdf->render();
     }
 
+    public function actionApplicationClosePdf($id)
+    {
+        $model = $this->findModel($id);
+
+        $content = $this->renderPartial('application-close-pdf', [
+            'model' => $model,
+        ]);
+
+        $pdf = new Pdf([
+            'mode' => Pdf::MODE_UTF8,
+            'destination' => Pdf::DEST_BROWSER,
+            'content' => $content,
+            'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
+            'options' => ['title' => 'Уведомление о расторжении договора'],
+            'methods' => [
+                'SetHeader' => ['Уведомление о расторжении договора'],
+            ]
+        ]);
+
+        return $pdf->render();
+    }
+
     public function actionGenerate($id)
     {
         $model = $this->findModel($id);
@@ -540,6 +563,10 @@ class ContractsController extends Controller
         $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
 
         if ($informs->load(Yii::$app->request->post())) {
+            if ($model->wait_termnate > 0) {
+                throw new ForbiddenHttpException('Действие запрещено.');
+            }
+
             if (isset($roles['certificate'])) {
                 $model->terminator_user = 1;
             }

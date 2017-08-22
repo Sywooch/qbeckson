@@ -409,6 +409,9 @@ $this->params['breadcrumbs'][] = $this->title;
 Вы действительно хотите расторгнуть данный договор с 1.' . $month . '.' . $year . '?']]);
         echo '</div>';
     }
-    ?>
 
+    if ($model->status == Contracts::STATUS_CLOSED || $model->wait_termnate > 0) {
+        echo '<br /><br /><div class="alert alert-warning">Для юридического закрепления расторжения договора заполните <a href="' . Url::to(['application-close-pdf', 'id' => $model->id]) . '">бланк уведомления о расторжении договора</a> и передайте заявление ' . (Yii::$app->user->can('certificates') ? 'Поставщику' : 'Заказчику') . ' услуг</div>';
+    }
+    ?>
 </div>
