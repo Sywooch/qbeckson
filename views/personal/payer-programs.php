@@ -59,7 +59,7 @@ $organization = [
         return Html::a(
             $model->organization->name,
             Url::to(['organization/view', 'id' => $model->organization_id]),
-            ['target' => '_blank', 'data-pjax' => '0']
+            ['target' => '_blank', 'data-pjax' => false]
         );
     },
 ];
@@ -67,7 +67,9 @@ $municipality = [
     'attribute' => 'mun',
     'label' => 'Муниципалитет',
     'type' => SearchFilter::TYPE_DROPDOWN,
-    'data' => ArrayHelper::map(Mun::find()->all(), 'id', 'name'),
+    'data' => ArrayHelper::map(Mun::find()->andWhere([
+        'operator_id' => Yii::$app->operator->identity->id
+    ])->all(), 'id', 'name'),
     'value' => 'municipality.name',
 ];
 $name = [

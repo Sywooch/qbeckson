@@ -10,15 +10,12 @@ use app\models\search\ContractsSearch;
 use app\models\search\CooperateSearch;
 use app\models\search\InvoicesSearch;
 use app\models\OrganizationPayerAssignment;
-use app\models\User;
 use app\models\UserIdentity;
 use Yii;
 use app\models\Programs;
 use app\models\search\ProgramsSearch;
-use app\models\ProgramsfromcertSearch;
 use app\models\Organization;
 use app\models\search\OrganizationSearch;
-use app\models\Informs;
 use app\models\Contracts;
 use app\models\ContractsoSearch;
 use app\models\ContractsnSearch;
@@ -33,14 +30,12 @@ use app\models\Certificates;
 use app\models\search\CertificatesSearch;
 use app\models\GroupsSearch;
 use app\models\FavoritesSearch;
-use yii\data\ActiveDataProvider;
 use app\models\ProgrammeModuleSearch;
 use app\models\PreviusSearch;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\BadRequestHttpException;
-use yii\helpers\Url;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -103,7 +98,7 @@ class PersonalController extends Controller
             /** @var UserIdentity $user */
             $user = Yii::$app->user->getIdentity();
             $user->mun_id = $munId;
-            if (!$user->save()) {
+            if (false === $user->save()) {
                 Yii::$app->session->setFlash('danger', 'Что-то не так!');
             }
 
@@ -505,11 +500,11 @@ class PersonalController extends Controller
 
         $searchPrograms = new ProgramsSearch([
             'verification' => [2],
-            'organization_id' => ArrayHelper::getColumn($user->payer->cooperates, 'organization_id'),
+            'payerId' => $user->payer->id,
             'hours' => '0,2000',
             'limit' => '0,10000',
             'rating' => '0,100',
-            'modelName' => 'SearchPrograms',
+            'modelName' => '',
         ]);
         $programsProvider = $searchPrograms->search(Yii::$app->request->queryParams);
 
@@ -528,7 +523,7 @@ class PersonalController extends Controller
         $user = Yii::$app->user->getIdentity();
 
         $searchPrograms = new ProgramsSearch([
-            'organization_id' => ArrayHelper::getColumn($user->payer->organizations, 'id'),
+            'payerId' => $user->payer->id,
             'hours' => '0,2000',
             'limit' => '0,10000',
             'rating' => '0,100',
@@ -602,10 +597,8 @@ class PersonalController extends Controller
         $organization = Yii::$app->user->identity->organization;
         $organizationSettingsForm = new OrganizationSettingsForm();
 
-        $model = (null !== $organization->contractSettings) ?
-            $organization->contractSettings : new OrganizationContractSettings([
-                'organization_id' => $organization->id
-            ]);
+        $model = $organization->contractSettings ??
+            new OrganizationContractSettings(['organization_id' => $organization->id]);
         $organizationSettingsForm->setModel($model);
 
         if ($organization->load(Yii::$app->request->post()) &&  $organization->save()) {
@@ -910,22 +903,6 @@ class PersonalController extends Controller
         ]);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public function actionCertificateStatistic()
     {
         $certificate = Yii::$app->user->identity->certificate;
@@ -1041,11 +1018,6 @@ class PersonalController extends Controller
         ]);
     }
 
-    public function actionCertificatePrograms()
-    {
-        return $this->redirect(['programs/search']);
-    }
-
     public function actionCertificatePrevius()
     {
         $certificates = new Certificates();
@@ -1115,14 +1087,39 @@ class PersonalController extends Controller
         ]);
     }
 
+    /**
+     * @return string
+     */
+    public function actionCertificatePrograms(): string
+    {
+        $searchModel = new ProgramsSearch([
+            'verification' => 2,
+            'hours' => '0,2000',
+            'rating' => '0,100',
+            'modelName' => '',
+        ]);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('certificate-search', [
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+        ]);
+    }
+
     public function actionCertificateOrganizations()
     {
-        $searchOrganization = new OrganizationSearch();
-        $OrganizationProvider = $searchOrganization->search(Yii::$app->request->queryParams);
+        $searchOrganization = new OrganizationSearch([
+            'programs' => '0,1000',
+            'children' => '0,10000',
+            'raiting' => '0,100',
+            'max_child' => '0,10000',
+            'modelName' => ''
+        ]);
+        $organizationProvider = $searchOrganization->search(Yii::$app->request->queryParams);
 
         return $this->render('certificate-organizations', [
             'searchOrganization' => $searchOrganization,
-            'OrganizationProvider' => $OrganizationProvider,
+            'organizationProvider' => $organizationProvider,
         ]);
     }
 }

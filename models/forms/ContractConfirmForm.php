@@ -23,11 +23,13 @@ class ContractConfirmForm extends Model
     /**
      * ContractConfirmForm constructor.
      * @param Contracts $contract
+     * @param null $certificateId
      * @param array $config
      */
-    public function __construct(Contracts $contract, $config = [])
+    public function __construct(Contracts $contract, $certificateId = null, $config = [])
     {
         $this->setContract($contract);
+        $this->setCertificate($certificateId);
         parent::__construct($config);
     }
 
@@ -59,8 +61,10 @@ class ContractConfirmForm extends Model
     {
         return [
             'firstConfirmation' => 'Действительно хочу подать заявку',
-            'secondConfirmation' => 'Я осознаю и соглашаюсь, что в соответствии с условиями договора предусмотрено частичное финансирование услуги по дополнительному образованию за счет моих средств',
-            'thirdConfirmation' => 'Я ознакомился с условиями обучения, в том числе со сроками обучения, условиями оплаты за счет средств сертификата и хочу подать заявку',
+            'secondConfirmation' => 'Я осознаю и соглашаюсь, что в соответствии с условиями договора предусмотрено 
+                частичное финансирование услуги по дополнительному образованию за счет моих средств',
+            'thirdConfirmation' => 'Я ознакомился с условиями обучения, в том числе со сроками обучения, условиями 
+                оплаты за счет средств сертификата и хочу подать заявку',
         ];
     }
 
@@ -70,14 +74,15 @@ class ContractConfirmForm extends Model
     public function validateConfirmation($attribute)
     {
         $balance = $this->getCertificate()->balance_f;
-        if ($this->getContract()->period === ContractRequestForm::CURRENT_REALIZATION_PERIOD) {
+        if ($this->getContract()->period === Contracts::CURRENT_REALIZATION_PERIOD) {
             $balance = $this->getCertificate()->balance;
         }
 
         if ($this->getContract()->balance !== $balance) {
             $this->addError(
                 $attribute,
-                'К сожалению заявка не может быть направлена в организацию, поскольку после последнего расчета значение Вашего номинала было изменено. Пересчитайте параметры заявки.'
+                'К сожалению заявка не может быть направлена в организацию, поскольку после последнего расчета 
+                значение Вашего номинала было изменено. Пересчитайте параметры заявки.'
             );
         }
     }
@@ -90,23 +95,32 @@ class ContractConfirmForm extends Model
         if (null !== ($contract = $this->getContract()) && null !== ($certificate = $this->getCertificate())) {
             //TODO Обернуть в транзакцию!!!
             $organization = $contract->organization;
-            $organization->contracts_count++;
-            $organization->save(false);
+            $organization->updateCounters(['contracts_count' => 1]);
 
             $contract->number = $organization->contracts_count . ' - ПФ';
             $contract->date = date('Y-m-d');
             $contract->status = 0;
             $contract->rezerv = $contract->funds_cert;
-            $contract->save(false);
+            $contract->save(false, [
+                'number',
+                'date',
+                'status',
+                'rezerv',
+            ]);
 
-            if ($contract->period === ContractRequestForm::CURRENT_REALIZATION_PERIOD) {
-                $certificate->balance -= $contract->funds_cert;
-                $certificate->rezerv += $contract->funds_cert;
+            if ($contract->period === Contracts::CURRENT_REALIZATION_PERIOD) {
+                $certificate->updateCounters([
+                    'balance' => $contract->funds_cert * -1,
+                    'rezerv' => $contract->funds_cert,
+                ]);
+            } elseif ($contract->period === Contracts::FUTURE_REALIZATION_PERIOD) {
+                $certificate->updateCounters([
+                    'balance_f' => $contract->funds_cert * -1,
+                    'rezerv_f' => $contract->funds_cert,
+                ]);
             } else {
-                $certificate->balance_f -= $contract->funds_cert;
-                $certificate->rezerv_f += $contract->funds_cert;
+                throw new \DomainException('Period not found');
             }
-            $certificate->save(false);
 
             return true;
         }
@@ -123,14 +137,19 @@ class ContractConfirmForm extends Model
     }
 
     /**
+     * @param integer|null $certificateId
+     */
+    public function setCertificate($certificateId)
+    {
+        $this->certificate = (null === $certificateId) ?
+            Yii::$app->user->getIdentity()->certificate : Certificates::findOne($certificateId);
+    }
+
+    /**
      * @return Certificates
      */
     public function getCertificate(): Certificates
     {
-        if (null === $this->certificate) {
-            $this->certificate = Yii::$app->user->identity->certificate;
-        }
-
         return $this->certificate;
     }
 

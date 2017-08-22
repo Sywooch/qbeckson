@@ -45,7 +45,7 @@ $user = Yii::$app->user->getIdentity();
                                 'items' => [
                                     [
                                         'label' => 'Выйти(' .  $user->username . ')',
-                                        'url' => ['/site/logout'],
+                                        'url' => ['site/logout'],
                                         'linkOptions' => [
                                             'data-method' => 'post',
                                             'class' => 'btn btn-link'
@@ -220,7 +220,7 @@ $user = Yii::$app->user->getIdentity();
                                 echo Nav::widget([
                                     'options' => ['class' => 'navbar-nav'],
                                     'items' => [
-                                        ['label' => 'Программы', 'url' => ['/programs/search']],
+                                        ['label' => 'Программы', 'url' => ['/personal/certificate-programs']],
                                         ['label' => 'Организации', 'url' => ['/personal/certificate-organizations']],
                                     ],
                                 ]);

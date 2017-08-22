@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\db\ActiveRecord;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -91,24 +92,29 @@ use yii\helpers\Url;
  * @property Payers $payer
  * @property Programs $program
  * @property ProgrammeModule $module
+ * @property Groups $group
  */
-class Contracts extends \yii\db\ActiveRecord
+class Contracts extends ActiveRecord
 {
+    const CURRENT_REALIZATION_PERIOD = 1;
+    const FUTURE_REALIZATION_PERIOD = 2;
+    const PAST_REALIZATION_PERIOD = 3;
+
     const STATUS_CREATED = 0;
-
     const STATUS_ACTIVE = 1;
-
     const STATUS_REFUSED = 2;
-
     const STATUS_ACCEPTED = 3;
-
     const STATUS_CLOSED = 4;
+
+    const SCENARIO_CREATE_DATE = 10;
 
     public $certnumber;
 
     public $certfio;
 
     public $month_start_edu_contract;
+
+    public $applicationIsReceived = 0;
     
     /**
      * @inheritdoc
@@ -126,8 +132,12 @@ class Contracts extends \yii\db\ActiveRecord
         return [
             [['certificate_id', 'program_id', 'organization_id', 'status', 'status_year', 'funds_gone', 'group_id', 'year_id', 'sposob', 'prodolj_d', 'prodolj_m', 'prodolj_m_user', 'ocenka', 'wait_termnate', 'terminator_user', 'payment_order', 'period'], 'integer'],
             [['all_funds', 'funds_cert', 'all_parents_funds', 'first_m_price', 'other_m_price', 'first_m_nprice', 'other_m_nprice', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch', 'cert_dol', 'payer_dol', 'rezerv', 'paid', 'fontsize', 'balance', 'payer_first_month_payment', 'payer_other_month_payment', 'parents_other_month_payment', 'parents_first_month_payment'], 'number'],
-            [['date', 'status_termination', 'start_edu_programm', 'stop_edu_contract', 'start_edu_contract', 'date_termnate'], 'safe'],
+            [['date', 'status_termination', 'start_edu_programm', 'stop_edu_contract', 'start_edu_contract', 'date_termnate', 'applicationIsReceived'], 'safe'],
+            ['date_initiate_termination', 'date', 'format' => 'php:Y-m-d'],
+            ['date', 'validateDate'],
+            ['date', 'required', 'on' => self::SCENARIO_CREATE_DATE],
             [['status_comment', 'number', 'certnumber', 'certfio', 'change1', 'change2', 'change_org_fio', 'org_position', 'org_position_min', 'change_doctype', 'change_fioparent', 'change6', 'change_fiochild', 'change8', 'change9', 'change10', 'month_start_edu_contract', 'url'], 'string'],
+            ['applicationIsReceived', 'required', 'requiredValue' => 1, 'message' => false, 'on' => self::SCENARIO_CREATE_DATE],
             [['certificate_id', 'program_id', 'organization_id'], 'required'],
             [['link_doc', 'link_ofer'], 'string', 'max' => 255],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
@@ -137,6 +147,14 @@ class Contracts extends \yii\db\ActiveRecord
             [['group_id'], 'exist', 'skipOnError' => true, 'targetClass' => Groups::className(), 'targetAttribute' => ['group_id' => 'id']],
             [['year_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProgrammeModule::className(), 'targetAttribute' => ['year_id' => 'id']],
         ];
+    }
+
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_CREATE_DATE] = $scenarios[self::SCENARIO_DEFAULT];
+
+        return $scenarios;
     }
 
     /**
@@ -204,8 +222,18 @@ class Contracts extends \yii\db\ActiveRecord
             'terminator_user' => 'Инициатор расторжения',
             'fontsize' => 'Размер шрифта',
             'certificatenumber' => 'Номер сертификата',
-            'payment_order' => 'Порядок оплаты'
+            'payment_order' => 'Порядок оплаты',
+            'applicationIsReceived' => 'заявление от Заказчика получено',
         ];
+    }
+
+    public function validateDate($attribute, $params)
+    {
+        //print_r(strtotime($this->$attribute)); echo ' -- ';
+        //print_r(strtotime($this->start_edu_contract));exit;
+        if (strtotime($this->$attribute) > strtotime($this->start_edu_contract)) {
+            $this->addError($attribute, 'Дата договора не может превышать дату начала действия договора.');
+        }
     }
 
     public function getPayer()
@@ -416,6 +444,20 @@ class Contracts extends \yii\db\ActiveRecord
         if ($id == 4) { return 'Прекратил действие'; }
     }
 
+    public function getCanBeTerminated()
+    {
+        if ($this->wait_termnate < 1 && (Yii::$app->user->can('organizations') || Yii::$app->user->can('certificate')) && $this->status == self::STATUS_ACTIVE && $this->date <= date('Y-m-d')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function getFullUrl()
+    {
+        return Url::to('/', true) . 'uploads/contracts/' . $this->url;
+    }
+
     public function getStatusName()
     {
         $statusName = '';
@@ -439,8 +481,23 @@ class Contracts extends \yii\db\ActiveRecord
         return $statusName;
     }
 
+    public function getTerminatorUserRole()
+    {
+        $role = null;
+        switch ($this->terminator_user) {
+            case 1:
+                $role = 'certificate';
+                break;
+            case 2:
+                $role = 'organizations';
+                break;
+        }
+
+        return $role;
+    }
+
     /**
-     * DEPRECATED
+     * @deprecated
      * Use app\helpers\FormattingHelper::asSpelloutOrdinal() instead
      */
     public function yearName($data) {

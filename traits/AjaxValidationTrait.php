@@ -15,7 +15,6 @@ trait AjaxValidationTrait
 {
     /**
      * Performs ajax validation.
-     *
      * @param Model $model
      */
     protected function performAjaxValidation(Model $model)

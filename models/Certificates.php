@@ -33,6 +33,7 @@ use Yii;
  *
  * @property User $user
  * @property Payers $payers
+ * @property Payers $payer
  * @property Contracts[] $contracts0
  */
 class Certificates extends \yii\db\ActiveRecord
@@ -86,7 +87,6 @@ class Certificates extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'soname', 'possible_cert_group',], 'required'],
-            [['fio_parent'], 'required'],
             [['user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'cert_group', 'pasport_s', 'pasport_n', 'pasport_v', 'phone', 'possible_cert_group', 'updated_cert_group'], 'integer'],
             [['nominal', 'nominal_f'], 'number', 'max' => 100000],
             [['number'], 'string', 'length' => [10, 10]],
@@ -159,7 +159,7 @@ class Certificates extends \yii\db\ActiveRecord
         }
     }
 
-    public function beforeSave($insert)
+    public function setNominals()
     {
         if (!empty($this->selectCertGroup) && $this->selectCertGroup == self::TYPE_PF) {
             $this->cert_group = $this->possible_cert_group;
@@ -174,8 +174,22 @@ class Certificates extends \yii\db\ActiveRecord
             $this->balance = 0;
             $this->balance_f = 0;
         }
+    }
 
-        return parent::beforeSave($insert);
+    public function changeBalance($contract)
+    {
+        if ($contract->period === Contracts::CURRENT_REALIZATION_PERIOD) {
+            $this->balance += $contract->rezerv;
+            $this->rezerv -= $contract->rezerv;
+        } elseif ($contract->period === Contracts::FUTURE_REALIZATION_PERIOD) {
+            $this->balance_f += $contract->rezerv;
+            $this->rezerv_f -= $contract->rezerv;
+        } elseif ($contract->period === Contracts::PAST_REALIZATION_PERIOD) {
+            $this->balance_p += $contract->rezerv;
+            $this->rezerv_p -= $contract->rezerv;
+        }
+
+        return $this->save();
     }
 
     public function getCertGroupTypes()

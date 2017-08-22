@@ -103,7 +103,7 @@ $operatorSettings = Yii::$app->operator->identity->settings;
             <p class="lead text-justify">
                 Вы действительно готовы направить оферту на заключение договора? Заявка будет переведена в раздел "подтвержденные",
                 будет сформирован договор-оферта, который будет храниться по адресу:
-                <?= Url::to('/', true) . 'uploads/contracts/' . $model->url ?>
+                <?= $model->fullUrl ?>
             </p>
             <?= Html::a('Подтвердить', ['contracts/ok', 'id' => $model->id], ['class' => 'btn btn-success btn-block']) ?>
         <?php Modal::end() ?>

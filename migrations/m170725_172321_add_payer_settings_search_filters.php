@@ -12,8 +12,8 @@ class m170725_172321_add_payer_settings_search_filters extends Migration
     {
         $this->insert('settings_search_filters', [
             'table_name' => 'programs',
-            'table_columns' => 'form,name,year,hours,directivity,zab,ageGroupMin,ageGroupMax,rating,limit',
-            'inaccessible_columns' => 'name,municipality,organization,organization_id',
+            'table_columns' => 'form,name,year,hours,directivity,zab,age_group_min,age_group_max,rating,limit',
+            'inaccessible_columns' => 'name,mun,organization,organization_id',
             'is_active' => 1,
             'role' => UserIdentity::ROLE_PAYER,
         ]);

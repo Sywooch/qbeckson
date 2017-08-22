@@ -88,8 +88,10 @@ $children = [
     'attribute' => 'children',
     'value' => function ($model) {
         /** @var \app\models\Organization $model */
-        $childrenCount = count(array_unique($model->getChildren()->andWhere(['contracts.status' => 1])->asArray()->all()));
-        return (int)$childrenCount > 0 ? $childrenCount : '-';
+        $childrenCount = count(array_unique(
+            $model->getChildren()->andWhere(['contracts.status' => 1])->asArray()->all()
+        ));
+        return $childrenCount > 0 ? $childrenCount : '-';
     },
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
     'pluginOptions' => [

@@ -115,9 +115,9 @@ class CompletenessController extends Controller
                 $month = $start_edu_contract[1];
                         
                         if ($month == date('m')-1) {
-                            $price = $contract->first_m_price * $contract->payer_dol;
+                            $price = $contract->payer_first_month_payment;
                         } else {
-                            $price = $contract->other_m_price * $contract->payer_dol;
+                            $price = $contract->payer_other_month_payment;
                         }
                 
                 
@@ -183,9 +183,9 @@ class CompletenessController extends Controller
                 $month = $start_edu_contract[1];
                         
                         if ($month == date('m')) {
-                            $price = $contract->first_m_price * $contract->payer_dol;
+                            $price = $contract->payer_first_month_payment;
                         } else {
-                            $price = $contract->other_m_price * $contract->payer_dol;
+                            $price = $contract->payer_other_month_payment;
                         }
                 
                 

@@ -16,9 +16,6 @@ use yii\base\Model;
  */
 class ContractRequestForm extends Model
 {
-    const CURRENT_REALIZATION_PERIOD = 1;
-    const FUTURE_REALIZATION_PERIOD = 2;
-
     public $dateFrom;
     public $dateTo;
 
@@ -31,16 +28,18 @@ class ContractRequestForm extends Model
     /**
      * ContractRequestForm constructor.
      * @param integer $groupId
+     * @param null $certificateId
      * @param Contracts|null $contract
      * @param array $config
      */
-    public function __construct($groupId, $contract = null, $config = [])
+    public function __construct($groupId, $certificateId = null, $contract = null, $config = [])
     {
         $this->setGroup($groupId);
         $this->setContract($contract);
+        $this->setCertificate($certificateId);
         if (null === $this->dateFrom) {
-            if (time() < strtotime($this->getSettings()->current_program_date_from)) {
-                $this->dateFrom = $this->getSettings()->current_program_date_from;
+            if (time() < strtotime($this->getGroup()->datestart)) {
+                $this->dateFrom = Yii::$app->formatter->asDate($this->getGroup()->datestart);
             } else {
                 $this->dateFrom = date('d.m.Y', strtotime('first day of next month'));
             }
@@ -49,6 +48,8 @@ class ContractRequestForm extends Model
     }
 
     /**
+     * TODO Сделать вализацию группы при подаче договора, а не только на фронэнде.
+     *
      * Когда попали в окно расчетов по договору:
      *
      * Дата начала по договору не может быть выбрать ранее, чем дата начала обучения в группе.
@@ -98,7 +99,7 @@ class ContractRequestForm extends Model
         if (strtotime($this->dateFrom) >= strtotime($settings->current_program_date_from) &&
             strtotime($this->dateFrom) <= strtotime($settings->current_program_date_to)
         ) {
-            $this->setRealizationPeriod(self::CURRENT_REALIZATION_PERIOD);
+            $this->setRealizationPeriod(Contracts::CURRENT_REALIZATION_PERIOD);
             $this->dateTo = $settings->current_program_date_to;
             if (strtotime($group->datestop) < strtotime($settings->current_program_date_to)) {
                 $this->dateTo = $group->datestop;
@@ -108,7 +109,7 @@ class ContractRequestForm extends Model
         if (strtotime($this->dateFrom) >= strtotime($settings->future_program_date_from) &&
             strtotime($this->dateFrom) <= strtotime($settings->future_program_date_to)
         ) {
-            $this->setRealizationPeriod(self::FUTURE_REALIZATION_PERIOD);
+            $this->setRealizationPeriod(Contracts::FUTURE_REALIZATION_PERIOD);
             $this->dateTo = $settings->future_program_date_to;
             if (strtotime($group->datestop) < strtotime($settings->future_program_date_to)) {
                 $this->dateTo = $group->datestop;
@@ -157,12 +158,15 @@ class ContractRequestForm extends Model
      *
      * В результате мы имеем все параметры договора кроме увязки с остатками сертификата…
      * All_funds = цена первого месяца + цена прочего месяца*число прочих месяцев
-     * Вариант А: funds_cert = min (нормативная стоимость первого месяца + нормативная стоимость прочего месяца*число прочих месяцев; остаток сертификата текущего периода)
-     * Вариант Б: funds_cert = min (нормативная стоимость первого месяца + нормативная стоимость прочего месяца*число прочих месяцев; остаток сертификата будущего периода)
+     * Вариант А: funds_cert = min (нормативная стоимость первого месяца + нормативная стоимость прочего
+     * месяца*число прочих месяцев; остаток сертификата текущего периода)
+     * Вариант Б: funds_cert = min (нормативная стоимость первого месяца + нормативная стоимость прочего
+     * месяца*число прочих месяцев; остаток сертификата будущего периода)
      * all_parents_funds= All_funds - funds_cert
      * first_m_price – цена первого месяца
      * other_m_price – цена прочего месяца (0 – если всего один месяц)
-     * first_m_nprice – нормативная стоимость первого месяца (0 – если всего один месяц) other_m_nprice - нормативная стоимость прочего месяца
+     * first_m_nprice – нормативная стоимость первого месяца (0 – если всего один месяц) other_m_nprice -
+     * нормативная стоимость прочего месяца
      * Подтверждение заявки: вот тут вот будут расчеты влиять на остатки и резервы текущего и будущего периодов
      *
      * @return mixed
@@ -187,7 +191,7 @@ class ContractRequestForm extends Model
                 $realizationPeriodInDays / $groupRealizationPeriod * $group->module->normative_price
             );
             // Меньшее из трёх all_funds / $normativePrice / отсток по сертификату
-            if ($this->getRealizationPeriod() === self::CURRENT_REALIZATION_PERIOD) {
+            if ($this->getRealizationPeriod() === Contracts::CURRENT_REALIZATION_PERIOD) {
                 $balance = $this->getCertificate()->balance;
             } else {
                 $balance = $this->getCertificate()->balance_f;
@@ -220,7 +224,7 @@ class ContractRequestForm extends Model
                 $firstMonthNormativePrice = $normativePrice -
                     $otherMonthesNormativePricePerMonth * ($realizationPeriodInMonthes - 1);
 
-                if ($all_parents_funds) {
+                if ($all_parents_funds > 0) {
                     $parents_other_month_payment = CalculationHelper::roundTo(
                         ($realizationPeriodInDays - $daysInFirstMonth) /
                         $realizationPeriodInDays * $all_parents_funds / ($realizationPeriodInMonthes - 1),
@@ -229,7 +233,7 @@ class ContractRequestForm extends Model
                     $parents_first_month_payment = $all_parents_funds - $parents_other_month_payment *
                         ($realizationPeriodInMonthes - 1);
                 }
-                if ($funds_cert) {
+                if ($funds_cert > 0) {
                     $payer_other_month_payment = CalculationHelper::roundTo(
                         ($realizationPeriodInDays - $daysInFirstMonth) /
                         $realizationPeriodInDays * $funds_cert / ($realizationPeriodInMonthes - 1),
@@ -265,7 +269,7 @@ class ContractRequestForm extends Model
                 'parents_other_month_payment' => $parents_other_month_payment ?? 0,
                 'payer_first_month_payment' => $payer_first_month_payment ?? $funds_cert,
                 'payer_other_month_payment' => $payer_other_month_payment ?? 0,
-                'url' => $this->getCertificate()->number . '-' . Yii::$app->security->generateRandomString(4) . '.pfd',
+                'url' => $this->getCertificate()->number . '-' . Yii::$app->security->generateRandomString(4) . '.pdf',
                 'sposob' => 2,
                 'payment_order' => 1,
                 'balance' => $balance,
@@ -315,7 +319,7 @@ class ContractRequestForm extends Model
     {
         $this->group = Groups::findOne($groupId);
         if (null === $this->group) {
-            throw new \DomainException('Group not found');
+            throw new \DomainException('Group not found!');
         }
     }
 
@@ -336,14 +340,22 @@ class ContractRequestForm extends Model
     }
 
     /**
+     * @param integer|null $certificateId
+     */
+    public function setCertificate($certificateId)
+    {
+        $this->certificate = (null === $certificateId) ?
+            Yii::$app->user->getIdentity()->certificate : Certificates::findOne($certificateId);
+        if (null === $this->certificate) {
+            throw new \DomainException('Certificate not found!');
+        }
+    }
+
+    /**
      * @return Certificates
      */
     public function getCertificate(): Certificates
     {
-        if (null === $this->certificate) {
-            $this->certificate = Yii::$app->user->identity->certificate;
-        }
-
         return $this->certificate;
     }
 

@@ -258,7 +258,7 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
 
     if ($roles['organizations'] and $organization['actual'] != 0) {
         echo "<p>";
-        echo Html::a('Создать новый договор', ['certificates/verificate'], ['class' => 'btn btn-success']);
+        echo Html::a('Создать новый договор', ['contracts/create'], ['class' => 'btn btn-success']);
         echo "</p>";
     }
     ?>
