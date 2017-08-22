@@ -12,11 +12,8 @@ use app\models\Contracts;
 /* @var $this yii\web\View */
 /* @var $model app\models\Contracts */
 
-$contractdate = explode('-', $model->date);
-//if ($model->status == 1 || $model->status == 4 || $model->status == 2 ) { $this->title = 'Просмотр договора от '.$contractdate["2"].'.'.$contractdate[1].'.'.$contractdate[0].' № '.$model->number; }
-
 if ($model->status == Contracts::STATUS_ACTIVE || $model->status == Contracts::STATUS_CLOSED || $model->status == Contracts::STATUS_REFUSED) {
-    $this->title = 'Просмотр договора № ' . $model->number;
+    $this->title = 'Просмотр договора № ' . $model->number . ' от ' . Yii::$app->formatter->asDate($model->date);
 } elseif ($model->status == Contracts::STATUS_CREATED) {
     $this->title = 'Просмотр заявки';
 } elseif ($model->status == Contracts::STATUS_ACCEPTED) {
