@@ -444,6 +444,15 @@ class Contracts extends ActiveRecord
         if ($id == 4) { return 'Прекратил действие'; }
     }
 
+    public function getCanBeTerminated()
+    {
+        if ($this->wait_termnate < 1 && (Yii::$app->user->can('organizations') || Yii::$app->user->can('certificate')) && $this->status == self::STATUS_ACTIVE && $this->date <= date('Y-m-d')) {
+            return true;
+        }
+
+        return false;
+    }
+
     public function getFullUrl()
     {
         return Url::to('/', true) . 'uploads/contracts/' . $this->url;

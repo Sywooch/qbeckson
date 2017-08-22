@@ -339,7 +339,7 @@ $this->params['breadcrumbs'][] = $this->title;
     }
     ?>
     <?php
-    if ($model->wait_termnate != 1 && isset($roles['certificate']) && $model->status == 1) {
+    if ($model->canBeTerminated && isset($roles['certificate'])) {
         if ($certificate->actual == 1) {
             if (date("m") == 12) {
                 $month = 1;
@@ -389,7 +389,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ?> <!-- + 1 месяц !!! -->
 
     <?php
-    if ($model->wait_termnate != 1 && isset($roles['organizations']) && $model->status == 1) {
+    if ($model->canBeTerminated && isset($roles['organizations'])) {
 
         if (date("m") == 12) {
             $month = 1;
