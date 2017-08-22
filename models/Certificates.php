@@ -87,7 +87,6 @@ class Certificates extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'soname', 'possible_cert_group',], 'required'],
-            [['fio_parent'], 'required'],
             [['user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'cert_group', 'pasport_s', 'pasport_n', 'pasport_v', 'phone', 'possible_cert_group', 'updated_cert_group'], 'integer'],
             [['nominal', 'nominal_f'], 'number', 'max' => 100000],
             [['number'], 'string', 'length' => [10, 10]],

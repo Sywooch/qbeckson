@@ -156,6 +156,7 @@ $normativePrice = [
 ];
 $actions = [
     'class' => ActionColumn::class,
+    'controller' => 'programs',
     'template' => '{view}',
     'searchFilter' => false,
 ];

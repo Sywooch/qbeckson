@@ -146,7 +146,7 @@ $this->params['breadcrumbs'][] = $this->title;
     } ?>
 
     <?php
-    if ($model->wait_termnate == 1 && ($model->status == Contracts::STATUS_REFUSED || $model->status == Contracts::STATUS_CLOSED)) {
+    if ($model->wait_termnate == 1 && $model->status != Contracts::STATUS_CLOSED) {
          echo '<h3>Ожидается расторжение договора с первого числа следующего месяца</h3>';
 
         echo DetailView::widget([
