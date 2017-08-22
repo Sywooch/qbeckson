@@ -593,8 +593,16 @@ class OrganizationController extends Controller
                     $contract = Contracts::findOne($value);
 
                     $cert = Certificates::findOne($contract->certificate_id);
-                    $cert->balance = $cert->balance + $contract->rezerv;
-                    $cert->rezerv = $cert->rezerv - $contract->rezerv;
+                    if ($model->period === Contracts::CURRENT_REALIZATION_PERIOD) {
+                        $cert->balance += $contract->rezerv;
+                        $cert->rezerv -= $contract->rezerv;
+                    } elseif ($model->period === Contracts::FUTURE_REALIZATION_PERIOD) {
+                        $cert->balance_f += $contract->rezerv;
+                        $cert->rezerv_f -= $contract->rezerv;
+                    } elseif ($model->period === Contracts::PAST_REALIZATION_PERIOD) {
+                        $cert->balance_p += $contract->rezerv;
+                        $cert->rezerv_p -= $contract->rezerv;
+                    }
                     $cert->save();
 
                     $contract->rezerv = 0;

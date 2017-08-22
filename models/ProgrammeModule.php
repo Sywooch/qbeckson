@@ -16,6 +16,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $open
  * @property integer $price
  * @property integer $normative_price
+ * @property integer $maxchild
  *
  * @property Programs $program
  * @property Contracts[] $activeContracts

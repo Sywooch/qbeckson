@@ -1,16 +1,99 @@
 <?php
-use yii\helpers\Html;
+
+use app\helpers\GridviewHelper;
+use app\models\UserIdentity;
+use app\widgets\SearchFilter;
 use kartik\grid\GridView;
-use app\models\Informs;
-use yii\helpers\Url;
-use kartik\export\ExportMenu;
-//use kartik\grid\GridView;
 use app\models\Certificates;
+use yii\grid\ActionColumn;
 
 /* @var $this yii\web\View */
-/* @var $OrganizationProvider \yii\data\ActiveDataProvider */
+/* @var $organizationProvider \yii\data\ActiveDataProvider */
+/* @var $searchOrganization \app\models\search\OrganizationSearch */
 $this->title = 'Организации';
 $this->params['breadcrumbs'][] = 'Организации';
+
+$name = [
+    'attribute' => 'name',
+];
+$type = [
+    'attribute' => 'type',
+    'value' => function ($model) {
+        /** @var \app\models\Organization $model */
+        return $model::types()[$model->type];
+    },
+    'type' => SearchFilter::TYPE_DROPDOWN,
+    'data' => $searchOrganization::types(),
+];
+$programs = [
+    'attribute' => 'programs',
+    'value' => function ($model) {
+        /** @var \app\models\Organization $model */
+        $programsCount = $model->getPrograms()->andWhere(['programs.verification' => 2])->count();
+        return (int)$programsCount > 0 ? $programsCount : '-';
+    },
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    'pluginOptions' => [
+        'max' => 1000
+    ]
+];
+$children = [
+    'attribute' => 'children',
+    'value' => function ($model) {
+        /** @var \app\models\Organization $model */
+        $childrenCount = count(array_unique(
+            $model->getChildren()->andWhere(['contracts.status' => [1]])->asArray()->all()
+        ));
+        return $childrenCount > 0 ? $childrenCount : '-';
+    },
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    'pluginOptions' => [
+        'max' => 10000
+    ]
+];
+$max_child = [
+    'attribute' => 'max_child',
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    'pluginOptions' => [
+        'max' => 10000
+    ]
+];
+$raiting = [
+    'attribute' => 'raiting',
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    'pluginOptions' => [
+        'max' => 100
+    ]
+];
+$actual = [
+    'attribute' => 'actual',
+    'value' => function ($model) {
+        /** @var \app\models\Organization $model */
+        return $model->actual === 0 ? '-' : '+';
+    },
+    'type' => SearchFilter::TYPE_DROPDOWN,
+    'data' => [
+        1 => 'Да',
+        0 => 'Нет'
+    ]
+];
+$actions = [
+    'class' => ActionColumn::class,
+    'controller' => 'organization',
+    'template' => '{view}',
+    'searchFilter' => false,
+];
+
+$columns = [
+    $name,
+    $type,
+    $programs,
+    $children,
+    $max_child,
+    $raiting,
+    $actual,
+    $actions,
+];
 ?>
 <?php if (Yii::$app->user->can('certificate')) : ?>
     <div class="row">
@@ -22,16 +105,25 @@ $this->params['breadcrumbs'][] = 'Организации';
     </div>
     <br>
 <?php endif; ?>
-
+<?= SearchFilter::widget([
+    'model' => $searchOrganization,
+    'action' => ['personal/certificate-organizations'],
+    'data' => GridviewHelper::prepareColumns(
+        'organization',
+        $columns,
+        null,
+        'searchFilter',
+        null
+    ),
+    'role' => UserIdentity::ROLE_CERTIFICATE,
+]); ?>
 <?= GridView::widget([
-    'dataProvider' => $OrganizationProvider,
-    'filterModel' => $searchOrganization,
+    'dataProvider' => $organizationProvider,
     'pjax' => true,
-    'rowOptions' => function ($model, $index, $widget, $grid) {
+    'rowOptions' => function ($model) {
         if ($model) {
             $certificates = new Certificates();
             $certificate = $certificates->getCertificates();
-
             $rows = (new \yii\db\Query())
                 ->select(['id'])
                 ->from('cooperate')
@@ -39,96 +131,11 @@ $this->params['breadcrumbs'][] = 'Организации';
                 ->andWhere(['organization_id' => $model['id']])
                 ->andWhere(['status' => 1])
                 ->count();
-
-            if ($rows == 0) {
+            if ((int)$rows === 0) {
                 return ['class' => 'danger'];
             }
         }
     },
-    'summary' => false,
-    'columns' => [
-        'name',
-        ['attribute' => 'type',
-            'value' => function ($data) {
-                if ($data->type == 1) {
-                    return 'Образовательная организация';
-                }
-                if ($data->type == 2) {
-                    return 'Организация, осуществляющая обучение';
-                }
-                if ($data->type == 3) {
-                    return 'Индивидуальный предприниматель (с наймом)';
-                }
-                if ($data->type == 4) {
-                    return 'Индивидуальный предприниматель (без найма)';
-                }
-            }
-        ],
-        [
-            'label' => 'Число программ',
-            'value' => function ($data) {
-                $programs = (new \yii\db\Query())
-                    ->select(['id'])
-                    ->from('programs')
-                    ->where(['organization_id' => $data->id])
-                    ->andWhere(['verification' => 2])
-                    ->count();
-
-                return $programs;
-            }
-        ],
-        [
-            'label' => 'Число обучающихся',
-            'value' => function ($data) {
-                $cert = (new \yii\db\Query())
-                    ->select(['certificate_id'])
-                    ->from('contracts')
-                    ->where(['organization_id' => $data->id])
-                    ->andWhere(['status' => 1])
-                    ->all();
-                $cert = array_unique($cert);
-                $cert = count($cert);
-
-                return $cert;
-            }
-        ],
-        'max_child',
-        'raiting',
-        ['attribute' => 'actual',
-            'value' => function ($data) {
-                if ($data->actual == 0) {
-                    return '-';
-                } else {
-                    return '+';
-                }
-            }
-        ],
-        [
-            'label' => 'Соглашение',
-            'value' => function ($data) {
-                $certificates = new Certificates();
-                $certificate = $certificates->getCertificates();
-
-                $rows = (new \yii\db\Query())
-                    ->select(['id'])
-                    ->from('cooperate')
-                    ->where(['payer_id' => $certificate['payer_id']])
-                    ->andWhere(['organization_id' => $data['id']])
-                    ->andWhere(['status' => 1])
-                    ->count();
-
-                if ($rows == 0) {
-                    return 'Нет';
-                } else {
-                    return 'Да';
-                }
-            },
-        ],
-        [
-            'class' => 'yii\grid\ActionColumn',
-            'controller' => 'organization',
-            'template' => '{view}',
-        ],
-    ],
+    'columns' => GridviewHelper::prepareColumns('organization', $columns),
 ]); ?>
 

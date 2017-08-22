@@ -50,7 +50,8 @@ use yii\helpers\Url;
 
 <ul class="nav nav-tabs">
     <li class="active"><a data-toggle="tab" href="#panel1">Обучение в текущем году</a></li>
-    <li><a data-toggle="tab" href="#panel2">Ожидающие подтверждения <span class="badge"><?= $programnocertProvider->getTotalCount() ?></span></a></li>
+    <li><a data-toggle="tab" href="#panel2">Ожидающие подтверждения <span
+                    class="badge"><?= $programnocertProvider->getTotalCount() ?></span></a></li>
 </ul>
 <br>
 
@@ -59,7 +60,7 @@ use yii\helpers\Url;
         <?= Html::a('Поиск программы', ['programs/index'], ['class' => 'btn btn-success']) ?>
     </p>
     <div id="panel1" class="tab-pane fade in active">
-        
+
         <?= GridView::widget([
             'dataProvider' => $programcertProvider,
             'filterModel' => $programcertModel,
@@ -71,13 +72,13 @@ use yii\helpers\Url;
                 //'organization_id',
                 //'verification',
                 'organization.name',
-                 'name',
+                'name',
                 'year',
-                 //'open',
+                //'open',
                 // 'normative_price',
-                 //'price',
-                 //'rating',
-                 //'limit',
+                //'price',
+                //'rating',
+                //'limit',
                 // 'study',
                 // 'open',
                 // 'goal:ntext',
@@ -89,9 +90,10 @@ use yii\helpers\Url;
                 // 'link',
                 // 'certification_date',
 
-                ['class' => 'yii\grid\ActionColumn',
-                'controller' => 'programs',
-                'template' => '{view}',
+                [
+                    'class' => 'yii\grid\ActionColumn',
+                    'controller' => 'programs',
+                    'template' => '{view}',
                 ],
             ],
         ]); ?>
@@ -101,20 +103,20 @@ use yii\helpers\Url;
             'dataProvider' => $programnocertProvider,
             'filterModel' => $programnocertModel,
             'columns' => [
-               //['class' => 'yii\grid\SerialColumn'],
+                //['class' => 'yii\grid\SerialColumn'],
 
                 //'id',
                 //'program_id',
                 //'organization_id',
                 //'verification',
                 'organization.name',
-                 'name',
+                'name',
                 'year',
-                 //'open',
+                //'open',
                 // 'normative_price',
-                 //'price',
-                 //'rating',
-                 //'limit',
+                //'price',
+                //'rating',
+                //'limit',
                 // 'study',
                 // 'open',
                 // 'goal:ntext',
@@ -126,9 +128,10 @@ use yii\helpers\Url;
                 // 'link',
                 // 'certification_date',
 
-                ['class' => 'yii\grid\ActionColumn',
-                'controller' => 'programs',
-                'template' => '{view}',
+                [
+                    'class' => 'yii\grid\ActionColumn',
+                    'controller' => 'programs',
+                    'template' => '{view}',
                 ],
             ],
         ]); ?>

@@ -67,14 +67,6 @@ $columns = [
         ),
     ],
     [
-        'attribute' => 'actual',
-        'value' => function ($data) {
-            return $data->actual > 0 ? '+' : '-';
-        },
-        'type' => SearchFilter::TYPE_DROPDOWN,
-        'data' => [1 => 'Активен', 0 => 'Приостановлен'],
-    ],
-    [
         'class' => ActionColumn::class,
         'controller' => 'certificates',
         'template' => '{view}',

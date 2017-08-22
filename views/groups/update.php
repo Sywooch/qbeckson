@@ -75,14 +75,7 @@ $this->registerJs($js, $this::POS_READY);
         </div>
     <?php endforeach; ?>
     <?php
-    $contracts = (new \yii\db\Query())
-        ->select(['id'])
-        ->from('contracts')
-        ->where(['group_id' => $model->id])
-        ->andWhere(['status' => [0,1,3]])
-        ->count();
-    
-    if ($contracts === 0) {
+    if (count($model->getContracts()->andWhere(['contracts.status' => [0, 1, 3]])->all()) === 0) {
         echo $form->field($model, 'datestart')->widget(DateControl::class, [
             'type' => DateControl::FORMAT_DATE,
             'ajaxConversion' => false,
