@@ -325,7 +325,7 @@ $config = [
                 [
                     'allow' => true,
                     'roles' => ['certificate'],
-                    'actions' => ['request', 'reject-request', 'application-close-pdf']
+                    'actions' => ['request', 'reject-request', 'application-close-pdf', 'application-pdf']
                 ],
                 [
                     'allow' => true,
