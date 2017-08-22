@@ -182,7 +182,7 @@ class ContractsController extends Controller
                 if ($confirmForm->save()) {
                     Yii::$app->session->setFlash('success', 'Вы успешно подали заявку на обучение.');
 
-                    return $this->redirect(['view', 'id' => $contract->id]);
+                    return $this->redirect(['verificate', 'id' => $contract->id]);
                 } else {
                     Yii::$app->session->setFlash('danger', 'Что-то не так.');
 

@@ -446,7 +446,7 @@ class Contracts extends ActiveRecord
 
     public function getCanBeTerminated()
     {
-        if ($this->wait_termnate < 1 && (Yii::$app->user->can('organizations') || Yii::$app->user->can('certificate')) && $this->status == self::STATUS_ACTIVE && $this->date <= date('Y-m-d')) {
+        if ($this->wait_termnate < 1 && (Yii::$app->user->can('organizations') || Yii::$app->user->can('certificate')) && $this->status == self::STATUS_ACTIVE && $this->start_edu_contract <= date('Y-m-d')) {
             return true;
         }
 
