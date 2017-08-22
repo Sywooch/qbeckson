@@ -470,7 +470,11 @@ class ContractsController extends Controller
     {
         $model = $this->findModel($id);
 
-        $content = $this->renderPartial('application-close-pdf', [
+        if (!Yii::$app->user->can($model->terminatorUserRole)) {
+            throw new ForbiddenHttpException('Действите запрещено.');
+        }
+
+        $content = $this->renderPartial(Yii::$app->user->can('certificate') ? 'application-close-certificate-pdf' : 'application-close-organization-pdf', [
             'model' => $model,
         ]);
 
@@ -575,6 +579,7 @@ class ContractsController extends Controller
             }
 
             $model->wait_termnate = 1;
+            $model->date_initiate_termination = date('Y-m-d');
             $model->status_comment = $informs->dop;
 
             $cert = Certificates::findOne($model->certificate_id);

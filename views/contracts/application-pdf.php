@@ -51,7 +51,7 @@ ___________________/______________________ /
     <table>
         <tr>
             <td>
-                <?= Yii::$app->formatter->asDate((strtotime($model->start_edu_contract) < time()) ? strtotime($model->start_edu_contract) : time()) ?>
+                <?= Yii::$app->formatter->asDate((strtotime($model->start_edu_contract) < time()) ? $model->start_edu_contract : time()) ?>
             </td>
             <td width="55%">
 <pre style="border: 0; background-color: transparent;">
