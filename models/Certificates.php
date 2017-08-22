@@ -177,6 +177,22 @@ class Certificates extends \yii\db\ActiveRecord
         }
     }
 
+    public function changeBalance($contract)
+    {
+        if ($contract->period === Contracts::CURRENT_REALIZATION_PERIOD) {
+            $this->balance += $contract->rezerv;
+            $this->rezerv -= $contract->rezerv;
+        } elseif ($model->period === Contracts::FUTURE_REALIZATION_PERIOD) {
+            $this->balance_f += $contract->rezerv;
+            $this->rezerv_f -= $contract->rezerv;
+        } elseif ($model->period === Contracts::PAST_REALIZATION_PERIOD) {
+            $this->balance_p += $contract->rezerv;
+            $this->rezerv_p -= $contract->rezerv;
+        }
+
+        return $this->save();
+    }
+
     public function getCertGroupTypes()
     {
         return [

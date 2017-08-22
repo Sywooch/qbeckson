@@ -327,8 +327,15 @@ class ContractsController extends Controller
             $program->last_contracts = $program->last_contracts + 1;
             $program->save();
 
-            $cert->rezerv = $cert->rezerv - ($model->payer_first_month_payment);
-            $cert->save();
+            if ($model->period === Contracts::CURRENT_REALIZATION_PERIOD) {
+                $cert->updateCounters([
+                    'rezerv' => $model->payer_first_month_payment * -1,
+                ]);
+            } elseif ($model->period === Contracts::FUTURE_REALIZATION_PERIOD) {
+                $cert->updateCounters([
+                    'rezerv_f' => $model->payer_first_month_payment * -1,
+                ]);
+            }
 
             $model->paid = $model->payer_first_month_payment;
             $model->rezerv = $model->rezerv - ($model->payer_first_month_payment);
@@ -477,17 +484,7 @@ class ContractsController extends Controller
         //TODO добавить транзакцию
         if ($informs->load(Yii::$app->request->post())) {
             $cert = Certificates::findOne($model->certificate_id);
-            if ($model->period === Contracts::CURRENT_REALIZATION_PERIOD) {
-                $cert->balance += $model->rezerv;
-                $cert->rezerv -= $model->rezerv;
-            } elseif ($model->period === Contracts::FUTURE_REALIZATION_PERIOD) {
-                $cert->balance_f += $model->rezerv;
-                $cert->rezerv_f -= $model->rezerv;
-            } elseif ($model->period === Contracts::PAST_REALIZATION_PERIOD) {
-                $cert->balance_p += $model->rezerv;
-                $cert->rezerv_p -= $model->rezerv;
-            }
-            $cert->save();
+            $cert->changeBalance($model);
 
             $model->rezerv = 0;
             $model->status = 2;
@@ -527,19 +524,8 @@ class ContractsController extends Controller
     {
         $model = $this->findModel($id);
         $cert = Certificates::findOne($model->certificate_id);
-        //TODO добавить транзакцию
-        if ($model->period === Contracts::CURRENT_REALIZATION_PERIOD) {
-            $cert->balance += $model->rezerv;
-            $cert->rezerv -= $model->rezerv;
-        } elseif ($model->period === Contracts::FUTURE_REALIZATION_PERIOD) {
-            $cert->balance_f += $model->rezerv;
-            $cert->rezerv_f -= $model->rezerv;
-        } elseif ($model->period === Contracts::PAST_REALIZATION_PERIOD) {
-            $cert->balance_p += $model->rezerv;
-            $cert->rezerv_p -= $model->rezerv;
-        }
+        $cert->changeBalance($model);
 
-        $cert->save();
         $model->rezerv = 0;
         $model->status = 2;
         if ($model->save()) {
@@ -565,19 +551,8 @@ class ContractsController extends Controller
             $model->status_comment = $informs->dop;
 
             $cert = Certificates::findOne($model->certificate_id);
+            $cert->changeBalance($model);
 
-            //TODO добавить транзакцию
-            if ($model->period === Contracts::CURRENT_REALIZATION_PERIOD) {
-                $cert->balance += $model->rezerv;
-                $cert->rezerv -= $model->rezerv;
-            } elseif ($model->period === Contracts::FUTURE_REALIZATION_PERIOD) {
-                $cert->balance_f += $model->rezerv;
-                $cert->rezerv_f -= $model->rezerv;
-            } elseif ($model->period === Contracts::PAST_REALIZATION_PERIOD) {
-                $cert->balance_p += $model->rezerv;
-                $cert->rezerv_p -= $model->rezerv;
-            }
-            $cert->save();
             $model->rezerv = 0;
             if ($model->save()) {
                 if (isset($roles['certificate'])) {
