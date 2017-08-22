@@ -700,7 +700,7 @@ class ContractsController extends Controller
         $headerText = $organization->contractSettings->header_text;
         $headerText = str_replace(
             '№0000000000',
-            '№' . $model->number . ' (обладатель сертификата - ' . $model->certificate->fio_child . ')',
+            '№' . $model->certificate->number . ' (обладатель сертификата - ' . $model->certificate->fio_child . ')',
             $headerText
         );
             $html = <<<EOD
