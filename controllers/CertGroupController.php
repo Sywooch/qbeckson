@@ -59,7 +59,7 @@ class CertGroupController extends Controller
                 }
 
                 if ($model->oldAttributes['nominal_f'] !== $model->nominal_f) {
-                    if (true !== ($result = $this->payerService->updateCertificateNominal($model->id, $model->nominal_f, 'future'))) {
+                    if (true !== ($result = $this->payerService->updateCertificateNominal($model->id, $model->nominal_f, '_f'))) {
                         return ['output' => '', 'message' => $result];
                     }
                 }
