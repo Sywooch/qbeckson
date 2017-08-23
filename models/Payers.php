@@ -50,6 +50,22 @@ class Payers extends \yii\db\ActiveRecord
     public $directionality_6;
 
     /**
+     * @return array
+     */
+    public static function directionalityAttributes(): array
+    {
+        return [
+            'directionality_1rob' => 'Техническая (робототехника)',
+            'directionality_1' => 'Техническая (иная)',
+            'directionality_2' => 'Естественнонаучная',
+            'directionality_3' => 'Физкультурно-спортивная',
+            'directionality_4' => 'Художественная',
+            'directionality_5' => 'Туристско-краеведческая',
+            'directionality_6' => 'Социально-педагогическая',
+        ];
+    }
+
+    /**
      * @inheritdoc
      */
     public static function tableName()
