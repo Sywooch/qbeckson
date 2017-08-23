@@ -91,12 +91,13 @@ class ContractsController extends Controller
             $parents = $_POST['depdrop_parents'];
             if ($parents) {
                 $programId = $parents[0];
+                /** @var ProgrammeModule[] $rows */
                 $rows = ProgrammeModule::find()
                     ->andWhere(['program_id' => $programId, 'open' => 1])
                     ->all();
 
                 foreach ($rows as $value) {
-                    $out[] = ['id' => $value['id'], 'name' => $value['year']];
+                    $out[] = ['id' => $value->id, 'name' => $value->getFullname()];
                 }
 
                 echo Json::encode(['output' => $out, 'selected' => '']);
