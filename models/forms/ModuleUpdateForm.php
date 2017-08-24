@@ -2,6 +2,9 @@
 
 namespace app\models\forms;
 
+use app\helpers\CalculationHelper;
+use app\models\OperatorSettings;
+use app\models\Payers;
 use app\models\ProgrammeModule;
 use Yii;
 use yii\base\Model;
@@ -12,10 +15,15 @@ use yii\base\Model;
  */
 class ModuleUpdateForm extends Model
 {
+    public $dateFrom;
+    public $dateTo;
     public $price;
-    public $confirm;
+    public $firstConfirm;
+    public $secondConfirm;
 
     private $model;
+    private $settings;
+    private $payer;
 
     /**
      * ModuleUpdateForm constructor.
@@ -34,8 +42,22 @@ class ModuleUpdateForm extends Model
     public function rules(): array
     {
         return [
-            ['price', 'required'],
-            ['confirm', 'required', 'requiredValue' => 1, 'message' => 'Необходимо подтвердить действие'],
+            [['price'], 'required'],
+            [['dateFrom', 'dateTo'], 'safe'],
+            [
+                'firstConfirm', 'required', 'requiredValue' => 1,
+                'when' => function ($model) {
+                    return $model->price > $model->getModel()->normative_price;
+                },
+                'message' => 'Необходимо подтвердить действие'
+            ],
+            [
+                'secondConfirm', 'required', 'requiredValue' => 1,
+                'when' => function ($model) {
+                    return $model->price > $model->calculateRecommendedPrice();
+                },
+                'message' => 'Необходимо подтвердить действие'
+            ],
             ['price', 'number'],
             ['price', 'validateData']
         ];
@@ -48,7 +70,13 @@ class ModuleUpdateForm extends Model
     {
         return [
             'price' => 'Установите цену модуля:',
-            'confirm' => 'Подтвердить',
+            'firstConfirm' => 'Я подтверждаю, что осознанно устанавливаю стоимость модуля, превышающую нормативную 
+                стоимость, что потребует оплаты части стоимости модуля со стороны родителей',
+            'secondConfirm' => 'Я подтверждаю, что осознанно устанавливаю стоимость, 
+                которая возможно не будет покрыта полностью за счет средств сертификата детей в муниципальном районе 
+                (городском округе), в котором реализуется программа',
+            'dateFrom' => 'Дата начала',
+            'dateTo' => 'Дата конца'
         ];
     }
 
@@ -57,7 +85,7 @@ class ModuleUpdateForm extends Model
      */
     public function validateData($attribute)
     {
-        if (count($this->getModel()->contracts) > 0) {
+        if (count($this->getModel()->getContracts()->andWhere(['contracts.status' => [0,1,3]])->all()) > 0) {
             $this->addError($attribute, 'Нельзя изменить цену программы, есть заявка на эту программу');
         }
     }
@@ -67,21 +95,75 @@ class ModuleUpdateForm extends Model
      */
     public function save(): bool
     {
-        if ($this->validate() && null !== ($model = $this->getModel())) {
+        if (null !== ($model = $this->getModel())) {
             $model->price = $this->price;
 
-            return $model->save(false, ['price']);
+            return $model->save(false);
         }
 
         return false;
     }
 
     /**
-     * @return ProgrammeModule|null
+     * (расчет: если дата конца текущего периода < дата начала группы, то 0%, иначе -
+     * (дата конца текущего текущего периода - дата начала группы +1)/(дата конца группы - дата начала группы +1))
      */
-    public function getModel()
+    public function calculateCurrentPercent()
     {
-        return $this->model;
+        if (strtotime($this->getSettings()->current_program_date_to) < strtotime($this->dateFrom)) {
+            $currentPercent = 0;
+        } else {
+            $dateFrom = max(strtotime($this->dateFrom), strtotime($this->getSettings()->current_program_date_from));
+            $dateTo = min(strtotime($this->dateTo), strtotime($this->getSettings()->current_program_date_to));
+            $currentPercent = CalculationHelper::daysBetweenDates(
+                date('Y-m-d', $dateFrom),
+                date('Y-m-d', $dateTo)
+            ) / CalculationHelper::daysBetweenDates($this->dateTo, $this->dateFrom) * 100;
+        }
+
+        return $currentPercent;
+    }
+
+    /**
+     * (расчет: если дата конца группы < дата начала будущего периода, то 0%, иначе:
+     * (дата конца группы - дата начала будущего периода+1)/(дата конца группы - дата начала группы +1) )
+     */
+    public function calculateFuturePercent()
+    {
+        if (strtotime($this->getSettings()->future_program_date_from) > strtotime($this->dateTo)) {
+            $futurePercent = 0;
+        } else {
+            $dateFrom = max(strtotime($this->dateFrom), strtotime($this->getSettings()->future_program_date_from));
+            $dateTo = min(strtotime($this->dateTo), strtotime($this->getSettings()->future_program_date_to));
+            $futurePercent = CalculationHelper::daysBetweenDates(
+                date('Y-m-d', $dateFrom),
+                date('Y-m-d', $dateTo)
+            ) / CalculationHelper::daysBetweenDates($this->dateTo, $this->dateFrom) * 100;
+        }
+
+        return $futurePercent;
+    }
+
+    /**
+     * (минимум из максимальных цен для текущего и будущего периода: мин(номинал текущий/долю программы в
+     * текущем периоде; номинал будущего периода/доля программы в будущем периоде). Округляем вниз до рубля)
+     */
+    public function calculateRecommendedPrice()
+    {
+        $certGroup = $this->getPayer()->firstCertGroup;
+        if ($this->calculateCurrentPercent() === 0 && $this->calculateFuturePercent() !== 0) {
+            $recommendedPrice = $certGroup->nominal_f / $this->calculateFuturePercent() * 100;
+        } elseif ($this->calculateFuturePercent() === 0 && $this->calculateCurrentPercent() !== 0) {
+            $recommendedPrice = $certGroup->nominal / $this->calculateCurrentPercent() * 100;
+        } else {
+            $recommendedPrice = min(
+                $certGroup->nominal / $this->calculateCurrentPercent() * 100,
+                $certGroup->nominal_f / $this->calculateFuturePercent() * 100
+            );
+        }
+        //$this->price = floor($recommendedPrice);
+
+        return $recommendedPrice;
     }
 
     /**
@@ -101,8 +183,41 @@ class ModuleUpdateForm extends Model
             throw new \DomainException('Model not found');
         }
         $this->price = $this->model->price ?: null;
+        if ($group = $this->model->groups[0]) {
+            $this->dateFrom = date('d.m.Y', strtotime($group->datestart));
+            $this->dateTo = date('d.n.Y', strtotime($group->datestop));
+        }
     }
 
+    /**
+     * @return ProgrammeModule|null
+     */
+    public function getModel()
+    {
+        return $this->model;
+    }
 
+    /**
+     * @return OperatorSettings|null
+     */
+    public function getSettings()
+    {
+        if (null === $this->settings) {
+            $this->settings = Yii::$app->operator->identity->settings;
+        }
 
+        return $this->settings;
+    }
+
+    /**
+     * @return Payers|null
+     */
+    public function getPayer()
+    {
+        if (null === $this->payer) {
+            $this->payer = $this->getModel()->program->municipality->payer;
+        }
+
+        return $this->payer;
+    }
 }

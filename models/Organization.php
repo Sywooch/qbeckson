@@ -518,7 +518,8 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
-     * @deprecated Use relation in app\models\UserIdentity instead
+     * @deprecated
+     * Use relation in app\models\User instead
      */
     public function getOrganization()
     {
