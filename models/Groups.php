@@ -89,11 +89,13 @@ class Groups extends ActiveRecord
             $result = '';
             foreach ($this->classes as $class) {
                 $result .= '<p>' .
-                        $class->week_day . ': '. $class->time_from . ' - ' . $class->time_to . ' ' . $class->address .
+                    $class->week_day . ': ' . $class->time_from . ' - ' . $class->time_to . ' ' . $class->address .
                     '</p>';
             }
+
             return $result;
         }
+
         return '<p>Адрес: ' . $this->address . '</p><p>' . 'Расписание: ' . $this->schedule . '</p>';
     }
 
@@ -128,16 +130,24 @@ class Groups extends ActiveRecord
     {
         return $this->hasMany(Contracts::class, ['group_id' => 'id']);
     }
-    
+
+    /**
+     * @deprecated
+     * @param $id
+     * @return array|null|ActiveRecord
+     */
     public function getGroup($id)
     {
-         $query = Groups::find();
-
-        $query->where(['id' => $id]);
+        $query = Groups::find()
+            ->where(['id' => $id]);
 
         return $query->one();
     }
-    
+
+    /**
+     * @deprecated
+     * @return \yii\db\ActiveQuery
+     */
     public function getYear()
     {
         return $this->hasOne(ProgrammeModule::className(), ['id' => 'year_id']);

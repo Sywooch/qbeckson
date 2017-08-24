@@ -407,7 +407,7 @@ class OrganizationController extends Controller
             $model->max_child = floor(($model->last_year_contract * ($mun->deystv / $mun->lastdeystv)) * $coef_raiting);
         }
 
-        if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->save(true, ['max_child'])) {
             return $this->redirect(['/organization/view', 'id' => $model->id]);
         }
 
@@ -419,9 +419,10 @@ class OrganizationController extends Controller
 
     public function actionAlllimit()
     {
-        $org = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('organization')
+        $org = Organization::find()
+            ->select(['`organization`.id'])
+            ->joinWith('municipality')
+            ->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id)
             ->column();
 
         foreach ($org as $organization_id) {
@@ -475,8 +476,9 @@ class OrganizationController extends Controller
                 $model->max_child = floor(($model->last_year_contract * ($mun->deystv / $mun->lastdeystv)) * $coef_raiting);
             }
 
-
-            $model->save();
+            if (!$model->save(true, ['max_child'])) {
+                Yii::$app->session->setFlash('danger', 'При сохранении лимитов у некоторых организаций произошла ошибка.');
+            }
         }
 
         return $this->redirect(['/personal/operator-organizations']);
@@ -507,8 +509,6 @@ class OrganizationController extends Controller
 
         }
 
-
-        //return var_dump();
         if ($count2 != 0) {
             $model->raiting = round($count / $count2, 2);
         } else {
@@ -516,16 +516,17 @@ class OrganizationController extends Controller
         }
 
 
-        if ($model->save()) {
+        if ($model->save(true, ['raiting'])) {
             return $this->redirect(['/organization/view', 'id' => $model->id]);
         }
     }
 
     public function actionAllraiting()
     {
-        $org = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('organization')
+        $org = Organization::find()
+            ->select(['`organization`.id'])
+            ->joinWith('municipality')
+            ->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id)
             ->column();
 
         foreach ($org as $organization_id) {
@@ -555,7 +556,9 @@ class OrganizationController extends Controller
                 $model->raiting = null;
             }
 
-            $model->save();
+            if (!$model->save(true, ['raiting'])) {
+                Yii::$app->session->setFlash('danger', 'При сохранении рейтинга у некоторых организаций произошла ошибка.');
+            }
         }
 
         return $this->redirect(['/personal/operator-organizations']);
