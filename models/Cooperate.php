@@ -37,6 +37,7 @@ use yii\db\ActiveRecord;
  * @property null|string $documentUrl
  * @property null|string $additionalDocumentUrl
  * @property Payers $payer
+ * @property Contracts[] $contracts
  */
 class Cooperate extends ActiveRecord
 {
@@ -275,7 +276,13 @@ class Cooperate extends ActiveRecord
         ];
     }
 
-
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getContracts()
+    {
+        return $this->hasMany(Contracts::class, ['payer_id' => 'payer_id', 'organization_id' => 'organization_id']);
+    }
 
 
 

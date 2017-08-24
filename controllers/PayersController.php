@@ -111,6 +111,7 @@ class PayersController extends Controller
                         $group = new CertGroup();
                         $group->payer_id = $model->id;
                         $group->group = $value[0];
+                        $group->amount = 0;
                         $group->nominal = $value[1];
                         $group->nominal_f = $value[1];
                         $group->is_special = !empty($value[2]) ? 1 : null;

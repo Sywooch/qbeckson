@@ -36,7 +36,7 @@ class ProgramsSearch extends Programs
     public function rules()
     {
         return [
-            [['id', 'form', 'mun', 'ground', 'price', 'study', 'last_contracts',
+            [['id', 'form', 'mun', 'ground', 'price', 'study', 'last_contracts', 'direction_id',
                 'last_s_contracts', 'last_s_contracts_rod', 'year', 'both_teachers', 'ovz', 'quality_control', 'p3z', 'municipality'], 'integer'],
             [['name', 'vid', 'colse_date', 'task', 'annotation', 'fullness', 'complexity', 'norm_providing',
                 'zab', 'link', 'certification_date', 'verification', 'organization_id', 'payerId'], 'safe'],
@@ -156,11 +156,11 @@ class ProgramsSearch extends Programs
             'programs.ocen_kadr' => $this->ocen_kadr,
             'programs.ocen_mat' => $this->ocen_mat,
             'programs.ocen_obch' => $this->ocen_obch,
+            'programs.direction_id' => $this->direction_id,
             'organization.mun' => $this->municipality,
         ]);
 
         $query->andFilterWhere(['like', 'programs.name', $this->name])
-            ->andFilterWhere(['like', 'programs.directivity', $this->directivity])
             ->andFilterWhere(['like', 'programs.vid', $this->vid])
             ->andFilterWhere(['like', 'programs.task', $this->task])
             ->andFilterWhere(['like', 'programs.annotation', $this->annotation])

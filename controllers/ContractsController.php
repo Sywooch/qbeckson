@@ -91,12 +91,13 @@ class ContractsController extends Controller
             $parents = $_POST['depdrop_parents'];
             if ($parents) {
                 $programId = $parents[0];
+                /** @var ProgrammeModule[] $rows */
                 $rows = ProgrammeModule::find()
                     ->andWhere(['program_id' => $programId, 'open' => 1])
                     ->all();
 
                 foreach ($rows as $value) {
-                    $out[] = ['id' => $value['id'], 'name' => $value['year']];
+                    $out[] = ['id' => $value->id, 'name' => $value->getFullname()];
                 }
 
                 echo Json::encode(['output' => $out, 'selected' => '']);
@@ -182,7 +183,10 @@ class ContractsController extends Controller
                 if ($confirmForm->save()) {
                     Yii::$app->session->setFlash('success', 'Вы успешно подали заявку на обучение.');
 
-                    return $this->redirect(['verificate', 'id' => $contract->id]);
+                    return $this->redirect([
+                        Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION) ? 'verificate' : 'view',
+                        'id' => $contract->id
+                    ]);
                 } else {
                     Yii::$app->session->setFlash('danger', 'Что-то не так.');
 

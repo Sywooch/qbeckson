@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\forms\ConfirmRequestForm;
+use app\models\forms\RejectContractForm;
 use app\models\UserIdentity;
 use app\traits\AjaxValidationTrait;
 use Yii;
@@ -13,6 +14,7 @@ use yii\filters\VerbFilter;
 use app\models\Organization;
 use app\models\Payers;
 use app\models\User;
+use yii\web\Response;
 
 /**
  * CooperateController implements the CRUD actions for Cooperate model.
@@ -24,16 +26,34 @@ class CooperateController extends Controller
     /**
      * @inheritdoc
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
+                    'reject-contract' => ['POST'],
                 ],
             ],
         ];
+    }
+
+    /**
+     * @param $id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     */
+    public function actionRejectContract($id): Response
+    {
+        $model = new RejectContractForm($id);
+        if ($model->reject()) {
+            Yii::$app->session->setFlash('success', 'Вы успешно расторгли соглашение.');
+        } else {
+            Yii::$app->session->setFlash('error', 'Вы не можете расторгнуть соглашение.');
+        }
+
+        return $this->goBack();
     }
 
     /**
@@ -237,16 +257,6 @@ class CooperateController extends Controller
         }
 
         return $this->redirect(['personal/operator-cooperates']);
-    }
-
-    /**
-     * Не работает
-     * Финальное отклонение заявки плательщиком по каким-либо причинам.
-     *
-     * @param $id
-     */
-    public function actionRejectContract($id)
-    {
     }
 
     /**

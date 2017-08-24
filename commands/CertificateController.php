@@ -5,9 +5,33 @@ namespace app\commands;
 use app\models\Certificates;
 use yii;
 use yii\console\Controller;
+use app\services\PayerService;
 
 class CertificateController extends Controller
 {
+    private $payerService;
+
+    public function init()
+    {
+        $this->payerService = new PayerService;
+        parent::init();
+    }
+
+    public function actionUpdateNominals()
+    {
+        $groups = Certificates::find()
+            ->joinWith('certGroup')
+            ->where("`cert_group`.is_special < 1 OR `cert_group`.is_special IS NULL")
+            ->groupBy('cert_group')
+            ->all();
+
+        foreach ($groups as $group) {
+            $this->payerService->updateCertificateNominal($group->certGroup->id, $group->certGroup->nominal, '', false);
+            $this->payerService->updateCertificateNominal($group->certGroup->id, $group->certGroup->nominal_f, '_f', false);
+            echo '--> ' . $group->certGroup->id . PHP_EOL;
+        }
+    }
+
     public function actionUpdatePossibleCertGroup()
     {
         $models = Certificates::find()

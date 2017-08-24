@@ -50,6 +50,22 @@ class Payers extends \yii\db\ActiveRecord
     public $directionality_6;
 
     /**
+     * @return array
+     */
+    public static function directionalityAttributes(): array
+    {
+        return [
+            'directionality_1rob' => 'Техническая (робототехника)',
+            'directionality_1' => 'Техническая (иная)',
+            'directionality_2' => 'Естественнонаучная',
+            'directionality_3' => 'Физкультурно-спортивная',
+            'directionality_4' => 'Художественная',
+            'directionality_5' => 'Туристско-краеведческая',
+            'directionality_6' => 'Социально-педагогическая',
+        ];
+    }
+
+    /**
      * @inheritdoc
      */
     public static function tableName()
@@ -64,7 +80,7 @@ class Payers extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'name_dat', 'INN', 'OGRN', 'KPP', 'OKPO', 'address_legal', 'address_actual', 'email', 'phone', 'position', 'fio', 'code'], 'required'],
-            [['user_id', 'INN', 'OGRN', 'KPP', 'OKPO', 'directionality_1rob_count', 'directionality_1_count', 'directionality_2_count', 'directionality_3_count', 'directionality_4_count', 'directionality_5_count', 'directionality_6_count', 'mun'], 'integer'],
+            [['user_id', 'INN', 'OGRN', 'KPP', 'OKPO', 'directionality_1rob_count', 'directionality_1_count', 'directionality_2_count', 'directionality_3_count', 'directionality_4_count', 'directionality_5_count', 'directionality_6_count', 'mun', 'certificate_can_use_future_balance'], 'integer'],
             ['operator_id', 'integer'],
             [['code'], 'string', 'length' => [2, 2]],
             [['directionality'], 'safe'],

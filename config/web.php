@@ -275,7 +275,7 @@ $config = [
             'cooperate' => [
                 [
                     'allow' => true,
-                    'actions' => ['request', 'appeal-request', 'requisites'],
+                    'actions' => ['request', 'appeal-request', 'requisites', 'reject-contract'],
                     'roles' => ['organizations'],
                 ],
                 [

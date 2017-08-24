@@ -58,6 +58,11 @@ class CertificateGroupQueue extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @param integer $certGroupId
+     * @param null|integer $limit
+     * @return CertificateGroupQueue[]|array
+     */
     public static function getByCertGroup($certGroupId, $limit = null)
     {
         $query = static::find()
