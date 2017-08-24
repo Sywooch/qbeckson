@@ -115,9 +115,7 @@ class PayersController extends Controller
                         $group->nominal = $value[1];
                         $group->nominal_f = $value[1];
                         $group->is_special = !empty($value[2]) ? 1 : null;
-                        if (!$group->save()) {
-                            print_r($group->errors);exit;
-                        }
+                        $group->save();
                     }
 
                     return $this->render('/user/view', [

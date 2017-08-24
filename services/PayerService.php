@@ -17,14 +17,16 @@ class PayerService
      * @param string $suffix
      * @return bool|string
      */
-    public function updateCertificateNominal($groupId, $newNominal, $suffix = '')
+    public function updateCertificateNominal($groupId, $newNominal, $suffix = '', $checkExistence = true)
     {
-        $exist = Certificates::find()
-            ->andWhere('balance' . $suffix . ' < nominal' . $suffix . ' - ' . $newNominal)
-            ->andWhere(['cert_group' => $groupId])
-            ->exists();
-        if ($exist) {
-            return 'Предлагаемый номинал не может быть установлен в силу того, что часть сертификатов уже заключили договоры на большую сумму.';
+        if ($checkExistence) {
+            $exist = Certificates::find()
+                ->andWhere('balance' . $suffix . ' < nominal' . $suffix . ' - ' . $newNominal)
+                ->andWhere(['cert_group' => $groupId])
+                ->exists();
+            if ($exist) {
+                return 'Предлагаемый номинал не может быть установлен в силу того, что часть сертификатов уже заключили договоры на большую сумму.';
+            }
         }
 
         Yii::$app->db->createCommand('UPDATE certificates SET
