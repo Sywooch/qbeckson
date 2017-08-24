@@ -38,6 +38,7 @@ use app\models\Cooperate;
  * @property Cooperate[] $cooperates
  * @property User $user
  * @property CertificateInformation $certificateInformation
+ * @property CertGroup $firstCertGroup
  */
 class Payers extends \yii\db\ActiveRecord
 {
@@ -385,6 +386,9 @@ class Payers extends \yii\db\ActiveRecord
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 
+    /**
+     * @return $this
+     */
     public function getFirstCertGroup()
     {
         return $this->hasOne(CertGroup::className(), ['payer_id' => 'id'])

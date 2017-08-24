@@ -2,8 +2,8 @@
 
 namespace app\models;
 
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
-use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "years".
@@ -91,6 +91,23 @@ class ProgrammeModule extends ActiveRecord
             'results' => 'Ожидаемые результаты освоения модуля',
             'fullname' => 'Наименование модуля',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getGroups()
+    {
+        return $this->hasMany(Groups::class, ['year_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getContracts()
+    {
+        return $this->hasMany(Contracts::class, ['group_id' => 'id'])
+            ->via('groups');
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "mun".
@@ -21,9 +22,10 @@ use Yii;
  * @property integer $stav
  * @property integer $deystv
  * @property integer $lastdeystv
+ * @property Payers $payer
  * @property integer $countdet
  */
-class Mun extends \yii\db\ActiveRecord
+class Mun extends ActiveRecord
 {
     /**
      * @inheritdoc
@@ -91,6 +93,14 @@ class Mun extends \yii\db\ActiveRecord
             'lastdeystv' => 'Число действовавших в предыдущем учебном году сертификатов дополнительного образования',
             'countdet' => 'Общее число детей в возрасте от 5-ти до 18-ти лет, проживающее на территории муниципального района (городского округа)'
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPayer()
+    {
+        return $this->hasOne(Payers::class, ['mun' => 'id']);
     }
 
     /**
