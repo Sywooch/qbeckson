@@ -14,7 +14,6 @@ class CertificateController extends Controller
     public function init()
     {
         $this->payerService = new PayerService;
-
         parent::init();
     }
 
@@ -22,15 +21,14 @@ class CertificateController extends Controller
     {
         $groups = Certificates::find()
             ->joinWith('certGroup')
-            ->select('`cert_group`.id,`cert_group`.nominal,`cert_group`.nominal_f')
             ->where("`cert_group`.is_special < 1 OR `cert_group`.is_special IS NULL")
             ->groupBy('cert_group')
             ->all();
 
         foreach ($groups as $group) {
-            $this->payerService->updateCertificateNominal($group->id, $group->nominal, '', false);
-            $this->payerService->updateCertificateNominal($group->id, $group->nominal_f, '_f', false);
-            echo '--> ' . $group->id . PHP_EOL;
+            $this->payerService->updateCertificateNominal($group->certGroup->id, $group->certGroup->nominal, '', false);
+            $this->payerService->updateCertificateNominal($group->certGroup->id, $group->certGroup->nominal_f, '_f', false);
+            echo '--> ' . $group->certGroup->id . PHP_EOL;
         }
     }
 

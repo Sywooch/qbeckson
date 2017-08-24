@@ -792,7 +792,7 @@ $this->registerJs($js, $this::POS_END);
                             $count2 = (new \yii\db\Query())
                                 ->select(['id'])
                                 ->from('contracts')
-                                ->where(['status' => [0, 1, 3, 5]])
+                                ->where(['status' => [0, 1, 3]])
                                 ->andWhere(['organization_id' => $model->organization_id])
                                 ->count();
 
@@ -842,10 +842,12 @@ $this->registerJs($js, $this::POS_END);
                             }
 
                             if ($cooperate != 0) {
+                                $groups = $GroupsProvider->models;
                                 if ($value->open == 0) {
                                     echo '<h4>Вы не можете записаться на программу. Зачисление закрыто.</h4>';
-                                } else {
-                                    if ($certificate->balance == 0) {
+                                } elseif (!empty($groups)) {
+                                    $firstGroup = array_shift($groups);
+                                    if (($certificate->balance < 1 && $model->certificate_can_use_future_balance < 1) || ($certificate->balance < 1 && $model->certificate_can_use_future_balance > 0 && $certificate->balance_f < 1)) {
                                         echo '<h4>Вы не можете записаться на программу. Нет свободных средств на сертификате.</h4>';
                                     } else {
                                         if ($organization->actual == 0) {
