@@ -508,8 +508,18 @@ class Organization extends \yii\db\ActiveRecord
         return false;
     }
 
+    public function hasEmptyInfo()
+    {
+        if (empty($this->contractSettings->organization_first_ending) || empty($this->contractSettings->organization_second_ending) || empty($this->contractSettings->director_name_ending)) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
-     * @deprecated Use relation in app\models\UserIdentity instead
+     * @deprecated
+     * Use relation in app\models\User instead
      */
     public function getOrganization()
     {
