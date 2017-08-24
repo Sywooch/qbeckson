@@ -2,9 +2,12 @@
 
 namespace app\commands;
 
+use Yii;
 use app\components\GoogleCoordinates;
+use app\models\CertGroup;
 use app\models\Organization;
 use app\models\OrganizationAddress;
+use app\models\Payers;
 use app\models\ProgramAddressAssignment;
 use app\models\ProgramModuleAddressAssignment;
 use yii\console\Controller;
@@ -140,6 +143,30 @@ class MigrationController extends Controller
                         }
 
                         unset($organizationAddress, $programAddress, $moduleAddress);
+                    }
+                }
+            }
+        }
+    }
+
+    public function actionAddCertGroups()
+    {
+        $payers = Payers::find()
+            ->with('certGroups')
+            ->all();
+
+        foreach ($payers as $payer) {
+            if (empty($payer->certGroups)) {
+                foreach (Yii::$app->params['groups'] as $value) {
+                    $group = new CertGroup();
+                    $group->payer_id = $payer->id;
+                    $group->group = $value[0];
+                    $group->amount = 0;
+                    $group->nominal = $value[1];
+                    $group->nominal_f = $value[1];
+                    $group->is_special = !empty($value[2]) ? 1 : null;
+                    if (!$group->save()) {
+                        print_r($group->errors);exit;
                     }
                 }
             }
