@@ -3,6 +3,8 @@
 namespace app\controllers;
 
 use app\models\forms\ModuleAddressForm;
+use app\models\forms\ModuleUpdateForm;
+use app\traits\AjaxValidationTrait;
 use Yii;
 use app\models\ProgrammeModule;
 use app\models\ProgrammeModuleSearch;
@@ -18,6 +20,8 @@ use app\models\Programs;
  */
 class YearsController extends Controller
 {
+    use AjaxValidationTrait;
+
     /**
      * @inheritdoc
      */
@@ -108,34 +112,21 @@ class YearsController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $model = new ModuleUpdateForm($id);
+        $this->performAjaxValidation($model);
 
         if ($model->load(Yii::$app->request->post())) {
-
-            $contracts = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('contracts')
-                ->where(['program_id' => $model->program_id])
-                ->andWhere(['status' => [0, 1, 3]])
-                ->count();
-
-            if ($contracts == 0) {
-                $model->save();
-
-                return $this->redirect(['programs/view', 'id' => $model->program_id]);
+            if ($model->save()) {
+                return $this->redirect(['programs/view', 'id' => $model->getModel()->program->id]);
             } else {
-                Yii::$app->session->setFlash('error', 'Нельзя изменить цену программы, есть заявку на эту программу.');
-
-                return $this->render('update', [
-                    'model' => $model,
-                ]);
+                Yii::$app->session->setFlash('error', 'Что-то не так.');
             }
-
-        } else {
-            return $this->render('update', [
-                'model' => $model,
-            ]);
         }
+
+        return $this->render('update', [
+            'model' => $model,
+            'settings' => Yii::$app->operator->identity->settings,
+        ]);
     }
 
     /**

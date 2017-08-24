@@ -509,12 +509,10 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
-     * DEPRECATED
-     * Use relation in app\models\User instead
+     * @deprecated Use relation in app\models\UserIdentity instead
      */
     public function getOrganization()
     {
-
         $query = Organization::find();
 
         if (!Yii::$app->user->isGuest) {
