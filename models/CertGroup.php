@@ -77,7 +77,7 @@ class CertGroup extends ActiveRecord
             'payer_id' => 'Payer ID',
             'group' => 'Группа',
             'nominal' => 'Номинал',
-            'nominal_f' => 'Номинал будущего периода',
+            'nominal_f' => 'Номинал будущего периода (от ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_from) . ' до ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_to) . ')',
             'countCertificates' => 'Количество используемых сертификатов',
             'amount' => 'Лимит',
         ];
