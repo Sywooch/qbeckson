@@ -29,6 +29,7 @@ use app\models\Cooperate;
  * @property integer $directionality_4_count
  * @property integer $directionality_5_count
  * @property integer $directionality_6_count
+ * @property integer $certificate_can_use_future_balance
  *
  * @property Certificates[] $certificates
  * @property Invoices[] $invoices

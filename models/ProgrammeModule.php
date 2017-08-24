@@ -24,6 +24,7 @@ use yii\db\ActiveRecord;
  * @property ProgramModuleAddress[] $oldAddresses
  * @property OrganizationAddress $mainAddress
  * @property ProgramModuleAddressAssignment[] $moduleAddressAssignments
+ * @property Groups[] $groups
  */
 class ProgrammeModule extends ActiveRecord
 {
