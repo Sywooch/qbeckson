@@ -85,7 +85,7 @@ class ModuleUpdateForm extends Model
      */
     public function validateData($attribute)
     {
-        if (count($this->getModel()->contracts) > 0) {
+        if (count($this->getModel()->getContracts()->andWhere(['contracts.status' => [0,1,3]])) > 0) {
             $this->addError($attribute, 'Нельзя изменить цену программы, есть заявка на эту программу');
         }
     }
