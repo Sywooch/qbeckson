@@ -2,6 +2,7 @@
 
 use kartik\grid\EditableColumn;
 use yii\helpers\Html;
+use yii\bootstrap\ActiveForm;
 use kartik\grid\GridView;
 
 /* @var $this yii\web\View */
@@ -10,6 +11,8 @@ use kartik\grid\GridView;
 
 $this->title = 'Номиналы групп';
 $this->params['breadcrumbs'][] = $this->title;
+$this->registerJs("jQuery('#payers-certificate_can_use_future_balance').click(function(){jQuery.post('/payers/save-params', {'Payers[certificate_can_use_future_balance]': jQuery(this).prop('checked') ? 1 : 0}).done(function(data){});});");
+
 ?>
 <div class="cert-group-index col-md-10 col-md-offset-1">
     <h1><?= Html::encode($this->title) ?></h1>
@@ -114,4 +117,9 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
+
+    <?php $form = ActiveForm::begin(); ?>
+    <?= $form->field(Yii::$app->user->identity->payer, 'certificate_can_use_future_balance')->checkbox() ?>
+    <?php ActiveForm::end(); ?>
+
 </div>

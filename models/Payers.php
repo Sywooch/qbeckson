@@ -122,7 +122,8 @@ class Payers extends \yii\db\ActiveRecord
             'directionality_5_count' => 'Максимальное число детей в "Туристско-краеведческой" направленности',
             'directionality_6_count' => 'Максимальное число детей в "Социально-педагогической" направленности',
             'cooperates' => 'Число заключенных соглашений',
-            'certificates' => 'Число выданных сертификатов'
+            'certificates' => 'Число выданных сертификатов',
+            'certificate_can_use_future_balance' => 'Установите возможность заключения договоров за счет средств сертификатов, предусмотренных на период от ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_from) . ' до ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_to),
         ];
     }
 
