@@ -843,7 +843,7 @@ $this->registerJs($js, $this::POS_END);
                                 if ($value->open == 0) {
                                     echo '<h4>Вы не можете записаться на программу. Зачисление закрыто.</h4>';
                                 } elseif (!empty($groups)) {
-                                    if (($certificate->balance < 1 && $certificate->certificate_can_use_future_balance < 1) || ($certificate->payer->balance < 1 && $certificate->payer->certificate_can_use_future_balance > 0 && $certificate->balance_f < 1)) {
+                                    if (($certificate->balance < 1 && $certificate->payer->certificate_can_use_future_balance < 1) || ($certificate->balance < 1 && $certificate->payer->certificate_can_use_future_balance > 0 && $certificate->balance_f < 1)) {
                                         echo '<h4>Вы не можете записаться на программу. Нет свободных средств на сертификате.</h4>';
                                     } else {
                                         if ($organization->actual == 0) {
