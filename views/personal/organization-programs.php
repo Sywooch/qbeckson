@@ -1,6 +1,7 @@
 <?php
 
 use app\helpers\GridviewHelper;
+use app\models\statics\DirectoryProgramDirection;
 use app\models\UserIdentity;
 use yii\grid\ActionColumn;
 use app\widgets\SearchFilter;
@@ -77,10 +78,11 @@ $hours = [
     ]
 ];
 $directivity = [
-    'attribute' => 'directivity',
+    'attribute' => 'direction_id',
+    'value' => 'direction.name',
     'label' => 'Направленность',
     'type' => SearchFilter::TYPE_DROPDOWN,
-    'data' => $searchOpenPrograms::directivities(),
+    'data' => ArrayHelper::map(DirectoryProgramDirection::find()->all(), 'id', 'name'),
 ];
 $form = [
     'attribute' => 'form',

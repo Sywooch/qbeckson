@@ -8,6 +8,21 @@ use yii\helpers\ArrayHelper;
 /* @var $this yii\web\View */
 /* @var $model app\models\Payers */
 /* @var $form yii\widgets\ActiveForm */
+
+$js = <<<'JS'
+$('.item-checkbox').change(function() {
+    var $this = $(this);
+    var block = $this.closest('.form-group').next('.item-block');
+    if($this.is(":checked")) {
+        console.log('down');
+        block.slideDown();
+    } else {
+        console.log('up');
+        block.slideUp();
+    }
+})
+JS;
+$this->registerJs($js, $this::POS_READY);
 ?>
 
 <div class="payers-form" ng-app>
@@ -74,118 +89,28 @@ use yii\helpers\ArrayHelper;
 
     <label class="control-label">Оплачивает направленности</label>
 
-    <?php
-    if (empty($model->directionality_1rob)) {
-        print $form->field($model, 'directionality_1rob')->checkbox(['value' => 'Техническая (робототехника)', 'ng-model' => 'ShowCheck12'])->label('Техническая (робототехника)');
-        print '<div ng-show="ShowCheck12">';
-        print $form->field($model, 'directionality_1rob_count')->textInput();
-        print '<small class="underlabel">Оставьте поле пустым или введите 0, чтобы не ограничивать количество детей в этой направленности.</small>
-        </div>';
-    } else {
-        print $form->field($model, 'directionality_1rob')->checkbox(['value' => 'Техническая (робототехника)', 'ng-model' => 'ShowCheck12', 'ng-checked' => '!ShowCheck12'])->label('Техническая (робототехника)');
-        print '<div ng-hide="ShowCheck12">';
-        print $form->field($model, 'directionality_1rob_count')->textInput();
-        print '<small class="underlabel">Оставьте поле пустым или введите 0, чтобы не ограничивать количество детей в этой направленности.</small>
-        </div>';
-    }
-    ?>
-
-    <?php
-    if (empty($model->directionality_1)) {
-        print $form->field($model, 'directionality_1')->checkbox(['value' => 'Техническая (иная)', 'ng-model' => 'ShowCheck1'])->label('Техническая (иная)');
-        print '<div ng-show="ShowCheck1">';
-        print $form->field($model, 'directionality_1_count')->textInput();
-        print '<small class="underlabel">Оставьте поле пустым или введите 0, чтобы не ограничивать количество детей в этой направленности.</small>
-        </div>';
-    } else {
-        print $form->field($model, 'directionality_1')->checkbox(['value' => 'Техническая (иная)', 'ng-model' => 'ShowCheck1', 'ng-checked' => '!ShowCheck1'])->label('Техническая (иная)');
-        print '<div ng-hide="ShowCheck1">';
-        print $form->field($model, 'directionality_1_count')->textInput();
-        print '<small class="underlabel">Оставьте поле пустым или введите 0, чтобы не ограничивать количество детей в этой направленности.</small>
-        </div>';
-    }
-    ?>
-
-    <?php
-    if (empty($model->directionality_2)) {
-        print $form->field($model, 'directionality_2')->checkbox(['value' => 'Естественнонаучная', 'ng-model' => 'ShowCheck2'])->label('Естественнонаучная');
-        print '<div ng-show="ShowCheck2">';
-        print $form->field($model, 'directionality_2_count')->textInput();
-        print '<small class="underlabel">Оставьте поле пустым или введите 0, чтобы не ограничивать количество детей в этой направленности.</small>
-        </div>';
-    } else {
-        print $form->field($model, 'directionality_2')->checkbox(['value' => 'Естественнонаучная', 'ng-model' => 'ShowCheck2', 'ng-checked' => '!ShowCheck2'])->label('Естественнонаучная');
-        print '<div ng-hide="ShowCheck2">';
-        print $form->field($model, 'directionality_2_count')->textInput();
-        print '<small class="underlabel">Оставьте поле пустым или введите 0, чтобы не ограничивать количество детей в этой направленности.</small>
-        </div>';
-    }
-    ?>
-
-    <?php
-    if (empty($model->directionality_3)) {
-        print $form->field($model, 'directionality_3')->checkbox(['value' => 'Физкультурно-спортивная', 'ng-model' => 'ShowCheck3'])->label('Физкультурно-спортивная');
-        print '<div ng-show="ShowCheck3">';
-        print $form->field($model, 'directionality_3_count')->textInput();
-        print '<small class="underlabel">Оставьте поле пустым или введите 0, чтобы не ограничивать количество детей в этой направленности.</small>
-        </div>';
-    } else {
-        print $form->field($model, 'directionality_3')->checkbox(['value' => 'Физкультурно-спортивная', 'ng-model' => 'ShowCheck3', 'ng-checked' => '!ShowCheck3'])->label('Физкультурно-спортивная');
-        print '<div ng-hide="ShowCheck3">';
-        print $form->field($model, 'directionality_3_count')->textInput();
-        print '<small class="underlabel">Оставьте поле пустым или введите 0, чтобы не ограничивать количество детей в этой направленности.</small>
-        </div>';
-    }
-    ?>
-
-    <?php
-    if (empty($model->directionality_4)) {
-        print $form->field($model, 'directionality_4')->checkbox(['value' => 'Художественная', 'ng-model' => 'ShowCheck4'])->label('Художественная');
-        print '<div ng-show="ShowCheck4">';
-        print $form->field($model, 'directionality_4_count')->textInput();
-        print '<small class="underlabel">Оставьте поле пустым или введите 0, чтобы не ограничивать количество детей в этой направленности.</small>
-        </div>';
-    } else {
-        print $form->field($model, 'directionality_4')->checkbox(['value' => 'Художественная', 'ng-model' => 'ShowCheck4', 'ng-checked' => '!ShowCheck4'])->label('Художественная');
-        print '<div ng-hide="ShowCheck4">';
-        print $form->field($model, 'directionality_4_count')->textInput();
-        print '<small class="underlabel">Оставьте поле пустым или введите 0, чтобы не ограничивать количество детей в этой направленности.</small>
-        </div>';
-    }
-    ?>
-
-    <?php
-    if (empty($model->directionality_5)) {
-        print $form->field($model, 'directionality_5')->checkbox(['value' => 'Туристско-краеведческая', 'ng-model' => 'ShowCheck5'])->label('Туристско-краеведческая');
-        print '<div ng-show="ShowCheck5">';
-        print $form->field($model, 'directionality_5_count')->textInput();
-        print '<small class="underlabel">Оставьте поле пустым или введите 0, чтобы не ограничивать количество детей в этой направленности.</small>
-        </div>';
-    } else {
-        print $form->field($model, 'directionality_5')->checkbox(['value' => 'Туристско-краеведческая', 'ng-model' => 'ShowCheck5', 'ng-checked' => '!ShowCheck5'])->label('Туристско-краеведческая');
-        print '<div ng-hide="ShowCheck5">';
-        print $form->field($model, 'directionality_5_count')->textInput();
-        print '<small class="underlabel">Оставьте поле пустым или введите 0, чтобы не ограничивать количество детей в этой направленности.</small>
-        </div>';
-    }
-    ?>
-
-    <?php
-    if (empty($model->directionality_6)) {
-        print $form->field($model, 'directionality_6')->checkbox(['value' => 'Социально-педагогическая', 'ng-model' => 'ShowCheck6'])->label('Социально-педагогическая');
-        print '<div ng-show="ShowCheck6">';
-        print $form->field($model, 'directionality_6_count')->textInput();
-        print '<small class="underlabel">Оставьте поле пустым или введите 0, чтобы не ограничивать количество детей в этой направленности.</small>
-        </div>';
-    } else {
-        print $form->field($model, 'directionality_6')->checkbox(['value' => 'Социально-педагогическая', 'ng-model' => 'ShowCheck6', 'ng-checked' => '!ShowCheck6'])->label('Социально-педагогическая');
-        print '<div ng-hide="ShowCheck6">';
-        print $form->field($model, 'directionality_6_count')->textInput();
-        print '<small class="underlabel">Оставьте поле пустым или введите 0, чтобы не ограничивать количество детей в этой направленности.</small>
-        </div>';
-    }
-    ?>
-
+    <?php foreach ($model::directionalityAttributes() as $attribute => $name) : ?>
+        <hr>
+        <?php if (!empty($model->{$attribute . '_count'})) : ?>
+            <?php $model->$attribute = 1; ?>
+        <?php endif; ?>
+            <div class="item">
+                <?= $form->field($model, $attribute)->checkbox([
+                    'class' => 'item-checkbox'
+                ])->label($name) ?>
+                <?php if (!empty($model->{$attribute . '_count'})) : ?>
+                    <div class="item-block">
+                <?php else : ?>
+                    <div class="item-block" style="display: none;">
+                <?php endif; ?>
+                    <?= $form->field($model, $attribute . '_count')->textInput(); ?>
+                    <small class="underlabel">
+                        Оставьте поле пустым или введите 0, чтобы не ограничивать
+                        количество детей в этой направленности.
+                    </small>
+                </div>
+            </div>
+    <?php endforeach; ?>
     <div class="form-group">
         <?php
         if (isset($roles['operators'])) {

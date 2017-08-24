@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\CertificateGroupQueue;
 use app\models\Certificates;
+use app\services\PayerService;
 use Yii;
 use yii\web\Response;
 use yii\web\Controller;
@@ -16,6 +17,15 @@ use app\models\search\CertGroupSearch;
  */
 class CertGroupController extends Controller
 {
+    private $payerService;
+
+    public function __construct($id, $module, PayerService $payerService, $config = [])
+    {
+        $this->payerService = $payerService;
+
+        parent::__construct($id, $module, $config);
+    }
+
     /**
      * Lists all CertGroup models.
      * @return mixed
@@ -42,7 +52,19 @@ class CertGroupController extends Controller
                     return ['output' => '', 'message' => 'Неверный пароль.'];
                 }
 
-                if ($model->oldAttributes['amount'] != $model->amount) {
+                if ($model->oldAttributes['nominal'] !== $model->nominal) {
+                    if (true !== ($result = $this->payerService->updateCertificateNominal($model->id, $model->nominal))) {
+                        return ['output' => '', 'message' => $result];
+                    }
+                }
+
+                if ($model->oldAttributes['nominal_f'] !== $model->nominal_f) {
+                    if (true !== ($result = $this->payerService->updateCertificateNominal($model->id, $model->nominal_f, '_f'))) {
+                        return ['output' => '', 'message' => $result];
+                    }
+                }
+
+                if ($model->oldAttributes['amount'] !== $model->amount) {
                     $certGroupCount = Certificates::getCountCertGroup($model->id);
                     $vacancies = $model->amount - $certGroupCount;
                     if ($vacancies > 0 && $queue = CertificateGroupQueue::getByCertGroup($model->id, $vacancies)) {
@@ -52,9 +74,11 @@ class CertGroupController extends Controller
                     }
                 }
 
-                $model->save(false);
+                if (false === $model->save(false)) {
+                    $out = ['output' => '', 'message' => 'Ошибка при сохранении.'];
+                }
             } else {
-                $out = ['output' => $output, 'message' => 'Ошибка при сохранении.'];
+                $out = ['output' => '', 'message' => 'Ошибка при сохранении.'];
             }
 
             return $out;

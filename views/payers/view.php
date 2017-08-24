@@ -211,6 +211,12 @@ $this->params['breadcrumbs'][] = $this->title;
             }
 
             if (null !== ($cooperation = $model->getCooperation())) {
+                if (count($cooperation->contracts) < 1) {
+                    echo $this->render(
+                        '../cooperate/reject-contract',
+                        ['cooperation' => $cooperation]
+                    );
+                }
                 if (null !== $cooperation->getDocumentUrl()) {
                     echo '<hr><div class="panel panel-default">
                         <div class="panel-body">' .
