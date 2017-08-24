@@ -275,6 +275,21 @@ class PayersController extends Controller
 
     }
 
+
+    public function actionSaveParams()
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $post = Yii::$app->request->post();
+            $model = Yii::$app->user->identity->payer;
+            if ($model->load($post) && $model->save(false, ['certificate_can_use_future_balance'])) {
+                return true;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Deletes an existing Payers model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
