@@ -164,20 +164,23 @@ $this->registerJs($js, $this::POS_END);
                                         'attribute' => 'price',
                                         'format' => 'raw',
                                         'value' => function ($data) {
-                                            $price = (new \yii\db\Query())
-                                                ->select(['price'])
-                                                ->from('years')
-                                                ->where(['id' => $data->id])
-                                                ->one();
-
-                                            if ($price['price'] > 0) {
+                                            /** @var \app\models\ProgrammeModule $data */
+                                            if ($data->price > 0) {
                                                 if ($data->open === 1) {
-                                                    return $price['price'];
+                                                    return $data->price;
                                                 } else {
-                                                    return Html::a($price['price'], Url::to(['years/update', 'id' => $data->id]), ['class' => 'btn btn-primary']);
+                                                    return Html::a(
+                                                        $data->price,
+                                                        Url::to(['years/update', 'id' => $data->id]),
+                                                        ['class' => 'btn btn-primary']
+                                                    );
                                                 }
                                             } else {
-                                                return Html::a('Установить цену', Url::to(['years/update', 'id' => $data->id]), ['class' => 'btn btn-success']);
+                                                return Html::a(
+                                                    'Установить цену',
+                                                    Url::to(['years/update', 'id' => $data->id]),
+                                                    ['class' => 'btn btn-success']
+                                                );
                                             }
                                         }
                                     ],

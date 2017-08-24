@@ -146,10 +146,7 @@ class ProgramsController extends Controller
     public function actionView($id)
     {
         $model = $this->findModel($id);
-        //$model->zab = explode(',', $model->zab);
-
         $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-
         if (isset($roles['organizations'])) {
             $organizations = new Organization();
             $organization = $organizations->getOrganization();
