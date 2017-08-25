@@ -160,7 +160,7 @@ class Organization extends \yii\db\ActiveRecord
             [['user_id', 'actual', 'type', 'bank_bik', 'korr_invoice', 'doc_type', 'max_child', 'amount_child', 'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'last', 'last_year_contract', 'certprogram', 'status', 'organizational_form', 'certificate_accounting_limit', 'contracts_count'], 'integer'],
             [['license_date', 'date_proxy', 'cratedate', 'accepted_date'], 'safe'],
             [['raiting'], 'number'],
-            [['about', 'site', 'phone', 'refuse_reason', 'anonymous_update_token'], 'string'],
+            [['about', 'site', 'phone', 'refuse_reason', 'anonymous_update_token', 'receiver'], 'string'],
             [['email'], 'email'],
             [['name', 'license_number', 'license_issued', 'license_issued_dat', 'bank_name', 'bank_sity', 'fio_contact', 'fio', 'position', 'position_min', 'address_legal', 'address_actual', 'geocode', 'full_name'], 'string', 'max' => 255],
             [['rass_invoice', 'ground', 'number_proxy'], 'string', 'max' => 45],
@@ -311,7 +311,7 @@ class Organization extends \yii\db\ActiveRecord
             'bank_name' => 'Наименование банка',
             'bank_bik' => 'БИК Банка',
             'bank_sity' => 'Город банка',
-            'korr_invoice' => 'Корр/Счет',
+            'korr_invoice' => 'К/с (л/с)',
             'rass_invoice' => 'Расчетный счет',
             'fio_contact' => 'Контактное лицо',
             'fio' => 'ФИО представителя поставщика',
@@ -350,6 +350,7 @@ class Organization extends \yii\db\ActiveRecord
             'children' => 'Число обучающихся',
             'programs' => 'Количество программ',
             'certificate_accounting_limit' => 'Лимит зачисления',
+            'receiver' => 'Получатель (необязательно)',
         ];
     }
 
@@ -510,7 +511,7 @@ class Organization extends \yii\db\ActiveRecord
 
     public function hasEmptyInfo()
     {
-        if (empty($this->contractSettings->organization_first_ending) || empty($this->contractSettings->organization_second_ending) || empty($this->contractSettings->director_name_ending)) {
+        if (((empty($this->contractSettings->organization_first_ending) || empty($this->contractSettings->organization_second_ending) || empty($this->contractSettings->director_name_ending)) && $this->type != self::TYPE_IP_WITHOUT_WORKERS) || (empty($this->contractSettings->organization_second_ending) && $this->type == self::TYPE_IP_WITHOUT_WORKERS)) {
             return true;
         }
 

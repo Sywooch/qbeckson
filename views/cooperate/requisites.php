@@ -13,7 +13,7 @@ $model->scenario = Cooperate::SCENARIO_REQUISITES;
 ?>
 <?php
 Modal::begin([
-    'header' => '<h2>Заявка на регистрацию организации</h2>',
+    'header' => '<h2>Реквизиты соглашения</h2>',
     'toggleButton' => [
         'tag' => 'a',
         'class' => 'btn btn-primary',

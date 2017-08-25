@@ -38,9 +38,15 @@ $this->registerJs($js, $this::POS_READY);
                 <p><label class="control-label">Наименование банка</label> - <?= $organization['bank_name'] ?></p>
                 <p><label class="control-label">Расчетный счет банка</label> - <?= $organization['rass_invoice'] ?></p>
                 <p><label class="control-label">БИК Банка</label> - <?= $organization['bank_bik'] ?></p>
-                <p><label class="control-label">Корр/Счет</label> - <?= $organization['korr_invoice'] ?></p>
+                <p><label class="control-label"><?= $organization->attributeLabels()['korr_invoice'] ?></label>
+                    - <?= $organization['korr_invoice'] ?></p>
                 <p><label class="control-label">Город банка</label> - <?= $organization['bank_sity'] ?></p>
                 <p><label class="control-label">Контактное лицо</label> - <?= $organization['fio_contact'] ?></p>
+                <?php if ($organization->type === Organization::TYPE_IP_WITHOUT_WORKERS):?>
+                <p class="pull-right">
+                    <a id="open-document-form-modal-0" data-toggle="modal" data-target="#w0" class="btn btn-primary">Создать шапку для договоров-оферт</a>
+                </p>
+                <?php endif; ?>
                 <p>
                     <?= Html::a('Редактировать', ['/organization/edit', 'id' => $organization['id']], ['class' => 'btn btn-success']) ?>
                 </p>
@@ -49,14 +55,14 @@ $this->registerJs($js, $this::POS_READY);
                 'id' => 'organization-form-pjax'
             ]); ?>
             <div class="col-md-8">
-                <?php $form = ActiveForm::begin([
-                    'id' => 'organization-form',
-                    'options' => [
-                        'data-pjax' => true
-                    ]
-                ]); ?>
                 <?php
-                if ($organization->type !== 4) {
+                if ($organization->type !== Organization::TYPE_IP_WITHOUT_WORKERS) {
+                    $form = ActiveForm::begin([
+                        'id' => 'organization-form',
+                        'options' => [
+                            'data-pjax' => true
+                        ]
+                    ]);
                     $doc_type = 'none';
                     if ($organization->doc_type === 1) {
                         $doc_type = 'block';
@@ -72,7 +78,7 @@ $this->registerJs($js, $this::POS_READY);
                     <div class="form-group field-organization-license">
                         <label class="control-label" for="organization-type">
                         Сведения о лицензии от ' . date('m.d.Y', strtotime($organization->license_date)) .
-                        ' №'.$organization->license_number . ':</label>
+                        ' №' . $organization->license_number . ':</label>
                         <div class="container-fluid">
                             <div class="row">
                                 <div class="col-md-12 license">

@@ -143,7 +143,7 @@ class GroupsController extends Controller
                         if ($flag) {
                             $transaction->commit();
 
-                            return $this->redirect(['personal/organization-groups']);
+                            return $this->redirect(['programs/view', 'id' => $model->program_id]);
                         }
                     } catch (Exception $e) {
                         $transaction->rollBack();
@@ -300,6 +300,7 @@ class GroupsController extends Controller
             } else {
                 Model::loadMultiple($groupClasses, Yii::$app->request->post());
                 if ($model->validate() && Model::validateMultiple($groupClasses)) {
+                    $flag = true;
                     $transaction = Yii::$app->db->beginTransaction();
                     try {
                         if ($model->save(false)) {
@@ -321,7 +322,7 @@ class GroupsController extends Controller
                         if ($flag) {
                             $transaction->commit();
 
-                            return $this->redirect(['personal/organization-groups']);
+                            return $this->redirect(['programs/view', 'id' => $model->program_id]);
                         }
                     } catch (Exception $e) {
                         $transaction->rollBack();
