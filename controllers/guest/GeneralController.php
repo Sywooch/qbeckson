@@ -26,7 +26,7 @@ class GeneralController extends Controller
         ]);
         $provider = $model->search(Yii::$app->request->queryParams);
 
-        return $this->render('../programs', [
+        return $this->render('programs', [
             'model' => $model,
             'provider' => $provider,
         ]);
@@ -38,7 +38,7 @@ class GeneralController extends Controller
      */
     public function actionProgram($id): string
     {
-        return $this->render('../program', [
+        return $this->render('program', [
             'model' => Programs::findOne($id)
         ]);
     }
@@ -53,7 +53,7 @@ class GeneralController extends Controller
         ]);
         $provider = $model->search(Yii::$app->request->queryParams);
 
-        return $this->render('../organizations', [
+        return $this->render('organizations', [
             'model' => $model,
             'provider' => $provider,
         ]);
@@ -65,7 +65,7 @@ class GeneralController extends Controller
      */
     public function actionOrganization($id): string
     {
-        return $this->render('../organization', [
+        return $this->render('organization', [
             'model' => Organization::findOne($id)
         ]);
     }
