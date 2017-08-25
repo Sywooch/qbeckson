@@ -1096,6 +1096,7 @@ class PersonalController extends Controller
             'verification' => 2,
             'hours' => '0,2000',
             'rating' => '0,100',
+            'mun' => Yii::$app->user->identity->mun_id,
             'modelName' => '',
         ]);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
