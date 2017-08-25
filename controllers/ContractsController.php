@@ -1064,7 +1064,7 @@ EOD;
 
 			<p>р/с: ' . $organization->rass_invoice . '</p>
 			
-			' . (empty($organization->receiver) ?: "<p>Получатель: " . $organization->receiver . "</p>") . '
+			' . (empty($organization->receiver) ? '' : "<p>Получатель: " . $organization->receiver . "</p>") . '
             
             <p>ИНН: ' . $organization->inn . '</p>
             
