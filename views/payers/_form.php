@@ -59,19 +59,19 @@ $this->registerJs($js, $this::POS_READY);
 
     <?= $form->field($model, 'code')->textInput(!isset($roles['operators']) ? ['readOnly' => true] : ['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'name')->textInput(!isset($roles['operators']) ? ['readOnly' => true] : ['maxlength' => true]) ?>
+    <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'name_dat')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'OGRN')->textInput(!isset($roles['operators']) ? ['readOnly' => true] : ['maxlength' => true]) ?>
+    <?= $form->field($model, 'OGRN')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'INN')->textInput(!isset($roles['operators']) ? ['readOnly' => true] : ['maxlength' => true]) ?>
+    <?= $form->field($model, 'INN')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'KPP')->textInput(!isset($roles['operators']) ? ['readOnly' => true] : ['maxlength' => true]) ?>
+    <?= $form->field($model, 'KPP')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'OKPO')->textInput(!isset($roles['operators']) ? ['readOnly' => true] : ['maxlength' => true]) ?>
+    <?= $form->field($model, 'OKPO')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'address_legal')->textInput(!isset($roles['operators']) ? ['readOnly' => true] : ['maxlength' => true]) ?>
+    <?= $form->field($model, 'address_legal')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'address_actual')->textInput(['maxlength' => true]) ?>
 
