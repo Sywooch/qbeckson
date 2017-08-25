@@ -511,7 +511,7 @@ class Organization extends \yii\db\ActiveRecord
 
     public function hasEmptyInfo()
     {
-        if (empty($this->contractSettings->organization_first_ending) || empty($this->contractSettings->organization_second_ending) || empty($this->contractSettings->director_name_ending)) {
+        if (((empty($this->contractSettings->organization_first_ending) || empty($this->contractSettings->organization_second_ending) || empty($this->contractSettings->director_name_ending)) && $this->type != self::TYPE_IP_WITHOUT_WORKERS) || (empty($this->contractSettings->organization_second_ending) && $this->type == self::TYPE_IP_WITHOUT_WORKERS)) {
             return true;
         }
 
