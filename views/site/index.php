@@ -10,14 +10,40 @@ use yii\bootstrap\ActiveForm;
 $this->title = 'Портал сопровождения персонифицированного финансирования дополнительного образования детей';
 ?>
 <div class="site-index">
-
-    <div class="jumbotron">
-
-        <p class="lead"><?= $this->title ?></p>
-        
-    </div>
-
     <div class="body-content">
+        <div class="row">
+            <a href="<?= Url::to(['guest/general/programs']) ?>">
+                <div class="col-md-offset-3 col-md-3">
+                    <div class="text-center container-fluid box-hover">
+                        <span class="row">
+                            <span class="col-md-12">
+                                <p class="lead">Реестр образовательных программ</p>
+                                <!--<small>список програм, созданный организациями</small>-->
+                            </span>
+                            <!--<div class="pull-right">
+                                <i class="glyphicon glyphicon-chevron-right"></i>
+                            </div>-->
+                        </span>
+                    </div>
+                </div>
+            </a>
+            <a href="<?= Url::to(['guest/general/organizations']) ?>">
+                <div class="col-md-3">
+                    <div class="text-center container-fluid box-hover">
+                        <span class="row">
+                            <span class="col-md-12">
+                                <p class="lead">Реестр поставщиков образовательных услуг</p>
+                                <!--<small>список организаций</small>-->
+                            </span>
+                            <!--<div class="pull-right">
+                                <i class="glyphicon glyphicon-chevron-right"></i>
+                            </div>-->
+                        </span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <hr>
         <div class="row">
             <div class="col-md-4 col-md-offset-4">
                 <?php $form = ActiveForm::begin([
@@ -43,10 +69,8 @@ $this->title = 'Портал сопровождения персонифицир
                 </div>
             </div>
         </div>
-
     </div>
 </div>
-
 <!-- Modal 2 -->
 <div class="modal fade" id="information-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
@@ -69,7 +93,6 @@ $this->title = 'Портал сопровождения персонифицир
         </div>
     </div>
 </div>
-
 <!-- Modal 1 -->
 <div class="modal fade" id="create-organization-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">

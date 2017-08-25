@@ -17,6 +17,7 @@ use yii\db\ActiveRecord;
  * @property integer $price
  * @property integer $normative_price
  * @property integer $maxchild
+ * @property integer $minchild
  *
  * @property Programs $program
  * @property Contracts[] $activeContracts
@@ -109,14 +110,6 @@ class ProgrammeModule extends ActiveRecord
     {
         return $this->hasMany(Contracts::class, ['group_id' => 'id'])
             ->via('groups');
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getOldAddresses()
-    {
-        return $this->hasMany(ProgramModuleAddress::class, ['program_module_id' => 'id']);
     }
 
     /**
