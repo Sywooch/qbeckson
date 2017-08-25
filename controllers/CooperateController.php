@@ -183,6 +183,23 @@ class CooperateController extends Controller
         return $this->goBack();
     }
 
+    public function actionPaymentLimit($id)
+    {
+        $model = $this->findModel($id);
+        $model->scenario = Cooperate::SCENARIO_LIMIT;
+
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->save()) {
+                Yii::$app->session->setFlash('success', 'Вы успешно изменили максимальную сумму.');
+
+                return $this->redirect(['organization/view', 'id' => $model->organization_id]);
+            }
+            Yii::$app->session->setFlash('error', 'Возникла ошибка при заполнении реквизитов.');
+        }
+
+        return $this->goBack();
+    }
+
     /**
      * Ввод реквизитов органзацией
      *

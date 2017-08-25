@@ -347,10 +347,10 @@ class OrganizationController extends Controller
 
         $model = $this->findModel($organization['id']);
 
-        if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['/personal/organization-info', 'id' => $model->id]);
         }
-
+        
         return $this->render('edit', [
             'model' => $model,
         ]);

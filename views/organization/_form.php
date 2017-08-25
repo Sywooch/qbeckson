@@ -123,6 +123,8 @@ $readonlyField = !Yii::$app->user->can('operators') && !Yii::$app->user->isGuest
         <?= $form->field($model, 'korr_invoice')->textInput() ?>
 
         <?= $form->field($model, 'rass_invoice')->textInput(['maxlength' => true]) ?>
+
+        <?= $form->field($model, 'receiver')->textInput(['maxlength' => true]) ?>
     </div>
 
     <?= $form->field($model, 'phone')->textInput(['maxlength' => true]) ?>

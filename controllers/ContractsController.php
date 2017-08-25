@@ -1061,7 +1061,7 @@ EOD;
 
 			<p>БИК: ' . $organization->bank_bik . '</p>
 
-			<p>к/с: ' . $organization->korr_invoice . '</p>
+			<p>к/с (л/с): ' . $organization->korr_invoice . '</p>
 
 			<p>р/с: ' . $organization->rass_invoice . '</p>
             
