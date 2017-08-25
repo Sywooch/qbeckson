@@ -311,7 +311,7 @@ class Organization extends \yii\db\ActiveRecord
             'bank_name' => 'Наименование банка',
             'bank_bik' => 'БИК Банка',
             'bank_sity' => 'Город банка',
-            'korr_invoice' => 'Корр/Счет',
+            'korr_invoice' => 'К/с (л/с)',
             'rass_invoice' => 'Расчетный счет',
             'fio_contact' => 'Контактное лицо',
             'fio' => 'ФИО представителя поставщика',

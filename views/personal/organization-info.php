@@ -38,7 +38,7 @@ $this->registerJs($js, $this::POS_READY);
                 <p><label class="control-label">Наименование банка</label> - <?= $organization['bank_name'] ?></p>
                 <p><label class="control-label">Расчетный счет банка</label> - <?= $organization['rass_invoice'] ?></p>
                 <p><label class="control-label">БИК Банка</label> - <?= $organization['bank_bik'] ?></p>
-                <p><label class="control-label">Корр/Счет</label> - <?= $organization['korr_invoice'] ?></p>
+                <p><label class="control-label"><?= $organization->attributeLabels()['korr_invoice'] ?></label> - <?= $organization['korr_invoice'] ?></p>
                 <p><label class="control-label">Город банка</label> - <?= $organization['bank_sity'] ?></p>
                 <p><label class="control-label">Контактное лицо</label> - <?= $organization['fio_contact'] ?></p>
                 <p>

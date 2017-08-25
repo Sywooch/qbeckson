@@ -62,6 +62,7 @@ $this->params['breadcrumbs'][] = ['label' => 'Персональная инфо�
                 </p>
             </div>
             <div role="tabpanel" class="tab-pane" id="future">
+                <?php if ($certificate->payer->certificate_can_use_future_balance > 0): ?>
                 <p class="lead">Номинал сертификата на будущий период<br>
                     <strong class="bignumbers"><?= $certificate->nominal_f ?></strong>
                 </p>
@@ -71,6 +72,9 @@ $this->params['breadcrumbs'][] = ['label' => 'Персональная инфо�
                 <p class="lead">Зарезервировано на оплату договоров на будущий период<br>
                     <strong class="bignumbers"><?= $certificate->rezerv_f ?></strong>
                 </p>
+                <?php else: ?>
+                    <p>Номинал на будущий период пока не определен.</p>
+                <?php endif; ?>
             </div>
         </div>
         </div>
