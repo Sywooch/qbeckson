@@ -71,7 +71,7 @@ $municipality = [
     'attribute' => 'mun',
     'value' => 'municipality.name',
     'label' => 'Муниципалитет',
-    'filter' => ArrayHelper::map(Mun::find()->all(), 'id', 'name'),
+    'filter' => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
 ];
 $price = [
     'label' => 'Цена*',
@@ -102,14 +102,14 @@ $columns = [
     $name,
     $municipality,
     $directivity,
-    $year,
+    //$year,
     $hours,
     $ageGroupMin,
     $ageGroupMax,
     $rating,
     $zab,
-    $price,
-    $normativePrice,
+    //$price,
+    //$normativePrice,
     $actions,
 ];
 

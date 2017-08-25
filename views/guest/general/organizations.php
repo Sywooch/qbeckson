@@ -20,7 +20,7 @@ $municipality = [
     'attribute' => 'mun',
     'value' => 'municipality.name',
     'label' => 'Муниципалитет',
-    'filter' => ArrayHelper::map(Mun::find()->all(), 'id', 'name'),
+    'filter' => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
 ];
 $type = [
     'attribute' => 'type',
@@ -80,10 +80,10 @@ $columns = [
     $municipality,
     $type,
     $programs,
-    $children,
-    $max_child,
+    //$children,
+    //$max_child,
     $raiting,
-    $actual,
+    //$actual,
     $actions,
 ];
 

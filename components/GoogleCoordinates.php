@@ -27,19 +27,17 @@ class GoogleCoordinates
     /**
      * @return string
      */
-    public function getLat()
+    public function getLat(): string
     {
-        return isset($this->getResponse()->results[0]->geometry->location->lat) ?
-            $this->getResponse()->results[0]->geometry->location->lat : '';
+        return $this->getResponse()->results[0]->geometry->location->lat ?? '';
     }
 
     /**
      * @return string
      */
-    public function getLng()
+    public function getLng(): string
     {
-        return isset($this->getResponse()->results[0]->geometry->location->lng) ?
-            $this->getResponse()->results[0]->geometry->location->lng : '';
+        return $this->getResponse()->results[0]->geometry->location->lng ?? '';
     }
 
     /**
