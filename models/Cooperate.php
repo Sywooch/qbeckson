@@ -50,6 +50,7 @@ class Cooperate extends ActiveRecord
     const SCENARIO_REJECT = 'reject';
     const SCENARIO_APPEAL = 'appeal';
     const SCENARIO_REQUISITES = 'requisites';
+    const SCENARIO_LIMIT = 'limit';
 
     const DOCUMENT_TYPE_GENERAL = 'general';
     const DOCUMENT_TYPE_EXTEND = 'extend';
@@ -76,9 +77,8 @@ class Cooperate extends ActiveRecord
     public function scenarios()
     {
         $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_REJECT] = $scenarios[self::SCENARIO_APPEAL] =
-        $scenarios[self::SCENARIO_REQUISITES] =
-            $scenarios[self::SCENARIO_DEFAULT];
+        $scenarios[self::SCENARIO_REJECT] = $scenarios[self::SCENARIO_APPEAL] = $scenarios[self::SCENARIO_REQUISITES] = $scenarios[self::SCENARIO_DEFAULT];
+        $scenarios[self::SCENARIO_LIMIT] = ['total_payment_limit'];
 
         return $scenarios;
     }
@@ -94,6 +94,7 @@ class Cooperate extends ActiveRecord
             [['reject_reason'], 'required', 'on' => self::SCENARIO_REJECT],
             [['appeal_reason'], 'required', 'on' => self::SCENARIO_APPEAL],
             [['date', 'number'], 'required', 'on' => self::SCENARIO_REQUISITES],
+            [['total_payment_limit'], 'required', 'on' => self::SCENARIO_LIMIT],
 
             [['organization_id', 'payer_id', 'status'], 'integer'],
             [['date', 'date_dissolution'], 'safe'],
@@ -236,6 +237,7 @@ class Cooperate extends ActiveRecord
             'reject_reason' => 'Причина отказа',
             'appeal_reason' => 'Жалоба',
             'created_date' => 'Дата подачи заявки',
+            'total_payment_limit' => 'Максимальная сумма',
         ];
     }
 

@@ -18,7 +18,7 @@ Modal::begin([
     ],
 ]);
 ?>
-<p class="lead">Вы уверенны, что хотите расторнуть соглашение?</p>
+<p class="lead">Вы уверены, что хотите расторнуть соглашение?</p>
 <?php $form = ActiveForm::begin([
     'id' => 'cooperate-reject-contract-form',
     'action' => ['cooperate/reject-contract', 'id' => $cooperation->id]

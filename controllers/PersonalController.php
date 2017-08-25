@@ -595,6 +595,7 @@ class PersonalController extends Controller
     public function actionOrganizationInfo()
     {
         $organization = Yii::$app->user->identity->organization;
+
         $organizationSettingsForm = new OrganizationSettingsForm();
 
         $model = $organization->contractSettings ??

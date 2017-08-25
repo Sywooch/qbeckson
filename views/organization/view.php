@@ -385,7 +385,7 @@ $this->params['breadcrumbs'][] = $this->title;
             echo Html::a('Назад', ['personal/payer-organizations'], ['class' => 'btn btn-primary']);
 
             if (null !== ($cooperation = $model->getCooperation())) {
-                if (count($cooperation->contracts) < 1) {
+                if (count($cooperation->contracts) < 1 && $cooperation->status === Cooperate::STATUS_ACTIVE) {
                     echo $this->render(
                         '../cooperate/reject-contract',
                         ['cooperation' => $cooperation]
@@ -427,6 +427,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     $cooperation->status === Cooperate::STATUS_ACTIVE
                 ) {
                     echo '<hr>';
+                    if ($cooperation->status == Cooperate::STATUS_ACTIVE && $cooperation->document_type == Cooperate::DOCUMENT_TYPE_EXTEND && Yii::$app->user->can('payers')) {
+                        echo '<div class="pull-right">Установлена максимальная сумма по договору - ' . $this->render(
+                            '../cooperate/payment-limit',
+                            [
+                                'model' => $cooperation,
+                            ]
+                        ) . '</div>';
+                    }
                     echo $this->render(
                         '../cooperate/requisites',
                         [

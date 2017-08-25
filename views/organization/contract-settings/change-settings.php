@@ -14,8 +14,8 @@ Modal::begin([
     'toggleButton' => [
         'tag' => 'a',
         'id' => 'open-document-form-modal',
-        'label' => 'Созранить',
-        'style' => 'display: none'
+        'label' => 'Сохранить',
+        'style' => 'display: none;'
     ],
 ]);
 ?>

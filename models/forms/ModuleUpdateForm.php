@@ -184,7 +184,7 @@ class ModuleUpdateForm extends Model
         $this->price = $this->model->price ?: null;
         if ($group = $this->model->groups[0]) {
             $this->dateFrom = date('d.m.Y', strtotime($group->datestart));
-            $this->dateTo = date('d.n.Y', strtotime($group->datestop));
+            $this->dateTo = date('d.m.Y', strtotime($group->datestop));
         }
     }
 
