@@ -113,9 +113,7 @@ class YearsController extends Controller
     public function actionUpdate($id)
     {
         $model = new ModuleUpdateForm($id);
-        $this->performAjaxValidation($model);
-
-        if ($model->load(Yii::$app->request->post())) {
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             if ($model->save()) {
                 return $this->redirect(['programs/view', 'id' => $model->getModel()->program->id]);
             } else {
@@ -124,8 +122,17 @@ class YearsController extends Controller
         }
 
         return $this->render('update', [
-            'model' => $model,
-            'settings' => Yii::$app->operator->identity->settings,
+            'model' => $model
+        ]);
+    }
+
+    public function actionUpdateRequest($id)
+    {
+        $model = new ModuleUpdateForm($id);
+        $model->load(Yii::$app->request->post());
+
+        return $this->render('update', [
+            'model' => $model
         ]);
     }
 
