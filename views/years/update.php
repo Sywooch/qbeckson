@@ -72,11 +72,11 @@ $this->registerJs($js, $this::POS_READY);*/
                     договор будет заключаться:
                 </p>
                 <p>
-                    - при заключении договора в текущем периоде - на <?= round($model->calculateCurrentPercent()) ?>
+                    - при заключении договора в текущем периоде (с <?= Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_from) ?> до <?= Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_to) ?>) - на <?= round($model->calculateCurrentPercent()) ?>
                     % стоимости модуля;
                 </p>
                 <p>
-                    - при заключении договора на будущий период - на <?= round($model->calculateFuturePercent(), 2) ?>
+                    - при заключении договора на будущий период (с <?= Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_from) ?> до <?= Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_to) ?>) - на <?= round($model->calculateFuturePercent(), 2) ?>
                     % стоимости модуля.
                 </p>
                 <p>
