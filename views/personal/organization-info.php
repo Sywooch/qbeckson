@@ -42,6 +42,11 @@ $this->registerJs($js, $this::POS_READY);
                     - <?= $organization['korr_invoice'] ?></p>
                 <p><label class="control-label">Город банка</label> - <?= $organization['bank_sity'] ?></p>
                 <p><label class="control-label">Контактное лицо</label> - <?= $organization['fio_contact'] ?></p>
+                <?php if ($organization->type === Organization::TYPE_IP_WITHOUT_WORKERS):?>
+                <p class="pull-right">
+                    <a id="open-document-form-modal-0" data-toggle="modal" data-target="#w0" class="btn btn-primary">Создать шапку для договоров-оферт</a>
+                </p>
+                <?php endif; ?>
                 <p>
                     <?= Html::a('Редактировать', ['/organization/edit', 'id' => $organization['id']], ['class' => 'btn btn-success']) ?>
                 </p>
@@ -51,7 +56,7 @@ $this->registerJs($js, $this::POS_READY);
             ]); ?>
             <div class="col-md-8">
                 <?php
-                if ($organization->type !== 4) {
+                if ($organization->type !== Organization::TYPE_IP_WITHOUT_WORKERS) {
                     $form = ActiveForm::begin([
                         'id' => 'organization-form',
                         'options' => [
