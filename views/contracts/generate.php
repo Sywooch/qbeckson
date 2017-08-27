@@ -93,7 +93,7 @@ $operatorSettings = Yii::$app->operator->identity->settings;
         <?= Html::a('Отмена', Url::to(['contracts/verificate', 'id' => $model->id]), ['class' => 'btn btn-danger']); ?>
         <?= Html::a('Предпросмотр договора', Url::to(['contracts/mpdf', 'id' => $model->id]), ['class' => 'btn btn-primary']); ?>
         <?php if (Yii::$app->user->identity->organization->hasEmptyInfo()): ?>
-        <p class="text-danger">Заполните "данные для договора" (меню Информация - Сведения об организации)!</p>
+        <p class="text-danger" style="display: inline;">Заполните "данные для договора" (меню Информация - Сведения об организации)!</p>
         <?php else: ?>
         <?php Modal::begin([
             'header' => false,
