@@ -63,11 +63,11 @@ class PayersSearch extends Payers
         $query = Payers::find()
             ->select([
                 'payers.*',
-                'COUNT(certificates.id) as certCount',
+                //'COUNT(certificates.id) as certCount',
                 'COUNT(cooperate.id) as coopCount'
             ])
             ->joinWith([
-                'certificates',
+                //'certificates',
                 'cooperates'
             ])
             ->andWhere(['operator_id' => Yii::$app->operator->identity->id]);
