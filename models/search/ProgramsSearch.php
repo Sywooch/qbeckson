@@ -89,9 +89,7 @@ class ProgramsSearch extends Programs
                 'modules'
             ]);
 
-        if (!Yii::$app->user->isGuest) {
-            $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
-        }
+        $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
 
         if ($this->isMunicipalTask) {
             $query->andWhere(['>', 'programs.is_municipal_task', 0]);

@@ -79,9 +79,7 @@ class OrganizationSearch extends Organization
                 'contracts',
             ]);
 
-        if (!Yii::$app->user->isGuest) {
-            $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
-        }
+        $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
 
         if ($this->possibleForSuborder === true) {
             $query->andWhere('mun.id = ' . Yii::$app->user->identity->payer->municipality->id)
