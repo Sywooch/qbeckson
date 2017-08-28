@@ -46,6 +46,8 @@ use yii\helpers\ArrayHelper;
  * @property string $certification_date
  * @property array $activity_ids
  * @property integer $direction_id
+ * @property integer $age_group_min
+ * @property integer $age_group_max
  *
  * @property Contracts[] $contracts
  * @property Favorites[] $favorites

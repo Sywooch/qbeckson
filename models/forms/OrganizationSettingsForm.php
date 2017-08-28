@@ -59,7 +59,7 @@ class OrganizationSettingsForm extends Model
     /**
      * @return string
      */
-    public function generateHeader()
+    public function generateHeader(): string
     {
         if (null === $this->header) {
             $organization = $this->getOrganization();

@@ -5,7 +5,6 @@ namespace app\components;
 use Yii;
 use app\models\UserIdentity;
 use yii\base\Component;
-use yii\base\Event;
 use yii\web\BadRequestHttpException;
 use app\models\Operators;
 
