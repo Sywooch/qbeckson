@@ -156,12 +156,9 @@ class PayersController extends Controller
 
         if ($user->load(Yii::$app->request->post())) {
             if ($model->load(Yii::$app->request->post())) {
-
                 //$model->mun = implode(",", $model->mun);
+                $model->directionality = $model->directionality_1rob . "," . $model->directionality_1 . "," . $model->directionality_2 . "," . $model->directionality_3 . "," . $model->directionality_4 . "," . $model->directionality_5 . "," . $model->directionality_6;
 
-                $model->directionality = $model->directionality_1 . "," . $model->directionality_2 . "," . $model->directionality_3 . "," . $model->directionality_4 . "," . $model->directionality_5 . "," . $model->directionality_6;
-
-                $model->validate();
                 $model->save();
             }
 
@@ -188,12 +185,9 @@ class PayersController extends Controller
         }
 
         if ($model->load(Yii::$app->request->post())) {
+            $model->populateDirections();
 
-            //$model->mun = implode(",", $model->mun);
-
-            $model->directionality = $model->directionality_1rob . "," . $model->directionality_1 . "," . $model->directionality_2 . "," . $model->directionality_3 . "," . $model->directionality_4 . "," . $model->directionality_5 . "," . $model->directionality_6;
-
-            if ($model->validate() && $model->save()) {
+            if ($model->save()) {
                 return $this->redirect(['/payers/view', 'id' => $model->id]);
             }
         }
