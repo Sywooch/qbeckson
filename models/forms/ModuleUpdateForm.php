@@ -85,7 +85,7 @@ class ModuleUpdateForm extends Model
      */
     public function validateData($attribute)
     {
-        if (count($this->getModel()->getContracts()->andWhere(['contracts.status' => [0,1,3]])->all()) > 0) {
+        if ($this->getModel()->getContracts()->andWhere(['contracts.status' => [0,1,3]])->count() > 0) {
             $this->addError($attribute, 'Нельзя изменить цену программы, есть заявка на эту программу');
         }
     }
@@ -161,7 +161,6 @@ class ModuleUpdateForm extends Model
                 $certGroup->nominal_f / $this->calculateFuturePercent() * 100
             );
         }
-        //$this->price = floor($recommendedPrice);
 
         return $recommendedPrice;
     }

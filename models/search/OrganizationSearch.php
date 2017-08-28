@@ -29,7 +29,7 @@ class OrganizationSearch extends Organization
      */
     public function formName()
     {
-        return $this->modelName;
+        return $this->modelName ?: '';
     }
 
     /**
@@ -79,7 +79,9 @@ class OrganizationSearch extends Organization
                 'contracts',
             ]);
 
-        $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
+        if (!Yii::$app->user->isGuest) {
+            $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
+        }
 
         if ($this->possibleForSuborder === true) {
             $query->andWhere('mun.id = ' . Yii::$app->user->identity->payer->municipality->id)
@@ -92,7 +94,6 @@ class OrganizationSearch extends Organization
                 ->andWhere('organization_payer_assignment.payer_id = ' . Yii::$app->user->identity->payer->id)
                 ->andWhere('organization_payer_assignment.status = ' . OrganizationPayerAssignment::STATUS_ACTIVE . ' OR organization_payer_assignment.status = ' . OrganizationPayerAssignment::STATUS_PENDING);
         }
-        // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

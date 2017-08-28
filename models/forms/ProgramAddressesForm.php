@@ -44,7 +44,7 @@ class ProgramAddressesForm extends Model
     /**
      * @return bool
      */
-    public function save()
+    public function save(): bool
     {
         if ($this->getModel() && $this->validate()) {
             foreach ($this->isChecked as $key => $record) {
@@ -78,7 +78,7 @@ class ProgramAddressesForm extends Model
     }
 
     /**
-     * @return Programs
+     * @return Programs|null
      */
     public function getModel()
     {
@@ -88,7 +88,7 @@ class ProgramAddressesForm extends Model
     /**
      * @param Programs $model
      */
-    public function setModel($model)
+    public function setModel(Programs $model)
     {
         $this->model = $model;
         $this->loadModel();

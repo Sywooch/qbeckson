@@ -8,7 +8,7 @@ use app\models\Organization;
 use app\models\Contracts;
 use app\models\Certificates;
 use app\models\Informs;
-use app\models\OrganizationSearch;
+use app\models\search\OrganizationSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\ForbiddenHttpException;

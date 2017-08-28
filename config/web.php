@@ -333,6 +333,12 @@ $config = [
                     'actions' => ['create', 'request', 'reject-request']
                 ],
             ],
+            'guest/general' => [
+                [
+                    'allow' => true,
+                    'roles' => ['?']
+                ],
+            ]
         ],
     ],
 

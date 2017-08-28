@@ -1,5 +1,6 @@
 <?php
 
+use app\models\UserIdentity;
 use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
@@ -81,11 +82,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     'label' => 'Основной район (округ)',
                     'value' => function ($model) {
                         /** @var \app\models\Organization $model */
-                        return Html::a(
-                            $model->municipality->name,
-                            ['mun/view', 'id' => $model->municipality->id],
-                            ['target' => '_blank', 'data-pjax' => '0']
-                        );
+                        if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
+                            return $model->municipality->name;
+                        } else {
+                            return Html::a(
+                                $model->municipality->name,
+                                ['mun/view', 'id' => $model->municipality->id],
+                                ['target' => '_blank', 'data-pjax' => '0']
+                            );
+                        }
                     },
                     'format' => 'raw',
                 ],
@@ -204,7 +209,7 @@ $this->params['breadcrumbs'][] = $this->title;
     if (isset($roles['certificate'])) {
         echo DetailView::widget([
         'model' => $model,
-        'attributes' => [   
+        'attributes' => [
             'max_child',
             [
                 'label' => 'Число обучающихся',

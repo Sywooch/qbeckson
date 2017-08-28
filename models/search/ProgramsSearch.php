@@ -49,7 +49,7 @@ class ProgramsSearch extends Programs
     /**
      * @return array
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return array_merge(parent::attributeLabels(), [
             'age_group_min' => 'Возраст от',
@@ -78,16 +78,20 @@ class ProgramsSearch extends Programs
      */
     public function search($params, $pageSize = 50)
     {
-        $query = Programs::find()->select([
-            'programs.*',
-            'SUM(years.hours) as countHours'
-        ])
+        $query = Programs::find()
+            ->select([
+                'programs.*',
+                'SUM(years.hours) as countHours'
+            ])
             ->joinWith([
                 'municipality',
                 'organization',
                 'modules'
-            ])
-            ->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
+            ]);
+
+        if (!Yii::$app->user->isGuest) {
+            $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
+        }
 
         if ($this->isMunicipalTask) {
             $query->andWhere(['>', 'programs.is_municipal_task', 0]);
@@ -98,8 +102,6 @@ class ProgramsSearch extends Programs
                 ['programs.is_municipal_task' => 0]
             ]);
         }
-
-
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
