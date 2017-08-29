@@ -2,17 +2,22 @@
 
 namespace app\controllers;
 
+use yii\base\Model;
 use app\models\CertificateInformation;
+use app\models\Help;
 use app\models\Mun;
+use app\models\search\HelpSearch;
 use app\models\SettingsSearchFilters;
 use app\models\UserSearchFiltersAssignment;
 use Yii;
 use yii\captcha\CaptchaAction;
 use yii\filters\AccessControl;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\helpers\PermissionHelper;
+use yii\web\NotFoundHttpException;
 
 class SiteController extends Controller
 {
@@ -62,6 +67,41 @@ class SiteController extends Controller
 
         return $this->render('information', [
             'result' => $result,
+        ]);
+    }
+
+    public function actionManualsRequired()
+    {
+        $userRoles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
+        $searchModel = new HelpSearch(['role' => array_shift($userRoles)]);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $models = $dataProvider->models;
+        foreach ($models as $model) {
+            $model->scenario = Help::SCENARIO_CHECK;
+            $model->getCheckes();
+        }
+
+        if (Model::loadMultiple($models, Yii::$app->request->post()) && Model::validateMultiple($models)) {
+            foreach ($models as $model) {
+                $model->saveCheckes();
+            }
+
+            return $this->redirect('index');
+        }
+
+        return $this->render('manuals-required', [
+            'models' => $models,
+        ]);
+    }
+
+    public function actionManual($id)
+    {
+        if (!$model = Help::findOne($id)) {
+            throw new NotFoundHttpException('Такой страницы не существует.');
+        }
+
+        return $this->render('manual', [
+            'model' => $model,
         ]);
     }
 
