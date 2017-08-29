@@ -904,8 +904,11 @@ EOD;
             }
         }
 
-        $start_edu_contract = explode("-", $model->start_edu_contract);
-        $datestop = explode("-", $group->datestop);
+        $finishStudyDate = $model->period === Contracts::CURRENT_REALIZATION_PERIOD ? Yii::$app->operator->identity->settings->current_program_date_to : Yii::$app->operator->identity->settings->future_program_date_to;
+
+        if ($finishStudyDate > $group->datestop) {
+            $finishStudyDate = $group->datestop;
+        }
 
         $text = '
         <div style="font-size: ' . $model->fontsize . '" >
@@ -932,7 +935,7 @@ EOD;
 	2.1. Исполнитель обязуется оказать Обучающемуся образовательную услугу по реализации ' . $chast . ' дополнительной общеобразовательной программы ' . $directivity . ' направленности «' . $program->name . '» '. ((null === $model->module->name) ? ('модуля (года) - ' . $model->module->year) : 'модуля: «' . $model->module->name . '»') . ' (далее – Образовательная услуга, Программа), в пределах учебного плана программы, предусмотренного на период обучения по Договору.<br>
     2.2. Форма обучения и используемые образовательные технологии: ' . $programform . '<br>
 	2.3. Заказчик обязуется содействовать получению Обучающимся образовательной услуги' . $text1 . '.<br>
-	2.4. ' . $text144 . ' Период обучения по Договору: с ' . $start_edu_contract[2] . '.' . $start_edu_contract[1] . '.' . $start_edu_contract[0] . ' по ' . $datestop[2] . '.' . $datestop[1] . '.' . $datestop[0] . '.
+	2.4. ' . $text144 . ' Период обучения по Договору: с ' . Yii::$app->formatter->asDate($model->start_edu_contract) . ' по ' . Yii::$app->formatter->asDate($finishStudyDate) . '.
 </div>
 
 <p style="text-align:center">III. Права Исполнителя, Заказчика и Обучающегося</p>
