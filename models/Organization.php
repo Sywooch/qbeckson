@@ -157,10 +157,10 @@ class Organization extends \yii\db\ActiveRecord
              'whenClient' => "function (attribute, value) {
                  return $('#organization-type').val() != 4;
             }"],
-            [['user_id', 'actual', 'type', 'bank_bik', 'korr_invoice', 'doc_type', 'max_child', 'amount_child', 'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'last', 'last_year_contract', 'certprogram', 'status', 'organizational_form', 'certificate_accounting_limit', 'contracts_count'], 'integer'],
+            [['user_id', 'actual', 'type', 'bank_bik', 'doc_type', 'max_child', 'amount_child', 'inn', 'KPP', 'OGRN', 'okopo', 'mun', 'last', 'last_year_contract', 'certprogram', 'status', 'organizational_form', 'certificate_accounting_limit', 'contracts_count'], 'integer'],
             [['license_date', 'date_proxy', 'cratedate', 'accepted_date'], 'safe'],
             [['raiting'], 'number'],
-            [['about', 'site', 'phone', 'refuse_reason', 'anonymous_update_token', 'receiver'], 'string'],
+            [['about', 'site', 'phone', 'refuse_reason', 'anonymous_update_token', 'receiver', 'korr_invoice'], 'string'],
             [['email'], 'email'],
             [['name', 'license_number', 'license_issued', 'license_issued_dat', 'bank_name', 'bank_sity', 'fio_contact', 'fio', 'position', 'position_min', 'address_legal', 'address_actual', 'geocode', 'full_name'], 'string', 'max' => 255],
             [['rass_invoice', 'ground', 'number_proxy'], 'string', 'max' => 45],
