@@ -1,6 +1,8 @@
 <?php
 namespace app\commands;
 
+use app\models\Operators;
+use app\models\Payers;
 use yii;
 use yii\console\Controller;
 use app\models\Contracts;
@@ -18,21 +20,54 @@ php yii contract/completeness-create
 
 class ContractController extends Controller
 {
-    // Подготовка к тесту Close
-    public function actionPrepareCloseTest()
+    public function actionShiftPeriod()
     {
-        // Для контрактов обнуляем параметры
-        Contracts::updateAll(['wait_termnate' => 0, 'date_termnate' => 'NULL', 'stop_edu_contract' => 'NULL', 'status' => 1]);
-        // Для контрактов случайно ставим wait_termnate = 1
-        Contracts::updateAll(['wait_termnate' => 1], 'RAND() <= 0.02');
-        // Для программ обнуляем last_s_contracts_rod, last_s_contracts, last_contracts
-        Programs::updateAll(['last_s_contracts_rod' => 0, 'last_s_contracts' => 0, 'last_contracts' => 0]);
-        // Для организаций ставим amount_child = 10
-        Organization::updateAll(['amount_child' => 10]);
-        // Для нескольких контрактов случайно ставим stop_edu_contract текущим месяцем
-        Contracts::updateAll(['stop_edu_contract' => date('Y-m-d')], 'RAND() <= 0.02');
-        // Для нескольких контрактов случайно ставим stop_edu_contract будущим месяцем
-        Contracts::updateAll(['stop_edu_contract' => date('Y-m-d', time() + 40 * 24 * 60 * 60)], 'RAND() <= 0.02');
+        $operators = Operators::find()->all();
+        foreach ($operators as $operator) {
+            $settings = $operator->settings;
+            if (empty($settings) || $settings->current_program_date_to > date('Y-m-d')) {
+                continue;
+            }
+            // Сдвигаем периоды оператора
+            $settings->current_program_date_to = $settings->future_program_date_to;
+            $settings->current_program_date_from = $settings->future_program_date_from;
+            $baseDate = $settings->future_program_date_to;
+            $settings->future_program_date_from = date("Y-m-d", strtotime("+1 day", strtotime($baseDate)));
+            $settings->future_program_date_to = date("Y-m-d", strtotime("+1 year", strtotime($baseDate)));
+            if (1) {//$settings->save()) {
+                $arrayPayersIds = Payers::find()
+                    ->select('id')
+                    ->where(['operator_id' => $operator->id])
+                    ->indexBy('id')
+                    ->column();
+                $payersIds = join(',', $arrayPayersIds);
+                // Плательщики
+                $command = Yii::$app->db->createCommand("UPDATE payers AS p SET certificate_can_use_future_balance = 0 WHERE id IN (:payers)", [
+                    ':payers' => $payersIds,
+                ]);
+                $command->execute();
+                // Cert groups
+                date_default_timezone_set('Europe/Moscow');
+                $datetimeTo = date_create($settings->current_program_date_to);
+                $datetimeFrom = date_create($settings->current_program_date_from);
+                $difference = date_diff($datetimeFrom, $datetimeTo);
+                $coefficient = ($difference->format('%a') + 1) / 365;
+                $command = Yii::$app->db->createCommand("UPDATE cert_group SET nominal = nominal_f, nominal_f = ROUND(nominal_f * :coefficient) WHERE payer_id IN (:payers)", [
+                    ':payers' => $payersIds,
+                    ':coefficient' => $coefficient,
+                ]);
+                $command->execute();
+                // Сертификаты
+                $command = Yii::$app->db->createCommand("UPDATE `certificates` as c INNER JOIN `cert_group` as cg ON c.cert_group = cg.id SET c.nominal_p = c.nominal, c.balance_p = c.balance, c.rezerv_p = c.rezerv, c.nominal = c.nominal_f, c.balance = c.balance_f, c.rezerv = c.rezerv_f, c.nominal_f = cg.nominal_f, c.balance_f = cg.nominal_f, rezerv_f = 0 WHERE c.payer_id IN (:payers)", [
+                    ':payers' => $payersIds,
+                ]);
+                $command->execute();
+                // Договоры
+                $command = Yii::$app->db->createCommand("UPDATE `contracts` SET period = " . Contracts::CURRENT_REALIZATION_PERIOD . " WHERE period = " . Contracts::FUTURE_REALIZATION_PERIOD);
+                $command = Yii::$app->db->createCommand("UPDATE `contracts` SET period = " . Contracts::PAST_REALIZATION_PERIOD . " WHERE period = " . Contracts::CURRENT_REALIZATION_PERIOD);
+                $command->execute();
+            }
+        }
 
         return Controller::EXIT_CODE_NORMAL;
     }
@@ -56,15 +91,6 @@ class ContractController extends Controller
             ':month' => date('m'),
         ]);
         $command->execute();
-
-        return Controller::EXIT_CODE_NORMAL;
-    }
-
-    // Подготовка к тесту Write Off
-    public function actionPrepareWriteOffTest()
-    {
-        Yii::$app->db->createCommand()->delete('contracts')->execute();
-        Certificates::updateAll(['balance' => 5000, 'rezerv' => 0]);
 
         return Controller::EXIT_CODE_NORMAL;
     }
@@ -147,6 +173,8 @@ class ContractController extends Controller
                 ->count();
             // Создаем за предыдущий месяц
             // Если месяц январь - создаваться не будет
+            // TODO: Создавать счет если дата начала договора меньше первого числа текущего месяца
+            // только для тех, у которых контракт действует либо он статус 4 + дата расторжения контракта больше первого числа предыдущего месяца
             if (!$completenessExists) {
                 $this->createCompleteness($contract, $previousMonth, $this->monthlyPrice($contract, $previousMonth));
             }
@@ -155,6 +183,7 @@ class ContractController extends Controller
                 $this->createCompleteness($contract, time(), $this->monthlyPrice($contract, time()));
             }
             // Создаем преинвойс
+            // TODO: Создавать аванс если дата начала действия договора меньше чем первое числа предыдущего месяца
             if (!$preinvoiceExists && $contract->status == Contracts::STATUS_ACTIVE) {
                 $this->createPreinvoice($contract, $this->monthlyPrice($contract, time()));
             }
@@ -163,6 +192,7 @@ class ContractController extends Controller
         return Controller::EXIT_CODE_NORMAL;
     }
 
+    // Одноразовый метод, не для крона
     public function actionReserveRefound()
     {
         // Договора расторгаем

@@ -16,7 +16,12 @@ $config = [
         'authManager' => [
             'class' => 'yii\rbac\DbManager',
         ],
-
+        'operator' => [
+            'class' => 'app\components\Operator',
+        ],
+        'coefficient' => [
+            'class' => 'app\components\Coefficient',
+        ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],

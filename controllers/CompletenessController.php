@@ -123,7 +123,7 @@ class CompletenessController extends Controller
                 
                         
                 $complet->completeness = $model->completeness;
-                $complet->sum = ($price * $model->completeness) / 100;
+                $complet->sum = round(($price * $model->completeness) / 100, 2);
                 
                 $complet->save();
                 

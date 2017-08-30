@@ -58,6 +58,7 @@ class Invoices extends ActiveRecord
     public function rules()
     {
         return [
+            // TODO: number сделать string
             [['month', 'organization_id', 'payers_id', 'completeness', 'number', 'prepayment', 'status'], 'integer'],
             [['organization_id', 'payers_id', 'contracts', 'status'], 'required'],
             [['date'], 'safe'],

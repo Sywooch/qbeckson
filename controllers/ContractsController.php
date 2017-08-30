@@ -264,6 +264,7 @@ class ContractsController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post())) {
+            // TODO: Найти счет на аванс который сформирован на текущий месяц и изменить группу.
             $model->save();
 
             return $this->redirect(['/groups/contracts', 'id' => $model->group_id]);
@@ -380,9 +381,9 @@ class ContractsController extends Controller
                     }
                 }
 
-                $completeness->sum = ($price * $completeness->completeness) / 100;
+                $completeness->sum = round(($price * $completeness->completeness) / 100, 2);
 
-
+                // TODO: Создавать счет если только дата начала обучения меньше первого числа текущего месяца
                 if (date('m') != 1) {
                     $completeness->save();
                 }
@@ -404,9 +405,10 @@ class ContractsController extends Controller
                     $price = $model->payer_other_month_payment;
                 }
 
-                $preinvoice->sum = ($price * $preinvoice->completeness) / 100;
+                $preinvoice->sum = round(($price * $preinvoice->completeness) / 100, 2);
 
 
+                // TODO: Создавать аванс если только дата начала обучения меньше первого числа будущего месяца
                 if ($preinvoice->save()) {
                     $informs = new Informs();
                     $informs->program_id = $model->program_id;
@@ -624,7 +626,6 @@ class ContractsController extends Controller
             $searchContracts->payer_id = $payers->payer_id;
             $ContractsProvider = $searchContracts->search(Yii::$app->request->queryParams);
 
-            // return '<pre>'.var_dump($contracts).'</pre>';
             return $this->render('invoice', [
                 'payers' => $payers,
                 'searchContracts' => $searchContracts,

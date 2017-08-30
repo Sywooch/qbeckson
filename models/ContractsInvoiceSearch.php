@@ -42,10 +42,7 @@ class ContractsInvoiceSearch extends Contracts
      */
     public function search($params)
     {   
-        $lmonth = date('m')-1;
-        // День - первое число предыдущего месяца
-        $start = date('Y').'-'.$lmonth.'-'.date('d');
-        $query = Contracts::find()->where(['<=', 'start_edu_contract', $start])->andWhere(['>=', 'stop_edu_contract', $start]);
+        $query = Contracts::find();
 
         // add conditions that should always apply here
 
@@ -66,27 +63,27 @@ class ContractsInvoiceSearch extends Contracts
 
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
-        
+
         $lmonth = date('m')-1;
             $start = date('Y').'-'.$lmonth.'-01';
             
             $cal_days_in_month = cal_days_in_month(CAL_GREGORIAN, $lmonth, date('Y'));
-            
+
             $stop = date('Y').'-'.$lmonth.'-'.$cal_days_in_month;
         
          $contracts_all = (new \yii\db\Query())
                 ->select(['id'])
                 ->from('contracts')
-                ->where(['<=', 'start_edu_contract', $start])
+                ->where(['<=', 'start_edu_contract', $stop]) // TODO: поменять везде это
                 ->andWhere(['>=', 'stop_edu_contract', $start])
                 ->andWhere(['`contracts`.status' => 1])
                 ->andWhere(['>', 'all_funds', 0])
                 ->column();
-                            
+
             $contracts_terminated = (new \yii\db\Query())
                 ->select(['id'])
                 ->from('contracts')
-                ->where(['<=', 'start_edu_contract', $start])
+                ->where(['<=', 'start_edu_contract', $stop])
                 ->andWhere(['>=', 'stop_edu_contract', $start])
                 ->andWhere(['`contracts`.status' => 4])
                 ->andWhere(['<=' ,'date_termnate', $stop])
@@ -98,7 +95,7 @@ class ContractsInvoiceSearch extends Contracts
        // $contracts += $contracts_terminated;
             $contracts = array_merge($contracts_all, $contracts_terminated);
     
-        
+
 
         // grid filtering conditions
         $query->andFilterWhere([

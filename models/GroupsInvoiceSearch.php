@@ -69,6 +69,7 @@ class GroupsInvoiceSearch extends Groups
             ->where(['organization_id' => $organization['id']])
             ->andWhere([
                 'or',
+                // TODO: дата начала обучения по договору больше или равна первому дню предыдущего месяца
                 ['status' => 1],
                 [
                     'and',

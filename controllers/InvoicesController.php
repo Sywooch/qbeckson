@@ -103,7 +103,7 @@ class InvoicesController extends Controller
             $contracts_all = (new \yii\db\Query())
                 ->select(['id'])
                 ->from('contracts')
-                ->where(['<=', 'start_edu_contract', $start])
+                ->where(['<=', 'start_edu_contract', $stop])
                 ->andWhere(['>=', 'stop_edu_contract', $start])
                 ->andWhere(['organization_id' => $organization->id])
                 ->andWhere(['payer_id' => $payer])
@@ -114,7 +114,7 @@ class InvoicesController extends Controller
             $contracts_terminated = (new \yii\db\Query())
                 ->select(['id'])
                 ->from('contracts')
-                ->where(['<=', 'start_edu_contract', $start])
+                ->where(['<=', 'start_edu_contract', $stop])
                 ->andWhere(['>=', 'stop_edu_contract', $start])
                 ->andWhere(['organization_id' => $organization->id])
                 ->andWhere(['payer_id' => $payer])
@@ -130,7 +130,7 @@ class InvoicesController extends Controller
             
             $sum = 0;
             foreach($contracts as $contract_id){           
-                $contract = Contracts::findOne($contract_id);                     
+                $contract = Contracts::findOne($contract_id);
                 
                                 
 //return var_dump($contract);
@@ -173,7 +173,7 @@ class InvoicesController extends Controller
             $model->contracts = implode(",", $contracts);
             
             $model->sum = $sum;
-            $model->month = $lmonth; 
+            $model->month = $lmonth;
             $model->prepayment = 0;
             $model->status = 0;
         
@@ -183,11 +183,11 @@ class InvoicesController extends Controller
                 return $this->redirect(['/invoices/view', 'id' => $model->id]);
             }
         }
-        else {
-            return $this->render('number', [
-                'model' => $model,
-            ]);
-        }
+        // TODO: ELSE написать предупреждалку если нет договоров
+
+        return $this->render('number', [
+            'model' => $model,
+        ]);
     }
     
     public function actionDec($payer)

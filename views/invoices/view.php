@@ -211,9 +211,8 @@ $this->params['breadcrumbs'][] = $this->title;
                                     ->where(['contract_id' => $data->id])
                                     ->andWhere(['preinvoice' => 0])
                                     ->andWhere(['month' => 12])
-                                   ->andWhere(['preinvoice' => 0])
                                     ->one();
-                               /* 
+                               /*
                                 $nopreinvoice = (new \yii\db\Query())
                                     ->select(['id'])
                                     ->from('invoices')
