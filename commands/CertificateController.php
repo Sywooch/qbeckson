@@ -17,6 +17,16 @@ class CertificateController extends Controller
         parent::init();
     }
 
+    // Для всех сертификатов, у которых резерв = 0, надо баланс текущий и будущий сделать соответствующим номиналу.
+    public function actionUpdateBalance()
+    {
+        $command = Yii::$app->db->createCommand("UPDATE certificates SET balance = nominal WHERE rezerv = 0");
+        $command->execute();
+
+        $command = Yii::$app->db->createCommand("UPDATE certificates SET balance_f = nominal_f WHERE rezerv_f = 0");
+        $command->execute();
+    }
+
     public function actionUpdateNominals()
     {
         $groups = Certificates::find()
