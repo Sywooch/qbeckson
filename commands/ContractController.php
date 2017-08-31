@@ -23,6 +23,7 @@ class ContractController extends Controller
     public function actionShiftPeriod()
     {
         $operators = Operators::find()->all();
+
         foreach ($operators as $operator) {
             $settings = $operator->settings;
             if (empty($settings) || $settings->current_program_date_to > date('Y-m-d')) {
@@ -111,6 +112,8 @@ class ContractController extends Controller
 
     public function actionCompletenessRefound()
     {
+        return Controller::EXIT_CODE_NORMAL;
+
         // TODO: временный костыль, переделать логику
         ini_set('memory_limit', '-1');
 
@@ -147,9 +150,10 @@ class ContractController extends Controller
 
         $previousMonth = strtotime('first day of previous month');
         $currentMonth = strtotime('first day of this month');
+        $lastDayOfThisMonth = strtotime('last day of this month');
 
         $contracts = Contracts::find()
-            ->where(['<=', 'start_edu_contract', date('Y-m-d', $currentMonth)])
+            ->where(['<=', 'start_edu_contract', date('Y-m-d', $lastDayOfThisMonth)])
             ->andWhere(['or', ['status' => Contracts::STATUS_ACTIVE], ['and', ['status' => Contracts::STATUS_CLOSED], ['>=', 'date_termnate', date('Y-m-d', $previousMonth)]]])
             ->all();
         // создает счета, которые только-только закрылись
@@ -174,7 +178,7 @@ class ContractController extends Controller
             // Создаем за предыдущий месяц
             // Если месяц январь - создаваться не будет
 
-            if (!$completenessExists) {
+            if (!$completenessExists && $contract->start_edu_contract <= date('Y-m-d', $currentMonth)) {
                 $this->createCompleteness($contract, $previousMonth, $this->monthlyPrice($contract, $previousMonth));
             }
             // Если текущий месяц == декабрь, то тоже создаем
@@ -182,7 +186,7 @@ class ContractController extends Controller
                 $this->createCompleteness($contract, time(), $this->monthlyPrice($contract, time()));
             }
             // Создаем преинвойс
-            if (!$preinvoiceExists && $contract->status == Contracts::STATUS_ACTIVE && $contract->start_edu_contract <= date('Y-m-d', $previousMonth)) {
+            if (!$preinvoiceExists && $contract->status == Contracts::STATUS_ACTIVE && $contract->start_edu_contract <= date('Y-m-d', $lastDayOfThisMonth)) {
                 $this->createPreinvoice($contract, $this->monthlyPrice($contract, time()));
             }
         }

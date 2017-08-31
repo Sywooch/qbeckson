@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\models\ContractsInvoiceSearch;
+use app\models\ContractspreInvoiceSearch;
 use Yii;
 use app\models\Invoices;
 use app\models\InvoicesSearch;
@@ -93,48 +95,14 @@ class InvoicesController extends Controller
 
         if ($model->load(Yii::$app->request->post())) {
             $lmonth = date('m') - 1;
-            $start = date('Y') . '-' . $lmonth . '-01';
 
-            $cal_days_in_month = cal_days_in_month(CAL_GREGORIAN, $lmonth, date('Y'));
+            $searchContracts = new ContractsInvoiceSearch();
+            $searchContracts->payer_id = $payer;
+            $ContractsProvider = $searchContracts->search(Yii::$app->request->queryParams);
 
-            $stop = date('Y') . '-' . $lmonth . '-' . $cal_days_in_month;
-
-            //return var_dump($payer);
-            $contracts_all = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('contracts')
-                ->where(['<=', 'start_edu_contract', $stop])
-                ->andWhere(['>=', 'stop_edu_contract', $start])
-                ->andWhere(['organization_id' => $organization->id])
-                ->andWhere(['payer_id' => $payer])
-                ->andWhere(['status' => 1])
-                ->andWhere(['>', 'all_funds', 0])
-                ->column();
-
-            $contracts_terminated = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('contracts')
-                ->where(['<=', 'start_edu_contract', $stop])
-                ->andWhere(['>=', 'stop_edu_contract', $start])
-                ->andWhere(['organization_id' => $organization->id])
-                ->andWhere(['payer_id' => $payer])
-                ->andWhere(['status' => 4])
-                ->andWhere(['<=', 'date_termnate', $stop])
-                ->andWhere(['>=', 'date_termnate', $start])
-                ->andWhere(['>', 'all_funds', 0])
-                ->column();
-
-            //array_push($contracts, $contracts_terminated);
-            // $contracts += $contracts_terminated;
-            $contracts = array_merge($contracts_all, $contracts_terminated);
-
+            $contracts = [];
             $sum = 0;
-            foreach ($contracts as $contract_id) {
-                $contract = Contracts::findOne($contract_id);
-
-
-//return var_dump($contract);
-
+            foreach ($ContractsProvider->models as $contract) {
                 $completeness = (new \yii\db\Query())
                     ->select(['sum'])
                     ->from('completeness')
@@ -143,32 +111,9 @@ class InvoicesController extends Controller
                     ->andWhere(['month' => $lmonth])
                     ->one();
 
-                /*$nopreinvoice = (new \yii\db\Query())
-                            ->select(['id'])
-                            ->from('invoices')
-                            ->where(['month' => date('m')])
-                            ->andWhere(['prepayment' => 1])
-                            ->andWhere(['status' => [0,1,2]])
-                            ->one();
-                    
-                    
-                $precompleteness = (new \yii\db\Query())
-                        ->select(['sum'])
-                        ->from('completeness')
-                        ->where(['contract_id' => $contract->id])
-                        ->andWhere(['preinvoice' => 1])
-                        ->andWhere(['month' => date('m')])
-                        ->one(); */
-
-                /*if (!isset($nopreinvoice['id']) or empty($nopreinvoice['id'])) {
-                    $sum += $completeness['sum'] + $precompleteness['sum'];
-                }
-                else { */
                 $sum += $completeness['sum'];
-                //}
-
-                //$model->completeness = $completeness['completeness'];  
                 $model->payers_id = $contract->payer_id;
+                array_push($contracts, $contract->id);
             }
             $model->contracts = implode(",", $contracts);
             $model->sum = $sum;
@@ -182,7 +127,6 @@ class InvoicesController extends Controller
                 return $this->redirect(['/invoices/view', 'id' => $model->id]);
             }
         }
-
         // TODO: ELSE написать предупреждалку если нет договоров
 
         return $this->render('number', [
@@ -298,24 +242,13 @@ class InvoicesController extends Controller
             $organizations = new Organization();
             $organization = $organizations->getOrganization();
 
-            //return var_dump($payer);
-            $month_start = date('Y-m-') . '01';
-            $contracts = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('contracts')
-                ->where(['<=', 'start_edu_contract', $month_start])
-                ->andWhere(['>=', 'stop_edu_contract', $month_start])
-                ->andWhere(['organization_id' => $organization->id])
-                ->andWhere(['payer_id' => $payer])
-                ->andWhere(['status' => 1])
-                ->andWhere(['>', 'all_funds', 0])
-                ->column();
-
-            //return var_dump($contracts);
+            $searchContracts = new ContractspreInvoiceSearch();
+            $searchContracts->payer_id = $payer;
+            $ContractsProvider = $searchContracts->search(Yii::$app->request->queryParams);
 
             $sum = 0;
-            foreach ($contracts as $contract_id) {
-                $contract = Contracts::findOne($contract_id);
+            $contracts = [];
+            foreach ($ContractsProvider->models as $contract) {
 
                 $completeness = (new \yii\db\Query())
                     ->select(['sum'])
@@ -330,6 +263,7 @@ class InvoicesController extends Controller
 
                 //$model->completeness = $completeness['completeness'];  
                 $model->payers_id = $contract->payer_id;
+                array_push($contracts, $contract->id);
             }
             $model->contracts = implode(",", $contracts);
 
@@ -340,7 +274,7 @@ class InvoicesController extends Controller
             $model->status = 0;
             $model->organization_id = $organization->id;
             $model->setCooperate();
-            $model->pdf = $model->generateInvoice();
+            $model->pdf = $model->generatePrepaid();
 
             if ($model->save()) {
                 return $this->redirect(['/invoices/view', 'id' => $model->id]);
@@ -441,6 +375,10 @@ class InvoicesController extends Controller
         }
     }
 
+    /**
+     * @deprecated
+     * @param $id
+     */
     public function actionMpdf($id)
     {
         ini_set('memory_limit', '-1');
@@ -569,6 +507,10 @@ class InvoicesController extends Controller
     }
 
 
+    /**
+     * @deprecated
+     * @param $id
+     */
     public function actionInvoice($id)
     {
         ini_set('memory_limit', '-1');
