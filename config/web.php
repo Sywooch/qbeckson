@@ -177,6 +177,13 @@ $config = [
                         'roles' => ['admins'],
                     ],
                 ],
+            'admin/cleanup' =>
+                [
+                    [
+                        'allow' => true,
+                        'roles' => ['admins'],
+                    ],
+                ],
             'organization' =>
                 [
                     [

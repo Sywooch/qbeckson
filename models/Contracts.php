@@ -240,6 +240,36 @@ class Contracts extends ActiveRecord
         $this->cooperate_id = $cooperate->id;
     }
 
+    public static function findByInterval($idStart, $idFinish, $organizationId = null)
+    {
+        $query = static::find()
+            ->where([
+                'and',
+                ['>=', 'id', $idStart],
+                ['<=', 'id', $idFinish],
+            ]);
+
+        $query->andFilterWhere(['organization_id' => $organizationId]);
+
+        return $query->all();
+    }
+
+    public function refoundMoney()
+    {
+        if ($this->period === self::CURRENT_REALIZATION_PERIOD) {
+            $this->certificate->balance += $this->rezerv + $this->paid;
+            $this->certificate->rezerv -= $this->rezerv;
+        } elseif ($this->period === self::FUTURE_REALIZATION_PERIOD) {
+            $this->certificate->balance_f += $this->rezerv + $this->paid;
+            $this->certificate->rezerv_f -= $this->rezerv;
+        } elseif ($this->period === self::PAST_REALIZATION_PERIOD) {
+            $this->certificate->balance_p += $this->rezerv + $this->paid;
+            $this->certificate->rezerv_p -= $this->rezerv;
+        }
+
+        return $this->certificate->save(false, ['balance', 'rezerv', 'balance_f', 'rezerv_f', 'balance_p', 'rezerv_p']);
+    }
+
     public function getPayer()
     {
         return $this->hasOne(Payers::className(), ['id' => 'payer_id']);

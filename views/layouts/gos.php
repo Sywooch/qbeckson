@@ -90,6 +90,15 @@ $user = Yii::$app->user->getIdentity();
                                 'url' => ['/import/index'],
                                 'items' => [
                                     ['label' => 'Дети (сертификаты)', 'url' => ['/import/children']],
+                                    ['label' => 'Корректировка паролей', 'url' => ['/import/children-password']],
+                                ],
+                            ],
+                            [
+                                'label' => 'Чистка данных',
+                                'url' => ['#'],
+                                'items' => [
+                                    ['label' => 'Удаление договоров', 'url' => ['/admin/cleanup/contract']],
+                                    ['label' => 'Удаление сертификатов', 'url' => ['/admin/cleanup/certificate']],
                                 ],
                             ],
                             [
