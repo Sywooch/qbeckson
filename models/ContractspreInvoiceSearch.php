@@ -42,24 +42,28 @@ class ContractspreInvoiceSearch extends Contracts
      */
     public function search($params)
     {
-       /* $cont = (new \yii\db\Query())
-                ->select(['contracts'])
-                ->from('invoices')
-                ->where(['month' => date('m')+1])
-                ->andWhere(['prepayment' => 1])
-                ->column();
-        
-        $contracts = array();
-        foreach ($cont as $value) {
-            $tmp = explode(",", $value);
-            foreach ($tmp as $contract) {
-                array_push($contracts, $contract);
-            }
-        }
-        $contracts = array_unique($contracts);
-        if (empty($contracts)) {$contracts = 0; } */
-        
-        $query = Contracts::find()->where(['<=', 'start_edu_contract', date('Y-m-d')])->andWhere(['>=', 'stop_edu_contract', date('Y-m-d')]);
+        /* $cont = (new \yii\db\Query())
+                 ->select(['contracts'])
+                 ->from('invoices')
+                 ->where(['month' => date('m')+1])
+                 ->andWhere(['prepayment' => 1])
+                 ->column();
+
+         $contracts = array();
+         foreach ($cont as $value) {
+             $tmp = explode(",", $value);
+             foreach ($tmp as $contract) {
+                 array_push($contracts, $contract);
+             }
+         }
+         $contracts = array_unique($contracts);
+         if (empty($contracts)) {$contracts = 0; } */
+        $currentMonth = strtotime('last day of this month');
+
+        $query = Contracts::find()
+            ->andWhere(['status' => 1])
+            ->andWhere(['>', 'all_funds', 0])
+            ->andWhere(['<=', 'start_edu_contract', date('Y-m-d', $currentMonth)]);
 
         // add conditions that should always apply here
 
@@ -72,6 +76,7 @@ class ContractspreInvoiceSearch extends Contracts
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             $query->where('0=1');
+
             return $dataProvider;
         }
 
@@ -80,28 +85,16 @@ class ContractspreInvoiceSearch extends Contracts
 
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
-        
-        $month_start = date('Y-m-').'01';
-            $contracts = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('contracts')
-                ->where(['<=', 'start_edu_contract', $month_start])
-                ->andWhere(['>=', 'stop_edu_contract', $month_start])
-                ->andWhere(['organization_id' => $organization->id])
-                ->andWhere(['payer_id' => $payer])
-                ->andWhere(['`contracts`.status' => 1])
-                ->andWhere(['>', 'all_funds', 0])
-                ->column();
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $contracts,
+            'id' => $this->id,
             'number' => $this->number,
             'date' => $this->date,
             'certificate_id' => $this->certificate_id,
             'organization_id' => $organization['id'],
             'payer_id' => $this->payer_id,
-            '`contracts`.status' => 1,
+            //'`contracts`.status' => 1,
             'status_termination' => $this->status_termination,
             'status_year' => $this->status_year,
             'start_edu_programm' => $this->start_edu_programm,

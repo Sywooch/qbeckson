@@ -245,7 +245,7 @@ class Invoices extends ActiveRecord
 
         $mpdf = new mPDF();
         $mpdf->WriteHtml($html);
-        $filename = '/uploads/invoices/prepaid-' . $model->number . '.pdf';
+        $filename = '/uploads/invoices/prepaid-' . $model->number . '_' . $model->date . '_' . $model->organization_id . '.pdf';
         $mpdf->Output(Yii::getAlias('@webroot' . $filename), 'F');
 
         return $filename;
@@ -390,7 +390,7 @@ class Invoices extends ActiveRecord
         $mpdf = new mPDF();
         $mpdf->WriteHtml($html);
 
-        $filename = '/uploads/invoices/invoice-' . $model->number . '.pdf';
+        $filename = '/uploads/invoices/invoice-' . $model->number . '_' . $model->date . '_' . $model->organization_id . '.pdf';
         $mpdf->Output(Yii::getAlias('@webroot' . $filename), 'F');
 
         return $filename;

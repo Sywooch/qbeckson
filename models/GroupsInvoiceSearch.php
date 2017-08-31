@@ -74,7 +74,7 @@ class GroupsInvoiceSearch extends Groups
             ->where(['organization_id' => $organization['id']])
             ->andWhere([
                 'or',
-                // TODO: ���� ������ �������� �� �������� ������ ��� ����� �������
+                // TODO: ??
                 ['status' => Contracts::STATUS_ACTIVE],
                 [
                     'and',

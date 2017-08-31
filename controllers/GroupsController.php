@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\GroupClass;
+use app\models\GroupsPreinvoiceSearch;
 use app\models\ProgramModuleAddress;
 use Yii;
 use app\models\Groups;
@@ -407,7 +408,6 @@ class GroupsController extends Controller
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
 
-        // TODO: в случае если месяц == 12 выводить договоры которые дата начала обучения по которым меньше чем 31 декабря пред. года
         $searchGroups = new GroupsInvoiceSearch(['invoice' => true]);
         $searchGroups->organization_id = $organization['id'];
 
@@ -425,7 +425,7 @@ class GroupsController extends Controller
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
 
-        $searchGroups = new GroupsInvoiceSearch();
+        $searchGroups = new GroupsPreinvoiceSearch();
         $searchGroups->organization_id = $organization['id'];
 
         $GroupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
@@ -437,11 +437,13 @@ class GroupsController extends Controller
 
     }
 
+    // Это для декабря (12 месяц)
     public function actionDec()
     {
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
 
+        // TODO: в случае если месяц == 12 выводить договоры которые дата начала обучения по которым меньше чем 31 декабря пред. года
         $searchGroups = new GroupsInvoiceSearch();
         $searchGroups->organization_id = $organization['id'];
 
