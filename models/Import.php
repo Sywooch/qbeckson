@@ -69,10 +69,13 @@ class Import extends Model
                 } else {
                     $userId = $user->id;
                 }
-                $certificateArray[] = [$userId, $username, $data[4], $data[5], FormattingHelper::convertEncoding($data[6]), FormattingHelper::convertEncoding($data[7]), FormattingHelper::convertEncoding($data[8]), FormattingHelper::convertEncoding($data[9]), $data[11], $data[12], $data[20], $data[21]];
+
+                $payer = Payers::findOne($data[4]);
+
+                $certificateArray[] = [$userId, $username, $data[4], $data[5], FormattingHelper::convertEncoding($data[6]), FormattingHelper::convertEncoding($data[7]), FormattingHelper::convertEncoding($data[8]), FormattingHelper::convertEncoding($data[9]), $data[11], $data[12], $data[20], $data[21], $payer->firstCertGroup->id];
             }
             fclose($handle);
-            Yii::$app->db->createCommand()->batchInsert('certificates', ['user_id', 'number', 'payer_id', 'actual', 'fio_child', 'name', 'soname', 'phname', 'nominal', 'balance', 'cert_group', 'rezerv'], $certificateArray)->execute();
+            Yii::$app->db->createCommand()->batchInsert('certificates', ['user_id', 'number', 'payer_id', 'actual', 'fio_child', 'name', 'soname', 'phname', 'nominal', 'balance', 'cert_group', 'rezerv', 'possible_cert_group'], $certificateArray)->execute();
         }
 
         return true;
