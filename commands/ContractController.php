@@ -34,7 +34,7 @@ class ContractController extends Controller
             $baseDate = $settings->future_program_date_to;
             $settings->future_program_date_from = date("Y-m-d", strtotime("+1 day", strtotime($baseDate)));
             $settings->future_program_date_to = date("Y-m-d", strtotime("+1 year", strtotime($baseDate)));
-            if (1) {//$settings->save()) {
+            if ($settings->save()) {
                 $arrayPayersIds = Payers::find()
                     ->select('id')
                     ->where(['operator_id' => $operator->id])

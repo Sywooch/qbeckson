@@ -501,7 +501,10 @@ class ContractsController extends Controller
     public function actionGenerate($id)
     {
         $model = $this->findModel($id);
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $model->setCooperate();
+            $model->save(false);
+
             return $this->refresh();
         }
 

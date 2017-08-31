@@ -2,6 +2,8 @@
 
 namespace app\commands;
 
+use app\models\Contracts;
+use app\models\Invoices;
 use Yii;
 use app\components\GoogleCoordinates;
 use app\models\CertGroup;
@@ -169,6 +171,27 @@ class MigrationController extends Controller
                         print_r($group->errors);exit;
                     }
                 }
+            }
+        }
+    }
+
+    public function actionPopulateCooperateId()
+    {
+        $contracts = Contracts::find()->all();
+        foreach ($contracts as $contract) {
+            if (empty($contract->cooperate_id)) {
+                $contract->setCooperate();
+                $contract->save(false, ['cooperate_id']);
+                echo $contract->id . PHP_EOL;
+            }
+        }
+
+        $invoices = Invoices::find()->all();
+        foreach ($invoices as $invoice) {
+            if (empty($invoice->cooperate_id)) {
+                $invoice->setCooperate();
+                $invoice->save(false, ['cooperate_id']);
+                echo $invoice->id . PHP_EOL;
             }
         }
     }
