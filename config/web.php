@@ -249,6 +249,12 @@ $config = [
                     'roles' => ['admins'],
                 ]
             ],
+            'admin/help' => [
+                [
+                    'allow' => true,
+                    'roles' => ['admins'],
+                ]
+            ],
             'certificates' => [
                 [
                     'actions' => ['group-pdf', 'password'],

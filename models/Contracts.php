@@ -130,7 +130,7 @@ class Contracts extends ActiveRecord
     public function rules()
     {
         return [
-            [['certificate_id', 'program_id', 'organization_id', 'status', 'status_year', 'funds_gone', 'group_id', 'year_id', 'sposob', 'prodolj_d', 'prodolj_m', 'prodolj_m_user', 'ocenka', 'wait_termnate', 'terminator_user', 'payment_order', 'period'], 'integer'],
+            [['certificate_id', 'program_id', 'organization_id', 'status', 'status_year', 'funds_gone', 'group_id', 'year_id', 'sposob', 'prodolj_d', 'prodolj_m', 'prodolj_m_user', 'ocenka', 'wait_termnate', 'terminator_user', 'payment_order', 'period', 'cooperate_id'], 'integer'],
             [['all_funds', 'funds_cert', 'all_parents_funds', 'first_m_price', 'other_m_price', 'first_m_nprice', 'other_m_nprice', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch', 'cert_dol', 'payer_dol', 'rezerv', 'paid', 'fontsize', 'balance', 'payer_first_month_payment', 'payer_other_month_payment', 'parents_other_month_payment', 'parents_first_month_payment'], 'number'],
             [['date', 'status_termination', 'start_edu_programm', 'stop_edu_contract', 'start_edu_contract', 'date_termnate', 'applicationIsReceived'], 'safe'],
             ['date_initiate_termination', 'date', 'format' => 'php:Y-m-d'],
@@ -229,11 +229,15 @@ class Contracts extends ActiveRecord
 
     public function validateDate($attribute, $params)
     {
-        //print_r(strtotime($this->$attribute)); echo ' -- ';
-        //print_r(strtotime($this->start_edu_contract));exit;
         if (strtotime($this->$attribute) > strtotime($this->start_edu_contract)) {
             $this->addError($attribute, 'Дата договора не может превышать дату начала действия договора.');
         }
+    }
+
+    public function setCooperate()
+    {
+        $cooperate = Cooperate::findCooperateByParams($this->payer_id, $this->organization_id);
+        $this->cooperate_id = $cooperate->id;
     }
 
     public function getPayer()

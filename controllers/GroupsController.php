@@ -407,12 +407,30 @@ class GroupsController extends Controller
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
 
-        $searchGroups = new GroupsInvoiceSearch();
+        // TODO: в случае если месяц == 12 выводить договоры которые дата начала обучения по которым меньше чем 31 декабря пред. года
+        $searchGroups = new GroupsInvoiceSearch(['invoice' => true]);
         $searchGroups->organization_id = $organization['id'];
 
         $GroupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
 
         return $this->render('invoice', [
+            'searchGroups' => $searchGroups,
+            'GroupsProvider' => $GroupsProvider,
+        ]);
+
+    }
+
+    public function actionPreinvoice()
+    {
+        $organizations = new Organization();
+        $organization = $organizations->getOrganization();
+
+        $searchGroups = new GroupsInvoiceSearch();
+        $searchGroups->organization_id = $organization['id'];
+
+        $GroupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
+
+        return $this->render('preinvoice', [
             'searchGroups' => $searchGroups,
             'GroupsProvider' => $GroupsProvider,
         ]);
@@ -436,91 +454,6 @@ class GroupsController extends Controller
 
     }
 
-    public function actionPreinvoice()
-    {
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
-
-        $searchGroups = new GroupsInvoiceSearch();
-        $searchGroups->organization_id = $organization['id'];
-
-        $GroupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
-
-        return $this->render('preinvoice', [
-            'searchGroups' => $searchGroups,
-            'GroupsProvider' => $GroupsProvider,
-        ]);
-
-    }
-    /*
-    public function actionFgroup()
-    {
-        $arr = array(220,
-221,
-223,
-224,
-225,
-226,
-227,
-228,
-229,
-230,
-231,
-232,
-233,
-234,
-235,
-236,
-237,
-238,
-243,
-244,
-245,
-252,
-259,
-260,
-265,
-266,
-272,
-273,
-292,
-294,
-295,
-296,
-301,
-302,
-303,
-304,
-305,
-306,
-307,
-308,
-309,
-311,
-313,
-315,
-318,
-319);
-    
-    foreach ($arr as $groups) {
-        $model = $this->findModel($groups);
-        
-        $year = (new \yii\db\Query())
-                    ->select(['id'])
-                    ->from('years')
-                    ->where(['program_id' => $model->program_id])
-                    ->andWhere(['year' => 1])
-                    ->one();
-        
-        $model->year_id = $year['id'];
-        if ($model->save()) {
-            echo "ok!<br>";
-        }
-        
-    }
-       
-    }
-*/
     /**
      * Finds the Groups model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

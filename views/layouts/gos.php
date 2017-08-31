@@ -104,6 +104,10 @@ $user = Yii::$app->user->getIdentity();
                                         'label' => 'Настройки фильтров',
                                         'url' => ['admin/search-filters/index']
                                     ],
+                                    [
+                                        'label' => 'Руководство пользователей',
+                                        'url' => ['admin/help/index']
+                                    ],
                                 ],
 
                             ]

@@ -14,6 +14,8 @@ use app\models\Organization;
  */
 class GroupsInvoiceSearch extends Groups
 {
+    public $invoice = false;
+
     /**
      * @inheritdoc
      */
@@ -21,7 +23,7 @@ class GroupsInvoiceSearch extends Groups
     {
         return [
             [['id', 'organization_id', 'program_id', 'year_id'], 'integer'],
-            [['name'], 'safe'],
+            [['name', 'invoice'], 'safe'],
         ];
     }
 
@@ -60,23 +62,32 @@ class GroupsInvoiceSearch extends Groups
             return $dataProvider;
         }
 
+        $previousMonth = strtotime('first day of previous month');
+        $currentMonth = strtotime('first day of this month');
+
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
 
-        $contracts = (new \yii\db\Query())
+        $contractsQuery = (new \yii\db\Query())
             ->select(['group_id'])
             ->from('contracts')
             ->where(['organization_id' => $organization['id']])
             ->andWhere([
                 'or',
-                ['status' => 1],
+                // TODO: ���� ������ �������� �� �������� ������ ��� ����� �������
+                ['status' => Contracts::STATUS_ACTIVE],
                 [
                     'and',
-                    ['status' => 4],
+                    ['status' => Contracts::STATUS_CLOSED],
                     ['>=', 'date_termnate', date('Y-m-d', strtotime('first day of previous month'))]
                 ],
-            ])
-            ->column();
+            ]);
+
+        if ($this->invoice === true) {
+            $contractsQuery->andWhere(['<=', 'start_edu_contract', date('Y-m-d', $currentMonth)]);
+        }
+
+        $contracts = $contractsQuery->column();
 
         if (empty($contracts)) {
             $contracts = 0;

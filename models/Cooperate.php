@@ -425,5 +425,18 @@ class Cooperate extends ActiveRecord
 
             return array_unique($rows);
         }
+
+        return null;
+    }
+
+    public static function findCooperateByParams($payerId, $organizationId)
+    {
+        $query = static::find()
+            ->where([
+                'payer_id' => $payerId,
+                'organization_id' => $organizationId,
+            ]);
+
+        return $query->one();
     }
 }

@@ -20,7 +20,10 @@ class CertificateController extends Controller
     // Для всех сертификатов, у которых резерв = 0, надо баланс текущий и будущий сделать соответствующим номиналу.
     public function actionUpdateBalance()
     {
-        $command = Yii::$app->db->createCommand("UPDATE certificates SET balance = nominal, balance_f = nominal_f WHERE rezerv = 0");
+        $command = Yii::$app->db->createCommand("UPDATE certificates SET balance = nominal WHERE rezerv = 0");
+        $command->execute();
+
+        $command = Yii::$app->db->createCommand("UPDATE certificates SET balance_f = nominal_f WHERE rezerv_f = 0");
         $command->execute();
     }
 
@@ -39,13 +42,40 @@ class CertificateController extends Controller
         }
     }
 
+    public function actionUpdatePossibleCertGroupPf($pf = false)
+    {
+        $query = Certificates::find()
+            ->joinWith('certGroup')
+            ->andWhere(['possible_cert_group' => 0]);
+
+        if (!$pf) {
+            $query->andWhere("`cert_group`.is_special < 1 OR `cert_group`.is_special IS NULL");
+        } else {
+            $query->andWhere("`cert_group`.is_special > 0");
+        }
+
+        $models = $query->all();
+
+        foreach ($models as $model) {
+            $model->possible_cert_group = $model->cert_group;
+            echo $model->id . PHP_EOL;
+            if (!$model->save(false, ['possible_cert_group'])) {
+                return self::EXIT_CODE_ERROR;
+            }
+        }
+
+        return self::EXIT_CODE_NORMAL;
+    }
+
     public function actionUpdatePossibleCertGroup()
     {
-        $models = Certificates::find()
+        $query = Certificates::find()
             ->joinWith('possibleCertGroup')
             ->joinWith('payer.firstCertGroup')
             ->where('`cert_group`.is_special > 0')
-            ->all();
+            ->groupBy('`certificates`.id');
+
+        $models = $query->all();
 
         foreach ($models as $model) {
             $model->possible_cert_group = $model->payer->firstCertGroup->id;

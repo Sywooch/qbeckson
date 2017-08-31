@@ -85,16 +85,10 @@ $columns = [
         'value' => function ($model) {
             /** @var \app\models\Invoices $model */
             if ($model->prepayment === 1) {
-                return Html::a(
-                    '<span class="glyphicon glyphicon-download-alt"></span>',
-                    Url::to(['invoices/mpdf', 'id' => $model->id])
-                );
+                return Html::a('<span class="glyphicon glyphicon-download-alt"></span>', !empty($model->pdf) ? Url::to($model->pdf) : Url::to(['invoices/mpdf', 'id' => $model->id]));
             }
 
-            return Html::a(
-                '<span class="glyphicon glyphicon-download-alt"></span>',
-                Url::to(['invoices/invoice', 'id' => $model->id])
-            );
+            return Html::a('<span class="glyphicon glyphicon-download-alt"></span>', !empty($model->pdf) ? Url::to($model->pdf) : Url::to(['invoices/invoice', 'id' => $model->id]));
         }
     ],
     [
