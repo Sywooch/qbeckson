@@ -263,9 +263,11 @@ class ContractsController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post())) {
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
             // TODO: Найти счет на аванс который сформирован на текущий месяц и изменить группу.
-            $model->save();
+            $preinvoice = Completeness::findPreinvoiceByContract($model->id, date('n'), date('Y'));
+            $preinvoice->group_id = $model->group_id;
+            $preinvoice->save(false, ['group_id']);
 
             return $this->redirect(['/groups/contracts', 'id' => $model->group_id]);
         }
@@ -345,8 +347,11 @@ class ContractsController extends Controller
 
             $model->paid = $model->payer_first_month_payment;
             $model->rezerv = $model->rezerv - ($model->payer_first_month_payment);
-
             $model->status = 1;
+
+            $previousMonth = strtotime('first day of previous month');
+            $currentMonth = strtotime('first day of this month');
+            $nextMonth = strtotime('first day of next month');
 
             if ($model->save()) {
                 $completeness = new Completeness();
@@ -383,8 +388,7 @@ class ContractsController extends Controller
 
                 $completeness->sum = round(($price * $completeness->completeness) / 100, 2);
 
-                // TODO: Создавать счет если только дата начала обучения меньше первого числа текущего месяца
-                if (date('m') != 1) {
+                if (date('m') != 1 && $model->start_edu_contract <= date('Y-m-d', $currentMonth)) {
                     $completeness->save();
                 }
 
@@ -407,9 +411,7 @@ class ContractsController extends Controller
 
                 $preinvoice->sum = round(($price * $preinvoice->completeness) / 100, 2);
 
-
-                // TODO: Создавать аванс если только дата начала обучения меньше первого числа будущего месяца
-                if ($preinvoice->save()) {
+                if ($preinvoice->save() && $model->start_edu_contract <= date('Y-m-d', $nextMonth)) {
                     $informs = new Informs();
                     $informs->program_id = $model->program_id;
                     $informs->contract_id = $model->id;

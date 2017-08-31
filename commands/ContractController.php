@@ -173,8 +173,7 @@ class ContractController extends Controller
                 ->count();
             // Создаем за предыдущий месяц
             // Если месяц январь - создаваться не будет
-            // TODO: Создавать счет если дата начала договора меньше первого числа текущего месяца
-            // только для тех, у которых контракт действует либо он статус 4 + дата расторжения контракта больше первого числа предыдущего месяца
+
             if (!$completenessExists) {
                 $this->createCompleteness($contract, $previousMonth, $this->monthlyPrice($contract, $previousMonth));
             }
@@ -183,8 +182,7 @@ class ContractController extends Controller
                 $this->createCompleteness($contract, time(), $this->monthlyPrice($contract, time()));
             }
             // Создаем преинвойс
-            // TODO: Создавать аванс если дата начала действия договора меньше чем первое числа предыдущего месяца
-            if (!$preinvoiceExists && $contract->status == Contracts::STATUS_ACTIVE) {
+            if (!$preinvoiceExists && $contract->status == Contracts::STATUS_ACTIVE && $contract->start_edu_contract <= date('Y-m-d', $previousMonth)) {
                 $this->createPreinvoice($contract, $this->monthlyPrice($contract, time()));
             }
         }

@@ -407,14 +407,11 @@ class GroupsController extends Controller
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
 
-        // TODO: выводить только те группы в которых есть договоры, дата начала обучения по которым меньше первого числа текущего месяца
-        // в случае если месяц == 12 выводить договоры которые дата начала обучения по которым меньше чем 31 декабря пред. года
-        $searchGroups = new GroupsInvoiceSearch();
+        // TODO: в случае если месяц == 12 выводить договоры которые дата начала обучения по которым меньше чем 31 декабря пред. года
+        $searchGroups = new GroupsInvoiceSearch(['invoice' => true]);
         $searchGroups->organization_id = $organization['id'];
 
         $GroupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
-
-        // TODO: Если моделей нет, то выводим текст вместо таблицы и убрать кнопку "продолжить"
 
         return $this->render('invoice', [
             'searchGroups' => $searchGroups,
