@@ -230,8 +230,7 @@ class ContractRequestForm extends Model
                         $realizationPeriodInDays * $all_parents_funds / ($realizationPeriodInMonthes - 1),
                         CalculationHelper::TO_DOWN
                     );
-                    $parents_first_month_payment = $all_parents_funds - $parents_other_month_payment *
-                        ($realizationPeriodInMonthes - 1);
+                    $parents_first_month_payment = $all_parents_funds - $parents_other_month_payment * ($realizationPeriodInMonthes - 1);
                 }
                 if ($funds_cert > 0) {
                     $payer_other_month_payment = CalculationHelper::roundTo(
