@@ -11,6 +11,7 @@ use yii\helpers\Html;
 use kartik\grid\GridView;
 use yii\helpers\Url;
 use kartik\export\ExportMenu;
+use kartik\dialog\Dialog;
 use app\models\ContractsPayerInvoiceSearch;
 use app\models\Payers;
 
@@ -357,8 +358,8 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
             'columns' => $preparedDissolvedColumns,
         ]); ?>
     </div>
-    <p class="lead">Экспорт данных:</p>
-    <?= ExportMenu::widget([
+    <!--<p class="lead">Экспорт данных:</p>-->
+    <!--<?= ExportMenu::widget([
         'dataProvider' => $ContractsallProvider,
         'filename' => 'all-contracts',
         'target' => ExportMenu::TARGET_BLANK,
@@ -436,7 +437,7 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
             'fontsize',
             'certificatenumber',
         ],
-    ]); ?>
+    ]); ?>-->
     <p>
         <?php
         $payers = new Payers();
@@ -446,9 +447,18 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
         $searchContracts->payer_id = $payer->id;
         $InvoiceProvider = $searchContracts->search(Yii::$app->request->queryParams);
 
-        echo ExportMenu::widget([
+        /*echo ExportMenu::widget([
             'dataProvider' => $InvoiceProvider,
             'target' => ExportMenu::TARGET_BLANK,
+            'krajeeDialogSettings' => [
+                'dialogDefaults' => [
+                    Dialog::DIALOG_CONFIRM => [
+                        'type' => Dialog::TYPE_WARNING,
+                        'title' => Yii::t('kvdialog', 'Confirmation345'),
+                        'btnCancelClass' => 'hidden'
+                    ],
+                ],
+            ],
             'showColumnSelector' => false,
             'filename' => date('d-m-Y'),
             'dropdownOptions' => [
@@ -493,9 +503,9 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
                     }
                 ],
             ],
-        ]);
+        ]);*/
         ?>
     <p>
     <br>
-    <p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>
+    <!--<p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>-->
 </div>
