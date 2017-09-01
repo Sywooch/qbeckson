@@ -6,8 +6,8 @@ class m170901_083721_update_certificate_table extends Migration
 {
     public function safeUp()
     {
-        $this->alterColumn('certificates', 'nominal', $this->float());
-        $this->alterColumn('certificates', 'balance', $this->float());
+        $this->alterColumn('certificates', 'nominal', $this->decimal(19, 2));
+        $this->alterColumn('certificates', 'balance', $this->decimal(19, 2));
     }
 
     public function safeDown()
