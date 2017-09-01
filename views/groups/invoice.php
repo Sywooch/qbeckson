@@ -39,7 +39,7 @@ $organization = $organizations->getOrganization();
 <div class="col-md-10 col-md-offset-1">
     <h1><?= Html::encode($this->title) ?></h1>
     <?php if (!$GroupsProvider->getTotalCount()): ?>
-        <p>Создать счет невозможно. В месяце <?= $date ?> не было действующих договоров, по которым предусматривалась оплата за счет сертификата.</p>
+        <p>Создать счет невозможно. В месяце <?= $m ?> не было действующих договоров, по которым предусматривалась оплата за счет сертификата.</p>
     <?php else: ?>
         <?= GridView::widget([
             'dataProvider' => $GroupsProvider,

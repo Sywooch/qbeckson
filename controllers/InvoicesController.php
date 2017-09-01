@@ -96,7 +96,7 @@ class InvoicesController extends Controller
         if ($model->load(Yii::$app->request->post())) {
             $lmonth = date('m') - 1;
 
-            $searchContracts = new ContractsInvoiceSearch();
+            $searchContracts = new ContractsInvoiceSearch(['pagination' => false]);
             $searchContracts->payer_id = $payer;
             $ContractsProvider = $searchContracts->search(Yii::$app->request->queryParams);
 
@@ -242,7 +242,7 @@ class InvoicesController extends Controller
             $organizations = new Organization();
             $organization = $organizations->getOrganization();
 
-            $searchContracts = new ContractspreInvoiceSearch();
+            $searchContracts = new ContractspreInvoiceSearch(['pagination' => false]);
             $searchContracts->payer_id = $payer;
             $ContractsProvider = $searchContracts->search(Yii::$app->request->queryParams);
 

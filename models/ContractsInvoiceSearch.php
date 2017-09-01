@@ -13,6 +13,8 @@ use app\models\Certificates;
  */
 class ContractsInvoiceSearch extends Contracts
 {
+    public $pagination = true;
+
     /**
      * @inheritdoc
      */
@@ -49,6 +51,10 @@ class ContractsInvoiceSearch extends Contracts
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
+
+        if ($this->pagination == false) {
+            $dataProvider->pagination = false;
+        }
 
         $this->load($params);
 
