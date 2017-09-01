@@ -71,7 +71,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 Договор заключается на период с
                                 <?= Yii::$app->formatter->asDate($contract->start_edu_contract) ?> по
                                 <?= Yii::$app->formatter->asDate($contract->stop_edu_contract) ?>
-                                (будут использованы средства, предусмотренные на период)
+                                (будут использованы средства, предусмотренные на <?= ($contract->start_edu_contract <= Yii::$app->operator->identity->settings->current_program_date_to) ? 'текущий' : 'будущий' ?> период)
                             </p>
                             <br>
                             <p>
@@ -88,7 +88,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <p>
                                 Всего с сертификата будет списано
                                 <?= $contract->funds_cert ?> руб. Остаток сертификата составит
-                                <?= $contract->period === Contracts::CURRENT_REALIZATION_PERIOD ?
+                                <?= $contract->period == Contracts::CURRENT_REALIZATION_PERIOD ?
                                     $contract->certificate->balance - $contract->funds_cert :
                                     $contract->certificate->balance_f - $contract->funds_cert;
                                 ?> руб.

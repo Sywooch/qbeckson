@@ -77,10 +77,10 @@ class ContractRequestForm extends Model
      */
     public function validateDate($attribute)
     {
-        if (strtotime($this->$attribute) < time()) {
+        /*if (strtotime($this->$attribute) < time()) {
             $this->addError($attribute, 'Дата начала должна быть больше или равна текущей дате');
             return;
-        }
+        }*/
 
         $group = $this->getGroup();
         if (strtotime($this->$attribute) < strtotime($group->datestart) ||
@@ -190,8 +190,8 @@ class ContractRequestForm extends Model
             $normativePrice = CalculationHelper::roundTo(
                 $realizationPeriodInDays / $groupRealizationPeriod * $group->module->normative_price
             );
-            // Меньшее из трёх all_funds / $normativePrice / отсток по сертификату
-            if ($this->getRealizationPeriod() === Contracts::CURRENT_REALIZATION_PERIOD) {
+            // Меньшее из трёх all_funds / $normativePrice / остаток по сертификату
+            if ($this->getRealizationPeriod() == Contracts::CURRENT_REALIZATION_PERIOD) {
                 $balance = $this->getCertificate()->balance;
             } else {
                 $balance = $this->getCertificate()->balance_f;

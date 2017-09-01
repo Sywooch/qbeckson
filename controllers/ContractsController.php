@@ -334,11 +334,11 @@ class ContractsController extends Controller
             $program->last_contracts = $program->last_contracts + 1;
             $program->save();
 
-            if ($model->period === Contracts::CURRENT_REALIZATION_PERIOD) {
+            if ($model->period == Contracts::CURRENT_REALIZATION_PERIOD) {
                 $cert->updateCounters([
                     'rezerv' => $model->payer_first_month_payment * -1,
                 ]);
-            } elseif ($model->period === Contracts::FUTURE_REALIZATION_PERIOD) {
+            } elseif ($model->period == Contracts::FUTURE_REALIZATION_PERIOD) {
                 $cert->updateCounters([
                     'rezerv_f' => $model->payer_first_month_payment * -1,
                 ]);
@@ -410,7 +410,9 @@ class ContractsController extends Controller
 
                 $preinvoice->sum = round(($price * $preinvoice->completeness) / 100, 2);
 
-                if ($preinvoice->save() && $model->start_edu_contract < date('Y-m-d', $nextMonth)) {
+                if ($model->start_edu_contract < date('Y-m-d', $nextMonth)) {
+                    $preinvoice->save();
+
                     $informs = new Informs();
                     $informs->program_id = $model->program_id;
                     $informs->contract_id = $model->id;
@@ -909,7 +911,7 @@ EOD;
             }
         }
 
-        $finishStudyDate = $model->period === Contracts::CURRENT_REALIZATION_PERIOD ? Yii::$app->operator->identity->settings->current_program_date_to : Yii::$app->operator->identity->settings->future_program_date_to;
+        $finishStudyDate = $model->period == Contracts::CURRENT_REALIZATION_PERIOD ? Yii::$app->operator->identity->settings->current_program_date_to : Yii::$app->operator->identity->settings->future_program_date_to;
 
         if ($finishStudyDate > $group->datestop) {
             $finishStudyDate = $group->datestop;
@@ -1543,11 +1545,11 @@ EOD;
 
                 $cert = Certificates::findOne($certificate->id);
 
-                if ($cont->period === Contracts::CURRENT_REALIZATION_PERIOD) {
+                if ($cont->period == Contracts::CURRENT_REALIZATION_PERIOD) {
                     $cert->balance += $cont->rezerv;
-                } elseif ($cont->period === Contracts::FUTURE_REALIZATION_PERIOD) {
+                } elseif ($cont->period == Contracts::FUTURE_REALIZATION_PERIOD) {
                     $cert->balance_f += $cont->rezerv;
-                } elseif ($cont->period === Contracts::PAST_REALIZATION_PERIOD) {
+                } elseif ($cont->period == Contracts::PAST_REALIZATION_PERIOD) {
                     $cert->balance_p += $cont->rezerv;
                 }
 

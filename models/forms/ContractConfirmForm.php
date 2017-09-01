@@ -74,15 +74,14 @@ class ContractConfirmForm extends Model
     public function validateConfirmation($attribute)
     {
         $balance = $this->getCertificate()->balance_f;
-        if ($this->getContract()->period === Contracts::CURRENT_REALIZATION_PERIOD) {
+        if ($this->getContract()->period == Contracts::CURRENT_REALIZATION_PERIOD) {
             $balance = $this->getCertificate()->balance;
         }
 
-        if ($this->getContract()->balance !== $balance) {
+        if ((int)$this->getContract()->balance != (int)$balance) {
             $this->addError(
                 $attribute,
-                'К сожалению заявка не может быть направлена в организацию, поскольку после последнего расчета 
-                значение Вашего номинала было изменено. Пересчитайте параметры заявки.'
+                'К сожалению заявка не может быть направлена в организацию, поскольку после последнего расчета значение Вашего номинала было изменено. Пересчитайте параметры заявки.'
             );
         }
     }
@@ -108,7 +107,7 @@ class ContractConfirmForm extends Model
                 'rezerv',
             ]);
 
-            if ($contract->period === Contracts::CURRENT_REALIZATION_PERIOD) {
+            if ($contract->period == Contracts::CURRENT_REALIZATION_PERIOD) {
                 $certificate->updateCounters([
                     'balance' => $contract->funds_cert * -1,
                     'rezerv' => $contract->funds_cert,
