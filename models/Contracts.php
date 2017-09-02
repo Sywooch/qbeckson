@@ -230,7 +230,8 @@ class Contracts extends ActiveRecord
     public function validateDate($attribute, $params)
     {
         if (strtotime($this->$attribute) > strtotime($this->start_edu_contract)) {
-            $this->addError($attribute, 'Дата договора не может превышать дату начала действия договора.');
+            $this->$attribute = $this->start_edu_contract;
+            //$this->addError($attribute, 'Дата договора не может превышать дату начала действия договора.');
         }
     }
 

@@ -746,7 +746,7 @@ class ContractsController extends Controller
             '№' . $model->certificate->number . ' (обладатель сертификата - ' . $model->certificate->fio_child . ')',
             $headerText
         );
-            $html = <<<EOD
+        $html = <<<EOD
 <div style="font-size:12;" > 
 <p style="text-align: center;">Договор об образовании №$model->number</p>
 <br>
@@ -793,7 +793,6 @@ EOD;
         }
 
 
-
         if ($model->sposob == 1) {
             $text77 = 'за наличный расчет';
         } else {
@@ -829,7 +828,7 @@ EOD;
     ' . round(($model->all_funds - floor($model->all_funds)) * 100, 0) . ' коп., в том числе:<br>
                 5.1.1. Будет оплачено за счет средств сертификата дополнительного образования Обучающегося - ' . floor($model->funds_cert) . ' руб. ' . round(($model->funds_cert - floor($model->funds_cert)) * 100, 0) . ' коп.<br>
                 5.1.2. Будет оплачено за счет средств Заказчика - ' . floor($model->all_parents_funds) . ' руб. ' . round(($model->all_parents_funds - floor($model->all_parents_funds)) * 100, 0) . ' коп.<br />
-            5.2. Оплата за счет средств сертификата осуществляется в рамках договора ' . (Yii::$app->operator->identity->settings->document_name === Cooperate::DOCUMENT_NAME_FIRST ? 'о возмещении затрат' : 'об оплате дополнительного образования') . ' № ' .  $cooperate['number'] . ' от ' . $date_cooperate[2] . '.' . $date_cooperate[1] . '.' . $date_cooperate[0] . ', заключенного между Исполнителем и ' . $payer->name_dat . ' (далее – Соглашение, Уполномоченная организация) ежемесячно не позднее 10-го числа месяца, следующего за месяцем оплаты в размере: ' . $text88 . '<br>
+            5.2. Оплата за счет средств сертификата осуществляется в рамках договора ' . (Yii::$app->operator->identity->settings->document_name === Cooperate::DOCUMENT_NAME_FIRST ? 'о возмещении затрат' : 'об оплате дополнительного образования') . ' № ' . $cooperate['number'] . ' от ' . $date_cooperate[2] . '.' . $date_cooperate[1] . '.' . $date_cooperate[0] . ', заключенного между Исполнителем и ' . $payer->name_dat . ' (далее – Соглашение, Уполномоченная организация) ежемесячно не позднее 10-го числа месяца, следующего за месяцем оплаты в размере: ' . $text88 . '<br>
             5.3. Заказчик осуществляет оплату ежемесячно ' . $text77 . ' не позднее 10-го числа месяца, следующего за месяцем оплаты в размере: ' . $text89 . '<br>';
 
             if ($model->payment_order === 1) {
@@ -848,7 +847,6 @@ EOD;
             5.3. Оплата за счет средств сертификата за месяц периода обучения по Договору осуществляется в полном объеме при условии, если по состоянию на первое число соответствующего месяца действие настоящего Договора не прекращено, независимо от фактического посещения Обучающимся занятий, предусмотренных учебным планом Программы в соответствующем месяце.<br>';
             $text4 .= '5.4. В случае отмены со стороны Исполнителя проведения одного или нескольких занятий в рамках оказания образовательной услуги объем оплаты по договору за месяц, в котором указанные занятия должны были быть проведены, уменьшается пропорционально доле таких занятий в общей продолжительности занятий в указанном месяце.<br>';
         }
-
 
 
         if ($year->kvdop == 0 and $year->hoursindivid == 0) {
@@ -939,7 +937,7 @@ EOD;
         <p style="text-align:center">II. Предмет Договора</p>
 
 <div align="justify">
-	2.1. Исполнитель обязуется оказать Обучающемуся образовательную услугу по реализации ' . $chast . ' дополнительной общеобразовательной программы ' . $directivity . ' направленности «' . $program->name . '» '. ((null === $model->module->name) ? ('модуля (года) - ' . $model->module->year) : 'модуля: «' . $model->module->name . '»') . ' (далее – Образовательная услуга, Программа), в пределах учебного плана программы, предусмотренного на период обучения по Договору.<br>
+	2.1. Исполнитель обязуется оказать Обучающемуся образовательную услугу по реализации ' . $chast . ' дополнительной общеобразовательной программы ' . $directivity . ' направленности «' . $program->name . '» ' . ((null === $model->module->name) ? ('модуля (года) - ' . $model->module->year) : 'модуля: «' . $model->module->name . '»') . ' (далее – Образовательная услуга, Программа), в пределах учебного плана программы, предусмотренного на период обучения по Договору.<br>
     2.2. Форма обучения и используемые образовательные технологии: ' . $programform . '<br>
 	2.3. Заказчик обязуется содействовать получению Обучающимся образовательной услуги' . $text1 . '.<br>
 	2.4. ' . $text144 . ' Период обучения по Договору: с ' . Yii::$app->formatter->asDate($model->start_edu_contract) . ' по ' . Yii::$app->formatter->asDate($finishStudyDate) . '.
@@ -1106,33 +1104,9 @@ EOD;
     {
         $model = $this->findModel($id);
 
-        $model->status = 3;
+        $model->status = Contracts::STATUS_ACCEPTED;
         if ($model->save()) {
-            $cert = Certificates::findOne($model->certificate_id);
-
-            $informs = new Informs();
-            $informs->program_id = $model->program_id;
-            $informs->contract_id = $model->id;
-            $informs->prof_id = $cert->payer_id;
-            $informs->text = 'Подтверждено создание договора';
-            $informs->from = 2;
-            $informs->date = date('Y-m-d');
-            $informs->read = 0;
-
-            if ($informs->save()) {
-                $inform = new Informs();
-                $inform->program_id = $model->program_id;
-                $inform->contract_id = $model->id;
-                $inform->prof_id = $model->certificate_id;
-                $inform->text = 'Подтверждено создание договора';
-                $inform->from = 4;
-                $inform->date = date('Y-m-d');
-                $inform->read = 0;
-
-                if ($inform->save()) {
-                    return $this->redirect(['mpdf', 'id' => $id, 'ok' => true]);
-                }
-            }
+            return $this->redirect(['mpdf', 'id' => $id, 'ok' => true]);
         }
     }
 
@@ -1569,7 +1543,6 @@ EOD;
             'user' => $user,
         ]);
     }
-
 
 
     public function actionUpdatescert()
