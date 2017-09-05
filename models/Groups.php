@@ -16,6 +16,8 @@ use yii\db\ActiveRecord;
  * @property string $name
  * @property string $datestart
  * @property string $datestop
+ * @property integer $status
+ * @property boolean $isActive
  *
  * @property Organization $organization
  * @property Contracts[] $contracts
@@ -26,6 +28,16 @@ use yii\db\ActiveRecord;
  */
 class Groups extends ActiveRecord
 {
+
+    const STATUS_ARCHIVED = 0;
+    const STATUS_ACTIVE   = 10;
+
+    /**/
+    public static function findActive()
+    {
+       return self::find()->where(['status' => self::STATUS_ACTIVE]);
+    }
+
     /**
      * @inheritdoc
      */
@@ -41,7 +53,7 @@ class Groups extends ActiveRecord
     {
         return [
             [['name', 'datestart', 'datestop', 'program_id'], 'required'],
-            [['organization_id', 'program_id', 'year_id'], 'integer'],
+            [['organization_id', 'program_id', 'year_id', 'status'], 'integer'],
             [['name'], 'string', 'max' => 255],
             [['address', 'schedule'], 'string'],
             [['datestop', 'datestart'], 'safe'],
@@ -69,6 +81,7 @@ class Groups extends ActiveRecord
             'schedule' => 'Расписание',
             'datestart' => 'Дата начала обучения',
             'datestop' => 'Дата окончания обучения',
+            'status' => 'Статус',
         ];
     }
 
@@ -124,11 +137,23 @@ class Groups extends ActiveRecord
     }
 
     /**
+     * Все контракты
      * @return \yii\db\ActiveQuery
      */
     public function getContracts()
     {
         return $this->hasMany(Contracts::class, ['group_id' => 'id']);
+    }
+
+    /**
+     * Контракты в работе
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLivingContracts()
+    {
+          return $this->getContracts()->andFilterWhere(['status' => [Contracts::STATUS_CREATED,
+              Contracts::STATUS_ACTIVE,
+              Contracts::STATUS_ACCEPTED]]);
     }
 
     /**
@@ -151,5 +176,32 @@ class Groups extends ActiveRecord
     public function getYear()
     {
         return $this->hasOne(ProgrammeModule::className(), ['id' => 'year_id']);
+    }
+
+    public function getIsActive()
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
+    /**
+     * можно отправить в архив?
+     * @return boolean
+     */
+    public function canBeArchived()
+    {
+        return !$this->getLivingContracts()->exists();
+    }
+
+    /**
+     * установка флага "в архиве"
+     * @return boolean
+     */
+    public function archive()
+    {
+        if(!$this->canBeArchived()){
+            return false;
+        }
+        $this->status = self::STATUS_ARCHIVED;
+        return $this->save(false);
     }
 }

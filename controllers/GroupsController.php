@@ -375,25 +375,32 @@ class GroupsController extends Controller
     }
 
     /**
-     * Deletes an existing Groups model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
+     * Ставит статус "архив" группе если нет активных контрактов
      * @param integer $id
+     * @throws NotFoundHttpException
      * @return mixed
      */
     public function actionDelete($id)
     {
         $user = User::findOne(Yii::$app->user->id);
-
+        $user->setShortLoginScenario();
         if ($user->load(Yii::$app->request->post())) {
-
-            if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
-                $this->findModel($id)->delete();
-
-                return $this->redirect(['/personal/organization-groups']);
+            if ($user->validate()) {
+                $group = $this->findModel($id);
+                if($group->archive()){
+                    Yii::$app->session->setFlash('success',
+                        sprintf( 'Группа %s отправлена в архив', $group->name));
+                    return $this->redirect(['/personal/organization-groups']);
+                }else{
+                    Yii::$app->session->setFlash('warning',
+                        sprintf( 'Удалить группу %s нельзя. Есть заявки или договоры на обучение', $group->name));
+                    return $this->redirect(['/groups/contracts', 'id' => $id]);
+                }
+                //Yii::trace('удаление группы '.$id.' прервано');
+                //$this->findModel($id)->delete();
             } else {
                 Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
-
-                return $this->redirect(['/personal/payer-certificates']);
+                return $this->redirect(['/personal/payer-certificates']); /** todo на данной странице Forbidden (#403) */
             }
         }
 
