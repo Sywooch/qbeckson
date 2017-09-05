@@ -196,7 +196,7 @@ class Groups extends ActiveRecord
      * установка флага "в архиве"
      * @return boolean
      */
-    public function archive()
+    public function setIsArchive()
     {
         if(!$this->canBeArchived()){
             return false;

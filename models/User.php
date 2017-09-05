@@ -61,9 +61,13 @@ class User extends ActiveRecord
             $this->addError($attribute, 'Не правильно введен пароль');
     }
 
+    /**
+     * @return $this
+     */
     public function setShortLoginScenario()
     {
         $this->scenario = self::SCENARIO_SHORT_LOGIN;
+        return $this;
     }
 
     /**

@@ -123,7 +123,6 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
      */
     public function validatePassword($password)
     {
-        //return $this->password === md5($password);
         return Yii::$app->getSecurity()->validatePassword($password, $this->password);
     }
 
@@ -258,5 +257,13 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
             self::ROLE_OPERATOR => 'Оператор',
             self::ROLE_MONITOR => 'Монитор',
         ];
+    }
+
+    /** @return User*/
+    public function getUser()
+    {
+        $user = new User();
+        $user->setAttributes(array_intersect_key($this->attributes, $user->attributes));
+        return $user;
     }
 }

@@ -2,26 +2,23 @@
 
 namespace app\controllers;
 
-use app\models\GroupClass;
-use app\models\GroupsPreinvoiceSearch;
-use app\models\ProgramModuleAddress;
-use Yii;
-use app\models\Groups;
-use app\models\ProgrammeModule;
-use app\models\Payers;
-use app\models\User;
-use app\models\GroupsSearch;
-use app\models\GroupsInvoiceSearch;
-use app\models\Completeness;
-use yii\base\Model;
-use yii\web\Controller;
-use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
-use app\models\Organization;
-use app\models\Contracts;
-use yii\helpers\Json;
-use yii\helpers\ArrayHelper;
 use app\models\ContractsStatus1onlySearch;
+use app\models\GroupClass;
+use app\models\Groups;
+use app\models\GroupsInvoiceSearch;
+use app\models\GroupsPreinvoiceSearch;
+use app\models\GroupsSearch;
+use app\models\Organization;
+use app\models\ProgrammeModule;
+use app\models\UserIdentity;
+use Yii;
+use yii\base\Model;
+use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
+use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
+use yii\web\NotFoundHttpException;
 
 
 /**
@@ -36,7 +33,7 @@ class GroupsController extends Controller
     {
         return [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class'   => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
                 ],
@@ -54,14 +51,16 @@ class GroupsController extends Controller
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
+            'searchModel'  => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
 
     /**
      * Displays a single Groups model.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionView($id)
@@ -80,7 +79,7 @@ class GroupsController extends Controller
         $ContractsProvider = $Contracts1Search->search(Yii::$app->request->queryParams);
 
         return $this->render('contracts', [
-            'model' => $model,
+            'model'             => $model,
             'ContractsProvider' => $ContractsProvider,
         ]);
     }
@@ -155,7 +154,7 @@ class GroupsController extends Controller
 
         return $this->render('create', [
             'groupClasses' => $groupClasses,
-            'model' => $model,
+            'model'        => $model,
         ]);
     }
 
@@ -248,8 +247,8 @@ class GroupsController extends Controller
         }
 
         return $this->render('newgroup', [
-            'model' => $model,
-            'groupClasses' => $groupClasses,
+            'model'                  => $model,
+            'groupClasses'           => $groupClasses,
             'programModuleAddresses' => $programModuleAddresses
         ]);
     }
@@ -257,7 +256,9 @@ class GroupsController extends Controller
     /**
      * Updates an existing Groups model.
      * If update is successful, the browser will be redirected to the 'view' page.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionUpdate($id)
@@ -333,9 +334,9 @@ class GroupsController extends Controller
         }
 
         return $this->render('update', [
-            'model' => $model,
+            'model'                  => $model,
             'programModuleAddresses' => $programModuleAddresses,
-            'groupClasses' => $groupClasses,
+            'groupClasses'           => $groupClasses,
         ]);
     }
 
@@ -376,38 +377,36 @@ class GroupsController extends Controller
 
     /**
      * Ставит статус "архив" группе если нет активных контрактов
+     *
      * @param integer $id
-     * @throws NotFoundHttpException
+     *
+     * @throws NotFoundHttpException | ForbiddenHttpException
      * @return mixed
      */
     public function actionDelete($id)
     {
-        $user = User::findOne(Yii::$app->user->id);
-        $user->setShortLoginScenario();
+        /** @var $identity UserIdentity */
+        $identity = Yii::$app->user->getIdentity();
+        $user = $identity->getUser()->setShortLoginScenario();
         if ($user->load(Yii::$app->request->post())) {
             if ($user->validate()) {
                 $group = $this->findModel($id);
-                if($group->archive()){
+                if ($group->setIsArchive()) {
                     Yii::$app->session->setFlash('success',
-                        sprintf( 'Группа %s отправлена в архив', $group->name));
+                        sprintf('Группа %s отправлена в архив', $group->name));
+
                     return $this->redirect(['/personal/organization-groups']);
-                }else{
+                } else {
                     Yii::$app->session->setFlash('warning',
-                        sprintf( 'Удалить группу %s нельзя. Есть заявки или договоры на обучение', $group->name));
-                    return $this->redirect(['/groups/contracts', 'id' => $id]);
+                        sprintf('Удалить группу %s нельзя. Есть заявки или договоры на обучение', $group->name));
                 }
-                //Yii::trace('удаление группы '.$id.' прервано');
-                //$this->findModel($id)->delete();
             } else {
                 Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
-                return $this->redirect(['/personal/payer-certificates']); /** todo на данной странице Forbidden (#403) */
             }
-        }
 
-        return $this->render('/user/delete', [
-            'user' => $user,
-            'title' => 'Удалить группу',
-        ]);
+            return $this->redirect(['/groups/contracts', 'id' => $id]);
+        }
+        throw new ForbiddenHttpException();
     }
 
     public function actionInvoice()
@@ -421,7 +420,7 @@ class GroupsController extends Controller
         $GroupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
 
         return $this->render('invoice', [
-            'searchGroups' => $searchGroups,
+            'searchGroups'   => $searchGroups,
             'GroupsProvider' => $GroupsProvider,
         ]);
 
@@ -438,7 +437,7 @@ class GroupsController extends Controller
         $GroupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
 
         return $this->render('preinvoice', [
-            'searchGroups' => $searchGroups,
+            'searchGroups'   => $searchGroups,
             'GroupsProvider' => $GroupsProvider,
         ]);
 
@@ -457,7 +456,7 @@ class GroupsController extends Controller
         $GroupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
 
         return $this->render('dec', [
-            'searchGroups' => $searchGroups,
+            'searchGroups'   => $searchGroups,
             'GroupsProvider' => $GroupsProvider,
         ]);
 
@@ -466,7 +465,9 @@ class GroupsController extends Controller
     /**
      * Finds the Groups model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
+     *
      * @param integer $id
+     *
      * @return Groups the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
