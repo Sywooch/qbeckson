@@ -2,8 +2,6 @@
 
 namespace app\models;
 
-use Yii;
-use yii\base\Model;
 use yii\db\ActiveRecord;
 
 /**
@@ -29,7 +27,7 @@ use yii\db\ActiveRecord;
 class Groups extends ActiveRecord
 {
 
-    const STATUS_ARCHIVED = 0;
+    const STATUS_ARCHIVED = 5;
     const STATUS_ACTIVE   = 10;
 
     /**/
