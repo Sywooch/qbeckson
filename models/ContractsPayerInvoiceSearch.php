@@ -42,28 +42,11 @@ class ContractsPayerInvoiceSearch extends Contracts
      */
     public function search($params)
     {
-       /* $cont = (new \yii\db\Query())
-                ->select(['contracts'])
-                ->from('invoices')
-                ->where(['month' => date('m')+1])
-                ->andWhere(['prepayment' => 1])
-                ->column();
-        
-        $contracts = array();
-        foreach ($cont as $value) {
-            $tmp = explode(",", $value);
-            foreach ($tmp as $contract) {
-                array_push($contracts, $contract);
-            }
-        }
-        $contracts = array_unique($contracts);
-        if (empty($contracts)) {$contracts = 0; } */
-        
-        $cal_days_in_month = cal_days_in_month(CAL_GREGORIAN, date('m'), date('Y'));
-        $start = date('Y-m-').$cal_days_in_month;
-        $stop = date('Y-m-').'1';
-        
-        $query = Contracts::find()->where(['<=', 'start_edu_contract', $start])->andWhere(['>=', 'stop_edu_contract', $stop]);
+        $firstDayOfThisMonth = strtotime('first day of this month');
+        $lastDayOfThisMonth = strtotime('last day of this month');
+
+        $query = Contracts::find()
+            ->andWhere(['or', ['and', ['status' => Contracts::STATUS_ACTIVE], ['<=', 'start_edu_contract', date('Y-m-d', $lastDayOfThisMonth)]], ['and', ['status' => Contracts::STATUS_CLOSED], ['>', 'date_termnate', date('Y-m-d', $firstDayOfThisMonth)]]]);
 
         // add conditions that should always apply here
 
@@ -76,14 +59,9 @@ class ContractsPayerInvoiceSearch extends Contracts
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             $query->where('0=1');
+
             return $dataProvider;
         }
-
-        $certificates = new Certificates();
-        $certificate = $certificates->getCertificates();
-
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -93,7 +71,7 @@ class ContractsPayerInvoiceSearch extends Contracts
             'certificate_id' => $this->certificate_id,
             'organization_id' => $this->organization_id,
             'payer_id' => $this->payer_id,
-            '`contracts`.status' => 1,
+            '`contracts`.status' => $this->status,
             'status_termination' => $this->status_termination,
             'status_year' => $this->status_year,
             'start_edu_programm' => $this->start_edu_programm,

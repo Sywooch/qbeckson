@@ -436,7 +436,7 @@ class Payers extends \yii\db\ActiveRecord
 
 
     /**
-     * DEPRECATED
+     * @deprecated
      * Use UserIdentity::payer instead
      */
     public function getPayer()
