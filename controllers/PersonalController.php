@@ -151,6 +151,7 @@ class PersonalController extends Controller
     {
         $searchRegistry = new OrganizationSearch([
             'statusArray' => [Organization::STATUS_ACTIVE, Organization::STATUS_BANNED],
+            'cooperateStatus' => Cooperate::STATUS_ACTIVE,
             'programs' => '0,1000',
             'children' => '0,10000',
             'amount_child' => '0,10000',
@@ -163,15 +164,34 @@ class PersonalController extends Controller
 
         $searchRequest = new OrganizationSearch([
             'statusArray' => [Organization::STATUS_NEW],
+            'cooperateStatus' => Cooperate::STATUS_NEW,
             'modelName' => 'SearchRequest',
         ]);
         $requestProvider = $searchRequest->search(Yii::$app->request->queryParams);
+
+        $searchConfirm = new OrganizationSearch([
+            'statusArray' => [Organization::STATUS_ACTIVE],
+            'cooperateStatus' => Cooperate::STATUS_CONFIRMED,
+            'modelName' => 'SearchConfirm',
+        ]);
+        $confirmProvider = $searchConfirm->search(Yii::$app->request->queryParams);
+
+        $searchReject = new OrganizationSearch([
+            'statusArray' => [Organization::STATUS_ACTIVE],
+            'cooperateStatus' => [Cooperate::STATUS_REJECTED, Cooperate::STATUS_APPEALED],
+            'modelName' => 'SearchReject',
+        ]);
+        $rejectProvider = $searchReject->search(Yii::$app->request->queryParams);
 
         return $this->render('operator-organizations', [
             'searchRegistry' => $searchRegistry,
             'registryProvider' => $registryProvider,
             'searchRequest' => $searchRequest,
             'requestProvider' => $requestProvider,
+            'searchReject' => $searchReject,
+            'rejectProvider' => $rejectProvider,
+            'searchConfirm' => $searchConfirm,
+            'confirmProvider' => $confirmProvider,
 
             'allRegistryProvider' => $allRegistryProvider,
         ]);
