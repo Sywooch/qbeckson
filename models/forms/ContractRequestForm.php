@@ -238,8 +238,7 @@ class ContractRequestForm extends Model
                         $realizationPeriodInDays * $funds_cert / ($realizationPeriodInMonthes - 1),
                         CalculationHelper::TO_DOWN
                     );
-                    $payer_first_month_payment = $funds_cert - $payer_other_month_payment *
-                        ($realizationPeriodInMonthes - 1);
+                    $payer_first_month_payment = round($funds_cert - $payer_other_month_payment * ($realizationPeriodInMonthes - 1), 2);
                 }
             }
 
