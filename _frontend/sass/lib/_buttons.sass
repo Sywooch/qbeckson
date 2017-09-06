@@ -1,0 +1,80 @@
+=button-variant($text-color, $color)
+  $border: shade($color,25%)
+  color: $text-color
+  background-color: $color
+  border-color: $border
+  &:focus,
+  &.focus
+    color: $text-color
+    background-color: darken($color, 10%)
+    border-color: darken($border, 25%)
+  &:hover
+    color: $text-color
+    background-color: darken($color, 10%)
+    border-color: darken($border, 12%)
+  &:active,
+  &.active,
+  .open > &.dropdown-toggle
+    color: $text-color
+    background-color: darken($color, 10%)
+    border-color: darken($border, 12%)
+    &:hover,
+    &:focus,
+    &.focus
+      color: $text-color
+      background-color: darken($color, 17%)
+      border-color: darken($border, 25%)
+  &:active,
+  &.active,
+  .open > &.dropdown-toggle
+    background-image: none
+  &.disabled,
+  &[disabled],
+  fieldset[disabled] &
+    &:hover,
+    &:focus,
+    &.focus
+      background-color: $color
+      border-color: $border
+  .badge
+    color: $color
+    background-color: $text-color
+
+.btn
+  border-radius: $default-border-radius
+  border: 1px solid transparent
+  font-weight: $default-btn-font-weight
+  padding: $padding-active-element
+  line-height: $font-height-element-default
+  transition: all $transition-default
+  min-width: 120px
+  letter-spacing: 0.2px
+
+.btn-default
+  +button-variant($color-button-text-default, $default-color)
+.btn-primary
+  +button-variant($color-button-text-default, $primary-color)
+.btn-success
+  +button-variant($color-button-text-default, $success-color)
+.btn-info
+  +button-variant($color-button-text-default, $info-color)
+.btn-warning
+  +button-variant($color-button-text-default, $warning-color)
+.btn-danger
+  +button-variant($color-button-text-default, $danger-color)
+.btn-theme
+  +button-variant($color-button-text-default, $color-theme)
+
+.btn-row
+  margin-top: $margin-vert-default
+  margin-bottom: $margin-vert-default
+  @media (max-width: $screen-sm-min - 1)
+    .btn
+      width: 100%
+      display: block
+    .btn + .btn
+      margin-top: $margin-vert-default
+      margin-top: $margin-vert-default
+  @media (min-width: $screen-sm-min)
+    .btn + .btn
+      margin-left: $margin-hor-default
