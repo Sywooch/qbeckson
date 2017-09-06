@@ -358,8 +358,8 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
             'columns' => $preparedDissolvedColumns,
         ]); ?>
     </div>
-    <!--<p class="lead">Экспорт данных:</p>-->
-    <!--<?= ExportMenu::widget([
+    <p class="lead">Экспорт данных:</p>
+    <?= ExportMenu::widget([
         'dataProvider' => $ContractsallProvider,
         'filename' => 'all-contracts',
         'target' => ExportMenu::TARGET_BLANK,
@@ -437,7 +437,7 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
             'fontsize',
             'certificatenumber',
         ],
-    ]); ?>-->
+    ]); ?>
     <p>
         <?php
         $payer = Yii::$app->user->identity->payer;
