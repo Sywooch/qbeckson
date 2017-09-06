@@ -126,16 +126,16 @@
         },
         {
             "name": "bower-asset/blueimp-file-upload",
-            "version": "v9.19.0",
+            "version": "v9.19.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/blueimp/jQuery-File-Upload.git",
-                "reference": "9459d1042a2e6b1d215c53a36d3fdc23150be04d"
+                "reference": "fbf442f1a90fdab69f1159951a2308fac0164993"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/blueimp/jQuery-File-Upload/zipball/9459d1042a2e6b1d215c53a36d3fdc23150be04d",
-                "reference": "9459d1042a2e6b1d215c53a36d3fdc23150be04d",
+                "url": "https://api.github.com/repos/blueimp/jQuery-File-Upload/zipball/fbf442f1a90fdab69f1159951a2308fac0164993",
+                "reference": "fbf442f1a90fdab69f1159951a2308fac0164993",
                 "shasum": ""
             },
             "require": {
@@ -2156,16 +2156,16 @@
         },
         {
             "name": "kartik-v/yii2-widget-datepicker",
-            "version": "v1.4.2",
+            "version": "v1.4.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kartik-v/yii2-widget-datepicker.git",
-                "reference": "8738f6dc3211d949b05189ba103aab786143fc6c"
+                "reference": "b793655b63e77e5598ed232cf887cc640c30420f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kartik-v/yii2-widget-datepicker/zipball/8738f6dc3211d949b05189ba103aab786143fc6c",
-                "reference": "8738f6dc3211d949b05189ba103aab786143fc6c",
+                "url": "https://api.github.com/repos/kartik-v/yii2-widget-datepicker/zipball/b793655b63e77e5598ed232cf887cc640c30420f",
+                "reference": "b793655b63e77e5598ed232cf887cc640c30420f",
                 "shasum": ""
             },
             "require": {
@@ -2206,7 +2206,7 @@
                 "widget",
                 "yii2"
             ],
-            "time": "2016-09-04T10:52:50+00:00"
+            "time": "2017-09-04T03:28:47+00:00"
         },
         {
             "name": "kartik-v/yii2-widget-datetimepicker",
@@ -4445,16 +4445,16 @@
         },
         {
             "name": "yiisoft/yii2-debug",
-            "version": "2.0.9",
+            "version": "2.0.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yiisoft/yii2-debug.git",
-                "reference": "647be6c9d48dc2f3c2e2f33b9eba0a4ca78abde9"
+                "reference": "372fbf0d47303b7d68275d6720935e5116915418"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yiisoft/yii2-debug/zipball/647be6c9d48dc2f3c2e2f33b9eba0a4ca78abde9",
-                "reference": "647be6c9d48dc2f3c2e2f33b9eba0a4ca78abde9",
+                "url": "https://api.github.com/repos/yiisoft/yii2-debug/zipball/372fbf0d47303b7d68275d6720935e5116915418",
+                "reference": "372fbf0d47303b7d68275d6720935e5116915418",
                 "shasum": ""
             },
             "require": {
@@ -4488,7 +4488,7 @@
                 "debugger",
                 "yii2"
             ],
-            "time": "2017-02-21T10:30:50+00:00"
+            "time": "2017-09-05T23:21:05+00:00"
         },
         {
             "name": "yiisoft/yii2-faker",
