@@ -439,42 +439,53 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
     ]); ?>
     <p>
         <?php
-        $payers = new Payers();
-        $payer = $payers->getPayer();
+        $payer = Yii::$app->user->identity->payer;
 
+        if ($doc = \app\models\ContractDocument::findByPayer($payer, date('Y'), date('m'))) {
+            echo '<br />' . Html::a('Скачать выписку от ' . Yii::$app->formatter->asDate($doc->created_at), '/uploads/contracts/' . $doc->file, ['class' => 'btn btn-primary']);
+        } else {
         $searchContracts = new ContractsPayerInvoiceSearch();
         $searchContracts->payer_id = $payer->id;
         $InvoiceProvider = $searchContracts->search(Yii::$app->request->queryParams);
 
+        echo '<div class="alert alert-warning">Внимание! После заказа реестра договоров для формирования заявки на субсидию в текущем месяце до его завершения новый реестр запросить уже не удастся. А это значит, что договоры, которые будут заключены после текущего момента будут включены в заявку уже в следующем месяце. Вы уверены, что сегодня тот самый день?</div>';
+
         echo ExportMenu::widget([
             'dataProvider' => $InvoiceProvider,
-            'target' => ExportMenu::TARGET_BLANK,
+            'target' => ExportMenu::TARGET_SELF,
             'showColumnSelector' => false,
-            'filename' => date('d-m-Y'),
+            'filename' => $payer->id . '_' . date('d-m-Y'),
+            'stream' => false,
+            'deleteAfterSave' => false,
+            'folder' => '@webroot/uploads/contracts',
+            'linkPath' => '@webroot/uploads/contracts',
             'dropdownOptions' => [
                 'class' => 'btn btn-success',
                 'label' => 'Сформировать реестр договоров для субсидии',
                 'icon' => false,
             ],
+            'showConfirmAlert' => false,
+            'afterSaveView' => '@app/views/contracts/export-view',
             'exportConfig' => [
                 ExportMenu::FORMAT_TEXT => false,
                 ExportMenu::FORMAT_CSV => false,
                 ExportMenu::FORMAT_HTML => false,
-                ExportMenu::FORMAT_EXCEL => false,
+                ExportMenu::FORMAT_PDF => false,
             ],
             'columns' => [
                 ['class' => 'yii\grid\SerialColumn'],
-                'number',
-                'date:date',
                 [
                     'attribute' => 'certificatenumber',
                     'label' => 'Сертификат',
                     'format' => 'raw',
                 ],
                 [
-                    'attribute' => 'organizationname',
-                    'label' => 'Организация',
+                    'attribute' => 'number',
+                    'label' => 'Реквизиты договора об обучении (твердой оферты)',
                     'format' => 'raw',
+                    'value' => function ($model) {
+                        return '№' . $model->number . ' от ' . Yii::$app->formatter->asDate($model->date);
+                    }
                 ],
                 [
                     'label' => 'К оплате',
@@ -484,9 +495,9 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
                         $month = $start_edu_contract[1];
 
                         if ($month == date('m')) {
-                            $price = $model->first_month_payer_payment;
+                            $price = $model->payer_first_month_payment;
                         } else {
-                            $price = $model->other_month_payer_payment;
+                            $price = $model->payer_other_month_payment;
                         }
 
                         return $price;
@@ -494,8 +505,6 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
                 ],
             ],
         ]);
-        ?>
-    <p>
-    <br>
-    <p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>
+    }
+?>
 </div>
