@@ -23,7 +23,14 @@ class CalculationHelper
         $valueArray = explode('.', $value * 1000);
         $result = substr(array_shift($valueArray), 0, -1) / 100;
 
-        return $method === self::TO_UP ? $result + 0.01 : $result;
+        return $method === self::TO_UP ? static::roundUp($value) : $result;
+    }
+
+    public static function roundUp($value, $precision = 2)
+    {
+        $pow = pow(10, $precision);
+
+        return (ceil($pow * $value) + ceil($pow * $value - ceil($pow * $value))) / $pow;
     }
 
     /**

@@ -11,6 +11,7 @@ use yii\helpers\Html;
 use kartik\grid\GridView;
 use yii\helpers\Url;
 use kartik\export\ExportMenu;
+use kartik\dialog\Dialog;
 use app\models\ContractsPayerInvoiceSearch;
 use app\models\Payers;
 

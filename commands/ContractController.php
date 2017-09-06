@@ -43,32 +43,39 @@ class ContractController extends Controller
                     ->column();
                 $payersIds = join(',', $arrayPayersIds);
                 // Плательщики
-                $command = Yii::$app->db->createCommand("UPDATE payers AS p SET certificate_can_use_future_balance = 0 WHERE id IN (:payers)", [
-                    ':payers' => $payersIds,
-                ]);
-                $command->execute();
+                $command = Yii::$app->db->createCommand("UPDATE payers AS p SET certificate_can_use_future_balance = 0 WHERE id IN ($payersIds)");
+                print_r($command->rawSql);
+                echo PHP_EOL . ' --> ' . $command->execute() . PHP_EOL;
                 // Cert groups
                 date_default_timezone_set('Europe/Moscow');
                 $datetimeTo = date_create($settings->current_program_date_to);
                 $datetimeFrom = date_create($settings->current_program_date_from);
                 $difference = date_diff($datetimeFrom, $datetimeTo);
-                $coefficient = ($difference->format('%a') + 1) / 365;
-                $command = Yii::$app->db->createCommand("UPDATE cert_group SET nominal = nominal_f, nominal_f = ROUND(nominal_f * :coefficient) WHERE payer_id IN (:payers)", [
-                    ':payers' => $payersIds,
+                $coefficient = 365 / ($difference->format('%a') + 1);
+                $command = Yii::$app->db->createCommand("UPDATE cert_group SET nominal = nominal_f, nominal_f = ROUND(nominal_f * :coefficient) WHERE payer_id IN ($payersIds)", [
                     ':coefficient' => $coefficient,
                 ]);
-                $command->execute();
+                print_r($command->rawSql);
+                echo PHP_EOL . ' --> ' . $command->execute() . PHP_EOL;
                 // Сертификаты
-                $command = Yii::$app->db->createCommand("UPDATE `certificates` as c INNER JOIN `cert_group` as cg ON c.cert_group = cg.id SET c.nominal_p = c.nominal, c.balance_p = c.balance, c.rezerv_p = c.rezerv, c.nominal = c.nominal_f, c.balance = c.balance_f, c.rezerv = c.rezerv_f, c.nominal_f = cg.nominal_f, c.balance_f = cg.nominal_f, rezerv_f = 0 WHERE c.payer_id IN (:payers)", [
-                    ':payers' => $payersIds,
-                ]);
-                $command->execute();
-                // Договоры
-                $command = Yii::$app->db->createCommand("UPDATE `contracts` SET period = " . Contracts::CURRENT_REALIZATION_PERIOD . " WHERE period = " . Contracts::FUTURE_REALIZATION_PERIOD);
-                $command = Yii::$app->db->createCommand("UPDATE `contracts` SET period = " . Contracts::PAST_REALIZATION_PERIOD . " WHERE period = " . Contracts::CURRENT_REALIZATION_PERIOD);
-                $command->execute();
+                $command = Yii::$app->db->createCommand("UPDATE `certificates` as c INNER JOIN `cert_group` as cg ON c.cert_group = cg.id SET c.nominal_p = c.nominal, c.balance_p = c.balance, c.rezerv_p = c.rezerv, c.nominal = c.nominal_f, c.balance = c.balance_f, c.rezerv = c.rezerv_f, c.nominal_f = cg.nominal_f, c.balance_f = cg.nominal_f, rezerv_f = 0 WHERE c.payer_id IN ($payersIds)");
+                print_r($command->rawSql);
+                echo PHP_EOL . ' --> ' . $command->execute() . PHP_EOL;
+            } else {
+                print_r($settings->errors);
             }
         }
+        // Договоры
+        // TODO: Делать это только для тех договоров, у которых сдвинулся оператор
+        $command = Yii::$app->db->createCommand("UPDATE `contracts` SET period = " . Contracts::PAST_REALIZATION_PERIOD . " WHERE period = " . Contracts::CURRENT_REALIZATION_PERIOD);
+        print_r($command->rawSql);
+        echo PHP_EOL;
+        $command->execute();
+        $command = Yii::$app->db->createCommand("UPDATE `contracts` SET period = " . Contracts::CURRENT_REALIZATION_PERIOD . " WHERE period = " . Contracts::FUTURE_REALIZATION_PERIOD);
+        print_r($command->rawSql);
+        echo PHP_EOL;
+        $command->execute();
+        echo 'Done.';
 
         return Controller::EXIT_CODE_NORMAL;
     }
@@ -93,6 +100,8 @@ class ContractController extends Controller
         ]);
         $command->execute();
 
+        echo 'Done.';
+
         return Controller::EXIT_CODE_NORMAL;
     }
 
@@ -102,7 +111,7 @@ class ContractController extends Controller
         // == Вынимаем действующие контракты, дата начала обучения которых меньше первого числа текущего месяца
         // Для контракта уменьшаем rezerv, увеличиваем paid
         // Для связанного сертификата уменьшаем rezerv
-        $command = Yii::$app->db->createCommand("UPDATE contracts as c CROSS JOIN certificates as crt ON c.certificate_id = crt.id SET crt.rezerv = c.rezerv - c.other_m_price * c.payer_dol, c.rezerv = c.rezerv - c.other_m_price * c.payer_dol, c.paid = c.paid + c.other_m_price * c.payer_dol WHERE c.status = 1 AND c.start_edu_contract < :contract_start", [
+        $command = Yii::$app->db->createCommand("UPDATE contracts as c CROSS JOIN certificates as crt ON c.certificate_id = crt.id SET crt.rezerv = c.rezerv - c.payer_other_month_payment, c.rezerv = c.rezerv - c.payer_other_month_payment, c.paid = c.paid + c.payer_other_month_payment WHERE c.status = 1 AND c.start_edu_contract < :contract_start", [
             ':contract_start' => date('Y-m-d', strtotime('first day of this month')),
         ]);
         $command->execute();
@@ -152,12 +161,15 @@ class ContractController extends Controller
         $currentMonth = strtotime('first day of this month');
         $lastDayOfThisMonth = strtotime('last day of this month');
 
-        $contracts = Contracts::find()
+        $query = Contracts::find()
             ->where(['<=', 'start_edu_contract', date('Y-m-d', $lastDayOfThisMonth)])
-            ->andWhere(['or', ['status' => Contracts::STATUS_ACTIVE], ['and', ['status' => Contracts::STATUS_CLOSED], ['>=', 'date_termnate', date('Y-m-d', $previousMonth)]]])
-            ->all();
-        // создает счета, которые только-только закрылись
+            ->andWhere(['or', ['status' => Contracts::STATUS_ACTIVE], ['and', ['status' => Contracts::STATUS_CLOSED], ['>=', 'date_termnate', date('Y-m-d', $previousMonth)]]]);
 
+        echo PHP_EOL . $query->prepare(Yii::$app->db->queryBuilder)->createCommand()->rawSql . PHP_EOL;
+
+        $contracts = $query->all();
+
+        // создает счета, которые только-только закрылись
         foreach ($contracts as $contract) {
             $completenessExists = Completeness::find()
                 ->where([
@@ -175,11 +187,14 @@ class ContractController extends Controller
                     'year' => date('Y'),
                 ])
                 ->count();
+
             // Создаем за предыдущий месяц
             // Если месяц январь - создаваться не будет
-
-            if (!$completenessExists && $contract->start_edu_contract <= date('Y-m-d', $currentMonth)) {
-                $this->createCompleteness($contract, $previousMonth, $this->monthlyPrice($contract, $previousMonth));
+            if (!$completenessExists && $contract->start_edu_contract < date('Y-m-d', $currentMonth)) {
+                echo PHP_EOL . 'Создал счет за ' . date('d.m.Y', $previousMonth) . PHP_EOL;
+                if (!$this->createCompleteness($contract, $previousMonth, $this->monthlyPrice($contract, $previousMonth))) {
+                    die('Ошибка создание счета.');
+                }
             }
             // Если текущий месяц == декабрь, то тоже создаем
             if (date('m') == 12) {
@@ -187,7 +202,10 @@ class ContractController extends Controller
             }
             // Создаем преинвойс
             if (!$preinvoiceExists && $contract->status == Contracts::STATUS_ACTIVE && $contract->start_edu_contract <= date('Y-m-d', $lastDayOfThisMonth)) {
-                $this->createPreinvoice($contract, $this->monthlyPrice($contract, time()));
+                echo PHP_EOL . 'Создал аванс за ' . date('d.m.Y') . PHP_EOL;
+                if (!$this->createPreinvoice($contract, $this->monthlyPrice($contract, time()))) {
+                    die('Ошибка создание аванса.');
+                }
             }
         }
 

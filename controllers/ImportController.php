@@ -25,4 +25,22 @@ class ImportController extends \yii\web\Controller
             'model' => $model,
         ]);
     }
+
+    public function actionChildrenPassword()
+    {
+        $model = new Import();
+
+        if (Yii::$app->request->isPost) {
+            $model->importFile = UploadedFile::getInstance($model, 'importFile');
+            if ($model->updateChildrenPassword()) {
+                Yii::$app->session->setFlash('success', 'Пароли успешно изменены.');
+
+                return $this->refresh();
+            }
+        }
+
+        return $this->render('children-password', [
+            'model' => $model,
+        ]);
+    }
 }

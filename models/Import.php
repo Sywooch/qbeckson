@@ -5,6 +5,7 @@ namespace app\models;
 use Yii;
 use yii\base\Model;
 use yii\web\UploadedFile;
+use app\helpers\FormattingHelper;
 
 class Import extends Model
 {
@@ -68,19 +69,35 @@ class Import extends Model
                 } else {
                     $userId = $user->id;
                 }
-                $certificateArray[] = [$userId, $username, $data[4], $data[5], $this->convertEncoding($data[6]), $this->convertEncoding($data[7]), $this->convertEncoding($data[8]), $this->convertEncoding($data[9]), $data[11], $data[12], $data[20], $data[21]];
-                //Yii::$app->db->createCommand()->batchInsert('certificates', ['user_id', 'number', 'payer_id', 'actual', 'fio_child', 'name', 'soname', 'phname', 'nominal', 'balance', 'cert_group', 'rezerv'], $certificateArray)->execute();
-                //$certificateArray = [];
+
+                $payer = Payers::findOne($data[4]);
+
+                $certificateArray[] = [$userId, $username, $data[4], $data[5], FormattingHelper::convertEncoding($data[6]), FormattingHelper::convertEncoding($data[7]), FormattingHelper::convertEncoding($data[8]), FormattingHelper::convertEncoding($data[9]), $data[11], $data[12], $data[20], $data[21], $payer->firstCertGroup->id];
             }
             fclose($handle);
-            Yii::$app->db->createCommand()->batchInsert('certificates', ['user_id', 'number', 'payer_id', 'actual', 'fio_child', 'name', 'soname', 'phname', 'nominal', 'balance', 'cert_group', 'rezerv'], $certificateArray)->execute();
+            Yii::$app->db->createCommand()->batchInsert('certificates', ['user_id', 'number', 'payer_id', 'actual', 'fio_child', 'name', 'soname', 'phname', 'nominal', 'balance', 'cert_group', 'rezerv', 'possible_cert_group'], $certificateArray)->execute();
         }
 
         return true;
     }
 
-    private function convertEncoding($text, $in = "CP1251", $out = "UTF-8")
+    public function updateChildrenPassword()
     {
-        return iconv($in, $out, $text);
+        if (($handle = fopen($this->importFile->tempName, "r")) !== false) {
+            while (($data = fgetcsv($handle, 1000, ";")) !== false) {
+                $username = $data[0];
+                $password = $data[1];
+                $user = User::find()
+                    ->where(['username' => $username])
+                    ->one();
+
+                if ($user) {
+                    $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+                    $user->save();
+                }
+            }
+        }
+
+        return true;
     }
 }

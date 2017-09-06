@@ -91,14 +91,14 @@ $this->registerJs($js, $this::POS_READY);
 
     <?php foreach ($model::directionalityAttributes() as $attribute => $name) : ?>
         <hr>
-        <?php if (in_array($name, $model->directionality)) : ?>
+        <?php if (!$model->isNewRecord && in_array($name, $model->directionality)) : ?>
             <?php $model->$attribute = 1; ?>
         <?php endif; ?>
             <div class="item">
                 <?= $form->field($model, $attribute)->checkbox([
                     'class' => 'item-checkbox'
                 ])->label($name) ?>
-                <?php if (in_array($name, $model->directionality)) : ?>
+                <?php if (!$model->isNewRecord && in_array($name, $model->directionality)) : ?>
                     <div class="item-block">
                 <?php else : ?>
                     <div class="item-block" style="display: none;">

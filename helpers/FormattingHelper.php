@@ -44,4 +44,9 @@ class FormattingHelper
 
         return $directivity;
     }
+
+    public static function convertEncoding($text, $in = "CP1251", $out = "UTF-8")
+    {
+        return iconv($in, $out, $text);
+    }
 }
