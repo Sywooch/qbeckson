@@ -88,9 +88,9 @@ $columns = [
             'contracts' => function ($url, $model)
             {
                 return Html::a(
-                    '<span class="glyphicon glyphicon-eye-open"></span>',
-                    Url::to(['groups/contracts', 'id' => $model->id]),
-                    ['title' => 'Просмотреть договоры']
+                    $model->isActive ? '<span class="glyphicon glyphicon-eye-open"></span>' : '<span class="glyphicon glyphicon-eye-close"></span>',
+                    $model->isActive ? Url::to(['groups/contracts', 'id' => $model->id]) : '#',
+                    $model->isActive ? ['title' => 'Просмотреть договоры'] : ['title' => 'Группа находится в архиве']
                 );
             }
         ],

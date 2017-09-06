@@ -2,27 +2,28 @@
 
 namespace app\models;
 
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "groups".
  *
- * @property integer $id
- * @property integer $organization_id
- * @property integer $program_id
- * @property integer $year_id
- * @property string $name
- * @property string $datestart
- * @property string $datestop
- * @property integer $status
- * @property boolean $isActive
+ * @property integer         $id
+ * @property integer         $organization_id
+ * @property integer         $program_id
+ * @property integer         $year_id
+ * @property string          $name
+ * @property string          $datestart
+ * @property string          $datestop
+ * @property integer         $status
+ * @property boolean         $isActive
  *
- * @property Organization $organization
- * @property Contracts[] $contracts
+ * @property Organization    $organization
+ * @property Contracts[]     $contracts
  * @property ProgrammeModule $module
- * @property mixed $year
- * @property Programs $program
- * @property GroupClass[] $classes
+ * @property mixed           $year
+ * @property Programs        $program
+ * @property GroupClass[]    $classes
  */
 class Groups extends ActiveRecord
 {
@@ -30,11 +31,16 @@ class Groups extends ActiveRecord
     const STATUS_ARCHIVED = 5;
     const STATUS_ACTIVE   = 10;
 
-    /**/
-    public static function findActive()
+    /**
+     *
+     * @inheritdoc
+     * @return ActiveQuery the newly created [[ActiveQuery]] instance.
+     */
+    public static function find()
     {
-       return self::find()->where(['status' => self::STATUS_ACTIVE]);
+        return parent::find()->where(['groups.status' => self::STATUS_ACTIVE]);
     }
+
 
     /**
      * @inheritdoc
@@ -70,16 +76,16 @@ class Groups extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'id'              => 'ID',
             'organization_id' => 'Организация',
-            'program_id' => 'Программа',
-            'year_id' => 'ID Года',
-            'name' => 'Название группы',
-            'address' => 'Адрес',
-            'schedule' => 'Расписание',
-            'datestart' => 'Дата начала обучения',
-            'datestop' => 'Дата окончания обучения',
-            'status' => 'Статус',
+            'program_id'      => 'Программа',
+            'year_id'         => 'ID Года',
+            'name'            => 'Название группы',
+            'address'         => 'Адрес',
+            'schedule'        => 'Расписание',
+            'datestart'       => 'Дата начала обучения',
+            'datestop'        => 'Дата окончания обучения',
+            'status'          => 'Статус',
         ];
     }
 
@@ -149,9 +155,9 @@ class Groups extends ActiveRecord
      */
     public function getLivingContracts()
     {
-          return $this->getContracts()->andFilterWhere(['status' => [Contracts::STATUS_CREATED,
-              Contracts::STATUS_ACTIVE,
-              Contracts::STATUS_ACCEPTED]]);
+        return $this->getContracts()->andFilterWhere(['status' => [Contracts::STATUS_CREATED,
+            Contracts::STATUS_ACTIVE,
+            Contracts::STATUS_ACCEPTED]]);
     }
 
     /**
@@ -200,6 +206,7 @@ class Groups extends ActiveRecord
             return false;
         }
         $this->status = self::STATUS_ARCHIVED;
+
         return $this->save(false);
     }
 }

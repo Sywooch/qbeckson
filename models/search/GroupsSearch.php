@@ -77,6 +77,7 @@ class GroupsSearch extends Groups
             return $dataProvider;
         }
 
+        $query->where(null);
         if ($this->status == Groups::STATUS_ACTIVE) {
             $query->andFilterWhere(['groups.status' => Groups::STATUS_ACTIVE]);
         } elseif ($this->status == Groups::STATUS_ARCHIVED) {
