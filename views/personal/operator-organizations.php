@@ -152,18 +152,9 @@ $requestColumns = [
     $type,
     $actions,
 ];
-$readonlyColumns = [
-    $name,
-    $fio_contact,
-    $site,
-    $email,
-    $mun,
-    $type,
-];
 
 $preparedRegistryColumns = GridviewHelper::prepareColumns('organization', $registryColumns, 'register');
 $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $requestColumns, 'request');
-$preparedReadonlyColumns = GridviewHelper::prepareColumns('organization', $readonlyColumns, 'request');
 ?>
 <ul class="nav nav-tabs">
     <li class="active">
@@ -174,16 +165,6 @@ $preparedReadonlyColumns = GridviewHelper::prepareColumns('organization', $reado
     <li>
         <a data-toggle="tab" href="#panel-requests">Заявки
             <span class="badge"><?= $requestProvider->totalCount ?></span>
-        </a>
-    </li>
-    <li>
-        <a data-toggle="tab" href="#panel2">Подтверждённые
-            <span class="badge"><?= $confirmProvider->totalCount ?></span>
-        </a>
-    </li>
-    <li>
-        <a data-toggle="tab" href="#panel4">Отклонены
-            <span class="badge"><?= $rejectProvider->totalCount ?></span>
         </a>
     </li>
 </ul>
@@ -257,50 +238,6 @@ $preparedReadonlyColumns = GridviewHelper::prepareColumns('organization', $reado
                 $requestColumns,
                 'request'
             )
-        ]); ?>
-    </div>
-    <div id="panel2" class="tab-pane fade">
-        <?= SearchFilter::widget([
-            'model' => $searchConfirm,
-            'action' => ['personal/payer-organizations#panel2'],
-            'data' => GridviewHelper::prepareColumns(
-                'organization',
-                $requestColumns,
-                'request',
-                'searchFilter',
-                null
-            ),
-            'role' => UserIdentity::ROLE_OPERATOR,
-            'type' => 'request'
-        ]); ?>
-        <?= GridView::widget([
-            'dataProvider' => $confirmProvider,
-            'filterModel' => null,
-            'pjax' => true,
-            'summary' => false,
-            'columns' => $preparedReadonlyColumns
-        ]); ?>
-    </div>
-    <div id="panel4" class="tab-pane fade">
-        <?= SearchFilter::widget([
-            'model' => $searchReject,
-            'action' => ['personal/payer-organizations#panel4'],
-            'data' => GridviewHelper::prepareColumns(
-                'organization',
-                $requestColumns,
-                'request',
-                'searchFilter',
-                null
-            ),
-            'role' => UserIdentity::ROLE_OPERATOR,
-            'type' => 'request'
-        ]); ?>
-        <?= GridView::widget([
-            'dataProvider' => $rejectProvider,
-            'filterModel' => null,
-            'pjax' => true,
-            'summary' => false,
-            'columns' => $preparedReadonlyColumns
         ]); ?>
     </div>
 </div>
