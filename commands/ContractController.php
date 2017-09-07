@@ -250,7 +250,7 @@ class ContractController extends Controller
             'contract_id' => $contract->id,
             'preinvoice' => 1,
             'completeness' => 80,
-            'sum' => ($price * 80) / 100,
+            'sum' => round(($price * 80) / 100, 2),
             'month' => date('m'),
             'year' => date('Y'),
         ]);

@@ -1115,7 +1115,8 @@ class PersonalController extends Controller
             'children' => '0,10000',
             'raiting' => '0,100',
             'max_child' => '0,10000',
-            'modelName' => ''
+            'modelName' => '',
+            'statusArray' => Organization::STATUS_ACTIVE,
         ]);
         $organizationProvider = $searchOrganization->search(Yii::$app->request->queryParams);
 

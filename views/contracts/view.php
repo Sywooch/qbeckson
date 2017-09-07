@@ -413,4 +413,7 @@ $this->params['breadcrumbs'][] = $this->title;
         echo '<br /><br /><div class="alert alert-warning">Для юридического закрепления расторжения договора заполните <a href="' . Url::to(['application-close-pdf', 'id' => $model->id]) . '">бланк уведомления о расторжении договора</a> и передайте заявление ' . (Yii::$app->user->can('certificate') ? 'Поставщику' : 'Заказчику') . ' услуг</div>';
     }
     ?>
+
+    <br /><br /><p style="font-size: xx-small;">Если Вам необходимо снова распечатать заявление &ndash; <a href="<?= Url::to(['application-pdf', 'id' => $model->id]) ?>">жмите сюда</a></p>
+
 </div>

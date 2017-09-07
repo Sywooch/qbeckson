@@ -1,16 +1,16 @@
 <?php
 
 use app\helpers\GridviewHelper;
+use app\models\Mun;
 use app\models\statics\DirectoryProgramDirection;
 use app\models\UserIdentity;
-use yii\grid\ActionColumn;
 use app\widgets\SearchFilter;
-use yii\helpers\Html;
-use kartik\grid\GridView;
-use yii\helpers\Url;
 use kartik\export\ExportMenu;
+use kartik\grid\GridView;
+use yii\grid\ActionColumn;
 use yii\helpers\ArrayHelper;
-use app\models\Mun;
+use yii\helpers\Html;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $searchOpenPrograms \app\models\search\ProgramsSearch */
@@ -56,7 +56,7 @@ $year = [
         /** @var \app\models\Programs $model */
         return Yii::$app->i18n->messageFormatter->format(
             '{n, plural, one{# модуль} few{# модуля} many{# модулей} other{# модуля}}',
-            ['n' => $model->year],
+            ['n' => count($model->years)],
             Yii::$app->language
         );
     },
@@ -313,7 +313,7 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
             'filterModel' => null,
             'rowOptions' => function ($model, $index, $widget, $grid) {
                 /** @var \app\models\Programs $model */
-                if ($model->verification === 1) {
+                if ($model->verification === \app\models\Programs::VERIFICATION_WAIT) {
                     return ['class' => 'danger'];
                 }
             },

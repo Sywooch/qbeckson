@@ -81,7 +81,7 @@ $year = [
         /** @var \app\models\Programs $model */
         return Yii::$app->i18n->messageFormatter->format(
             '{n, plural, one{# модуль} few{# модуля} many{# модулей} other{# модуля}}',
-            ['n' => $model->year],
+            ['n' => count($model->years)],
             Yii::$app->language
         );
     },
@@ -130,7 +130,7 @@ $municipality = [
 ];
 $price = [
     'attribute' => 'price',
-    'label' => 'Цена*',
+    'label' => 'Стоимость*',
     'value' => function ($data) {
         $year = (new \yii\db\Query())
             ->select(['price'])
@@ -235,6 +235,4 @@ $columns = [
         'columns' => GridviewHelper::prepareColumns('programs', $columns),
     ]); ?>
 </div>
-<br>
-<br>
-<p class="minitext">* Цена программы и нормативная стоимость (НС) многолетних программ указаны за первый год обучения.</p>
+<p class="minitext">* Стоимость модуля и нормативная стоимость модуля (НС) для программ с несколькими модулями указаны в таблице для первого модуля.</p>
