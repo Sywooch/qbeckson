@@ -38,7 +38,7 @@ class Groups extends ActiveRecord
      */
     public static function find()
     {
-        return parent::find()->where(['groups.status' => self::STATUS_ACTIVE]);
+        return parent::find()->where([self::tableName() . '.status' => self::STATUS_ACTIVE]);
     }
 
 

@@ -32,43 +32,44 @@ use yii\helpers\ArrayHelper;
  * @property integer $year
  * @property string $kvfirst
  * @property string $kvdop
- * @property integer $both_teachers
- * @property string $fullness
- * @property string $photo_base_url
- * @property string $photo_path
- * @property string $complexity
- * @property string $norm_providing
- * @property integer $ovz
- * @property integer $zab
- * @property string $age_group
- * @property integer $quality_control
- * @property string $link
- * @property string $certification_date
- * @property array $activity_ids
- * @property integer $direction_id
- * @property integer $age_group_min
- * @property integer $age_group_max
+ * @property integer                         $both_teachers
+ * @property string                          $fullness
+ * @property string                          $photo_base_url
+ * @property string                          $photo_path
+ * @property string                          $complexity
+ * @property string                          $norm_providing
+ * @property integer                         $ovz
+ * @property integer                         $zab
+ * @property string                          $age_group
+ * @property integer                         $quality_control
+ * @property string                          $link
+ * @property string                          $certification_date
+ * @property array                           $activity_ids
+ * @property integer                         $direction_id
+ * @property integer                         $age_group_min
+ * @property integer                         $age_group_max
+ * @property integer                         $is_municipal_task
  *
- * @property Contracts[] $contracts
- * @property Favorites[] $favorites
- * @property Groups[] $groups
- * @property Informs[] $informs
- * @property Organization $organization
- * @property ProgrammeModule[] $years
+ * @property Contracts[]                     $contracts
+ * @property Favorites[]                     $favorites
+ * @property Groups[]                        $groups
+ * @property Informs[]                       $informs
+ * @property Organization                    $organization
+ * @property ProgrammeModule[]               $years
  * @property DirectoryProgramActivity[]|null $activities
- * @property DirectoryProgramDirection|null $direction
- * @property string $directivity
- * @property mixed $countMonths
- * @property mixed $organizationProgram
- * @property mixed $organizationWaitProgram
- * @property mixed $organizationNoProgram
- * @property Mun $municipality
- * @property mixed $cooperateProgram
- * @property mixed $countHours
- * @property string $commonActivities
- * @property ProgrammeModule[] $modules
- * @property OrganizationAddress[] $addresses
- * @property ProgramAddressAssignment[] $addressAssignments
+ * @property DirectoryProgramDirection|null  $direction
+ * @property string                          $directivity
+ * @property mixed                           $countMonths
+ * @property mixed                           $organizationProgram
+ * @property mixed                           $organizationWaitProgram
+ * @property mixed                           $organizationNoProgram
+ * @property Mun                             $municipality
+ * @property mixed                           $cooperateProgram
+ * @property mixed                           $countHours
+ * @property string                          $commonActivities
+ * @property ProgrammeModule[]               $modules
+ * @property OrganizationAddress[]           $addresses
+ * @property ProgramAddressAssignment[]      $addressAssignments
  */
 class Programs extends ActiveRecord
 {
@@ -77,12 +78,29 @@ class Programs extends ActiveRecord
     public $search;
     public $programPhoto;
 
+    const VERIFICATION_UNDEFINED = 0;
+    const VERIFICATION_WAIT = 1;
+    const VERIFICATION_DONE = 2;
+    const VERIFICATION_DENIED = 3;
+    const VERIFICATION_IN_ARCHIVE = 10;
+
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
         return 'programs';
+    }
+
+    public static function find()
+    {
+        return parent::find()->where([self::tableName() . '.verification' => [
+            self::VERIFICATION_UNDEFINED,
+            self::VERIFICATION_WAIT,
+            self::VERIFICATION_DONE,
+            self::VERIFICATION_DENIED
+        ]
+        ]);
     }
 
     /**
@@ -261,6 +279,17 @@ class Programs extends ActiveRecord
     public function getContracts()
     {
         return $this->hasMany(Contracts::className(), ['program_id' => 'id']);
+    }
+
+    /**
+     * Контракты в работе
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLivingContracts()
+    {
+        return $this->getContracts()->andFilterWhere(['status' => [Contracts::STATUS_CREATED,
+            Contracts::STATUS_ACTIVE,
+            Contracts::STATUS_ACCEPTED]]);
     }
 
     /**
@@ -607,4 +636,34 @@ class Programs extends ActiveRecord
             10 => 'нарушение интеллекта',
         ];
     }
+
+    public function getIsActive()
+    {
+        return $this->verification !== self::VERIFICATION_IN_ARCHIVE;
+    }
+
+    /**
+     * можно отправить в архив?
+     * @return boolean
+     */
+    public function canBeArchived()
+    {
+        return !$this->getLivingContracts()->exists();
+    }
+
+    /**
+     * установка флага "в архиве"
+     * @return boolean
+     */
+    public function setIsArchive()
+    {
+        if (!$this->canBeArchived()) {
+            return false;
+        }
+        $this->verification = self::VERIFICATION_IN_ARCHIVE;
+
+        return $this->save(false);
+    }
+
+
 }

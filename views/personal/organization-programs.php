@@ -1,16 +1,14 @@
 <?php
 
 use app\helpers\GridviewHelper;
+use app\models\Mun;
 use app\models\statics\DirectoryProgramDirection;
 use app\models\UserIdentity;
-use yii\grid\ActionColumn;
 use app\widgets\SearchFilter;
-use yii\helpers\Html;
 use kartik\grid\GridView;
-use yii\helpers\Url;
-use kartik\export\ExportMenu;
+use yii\grid\ActionColumn;
 use yii\helpers\ArrayHelper;
-use app\models\Mun;
+use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $searchOpenPrograms \app\models\search\ProgramsSearch */
@@ -237,7 +235,7 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
             'summary' => false,
             'rowOptions' => function ($model, $index, $widget, $grid) {
                 /** @var \app\models\Programs $model */
-                if ($model->verification === 1) {
+                if ($model->verification === \app\models\Programs::VERIFICATION_WAIT) {
                     return ['class' => 'danger'];
                 }
             },
