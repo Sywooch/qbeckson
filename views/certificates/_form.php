@@ -30,7 +30,7 @@ echo Dialog::widget(['options' => ['title' => 'Предупреждение',]])
             echo $form->field($user, 'password')->textInput(['id' => 'pass']);
             echo Html::button('Сгенерировать пароль', ['class' => 'btn btn-success', 'onclick' => '(function () { $("#pass").val(Math.random().toString(36).slice(-8)); })();']);
             echo '</div>';
-        } elseif ($model->canChangeGroup) {
+        } else {
             echo '<div class="well">';
             echo $form->field($user, 'newlogin')->checkbox(['value' => 1, 'ng-model' => 'newlogin', 'label' => 'Изменить номер сертификата']);
             echo '<div ng-show="newlogin">';
@@ -83,10 +83,7 @@ echo Dialog::widget(['options' => ['title' => 'Предупреждение',]])
     }
     ?>
 
-    <?php if ($model->canChangeGroup) {
-        echo $form->field($model, 'nominal')->textInput(['readOnly' => true, 'maxlength' => true, 'id' => 'nominalField']);
-    }
-    ?>
+    <?php echo $form->field($model, 'nominal')->textInput(['readOnly' => true, 'maxlength' => true, 'id' => 'nominalField']); ?>
 
     <div class="form-group">
         <?php
@@ -97,11 +94,7 @@ echo Dialog::widget(['options' => ['title' => 'Предупреждение',]])
             echo Html::a('Отменить', '/personal/payer-certificates', ['class' => 'btn btn-danger']);
         }
         ?>
-        <?php if ($model->isNewRecord) {
-            echo Html::submitButton($model->isNewRecord ? 'Создать' : 'Обновить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
-        }
-        ?>
-        }
+        <?php echo Html::submitButton($model->isNewRecord ? 'Создать' : 'Обновить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']); ?>
     </div>
 
     <?php ActiveForm::end(); ?>
