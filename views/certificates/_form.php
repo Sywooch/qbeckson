@@ -97,7 +97,11 @@ echo Dialog::widget(['options' => ['title' => 'Предупреждение',]])
             echo Html::a('Отменить', '/personal/payer-certificates', ['class' => 'btn btn-danger']);
         }
         ?>
-        <?= Html::submitButton($model->isNewRecord ? 'Создать' : 'Обновить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
+        <?php if ($model->isNewRecord) {
+            echo Html::submitButton($model->isNewRecord ? 'Создать' : 'Обновить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
+        }
+        ?>
+        }
     </div>
 
     <?php ActiveForm::end(); ?>
