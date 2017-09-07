@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="initial-scale=1, width=device-width"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+        <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/plugins/jquery.dotdotdot.js"></script>
+        <script type="text/javascript" src="js/ui.js"></script>
+        <link type="text/css" rel="stylesheet" href="newstyle.css"/>
+    </head>
+    <body>
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="card">
+        <div class="row">
+          <div class="col-xs-12 col-sm-4 col-md-4 col-lg-3">
+            <div class="program-img socped"><img src="img/program-image.png"/></div>
+          </div>
+          <div class="col-xs-12 col-sm-8 col-md-8 col-lg-9">
+            <h2 class="card-title js-ellipsis-title">Инфо-интерес (Превосходная программа, просто замечательная, там ещё газету они делают)</h2>
+            <div class="card-badges">
+              <div class="card-badges-item card-badges-item_violet" title="Социально-педагогическая направленность"><span class="large-size icon-socped"></span></div>
+              <div class="card-badges-item card-badges-item_green" title="Рекомендуемый возраст с 12 до 14 лет"><span>12-14 лет</span></div>
+              <div class="card-badges-item card-badges-item_blue" title="Не предусмотрено обучение учащихся с ОВЗ"><span>Без ОВЗ</span></div>
+              <div class="card-badges-item card-badges-item_green" title="Зачисление открыто, есть свободные места"><span class="large-size icon-study"></span></div>
+              <div class="card-badges-item card-badges-item_star" title="Рейтинг программы: 98%"><i class="icon-star-full"></i><span class="big-size">98</span></div>
+            </div>
+            <div class="card-info">
+              <div class="card-info-paragraph card-info-paragraph_mh50">
+                <div>МБОУ ДО "Д(п)Ц" ГО "г. Якутск"</div>
+                <div>г. Петропавловск-Камчатский, ул. Парижской Коммунны, дом 512, строение Б, каб.207</div>
+              </div>
+              <div class="card-info-paragraph card-info-paragraph_mh38">
+                <div>Стоимость одного модуля</div>
+                <div class="adaptive-ib">Заявленная: 25 234.45 ₽</div>
+                <div class="adaptive-ib">Нормативная: 25 234.45 ₽</div>
+              </div><a class="btn btn-theme btn-block" href="#">Просмотр</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+  $(document).ready(function () {
+      $(".js-ellipsis-title").dotdotdot({
+          ellipsis: '... ',
+          wrap: 'word',
+          height: 60
+      });
+  });
+</script></body>
+</html>

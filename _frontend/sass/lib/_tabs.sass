@@ -1,0 +1,51 @@
+.nav-tabs
+  border-bottom: $tab-border
+  margin-top: $margin-vert-default
+  > li
+    line-height: $font-height-element-default
+    float: left
+    margin-bottom: - $default-line-width
+    a
+      border: $tab-border
+      margin-right: 0
+      padding: $padding-vert-default 12px
+      border-radius: $top-border-radius
+      color: $color-medium-default
+      background: $color-ultra-light-default
+      font-weight: bold
+      transition: background $transition-default, color $transition-default
+    &:hover:not(.active),
+    &:focus:not(.active)
+      a
+        color: $color-theme
+        background: $color-light-default
+    & + li
+      a
+        margin-left: -1px
+    &.active
+      > a
+        color: $color-theme
+        background: $white
+        border-bottom-color: transparent
+        cursor: default
+      &:hover,
+      &:focus
+        > a
+          color: $color-theme
+          background: $white
+          cursor: default
+
+.tab-content
+  padding: $padding-panel
+  background: $white
+  border: $tab-border
+  border-top: none
+  margin-bottom: $margin-vert-default
+  border-radius: $bottom-border-radius
+
+.tab-content
+  > .tab-pane
+    display: none
+
+  > .active
+    display: block

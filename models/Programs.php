@@ -349,7 +349,7 @@ class Programs extends ActiveRecord
         if (!empty($organization_id)) {
             $query->andWhere(['organization_id' => $organization_id]);
         }
-        if (!empty($verification)) {
+        if (isset($verification)) {
             $query->andWhere(['verification' => $verification]);
         }
 

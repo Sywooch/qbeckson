@@ -27,3 +27,4 @@ phpunit.phar
 /phpunit.xml
 
 /githelper.md
+_frontend/node_modules/

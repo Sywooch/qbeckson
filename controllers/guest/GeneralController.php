@@ -52,7 +52,8 @@ class GeneralController extends Controller
     public function actionOrganizations(): string
     {
         $model = new OrganizationSearch([
-            'modelName' => ''
+            'modelName' => '',
+            'statusArray' => Organization::STATUS_ACTIVE,
         ]);
         $provider = $model->search(Yii::$app->request->queryParams);
 

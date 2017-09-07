@@ -1,0 +1,140 @@
+include ../lib/_bofhtml.html
+include ../vars
+include ../mixins
+include ../lib/_header
+.container
+    .row: .col-xs-12
+        .panel
+            .row
+                .col-xs-12.col-sm-4.col-md-4.col-lg-3
+                    .program-img.socped
+                        img(src="img/program-image.png")
+                .col-xs-12.col-sm-8.col-md-8.col-lg-9
+                    h2.card-title.js-ellipsis-title Инфо-интерес (Превосходная программа, просто замечательная, там ещё газету они делают)
+                    .card-badges
+                        .card-badges-item.card-badges-item_violet(title="Социально-педагогическая направленность"): span.large-size.icon-socped
+                        .card-badges-item.card-badges-item_green(title="Рекомендуемый возраст с 12 до 14 лет"): span 12-14 лет
+                        .card-badges-item.card-badges-item_blue(title="Не предусмотрено обучение учащихся с ОВЗ"): span Без ОВЗ
+                        .card-badges-item.card-badges-item_star(title="Рейтинг программы: 98%")
+                            i.icon-star-full
+                            span.big-size 98
+                    .card-info
+                        .card-info-paragraph.card-info-paragraph_mh50
+                            div МБОУ ДО "Д(п)Ц" ГО "г. Якутск"
+                            div г. Петропавловск-Камчатский, ул. Парижской Коммунны, дом 512, строение Б, каб.207
+                        .card-info-paragraph.card-info-paragraph_mh38
+                            div Стоимость одного модуля
+                            .adaptive-ib Заявленная: 25 234.45 ₽
+                            .adaptive-ib Нормативная: 25 234.45 ₽
+                        a(href="#" data-toggle="collapse" data-target="#prog-detail-1").btn.btn-theme.btn-block Подробнее
+                .col-xs-12: #prog-detail-1.collapse.pt-18.program-info-view
+                    ul.text-info-lines
+                        li
+                            strong Направленность программы:
+                            | Техническая (иное)
+                        li
+                            strong Возраст детей:
+                            | 12 - 14 лет
+                        li
+                            strong Категория детей:
+                            | без ОВЗ
+                        li
+                            strong Лимит зачисления:
+                            | 120
+                        li
+                            strong Число обучающихся:
+                            | 12
+                        li
+                            strong Число модулей:
+                            | 2
+                        li
+                            strong Общая продолжительность (часов):
+                            | 720
+                        li
+                            strong Общая продолжительность (месяцев):
+                            | 18
+                        li
+                            strong Муниципальное образование:
+                            | Якутск
+                        li
+                            strong Тип местности:
+                            | городская
+                    .strong Цели и задачи
+                    p.text-justify Цель образовательной программы
+                    p.text-justify Задачи образовательной программы
+                    .strong Аннотация программы
+                    p.text-justify Модифицированная. Программой создается условия для активного включения обучающихся в профориентационную среду по направлениям филология и журналистика. С помощью полного обучающего курса обучающие должны прийти на уровень развития собственных инициатив, принимать участие в своем жизненном и профессиональном развитии. Работа над выпусками газеты предполагает непосредственное участие учащихся в рассмотрении сложных проблем общества с точк.
+                    .strong Нормы оснащения
+                    p.text-justify Материально-техническое обеспечение: кабинет, компьютеры, интернет, экран, проектор.
+    .row: .col-xs-12: .btn-row
+        a.btn.btn-danger(href='#') К списку программ
+        button.btn.btn-theme Редактировать
+        button.btn.btn-theme Отправить на сертификацию
+        button.btn.btn-theme Адреса программы
+        button.btn.btn-theme Посмотреть файл
+    .row: .col-xs-12
+        ul.nav.nav-tabs
+            li.active
+                a(data-toggle='tab', href='#tab-modul-1') Модуль 1
+            li
+                a(data-toggle='tab', href='#tab-modul-2') Модуль 2
+        .tab-content.program-info-view
+            #tab-modul-1.tab-pane.fade.in.active
+                .row: .col-xs-12
+                    h3 Модуль 1. История возникновения предпосылок появления инфо-интереса
+                .row: .col-xs-12: .btn-row
+                    button.btn.btn-theme Создать группу
+                    button.btn.btn-theme Записаться
+                    button.btn.btn-theme Установить цену
+                .row: .col-xs-12
+                    ul.text-info-lines
+                        li
+                            strong Продолжительность (месяцев):
+                            | 4
+                        li
+                            strong Продолжительность (часов):
+                            | 108
+                        li
+                            strong Наполняемость группы
+                            | 2 - 17 человек
+                        li
+                            strong Квалификация руководителя кружка
+                            | Не требуется
+                        li
+                            strong Цена программы
+                            | 9610 рублей
+                        li
+                            strong Нормативная стоимость
+                            | 9410 рублей
+                    table.theme-table
+                        thead
+                            tr
+                                th Группа
+                                th Программа
+                                th Расписание
+                                th Начало
+                                th Конец
+                                th Свободных мест
+                                th Действия
+                        tbody
+                            tr
+                                td ММ1
+                                td Инфо-интерес
+                                td
+                                    | Адрес: г. Якутск, улица Кирова 20
+                                    | Расписание: Вторник:09:00-09:45 09:55-10:40
+                                td 15.09.2017
+                                td 25.12.2017
+                                td 20
+                                td Записаться
+            #tab-modul-2.tab-pane.fade.in.active
+include ../lib/_footer
+script(type="text/javascript").
+    $(document).ready(function () {
+        $(".js-ellipsis-title").dotdotdot({
+            ellipsis: '... ',
+            wrap: 'word',
+            height: 60
+        });
+    });
+include ../lib/_eohtml.html
