@@ -171,7 +171,7 @@ class ProgramsController extends Controller
                 throw new ForbiddenHttpException('Нет доступа');
             }
         }
-
+        $rows = null;
         if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
             $certificate = $user->certificate;
             $rows = (new \yii\db\Query())
@@ -182,21 +182,15 @@ class ProgramsController extends Controller
                 ->andWhere(['status' => 1])
                 ->count();
 
-            if ($rows == 0) {
+            if ($rows === 0) {
                 Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в организацию, реализующую выбранную программу. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
             }
-
-            return $this->render('view', [
-                'model'     => $model,
-                'years'     => $model->years,
-                'cooperate' => $rows,
-            ]);
         }
 
         return $this->render('view', [
             'model'     => $model,
             'years'     => $model->years,
-            'cooperate' => null,
+            'cooperate' => $rows,
         ]);
     }
 
