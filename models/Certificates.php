@@ -163,8 +163,8 @@ class Certificates extends \yii\db\ActiveRecord
     {
         if (!empty($this->selectCertGroup) && $this->selectCertGroup == self::TYPE_PF) {
             $this->cert_group = $this->possible_cert_group;
-            $this->nominal = $this->certGroup->nominal;
-            $this->nominal_f = $this->certGroup->nominal_f;
+            $this->nominal = $this->possibleCertGroup->nominal;
+            $this->nominal_f = $this->possibleCertGroup->nominal_f;
             $this->balance = $this->nominal;
             $this->balance_f = $this->nominal_f;
         } elseif (!empty($this->selectCertGroup) && $certGroup = $this->payers->getCertGroups(1)->one()) {

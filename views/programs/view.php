@@ -308,7 +308,7 @@ $this->registerJs($js, $this::POS_END);
                             ],
                             [
                                 'attribute' => 'ground',
-                                'value' => $model->groundName($model->ground),
+                                'value'     => $model->groundName,
                             ],
                             [
                                 'attribute' => 'norm_providing',
@@ -359,7 +359,7 @@ $this->registerJs($js, $this::POS_END);
                             ],
                             [
                                 'attribute' => 'ground',
-                                'value' => $model->groundName($model->ground),
+                                'value'     => $model->groundName,
                             ],
                             [
                                 'attribute' => 'norm_providing',
@@ -414,7 +414,7 @@ $this->registerJs($js, $this::POS_END);
                             ],
                             [
                                 'attribute' => 'ground',
-                                'value' => $model->groundName($model->ground),
+                                'value'     => $model->groundName,
                             ],
                             [
                                 'attribute' => 'norm_providing',
@@ -483,7 +483,7 @@ $this->registerJs($js, $this::POS_END);
                                 ],
                                 [
                                     'attribute' => 'ground',
-                                    'value' => $model->groundName($model->ground),
+                                    'value'     => $model->groundName,
                                 ],
                                 [
                                     'attribute' => 'norm_providing',
@@ -544,7 +544,7 @@ $this->registerJs($js, $this::POS_END);
                                 ],
                                 [
                                     'attribute' => 'ground',
-                                    'value' => $model->groundName($model->ground),
+                                    'value'     => $model->groundName,
                                 ],
                                 [
                                     'attribute' => 'norm_providing',
@@ -604,7 +604,7 @@ $this->registerJs($js, $this::POS_END);
                             ],
                             [
                                 'attribute' => 'ground',
-                                'value' => $model->groundName($model->ground),
+                                'value'     => $model->groundName,
                             ],
                             [
                                 'attribute' => 'norm_providing',
@@ -691,6 +691,7 @@ $this->registerJs($js, $this::POS_END);
                         'label' => 'Общая продолжительность, месяцев',
                         'attribute' => 'countMonths',
                     ],
+
                 ],
             ]) ?>
 

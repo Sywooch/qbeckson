@@ -17,7 +17,9 @@ use yii\db\ActiveRecord;
  * @property string          $datestop
  * @property integer         $status
  * @property boolean         $isActive
+ * @property string          $fullSchedule
  *
+ * @property integer         $freePlaces
  * @property Organization    $organization
  * @property Contracts[]     $contracts
  * @property ProgrammeModule $module
@@ -83,9 +85,11 @@ class Groups extends ActiveRecord
             'name'            => 'Название группы',
             'address'         => 'Адрес',
             'schedule'        => 'Расписание',
+            'fullSchedule'    => 'Расписание',
             'datestart'       => 'Дата начала обучения',
             'datestop'        => 'Дата окончания обучения',
             'status'          => 'Статус',
+            'freePlaces'      => 'Свободных мест',
         ];
     }
 
@@ -97,10 +101,17 @@ class Groups extends ActiveRecord
         return $this->hasMany(GroupClass::class, ['group_id' => 'id']);
     }
 
+
+    /** свободные места*/
+    public function getFreePlaces(): int
+    {
+        return $this->module->maxchild - $this->getLivingContracts()->count();
+    }
+
     /**
      * @return string
      */
-    public function formatClasses()
+    public function getFullSchedule()
     {
         if ($this->classes) {
             $result = '';
@@ -155,7 +166,7 @@ class Groups extends ActiveRecord
      */
     public function getLivingContracts()
     {
-        return $this->getContracts()->andFilterWhere(['status' => [Contracts::STATUS_CREATED,
+        return $this->getContracts()->andFilterWhere([Contracts::tableName() . '.status' => [Contracts::STATUS_CREATED,
             Contracts::STATUS_ACTIVE,
             Contracts::STATUS_ACCEPTED]]);
     }
