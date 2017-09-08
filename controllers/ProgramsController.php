@@ -2,7 +2,9 @@
 
 namespace app\controllers;
 
+use app\assets\programsAsset\ProgramsAsset;
 use app\models\AllProgramsSearch;
+use app\models\Cooperate;
 use app\models\forms\ProgramAddressesForm;
 use app\models\Informs;
 use app\models\Model;
@@ -165,33 +167,42 @@ class ProgramsController extends Controller
         /** @var $user UserIdentity */
         $user = Yii::$app->user->identity;
         $model = $this->findModel($id);
-        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
-            if ($user->organization->id !== $model->organization_id) {
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
+            && $user->organization->id !== $model->organization_id) {
 
-                throw new ForbiddenHttpException('Нет доступа');
-            }
+            throw new ForbiddenHttpException('Нет доступа');
         }
         $rows = null;
         if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
-            $certificate = $user->certificate;
-            $rows = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('cooperate')
-                ->where(['payer_id' => $certificate->payer_id])
-                ->andWhere(['organization_id' => $model->organization_id])
-                ->andWhere(['status' => 1])
-                ->count();
+            $rows = Cooperate::find()->where([
+                Cooperate::tableName() . '.payer_id'        => $user->getCertificate()->select('payer_id'),
+                Cooperate::tableName() . '.organization_id' => $model->organization_id])->all();
 
-            if ($rows === 0) {
+
+            /*            $certificate = $user->certificate;
+                        $rows = (new \yii\db\Query())
+                            ->select(['id'])
+                            ->from('cooperate')
+                            ->where(['payer_id' => $certificate->payer_id])
+                            ->andWhere(['organization_id' => $model->organization_id])
+                            ->andWhere(['status' => 1])
+                            ->count();*/
+
+            if (!count($rows)) {
                 Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в организацию, реализующую выбранную программу. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
             }
         }
 
-        return $this->render('view', [
-            'model'     => $model,
-            'years'     => $model->years,
-            'cooperate' => $rows,
-        ]);
+
+        ProgramsAsset::register($this->view);
+
+        return $this->render('view/view', ['model' => $model]);
+
+        /* return $this->render('view', [
+             'model'     => $model,
+             'years'     => $model->years,
+             'cooperate' => $rows,
+         ]);*/
     }
 
     /**

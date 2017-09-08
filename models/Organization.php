@@ -2,8 +2,8 @@
 
 namespace app\models;
 
-use Yii;
 use app\behaviors\UploadBehavior;
+use Yii;
 
 /**
  * This is the model class for table "organization".
@@ -482,6 +482,7 @@ class Organization extends \yii\db\ActiveRecord
     {
          return $this->hasOne(OrganizationPayerAssignment::className(), ['organization_id' => 'id']);
     }
+
 
     /**
      * @return \yii\db\ActiveQuery

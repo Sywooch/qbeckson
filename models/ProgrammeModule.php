@@ -8,24 +8,25 @@ use yii\db\ActiveRecord;
 /**
  * This is the model class for table "years".
  *
- * @property integer $id
- * @property integer $program_id
- * @property integer $year
- * @property integer $month
- * @property integer $previus
- * @property integer $open
- * @property integer $price
- * @property integer $normative_price
- * @property integer $maxchild
- * @property integer $minchild
+ * @property integer                          $id
+ * @property integer                          $program_id
+ * @property integer                          $year
+ * @property integer                          $month
+ * @property integer                          $previus
+ * @property integer                          $open
+ * @property integer                          $price
+ * @property integer                          $normative_price
+ * @property integer                          $maxchild
+ * @property integer                          $minchild
+ * @property string                           $fullname
  *
- * @property Programs $program
- * @property Contracts[] $activeContracts
- * @property OrganizationAddress[] $addresses
- * @property ProgramModuleAddress[] $oldAddresses
- * @property OrganizationAddress $mainAddress
+ * @property Programs                         $program
+ * @property Contracts[]                      $activeContracts
+ * @property OrganizationAddress[]            $addresses
+ * @property ProgramModuleAddress[]           $oldAddresses
+ * @property OrganizationAddress              $mainAddress
  * @property ProgramModuleAddressAssignment[] $moduleAddressAssignments
- * @property Groups[] $groups
+ * @property Groups[]                         $groups
  */
 class ProgrammeModule extends ActiveRecord
 {

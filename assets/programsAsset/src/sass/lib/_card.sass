@@ -1,0 +1,105 @@
+=card-badges-item-variant($color: $color-theme)
+  color: $color
+  border-color: $color
+  background: tint($color, 85%)
+
+.card
+  margin: $margin-vert-default $margin-hor-default
+  padding: $padding-active-element
+  border: $tab-border
+  border-radius: $default-border-radius
+  background: $white
+  position: relative
+  @media (max-width: $screen-sm-min - 1)
+    padding-bottom: $margin-vert-default * 2
+  .card-title, p, .card-badges
+    margin-bottom: $margin-vert-default / 2
+    padding-bottom: 0
+    @media (max-width: $screen-sm-min - 1)
+      width: 100%
+      text-align: center
+  &:hover
+    box-shadow: 0 $default-shadow
+    .card-info
+      @media (max-width: $screen-sm-min - 1)
+        display: block
+
+.card-title
+  font-size: $font-size-h3
+  @media (max-width: $screen-sm-min - 1)
+    text-align: center
+    margin-top: $margin-vert-default
+  @media (min-width: $screen-sm-min)
+    +no-wrap
+
+.card-badges
+  margin-bottom: $card-badge-size / 12
+  @media (max-width: $screen-sm-min - 1)
+    text-align: center
+  &-item
+    +ib
+    border-radius: 50%
+    width: $card-badge-size
+    height: $card-badge-size
+    line-height: $card-badge-size * 11 / 12
+    margin: $card-badge-size / 12 $card-badge-size / 24
+    text-align: center
+    border: $card-badge-size / 26 solid
+    vertical-align: text-bottom
+    user-select: none
+    cursor: help
+    span
+      +ib
+      text-align: center
+      vertical-align: middle
+      line-height: 1
+      font-weight: bold
+      margin-right: -$card-badge-size / 10
+      margin-left: -$card-badge-size / 10
+      $this-font-size: $card-badge-size / 10 * 3
+      font-size: $this-font-size
+      &.big-size
+        font-size: $this-font-size * 1.5
+      &.large-size
+        font-size: $this-font-size * 2.5
+        font-weight: 400
+    &.card-badges-item_star
+      position: relative
+      +card-badges-item-variant($color: $yellow)
+      span
+        position: relative
+        color: $orange
+      i
+        position: absolute
+        color: $yellow
+        top: -$card-badge-size / 10
+        left: -$card-badge-size / 24
+        font-size: $card-badge-size
+    &.card-badges-item_red
+      +card-badges-item-variant($color: $red)
+    &.card-badges-item_blue
+      +card-badges-item-variant($color: $blue)
+    &.card-badges-item_green
+      +card-badges-item-variant($color: $green)
+    &.card-badges-item_violet
+      +card-badges-item-variant($color: $violet)
+    &.card-badges-item_orange
+      +card-badges-item-variant($color: $orange)
+
+.card-info
+  @media (max-width: $screen-sm-min - 1)
+    text-align: center
+  &-paragraph
+    margin-bottom: $margin-vert-default / 2
+    > div
+      line-height: 1.25
+      &:first-child
+        font-weight: bold
+    &:last-child, &.btn-row
+      margin-bottom: 0
+    &_mh50
+      @media (min-width: $screen-sm-min)
+        min-height: 50px
+    &_mh38
+      @media (min-width: $screen-sm-min)
+        min-height: 38px
