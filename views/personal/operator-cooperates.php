@@ -122,6 +122,14 @@ $columns = [
     $contractsCount,
     $payer_id,
     $actions,
+];
+
+$columnsNonActive = [
+    $organizationName,
+    $payerName,
+    $payerMunicipality,
+    $contractsCount,
+    $payer_id,
 ]
 
 ?>
@@ -130,6 +138,16 @@ $columns = [
         <li class="active">
             <a data-toggle="tab" href="#panel1">Действующие
                 <span class="badge"><?= $activeProvider->getTotalCount() ?></span>
+            </a>
+        </li>
+        <li>
+            <a data-toggle="tab" href="#panel3">Заявки
+                <span class="badge"><?= $newProvider->getTotalCount() ?></span>
+            </a>
+        </li>
+        <li>
+            <a data-toggle="tab" href="#panel4">Подтвержденные
+                <span class="badge"><?= $confirmedProvider->getTotalCount() ?></span>
             </a>
         </li>
         <li>
@@ -167,6 +185,20 @@ $columns = [
                 'dataProvider' => $appealedProvider,
                 'filterModel' => $searchAppealed,
                 'columns' => GridviewHelper::prepareColumns('cooperate', $columns),
+            ]); ?>
+        </div>
+        <div id="panel3" class="tab-pane fade">
+            <?= GridView::widget([
+                'dataProvider' => $newProvider,
+                'filterModel' => $searchNew,
+                'columns' => GridviewHelper::prepareColumns('cooperate', $columnsNonActive),
+            ]); ?>
+        </div>
+        <div id="panel4" class="tab-pane fade">
+            <?= GridView::widget([
+                'dataProvider' => $confirmedProvider,
+                'filterModel' => $searchConfirmed,
+                'columns' => GridviewHelper::prepareColumns('cooperate', $columnsNonActive),
             ]); ?>
         </div>
     </div>

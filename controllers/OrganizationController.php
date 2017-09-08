@@ -273,7 +273,9 @@ class OrganizationController extends Controller
 
         if ($user->load(Yii::$app->request->post()) && ($user->newlogin > 0 || $user->newpass > 0)) {
             $password = null;
+            //print_r($user);exit;
             if ($user->newpass > 0) {
+                //die('f');
                 if (!$user->password) {
                     $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
                     $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
@@ -281,6 +283,8 @@ class OrganizationController extends Controller
                     $password = $user->password;
                     $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
                 }
+            } else {
+                unset($user->password);
             }
 
             if ($user->save()) {
