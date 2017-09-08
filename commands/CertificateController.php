@@ -3,6 +3,7 @@
 namespace app\commands;
 
 use app\models\Certificates;
+use app\models\Contracts;
 use yii;
 use yii\console\Controller;
 use app\services\PayerService;
@@ -15,6 +16,39 @@ class CertificateController extends Controller
     {
         $this->payerService = new PayerService;
         parent::init();
+    }
+
+    // исправление ошибочных балансов
+    public function actionCheckWrongBalance()
+    {
+        $certificates = Certificates::find()
+            ->innerJoinWith('contracts0')
+            ->asArray()
+            ->all();
+
+        foreach ($certificates as $certificate) {
+            $contracts = Contracts::find()
+                ->select('certificate_id, SUM(paid + rezerv) as sum')
+                ->where([
+                    'status' => [
+                        Contracts::STATUS_CREATED,
+                        Contracts::STATUS_ACTIVE,
+                        Contracts::STATUS_ACCEPTED
+                    ],
+                    'certificate_id' => $certificate['id']
+                ])
+                ->groupBy('certificate_id')
+                ->asArray()
+                ->one();
+
+            if (intval($certificate['nominal']) != intval($certificate['balance'] + $contracts['sum'])) {
+                echo $certificate['id'] . '/';
+                $model = Certificates::findOne($certificate['id']);
+                $model->balance = $model->nominal - $contracts['sum'];
+                $model->save(false, ['balance']);
+            }
+
+        }
     }
 
     // Для всех сертификатов, у которых резерв = 0, надо баланс текущий и будущий сделать соответствующим номиналу.
