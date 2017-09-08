@@ -1,0 +1,20 @@
+.ib
+  +ib
+
+.mr-6
+  margin-right: 6px
+
+.pt-18
+  padding-top: 18px
+
+.adaptive-ib
+  +ib
+  @media (max-width: $screen-sm-min - 1)
+    display: block
+  @media (min-width: $screen-sm-min)
+    margin-right: $margin-hor-default
+
+.tc-danger
+  color: $danger-color
+.tc-success
+  color: $success-color

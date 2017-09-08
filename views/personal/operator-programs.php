@@ -56,7 +56,7 @@ $year = [
         /** @var \app\models\Programs $model */
         return Yii::$app->i18n->messageFormatter->format(
             '{n, plural, one{# модуль} few{# модуля} many{# модулей} other{# модуля}}',
-            ['n' => $model->year],
+            ['n' => count($model->years)],
             Yii::$app->language
         );
     },

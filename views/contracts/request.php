@@ -97,7 +97,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <?php if ($contract->all_parents_funds > 0) : ?>
                                 <p>
                                     В первый месяц потребуется доплата с Вашей стороны в размере
-                                    <?= $contract->parents_first_month_payment ?> руб.
+                                    <?= round($contract->parents_first_month_payment, 2) ?> руб.
                                 </p>
                                 <?php if ($contract->prodolj_m > 1) : ?>
                                     <p>

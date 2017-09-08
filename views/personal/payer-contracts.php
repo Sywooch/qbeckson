@@ -359,7 +359,7 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
         ]); ?>
     </div>
     <p class="lead">Экспорт данных:</p>
-    <?= ExportMenu::widget([
+    <!--<?= ExportMenu::widget([
         'dataProvider' => $ContractsallProvider,
         'filename' => 'all-contracts',
         'target' => ExportMenu::TARGET_BLANK,
@@ -437,13 +437,13 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
             'fontsize',
             'certificatenumber',
         ],
-    ]); ?>
+    ]); ?>-->
     <p>
         <?php
         $payer = Yii::$app->user->identity->payer;
 
         if ($doc = \app\models\ContractDocument::findByPayer($payer, date('Y'), date('m'))) {
-            echo '<br />' . Html::a('Скачать выписку от ' . Yii::$app->formatter->asDate($doc->created_at), '/uploads/contracts/' . $doc->file, ['class' => 'btn btn-primary']);
+            echo Html::a('Скачать выписку от ' . Yii::$app->formatter->asDate($doc->created_at), '/uploads/contracts/' . $doc->file, ['class' => 'btn btn-primary']);
         } else {
         $searchContracts = new ContractsPayerInvoiceSearch();
         $searchContracts->payer_id = $payer->id;
@@ -462,7 +462,7 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
             'linkPath' => '@web/uploads/contracts',
             'dropdownOptions' => [
                 'class' => 'btn btn-success',
-                'label' => 'Сформировать реестр договоров для субсидии',
+                'label' => 'Заказать реестр договоров для субсидии',
                 'icon' => false,
             ],
             'showConfirmAlert' => false,
@@ -472,12 +472,13 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
                 ExportMenu::FORMAT_CSV => false,
                 ExportMenu::FORMAT_HTML => false,
                 ExportMenu::FORMAT_PDF => false,
+                ExportMenu::FORMAT_EXCEL_X => false,
             ],
             'columns' => [
                 ['class' => 'yii\grid\SerialColumn'],
                 [
                     'attribute' => 'certificatenumber',
-                    'label' => 'Сертификат',
+                    'label' => 'Номер сертификата дополнительного образования',
                     'format' => 'raw',
                 ],
                 [
@@ -489,7 +490,7 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
                     }
                 ],
                 [
-                    'label' => 'К оплате',
+                    'label' => 'Объем обязательств Уполномоченной организации за текущий месяц в соответствии с договорами об обучении (твердыми офертами)',
                     'value' => function ($model) {
 
                         $start_edu_contract = explode("-", $model->start_edu_contract);

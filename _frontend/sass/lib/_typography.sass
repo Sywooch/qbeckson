@@ -1,0 +1,31 @@
+ul.text-info-lines
+  font-size: $font-size-default
+  line-height: $text-height-default
+  margin: $margin-vert-default / 2 0
+  padding: 0
+  >li
+    display: block
+    margin: $margin-vert-default / 2 0
+    padding: 0
+    list-style-type: none
+    strong
+      margin-right: $font-size-default / 2
+    &:first-child
+      margin-top: 0
+    &:last-child
+      margin-bottom: 0
+    & + &
+      padding-top: round($font-size-default / 2)
+
+h2
+  font-size: $font-size-h2
+  color: $color-theme
+  padding-top: 0
+  padding-bottom: $font-size-h2 / 3
+  margin: 0
+
+h3
+  font-size: $font-size-h3
+  color: $font-color-default
+  padding-bottom: $font-size-h3 / 3
+  margin: 0

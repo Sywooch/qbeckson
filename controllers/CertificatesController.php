@@ -148,44 +148,40 @@ class CertificatesController extends Controller
             return ActiveForm::validate($user);
         }
 
-        if ($user->load(Yii::$app->request->post())) {
-            // TODO: дублирование кода, избавиться
+        if (Yii::$app->request->isPost) {
             if ($model->load(Yii::$app->request->post())) {
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
-                $model->balance_f = $model->nominal_f;
+                $model->nominal = $model['oldAttributes']['nominal'];
+                if ($model->canChangeGroup) {
+                    $model->setNominals();
+                }
 
-                $model->setNominals();
                 $model->save();
             }
 
-            $password = null;
-            if ($user->newlogin == 1 || $user->newpass == 1) {
-                if ($user->newpass == 1) {
-                    if (!$user->password) {
-                        $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
-                        $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
-                    } else {
-                        $password = $user->password;
-                        $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+            if ($user->load(Yii::$app->request->post())) {
+                $password = null;
+                if ($user->newlogin == 1 || $user->newpass == 1) {
+                    if ($user->newpass == 1) {
+                        if (!$user->password) {
+                            $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
+                            $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+                        } else {
+                            $password = $user->password;
+                            $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+                        }
+                    }
+
+                    if ($user->save()) {
+                        return $this->render('/user/view', [
+                            'model' => $user,
+                            'password' => $password,
+                        ]);
                     }
                 }
-
-                if ($user->save()) {
-                    return $this->render('/user/view', [
-                        'model' => $user,
-                        'password' => $password,
-                    ]);
-                }
             }
-        }
 
-        if ($model->load(Yii::$app->request->post())) {
-            $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
-
-            $model->setNominals();
-            if ($model->save()) {
-                return $this->redirect(['/certificates/view', 'id' => $model->id]);
-            }
+            return $this->redirect(['/certificates/view', 'id' => $model->id]);
         }
 
         return $this->render('update', [
