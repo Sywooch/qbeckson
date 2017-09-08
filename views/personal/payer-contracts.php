@@ -277,6 +277,8 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
             'rowOptions' => function ($model, $index, $widget, $grid) {
                 if ($model->wait_termnate === 1) {
                     return ['class' => 'danger'];
+                } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
+                    return ['class' => 'warning'];
                 }
             },
             'columns' => $preparedActiveColumns,
@@ -302,6 +304,8 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
             'rowOptions' => function ($model, $index, $widget, $grid) {
                 if ($model->wait_termnate === 1) {
                     return ['class' => 'danger'];
+                } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
+                    return ['class' => 'warning'];
                 }
             },
             'pjax' => true,
@@ -326,6 +330,13 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
         <?= GridView::widget([
             'dataProvider' => $pendingContractsProvider,
             'filterModel' => null,
+            'rowOptions' => function ($model, $index, $widget, $grid) {
+                if ($model->wait_termnate === 1) {
+                    return ['class' => 'danger'];
+                } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
+                    return ['class' => 'warning'];
+                }
+            },
             'pjax' => true,
             'summary' => false,
             'columns' => $preparedPendingColumns,
