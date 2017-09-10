@@ -3,14 +3,20 @@
 /** @var $model \app\models\Programs */
 /** @var $this yii\web\View */
 
+$moduleTemplate = '_base_module';
+if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_CERTIFICATE)) {
+    $moduleTemplate = '_certificate_module';
+}
+
+
 echo \yii\bootstrap\Tabs::widget([
-    'items'       => array_map(function ($module)
+    'items'       => array_map(function ($module) use ($moduleTemplate, $cooperate)
     {
         /** @var $module \app\models\ProgrammeModule */
         /** @var $this yii\web\View */
         $result = [];
         $result['label'] = $module->getShortName();
-        $result['content'] = $this->render('_base_module', ['model' => $module]);
+        $result['content'] = $this->render($moduleTemplate, ['model' => $module, 'cooperate' => $cooperate]);
 
         return $result;
     }, $model->modules),

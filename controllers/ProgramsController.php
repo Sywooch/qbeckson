@@ -172,9 +172,9 @@ class ProgramsController extends Controller
 
             throw new ForbiddenHttpException('Нет доступа');
         }
-        $rows = null;
+        $cooperate = null;
         if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
-            $rows = Cooperate::find()->where([
+            $cooperate = Cooperate::find()->where([
                 Cooperate::tableName() . '.payer_id'        => $user->getCertificate()->select('payer_id'),
                 Cooperate::tableName() . '.organization_id' => $model->organization_id])->all();
 
@@ -188,7 +188,7 @@ class ProgramsController extends Controller
                             ->andWhere(['status' => 1])
                             ->count();*/
 
-            if (!count($rows)) {
+            if (!count($cooperate)) {
                 Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в организацию, реализующую выбранную программу. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
             }
         }
@@ -196,7 +196,7 @@ class ProgramsController extends Controller
 
         ProgramsAsset::register($this->view);
 
-        return $this->render('view/view', ['model' => $model]);
+        return $this->render('view/view', ['model' => $model, 'cooperate' => $cooperate]);
 
         /* return $this->render('view', [
              'model'     => $model,
@@ -225,12 +225,11 @@ class ProgramsController extends Controller
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
 
-                return ArrayHelper::merge(
+                return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelsYears),
                     ActiveForm::validate($model)
-                );
+                ));
             }
 
 
@@ -482,12 +481,11 @@ class ProgramsController extends Controller
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
 
-                return ArrayHelper::merge(
+                return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelsYears),
                     ActiveForm::validate($model)
-                );
+                ));
             }
 
             $valid = $model->validate();
@@ -658,12 +656,11 @@ class ProgramsController extends Controller
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
 
-                return ArrayHelper::merge(
+                return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelsYears),
                     ActiveForm::validate($model)
-                );
+                ));
             }
 
             $valid = $model->validate();
@@ -964,26 +961,19 @@ class ProgramsController extends Controller
         $model = $this->findModel($id);
         $modelYears = $model->years;
         $file = new ProgramsFile();
+        /** @var $organisation Organization */
         $model->zab = explode(',', $model->zab);
-
-        $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-
-        if (isset($roles['organizations'])) {
-            $organizations = new Organization();
-            $organization = $organizations->getOrganization();
-
-            if ($organization['id'] != $model->organization_id) {
+        $organization = Yii::$app->user->identity->organization;
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
+            && $organization->id !== $model->organization_id) {
                 throw new ForbiddenHttpException('Нет доступа');
-            }
         }
-
         if ($model->load(Yii::$app->request->post())) {
             if ($model->verification == Programs::VERIFICATION_WAIT) {
                 Yii::$app->session->setFlash('error', 'Редактирование недоступно, программа проходит сертификацию.');
 
                 return $this->redirect(['/personal/organization-programs']);
             }
-
             $file->docFile = UploadedFile::getInstance($file, 'docFile');
             if ($file->docFile) {
                 $datetime = microtime(true); // date("Y-m-d-G-i-s");
@@ -1004,12 +994,11 @@ class ProgramsController extends Controller
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
 
-                return ArrayHelper::merge(
+                return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelYears),
                     ActiveForm::validate($model)
-                );
+                ));
             }
 
             $valid = $model->validate();
@@ -1077,12 +1066,11 @@ class ProgramsController extends Controller
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
 
-                return ArrayHelper::merge(
+                return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelYears),
                     ActiveForm::validate($model)
-                );
+                ));
             }
 
             $valid = $model->validate();

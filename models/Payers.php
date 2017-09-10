@@ -3,7 +3,6 @@
 namespace app\models;
 
 use Yii;
-use app\models\Cooperate;
 
 /**
  * This is the model class for table "payers".
@@ -26,20 +25,21 @@ use app\models\Cooperate;
  * @property integer $directionality_1_count
  * @property integer $directionality_2_count
  * @property integer $directionality_3_count
- * @property integer $directionality_4_count
- * @property integer $directionality_5_count
- * @property integer $directionality_6_count
- * @property integer $certificate_can_use_future_balance
+ * @property integer                $directionality_4_count
+ * @property integer                $directionality_5_count
+ * @property integer                $directionality_6_count
+ * @property integer                $certificate_can_use_future_balance
  *
- * @property Certificates[] $certificates
- * @property Invoices[] $invoices
- * @property mixed $payer
- * @property mixed $noCooperatePayer
- * @property Mun $municipality
- * @property Cooperate[] $cooperates
- * @property User $user
+ * @property Certificates[]         $certificates
+ * @property Invoices[]             $invoices
+ * @property mixed                  $payer
+ * @property mixed                  $noCooperatePayer
+ * @property Mun                    $municipality
+ * @property Cooperate[]            $cooperates
+ * @property User                   $user
  * @property CertificateInformation $certificateInformation
- * @property CertGroup $firstCertGroup
+ * @property CertGroup              $firstCertGroup
+ * @property Contracts              $contracts
  */
 class Payers extends \yii\db\ActiveRecord
 {
@@ -449,5 +449,39 @@ class Payers extends \yii\db\ActiveRecord
         }
 
         return $query->one();
+    }
+
+
+    /** возвращает лимит направления по названию направления
+     * @return null|int
+     */
+    public function getDirectionalityCountByName($name)
+    {
+        if ($result = array_search($name, $this::getDirtyAttributes())) {
+
+            return $this->{$result};
+        }
+
+        return null;
+    }
+
+    /** @return  \yii\db\ActiveQuery */
+    public function getContracts()
+    {
+        return $this->hasMany(Contracts::className(), ['payer_id' => 'id'])->inverseOf('payers');
+    }
+
+    /** @return  \yii\db\ActiveQuery */
+    public function getActiveContractsByProgram($programId)
+    {
+        return $this->hasMany(Contracts::className(), ['payer_id' => 'id'])
+            ->where([
+                Contracts::tableName() . '.program_id' => $programId,
+                Contracts::tableName() . '.status'     => [
+                    Contracts::STATUS_CREATED,
+                    Contracts::STATUS_ACTIVE,
+                    Contracts::STATUS_ACCEPTED
+                ]
+            ]);
     }
 }
