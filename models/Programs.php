@@ -52,6 +52,9 @@ use yii\helpers\ArrayHelper;
  * @property integer                         $is_municipal_task
  * @property string                          $zabAsString
  *
+ * @property string                          $iconClass
+ *
+ *
  * @property Contracts[]                     $contracts
  * @property Favorites[]                     $favorites
  * @property Groups[]                        $groups
@@ -66,8 +69,8 @@ use yii\helpers\ArrayHelper;
  * @property mixed                           $organizationWaitProgram
  * @property mixed                           $organizationNoProgram
  * @property Mun                             $municipality
- * @property mixed                           $cooperateProgram
- * @property mixed         $countHours
+ * @property mixed            $cooperateProgram
+ * @property mixed                           $countHours
  * @property string                          $commonActivities
  * @property ProgrammeModule[]               $modules
  * @property OrganizationAddress[]           $addresses
@@ -80,6 +83,10 @@ class Programs extends ActiveRecord
     const VERIFICATION_DONE = 2;
     const VERIFICATION_DENIED = 3;
     const VERIFICATION_IN_ARCHIVE = 10;
+
+    const ICON_DEFAULT = 'icon-socped';
+    const ICON_KEY_IN_PARAMS = 'directivityIconsClass';
+
     public $file;
     public $edit;
     public $search;
@@ -716,6 +723,19 @@ class Programs extends ActiveRecord
     public function existsFreePlace()
     {
         return $this->limit > $this->getActiveContracts()->count();
+    }
+
+    /** Класс иконки направления программы
+     * @return string
+     */
+    public function getIconClass()
+    {
+        if (array_key_exists(self::ICON_KEY_IN_PARAMS, Yii::$app->params) &&
+            array_key_exists($this->direction_id, Yii::$app->params[self::ICON_KEY_IN_PARAMS])) {
+            return Yii::$app->params[self::ICON_KEY_IN_PARAMS][$this->direction_id];
+        }
+
+        return self::ICON_DEFAULT;
     }
 
 }
