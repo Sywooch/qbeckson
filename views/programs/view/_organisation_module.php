@@ -3,6 +3,9 @@
 
 /** @var $this yii\web\View */
 
+use yii\helpers\Html;
+use yii\helpers\Url;
+
 ?>
 <div class="row">
     <div class="col-xs-12">
@@ -72,26 +75,16 @@
                 'datestop:date',
                 'freePlaces',
                 ['class'    => 'yii\grid\ActionColumn',
-                 'header'   => 'Действия',
-                 'template' => '{permit}',
-                 'buttons'  =>
+                 'template' => '{view}',
+
+                 'buttons' =>
                      [
-                         'permit' => function ($url, $model)
+                         'view' => function ($url, $model)
                          {
-                             /** @var $identity \app\models\UserIdentity */
-                             $identity = Yii::$app->user->identity;
-                             if ($model->freePlaces && $identity->certificate->actual) {
-
-                                 return \yii\helpers\Html::a('Выбрать',
-                                     \yii\helpers\Url::to(['/contracts/request', 'groupId' => $model->id]),
-                                     [
-                                         'class' => 'btn btn-success',
-                                         'title' => 'Выбрать'
-                                     ]);
+                             if (Yii::$app->user->can('organizations')) {
+                                 return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', Url::to(['/groups/contracts', 'id' => $model->id]));
                              }
-                             return false;
                          },
-
                      ]
                 ],
 

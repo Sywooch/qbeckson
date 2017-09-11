@@ -59,7 +59,7 @@ use yii\helpers\Url;
                 }
             } else {
                 $active = false;
-                $message = 'Нет цены';
+                $message = 'Нет цены, нельзя открыть';
             }
         } else {
             $active = false;
@@ -77,7 +77,7 @@ use yii\helpers\Url;
 
         /** установка цены */
         if ($model->price) {
-            if ($model->open) {
+            if ($model->open && $model->price) {
                 echo \yii\bootstrap\Button::widget(['label'   => 'Нельзя изменить цену',
                                                     'options' => ['class'    => 'btn btn-theme',
                                                                   'disabled' => 'disabled'],]);
@@ -107,6 +107,8 @@ use yii\helpers\Url;
                 ['years/add-addresses', 'id' => $model->id], ['class' => 'btn btn-theme']
             );
         }
+        /** Группы*/
+        echo Html::a('Добавить группу', Url::to(['/groups/newgroup', 'id' => $model->id]), ['class' => 'btn btn-theme']);
 
 
 
