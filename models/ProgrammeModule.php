@@ -236,4 +236,6 @@ class ProgrammeModule extends ActiveRecord
 
         return array_unique($rows);
     }
+
+
 }

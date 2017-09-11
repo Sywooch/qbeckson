@@ -6,6 +6,8 @@
 $moduleTemplate = '_base_module';
 if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_CERTIFICATE)) {
     $moduleTemplate = '_certificate_module';
+} elseif (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)) {
+    $moduleTemplate = '_organisation_module';
 }
 
 

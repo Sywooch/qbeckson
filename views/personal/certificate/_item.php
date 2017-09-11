@@ -2,8 +2,12 @@
 /* @var $this yii\web\View */
 /* @var $model \app\models\Programs */
 
+use yii\helpers\Html;
+use yii\helpers\Url;
+
 if (!$photo = $model->getPhoto()) {
-    $photo = $this->getAssetManager()->getAssetUrl($this->assetBundles[\app\assets\programsAsset\ProgramsAsset::className()], 'img/program-image.png');
+    $photo = $this->getAssetManager()->getAssetUrl($this->assetBundles[\app\assets\programsAsset\ProgramsAsset::className()],
+        $model->defaultPhoto);
 }
 $fStrings = [];
 $fStrings['ageGroupShort'] = Yii::t('app', '{min}-{max} лет',
@@ -59,8 +63,10 @@ $fStrings['costFirstModuleNotmativ'] = Yii::t('app', 'Нормативная: {f
                     </div>
                     <div class="card-info">
                         <div class="card-info-paragraph card-info-paragraph_mh50">
-                            <div><?= $model->organization->name ?></div>
-                            <div><?= $model->organization->address_legal ?></div>
+                            <div><?= Html::a($model->organization->name, Url::to(['/organization/view',
+                                    'id' => $model->organization->id]),
+                                    ['target' => '_blank']); ?></div>
+                            <div><?= ($model->mainAddress ? $model->mainAddress->address : $model->organization->address_legal) ?></div>
                         </div>
                         <div class="card-info-paragraph card-info-paragraph_mh38">
                             <div>Стоимость одного модуля</div>

@@ -23,10 +23,10 @@ use yii\helpers\Url;
                             if ($organization->date_proxy && $organization->number_proxy) {
                                 $active = true;
                                 if ($model->open) {
-                                    $message = 'Закрыть';
+                                    $message = 'Закрыть зачисление';
                                     $url = Url::to(['years/stop', 'id' => $model->id]);
                                 } else {
-                                    $message = 'Открыть';
+                                    $message = 'Открыть зачисление';
                                     $url = Url::to(['years/start', 'id' => $model->id]);
                                 }
                             } else {
@@ -36,10 +36,10 @@ use yii\helpers\Url;
                         } else {
                             $active = true;
                             if ($model->open) {
-                                $message = 'Закрыть';
+                                $message = 'Закрыть зачисление';
                                 $url = Url::to(['years/stop', 'id' => $model->id]);
                             } else {
-                                $message = 'Открыть';
+                                $message = 'Открыть зачисление';
                                 $url = Url::to(['years/start', 'id' => $model->id]);
                             }
                         }
@@ -50,16 +50,16 @@ use yii\helpers\Url;
                 } else {
                     $active = true;
                     if ($model->open) {
-                        $message = 'Закрыть';
+                        $message = 'Закрыть зачисление';
                         $url = Url::to(['years/stop', 'id' => $model->id]);
                     } else {
-                        $message = 'Открыть';
+                        $message = 'Открыть зачисление';
                         $url = Url::to(['years/start', 'id' => $model->id]);
                     }
                 }
             } else {
                 $active = false;
-                $message = 'Нет цены';
+                $message = 'Нет цены, нельзя открыть';
             }
         } else {
             $active = false;
@@ -77,7 +77,7 @@ use yii\helpers\Url;
 
         /** установка цены */
         if ($model->price) {
-            if ($model->open) {
+            if ($model->open && $model->price) {
                 echo \yii\bootstrap\Button::widget(['label'   => 'Нельзя изменить цену',
                                                     'options' => ['class'    => 'btn btn-theme',
                                                                   'disabled' => 'disabled'],]);
@@ -88,30 +88,28 @@ use yii\helpers\Url;
             echo Html::a('Установить цену', Url::to(['years/update', 'id' => $model->id]), ['class' => 'btn btn-theme']);
         }
 
-        /** предварительные записи*/
-        if ($model->previus) {
+        /** предварительные записи */
+        /*if ($model->previus) {
             echo Html::a('Закрыть запись', Url::to(['years/prevstop', 'id' => $model->id]), ['class' => 'btn btn-theme']);
         } else {
             echo Html::a('Открыть запись', Url::to(['years/prevstart', 'id' => $model->id]), ['class' => 'btn btn-theme']);
-        }
+        }*//*отключено 110917*/
 
         /** Адреса */
-        if (count($model->addresses) > 0 && null !== $model->mainAddress) {
-            echo Html::a(
-                $model->mainAddress->address,
-                ['years/add-addresses', 'id' => $model->id], ['class' => 'btn btn-theme']
-            );
-        }
         if (count($model->addresses)) {
             echo Html::a(
-                'Редактирование адресов',
+                'Изменить адреса модуля',
+                ['years/add-addresses', 'id' => $model->id], ['class' => 'btn btn-theme']
+            );
+        } else {
+            echo Html::a(
+                'Указать адреса для модуля',
                 ['years/add-addresses', 'id' => $model->id], ['class' => 'btn btn-theme']
             );
         }
-        echo Html::a(
-            'Добавить адреса',
-            ['years/add-addresses', 'id' => $model->id], ['class' => 'btn btn-theme']
-        );
+        /** Группы*/
+        echo Html::a('Добавить группу', Url::to(['/groups/newgroup', 'id' => $model->id]), ['class' => 'btn btn-theme']);
+
 
 
         ?>

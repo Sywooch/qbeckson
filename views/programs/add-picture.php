@@ -15,9 +15,9 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="programs-add-picture">
     <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]); ?>
     <?php $fileUploadAttributes = [
-        'url' => ['file-storage/program-upload'],
-        'maxFileSize' => 10 * 1024 * 1024,
-        'multiple' => false,
+        'url'             => ['file-storage/program-upload'],
+        'maxFileSize'     => 1024 * 1024,
+        'multiple'        => false,
         'acceptFileTypes' => new JsExpression('/(\.|\/)(jpg|jpeg|png|gif)$/i'),
     ] ?>
     <?= $form->field($model, 'programPhoto')->widget(Upload::class, $fileUploadAttributes); ?>
