@@ -142,13 +142,13 @@ $columnsNonActive = [
             </a>
         </li>
         <li>
-            <a data-toggle="tab" href="#panel3">Заявки
-                <span class="badge"><?= $newProvider->getTotalCount() ?></span>
+            <a data-toggle="tab" href="#panel4">Подтвержденные
+                <span class="badge"><?= $confirmedProvider->getTotalCount() ?></span>
             </a>
         </li>
         <li>
-            <a data-toggle="tab" href="#panel4">Подтвержденные
-                <span class="badge"><?= $confirmedProvider->getTotalCount() ?></span>
+            <a data-toggle="tab" href="#panel3">Заявки
+                <span class="badge"><?= $newProvider->getTotalCount() ?></span>
             </a>
         </li>
         <li>
