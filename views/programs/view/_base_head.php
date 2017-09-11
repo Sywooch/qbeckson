@@ -49,7 +49,7 @@ $this->registerJs($truncateNameJS, $this::POS_READY);
             <h2 class="card-title js-ellipsis-title"><?= $model->name ?></h2>
             <div class="card-badges">
                 <div class="card-badges-item card-badges-item_violet" title="<?= $model->direction->name ?>"><span
-                            class="large-size icon-socped"></span></div>
+                            class="large-size <?= $model->iconClass ?>"></span></div>
                 <div class="card-badges-item card-badges-item_green" title="<?= $fStrings['ageGroupFull'] ?>">
                     <span><?= $fStrings['ageGroupShort'] ?></span>
                 </div>

@@ -17,7 +17,7 @@ use yii\helpers\Url;
     }
 
     if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_CERTIFICATE)) {
-        echo Html::a('К списку программ', '/programs/search', ['class' => 'btn btn-danger']);
+        echo Html::a('К списку программ', '/personal/certificate-programs', ['class' => 'btn btn-danger']);
     }
 
     if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_PAYER)) {

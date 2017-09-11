@@ -40,7 +40,7 @@ $fStrings['costFirstModuleNotmativ'] = Yii::t('app', 'Нормативная: {f
                     <h2 class="card-title js-ellipsis-title"><?= $model->name ?></h2>
                     <div class="card-badges">
                         <div class="card-badges-item card-badges-item_violet" title="<?= $model->direction->name ?>">
-                            <span class="large-size icon-socped"></span></div>
+                            <span class="large-size <?= $model->iconClass ?>"></span></div>
                         <div class="card-badges-item card-badges-item_green" title="<?= $fStrings['ageGroupFull'] ?>">
                             <span><?= $fStrings['ageGroupShort'] ?></span></div>
                         <div class="card-badges-item card-badges-item_blue" title="<?= $fStrings['zabFull'] ?>">
@@ -50,9 +50,12 @@ $fStrings['costFirstModuleNotmativ'] = Yii::t('app', 'Нормативная: {f
                                  title="Зачисление открыто, есть свободные места"><span
                                         class="large-size icon-study"></span></div>
                         <?php endif; ?>
-                        <div class="card-badges-item card-badges-item_star" title="<?= $fStrings['rateFull'] ?>"><i
-                                    class="icon-star-full"></i><span
-                                    class="big-size"><?= $fStrings['rateShort'] ?></span></div>
+                        <?php if ($model->rating): ?>
+
+                            <div class="card-badges-item card-badges-item_star" title="<?= $fStrings['rateFull'] ?>"><i
+                                        class="icon-star-full"></i><span
+                                        class="big-size"><?= $fStrings['rateShort'] ?></span></div>
+                        <?php endif; ?>
                     </div>
                     <div class="card-info">
                         <div class="card-info-paragraph card-info-paragraph_mh50">
