@@ -19,11 +19,11 @@ $this->params['breadcrumbs'][] = $this->title;
 </div>
 <div class="row">
     <div class="col-xs-12">
-        <?= $this->render('_base_controls'); ?>
+        <?= $this->render('_base_controls', ['model' => $model]); ?>
     </div>
 </div>
 <div class="row">
     <div class="col-xs-12">
-        <?= $this->render('_base_body', ['model' => $model]) ?>
+        <?= $this->render('_base_body', ['model' => $model, 'cooperate' => $cooperate]) ?>
     </div>
 </div>

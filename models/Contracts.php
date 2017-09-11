@@ -278,7 +278,7 @@ class Contracts extends ActiveRecord
     
     public function getPayers()
     {
-        return $this->hasOne(Payers::className(), ['id' => 'payer_id']);
+        return $this->hasOne(Payers::className(), ['id' => 'payer_id'])->inverseOf('contracts');
     }
     
     public function getPayersname()
@@ -323,7 +323,7 @@ class Contracts extends ActiveRecord
      */
     public function getOrganization()
     {
-        return $this->hasOne(Organization::className(), ['id' => 'organization_id']);
+        return $this->hasOne(Organization::className(), ['id' => 'organization_id'])->inverseOf('contracts');
     }
 
     public function getOrganizationname()

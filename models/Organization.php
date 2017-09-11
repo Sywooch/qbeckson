@@ -390,7 +390,16 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getContracts()
     {
-        return $this->hasMany(Contracts::className(), ['organization_id' => 'id']);
+        return $this->hasMany(Contracts::className(), ['organization_id' => 'id'])->inverseOf('organization');
+    }
+
+    public function getActiveContracts()
+    {
+        return $this->getContracts()->where([Contracts::tableName() . '.status' => [
+            Contracts::STATUS_CREATED,
+            Contracts::STATUS_ACTIVE,
+            Contracts::STATUS_ACCEPTED
+        ]]);
     }
 
     /**
@@ -626,6 +635,12 @@ class Organization extends \yii\db\ActiveRecord
     {
         $this->status = self::STATUS_REFUSED;
         $this->actual = 0;
+    }
+
+    /** @return bool */
+    public function existsFreePlace()
+    {
+        return $this->max_child > $this->getActiveContracts()->count();
     }
 
     public function sendRequestEmail()

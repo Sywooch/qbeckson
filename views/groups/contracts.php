@@ -63,16 +63,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     Url::to(['/programs/view', 'id' => $model->program->id]),
                     ['class' => 'blue', 'target' => '_blank']),
             ],
-            [
-                'attribute' => 'schedule',
-                'label'     => 'Расписание',
-                'value'     => function ($model)
-                {
-                    /** @var \app\models\Groups $model */
-                    return $model->formatClasses();
-                },
-                'format'    => 'raw'
-            ],
+
+            'fullSchedule:raw',
             'datestart:date',
             'datestop:date',
             [

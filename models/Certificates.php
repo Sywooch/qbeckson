@@ -17,24 +17,24 @@ use Yii;
  * @property integer $actual
  * @property string $fio_child
  * @property string $fio_parent
- * @property integer $nominal_f
- * @property integer $balance_f
- * @property integer $rezerv_f
- * @property integer $nominal
- * @property integer $balance
- * @property integer $rezerv
- * @property integer $contracts
- * @property integer $directivity1
- * @property integer $directivity2
- * @property integer $directivity3
- * @property integer $directivity4
- * @property integer $directivity5
- * @property integer $directivity6
+ * @property integer     $nominal_f
+ * @property integer     $balance_f
+ * @property integer     $rezerv_f
+ * @property integer     $nominal
+ * @property integer     $balance
+ * @property integer     $rezerv
+ * @property integer     $contracts
+ * @property integer     $directivity1
+ * @property integer     $directivity2
+ * @property integer     $directivity3
+ * @property integer     $directivity4
+ * @property integer     $directivity5
+ * @property integer     $directivity6
  *
- * @property User $user
- * @property Payers $payers
- * @property Payers $payer
- * @property Contracts[] $contracts0
+ * @property User        $user
+ * @property Payers      $payers
+ * @property Payers      $payer
+ * @property Contracts[] $contractsModels
  */
 class Certificates extends \yii\db\ActiveRecord
 {
@@ -236,7 +236,7 @@ class Certificates extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getContracts0()
+    public function getContractsModels()
     {
         return $this->hasMany(Contracts::className(), ['certificate_id' => 'id']);
     }
@@ -405,6 +405,24 @@ class Certificates extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param $programId int
+     *
+     * @return \yii\db\ActiveQuery
+     * */
+    public function getActiveContractsByProgram($programId)
+    {
+        return $this->getContractsModels()->where([
+            Contracts::tableName() . '.status'     => [
+                Contracts::STATUS_CREATED,
+                Contracts::STATUS_ACTIVE,
+                Contracts::STATUS_ACCEPTED
+            ],
+            Contracts::tableName() . '.program_id' => $programId
+        ]);
+    }
+
+
+    /**
      * @deprecated
      */
     public function getSumContractes($payer_id)
@@ -431,4 +449,5 @@ class Certificates extends \yii\db\ActiveRecord
 
         return $query->one();
     }
+
 }

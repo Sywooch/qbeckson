@@ -712,4 +712,10 @@ class Programs extends ActiveRecord
     }
 
 
+    /** @return bool */
+    public function existsFreePlace()
+    {
+        return $this->limit > $this->getActiveContracts()->count();
+    }
+
 }

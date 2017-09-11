@@ -11,11 +11,7 @@
 </div>
 <div class="row">
     <div class="col-xs-12">
-        <div class="btn-row">
-            <button class="btn btn-theme">Создать группу</button>
-            <button class="btn btn-theme">Записаться</button>
-            <button class="btn btn-theme">Установить цену</button>
-        </div>
+        <?= $this->render('_base_module_controls', ['model' => $model]); ?>
     </div>
 </div>
 <div class="row">

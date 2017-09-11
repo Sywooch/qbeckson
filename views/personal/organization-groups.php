@@ -33,16 +33,11 @@ $columns = [
         'label'     => 'Программа',
         'format'    => 'raw'
     ],
-    [
-        'attribute' => 'schedule',
-        'label'     => 'Расписание',
-        'value'     => function ($model)
-        {
-            /** @var \app\models\Groups $model */
-            return $model->formatClasses();
-        },
-        'format'    => 'raw'
-    ],
+
+    ['attribute' => 'fullSchedule',
+     'format'    => 'raw'],
+
+
     [
         'attribute' => 'datestart',
         'format'    => 'date',
