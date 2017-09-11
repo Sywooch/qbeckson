@@ -66,16 +66,18 @@ use yii\helpers\ArrayHelper;
  * @property DirectoryProgramDirection|null  $direction
  * @property string                          $directivity
  * @property mixed                           $countMonths
- * @property mixed                           $organizationProgram
- * @property mixed                           $organizationWaitProgram
- * @property mixed                           $organizationNoProgram
- * @property Mun                             $municipality
- * @property mixed            $cooperateProgram
- * @property mixed                           $countHours
- * @property string                          $commonActivities
- * @property ProgrammeModule[]               $modules
- * @property OrganizationAddress[]           $addresses
- * @property ProgramAddressAssignment[]      $addressAssignments
+ * @property mixed                      $organizationProgram
+ * @property mixed                      $organizationWaitProgram
+ * @property mixed                      $organizationNoProgram
+ * @property Mun                        $municipality
+ * @property mixed                      $cooperateProgram
+ * @property mixed                      $countHours
+ * @property string                     $commonActivities
+ * @property ProgrammeModule[]          $modules
+ * @property OrganizationAddress[]      $addresses
+ * @property OrganizationAddress        $mainAddress
+ * @property ProgramAddressAssignment[] $addressAssignments
+ * @property ProgramAddressAssignment[] $mainAddressAssignments
  */
 class Programs extends ActiveRecord
 {
@@ -201,11 +203,33 @@ class Programs extends ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getMainAddressAssignments()
+    {
+        return $this->hasMany(ProgramAddressAssignment::class, ['program_id' => 'id'])->andWhere(['status' => 1]);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMainAddress()
+    {
+        return $this->hasOne(OrganizationAddress::class, ['id' => 'organization_address_id'])
+            ->via('mainAddressAssignments');
+    }
+
+
+
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getAddresses()
     {
         return $this->hasMany(OrganizationAddress::class, ['id' => 'organization_address_id'])
             ->via('addressAssignments');
     }
+
 
     /**
      * @return \yii\db\ActiveQuery

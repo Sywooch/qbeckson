@@ -1,5 +1,6 @@
 <?php
 /* @var $this yii\web\View */
+
 /* @var $model app\models\Programs */
 
 use yii\helpers\Html;
@@ -101,9 +102,9 @@ $this->registerJs($JS, $this::POS_READY);
                     'options'    => [
                         'tag'   => 'ul',
                         'class' => 'text-info-lines'],
-                    'template'   => '<li><strong>{label}:</strong>{value}</li>',
+                    'template'   => '<li {captionOptions}><strong>{label}:</strong>{value}</li>',
                     'model'      => $model,
-                    'attributes' => [
+                    'attributes' => array_merge([
                         'direction.name',
                         ['label' => 'Возраст детей',
                          'value' => $model->age_group_min . ' - ' . $model->age_group_max],
@@ -123,7 +124,20 @@ $this->registerJs($JS, $this::POS_READY);
                         ],
                         'municipality.name',
                         'groundName',
-                    ]
+                        [
+                            'label' => 'Адреса реализации программы',
+                            'value' => ($model->addresses ? '' : 'не указаны'),
+                        ],
+
+                    ],
+                        array_map(function ($index, $address)
+                        {
+                            /** @var $address \app\models\OrganizationAddress */
+                            return [
+                                'label'          => sprintf('Адрес %d', $index + 1),
+                                'value'          => $address->address,
+                                'captionOptions' => ['style' => ['padding-left' => '20px']]];
+                        }, array_keys($model->addresses), $model->addresses))
                 ]) ?>
                 <div class="strong">Цели и задачи</div>
                 <p class="text-justify"><?= $model->task; ?></p>

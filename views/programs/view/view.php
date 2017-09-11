@@ -9,12 +9,17 @@ if (Yii::$app->user->can('operators')) {
 } elseif (Yii::$app->user->can('organizations')) {
     $this->params['breadcrumbs'][] = ['label' => $model->isMunicipalTask ? 'Муниципальные задания' : 'Программы', 'url' => $model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']];
 }
+$headTemplate = '_base_head';
+if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)) {
+    $headTemplate = '_organisation_head';
+}
+
 
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="row">
     <div class="col-xs-12">
-        <?= $this->render('_base_head', ['model' => $model]) ?>
+        <?= $this->render($headTemplate, ['model' => $model]) ?>
     </div>
 </div>
 <div class="row">

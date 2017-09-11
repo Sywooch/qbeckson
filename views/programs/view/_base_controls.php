@@ -28,7 +28,7 @@ use yii\helpers\Url;
         echo Html::a('К списку программ', '/personal/organization-programs', ['class' => 'btn btn-theme']);
         if ($model->verification === \app\models\Programs::VERIFICATION_DONE) {
             echo Html::a($model->getPhoto() ? 'Изменить фото' : 'Добавить фото', ['add-photo', 'id' => $model->id], ['class' => 'btn btn-theme']);
-            echo Html::a('Адреса программы', ['add-addresses', 'id' => $model->id], ['class' => 'btn btn-theme']);
+            echo Html::a($model->addresses ? 'Изменить адреса для программы' : 'Указать адреса для программы', ['add-addresses', 'id' => $model->id], ['class' => 'btn btn-theme']);
         }
 
         if ($model->getLivingContracts()->exists() || $model->getModules()->andWhere(['open' => 1])->exists()) {
@@ -51,7 +51,7 @@ use yii\helpers\Url;
 
     }
 
-    echo Html::a('Посмотреть файл', '/' . $model->link, ['class' => 'btn btn-theme']);
+    echo Html::a('Открыть текст программы', '/' . $model->link, ['class' => 'btn btn-theme']);
     ?>
 </div>
 
