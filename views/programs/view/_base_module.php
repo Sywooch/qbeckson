@@ -20,9 +20,9 @@
             'options'    => [
                 'tag'   => 'ul',
                 'class' => 'text-info-lines'],
-            'template'   => '<li><strong>{label}:</strong>{value}</li>',
+            'template'   => '<li {captionOptions}><strong>{label}:</strong>{value}</li>',
             'model'      => $model,
-            'attributes' => [
+            'attributes' => array_merge([
                 ['attribute' => 'month',
                  'label'     => 'Продолжительность (месяцев)'
                 ],
@@ -45,8 +45,20 @@
                     'attribute' => 'normative_price',
                     'format'    => 'currency',
                 ],
+                [
+                    'label' => 'Адреса реализации модуля',
+                    'value' => ($model->addresses ? '' : 'не указаны'),
+                ],
 
-            ]
+            ],
+                array_map(function ($index, $address)
+                {
+                    /** @var $address \app\models\OrganizationAddress */
+                    return [
+                        'label'          => sprintf('Адрес %d', $index + 1),
+                        'value'          => $address->address,
+                        'captionOptions' => ['style' => ['padding-left' => '20px']]];
+                }, array_keys($model->addresses), $model->addresses))
         ]) ?>
         <?= \yii\grid\GridView::widget([
             'dataProvider' => new \yii\data\ActiveDataProvider(['query' => $model->getGroups()]),

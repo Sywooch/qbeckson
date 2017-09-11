@@ -23,10 +23,10 @@ use yii\helpers\Url;
                             if ($organization->date_proxy && $organization->number_proxy) {
                                 $active = true;
                                 if ($model->open) {
-                                    $message = 'Закрыть';
+                                    $message = 'Закрыть зачисление';
                                     $url = Url::to(['years/stop', 'id' => $model->id]);
                                 } else {
-                                    $message = 'Открыть';
+                                    $message = 'Открыть зачисление';
                                     $url = Url::to(['years/start', 'id' => $model->id]);
                                 }
                             } else {
@@ -36,10 +36,10 @@ use yii\helpers\Url;
                         } else {
                             $active = true;
                             if ($model->open) {
-                                $message = 'Закрыть';
+                                $message = 'Закрыть зачисление';
                                 $url = Url::to(['years/stop', 'id' => $model->id]);
                             } else {
-                                $message = 'Открыть';
+                                $message = 'Открыть зачисление';
                                 $url = Url::to(['years/start', 'id' => $model->id]);
                             }
                         }
@@ -50,10 +50,10 @@ use yii\helpers\Url;
                 } else {
                     $active = true;
                     if ($model->open) {
-                        $message = 'Закрыть';
+                        $message = 'Закрыть зачисление';
                         $url = Url::to(['years/stop', 'id' => $model->id]);
                     } else {
-                        $message = 'Открыть';
+                        $message = 'Открыть зачисление';
                         $url = Url::to(['years/start', 'id' => $model->id]);
                     }
                 }
@@ -96,22 +96,18 @@ use yii\helpers\Url;
         }*//*отключено 110917*/
 
         /** Адреса */
-        if (count($model->addresses) > 0 && null !== $model->mainAddress) {
-            echo Html::a(
-                $model->mainAddress->address,
-                ['years/add-addresses', 'id' => $model->id], ['class' => 'btn btn-theme']
-            );
-        }
         if (count($model->addresses)) {
             echo Html::a(
-                'Редактирование адресов',
+                'Изменить адреса модуля',
+                ['years/add-addresses', 'id' => $model->id], ['class' => 'btn btn-theme']
+            );
+        } else {
+            echo Html::a(
+                'Указать адреса для модуля',
                 ['years/add-addresses', 'id' => $model->id], ['class' => 'btn btn-theme']
             );
         }
-        echo Html::a(
-            'Добавить адреса',
-            ['years/add-addresses', 'id' => $model->id], ['class' => 'btn btn-theme']
-        );
+
 
 
         ?>
