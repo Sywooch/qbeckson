@@ -130,6 +130,7 @@ $columnsNonActive = [
     $payerMunicipality,
     $contractsCount,
     $payer_id,
+    $actions,
 ]
 
 ?>
@@ -188,6 +189,21 @@ $columnsNonActive = [
             ]); ?>
         </div>
         <div id="panel3" class="tab-pane fade">
+            <?php if ($searchNew->payer_id) : ?>
+                <p class="lead">Показаны результаты для плательщика: <?= $searchActive->payerName; ?></p>
+            <?php endif; ?>
+            <?= SearchFilter::widget([
+                'model' => $searchNew,
+                'action' => ['personal/operator-cooperates#panel3'],
+                'data' => GridviewHelper::prepareColumns(
+                    'cooperate',
+                    $columnsNonActive,
+                    null,
+                    'searchFilter',
+                    null
+                ),
+                'role' => UserIdentity::ROLE_OPERATOR,
+            ]); ?>
             <?= GridView::widget([
                 'dataProvider' => $newProvider,
                 'filterModel' => $searchNew,
@@ -195,6 +211,21 @@ $columnsNonActive = [
             ]); ?>
         </div>
         <div id="panel4" class="tab-pane fade">
+            <?php if ($searchConfirmed->payer_id) : ?>
+                <p class="lead">Показаны результаты для плательщика: <?= $searchActive->payerName; ?></p>
+            <?php endif; ?>
+            <?= SearchFilter::widget([
+                'model' => $searchConfirmed,
+                'action' => ['personal/operator-cooperates#panel4'],
+                'data' => GridviewHelper::prepareColumns(
+                    'cooperate',
+                    $columnsNonActive,
+                    null,
+                    'searchFilter',
+                    null
+                ),
+                'role' => UserIdentity::ROLE_OPERATOR,
+            ]); ?>
             <?= GridView::widget([
                 'dataProvider' => $confirmedProvider,
                 'filterModel' => $searchConfirmed,

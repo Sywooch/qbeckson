@@ -3,18 +3,29 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
+use app\models\Cooperate;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Cooperate */
 
-$this->title = $model->number ?: 'Обработка соглашения';
-$this->params['breadcrumbs'][] = 'Соглашение: ' . $this->title;
+$this->title = $model->number ? 'Просмотр соглашения ' . $model->number : 'Обработка соглашения';
+$this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="cooperate-view">
     <h1><?= Html::encode($this->title) ?></h1>
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
+            [
+                'attribute' => 'number',
+                'label' => 'Реквизиты',
+                'format' => 'raw',
+                'visible' => (in_array($model->status, [Cooperate::STATUS_REJECTED, Cooperate::STATUS_APPEALED])) ? false : true,
+                'value' => function ($model) {
+                    /** @var \app\models\Cooperate $model */
+                    return $model->number . ' от ' . Yii::$app->formatter->asDate($model->date);
+                },
+            ],
             [
                 'attribute' => 'organizationName',
                 'label' => 'Организация',
@@ -41,8 +52,16 @@ $this->params['breadcrumbs'][] = 'Соглашение: ' . $this->title;
                     );
                 },
             ],
-            'reject_reason:ntext',
-            'appeal_reason:ntext',
+            [
+                'attribute' => 'reject_reason',
+                'format' => 'ntext',
+                'visible' => (!in_array($model->status, [Cooperate::STATUS_REJECTED, Cooperate::STATUS_APPEALED])) ? false : true,
+            ],
+            [
+                'attribute' => 'appeal_reason',
+                'format' => 'ntext',
+                'visible' => (!in_array($model->status, [Cooperate::STATUS_REJECTED, Cooperate::STATUS_APPEALED])) ? false : true,
+            ],
             'created_date',
             [
                 'attribute' => 'status',
