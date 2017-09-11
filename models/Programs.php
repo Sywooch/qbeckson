@@ -53,6 +53,7 @@ use yii\helpers\ArrayHelper;
  * @property string                          $zabAsString
  *
  * @property string                          $iconClass
+ * @property string                          $defaultPhoto
  *
  *
  * @property Contracts[]                     $contracts
@@ -220,7 +221,7 @@ class Programs extends ActiveRecord
      */
     public function getPhoto()
     {
-        return $this->photo_base_url ? $this->photo_base_url . '/' . $this->photo_path : null;
+        return $this->photo_base_url ? $this->photo_base_url . DIRECTORY_SEPARATOR . $this->photo_path : null;
     }
 
     /**
@@ -732,10 +733,25 @@ class Programs extends ActiveRecord
     {
         if (array_key_exists(self::ICON_KEY_IN_PARAMS, Yii::$app->params) &&
             array_key_exists($this->direction_id, Yii::$app->params[self::ICON_KEY_IN_PARAMS])) {
-            return Yii::$app->params[self::ICON_KEY_IN_PARAMS][$this->direction_id];
+            return Yii::$app->params[self::ICON_KEY_IN_PARAMS][$this->direction_id]['icon'];
         }
 
         return self::ICON_DEFAULT;
+    }
+
+
+    /** @return  string|null
+     *  файл находит в assetBundle и имеет динамический путь
+     */
+    public function getDefaultPhoto()
+    {
+        if (array_key_exists(self::ICON_KEY_IN_PARAMS, Yii::$app->params) &&
+            array_key_exists($this->direction_id, Yii::$app->params[self::ICON_KEY_IN_PARAMS])) {
+
+            return Yii::$app->params[self::ICON_KEY_IN_PARAMS][$this->direction_id]['image'];
+        }
+
+        return null;
     }
 
 }

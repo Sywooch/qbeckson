@@ -84,14 +84,14 @@ return [
         1 => 'Заказчик',
         2 => 'Исполнитель',
     ],
-
+    /* Пути к изображениям по умолчанию, задаются относительно $sourcePath в app\assets\programsAsset\ProgramsAsset */
     'directivityIconsClass' => [
-        1 => 'icon-robot',  //техническая робототехника
-        2 => 'icon-tech',   //техническая иная
-        3 => 'icon-art', //художественная
-        4 => 'icon-estnauch', //Естественно-научная
-        5 => 'icon-socped', //Социально-педагогическая
-        6 => 'icon-turist', //Туристко-краеведческая
-        7 => 'icon-sport', //Физкультурно-спортивная
+        1 => ['icon' => 'icon-robot', 'image' => 'img/def-prog-img/robot.svg'],  //техническая робототехника
+        2 => ['icon' => 'icon-tech', 'image' => 'img/def-prog-img/tech.svg'],   //техническая иная
+        3 => ['icon' => 'icon-art', 'image' => 'img/def-prog-img/art.svg'], //художественная
+        4 => ['icon' => 'icon-estnauch', 'image' => 'img/def-prog-img/estnauch.svg'], //Естественно-научная
+        5 => ['icon' => 'icon-socped', 'image' => 'img/def-prog-img/socped.svg'], //Социально-педагогическая
+        6 => ['icon' => 'icon-turist', 'image' => 'img/def-prog-img/turist.svg'], //Туристко-краеведческая
+        7 => ['icon' => 'icon-sport', 'image' => 'img/def-prog-img/sport.svg'], //Физкультурно-спортивная
     ]
 ];

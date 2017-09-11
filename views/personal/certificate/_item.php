@@ -3,7 +3,8 @@
 /* @var $model \app\models\Programs */
 
 if (!$photo = $model->getPhoto()) {
-    $photo = $this->getAssetManager()->getAssetUrl($this->assetBundles[\app\assets\programsAsset\ProgramsAsset::className()], 'img/program-image.png');
+    $photo = $this->getAssetManager()->getAssetUrl($this->assetBundles[\app\assets\programsAsset\ProgramsAsset::className()],
+        $model->defaultPhoto);
 }
 $fStrings = [];
 $fStrings['ageGroupShort'] = Yii::t('app', '{min}-{max} лет',
