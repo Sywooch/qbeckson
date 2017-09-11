@@ -88,12 +88,12 @@ use yii\helpers\Url;
             echo Html::a('Установить цену', Url::to(['years/update', 'id' => $model->id]), ['class' => 'btn btn-theme']);
         }
 
-        /** предварительные записи*/
-        if ($model->previus) {
+        /** предварительные записи */
+        /*if ($model->previus) {
             echo Html::a('Закрыть запись', Url::to(['years/prevstop', 'id' => $model->id]), ['class' => 'btn btn-theme']);
         } else {
             echo Html::a('Открыть запись', Url::to(['years/prevstart', 'id' => $model->id]), ['class' => 'btn btn-theme']);
-        }
+        }*//*отключено 110917*/
 
         /** Адреса */
         if (count($model->addresses) > 0 && null !== $model->mainAddress) {
