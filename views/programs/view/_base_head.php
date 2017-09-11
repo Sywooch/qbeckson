@@ -29,20 +29,40 @@ $fStrings['costFirstModule'] = Yii::t('app', 'Заявленная: {formattedVa
 $fStrings['costFirstModuleNotmativ'] = Yii::t('app', 'Нормативная: {formattedValue}',
     ['formattedValue' => Yii::$app->formatter->asCurrency($model->getModules()->one()->normative_price),]);
 
-$truncateNameJS = <<<JS
- $(".js-ellipsis-title").dotdotdot({
+$JS = <<<JS
+ $('.js-ellipsis-title').dotdotdot({
           ellipsis: '... ',
           wrap: 'word',
           height: 60
       });
+ const collapse = $('#prog-detail-1');
+ const moreButton = $('#more-button');
+ 
+ collapse.on('show.bs.collapse', function() {
+   moreButton.text('Скрыть подробную информацию');
+   moreButton.fadeTo( "slow", 0.6 );
+ });
+ collapse.on('hide.bs.collapse', function() {
+   moreButton.text('Подробнее');
+   moreButton.fadeTo( "slow", 1 );
+ });
+ 
 JS;
+
+/*
+ show.bs.collapse	Это событие срабатывает во время вызова метода show.
+shown.bs.collapse	Это событие срабатывает, когда этот элемент отображается пользователю (при этом ожидается завершение навигации CSS).
+hide.bs.collapse	Это событие срабатывает во время вызова метода hide.
+hidden.bs.collapse
+ * */
+
 
 if (!$photo = $model->getPhoto()) {
     $photo = $this->getAssetManager()->getAssetUrl($this->assetBundles[\app\assets\programsAsset\ProgramsAsset::className()],
         $model->defaultPhoto);
 }
 
-$this->registerJs($truncateNameJS, $this::POS_READY);
+$this->registerJs($JS, $this::POS_READY);
 ?>
 <div class="panel">
     <div class="row">
@@ -79,7 +99,8 @@ $this->registerJs($truncateNameJS, $this::POS_READY);
                     <div class="adaptive-ib"><?= $fStrings['costFirstModule'] ?></div>
                     <div class="adaptive-ib"><?= $fStrings['costFirstModuleNotmativ'] ?></div>
                 </div>
-                <a class="btn btn-theme btn-block" href="#" data-toggle="collapse" data-target="#prog-detail-1">Подробнее</a>
+                <a id="more-button" class="btn btn-theme btn-block" href="#" data-toggle="collapse"
+                   data-target="#prog-detail-1">Подробнее</a>
             </div>
         </div>
         <div class="col-xs-12">
