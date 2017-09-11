@@ -49,14 +49,6 @@ $JS = <<<JS
  
 JS;
 
-/*
- show.bs.collapse	Это событие срабатывает во время вызова метода show.
-shown.bs.collapse	Это событие срабатывает, когда этот элемент отображается пользователю (при этом ожидается завершение навигации CSS).
-hide.bs.collapse	Это событие срабатывает во время вызова метода hide.
-hidden.bs.collapse
- * */
-
-
 if (!$photo = $model->getPhoto()) {
     $photo = $this->getAssetManager()->getAssetUrl($this->assetBundles[\app\assets\programsAsset\ProgramsAsset::className()],
         $model->defaultPhoto);
