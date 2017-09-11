@@ -70,6 +70,7 @@ class Payers extends \yii\db\ActiveRecord
     public function populateDirections()
     {
         $directionsArray = self::directionalityAttributes();
+        $this->directionality = '';
 
         foreach ($directionsArray as $index => $value) {
             if (!empty($this->$index)) {
