@@ -83,11 +83,9 @@ $this->registerJs($JS, $this::POS_READY);
                     <div><?= ($model->mainAddress ? $model->mainAddress->address : $model->organization->address_legal) ?></div>
                 </div>
                 <div class="card-info-paragraph card-info-paragraph_mh38">
-                    <div>Стоимость одного модуля</div>
-                    <div class="adaptive-ib"><?= $fStrings['costFirstModule'] ?></div>
-                    <div class="adaptive-ib"><?= $fStrings['costFirstModuleNotmativ'] ?></div>
+
                 </div>
-                <a id="more-button" class="btn btn-theme btn-block" href="#" data-toggle="collapse"
+                <a id="more-button" class="btn btn-theme" href="#" data-toggle="collapse"
                    data-target="#prog-detail-1">Подробнее</a>
             </div>
         </div>

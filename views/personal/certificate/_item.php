@@ -1,5 +1,6 @@
 <?php
 /* @var $this yii\web\View */
+
 /* @var $model \app\models\Programs */
 
 use yii\helpers\Html;
@@ -27,10 +28,10 @@ $fStrings['rateFull'] = Yii::t('app', 'Рейтинг программы: {ratin
 $fStrings['rateShort'] = Yii::t('app', '{rating}',
     ['rating' => Yii::$app->formatter->asInteger($model->rating)]);
 
-$fStrings['costFirstModule'] = Yii::t('app', 'Заявленная: {formattedValue}',
+$fStrings['costFirstModule'] = Yii::t('app', 'Заявленная: {formattedValue}*',
     ['formattedValue' => Yii::$app->formatter->asCurrency($model->getModules()->one()->price),]);
 
-$fStrings['costFirstModuleNotmativ'] = Yii::t('app', 'Нормативная: {formattedValue}',
+$fStrings['costFirstModuleNotmativ'] = Yii::t('app', 'Нормативная: {formattedValue}*',
     ['formattedValue' => Yii::$app->formatter->asCurrency($model->getModules()->one()->normative_price),]);
 ?>
 <div class="row">
@@ -70,8 +71,12 @@ $fStrings['costFirstModuleNotmativ'] = Yii::t('app', 'Нормативная: {f
                         </div>
                         <div class="card-info-paragraph card-info-paragraph_mh38">
                             <div>Стоимость одного модуля</div>
-                            <div class="adaptive-ib"><?= $fStrings['costFirstModule'] ?></div>
-                            <div class="adaptive-ib"><?= $fStrings['costFirstModuleNotmativ'] ?></div>
+                            <div class="adaptive-ib" data-placement="top" data-toggle="tooltip"
+                                 title="Стоимость модуля и нормативная стоимость модуля (НС) для программ с несколькими модулями указаны в таблице для первого модуля.">
+                                <?= $fStrings['costFirstModule'] ?>
+                            </div>
+                            <div class="adaptive-ib" data-placement="top" data-toggle="tooltip"
+                                 title="Стоимость модуля и нормативная стоимость модуля (НС) для программ с несколькими модулями указаны в таблице для первого модуля."><?= $fStrings['costFirstModuleNotmativ'] ?></div>
                         </div><?= \yii\helpers\Html::a('Просмотр', ['programs/view', 'id' => $model->id], ['class' => 'btn btn-theme btn-block']) ?>
                     </div>
                 </div>
@@ -79,3 +84,4 @@ $fStrings['costFirstModuleNotmativ'] = Yii::t('app', 'Нормативная: {f
         </div>
     </div>
 </div>
+* Стоимость модуля и нормативная стоимость модуля (НС) для программ с несколькими модулями указаны в таблице для первого модуля.
