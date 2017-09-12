@@ -75,7 +75,7 @@ class Help extends \yii\db\ActiveRecord
             'name' => 'Название',
             'body' => 'Текст',
             'applied_to' => 'Кто должен поставить "галочки" о прочтении',
-            'checked' => 'Раздел «<a href="/">' . $this->name . '</a>» прочитан. Специалисты, имеющие доступ в личный кабинет, учитывают его содержание при работе с системой.',
+            'checked' => 'Раздел «<a target="_blank" href="' . \yii\helpers\Url::to(['site/manual', 'id' => $this->id]) . '">' . $this->name . '</a>» прочитан. Специалисты, имеющие доступ в личный кабинет, учитывают его содержание при работе с системой.',
         ];
     }
 
@@ -119,18 +119,6 @@ class Help extends \yii\db\ActiveRecord
     {
         return $this->hasMany(User::className(), ['id' => 'user_id'])->viaTable('help_user_assignment', ['help_id' => 'id']);
     }
-
-    /*public static function getCountUncheckedMans($role)
-    {
-        $query = static::find()
-            ->joinWith('helpUserAssignments')
-            ->andWhere('`help_user_assignment`.user_id IS NULL')
-            ->andWhere('`help_user_assignment`.user_id != ' . Yii::$app->user->id)
-            ->andWhere(new Expression('FIND_IN_SET(:role, applied_to)'))
-            ->addParams([':role' => $role->name]);
-        print_r($query->prepare(Yii::$app->db->queryBuilder)->createCommand()->rawSql);exit;
-        return $query->count();
-    }*/
 
     public static function getCountUncheckedMans($role)
     {

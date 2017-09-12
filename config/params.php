@@ -1,6 +1,6 @@
 <?php
 return [
-    'adminEmail' => 'support@dev.pfdo.ru',
+    'adminEmail' => 'support@pfdo.ru',
     
     'directivity' => [
         'Техническая (робототехника)' => 'Техническая (робототехника)',
