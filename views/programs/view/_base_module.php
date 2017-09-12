@@ -71,29 +71,7 @@
                 'datestart:date',
                 'datestop:date',
                 'freePlaces',
-                ['class'    => 'yii\grid\ActionColumn',
-                 'header'   => 'Действия',
-                 'template' => '{permit}',
-                 'buttons'  =>
-                     [
-                         'permit' => function ($url, $model)
-                         {
-                             /** @var $identity \app\models\UserIdentity */
-                             $identity = Yii::$app->user->identity;
-                             if ($model->freePlaces && $identity->certificate->actual) {
 
-                                 return \yii\helpers\Html::a('Выбрать',
-                                     \yii\helpers\Url::to(['/contracts/request', 'groupId' => $model->id]),
-                                     [
-                                         'class' => 'btn btn-success',
-                                         'title' => 'Выбрать'
-                                     ]);
-                             }
-                             return false;
-                         },
-
-                     ]
-                ],
 
             ],
         ]); ?>
