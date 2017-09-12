@@ -308,10 +308,9 @@ class CertificatesController extends Controller
 
             if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
                 $model = $this->findModel($id);
-                if (!$model->hasContracts) {
-                    throw new ForbiddenHttpException('Невозможно совершить действие.');
+                if ($model->hasContracts) {
+                    throw new ForbiddenHttpException('Невозможно удалить сертификат, так как он уже заключил договоры.');
                 }
-
                 User::findOne($model['user_id'])->delete();
 
                 return $this->redirect(['/personal/payer-certificates']);

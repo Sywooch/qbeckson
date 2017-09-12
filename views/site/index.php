@@ -49,11 +49,11 @@ $this->title = 'Портал сопровождения персонифицир
                 <?php $form = ActiveForm::begin([
                     'id' => 'login-form',
                 ]); ?>
-                    <?= $form->field($model, 'username')->textInput(['autofocus' => true]) ?>
-                    <?= $form->field($model, 'password')->passwordInput() ?>
-                    <div class="form-group">
-                        <?= Html::submitButton('Войти', ['class' => 'btn btn-primary', 'name' => 'login-button']) ?>
-                    </div>
+                <?= $form->field($model, 'username')->textInput(['autofocus' => true]) ?>
+                <?= $form->field($model, 'password', ['template' => "{label}\n<div class=\"input-group\">{input}\n<span class=\"input-group-btn\"><button class=\"btn btn-default toggle-password\" type=\"button\"><span class=\"glyphicon glyphicon-eye-open\" aria-hidden=\"true\"></span></button></span></div>\n{hint}\n{error}"])->passwordInput() ?>
+                <div class="form-group">
+                    <?= Html::submitButton('Войти', ['class' => 'btn btn-primary', 'name' => 'login-button']) ?>
+                </div>
                 <?php ActiveForm::end(); ?>
                 <div class="panel panel-default">
                     <div class="panel-body">
@@ -76,7 +76,8 @@ $this->title = 'Портал сопровождения персонифицир
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть"><span
+                            aria-hidden="true">&times;</span></button>
                 <h4>Узнать, как получить сертификат</h4>
             </div>
             <div class="modal-body">
@@ -98,12 +99,15 @@ $this->title = 'Портал сопровождения персонифицир
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть"><span
+                            aria-hidden="true">&times;</span></button>
                 <h4>Заявка на регистрацию организации</h4>
             </div>
             <div class="modal-body">
-                <a href="<?= Url::to('/organization/request') ?>" class="btn btn-primary">Отправить заявку на регистрацию организации</a><br /><br />
-                <a href="<?= Url::to('/organization/check-status') ?>" class="btn btn-success">Проверить статус заявки</a>
+                <a href="<?= Url::to('/organization/request') ?>" class="btn btn-primary">Отправить заявку на
+                    регистрацию организации</a><br/><br/>
+                <a href="<?= Url::to('/organization/check-status') ?>" class="btn btn-success">Проверить статус
+                    заявки</a>
             </div>
         </div>
     </div>

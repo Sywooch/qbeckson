@@ -55,6 +55,17 @@ $(document).ready(function () {
     $(".show-additional-params").click(function(){
         $(".additional-params").slideToggle();
     });
+
+    $(".toggle-password").click(function(){
+        $obj = $("#loginform-password");
+        if ($obj.attr('type') === 'password') {
+            $obj.attr('type', 'text');
+            $(this).find('span').removeClass('glyphicon-eye-open').addClass('glyphicon-eye-close');
+        } else {
+            $obj.attr('type', 'password');
+            $(this).find('span').removeClass('glyphicon-eye-close').addClass('glyphicon-eye-open');
+        }
+    });
 });
 
 function selectGroup(obj) {
