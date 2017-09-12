@@ -74,6 +74,14 @@ function selectGroup(obj) {
     return true;
 }
 
+function showNextContainer(obj) {
+    if ($(obj).prop('checked') == true) {
+        $(obj).parents(".checkbox-container").next().show();
+    } else {
+        $(obj).parents(".checkbox-container").nextAll().hide();
+        $(obj).parents(".checkbox-container").nextAll().find('input').attr('checked', false);
+    }
+}
 
 function selectType(value) {
         if (value == 2) { 

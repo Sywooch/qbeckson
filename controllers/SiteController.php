@@ -74,7 +74,7 @@ class SiteController extends Controller
     {
         $userRoles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
         $searchModel = new HelpSearch(['role' => array_shift($userRoles)]);
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(null);
         $models = $dataProvider->models;
         foreach ($models as $model) {
             $model->scenario = Help::SCENARIO_CHECK;

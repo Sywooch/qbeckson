@@ -10,11 +10,18 @@ $this->title = $model->name;
 <div class="site-manual row">
     <div class="col-md-10 col-md-offset-1">
         <h3>Для продолжения работы в системе подтвердите, что Вы работаете в ней не вслепую</h3>
-        <?php $form = ActiveForm::begin(); ?>
+        <?php
+            $form = ActiveForm::begin();
+            $i = 0;
+        ?>
         <?php foreach ($models as $index => $model): ?>
-            <?= $form->field($model, "[$index]checked")->checkbox()->label($model->getAttributeLabel('checked')) ?>
+            <div class="checkbox-container" style="display: <?= (!$i++ || $model->checked > 0) ? 'block' : 'none'; ?>">
+                <?= $form->field($model, "[$index]checked")->checkbox(['onClick' => 'showNextContainer(this);'])->label($model->getAttributeLabel('checked')) ?>
+            </div>
         <?php endforeach; ?>
-        <?= Html::submitButton('Сохранить и продолжить', ['class' => 'btn btn-primary']) ?>
+        <div class="checkbox-container save-button" style="display: none;">
+            <?= Html::submitButton('Сохранить и продолжить', ['class' => 'btn btn-primary']) ?>
+        </div>
         <?php ActiveForm::end(); ?>
     </div>
 </div>
