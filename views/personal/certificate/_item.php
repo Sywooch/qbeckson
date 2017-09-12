@@ -34,8 +34,7 @@ $fStrings['costFirstModule'] = Yii::t('app', 'Заявленная: {formattedVa
 $fStrings['costFirstModuleNotmativ'] = Yii::t('app', 'Нормативная: {formattedValue}*',
     ['formattedValue' => Yii::$app->formatter->asCurrency($model->getModules()->one()->normative_price),]);
 ?>
-<div class="row">
-    <div class="col-xs-12">
+<div class="col-xs-12 col-lg-6">
         <div class="card">
             <div class="row">
                 <div class="col-xs-12 col-sm-4 col-md-4 col-lg-3">
@@ -83,5 +82,3 @@ $fStrings['costFirstModuleNotmativ'] = Yii::t('app', 'Нормативная: {f
             </div>
         </div>
     </div>
-</div>
-* Стоимость модуля и нормативная стоимость модуля (НС) для программ с несколькими модулями указаны в таблице для первого модуля.

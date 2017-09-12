@@ -150,7 +150,6 @@ $price = [
             ->where(['year' => 1])
             ->andWhere(['program_id' => $data->id])
             ->one();
-
         return $year['price'];
     },
     'searchFilter' => false,
@@ -166,7 +165,6 @@ $normativePrice = [
             ->where(['year' => 1])
             ->andWhere(['program_id' => $data->id])
             ->one();
-
         return $year['normative_price'];
     },
     'searchFilter' => false,
@@ -195,7 +193,8 @@ $columns = [
 ];
 
 
-if (Yii::$app->user->can('certificate')) : ?>
+?>
+
     <div class="row">
         <div class="col-md-12">
             <div class="pull-right">
@@ -204,7 +203,7 @@ if (Yii::$app->user->can('certificate')) : ?>
         </div>
     </div>
     <br>
-<?php endif; ?>
+
 <?= SearchFilter::widget([
     'model'  => $searchModel,
     'action' => ['personal/certificate-programs'],
@@ -216,9 +215,10 @@ if (Yii::$app->user->can('certificate')) : ?>
         null
     ),
     'role'   => UserIdentity::ROLE_CERTIFICATE,
-]);
-
+]); ?>
+<?php
 echo \yii\widgets\ListView::widget([
     'dataProvider' => $dataProvider,
-    'itemView'     => '_item'
+    'itemView'     => '_item',
+    'layout'       => "<div class='row'>{items}</div>\n{pager}"
 ]); ?>
