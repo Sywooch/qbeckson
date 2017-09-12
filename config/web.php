@@ -12,7 +12,7 @@ $config = [
     'language' => 'ru-RU',
     'sourceLanguage' => 'ru-RU',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log', 'manual'],
     'layout' => 'gos',
     'defaultRoute' => 'site/index',
     'components' => [
@@ -35,6 +35,9 @@ $config = [
         ],
         'coefficient' => [
             'class' => 'app\components\Coefficient',
+        ],
+        'manual' => [
+            'class' => 'app\components\Manual',
         ],
         'user' => [
             'identityClass' => 'app\models\UserIdentity',

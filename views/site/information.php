@@ -31,7 +31,7 @@ $this->title = 'Информация о получении сертификат�
             </p>
             <p>
                 <strong><?= $labels['rules']; ?>:</strong><br>
-                <?= $result->rules ?>
+                <?= nl2br($result->rules) ?>
             </p>
             <p>
                 <strong><?= $labels['statementFile']; ?>:</strong>
