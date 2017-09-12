@@ -9,7 +9,7 @@ $this->title = 'Для продолжения работы в системе п�
 ?>
 <div class="site-manual row">
     <div class="col-md-10 col-md-offset-1">
-        <h3><?= $this->title ?></h3>
+        <h3><?= $this->title ?></h3><br />
         <?php
             $form = ActiveForm::begin();
             $i = 0;
