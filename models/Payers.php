@@ -458,9 +458,8 @@ class Payers extends \yii\db\ActiveRecord
      */
     public function getDirectionalityCountByName($name)
     {
-        if ($result = array_search($name, $this::getDirtyAttributes())) {
-
-            return $this->{$result};
+        if ($result = array_search($name, $this::directionalityAttributes())) {
+            return $this->{$result . '_count'};
         }
 
         return null;

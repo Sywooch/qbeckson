@@ -3,6 +3,9 @@
 
 /* @var $model app\models\Programs */
 
+use yii\helpers\Html;
+use yii\helpers\Url;
+
 $fStrings = [];
 $fStrings['ageGroupShort'] = Yii::t('app', '{min}-{max} лет',
     ['min' => $model->age_group_min, 'max' => $model->age_group_max]);
@@ -79,11 +82,10 @@ $this->registerJs($JS, $this::POS_READY);
             </div>
             <div class="card-info">
                 <div class="card-info-paragraph card-info-paragraph_mh50">
-                    <div><?= $model->organization->name ?></div>
+                    <div><?= Html::a($model->organization->name, Url::to(['/organization/view',
+                            'id' => $model->organization->id]),
+                            ['target' => '_blank']); ?></div>
                     <div><?= ($model->mainAddress ? $model->mainAddress->address : $model->organization->address_legal) ?></div>
-                </div>
-                <div class="card-info-paragraph card-info-paragraph_mh38">
-
                 </div>
                 <a id="more-button" class="btn btn-theme" href="#" data-toggle="collapse"
                    data-target="#prog-detail-1">Подробнее</a>

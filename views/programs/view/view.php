@@ -12,8 +12,9 @@ if (Yii::$app->user->can('operators')) {
 $headTemplate = '_base_head';
 if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)) {
     $headTemplate = '_organisation_head';
+} elseif (Yii::$app->user->can(\app\models\UserIdentity::ROLE_OPERATOR)) {
+    $headTemplate = '_operator_head';
 }
-
 
 $this->params['breadcrumbs'][] = $this->title;
 ?>

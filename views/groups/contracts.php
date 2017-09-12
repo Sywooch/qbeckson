@@ -109,7 +109,12 @@ $this->params['breadcrumbs'][] = $this->title;
         echo "<h3>В этой группе нет обучающихся</h3>";
         $del = 1;
     }
-    echo Html::a('Назад', '/personal/organization-groups', ['class' => 'btn btn-primary']);
+    if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_OPERATOR)) {
+        echo Html::a('Назад', ['/programs/view', 'id' => $model->program_id], ['class' => 'btn btn-primary']);
+    } else {
+        echo Html::a('Назад', '/personal/organization-groups', ['class' => 'btn btn-primary']);
+    }
+
     echo Html::a('Редактировать',
         ($model->isActive ? ['/groups/update', 'id' => $model->id] : '#'),
         ['class' => 'btn btn-primary '.($model->isActive ? '' : 'disabled')]);
