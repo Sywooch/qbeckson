@@ -26,7 +26,7 @@ if (count($cooperate)) {
             if ($organization->actual == 0) {
                 $message = '<h4>Вы не можете записаться на программу. Действие организации приостановленно.</h4>';
             } else {
-                if ($activeContractsByProgramInPayer >= $limit_napr) {
+                if ($activeContractsByProgramInPayer >= $limit_napr && (Yii::trace($activeContractsByProgramInPayer)) || (Yii::trace($limit_napr))) {
                     $message = '<h4>Вы не можете записаться на программу. Достигнут максимальный предел числа одновременно оплачиваемых вашей уполномоченной организацией услуг по данной направленности.</h4>';
                 } else {
                     if (!$organization->existsFreePlace()) {
