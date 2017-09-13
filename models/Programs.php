@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\behaviors\ResizeImageAfterSaveBehavior;
 use app\models\statics\DirectoryProgramActivity;
 use app\models\statics\DirectoryProgramDirection;
 use trntv\filekit\behaviors\UploadBehavior;
@@ -66,18 +67,18 @@ use yii\helpers\ArrayHelper;
  * @property DirectoryProgramDirection|null  $direction
  * @property string                          $directivity
  * @property mixed                           $countMonths
- * @property mixed                      $organizationProgram
- * @property mixed                      $organizationWaitProgram
- * @property mixed                      $organizationNoProgram
- * @property Mun                        $municipality
- * @property mixed                      $cooperateProgram
- * @property mixed                      $countHours
- * @property string                     $commonActivities
- * @property ProgrammeModule[]          $modules
- * @property OrganizationAddress[]      $addresses
- * @property OrganizationAddress        $mainAddress
- * @property ProgramAddressAssignment[] $addressAssignments
- * @property ProgramAddressAssignment[] $mainAddressAssignments
+ * @property mixed                           $organizationProgram
+ * @property mixed                           $organizationWaitProgram
+ * @property mixed                           $organizationNoProgram
+ * @property Mun                             $municipality
+ * @property mixed                           $cooperateProgram
+ * @property mixed                           $countHours
+ * @property string                          $commonActivities
+ * @property ProgrammeModule[]               $modules
+ * @property OrganizationAddress[]           $addresses
+ * @property OrganizationAddress             $mainAddress
+ * @property ProgramAddressAssignment[]      $addressAssignments
+ * @property ProgramAddressAssignment[]      $mainAddressAssignments
  */
 class Programs extends ActiveRecord
 {
@@ -188,7 +189,12 @@ class Programs extends ActiveRecord
                 'pathAttribute'    => 'photo_path',
                 'baseUrlAttribute' => 'photo_base_url',
                 'attribute'        => 'programPhoto',
-            ]
+            ],
+            ['class'     => ResizeImageAfterSaveBehavior::className(),
+             'attribute' => 'photo_path',
+             'width'     => 210,
+             'height'    => 210,
+             'basePath'  => Yii::getAlias('@webroot/uploads')],
         ];
     }
 
@@ -216,9 +222,6 @@ class Programs extends ActiveRecord
         return $this->hasOne(OrganizationAddress::class, ['id' => 'organization_address_id'])
             ->via('mainAddressAssignments');
     }
-
-
-
 
 
     /**
