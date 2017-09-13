@@ -572,7 +572,7 @@ class Contracts extends ActiveRecord
             ->where('`payers`.operator_id = ' . Yii::$app->operator->identity->id);
 
         if (empty($params['status'])) {
-            $query->andWhere(['status' => 1]);
+            $query->andWhere(['status' => self::STATUS_ACTIVE]);
         } else {
             $query->andWhere(['status' => $params['status']]);
         }

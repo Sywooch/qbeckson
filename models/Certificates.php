@@ -200,6 +200,10 @@ class Certificates extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @deprecated
+     * @return int|string
+     */
     public function getCountActiveContracts()
     {
         $query = Contracts::find()
@@ -207,6 +211,25 @@ class Certificates extends \yii\db\ActiveRecord
             ->andWhere(['=', 'status', Contracts::STATUS_ACTIVE]);
 
         return $query->count();
+    }
+
+    public function getHasContracts()
+    {
+        if (Contracts::getCountContracts([
+            'status' => [
+                Contracts::STATUS_CREATED,
+                Contracts::STATUS_ACTIVE,
+                Contracts::STATUS_REFUSED,
+                Contracts::STATUS_ACCEPTED,
+                Contracts::STATUS_CLOSED,
+            ],
+            'certificateId' => $this->id,
+        ])
+        ) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

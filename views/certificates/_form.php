@@ -32,11 +32,12 @@ echo Dialog::widget(['options' => ['title' => 'Предупреждение',]])
             echo '</div>';
         } else {
             echo '<div class="well">';
-            echo $form->field($user, 'newlogin')->checkbox(['value' => 1, 'ng-model' => 'newlogin', 'label' => 'Изменить номер сертификата']);
-            echo '<div ng-show="newlogin">';
-            echo $form->field($user, 'username', ['enableAjaxValidation' => true])->textInput(['id' => 'login', 'maxlength' => true])->label('Номер сертификата');
-            /* echo Html::button('Сгенерировать номер сертификата', ['class' => 'btn btn-success', 'onclick' => '(function () { $("#login").val(Math.random().toString(36).slice(-8)); })();']); */
-            echo '</div>';
+            if ($model->canChangeGroup) {
+                echo $form->field($user, 'newlogin')->checkbox(['value' => 1, 'ng-model' => 'newlogin', 'label' => 'Изменить номер сертификата']);
+                echo '<div ng-show="newlogin">';
+                echo $form->field($user, 'username', ['enableAjaxValidation' => true])->textInput(['id' => 'login', 'maxlength' => true])->label('Номер сертификата');
+                echo '</div>';
+            }
 
             echo $form->field($user, 'newpass')->checkbox(['value' => 1, 'ng-model' => 'newpass']);
             echo '<div ng-show="newpass">';
@@ -69,7 +70,12 @@ echo Dialog::widget(['options' => ['title' => 'Предупреждение',]])
             $dataOptions[$index] = ['data-nominal' => $value];
         }
 
-        echo $form->field($model, 'possible_cert_group')->dropDownList(ArrayHelper::map(CertGroup::getPossibleList($payer->id), 'id', 'group'), ['options' => $dataOptions, 'prompt' => 'Выберите группу...', 'id' => 'possible-cert-group']);
+        echo $form->field($model, 'possible_cert_group')->dropDownList(ArrayHelper::map(CertGroup::getPossibleList($payer->id), 'id', 'group'), [
+            'options' => $dataOptions,
+            'prompt' => 'Выберите группу...',
+            'onChange' => 'selectGroup($("#select-cert-group"));',
+            'id' => 'possible-cert-group'
+        ]);
 
         echo $form->field($model, 'selectCertGroup')->radioList($model->getCertGroupTypes(), [
             'item' => function ($index, $label, $name, $checked, $value) use ($dataOptions) {

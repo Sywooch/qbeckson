@@ -62,7 +62,14 @@ class HelpSearch extends Help
         }
 
         if (!empty($this->role)) {
-            $query->andWhere(new Expression('FIND_IN_SET(:role, applied_to)'))
+            $subQuery = (new \yii\db\Query())
+                ->select('help_id')
+                ->from('help_user_assignment')
+                ->where(['user_id' => Yii::$app->user->id])
+                ->andWhere('`help_user_assignment`.help_id = `help`.id');
+
+            $query->andWhere(['not exists', $subQuery])
+                ->andWhere(new Expression('FIND_IN_SET(:role, applied_to)'))
                 ->addParams([':role' => $this->role->name]);
         }
 

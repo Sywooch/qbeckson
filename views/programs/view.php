@@ -880,7 +880,7 @@ $this->registerJs($js, $this::POS_END);
                                                         if (in_array($model['id'], $myprog)) {
                                                             echo '<p>Вы уже подали заявку на программу/заключили договор на обучение</p>';
                                                         } else {
-                                                            echo '<p>Вы можете записаться на программу. Выберете группу:</p>';
+                                                            echo '<p>Вы можете записаться на программу. Выберите группу:</p>';
 
                                                             echo GridView::widget([
                                                                 'dataProvider' => $GroupsProvider,

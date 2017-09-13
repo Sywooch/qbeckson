@@ -4,6 +4,7 @@ namespace app\models;
 
 use Yii;
 use app\behaviors\ArrayOrStringBehavior;
+use yii\db\Expression;
 
 /**
  * This is the model class for table "help".
@@ -60,7 +61,7 @@ class Help extends \yii\db\ActiveRecord
             [['body', 'applied_to'], 'string'],
             [['name'], 'string', 'max' => 255],
             ['checked', 'safe'],
-            ['checked', 'required', 'on' => self::SCENARIO_CHECK, 'requiredValue' => 1, 'message' => 'Отметьте, что вы прочли инструкцию.'],
+            ['checked', 'required', 'on' => self::SCENARIO_CHECK, 'requiredValue' => 1, 'message' => false],
         ];
     }
 
@@ -74,11 +75,12 @@ class Help extends \yii\db\ActiveRecord
             'name' => 'Название',
             'body' => 'Текст',
             'applied_to' => 'Кто должен поставить "галочки" о прочтении',
-            'checked' => 'Раздел «<a href="/">' . $this->name . '</a>» прочитан. Специалисты, имеющие доступ в личный кабинет, учитывают его содержание при работе с системой.',
+            'checked' => 'Раздел «<a target="_blank" href="' . \yii\helpers\Url::to(['site/manual', 'id' => $this->id]) . '">' . $this->name . '</a>» прочитан. Специалисты, имеющие доступ в личный кабинет, учитывают его содержание при работе с системой.',
         ];
     }
 
-    public function saveCheckes() {
+    public function saveCheckes()
+    {
         if ($this->checked > 0 && empty($this->user)) {
             $this->link('users', Yii::$app->user->identity);
         }
@@ -116,5 +118,21 @@ class Help extends \yii\db\ActiveRecord
     public function getUsers()
     {
         return $this->hasMany(User::className(), ['id' => 'user_id'])->viaTable('help_user_assignment', ['help_id' => 'id']);
+    }
+
+    public static function getCountUncheckedMans($role)
+    {
+        $subQuery = (new \yii\db\Query())
+            ->select('help_id')
+            ->from('help_user_assignment')
+            ->where(['user_id' => Yii::$app->user->id])
+            ->andWhere('`help_user_assignment`.help_id = `help`.id');
+
+        $query = static::find()
+            ->andWhere(['not exists', $subQuery])
+            ->andWhere(new Expression('FIND_IN_SET(:role, applied_to)'))
+            ->addParams([':role' => $role->name]);
+
+        return $query->count();
     }
 }

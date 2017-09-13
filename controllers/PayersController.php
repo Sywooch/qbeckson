@@ -156,8 +156,7 @@ class PayersController extends Controller
 
         if ($user->load(Yii::$app->request->post())) {
             if ($model->load(Yii::$app->request->post())) {
-                //$model->mun = implode(",", $model->mun);
-                $model->directionality = $model->directionality_1rob . "," . $model->directionality_1 . "," . $model->directionality_2 . "," . $model->directionality_3 . "," . $model->directionality_4 . "," . $model->directionality_5 . "," . $model->directionality_6;
+                $model->populateDirections();
 
                 $model->save();
             }

@@ -35,32 +35,32 @@
 
     <p>Я ознакомлен с условиями договора-оферты №<?= $model->number ?>, представленной в сети Интернет по адресу <?= $model->fullUrl ?> и полностью и безоговорочно принимаю их.</p>
 
-<pre style="border: 0; background-color: transparent;">
+<pre style="border: 0; background-color: transparent; font-size: 11px;">
 ___________________/______________________ /
      подпись             расшифровка
 </pre>
 
     <p>С Уставом, лицензией и образовательной программой «<?= $model->organization->name ?>» ознакомлен.</p>
 
-    <pre style="border: 0; background-color: transparent;">
+    <pre style="border: 0; background-color: transparent; font-size: 11px;">
 ___________________/______________________ /
      подпись             расшифровка
 </pre>
 
     <p>Даю согласие на обработку предоставленных в настоящем заявлении моих персональных данных и персональных данных моего ребенка в порядке, установленном Федеральным законом от 27 июля 2006 г. №152-ФЗ «О персональных данных».</p>
 
-<pre style="border: 0; background-color: transparent;">
+<pre style="border: 0; background-color: transparent; font-size: 11px;">
 ___________________/______________________ /
      подпись             расшифровка
 </pre>
 
     <table>
         <tr>
-            <td>
+            <td style="font-size: 11px;">
                 <?= Yii::$app->formatter->asDate((strtotime($model->start_edu_contract) < time()) ? $model->start_edu_contract : time()) ?>
             </td>
             <td width="55%">
-<pre style="border: 0; background-color: transparent;">
+<pre style="border: 0; background-color: transparent; font-size: 11px;">
 ___________________/______________________ /
      подпись             расшифровка
 </pre>
