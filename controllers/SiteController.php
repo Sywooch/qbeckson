@@ -70,24 +70,6 @@ class SiteController extends Controller
         ]);
     }
 
-    public function actionTestMail()
-    {
-        /*$message = "Line 1\r\nLine 2\r\nLine 3";
-        $message = wordwrap($message, 70, "\r\n");
-        var_dump(mail('nauly@mail.ru', 'My Subject', $message));
-        exit;*/
-
-
-        var_dump(Yii::$app->mailer->compose()
-            ->setTo('nauly@mail.ru')
-            ->setFrom(['support@pfdo.ru' => 'PFDO'])
-            ->setSubject('Сообщение с pfdo')
-            ->setTextBody('TEST mail from pfdo')
-            ->setHtmlBody('<b>HTML content</b>')
-            ->send());
-        exit;
-    }
-
     public function actionManualsRequired()
     {
         $userRoles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
