@@ -150,6 +150,7 @@ $price = [
             ->where(['year' => 1])
             ->andWhere(['program_id' => $data->id])
             ->one();
+
         return $year['price'];
     },
     'searchFilter' => false,
@@ -165,6 +166,7 @@ $normativePrice = [
             ->where(['year' => 1])
             ->andWhere(['program_id' => $data->id])
             ->one();
+
         return $year['normative_price'];
     },
     'searchFilter' => false,
@@ -194,7 +196,6 @@ $columns = [
 
 
 ?>
-
     <div class="row">
         <div class="col-md-12">
             <div class="pull-right">
@@ -220,5 +221,26 @@ $columns = [
 echo \yii\widgets\ListView::widget([
     'dataProvider' => $dataProvider,
     'itemView'     => '_item',
-    'layout'       => "<div class='row'>{items}</div>\n{pager}"
+    'layout'       => '{items}{pager}',
+    'itemOptions'  => ['class' => 'col-xs-12 col-lg-6'],
+    'beforeItem'   => function ($model, $key, $index, $list)
+    {
+        if ($index === 0) {
+            return '<div class="row">';
+        } elseif ((($index + 2) % 2 === 0)) {
+            return '<div class="row">';
+        }
+
+        return '';
+    },
+    'afterItem'    => function ($model, $key, $index, $list)
+    {
+        /** @var $list \yii\widgets\ListView */
+        if ((($index + 1) % 2 === 0 && ($index !== 0) || $index >= $list->dataProvider->getCount() - 1)) {
+            return '</div>';
+        }
+
+        return '';
+    }
+
 ]); ?>

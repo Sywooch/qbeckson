@@ -778,4 +778,28 @@ class Programs extends ActiveRecord
         return null;
     }
 
+    /**
+     * доступна ли данная программа для зачисления указанному пользователю
+     *
+     * @param $certificateUser UserIdentity
+     *
+     * @return boolean
+     */
+    public function isAvailable(UserIdentity $certificateUser)
+    {
+        return $this->getGroups()->exists()  //есть группы
+            && Cooperate::find()->where([
+                Cooperate::tableName() . '.payer_id'        => $certificateUser->getCertificate()->select('payer_id'),
+                Cooperate::tableName() . '.organization_id' => $this->organization_id])->exists()   //есть соглашение с уполномоченой организацией
+            && $this->getModules()->andWhere([\app\models\ProgrammeModule::tableName() . '.open' => 1])->exists() //есть модули с открытым зачислением
+            && (!(($certificateUser->certificate->balance < 1 && $certificateUser->certificate->payer->certificate_can_use_future_balance < 1) || ($certificateUser->certificate->balance < 1 && $certificateUser->certificate->payer->certificate_can_use_future_balance > 0 && $certificateUser->certificate->balance_f < 1))) // есть средства на счету сертификата
+            && $this->organization->actual // Организация программы действует
+            && ($certificateUser->certificate->payer->getActiveContractsByProgram($this->id)->count()
+                <= $certificateUser->certificate->payer->getDirectionalityCountByName($this->directivity))// Не достигнут максимальный предел числа одновременно оплачиваемых вашей уполномоченной организацией услуг по данной направленности
+            && $this->organization->existsFreePlace() //Есть место в организации
+            && $this->existsFreePlace() //В программе есть место
+            && !$certificateUser->certificate->getActiveContractsByProgram($this->id)->exists(); //Нет заключенных договоров на программу
+    }
+
+
 }
