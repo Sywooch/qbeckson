@@ -55,6 +55,17 @@ $(document).ready(function () {
     $(".show-additional-params").click(function(){
         $(".additional-params").slideToggle();
     });
+
+    $(".toggle-password").click(function(){
+        $obj = $("#loginform-password");
+        if ($obj.attr('type') === 'password') {
+            $obj.attr('type', 'text');
+            $(this).find('span').removeClass('glyphicon-eye-open').addClass('glyphicon-eye-close');
+        } else {
+            $obj.attr('type', 'password');
+            $(this).find('span').removeClass('glyphicon-eye-close').addClass('glyphicon-eye-open');
+        }
+    });
 });
 
 function selectGroup(obj) {
@@ -74,6 +85,14 @@ function selectGroup(obj) {
     return true;
 }
 
+function showNextContainer(obj) {
+    if ($(obj).prop('checked') == true) {
+        $(obj).parents(".checkbox-container").next().show();
+    } else {
+        $(obj).parents(".checkbox-container").nextAll().hide();
+        $(obj).parents(".checkbox-container").nextAll().find('input').attr('checked', false);
+    }
+}
 
 function selectType(value) {
         if (value == 2) { 

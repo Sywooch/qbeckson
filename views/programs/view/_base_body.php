@@ -25,6 +25,7 @@ echo \yii\bootstrap\Tabs::widget([
         return $result;
     }, $model->modules),
     'itemOptions' => ['class' => 'program-info-view'],
+    'navType'     => 'new-nav-tabs'
 ]);
 
 

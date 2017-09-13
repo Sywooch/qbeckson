@@ -75,7 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         if (Yii::$app->user->can('payer')) {
             echo '<div class="pull-right">';
-            if (PermissionHelper::checkMonitorUrl('/certificates/delete')) {
+            if (!$model->hasContracts && PermissionHelper::checkMonitorUrl('/certificates/delete')) {
                 echo Html::a('Удалить', Url::to(['/certificates/delete', 'id' => $model->id]), ['class' => 'btn btn-danger',
                     'data' => [
                         'confirm' => 'Уверены, что хотите удалить сертификат?',

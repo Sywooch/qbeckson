@@ -285,8 +285,10 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
             'pjax' => true,
             'summary' => false,
             'rowOptions' => function ($model, $index, $widget, $grid) {
-                if ($model->wait_termnate === 1) {
+                if ($model->wait_termnate > 0) {
                     return ['class' => 'danger'];
+                } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
+                    return ['class' => 'warning'];
                 }
             },
             'columns' => $preparedActiveColumns,
@@ -312,6 +314,8 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
             'rowOptions' => function ($model, $index, $widget, $grid) {
                 if ($model->wait_termnate === 1) {
                     return ['class' => 'danger'];
+                } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
+                    return ['class' => 'warning'];
                 }
             },
             'pjax' => true,
@@ -337,6 +341,13 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
             'dataProvider' => $pendingContractsProvider,
             'filterModel' => null,
             'pjax' => true,
+            'rowOptions' => function ($model, $index, $widget, $grid) {
+                if ($model->wait_termnate === 1) {
+                    return ['class' => 'danger'];
+                } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
+                    return ['class' => 'warning'];
+                }
+            },
             'summary' => false,
             'columns' => $preparedPendingColumns,
         ]); ?>

@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\behaviors\ResizeImageAfterSaveBehavior;
 use app\models\statics\DirectoryProgramActivity;
 use app\models\statics\DirectoryProgramDirection;
 use trntv\filekit\behaviors\UploadBehavior;
@@ -66,18 +67,18 @@ use yii\helpers\ArrayHelper;
  * @property DirectoryProgramDirection|null  $direction
  * @property string                          $directivity
  * @property mixed                           $countMonths
- * @property mixed                      $organizationProgram
- * @property mixed                      $organizationWaitProgram
- * @property mixed                      $organizationNoProgram
- * @property Mun                        $municipality
- * @property mixed                      $cooperateProgram
- * @property mixed                      $countHours
- * @property string                     $commonActivities
- * @property ProgrammeModule[]          $modules
- * @property OrganizationAddress[]      $addresses
- * @property OrganizationAddress        $mainAddress
- * @property ProgramAddressAssignment[] $addressAssignments
- * @property ProgramAddressAssignment[] $mainAddressAssignments
+ * @property mixed                           $organizationProgram
+ * @property mixed                           $organizationWaitProgram
+ * @property mixed                           $organizationNoProgram
+ * @property Mun                             $municipality
+ * @property mixed                           $cooperateProgram
+ * @property mixed                           $countHours
+ * @property string                          $commonActivities
+ * @property ProgrammeModule[]               $modules
+ * @property OrganizationAddress[]           $addresses
+ * @property OrganizationAddress             $mainAddress
+ * @property ProgramAddressAssignment[]      $addressAssignments
+ * @property ProgramAddressAssignment[]      $mainAddressAssignments
  */
 class Programs extends ActiveRecord
 {
@@ -188,7 +189,12 @@ class Programs extends ActiveRecord
                 'pathAttribute'    => 'photo_path',
                 'baseUrlAttribute' => 'photo_base_url',
                 'attribute'        => 'programPhoto',
-            ]
+            ],
+            ['class'     => ResizeImageAfterSaveBehavior::className(),
+             'attribute' => 'photo_path',
+             'width'     => 210,
+             'height'    => 210,
+             'basePath'  => Yii::getAlias('@webroot/uploads')],
         ];
     }
 
@@ -216,9 +222,6 @@ class Programs extends ActiveRecord
         return $this->hasOne(OrganizationAddress::class, ['id' => 'organization_address_id'])
             ->via('mainAddressAssignments');
     }
-
-
-
 
 
     /**
@@ -777,5 +780,29 @@ class Programs extends ActiveRecord
 
         return null;
     }
+
+    /**
+     * доступна ли данная программа для зачисления указанному пользователю
+     *
+     * @param $certificateUser UserIdentity
+     *
+     * @return boolean
+     */
+    public function isAvailable(UserIdentity $certificateUser)
+    {
+        return $this->getGroups()->exists()  //есть группы
+            && Cooperate::find()->where([
+                Cooperate::tableName() . '.payer_id'        => $certificateUser->getCertificate()->select('payer_id'),
+                Cooperate::tableName() . '.organization_id' => $this->organization_id])->exists()   //есть соглашение с уполномоченой организацией
+            && $this->getModules()->andWhere([\app\models\ProgrammeModule::tableName() . '.open' => 1])->exists() //есть модули с открытым зачислением
+            && (!(($certificateUser->certificate->balance < 1 && $certificateUser->certificate->payer->certificate_can_use_future_balance < 1) || ($certificateUser->certificate->balance < 1 && $certificateUser->certificate->payer->certificate_can_use_future_balance > 0 && $certificateUser->certificate->balance_f < 1))) // есть средства на счету сертификата
+            && $this->organization->actual // Организация программы действует
+            && ($certificateUser->certificate->payer->getActiveContractsByProgram($this->id)->count()
+                <= $certificateUser->certificate->payer->getDirectionalityCountByName($this->directivity))// Не достигнут максимальный предел числа одновременно оплачиваемых вашей уполномоченной организацией услуг по данной направленности
+            && $this->organization->existsFreePlace() //Есть место в организации
+            && $this->existsFreePlace() //В программе есть место
+            && !$certificateUser->certificate->getActiveContractsByProgram($this->id)->exists(); //Нет заключенных договоров на программу
+    }
+
 
 }

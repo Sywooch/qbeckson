@@ -6,6 +6,7 @@ use app\models\forms\CertificateVerificationForm;
 use app\traits\AjaxValidationTrait;
 use Yii;
 use yii\helpers\Url;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -170,6 +171,8 @@ class CertificatesController extends Controller
                             $password = $user->password;
                             $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
                         }
+                    } else {
+                        unset($user->password);
                     }
 
                     if ($user->save()) {
@@ -305,12 +308,14 @@ class CertificatesController extends Controller
 
             if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
                 $model = $this->findModel($id);
-
+                if ($model->hasContracts) {
+                    throw new ForbiddenHttpException('Невозможно удалить сертификат, так как он уже заключил договоры.');
+                }
                 User::findOne($model['user_id'])->delete();
 
                 return $this->redirect(['/personal/payer-certificates']);
             } else {
-                Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
+                Yii::$app->session->setFlash('error', 'Неправильно введен пароль.');
 
                 return $this->redirect(['/personal/payer-certificates']);
             }

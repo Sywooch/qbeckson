@@ -14,6 +14,8 @@ if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)) {
     $headTemplate = '_organisation_head';
 } elseif (Yii::$app->user->can(\app\models\UserIdentity::ROLE_OPERATOR)) {
     $headTemplate = '_operator_head';
+} elseif (Yii::$app->user->can(\app\models\UserIdentity::ROLE_CERTIFICATE)) {
+    $headTemplate = '_certificate_head';
 }
 
 $this->params['breadcrumbs'][] = $this->title;
