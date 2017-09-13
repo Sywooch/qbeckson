@@ -2,22 +2,18 @@
 
 namespace app\controllers;
 
-use app\models\forms\CertificateVerificationForm;
+use app\models\Certificates;
+use app\models\Payers;
+use app\models\User;
 use app\traits\AjaxValidationTrait;
+use kartik\mpdf\Pdf;
 use Yii;
-use yii\helpers\Url;
-use yii\web\BadRequestHttpException;
+use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
-use app\models\Certificates;
-use app\models\Organization;
-use app\models\User;
-use app\models\Payers;
-use kartik\mpdf\Pdf;
 
 /**
  * CertificatesController implements the CRUD actions for Certificates model.

@@ -1,13 +1,13 @@
 <?php
 
-use yii\grid\ActionColumn;
 use app\helpers\GridviewHelper;
 use app\models\Mun;
 use app\models\UserIdentity;
 use app\widgets\SearchFilter;
+use yii\grid\ActionColumn;
+use yii\grid\GridView;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $searchAppealed app\models\search\CooperateSearch */
@@ -193,21 +193,21 @@ $columnsNonActive = [
                 <p class="lead">Показаны результаты для плательщика: <?= $searchActive->payerName; ?></p>
             <?php endif; ?>
             <?= SearchFilter::widget([
-                'model' => $searchNew,
+                'model'  => $searchNew,
                 'action' => ['personal/operator-cooperates#panel3'],
-                'data' => GridviewHelper::prepareColumns(
+                'data'   => GridviewHelper::prepareColumns(
                     'cooperate',
                     $columnsNonActive,
                     null,
                     'searchFilter',
                     null
                 ),
-                'role' => UserIdentity::ROLE_OPERATOR,
+                'role'   => UserIdentity::ROLE_OPERATOR,
             ]); ?>
             <?= GridView::widget([
                 'dataProvider' => $newProvider,
-                'filterModel' => $searchNew,
-                'columns' => GridviewHelper::prepareColumns('cooperate', $columnsNonActive),
+                'filterModel'  => $searchNew,
+                'columns'      => GridviewHelper::prepareColumns('cooperate', $columnsNonActive),
             ]); ?>
         </div>
         <div id="panel4" class="tab-pane fade">
@@ -215,21 +215,21 @@ $columnsNonActive = [
                 <p class="lead">Показаны результаты для плательщика: <?= $searchActive->payerName; ?></p>
             <?php endif; ?>
             <?= SearchFilter::widget([
-                'model' => $searchConfirmed,
+                'model'  => $searchConfirmed,
                 'action' => ['personal/operator-cooperates#panel4'],
-                'data' => GridviewHelper::prepareColumns(
+                'data'   => GridviewHelper::prepareColumns(
                     'cooperate',
                     $columnsNonActive,
                     null,
                     'searchFilter',
                     null
                 ),
-                'role' => UserIdentity::ROLE_OPERATOR,
+                'role'   => UserIdentity::ROLE_OPERATOR,
             ]); ?>
             <?= GridView::widget([
                 'dataProvider' => $confirmedProvider,
-                'filterModel' => $searchConfirmed,
-                'columns' => GridviewHelper::prepareColumns('cooperate', $columnsNonActive),
+                'filterModel'  => $searchConfirmed,
+                'columns'      => GridviewHelper::prepareColumns('cooperate', $columnsNonActive),
             ]); ?>
         </div>
     </div>

@@ -109,9 +109,9 @@ class SelectGroupForm extends Model
         $payerContractsCount = Contracts::find()
             ->innerJoinWith('program')
             ->andWhere([
-                'payer_id' => $this->getCertificate()->payer_id,
+                'payer_id'                => $this->getCertificate()->payer_id,
                 '`programs`.direction_id' => $program->direction_id,
-                'status' => [0, 1, 3]
+                'status'                  => [0, 1, 3]
             ])
             ->count();
 

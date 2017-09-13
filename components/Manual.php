@@ -2,9 +2,9 @@
 
 namespace app\components;
 
+use app\models\Help;
 use Yii;
 use yii\base\Component;
-use app\models\Help;
 
 class Manual extends Component
 {
