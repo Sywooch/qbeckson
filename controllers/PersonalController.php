@@ -2,40 +2,40 @@
 
 namespace app\controllers;
 
-use app\models\Cooperate;
-use app\models\forms\OrganizationSettingsForm;
-use app\models\Mun;
-use app\models\OrganizationContractSettings;
-use app\models\search\ContractsSearch;
-use app\models\search\CooperateSearch;
-use app\models\search\InvoicesSearch;
-use app\models\OrganizationPayerAssignment;
-use app\models\UserIdentity;
-use Yii;
-use app\models\Programs;
-use app\models\search\ProgramsSearch;
-use app\models\Organization;
-use app\models\search\OrganizationSearch;
+use app\models\Certificates;
 use app\models\Contracts;
-use app\models\ContractsoSearch;
-use app\models\ContractsnSearch;
 use app\models\Contracts2Search;
 use app\models\Contracts3Search;
 use app\models\Contracts5Search;
-use app\models\PayersSearch;
-use app\models\ProgramsclearSearch;
+use app\models\ContractsnSearch;
 use app\models\ContractsOrgclearSearch;
+use app\models\ContractsoSearch;
 use app\models\ContractsPayerclearSearch;
-use app\models\Certificates;
-use app\models\search\CertificatesSearch;
-use app\models\GroupsSearch;
+use app\models\Cooperate;
 use app\models\FavoritesSearch;
-use app\models\ProgrammeModuleSearch;
+use app\models\forms\OrganizationSettingsForm;
+use app\models\GroupsSearch;
+use app\models\Mun;
+use app\models\Organization;
+use app\models\OrganizationContractSettings;
+use app\models\OrganizationPayerAssignment;
+use app\models\PayersSearch;
 use app\models\PreviusSearch;
+use app\models\ProgrammeModuleSearch;
+use app\models\Programs;
+use app\models\ProgramsclearSearch;
+use app\models\search\CertificatesSearch;
+use app\models\search\ContractsSearch;
+use app\models\search\CooperateSearch;
+use app\models\search\InvoicesSearch;
+use app\models\search\OrganizationSearch;
+use app\models\search\ProgramsSearch;
+use app\models\UserIdentity;
+use Yii;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
-use yii\web\Controller;
 use yii\web\BadRequestHttpException;
+use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -66,37 +66,37 @@ class PersonalController extends Controller
     public function actionOperatorCooperates()
     {
         $searchActive = new CooperateSearch([
-            'status' => Cooperate::STATUS_ACTIVE,
+            'status'    => Cooperate::STATUS_ACTIVE,
             'modelName' => 'SearchActive',
         ]);
         $activeProvider = $searchActive->search(Yii::$app->request->queryParams);
 
         $searchAppealed = new CooperateSearch([
-            'status' => Cooperate::STATUS_APPEALED,
+            'status'    => Cooperate::STATUS_APPEALED,
             'modelName' => 'SearchAppealed',
         ]);
         $appealedProvider = $searchAppealed->search(Yii::$app->request->queryParams);
 
         $searchNew = new CooperateSearch([
-            'status' => Cooperate::STATUS_NEW,
+            'status'    => Cooperate::STATUS_NEW,
             'modelName' => 'SearchNew',
         ]);
         $newProvider = $searchNew->search(Yii::$app->request->queryParams);
 
         $searchConfirmed = new CooperateSearch([
-            'status' => Cooperate::STATUS_CONFIRMED,
+            'status'    => Cooperate::STATUS_CONFIRMED,
             'modelName' => 'SearchConfirmed',
         ]);
         $confirmedProvider = $searchConfirmed->search(Yii::$app->request->queryParams);
 
         return $this->render('operator-cooperates', [
-            'searchActive' => $searchActive,
-            'activeProvider' => $activeProvider,
-            'searchAppealed' => $searchAppealed,
-            'appealedProvider' => $appealedProvider,
-            'searchNew' => $searchNew,
-            'newProvider' => $newProvider,
-            'searchConfirmed' => $searchConfirmed,
+            'searchActive'      => $searchActive,
+            'activeProvider'    => $activeProvider,
+            'searchAppealed'    => $searchAppealed,
+            'appealedProvider'  => $appealedProvider,
+            'searchNew'         => $searchNew,
+            'newProvider'       => $newProvider,
+            'searchConfirmed'   => $searchConfirmed,
             'confirmedProvider' => $confirmedProvider,
         ]);
     }

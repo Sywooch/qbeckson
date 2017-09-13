@@ -5,12 +5,12 @@ use app\models\Contracts;
 use app\models\Mun;
 use app\models\UserIdentity;
 use app\widgets\SearchFilter;
+use kartik\export\ExportMenu;
+use kartik\grid\GridView;
 use yii\grid\ActionColumn;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use kartik\export\ExportMenu;
-use kartik\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $activeContractsProvider \yii\data\ActiveDataProvider */
@@ -365,17 +365,18 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
         ]); ?>
         <?= GridView::widget([
             'dataProvider' => $pendingContractsProvider,
-            'filterModel' => null,
-            'rowOptions' => function ($model, $index, $widget, $grid) {
+            'filterModel'  => null,
+            'rowOptions'   => function ($model, $index, $widget, $grid)
+            {
                 if ($model->wait_termnate === 1) {
                     return ['class' => 'danger'];
                 } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
                     return ['class' => 'warning'];
                 }
             },
-            'pjax' => true,
-            'summary' => false,
-            'columns' => $preparedPendingColumns,
+            'pjax'         => true,
+            'summary'      => false,
+            'columns'      => $preparedPendingColumns,
         ]); ?>
         <p class="lead">Экспорт данных:</p>
         <?= ExportMenu::widget([

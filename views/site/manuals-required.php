@@ -1,7 +1,7 @@
 <?php
 
-use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
+use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 
@@ -9,10 +9,10 @@ $this->title = 'Для продолжения работы в системе п�
 ?>
 <div class="site-manual row">
     <div class="col-md-10 col-md-offset-1">
-        <h3><?= $this->title ?></h3><br />
+        <h3><?= $this->title ?></h3><br/>
         <?php
-            $form = ActiveForm::begin();
-            $i = 0;
+        $form = ActiveForm::begin();
+        $i = 0;
         ?>
         <?php foreach ($models as $index => $model): ?>
             <div class="checkbox-container" style="display: <?= (!$i++ || $model->checked > 0) ? 'block' : 'none'; ?>">

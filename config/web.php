@@ -1,84 +1,85 @@
 <?php
+
+use app\components\KeyStorage;
 use app\components\LocalFlysystemBuilder;
 use developeruz\db_rbac\behaviors\AccessBehavior;
 use kartik\datecontrol\Module;
 use trntv\filekit\Storage;
-use app\components\KeyStorage;
 
 $params = require(__DIR__ . '/params.php');
 
 $config = [
-    'id' => 'basic',
-    'language' => 'ru-RU',
+    'id'             => 'basic',
+    'language'       => 'ru-RU',
     'sourceLanguage' => 'ru-RU',
-    'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log', 'manual'],
-    'layout' => 'gos',
-    'defaultRoute' => 'site/index',
-    'components' => [
-        'keyStorage' => [
+    'basePath'       => dirname(__DIR__),
+    'bootstrap'      => ['log', 'manual'],
+    'layout'         => 'gos',
+    'defaultRoute'   => 'site/index',
+    'components'     => [
+        'keyStorage'    => [
             'class' => KeyStorage::class
         ],
         'yandexMapsApi' => [
             'class' => 'mirocow\yandexmaps\Api',
         ],
-        'request' => [
+        'request'       => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => 'BiX8pOuGw7eu1QX9cP19jptOtNg9vYA7',
+            'cookieValidationKey'  => 'BiX8pOuGw7eu1QX9cP19jptOtNg9vYA7',
             'enableCsrfValidation' => false,
         ],
-        'cache' => [
+        'cache'         => [
             'class' => 'yii\caching\FileCache',
         ],
-        'operator' => [
+        'operator'      => [
             'class' => 'app\components\Operator',
         ],
-        'coefficient' => [
+        'coefficient'   => [
             'class' => 'app\components\Coefficient',
         ],
-        'manual' => [
+        'manual'        => [
             'class' => 'app\components\Manual',
         ],
-        'user' => [
-            'identityClass' => 'app\models\UserIdentity',
+        'user'          => [
+            'identityClass'   => 'app\models\UserIdentity',
             'enableAutoLogin' => true,
-            'loginUrl'=>['/site/index'],
+            'loginUrl'        => ['/site/index'],
         ],
-        'errorHandler' => [
+        'errorHandler'  => [
             'errorAction' => 'site/error',
         ],
-        'mailer' => [
-            'class' => 'yii\swiftmailer\Mailer',
+        'mailer'        => [
+            'class'            => 'yii\swiftmailer\Mailer',
             'useFileTransport' => false,
-            'transport' => [
-                'class' => 'Swift_SmtpTransport',
-                'host' => 'smtp.mail.ru',
-                'username' => 'noreply.pfdo@mail.ru',
-                'password' => 'qwerty123456',
-                'port' => '465',
+            'transport'        => [
+                'class'      => 'Swift_SmtpTransport',
+                'host'       => 'smtp.mail.ru',
+                'username'   => 'noreply.pfdo@mail.ru',
+                'password'   => 'qwerty123456',
+                'port'       => '465',
                 'encryption' => 'ssl',
             ],
         ],
-        'log' => [
+        'log'           => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
-            'targets' => [
+            'targets'    => [
                 [
-                    'class' => 'yii\log\FileTarget',
+                    'class'  => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
                 ],
             ],
         ],
-        'db' => require(__DIR__ . '/db.php'),
-        'urlManager' => [
-            'enablePrettyUrl' => true,
-            'showScriptName' => false,
+        'db'            => require(__DIR__ . '/db.php'),
+        'urlManager'    => [
+            'enablePrettyUrl'     => true,
+            'showScriptName'      => false,
             'enableStrictParsing' => false,
-            'rules' => [
-                '<module:\w+>/<controller:\w+>/<action:(\w|-)+>' => '<module>/<controller>/<action>',
+            'rules'               => [
+                '<module:\w+>/<controller:\w+>/<action:(\w|-)+>'          => '<module>/<controller>/<action>',
                 '<module:\w+>/<controller:\w+>/<action:(\w|-)+>/<id:\d+>' => '<module>/<controller>/<action>',
             ],
         ],
-        'authManager' => [
+        'authManager'   => [
             'class' => 'yii\rbac\DbManager',
         ],
         'formatter'     => [
@@ -99,54 +100,54 @@ $config = [
                 NumberFormatter::CURRENCY_SYMBOL => '&#8381;',
             ],
         ],
-        'fileStorage' => [
-            'class' => Storage::class,
-            'baseUrl' => '@web/uploads',
+        'fileStorage'   => [
+            'class'      => Storage::class,
+            'baseUrl'    => '@web/uploads',
             'filesystem' => [
                 'class' => LocalFlysystemBuilder::class,
-                'path' => '@webroot/uploads'
+                'path'  => '@webroot/uploads'
             ],
         ],
     ],
-    'modules' => [
-        'permit' => [
-            'class' => 'developeruz\db_rbac\Yii2DbRbac',
+    'modules'        => [
+        'permit'      => [
+            'class'  => 'developeruz\db_rbac\Yii2DbRbac',
             'params' => [
                 'userClass' => 'app\models\UserIdentity'
             ]
         ],
-        'gridview' => [
+        'gridview'    => [
             'class' => '\kartik\grid\Module'
         ],
         'datecontrol' => [
             'class' => 'kartik\datecontrol\Module',
 
             'displaySettings' => [
-                Module::FORMAT_DATE => 'php:d.m.Y',
-                Module::FORMAT_TIME => 'hh:mm:ss a',
+                Module::FORMAT_DATE     => 'php:d.m.Y',
+                Module::FORMAT_TIME     => 'hh:mm:ss a',
                 Module::FORMAT_DATETIME => 'dd-MM-yyyy hh:mm:ss a',
             ],
 
             'saveSettings' => [
-                Module::FORMAT_DATE => 'php:Y-m-d',
-                Module::FORMAT_TIME => 'php:H:i:s',
+                Module::FORMAT_DATE     => 'php:Y-m-d',
+                Module::FORMAT_TIME     => 'php:H:i:s',
                 Module::FORMAT_DATETIME => 'php:Y-m-d H:i:s',
             ],
 
             'autoWidget' => true,
 
             'autoWidgetSettings' => [
-                Module::FORMAT_DATE => ['type' => 2, 'pluginOptions' => ['autoclose' => true]], // example
+                Module::FORMAT_DATE     => ['type' => 2, 'pluginOptions' => ['autoclose' => true]], // example
                 Module::FORMAT_DATETIME => [], // setup if needed
-                Module::FORMAT_TIME => [], // setup if needed
+                Module::FORMAT_TIME     => [], // setup if needed
             ],
 
             'widgetSettings' => [
                 Module::FORMAT_DATE => [
-                    'class' => 'yii\jui\DatePicker', // example
+                    'class'   => 'yii\jui\DatePicker', // example
                     'options' => [
                         'dateFormat' => 'php:Y-m-d',
-                        'options' => ['class' => 'form-control'],
+                        'options'    => ['class' => 'form-control'],
                     ]
                 ]
             ]
@@ -156,105 +157,105 @@ $config = [
     'as AccessBehavior' => [
         'class' => AccessBehavior::class,
         'rules' => [
-            'personal' => [
+            'personal'                          => [
                 [
-                    'allow' => true,
+                    'allow'   => true,
                     'actions' => ['operator-cooperates'],
-                    'roles' => ['operators']
+                    'roles'   => ['operators']
                 ],
                 [
                     'actions' => ['update-municipality'],
-                    'allow' => true,
-                    'roles' => ['certificate']
+                    'allow'   => true,
+                    'roles'   => ['certificate']
                 ],
                 [
                     'actions' => ['organization-suborder', 'organization-set-suborder-status', 'organization-municipal-task'],
-                    'allow' => true,
-                    'roles' => ['organizations']
+                    'allow'   => true,
+                    'roles'   => ['organizations']
                 ],
                 [
                     'actions' => ['payer-suborder-organizations', 'payer-all-organizations', 'payer-municipal-task'],
-                    'allow' => true,
-                    'roles' => ['payers']
+                    'allow'   => true,
+                    'roles'   => ['payers']
                 ],
             ],
-            'file-storage' => [
+            'file-storage'                      => [
                 [
                     'allow' => true,
                 ],
             ],
-            'site' =>
-            [
+            'site'                              =>
                 [
-                    'allow' => true,
+                    [
+                        'allow' => true,
+                    ],
                 ],
-            ],
-            'import' =>
+            'import'                            =>
                 [
                     [
                         'allow' => true,
                         'roles' => ['admins'],
                     ],
                 ],
-            'admin/cleanup' =>
+            'admin/cleanup'                     =>
                 [
                     [
                         'allow' => true,
                         'roles' => ['admins'],
                     ],
                 ],
-            'organization' =>
+            'organization'                      =>
                 [
                     [
                         'actions' => ['request', 'request-update', 'check-status'],
-                        'allow' => true,
+                        'allow'   => true,
                     ],
                     [
                         'actions' => ['set-as-subordinated', 'cancel-subording', 'view-subordered'],
-                        'allow' => true,
-                        'roles' => ['payers'],
+                        'allow'   => true,
+                        'roles'   => ['payers'],
                     ],
                 ],
-            'operators' =>
+            'operators'                         =>
                 [
                     [
                         'actions' => ['view'],
-                        'allow' => true,
+                        'allow'   => true,
                     ],
                 ],
-            'programs' =>
+            'programs'                          =>
                 [
                     [
                         'actions' => ['index', 'view'],
-                        'allow' => true,
+                        'allow'   => true,
                     ],
                 ],
-            'user' =>
+            'user'                              =>
                 [
                     [
                         'actions' => ['view'],
-                        'allow' => true,
+                        'allow'   => true,
                     ],
                 ],
-            'debug/default' =>
+            'debug/default'                     =>
                 [
                     [
                         'allow' => true,
                     ],
                 ],
-            'activity' =>
-            [
+            'activity'                          =>
                 [
-                    'actions' => ['load-activities', 'add-activity'],
-                    'allow' => true,
-                    'roles' => ['organizations'],
-                ]
-            ],
-            'program-module-address' => [
+                    [
+                        'actions' => ['load-activities', 'add-activity'],
+                        'allow'   => true,
+                        'roles'   => ['organizations'],
+                    ]
+                ],
+            'program-module-address'            => [
                 [
                     'actions' => ['create', 'update', 'select'],
-                    'allow' => true,
-                    'roles' => ['organizations'],
+                    'allow'   => true,
+                    'roles'   => ['organizations'],
                 ]
             ],
             'admin/directory-program-direction' => [
@@ -263,83 +264,83 @@ $config = [
                     'roles' => ['admins'],
                 ]
             ],
-            'admin/directory-program-activity' => [
+            'admin/directory-program-activity'  => [
                 [
                     'allow' => true,
                     'roles' => ['admins'],
                 ]
             ],
-            'admin/search-filters' => [
+            'admin/search-filters'              => [
                 [
                     'allow' => true,
                     'roles' => ['admins'],
                 ]
             ],
-            'admin/help' => [
+            'admin/help'                        => [
                 [
                     'allow' => true,
                     'roles' => ['admins'],
                 ]
             ],
-            'certificates' => [
+            'certificates'                      => [
                 [
                     'actions' => ['group-pdf', 'password'],
-                    'allow' => true,
-                    'roles' => ['certificate'],
+                    'allow'   => true,
+                    'roles'   => ['certificate'],
                 ],
             ],
-            'site/save-filter' => [
+            'site/save-filter'                  => [
                 [
                     'allow' => true,
                 ]
             ],
-            'maintenance' => [
+            'maintenance'                       => [
                 [
                     'allow' => true,
                 ]
             ],
-            'certificate-information' => [
+            'certificate-information'           => [
                 [
                     'allow' => true,
                     'roles' => ['payer'],
                 ]
             ],
-            'cooperate' => [
+            'cooperate'                         => [
                 [
-                    'allow' => true,
+                    'allow'   => true,
                     'actions' => ['request', 'appeal-request', 'requisites', 'reject-contract'],
-                    'roles' => ['organizations'],
+                    'roles'   => ['organizations'],
                 ],
                 [
-                    'allow' => true,
+                    'allow'   => true,
                     'actions' => ['confirm-request', 'reject-request', 'reject-contract', 'confirm-contract', 'requisites', 'payment-limit'],
-                    'roles' => ['payer'],
+                    'roles'   => ['payer'],
                 ],
                 [
-                    'allow' => true,
+                    'allow'   => true,
                     'actions' => ['view', 'reject-appeal', 'confirm-appeal'],
-                    'roles' => ['operators'],
+                    'roles'   => ['operators'],
                 ],
             ],
-            'operator/key-storage' => [
+            'operator/key-storage'              => [
                 [
                     'allow' => true,
                     'roles' => ['operators'],
                 ],
             ],
-            'monitor' => [
+            'monitor'                           => [
                 [
                     'allow' => true,
                     'roles' => ['payers'],
                 ]
             ],
-            'operator/operator-settings' => [
+            'operator/operator-settings'        => [
                 [
                     'allow' => true,
                     'roles' => ['operators']
                 ]
             ],
-            'organization/address' => [
+            'organization/address'              => [
                 [
                     'allow' => true,
                     'roles' => ['organizations']
@@ -348,24 +349,24 @@ $config = [
 
             'organization/contract-settings' => [
                 [
-                    'allow' => true,
+                    'allow'   => true,
                     'actions' => ['change-settings'],
-                    'roles' => ['organizations'],
+                    'roles'   => ['organizations'],
                 ]
             ],
-            'contracts' => [
+            'contracts'                      => [
                 [
-                    'allow' => true,
-                    'roles' => ['certificate'],
+                    'allow'   => true,
+                    'roles'   => ['certificate'],
                     'actions' => ['request', 'reject-request', 'application-close-pdf', 'application-pdf', 'termrequest']
                 ],
                 [
-                    'allow' => true,
-                    'roles' => ['operators'],
+                    'allow'   => true,
+                    'roles'   => ['operators'],
                     'actions' => ['create', 'request', 'reject-request']
                 ],
             ],
-            'guest/general' => [
+            'guest/general'                  => [
                 [
                     'allow' => true,
                     'roles' => ['?']
@@ -381,7 +382,7 @@ if (YII_ENV_DEV) {
     // configuration adjustments for 'dev' environment
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
-        'class' => 'yii\debug\Module',
+        'class'      => 'yii\debug\Module',
         'allowedIPs' => ['*'],
     ];
 

@@ -216,7 +216,7 @@ class Certificates extends \yii\db\ActiveRecord
     public function getHasContracts()
     {
         if (Contracts::getCountContracts([
-            'status' => [
+            'status'        => [
                 Contracts::STATUS_CREATED,
                 Contracts::STATUS_ACTIVE,
                 Contracts::STATUS_REFUSED,

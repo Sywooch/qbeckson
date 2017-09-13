@@ -1,10 +1,10 @@
 <?php
 
+use app\helpers\PermissionHelper;
+use app\models\Contracts;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
-use app\models\Contracts;
-use app\helpers\PermissionHelper;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Certificates */

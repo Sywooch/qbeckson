@@ -58,12 +58,12 @@ class Payers extends \yii\db\ActiveRecord
     {
         return [
             'directionality_1rob' => !$counters ? 'Техническая (робототехника)' : 'directionality_1rob_count',
-            'directionality_1' => !$counters ? 'Техническая (иная)' : 'directionality_1_count',
-            'directionality_2' => !$counters ? 'Естественнонаучная' : 'directionality_2_count',
-            'directionality_3' => !$counters ? 'Физкультурно-спортивная' : 'directionality_3_count',
-            'directionality_4' => !$counters ? 'Художественная' : 'directionality_4_count',
-            'directionality_5' => !$counters ? 'Туристско-краеведческая' : 'directionality_5_count',
-            'directionality_6' => !$counters ? 'Социально-педагогическая' : 'directionality_6_count',
+            'directionality_1'    => !$counters ? 'Техническая (иная)' : 'directionality_1_count',
+            'directionality_2'    => !$counters ? 'Естественнонаучная' : 'directionality_2_count',
+            'directionality_3'    => !$counters ? 'Физкультурно-спортивная' : 'directionality_3_count',
+            'directionality_4'    => !$counters ? 'Художественная' : 'directionality_4_count',
+            'directionality_5'    => !$counters ? 'Туристско-краеведческая' : 'directionality_5_count',
+            'directionality_6'    => !$counters ? 'Социально-педагогическая' : 'directionality_6_count',
         ];
     }
 

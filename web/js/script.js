@@ -56,7 +56,7 @@ $(document).ready(function () {
         $(".additional-params").slideToggle();
     });
 
-    $(".toggle-password").click(function(){
+    $(".toggle-password").click(function () {
         $obj = $("#loginform-password");
         if ($obj.attr('type') === 'password') {
             $obj.attr('type', 'text');
