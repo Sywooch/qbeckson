@@ -54,27 +54,30 @@ class Payers extends \yii\db\ActiveRecord
     /**
      * @return array
      */
-    public static function directionalityAttributes(): array
+    public static function directionalityAttributes($counters = false): array
     {
         return [
-            'directionality_1rob' => 'Техническая (робототехника)',
-            'directionality_1' => 'Техническая (иная)',
-            'directionality_2' => 'Естественнонаучная',
-            'directionality_3' => 'Физкультурно-спортивная',
-            'directionality_4' => 'Художественная',
-            'directionality_5' => 'Туристско-краеведческая',
-            'directionality_6' => 'Социально-педагогическая',
+            'directionality_1rob' => !$counters ? 'Техническая (робототехника)' : 'directionality_1rob_count',
+            'directionality_1' => !$counters ? 'Техническая (иная)' : 'directionality_1_count',
+            'directionality_2' => !$counters ? 'Естественнонаучная' : 'directionality_2_count',
+            'directionality_3' => !$counters ? 'Физкультурно-спортивная' : 'directionality_3_count',
+            'directionality_4' => !$counters ? 'Художественная' : 'directionality_4_count',
+            'directionality_5' => !$counters ? 'Туристско-краеведческая' : 'directionality_5_count',
+            'directionality_6' => !$counters ? 'Социально-педагогическая' : 'directionality_6_count',
         ];
     }
 
     public function populateDirections()
     {
         $directionsArray = self::directionalityAttributes();
+        $directionCountersArray = self::directionalityAttributes(true);
         $this->directionality = '';
 
         foreach ($directionsArray as $index => $value) {
             if (!empty($this->$index)) {
                 $this->directionality = join(',', [$this->directionality, $value]);
+            } else {
+                $this->{$directionCountersArray[$index]} = 0;
             }
         }
     }
