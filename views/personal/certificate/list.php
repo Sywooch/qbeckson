@@ -94,7 +94,8 @@ $directivity = [
 $age = [
     'attribute' => 'age',
     'label'     => 'Возраст',
-    'type'      => SearchFilter::TYPE_INPUT,
+    'type'      => SearchFilter::TYPE_DROPDOWN,
+    'data'      => \app\models\Programs::getAges()
 ];
 
 $rating = [

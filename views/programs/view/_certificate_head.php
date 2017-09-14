@@ -108,12 +108,10 @@ $this->registerJs($JS, $this::POS_READY);
                     'model'      => $model,
                     'attributes' => [
                         'direction.name',
+                        ['attribute' => 'commonActivities'],
                         ['label' => 'Возраст детей',
                          'value' => $model->age_group_min . ' - ' . $model->age_group_max],
                         'zabAsString',
-                        'limit',
-                        ['label' => 'Число обучающихся',
-                         'value' => $model->GetActiveContracts()->count(),],
                         ['label' => 'Число модулей',
                          'value' => $model->getModules()->count()],
                         [

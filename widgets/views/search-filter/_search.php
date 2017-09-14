@@ -41,7 +41,8 @@ use yii\helpers\Html;
         </div>
         <div class="col-md-12">
             <?= Html::submitButton('Начать поиск', ['class' => 'btn btn-primary']) ?>&nbsp;&nbsp;
-            <?= Html::a('Сбросить', !empty($action) ? $action : ['index'], ['class' => 'btn btn-default']) ?>&nbsp;&nbsp;
+            <?= Html::a('Сбросить', !empty($action) ? $action : ['index'],
+                ['class' => 'btn btn-default', 'style' => ['color' => '#333']]) ?>&nbsp;&nbsp;
             <a href="javascript:void(0);" class="btn btn-warning show-additional-params">Расширенный поиск</a>&nbsp;&nbsp;
             <a href="javascript:void(0);" class="toggle-search-settings">
                 <span class="glyphicon glyphicon-cog"></span> настроить

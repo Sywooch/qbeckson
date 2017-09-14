@@ -26,6 +26,7 @@ class SearchFilter extends Widget
     public $action;
     public $type;
     public $role;
+    public $customizable = true;
 
     /**
      * @inheritdoc
