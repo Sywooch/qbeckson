@@ -20,14 +20,43 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
+        'filterModel'  => $searchModel,
+        'columns'      => [
             'table_name',
-            'table_columns:ntext',
-            'inaccessible_columns:ntext',
+            ['attribute'      => 'table_columns',
+             'format'         => 'ntext',
+             'contentOptions' => [
+                 'style' => [
+                     'word-wrap' => 'break-word',
+                     'max-width' => '400px'
+                 ]
+             ],
+             'headerOptions'  => [
+                 'style' => [
+                     'word-wrap' => 'break-word',
+                     'max-width' => '400px'
+                 ]
+             ],
+
+            ],
+            ['attribute'      => 'inaccessible_columns',
+             'format'         => 'ntext',
+             'contentOptions' => [
+                 'style' => [
+                     'word-wrap' => 'break-word',
+                     'max-width' => '400px'
+                 ]
+             ],
+             'headerOptions'  => [
+                 'style' => [
+                     'word-wrap' => 'break-word',
+                     'max-width' => '400px'
+                 ]
+             ],
+
+            ],
             'is_active:boolean',
             'role',
-
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
