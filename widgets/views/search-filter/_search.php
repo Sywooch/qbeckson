@@ -1,11 +1,12 @@
 <?php
 
-use yii\helpers\Html;
-use yii\bootstrap\ActiveForm;
 use kartik\widgets\Select2;
+use yii\bootstrap\ActiveForm;
+use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $form yii\widgets\ActiveForm */
+/* @var $userFilter \app\models\UserSearchFiltersAssignment */
 ?>
 
 <div class="data-search search-form well">

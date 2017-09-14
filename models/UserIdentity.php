@@ -2,27 +2,27 @@
 
 namespace app\models;
 
+use developeruz\db_rbac\interfaces\UserRbacInterface;
 use Yii;
 use yii\db\ActiveRecord;
-use developeruz\db_rbac\interfaces\UserRbacInterface;
 use yii\web\BadRequestHttpException;
 use yii\web\IdentityInterface;
 
 /**
- * @property integer $id
- * @property string $username
- * @property string $password
- * @property string $access_token
- * @property string $auth_key
- * @property integer $mun_id
- * @property mixed $authKey
+ * @property integer             $id
+ * @property string              $username
+ * @property string              $password
+ * @property string              $access_token
+ * @property string              $auth_key
+ * @property integer             $mun_id
+ * @property mixed               $authKey
  *
  * @property \yii\db\ActiveQuery $dispute
- * @property Organization $organization
- * @property null|Certificates $certificate
- * @property null|Mun $municipality
- * @property mixed $userName
- * @property Payers $payer
+ * @property Organization        $organization
+ * @property null|Certificates   $certificate
+ * @property null|Mun            $municipality
+ * @property mixed               $userName
+ * @property Payers              $payer
  * @property \yii\db\ActiveQuery $operator
  */
 class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacInterface
@@ -50,8 +50,8 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
         return [
             [
                 'mun_id', 'exist', 'skipOnError' => true,
-                'targetClass' => Mun::class,
-                'targetAttribute' => ['mun_id' => 'id']
+                                   'targetClass'     => Mun::class,
+                                   'targetAttribute' => ['mun_id' => 'id']
             ],
         ];
     }
@@ -237,8 +237,8 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
             ->joinWith(['filter'])
             ->andWhere([
                 'user_search_filters_assignment.user_id' => Yii::$app->user->id,
-                'settings_search_filters.table_name' => $tableName,
-                'settings_search_filters.type' => $type
+                'settings_search_filters.table_name'     => $tableName,
+                'settings_search_filters.type'           => $type
             ]);
 
         return $query->one();
@@ -251,11 +251,11 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
     {
         return [
             self::ROLE_ADMINISTRATOR => 'Администратор',
-            self::ROLE_CERTIFICATE => 'Сертификат',
-            self::ROLE_PAYER => 'Плательщик',
-            self::ROLE_ORGANIZATION => 'Организация',
-            self::ROLE_OPERATOR => 'Оператор',
-            self::ROLE_MONITOR => 'Монитор',
+            self::ROLE_CERTIFICATE   => 'Сертификат',
+            self::ROLE_PAYER         => 'Плательщик',
+            self::ROLE_ORGANIZATION  => 'Организация',
+            self::ROLE_OPERATOR      => 'Оператор',
+            self::ROLE_MONITOR       => 'Монитор',
         ];
     }
 
@@ -264,6 +264,7 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
     {
         $user = new User();
         $user->setAttributes(array_intersect_key($this->attributes, $user->attributes));
+
         return $user;
     }
 }
