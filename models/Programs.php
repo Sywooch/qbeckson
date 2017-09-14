@@ -192,10 +192,21 @@ class Programs extends ActiveRecord
             ],
             ['class'     => ResizeImageAfterSaveBehavior::className(),
              'attribute' => 'photo_path',
-             'width'     => 210,
-             'height'    => 210,
+             'width'     => 400,
+             'height'    => 400,
              'basePath'  => Yii::getAlias('@webroot/uploads')],
         ];
+    }
+
+    /**
+     * Доступные для выбора возраста
+     * @return array
+     */
+    public static function getAges(): array
+    {
+        $arr = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+
+        return array_combine($arr, $arr);
     }
 
     /**
