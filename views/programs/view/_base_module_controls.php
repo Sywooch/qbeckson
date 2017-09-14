@@ -11,6 +11,7 @@ use yii\helpers\Url;
     if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)) {
         $message = '';
         $url = '#';
+        $classButton = 'btn-theme';
         $active = false;
 
         /**@var $organization \app\models\Organization */
@@ -25,6 +26,7 @@ use yii\helpers\Url;
                                 if ($model->open) {
                                     $message = 'Закрыть зачисление';
                                     $url = Url::to(['years/stop', 'id' => $model->id]);
+                                    $classButton = 'btn-danger';
                                 } else {
                                     $message = 'Открыть зачисление';
                                     $url = Url::to(['years/start', 'id' => $model->id]);
@@ -38,6 +40,7 @@ use yii\helpers\Url;
                             if ($model->open) {
                                 $message = 'Закрыть зачисление';
                                 $url = Url::to(['years/stop', 'id' => $model->id]);
+                                $classButton = 'btn-danger';
                             } else {
                                 $message = 'Открыть зачисление';
                                 $url = Url::to(['years/start', 'id' => $model->id]);
@@ -52,6 +55,7 @@ use yii\helpers\Url;
                     if ($model->open) {
                         $message = 'Закрыть зачисление';
                         $url = Url::to(['years/stop', 'id' => $model->id]);
+                        $classButton = 'btn-danger';
                     } else {
                         $message = 'Открыть зачисление';
                         $url = Url::to(['years/start', 'id' => $model->id]);
@@ -68,7 +72,7 @@ use yii\helpers\Url;
 
         /** Зачисление отккыть/закрыть */
         if ($active) {
-            echo Html::a($message, $url, ['class' => 'btn btn-theme']);
+            echo Html::a($message, $url, ['class' => 'btn ' . $classButton]);
         } else {
             echo \yii\bootstrap\Button::widget(['label'   => $message,
                                                 'options' => ['class'    => 'btn btn-theme',
