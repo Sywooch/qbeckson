@@ -1,7 +1,7 @@
 <?php
 
-use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\search\SettingsSearchFiltersSearch */
@@ -26,6 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'table_columns:ntext',
             'inaccessible_columns:ntext',
             'is_active:boolean',
+            'role',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

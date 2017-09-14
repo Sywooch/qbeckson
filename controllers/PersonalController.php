@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\assets\programsAsset\ProgramsAsset;
 use app\models\Certificates;
 use app\models\Contracts;
 use app\models\Contracts2Search;

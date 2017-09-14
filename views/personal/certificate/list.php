@@ -6,11 +6,9 @@
 
 use app\helpers\GridviewHelper;
 use app\models\Certificates;
-use app\models\Mun;
 use app\models\statics\DirectoryProgramDirection;
 use app\models\UserIdentity;
 use app\widgets\SearchFilter;
-use yii\grid\ActionColumn;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -85,28 +83,7 @@ $name = [
     'attribute' => 'name',
     'label'     => 'Наименование',
 ];
-$year = [
-    'attribute' => 'year',
-    'value'     => function ($model)
-    {
-        /** @var \app\models\Programs $model */
-        return Yii::$app->i18n->messageFormatter->format(
-            '{n, plural, one{# модуль} few{# модуля} many{# модулей} other{# модуля}}',
-            ['n' => count($model->years)],
-            Yii::$app->language
-        );
-    },
-    'type'      => SearchFilter::TYPE_TOUCH_SPIN,
-];
-$hours = [
-    'attribute'     => 'hours',
-    'value'         => 'countHours',
-    'label'         => 'Кол-во часов',
-    'type'          => SearchFilter::TYPE_RANGE_SLIDER,
-    'pluginOptions' => [
-        'max' => 2000
-    ]
-];
+
 $directivity = [
     'attribute' => 'direction_id',
     'value'     => 'direction.name',
@@ -114,16 +91,12 @@ $directivity = [
     'type'      => SearchFilter::TYPE_DROPDOWN,
     'data'      => ArrayHelper::map(DirectoryProgramDirection::find()->all(), 'id', 'name'),
 ];
-$ageGroupMin = [
-    'attribute' => 'age_group_min',
-    'label'     => 'Возраст от',
-    'type'      => SearchFilter::TYPE_TOUCH_SPIN,
+$age = [
+    'attribute' => 'age',
+    'label'     => 'Возраст',
+    'type'      => SearchFilter::TYPE_INPUT,
 ];
-$ageGroupMax = [
-    'attribute' => 'age_group_max',
-    'label'     => 'Возраст до',
-    'type'      => SearchFilter::TYPE_TOUCH_SPIN,
-];
+
 $rating = [
     'attribute'     => 'rating',
     'label'         => 'Рейтинг',
@@ -132,66 +105,16 @@ $rating = [
         'max' => 100
     ]
 ];
-$municipality = [
-    'attribute' => 'mun',
-    'label'     => 'Муниципалитет',
-    'type'      => SearchFilter::TYPE_DROPDOWN,
-    'data'      => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
-    'value'     => 'municipality.name',
-];
-$price = [
-    'attribute'    => 'price',
-    'label'        => 'Стоимость*',
-    'value'        => function ($data)
-    {
-        $year = (new \yii\db\Query())
-            ->select(['price'])
-            ->from('years')
-            ->where(['year' => 1])
-            ->andWhere(['program_id' => $data->id])
-            ->one();
-
-        return $year['price'];
-    },
-    'searchFilter' => false,
-];
-$normativePrice = [
-    'attribute'    => 'normativePrice',
-    'label'        => 'НС*',
-    'value'        => function ($data)
-    {
-        $year = (new \yii\db\Query())
-            ->select(['normative_price'])
-            ->from('years')
-            ->where(['year' => 1])
-            ->andWhere(['program_id' => $data->id])
-            ->one();
-
-        return $year['normative_price'];
-    },
-    'searchFilter' => false,
-];
-$actions = [
-    'class'        => ActionColumn::class,
-    'controller'   => 'programs',
-    'template'     => '{view}',
-    'searchFilter' => false,
-];
 
 $columns = [
     $favorites,
     $name,
-    $year,
-    $hours,
     $directivity,
-    $ageGroupMin,
-    $ageGroupMax,
+    $age,
     $rating,
     $zab,
-    $municipality,
-    $price,
-    $normativePrice,
-    $actions,
+
+
 ];
 
 

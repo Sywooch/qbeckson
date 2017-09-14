@@ -2,11 +2,11 @@
 
 namespace app\models\search;
 
+use app\models\Programs;
 use app\models\UserIdentity;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Programs;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -18,6 +18,7 @@ class ProgramsSearch extends Programs
     public $municipality;
     public $hours;
     public $isMunicipalTask = false;
+    public $age;
 
     public $modelName;
     public $payerId;
@@ -52,13 +53,14 @@ class ProgramsSearch extends Programs
     public function attributeLabels(): array
     {
         return array_merge(parent::attributeLabels(), [
-            'age_group_min' => 'Возраст от',
-            'age_group_max' => 'Возраст до',
-            'hours' => 'Кол-во часов',
-            'organization' => 'Название организации',
-            'mun' => 'Муниципалитет',
+            'age_group_min'  => 'Возраст от',
+            'age_group_max'  => 'Возраст до',
+            'hours'          => 'Кол-во часов',
+            'organization'   => 'Название организации',
+            'mun'            => 'Муниципалитет',
             'normativePrice' => 'НС*',
-            'price' => 'Цена*'
+            'price'          => 'Цена*',
+            'age'            => 'Возраст'
         ]);
     }
 
@@ -73,7 +75,7 @@ class ProgramsSearch extends Programs
     /**
      * Creates data provider instance with search query applied
      * @param array $params
-     * @param int $pageSize
+     * @param int   $pageSize
      * @return ActiveDataProvider
      */
     public function search($params, $pageSize = 50)
@@ -102,10 +104,10 @@ class ProgramsSearch extends Programs
         }
 
         $dataProvider = new ActiveDataProvider([
-            'query' => $query,
+            'query'      => $query,
             'pagination' => [
                 'pageSizeLimit' => false,
-                'pageSize' => $pageSize,
+                'pageSize'      => $pageSize,
             ]
         ]);
 
@@ -134,31 +136,36 @@ class ProgramsSearch extends Programs
         }
 
         $query->andFilterWhere([
-            'programs.id' => $this->id,
-            'programs.organization_id' => $this->organization_id,
-            'programs.verification' => $this->verification,
-            'programs.form' => $this->form,
-            'programs.mun' => $this->mun,
-            'programs.ground' => $this->ground,
-            'programs.price' => $this->price,
-            'programs.study' => $this->study,
-            'programs.last_contracts' => $this->last_contracts,
-            'programs.last_s_contracts' => $this->last_s_contracts,
+            'programs.id'                   => $this->id,
+            'programs.organization_id'      => $this->organization_id,
+            'programs.verification'         => $this->verification,
+            'programs.form'                 => $this->form,
+            'programs.mun'                  => $this->mun,
+            'programs.ground'               => $this->ground,
+            'programs.price'                => $this->price,
+            'programs.study'                => $this->study,
+            'programs.last_contracts'       => $this->last_contracts,
+            'programs.last_s_contracts'     => $this->last_s_contracts,
             'programs.last_s_contracts_rod' => $this->last_s_contracts_rod,
-            'programs.colse_date' => $this->colse_date,
-            'programs.year' => $this->year,
-            'programs.both_teachers' => $this->both_teachers,
-            'programs.ovz' => $this->ovz,
-            'programs.quality_control' => $this->quality_control,
-            'programs.certification_date' => $this->certification_date,
-            'programs.p3z' => $this->p3z,
-            'programs.ocen_fact' => $this->ocen_fact,
-            'programs.ocen_kadr' => $this->ocen_kadr,
-            'programs.ocen_mat' => $this->ocen_mat,
-            'programs.ocen_obch' => $this->ocen_obch,
-            'programs.direction_id' => $this->direction_id,
-            'organization.mun' => $this->municipality,
+            'programs.colse_date'           => $this->colse_date,
+            'programs.year'                 => $this->year,
+            'programs.both_teachers'        => $this->both_teachers,
+            'programs.ovz'                  => $this->ovz,
+            'programs.quality_control'      => $this->quality_control,
+            'programs.certification_date'   => $this->certification_date,
+            'programs.p3z'                  => $this->p3z,
+            'programs.ocen_fact'            => $this->ocen_fact,
+            'programs.ocen_kadr'            => $this->ocen_kadr,
+            'programs.ocen_mat'             => $this->ocen_mat,
+            'programs.ocen_obch'            => $this->ocen_obch,
+            'programs.direction_id'         => $this->direction_id,
+            'organization.mun'              => $this->municipality,
         ]);
+
+        if (!empty($this->age)) {
+            $query->andFilterWhere(['<=', 'programs.age_group_min', $this->age]);
+            $query->andFilterWhere(['>=', 'programs.age_group_max', $this->age]);
+        }
 
         $query->andFilterWhere(['like', 'programs.name', $this->name])
             ->andFilterWhere(['like', 'programs.vid', $this->vid])
