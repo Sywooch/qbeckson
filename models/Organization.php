@@ -635,7 +635,7 @@ class Organization extends \yii\db\ActiveRecord
                 ['model' => $this]
             )
             ->setTo($this->email)
-            ->setFrom([Yii::$app->params['adminEmail'] => 'PFDO'])
+            ->setFrom([Yii::$app->params['sendEmail'] => 'PFDO'])
             ->setSubject('Заявка на включение в реестр поставщиков зарегистрирована');
 
         if ($mail->send()) {
@@ -656,7 +656,7 @@ class Organization extends \yii\db\ActiveRecord
                 ]
             )
             ->setTo($this->email)
-            ->setFrom([Yii::$app->params['adminEmail'] => 'PFDO'])
+            ->setFrom([Yii::$app->params['sendEmail'] => 'PFDO'])
             ->setSubject($this->isRefused ? 'Заявка на включение в реестр поставщиков отклонена' : 'Заявка на включение в реестр поставщиков одобрена');
 
         if ($mail->send()) {

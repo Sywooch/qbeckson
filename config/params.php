@@ -1,7 +1,8 @@
 <?php
 return [
     'adminEmail' => 'support@pfdo.ru',
-    
+    'sendEmail' => 'noreply.pfdo@mail.ru',
+
     'directivity' => [
         'Техническая (робототехника)' => 'Техническая (робототехника)',
         'Техническая (иная)' => 'Техническая (иная)',
