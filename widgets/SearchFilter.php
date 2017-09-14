@@ -68,7 +68,6 @@ class SearchFilter extends Widget
                 'role' => $this->role
             ])
             ->one();
-        \Yii::trace(print_r($filter, true));
         $userFilter = UserSearchFiltersAssignment::findByFilter($filter);
 
         return $this->render('search-filter/_search', [

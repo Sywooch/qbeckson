@@ -38,9 +38,9 @@ class ProgramsSearch extends Programs
     {
         return [
             [['id', 'form', 'mun', 'ground', 'price', 'study', 'last_contracts', 'direction_id',
-                'last_s_contracts', 'last_s_contracts_rod', 'year', 'both_teachers', 'ovz', 'quality_control', 'p3z', 'municipality'], 'integer'],
+                'last_s_contracts', 'last_s_contracts_rod', 'year', 'both_teachers', 'ovz', 'quality_control', 'p3z', 'municipality', 'age'], 'integer'],
             [['name', 'vid', 'colse_date', 'task', 'annotation', 'fullness', 'complexity', 'norm_providing',
-                'zab', 'link', 'certification_date', 'verification', 'organization_id', 'payerId'], 'safe'],
+                'zab', 'link', 'certification_date', 'verification', 'organization_id', 'payerId', 'activity_ids'], 'safe'],
             [['ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch'], 'number'],
             [['organization', 'hours', 'age_group_min', 'age_group_max', 'limit', 'rating'], 'string'],
             ['open', 'safe'],
@@ -74,8 +74,10 @@ class ProgramsSearch extends Programs
 
     /**
      * Creates data provider instance with search query applied
+     *
      * @param array $params
      * @param int   $pageSize
+     *
      * @return ActiveDataProvider
      */
     public function search($params, $pageSize = 50)
@@ -88,7 +90,8 @@ class ProgramsSearch extends Programs
             ->joinWith([
                 'municipality',
                 'organization',
-                'modules'
+                'modules',
+                'activities'
             ]);
 
         $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
@@ -162,10 +165,9 @@ class ProgramsSearch extends Programs
             'organization.mun'              => $this->municipality,
         ]);
 
-        if (!empty($this->age)) {
-            $query->andFilterWhere(['<=', 'programs.age_group_min', $this->age]);
-            $query->andFilterWhere(['>=', 'programs.age_group_max', $this->age]);
-        }
+        $query->andFilterWhere(['<=', 'programs.age_group_min', $this->age]);
+        $query->andFilterWhere(['>=', 'programs.age_group_max', $this->age]);
+
 
         $query->andFilterWhere(['like', 'programs.name', $this->name])
             ->andFilterWhere(['like', 'programs.vid', $this->vid])
@@ -179,6 +181,16 @@ class ProgramsSearch extends Programs
 
         if (!empty($this->zab)) {
             $query->andFilterWhere(['or like', 'programs.zab', $this->zab]);
+        }
+
+        if ($this->activity_ids) {
+            $query->andWhere(array_reduce($this->activity_ids, function ($acc, $value)
+                {
+                    $acc[] = ['directory_program_activity.id' => $value];
+
+                    return $acc;
+                }, ['OR'])
+            );
         }
 
         if (!empty($this->age_group_min) && empty($this->age_group_max)) {

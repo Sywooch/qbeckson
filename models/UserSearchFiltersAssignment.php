@@ -83,7 +83,6 @@ class UserSearchFiltersAssignment extends ActiveRecord
     public function getColumns()
     {
         $arrayColumns = preg_split('/[\s*,\s*]*,+[\s*,\s*]*/', $this->user_columns);
-
         return array_combine($arrayColumns, $arrayColumns);
     }
 

@@ -105,11 +105,21 @@ $rating = [
         'max' => 100
     ]
 ];
+$activity_ids = [
+    'attribute'     => 'activity_ids',
+    'label'         => 'Рейтинг',
+    'type'          => SearchFilter::TYPE_SELECT2,
+    'data'          => ArrayHelper::map(\app\models\statics\DirectoryProgramActivity::find()->all(), 'id', 'name'),
+    'pluginOptions' => [
+        'max' => 100
+    ]
+];
 
 $columns = [
     $favorites,
     $name,
     $directivity,
+    $activity_ids,
     $age,
     $rating,
     $zab,

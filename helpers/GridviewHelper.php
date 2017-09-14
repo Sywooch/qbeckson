@@ -33,7 +33,6 @@ class GridviewHelper
             $inaccessibleColumns = $userFilter->filter->inaccessibleColumns;
             $otherColumns = $userFilter->columns;
         }
-
         foreach ($columns as $index => $column) {
             if (isset($column['type']) && $column['type'] === SearchFilter::TYPE_HIDDEN && null !== $excludeAttributes) {
                 unset($columns[$index]);
@@ -57,6 +56,7 @@ class GridviewHelper
             if (!empty($excludeAttributes)) {
                 foreach ($excludeAttributes as $excludeAttribute) {
                     if (isset($column[$excludeAttribute])) {
+                        Yii::trace($column['attribute'] . ' - Exclude');
                         unset($columns[$index][$excludeAttribute]);
                     }
                 }
