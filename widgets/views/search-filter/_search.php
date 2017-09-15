@@ -7,6 +7,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $form yii\widgets\ActiveForm */
 /* @var $userFilter \app\models\UserSearchFiltersAssignment */
+/* @var $customizable boolean */
 ?>
 
 <div class="data-search search-form well">
@@ -44,34 +45,38 @@ use yii\helpers\Html;
             <?= Html::a('Сбросить', !empty($action) ? $action : ['index'],
                 ['class' => 'btn btn-default', 'style' => ['color' => '#333']]) ?>&nbsp;&nbsp;
             <a href="javascript:void(0);" class="btn btn-warning show-additional-params">Расширенный поиск</a>&nbsp;&nbsp;
-            <a href="javascript:void(0);" class="toggle-search-settings">
-                <span class="glyphicon glyphicon-cog"></span> настроить
-            </a>
+            <?php if ($customizable): ?>
+                <a href="javascript:void(0);" class="toggle-search-settings">
+                    <span class="glyphicon glyphicon-cog"></span> настроить
+                </a>
+            <?php endif; ?>
         </div>
         <?php ActiveForm::end(); ?>
-        <div class="col-md-12 search-settings collapse">
-            <br/>
-            <?php
-            $form = ActiveForm::begin(['action' => ['site/save-filter']]);
-            $columnLabels = [];
-            foreach ($userFilter->filter->columnsForUser as $column) {
-                $columnLabels[$column] = $model->getAttributeLabel($column);
-            }
-            ?>
-            <?= $form->field($userFilter, 'filter_id')->hiddenInput()->label(false) ?>
-            <?= $form->field($userFilter, 'columns')->widget(Select2::class, [
-                'data' => array_combine($userFilter->filter->columnsForUser, $columnLabels),
-                'options' => [
-                    'placeholder' => 'Выберите..',
-                    'id' => Yii::$app->security->generateRandomString(6)
-                ],
-                'pluginOptions' => [
-                    'allowClear' => true,
-                    'multiple' => true,
-                ],
-            ]); ?>
-            <?= Html::submitButton('Сохранить', ['class' => 'btn btn-warning']) ?>
-            <?php ActiveForm::end(); ?>
-        </div>
+        <?php if ($customizable): ?>
+            <div class="col-md-12 search-settings collapse">
+                <br/>
+                <?php
+                $form = ActiveForm::begin(['action' => ['site/save-filter']]);
+                $columnLabels = [];
+                foreach ($userFilter->filter->columnsForUser as $column) {
+                    $columnLabels[$column] = $model->getAttributeLabel($column);
+                }
+                ?>
+                <?= $form->field($userFilter, 'filter_id')->hiddenInput()->label(false) ?>
+                <?= $form->field($userFilter, 'columns')->widget(Select2::class, [
+                    'data'          => array_combine($userFilter->filter->columnsForUser, $columnLabels),
+                    'options'       => [
+                        'placeholder' => 'Выберите..',
+                        'id'          => Yii::$app->security->generateRandomString(6)
+                    ],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                        'multiple'   => true,
+                    ],
+                ]); ?>
+                <?= Html::submitButton('Сохранить', ['class' => 'btn btn-warning']) ?>
+                <?php ActiveForm::end(); ?>
+            </div>
+        <?php endif; ?>
     </div>
 </div>

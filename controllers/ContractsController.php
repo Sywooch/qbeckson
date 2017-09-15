@@ -21,6 +21,7 @@ use yii\base\Response;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
+use yii\web\NotAcceptableHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use app\models\Informs;
@@ -562,6 +563,10 @@ class ContractsController extends Controller
     public function actionTermrequest($id)
     {
         $model = $this->findModel($id);
+        if (!in_array($model->status, [Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED])) {
+            throw new NotAcceptableHttpException('Контракт не может быть расторгнут, поскольку уже переведен в "действующие договоры"');
+        }
+
         $cert = Certificates::findOne($model->certificate_id);
         $cert->changeBalance($model);
 

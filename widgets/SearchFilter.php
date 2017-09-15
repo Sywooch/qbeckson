@@ -69,13 +69,16 @@ class SearchFilter extends Widget
                 'role' => $this->role
             ])
             ->one();
+
         $userFilter = UserSearchFiltersAssignment::findByFilter($filter);
 
+
         return $this->render('search-filter/_search', [
-            'model' => $this->model,
-            'action' => $this->action,
-            'data' => $this->data,
-            'userFilter' => $userFilter,
+            'model'        => $this->model,
+            'action'       => $this->action,
+            'data'         => $this->data,
+            'userFilter'   => $userFilter,
+            'customizable' => $this->customizable,
         ]);
     }
 }
