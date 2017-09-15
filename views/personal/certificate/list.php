@@ -83,6 +83,10 @@ $name = [
     'attribute' => 'name',
     'label'     => 'Наименование',
 ];
+$organisation = [
+    'attribute' => 'organization_id',
+    'type'      => SearchFilter::TYPE_HIDDEN
+];
 
 $directivity = [
     'attribute' => 'direction_id',
@@ -124,6 +128,7 @@ $columns = [
     $age,
     $rating,
     $zab,
+    $organisation,
 
 
 ];
