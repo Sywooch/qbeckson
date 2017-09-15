@@ -114,9 +114,6 @@ class CertificatesController extends Controller
                     $user->delete();
                 }
             }
-        } elseif (Yii::$app->request->isPost) {
-            print_r(Yii::$app->request->post());exit;
-            print_r($model->errors);exit;
         }
 
         return $this->render('create', [

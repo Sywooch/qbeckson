@@ -145,6 +145,24 @@ class PersonalController extends Controller
     /**
      * @return string
      */
+    public function actionOperatorInvoices()
+    {
+        $searchInvoices = new InvoicesSearch([
+            //'status' => [0, 1, 2],
+            'sum' => '0,10000000',
+        ]);
+        $invoicesProvider = $searchInvoices->search(Yii::$app->request->queryParams);
+
+        return $this->render('operator/operator-invoices', [
+            'searchInvoices'   => $searchInvoices,
+            'invoicesProvider' => $invoicesProvider,
+        ]);
+    }
+
+
+    /**
+     * @return string
+     */
     public function actionOperatorPayers()
     {
         $searchPayers = new PayersSearch([

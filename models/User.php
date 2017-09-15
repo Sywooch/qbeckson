@@ -44,7 +44,7 @@ class User extends ActiveRecord
         return [
             [['username'], 'unique', 'on' => self::SCENARIO_DEFAULT ],
             [['username'], 'required'],
-            [['confirm'], 'required'],
+            [['confirm'], 'required', 'on' => self::SCENARIO_SHORT_LOGIN],
             [['confirm'], 'validatePassword', 'on' => self::SCENARIO_SHORT_LOGIN],
             [['username'], 'string', 'length' => [2, 10]],
             [['confirm', 'oldpassword', 'newpassword'], 'string', 'max' => 10, 'min' => 6],
