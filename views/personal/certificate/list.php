@@ -140,16 +140,18 @@ $columns = [
     <br>
 
 <?= SearchFilter::widget([
-    'model'  => $searchModel,
-    'action' => ['personal/certificate-programs'],
-    'data'   => GridviewHelper::prepareColumns(
+    'model'        => $searchModel,
+    'action'       => ['personal/certificate-programs'],
+    'data'         => GridviewHelper::prepareColumns(
         'programs',
         $columns,
         null,
         'searchFilter',
-        null
+        null,
+        false
     ),
-    'role'   => UserIdentity::ROLE_CERTIFICATE,
+    'customizable' => false,
+    'role'         => UserIdentity::ROLE_CERTIFICATE,
 ]); ?>
 <?php
 echo \yii\widgets\ListView::widget([
