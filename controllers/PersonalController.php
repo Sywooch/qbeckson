@@ -1118,6 +1118,9 @@ class PersonalController extends Controller
             'modelName'    => '',
         ]);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        if ($searchModel->organization_id) {
+            Yii::$app->session->setFlash('success', 'Поиск по организации ' . $searchModel->getOrganization()->one()->name);
+        }
         ProgramsAsset::register($this->view);
 
         return $this->render('certificate/list', [
