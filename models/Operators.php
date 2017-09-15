@@ -8,22 +8,24 @@ use yii\db\ActiveRecord;
 /**
  * This is the model class for table "operators".
  *
- * @property integer $id
- * @property integer $user_id
- * @property string $name
- * @property integer $OGRN
- * @property integer $INN
- * @property integer $KPP
- * @property integer $OKPO
- * @property string $address_legal
- * @property string $address_actual
- * @property string $phone
- * @property string $email
- * @property string $position
- * @property string $fio
+ * @property integer          $id
+ * @property integer          $user_id
+ * @property string           $name
+ * @property integer          $OGRN
+ * @property integer          $INN
+ * @property integer          $KPP
+ * @property integer          $OKPO
+ * @property string           $address_legal
+ * @property string           $address_actual
+ * @property string           $phone
+ * @property string           $email
+ * @property string           $position
+ * @property string           $fio
+ *
  *
  * @property OperatorSettings $settings
- * @property User $user
+ * @property Coefficient      $coefficient
+ * @property User             $user
  */
 class Operators extends ActiveRecord
 {
@@ -79,6 +81,14 @@ class Operators extends ActiveRecord
     public function getSettings()
     {
         return $this->hasOne(OperatorSettings::class, ['operator_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCoefficient()
+    {
+        return $this->hasOne(Coefficient::className(), ['operator_id' => 'id'])->inverseOf('operator');
     }
 
     /**
