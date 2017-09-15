@@ -456,68 +456,68 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
         if ($doc = \app\models\ContractDocument::findByPayer($payer, date('Y'), date('m'))) {
             echo Html::a('Скачать выписку от ' . Yii::$app->formatter->asDate($doc->created_at), '/uploads/contracts/' . $doc->file, ['class' => 'btn btn-primary']);
         } else {
-        $searchContracts = new ContractsPayerInvoiceSearch();
-        $searchContracts->payer_id = $payer->id;
-        $InvoiceProvider = $searchContracts->search(Yii::$app->request->queryParams);
+            $searchContracts = new ContractsPayerInvoiceSearch();
+            $searchContracts->payer_id = $payer->id;
+            $InvoiceProvider = $searchContracts->search(Yii::$app->request->queryParams);
 
-        echo '<div class="alert alert-warning">Внимание! После заказа реестра договоров для формирования заявки на субсидию в текущем месяце до его завершения новый реестр запросить уже не удастся. А это значит, что договоры, которые будут заключены после текущего момента будут включены в заявку уже в следующем месяце. Вы уверены, что сегодня тот самый день?</div>';
+            echo '<div class="alert alert-warning">Внимание! После заказа реестра договоров для формирования заявки на субсидию в текущем месяце до его завершения новый реестр запросить уже не удастся. А это значит, что договоры, которые будут заключены после текущего момента будут включены в заявку уже в следующем месяце. Вы уверены, что сегодня тот самый день?</div>';
 
-        echo ExportMenu::widget([
-            'dataProvider' => $InvoiceProvider,
-            'target' => ExportMenu::TARGET_SELF,
-            'showColumnSelector' => false,
-            'filename' => $payer->id . '_' . date('d-m-Y'),
-            'stream' => false,
-            'deleteAfterSave' => false,
-            'folder' => '@webroot/uploads/contracts',
-            'linkPath' => '@web/uploads/contracts',
-            'dropdownOptions' => [
-                'class' => 'btn btn-success',
-                'label' => 'Заказать реестр договоров для субсидии',
-                'icon' => false,
-            ],
-            'showConfirmAlert' => false,
-            'afterSaveView' => '@app/views/contracts/export-view',
-            'exportConfig' => [
-                ExportMenu::FORMAT_TEXT => false,
-                ExportMenu::FORMAT_CSV => false,
-                ExportMenu::FORMAT_HTML => false,
-                ExportMenu::FORMAT_PDF => false,
-                ExportMenu::FORMAT_EXCEL_X => false,
-            ],
-            'columns' => [
-                ['class' => 'yii\grid\SerialColumn'],
-                [
-                    'attribute' => 'certificatenumber',
-                    'label' => 'Номер сертификата дополнительного образования',
-                    'format' => 'raw',
+            echo ExportMenu::widget([
+                'dataProvider' => $InvoiceProvider,
+                'target' => ExportMenu::TARGET_SELF,
+                'showColumnSelector' => false,
+                'filename' => $payer->id . '_' . date('d-m-Y'),
+                'stream' => false,
+                'deleteAfterSave' => false,
+                'folder' => '@webroot/uploads/contracts',
+                'linkPath' => '@web/uploads/contracts',
+                'dropdownOptions' => [
+                    'class' => 'btn btn-success',
+                    'label' => 'Заказать реестр договоров для субсидии',
+                    'icon' => false,
                 ],
-                [
-                    'attribute' => 'number',
-                    'label' => 'Реквизиты договора об обучении (твердой оферты)',
-                    'format' => 'raw',
-                    'value' => function ($model) {
-                        return '№' . $model->number . ' от ' . Yii::$app->formatter->asDate($model->date);
-                    }
+                'showConfirmAlert' => false,
+                'afterSaveView' => '@app/views/contracts/export-view',
+                'exportConfig' => [
+                    ExportMenu::FORMAT_TEXT => false,
+                    ExportMenu::FORMAT_CSV => false,
+                    ExportMenu::FORMAT_HTML => false,
+                    ExportMenu::FORMAT_PDF => false,
+                    ExportMenu::FORMAT_EXCEL_X => false,
                 ],
-                [
-                    'label' => 'Объем обязательств Уполномоченной организации за текущий месяц в соответствии с договорами об обучении (твердыми офертами)',
-                    'value' => function ($model) {
-
-                        $start_edu_contract = explode("-", $model->start_edu_contract);
-                        $month = $start_edu_contract[1];
-
-                        if ($month == date('m')) {
-                            $price = $model->payer_first_month_payment;
-                        } else {
-                            $price = $model->payer_other_month_payment;
+                'columns' => [
+                    ['class' => 'yii\grid\SerialColumn'],
+                    [
+                        'attribute' => 'certificatenumber',
+                        'label' => 'Номер сертификата дополнительного образования',
+                        'format' => 'raw',
+                    ],
+                    [
+                        'attribute' => 'number',
+                        'label' => 'Реквизиты договора об обучении (твердой оферты)',
+                        'format' => 'raw',
+                        'value' => function ($model) {
+                            return '№' . $model->number . ' от ' . Yii::$app->formatter->asDate($model->date);
                         }
+                    ],
+                    [
+                        'label' => 'Объем обязательств Уполномоченной организации за текущий месяц в соответствии с договорами об обучении (твердыми офертами)',
+                        'value' => function ($model) {
 
-                        return $price;
-                    }
+                            $start_edu_contract = explode("-", $model->start_edu_contract);
+                            $month = $start_edu_contract[1];
+
+                            if ($month == date('m')) {
+                                $price = $model->payer_first_month_payment;
+                            } else {
+                                $price = $model->payer_other_month_payment;
+                            }
+
+                            return $price;
+                        }
+                    ],
                 ],
-            ],
-        ]);
-    }
-?>
+            ]);
+        }
+        ?>
 </div>
