@@ -137,7 +137,8 @@ class Menu
                 ['label' => 'Муниципалитеты', 'url' => ['/mun/index']],
                 ['label' => 'Общие параметры', 'url' => ['/coefficient/update']],
                 //['label' => 'Настройки системы', 'url' => ['/operators/params']],
-            ]],
+            ]
+            ],
             [
                 'label' => 'Плательщики',
                 'items' => [
@@ -145,7 +146,14 @@ class Menu
                         'label' => 'Уполномоченные Организации',
                         'url'   => ['personal/operator-payers']
                     ],
-                    ['label' => 'Соглашения', 'url' => ['personal/operator-cooperates']]
+                    ['label' => 'Соглашения',
+                     'url'   => ['personal/operator-cooperates'],
+                    ],
+                    [
+                        'label' => 'Счета',
+                        'url'   => ['personal/operator-invoices'],
+                    ]
+
                 ]
             ],
             ['label' => 'Организации', 'url' => ['/personal/operator-organizations']],
