@@ -2,21 +2,20 @@
 
 namespace app\controllers;
 
-use yii\base\Model;
+use app\helpers\PermissionHelper;
 use app\models\CertificateInformation;
 use app\models\Help;
+use app\models\LoginForm;
 use app\models\Mun;
 use app\models\search\HelpSearch;
 use app\models\SettingsSearchFilters;
 use app\models\UserSearchFiltersAssignment;
 use Yii;
+use yii\base\Model;
 use yii\captcha\CaptchaAction;
 use yii\filters\AccessControl;
-use yii\web\BadRequestHttpException;
-use yii\web\Controller;
 use yii\filters\VerbFilter;
-use app\models\LoginForm;
-use app\helpers\PermissionHelper;
+use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
 class SiteController extends Controller

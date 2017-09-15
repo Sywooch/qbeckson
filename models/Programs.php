@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\behaviors\ResizeImageAfterSaveBehavior;
 use app\models\statics\DirectoryProgramActivity;
 use app\models\statics\DirectoryProgramDirection;
 use trntv\filekit\behaviors\UploadBehavior;
@@ -13,69 +14,114 @@ use yii\helpers\ArrayHelper;
 /**
  * This is the model class for table "programs".
  *
- * @property integer $id
- * @property integer $organization_id
- * @property integer $verification
- * @property string $name
- * @property string $vid
- * @property integer $mun
- * @property integer $ground
- * @property integer $price
- * @property integer $normative_price
- * @property integer $rating
- * @property integer $limit
- * @property integer $study
- * @property integer $open
- * @property string $colse_date
- * @property string $task
- * @property string $annotation
- * @property integer $year
- * @property string $kvfirst
- * @property string $kvdop
- * @property integer $both_teachers
- * @property string $fullness
- * @property string $photo_base_url
- * @property string $photo_path
- * @property string $complexity
- * @property string $norm_providing
- * @property integer $ovz
- * @property integer $zab
- * @property string $age_group
- * @property integer $quality_control
- * @property string $link
- * @property string $certification_date
- * @property array $activity_ids
- * @property integer $direction_id
- * @property integer $age_group_min
- * @property integer $age_group_max
+ * @property integer                         $id
+ * @property integer                         $organization_id
+ * @property integer                         $verification
+ * @property string                          $name
+ * @property string                          $vid
+ * @property integer                         $mun
+ * @property integer                         $ground
+ * @property string                          $groundName
+ * @property integer                         $price
+ * @property integer                         $normative_price
+ * @property integer                         $rating
+ * @property integer                         $limit
+ * @property integer                         $study
+ * @property integer                         $open
+ * @property string                          $colse_date
+ * @property string                          $task
+ * @property string                          $annotation
+ * @property integer                         $year
+ * @property string                          $kvfirst
+ * @property string                          $kvdop
+ * @property integer                         $both_teachers
+ * @property string                          $fullness
+ * @property string                          $photo_base_url
+ * @property string                          $photo_path
+ * @property string                          $complexity
+ * @property string                          $norm_providing
+ * @property integer                         $ovz
+ * @property integer                         $zab
+ * @property string                          $age_group
+ * @property integer                         $quality_control
+ * @property string                          $link
+ * @property string                          $certification_date
+ * @property array                           $activity_ids
+ * @property integer                         $direction_id
+ * @property integer                         $age_group_min
+ * @property integer                         $age_group_max
+ * @property integer                         $is_municipal_task
+ * @property string                          $zabAsString
  *
- * @property Contracts[] $contracts
- * @property Favorites[] $favorites
- * @property Groups[] $groups
- * @property Informs[] $informs
- * @property Organization $organization
- * @property ProgrammeModule[] $years
+ * @property string                          $iconClass
+ * @property string                          $defaultPhoto
+ *
+ *
+ * @property Contracts[]                     $contracts
+ * @property Favorites[]                     $favorites
+ * @property Groups[]                        $groups
+ * @property Informs[]                       $informs
+ * @property Organization                    $organization
+ * @property ProgrammeModule[]               $years
  * @property DirectoryProgramActivity[]|null $activities
- * @property DirectoryProgramDirection|null $direction
- * @property string $directivity
- * @property mixed $countMonths
- * @property mixed $organizationProgram
- * @property mixed $organizationWaitProgram
- * @property mixed $organizationNoProgram
- * @property Mun $municipality
- * @property mixed $cooperateProgram
- * @property mixed $countHours
- * @property string $commonActivities
- * @property ProgrammeModule[] $modules
- * @property OrganizationAddress[] $addresses
- * @property ProgramAddressAssignment[] $addressAssignments
+ * @property DirectoryProgramDirection|null  $direction
+ * @property string                          $directivity
+ * @property mixed                           $countMonths
+ * @property mixed                           $organizationProgram
+ * @property mixed                           $organizationWaitProgram
+ * @property mixed                           $organizationNoProgram
+ * @property Mun                             $municipality
+ * @property mixed                           $cooperateProgram
+ * @property mixed                           $countHours
+ * @property string                          $commonActivities
+ * @property ProgrammeModule[]               $modules
+ * @property OrganizationAddress[]           $addresses
+ * @property OrganizationAddress             $mainAddress
+ * @property ProgramAddressAssignment[]      $addressAssignments
+ * @property ProgramAddressAssignment[]      $mainAddressAssignments
  */
 class Programs extends ActiveRecord
 {
+    const VERIFICATION_UNDEFINED = 0;
+    const VERIFICATION_WAIT = 1;
+    const VERIFICATION_DONE = 2;
+    const VERIFICATION_DENIED = 3;
+    const VERIFICATION_IN_ARCHIVE = 10;
+
+    const ICON_DEFAULT = 'icon-socped';
+    const ICON_KEY_IN_PARAMS = 'directivityIconsClass';
+
     public $file;
     public $edit;
     public $search;
     public $programPhoto;
+
+    public static function getCountPrograms($organization_id = null, $verification = null)
+    {
+        $query = static::find()
+            ->joinWith(['municipality'])
+            ->where('`mun`.operator_id = ' . Yii::$app->operator->identity->id);
+
+        if (!empty($organization_id)) {
+            $query->andWhere(['organization_id' => $organization_id]);
+        }
+        if (isset($verification)) {
+            $query->andWhere(['verification' => $verification]);
+        }
+
+        return $query->count();
+    }
+
+    public static function find()
+    {
+        return parent::find()->where([self::tableName() . '.verification' => [
+            self::VERIFICATION_UNDEFINED,
+            self::VERIFICATION_WAIT,
+            self::VERIFICATION_DONE,
+            self::VERIFICATION_DENIED
+        ]
+        ]);
+    }
 
     /**
      * @inheritdoc
@@ -83,6 +129,21 @@ class Programs extends ActiveRecord
     public static function tableName()
     {
         return 'programs';
+    }
+
+    /**
+     * @return array
+     */
+    public static function forms()
+    {
+        return [
+            1 => 'Очная',
+            2 => 'Очно-заочная',
+            3 => 'Заочная',
+            4 => 'Очная с применением дистанционных технологий и/или электронного обучения',
+            5 => 'Очно-заочная с применением дистанционных технологий и/или электронного обучения',
+            6 => 'Заочная с применением дистанционных технологий и/или электронного обучения',
+        ];
     }
 
     /**
@@ -101,9 +162,9 @@ class Programs extends ActiveRecord
             ['age_group_min', 'compare', 'compareAttribute' => 'age_group_max', 'type' => 'number', 'operator' => '<='],
             ['age_group_max', 'compare', 'compareAttribute' => 'age_group_min', 'type' => 'number', 'operator' => '>='],
             [
-                'direction_id', 'exist', 'skipOnError' => true,
-                'targetClass' => DirectoryProgramDirection::class,
-                'targetAttribute' => ['direction_id' => 'id']
+                'direction_id', 'exist', 'skipOnError'     => true,
+                                         'targetClass'     => DirectoryProgramDirection::class,
+                                         'targetAttribute' => ['direction_id' => 'id']
             ],
             [['programPhoto'], 'safe'],
             [['activity_ids'], 'each', 'rule' => ['integer']],
@@ -117,19 +178,35 @@ class Programs extends ActiveRecord
     {
         return [
             [
-                'class' => LinkerBehavior::class,
+                'class'     => LinkerBehavior::class,
                 'relations' => [
                     'activity_ids' => 'activities',
                 ],
             ],
             [
-                'class' => UploadBehavior::class,
-                'multiple' => false,
-                'pathAttribute' => 'photo_path',
+                'class'            => UploadBehavior::class,
+                'multiple'         => false,
+                'pathAttribute'    => 'photo_path',
                 'baseUrlAttribute' => 'photo_base_url',
-                'attribute' => 'programPhoto',
-            ]
+                'attribute'        => 'programPhoto',
+            ],
+            ['class'     => ResizeImageAfterSaveBehavior::className(),
+             'attribute' => 'photo_path',
+             'width'     => 400,
+             'height'    => 400,
+             'basePath'  => Yii::getAlias('@webroot/uploads')],
         ];
+    }
+
+    /**
+     * Доступные для выбора возраста
+     * @return array
+     */
+    public static function getAges(): array
+    {
+        $arr = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+
+        return array_combine($arr, $arr);
     }
 
     /**
@@ -143,11 +220,30 @@ class Programs extends ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getMainAddressAssignments()
+    {
+        return $this->hasMany(ProgramAddressAssignment::class, ['program_id' => 'id'])->andWhere(['status' => 1]);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMainAddress()
+    {
+        return $this->hasOne(OrganizationAddress::class, ['id' => 'organization_address_id'])
+            ->via('mainAddressAssignments');
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getAddresses()
     {
         return $this->hasMany(OrganizationAddress::class, ['id' => 'organization_address_id'])
             ->via('addressAssignments');
     }
+
 
     /**
      * @return \yii\db\ActiveQuery
@@ -163,16 +259,30 @@ class Programs extends ActiveRecord
      */
     public function getPhoto()
     {
-        return $this->photo_base_url ? $this->photo_base_url . '/' . $this->photo_path : null;
+        return $this->photo_base_url ? $this->photo_base_url . DIRECTORY_SEPARATOR . $this->photo_path : null;
     }
 
     /**
+     * @return string
+     */
+    // TODO: Избавиться от этого метода (старая система "направленностей")
+    /**
      * @return \yii\db\ActiveQuery
      */
+
+    public function getActiveContracts()
+    {
+        return $this->hasMany(Contracts::class, ['year_id' => 'id'])
+            ->andWhere(['contracts.status' => 1])->via('modules')->groupBy(Contracts::getTableSchema()->columnNames);
+    }
+
+
     public function getModules()
     {
         return $this->hasMany(ProgrammeModule::class, ['program_id' => 'id']);
     }
+
+    // TODO: Избавиться от этого метода (старая система "видов")
 
     /**
      * @return \yii\db\ActiveQuery|DirectoryProgramDirection|null
@@ -182,16 +292,12 @@ class Programs extends ActiveRecord
         return $this->hasOne(DirectoryProgramDirection::className(), ['id' => 'direction_id']);
     }
 
-    /**
-     * @return string
-     */
-    // TODO: Избавиться от этого метода (старая система "направленностей")
+
     public function getDirectivity()
     {
         return $this->direction->old_name;
     }
 
-    // TODO: Избавиться от этого метода (старая система "видов")
     public function getCommonActivities()
     {
         if (!empty($this->activities)) {
@@ -207,60 +313,55 @@ class Programs extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'organization_id' => 'Организация',
-            'verification' => 'Статус сертификации',
-            'countHours' => 'Учебных часов',
-            'form' => 'Форма обучения',
-            'name' => 'Наименование программы',
-            'directivity' => 'Направленность программы',
-            'direction_id' => 'Направленность программы',
-            'vid' => 'Вид деятельности образовательной программы',
-            'commonActivities' => 'Вид деятельности образовательной программы',
-            'activity_ids' => 'Виды деятельности образовательной программы',
-            'mun' => 'Муниципальное образование',
-            'annotation' => 'Аннотация программы',
-            'task' => 'Цели и задачи программы',
-            'age_group_min' => 'Возрастная категория детей, определяемая минимальным возрастом лиц, которые могут быть зачислены на обучение по образовательной программе',
-            'age_group_max' => 'Возрастная категория детей, определяемая максимальным возрастом лиц, которые могут быть зачислены на обучение по образовательной программе',
-            'ovz' => 'Категория состояния здоровья детей, которые могут быть зачислены на обучение по образовательной программе (ОВЗ/без ОВЗ)',
-            'zab' => 'Заболевание',
-            'year' => 'Число модулей',
-            'norm_providing' => 'Нормы оснащения детей средствами обучения при проведении обучения по образовательной программе и интенсивность их использования',
-            'ground' => 'Тип местности',
-            'rating' => 'Рейтинг программы ',
-            'limit' => 'Лимит зачисления',
-            'link' => 'Ссылка на текст программы',
-            'edit' => 'Отправить на повторную сертификацию',
-            'p3z' => 'Коэффициент учета степени обеспечения оборудованием',
+            'id'                           => 'ID',
+            'organization_id'              => 'Организация',
+            'verification'                 => 'Статус сертификации',
+            'countHours'                   => 'Учебных часов',
+            'form'                         => 'Форма обучения',
+            'name'                         => 'Наименование программы',
+            'directivity'                  => 'Направленность программы',
+            'direction_id'                 => 'Направленность программы',
+            'vid'                          => 'Вид деятельности образовательной программы',
+            'commonActivities'             => 'Вид деятельности образовательной программы',
+            'activity_ids'                 => 'Виды деятельности образовательной программы',
+            'mun'                          => 'Муниципальное образование',
+            'municipality.name'            => 'Муниципальное образование',
+            'annotation'                   => 'Аннотация программы',
+            'task'                         => 'Цели и задачи программы',
+            'age_group_min'                => 'Возрастная категория детей, определяемая минимальным возрастом лиц, которые могут быть зачислены на обучение по образовательной программе',
+            'age_group_max'                => 'Возрастная категория детей, определяемая максимальным возрастом лиц, которые могут быть зачислены на обучение по образовательной программе',
+            'ovz'                          => 'Категория состояния здоровья детей, которые могут быть зачислены на обучение по образовательной программе (ОВЗ/без ОВЗ)',
+            'zab'                          => 'Заболевание',
+            'year'                         => 'Число модулей',
+            'norm_providing'               => 'Нормы оснащения детей средствами обучения при проведении обучения по образовательной программе и интенсивность их использования',
+            'ground'                       => 'Тип местности',
+            'groundName'                   => 'Тип местности',
+            'rating'                       => 'Рейтинг программы ',
+            'limit'                        => 'Лимит зачисления',
+            'link'                         => 'Ссылка на текст программы',
+            'edit'                         => 'Отправить на повторную сертификацию',
+            'p3z'                          => 'Коэффициент учета степени обеспечения оборудованием',
             //'price_next' => 'Ожидаемая стоимость будущего года',
             //'certification_date' => 'Дата направления программы на сертификацию',
             //'colse_date' => 'Дата завершения реализации программы',
-            'study' => 'Число обучающихся',
-            'last_contracts' => 'Число обучающихся и прошедших обучение',
-            'last_s_contracts' => 'Прошедших обучение',
-            'last_s_contracts_rod' => 'Прошедших обучение (расторгнутых родителем)',
-            'quality_control' => 'Число оценок качества',
+            'study'                        => 'Число обучающихся',
+            'last_contracts'               => 'Число обучающихся и прошедших обучение',
+            'last_s_contracts'             => 'Прошедших обучение',
+            'last_s_contracts_rod'         => 'Прошедших обучение (расторгнутых родителем)',
+            'quality_control'              => 'Число оценок качества',
             //'both_teachers' => 'Число педагогических работников, одновременно реализующих программу',
             //'fullness' => 'Наполняемость группы при реализации программы',
             //'complexity' => 'Сложность оборудования и средств обучения используемых при реализации программы',
-            'ocen_fact' => 'Оценка достижения заявленных результатов',
-            'ocen_kadr' => 'Оценка выполнения кадровых требований',
-            'ocen_mat' => 'Оценка выполнения требований к средствам обучения',
-            'ocen_obch' => 'Оценка общей удовлетворенности программой',
-            'selectyear' => 'Выберите год обучения по программе для просмотра подробной информации',
-            'activities' => 'Виды деятельности',
-            'programPhoto' => 'Картинка программы',
+            'ocen_fact'                    => 'Оценка достижения заявленных результатов',
+            'ocen_kadr'                    => 'Оценка выполнения кадровых требований',
+            'ocen_mat'                     => 'Оценка выполнения требований к средствам обучения',
+            'ocen_obch'                    => 'Оценка общей удовлетворенности программой',
+            'selectyear'                   => 'Выберите год обучения по программе для просмотра подробной информации',
+            'activities'                   => 'Виды деятельности',
+            'programPhoto'                 => 'Картинка программы',
             'certificate_accounting_limit' => 'Лимит зачисления',
+            'zabAsString'                  => 'Категория детей',
         ];
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getContracts()
-    {
-        return $this->hasMany(Contracts::className(), ['program_id' => 'id']);
     }
 
     /**
@@ -309,22 +410,6 @@ class Programs extends ActiveRecord
     public function getYears()
     {
         return $this->hasMany(ProgrammeModule::className(), ['program_id' => 'id']);
-    }
-
-    public static function getCountPrograms($organization_id = null, $verification = null)
-    {
-        $query = static::find()
-            ->joinWith(['municipality'])
-            ->where('`mun`.operator_id = ' . Yii::$app->operator->identity->id);
-
-        if (!empty($organization_id)) {
-            $query->andWhere(['organization_id' => $organization_id]);
-        }
-        if (isset($verification)) {
-            $query->andWhere(['verification' => $verification]);
-        }
-
-        return $query->count();
     }
 
     public function getPrograms($id)
@@ -429,10 +514,17 @@ class Programs extends ActiveRecord
         return $rows['name'];
     }
 
-    public function groundName($data)
+    public function getGroundName(): string
     {
 
-        return Yii::$app->params['ground'][$data];
+        if (array_key_exists($this->ground, Yii::$app->params['ground'])) {
+
+            return Yii::$app->params['ground'][$this->ground];
+        } else {
+
+            return 'undefined';
+        }
+
     }
 
     public function otkazName($data)
@@ -475,8 +567,52 @@ class Programs extends ActiveRecord
         return $rows;
     }
 
+    public function getZabAsString(): string
+    {
+        if ($this->ovz !== 2) {
+
+            return 'без ОВЗ';
+        }
+        $zabArray = explode(',', $this->zab);
+        $zabNamesArray = array_filter(self::illnesses(), function ($val) use ($zabArray)
+        {
+
+            return in_array($val, $zabArray);
+        }, ARRAY_FILTER_USE_KEY);
+
+        if (!count($zabNamesArray)) {
+
+            return 'без ОВЗ';
+        }
+
+        return implode(', ', $zabNamesArray);
+
+    }
+
+    /**
+     * @return array
+     */
+    public static function illnesses()
+    {
+        return [
+            1  => 'глухие',
+            2  => 'слабослышащие и позднооглохшие',
+            3  => 'слепые',
+            4  => 'слабовидящие',
+            5  => 'нарушения речи',
+            6  => 'фонетико-фонематическое нарушение речи',
+            7  => 'нарушение опорно-двигательного аппарата',
+            8  => 'задержка психического развития',
+            9  => 'расстройство аутистического спектра',
+            10 => 'нарушение интеллекта',
+        ];
+    }
+
+    /**/
+
     public function zabName($data, $ovz)
     {
+        return $this->zabAsString;
         if ($ovz == 2) {
             $zab = explode(',', $data);
             $display = '';
@@ -574,37 +710,110 @@ class Programs extends ActiveRecord
         return $this->is_municipal_task > 0 ? true : false;
     }
 
-    /**
-     * @return array
-     */
-    public static function forms()
+    public function getIsActive()
     {
-        return [
-            1 => 'Очная',
-            2 => 'Очно-заочная',
-            3 => 'Заочная',
-            4 => 'Очная с применением дистанционных технологий и/или электронного обучения',
-            5 => 'Очно-заочная с применением дистанционных технологий и/или электронного обучения',
-            6 => 'Заочная с применением дистанционных технологий и/или электронного обучения',
-        ];
+        return $this->verification !== self::VERIFICATION_IN_ARCHIVE;
     }
 
     /**
-     * @return array
+     * установка флага "в архиве"
+     * @return boolean
      */
-    public static function illnesses()
+    public function setIsArchive()
     {
-        return [
-            1 => 'глухие',
-            2 => 'слабослышащие и позднооглохшие',
-            3 => 'слепые',
-            4 => 'слабовидящие',
-            5 => 'нарушения речи',
-            6 => 'фонетико-фонематическое нарушение речи',
-            7 => 'нарушение опорно-двигательного аппарата',
-            8 => 'задержка психического развития',
-            9 => 'расстройство аутистического спектра',
-            10 => 'нарушение интеллекта',
-        ];
+        if (!$this->canBeArchived()) {
+            return false;
+        }
+        $this->verification = self::VERIFICATION_IN_ARCHIVE;
+
+        return $this->save(false);
     }
+
+    /**
+     * можно отправить в архив?
+     * @return boolean
+     */
+    public function canBeArchived()
+    {
+        return !$this->getLivingContracts()->exists();
+    }
+
+    /**
+     * Контракты в работе
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLivingContracts()
+    {
+        return $this->getContracts()->andFilterWhere(['status' => [Contracts::STATUS_CREATED,
+            Contracts::STATUS_ACTIVE,
+            Contracts::STATUS_ACCEPTED]]);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getContracts()
+    {
+        return $this->hasMany(Contracts::className(), ['program_id' => 'id']);
+    }
+
+
+    /** @return bool */
+    public function existsFreePlace()
+    {
+        return $this->limit > $this->getActiveContracts()->count();
+    }
+
+    /** Класс иконки направления программы
+     * @return string
+     */
+    public function getIconClass()
+    {
+        if (array_key_exists(self::ICON_KEY_IN_PARAMS, Yii::$app->params) &&
+            array_key_exists($this->direction_id, Yii::$app->params[self::ICON_KEY_IN_PARAMS])) {
+            return Yii::$app->params[self::ICON_KEY_IN_PARAMS][$this->direction_id]['icon'];
+        }
+
+        return self::ICON_DEFAULT;
+    }
+
+
+    /** @return  string|null
+     *  файл находит в assetBundle и имеет динамический путь
+     */
+    public function getDefaultPhoto()
+    {
+        if (array_key_exists(self::ICON_KEY_IN_PARAMS, Yii::$app->params) &&
+            array_key_exists($this->direction_id, Yii::$app->params[self::ICON_KEY_IN_PARAMS])) {
+
+            return Yii::$app->params[self::ICON_KEY_IN_PARAMS][$this->direction_id]['image'];
+        }
+
+        return null;
+    }
+
+    /**
+     * доступна ли данная программа для зачисления указанному пользователю
+     *
+     * @param $certificateUser UserIdentity
+     *
+     * @return boolean
+     */
+    public function isAvailable(UserIdentity $certificateUser)
+    {
+        return $this->getGroups()->exists()  //есть группы
+            && Cooperate::find()->where([
+                Cooperate::tableName() . '.payer_id'        => $certificateUser->getCertificate()->select('payer_id'),
+                Cooperate::tableName() . '.organization_id' => $this->organization_id])->exists()   //есть соглашение с уполномоченой организацией
+            && $this->getModules()->andWhere([\app\models\ProgrammeModule::tableName() . '.open' => 1])->exists() //есть модули с открытым зачислением
+            && (!(($certificateUser->certificate->balance < 1 && $certificateUser->certificate->payer->certificate_can_use_future_balance < 1) || ($certificateUser->certificate->balance < 1 && $certificateUser->certificate->payer->certificate_can_use_future_balance > 0 && $certificateUser->certificate->balance_f < 1))) // есть средства на счету сертификата
+            && $this->organization->actual // Организация программы действует
+            && ($certificateUser->certificate->payer->getActiveContractsByProgram($this->id)->count()
+                <= $certificateUser->certificate->payer->getDirectionalityCountByName($this->directivity))// Не достигнут максимальный предел числа одновременно оплачиваемых вашей уполномоченной организацией услуг по данной направленности
+            && $this->organization->existsFreePlace() //Есть место в организации
+            && $this->existsFreePlace() //В программе есть место
+            && !$certificateUser->certificate->getActiveContractsByProgram($this->id)->exists(); //Нет заключенных договоров на программу
+    }
+
+
 }

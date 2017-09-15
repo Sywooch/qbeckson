@@ -3,6 +3,7 @@
 namespace app\models;
 
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "user".
@@ -25,6 +26,8 @@ class User extends ActiveRecord
     public $newpass;
     public $newlogin;
 
+    const SCENARIO_SHORT_LOGIN = 'short_login';
+
     /**
      * @inheritdoc
      */
@@ -39,14 +42,32 @@ class User extends ActiveRecord
     public function rules()
     {
         return [
-            [['username'], 'unique'],
+            [['username'], 'unique', 'on' => self::SCENARIO_DEFAULT ],
             [['username'], 'required'],
+            [['confirm'], 'required'],
+            [['confirm'], 'validatePassword', 'on' => self::SCENARIO_SHORT_LOGIN],
             [['username'], 'string', 'length' => [2, 10]],
             [['confirm', 'oldpassword', 'newpassword'], 'string', 'max' => 10, 'min' => 6],
             [['password', 'access_token', 'auth_key'], 'string', 'max' => 64, 'min' => 6],
             [['newlogin', 'newpass'], 'boolean'],
             ['mun_id', 'integer'],
         ];
+    }
+
+
+    public function validatePassword($attribute)
+    {
+        \Yii::$app->getSecurity()->validatePassword($this->{$attribute}, $this->password) ||
+            $this->addError($attribute, 'Не правильно введен пароль');
+    }
+
+    /**
+     * @return $this
+     */
+    public function setShortLoginScenario()
+    {
+        $this->scenario = self::SCENARIO_SHORT_LOGIN;
+        return $this;
     }
 
     /**
@@ -66,6 +87,13 @@ class User extends ActiveRecord
             'newpassword' => 'Новый пароль',
             'confirm' => 'Подтвердите пароль',
         ];
+    }
+
+    public function scenarios()
+    {
+        return ArrayHelper::merge(parent::scenarios(),
+            [self::SCENARIO_SHORT_LOGIN => ['username', 'password']]
+        );
     }
 
     /**

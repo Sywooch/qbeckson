@@ -2,8 +2,8 @@
 
 namespace app\models;
 
-use Yii;
 use app\behaviors\ArrayOrStringBehavior;
+use Yii;
 use yii\db\Expression;
 
 /**
@@ -71,11 +71,11 @@ class Help extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'name' => 'Название',
-            'body' => 'Текст',
+            'id'         => 'ID',
+            'name'       => 'Название',
+            'body'       => 'Текст',
             'applied_to' => 'Кто должен поставить "галочки" о прочтении',
-            'checked' => 'Раздел «<a target="_blank" href="' . \yii\helpers\Url::to(['site/manual', 'id' => $this->id]) . '">' . $this->name . '</a>» прочитан. Специалисты, имеющие доступ в личный кабинет, учитывают его содержание при работе с системой.',
+            'checked'    => 'Раздел «<a target="_blank" href="' . \yii\helpers\Url::to(['site/manual', 'id' => $this->id]) . '">' . $this->name . '</a>» прочитан. Специалисты, имеющие доступ в личный кабинет, учитывают его содержание при работе с системой.',
         ];
     }
 

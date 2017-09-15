@@ -1,11 +1,11 @@
 <?php
 
 use yii\data\ArrayDataProvider;
+use yii\grid\GridView;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
-use yii\grid\GridView;
 
 /* @var $this \yii\web\View */
 /* @var $model \app\models\Programs */
@@ -62,7 +62,7 @@ $programAttributes = [
     ],
     [
         'attribute' => 'ground',
-        'value' => $model->groundName($model->ground),
+        'value'     => $model->groundName,
     ],
     [
         'attribute' => 'norm_providing',
@@ -127,7 +127,7 @@ $programSummaryAttributes =  [
                             'label' => 'Расписание',
                             'value' => function ($model) {
                                 /** @var \app\models\Groups $model */
-                                return $model->formatClasses();
+                                return $model->fullSchedule;
                             },
                             'format' => 'raw'
                         ],

@@ -6,12 +6,12 @@ use app\models\Mun;
 use app\models\Organization;
 use app\models\UserIdentity;
 use app\widgets\SearchFilter;
+use kartik\export\ExportMenu;
+use kartik\grid\GridView;
 use yii\grid\ActionColumn;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use kartik\export\ExportMenu;
-use kartik\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $activeContractsProvider \yii\data\ActiveDataProvider */
@@ -339,17 +339,18 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
         ]); ?>
         <?= GridView::widget([
             'dataProvider' => $pendingContractsProvider,
-            'filterModel' => null,
-            'pjax' => true,
-            'rowOptions' => function ($model, $index, $widget, $grid) {
+            'filterModel'  => null,
+            'pjax'         => true,
+            'rowOptions'   => function ($model, $index, $widget, $grid)
+            {
                 if ($model->wait_termnate === 1) {
                     return ['class' => 'danger'];
                 } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
                     return ['class' => 'warning'];
                 }
             },
-            'summary' => false,
-            'columns' => $preparedPendingColumns,
+            'summary'      => false,
+            'columns'      => $preparedPendingColumns,
         ]); ?>
     </div>
     <div id="panel5" class="tab-pane fade">

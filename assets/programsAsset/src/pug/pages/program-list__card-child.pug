@@ -1,0 +1,38 @@
+include ../lib/_bofhtml.html
+include ../vars
+include ../mixins
+include ../lib/_header
+.container
+    .row: .col-xs-12: .card: .row
+        .col-xs-12.col-sm-4.col-md-4.col-lg-3
+            .program-img.socped
+                img(src="img/program-image.png")
+        .col-xs-12.col-sm-8.col-md-8.col-lg-9
+            h2.card-title.js-ellipsis-title Инфо-интерес (Превосходная программа, просто замечательная, там ещё газету они делают)
+            .card-badges
+                .card-badges-item.card-badges-item_violet(title="Социально-педагогическая направленность"): span.large-size.icon-socped
+                .card-badges-item.card-badges-item_green(title="Рекомендуемый возраст с 12 до 14 лет"): span 12-14 лет
+                .card-badges-item.card-badges-item_blue(title="Не предусмотрено обучение учащихся с ОВЗ"): span Без ОВЗ
+                .card-badges-item.card-badges-item_green(title="Зачисление открыто, есть свободные места"): span.large-size.icon-study
+                .card-badges-item.card-badges-item_star(title="Рейтинг программы: 98%")
+                    i.icon-star-full
+                    span.big-size 98
+            .card-info
+                .card-info-paragraph.card-info-paragraph_mh50
+                    div МБОУ ДО "Д(п)Ц" ГО "г. Якутск"
+                    div г. Петропавловск-Камчатский, ул. Парижской Коммунны, дом 512, строение Б, каб.207
+                .card-info-paragraph.card-info-paragraph_mh38
+                    div Стоимость одного модуля
+                    .adaptive-ib Заявленная: 25 234.45 ₽
+                    .adaptive-ib Нормативная: 25 234.45 ₽
+                a(href="#").btn.btn-theme.btn-block Просмотр
+include ../lib/_footer
+script(type="text/javascript").
+    $(document).ready(function () {
+        $(".js-ellipsis-title").dotdotdot({
+            ellipsis: '... ',
+            wrap: 'word',
+            height: 60
+        });
+    });
+include ../lib/_eohtml.html

@@ -2,40 +2,41 @@
 
 namespace app\controllers;
 
-use app\models\Cooperate;
-use app\models\forms\OrganizationSettingsForm;
-use app\models\Mun;
-use app\models\OrganizationContractSettings;
-use app\models\search\ContractsSearch;
-use app\models\search\CooperateSearch;
-use app\models\search\InvoicesSearch;
-use app\models\OrganizationPayerAssignment;
-use app\models\UserIdentity;
-use Yii;
-use app\models\Programs;
-use app\models\search\ProgramsSearch;
-use app\models\Organization;
-use app\models\search\OrganizationSearch;
+use app\assets\programsAsset\ProgramsAsset;
+use app\models\Certificates;
 use app\models\Contracts;
-use app\models\ContractsoSearch;
-use app\models\ContractsnSearch;
 use app\models\Contracts2Search;
 use app\models\Contracts3Search;
 use app\models\Contracts5Search;
-use app\models\PayersSearch;
-use app\models\ProgramsclearSearch;
+use app\models\ContractsnSearch;
 use app\models\ContractsOrgclearSearch;
+use app\models\ContractsoSearch;
 use app\models\ContractsPayerclearSearch;
-use app\models\Certificates;
-use app\models\search\CertificatesSearch;
-use app\models\GroupsSearch;
+use app\models\Cooperate;
 use app\models\FavoritesSearch;
-use app\models\ProgrammeModuleSearch;
+use app\models\forms\OrganizationSettingsForm;
+use app\models\GroupsSearch;
+use app\models\Mun;
+use app\models\Organization;
+use app\models\OrganizationContractSettings;
+use app\models\OrganizationPayerAssignment;
+use app\models\PayersSearch;
 use app\models\PreviusSearch;
+use app\models\ProgrammeModuleSearch;
+use app\models\Programs;
+use app\models\ProgramsclearSearch;
+use app\models\search\CertificatesSearch;
+use app\models\search\ContractsSearch;
+use app\models\search\CooperateSearch;
+use app\models\search\InvoicesSearch;
+use app\models\search\OrganizationSearch;
+use app\models\search\ProgramsSearch;
+use app\models\UserIdentity;
+use Yii;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
-use yii\web\Controller;
 use yii\web\BadRequestHttpException;
+use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -52,7 +53,7 @@ class PersonalController extends Controller
     {
         return [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class'   => VerbFilter::className(),
                 'actions' => [
                     'update-municipality' => ['post'],
                 ],
@@ -66,37 +67,37 @@ class PersonalController extends Controller
     public function actionOperatorCooperates()
     {
         $searchActive = new CooperateSearch([
-            'status' => Cooperate::STATUS_ACTIVE,
+            'status'    => Cooperate::STATUS_ACTIVE,
             'modelName' => 'SearchActive',
         ]);
         $activeProvider = $searchActive->search(Yii::$app->request->queryParams);
 
         $searchAppealed = new CooperateSearch([
-            'status' => Cooperate::STATUS_APPEALED,
+            'status'    => Cooperate::STATUS_APPEALED,
             'modelName' => 'SearchAppealed',
         ]);
         $appealedProvider = $searchAppealed->search(Yii::$app->request->queryParams);
 
         $searchNew = new CooperateSearch([
-            'status' => Cooperate::STATUS_NEW,
+            'status'    => Cooperate::STATUS_NEW,
             'modelName' => 'SearchNew',
         ]);
         $newProvider = $searchNew->search(Yii::$app->request->queryParams);
 
         $searchConfirmed = new CooperateSearch([
-            'status' => Cooperate::STATUS_CONFIRMED,
+            'status'    => Cooperate::STATUS_CONFIRMED,
             'modelName' => 'SearchConfirmed',
         ]);
         $confirmedProvider = $searchConfirmed->search(Yii::$app->request->queryParams);
 
         return $this->render('operator-cooperates', [
-            'searchActive' => $searchActive,
-            'activeProvider' => $activeProvider,
-            'searchAppealed' => $searchAppealed,
-            'appealedProvider' => $appealedProvider,
-            'searchNew' => $searchNew,
-            'newProvider' => $newProvider,
-            'searchConfirmed' => $searchConfirmed,
+            'searchActive'      => $searchActive,
+            'activeProvider'    => $activeProvider,
+            'searchAppealed'    => $searchAppealed,
+            'appealedProvider'  => $appealedProvider,
+            'searchNew'         => $searchNew,
+            'newProvider'       => $newProvider,
+            'searchConfirmed'   => $searchConfirmed,
             'confirmedProvider' => $confirmedProvider,
         ]);
     }
@@ -147,15 +148,15 @@ class PersonalController extends Controller
     public function actionOperatorPayers()
     {
         $searchPayers = new PayersSearch([
-            'cooperates' => '0,100',
+            'cooperates'   => '0,100',
             'certificates' => '0,150000',
         ]);
         $payersProvider = $searchPayers->search(Yii::$app->request->queryParams);
         $allPayersProvider = $searchPayers->search(Yii::$app->request->queryParams, 99999);
 
         return $this->render('operator-payers', [
-            'searchPayers' => $searchPayers,
-            'payersProvider' => $payersProvider,
+            'searchPayers'      => $searchPayers,
+            'payersProvider'    => $payersProvider,
             'allPayersProvider' => $allPayersProvider,
         ]);
     }
@@ -166,28 +167,28 @@ class PersonalController extends Controller
     public function actionOperatorOrganizations()
     {
         $searchRegistry = new OrganizationSearch([
-            'statusArray' => [Organization::STATUS_ACTIVE, Organization::STATUS_BANNED],
-            'programs' => '0,1000',
-            'children' => '0,10000',
+            'statusArray'  => [Organization::STATUS_ACTIVE, Organization::STATUS_BANNED],
+            'programs'     => '0,1000',
+            'children'     => '0,10000',
             'amount_child' => '0,10000',
-            'raiting' => '0,100',
-            'max_child' => '0,10000',
-            'modelName' => 'SearchRegistry',
+            'raiting'      => '0,100',
+            'max_child'    => '0,10000',
+            'modelName'    => 'SearchRegistry',
         ]);
         $registryProvider = $searchRegistry->search(Yii::$app->request->queryParams);
         $allRegistryProvider = $searchRegistry->search(Yii::$app->request->queryParams, 99999);
 
         $searchRequest = new OrganizationSearch([
             'statusArray' => [Organization::STATUS_NEW],
-            'modelName' => 'SearchRequest',
+            'modelName'   => 'SearchRequest',
         ]);
         $requestProvider = $searchRequest->search(Yii::$app->request->queryParams);
 
         return $this->render('operator-organizations', [
-            'searchRegistry' => $searchRegistry,
+            'searchRegistry'   => $searchRegistry,
             'registryProvider' => $registryProvider,
-            'searchRequest' => $searchRequest,
-            'requestProvider' => $requestProvider,
+            'searchRequest'    => $searchRequest,
+            'requestProvider'  => $requestProvider,
 
             'allRegistryProvider' => $allRegistryProvider,
         ]);
@@ -200,15 +201,15 @@ class PersonalController extends Controller
     {
         $searchCertificates = new CertificatesSearch([
             'enableContractsCount' => true,
-            'nominal' => '0,150000',
-            'rezerv' => '0,150000',
-            'balance' => '0,150000',
+            'nominal'              => '0,150000',
+            'rezerv'               => '0,150000',
+            'balance'              => '0,150000',
         ]);
         $certificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
         $allCertificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams, 99999);
 
         return $this->render('operator-certificates', [
-            'searchCertificates' => $searchCertificates,
+            'searchCertificates'   => $searchCertificates,
             'certificatesProvider' => $certificatesProvider,
 
             'allCertificatesProvider' => $allCertificatesProvider,
@@ -221,30 +222,30 @@ class PersonalController extends Controller
     public function actionOperatorContracts()
     {
         $searchActiveContracts = new ContractsSearch([
-            'status' => Contracts::STATUS_ACTIVE,
-            'paid' => '0,150000',
-            'rezerv' => '0,150000',
+            'status'    => Contracts::STATUS_ACTIVE,
+            'paid'      => '0,150000',
+            'rezerv'    => '0,150000',
             'modelName' => 'SearchActiveContracts'
         ]);
         $activeContractsProvider = $searchActiveContracts->search(Yii::$app->request->queryParams);
         $allActiveContractsProvider = $searchActiveContracts->search(Yii::$app->request->queryParams, 99999);
 
         $searchConfirmedContracts = new ContractsSearch([
-            'status' => Contracts::STATUS_ACCEPTED,
+            'status'    => Contracts::STATUS_ACCEPTED,
             'modelName' => 'SearchConfirmedContracts'
         ]);
         $confirmedContractsProvider = $searchConfirmedContracts->search(Yii::$app->request->queryParams);
 
         $searchPendingContracts = new ContractsSearch([
-            'status' => Contracts::STATUS_CREATED,
+            'status'    => Contracts::STATUS_CREATED,
             'modelName' => 'SearchPendingContracts'
         ]);
         $pendingContractsProvider = $searchPendingContracts->search(Yii::$app->request->queryParams);
         $allPendingContractsProvider = $searchPendingContracts->search(Yii::$app->request->queryParams, 99999);
 
         $searchDissolvedContracts = new ContractsSearch([
-            'status' => Contracts::STATUS_CLOSED,
-            'paid' => '0,150000',
+            'status'    => Contracts::STATUS_CLOSED,
+            'paid'      => '0,150000',
             'modelName' => 'SearchDissolvedContracts'
         ]);
         $dissolvedContractsProvider = $searchDissolvedContracts->search(Yii::$app->request->queryParams);
@@ -253,19 +254,19 @@ class PersonalController extends Controller
         $allContractsProvider = (new ContractsSearch())->search(Yii::$app->request->queryParams, 99999);
 
         return $this->render('operator-contracts', [
-            'searchActiveContracts' => $searchActiveContracts,
-            'activeContractsProvider' => $activeContractsProvider,
-            'searchConfirmedContracts' => $searchConfirmedContracts,
+            'searchActiveContracts'      => $searchActiveContracts,
+            'activeContractsProvider'    => $activeContractsProvider,
+            'searchConfirmedContracts'   => $searchConfirmedContracts,
             'confirmedContractsProvider' => $confirmedContractsProvider,
-            'searchPendingContracts' => $searchPendingContracts,
-            'pendingContractsProvider' => $pendingContractsProvider,
-            'searchDissolvedContracts' => $searchDissolvedContracts,
+            'searchPendingContracts'     => $searchPendingContracts,
+            'pendingContractsProvider'   => $pendingContractsProvider,
+            'searchDissolvedContracts'   => $searchDissolvedContracts,
             'dissolvedContractsProvider' => $dissolvedContractsProvider,
 
-            'allActiveContractsProvider' => $allActiveContractsProvider,
-            'allPendingContractsProvider' => $allPendingContractsProvider,
+            'allActiveContractsProvider'    => $allActiveContractsProvider,
+            'allPendingContractsProvider'   => $allPendingContractsProvider,
             'allDissolvedContractsProvider' => $allDissolvedContractsProvider,
-            'allContractsProvider' => $allContractsProvider,
+            'allContractsProvider'          => $allContractsProvider,
         ]);
     }
 
@@ -276,27 +277,27 @@ class PersonalController extends Controller
     {
         $searchOpenPrograms = new ProgramsSearch([
             'verification' => [2],
-            'hours' => '0,2000',
-            'limit' => '0,10000',
-            'rating' => '0,100',
-            'modelName' => 'SearchOpenPrograms',
+            'hours'        => '0,2000',
+            'limit'        => '0,10000',
+            'rating'       => '0,100',
+            'modelName'    => 'SearchOpenPrograms',
         ]);
         $openProgramsProvider = $searchOpenPrograms->search(Yii::$app->request->queryParams);
         $allOpenProgramsProvider = $searchOpenPrograms->search(Yii::$app->request->queryParams, 99999);
 
         $searchWaitPrograms = new ProgramsSearch([
             'verification' => [0, 1],
-            'open' => 0,
-            'hours' => '0,2000',
-            'modelName' => 'SearchWaitPrograms',
+            'open'         => 0,
+            'hours'        => '0,2000',
+            'modelName'    => 'SearchWaitPrograms',
         ]);
         $waitProgramsProvider = $searchWaitPrograms->search(Yii::$app->request->queryParams);
         $allWaitProgramsProvider = $searchWaitPrograms->search(Yii::$app->request->queryParams, 99999);
 
         $searchClosedPrograms = new ProgramsSearch([
             'verification' => [3],
-            'hours' => '0,2000',
-            'modelName' => 'SearchClosedPrograms',
+            'hours'        => '0,2000',
+            'modelName'    => 'SearchClosedPrograms',
         ]);
         $closedProgramsProvider = $searchClosedPrograms->search(Yii::$app->request->queryParams);
 
@@ -310,18 +311,18 @@ class PersonalController extends Controller
         $GroupsallProvider = $searchGroupsall->search(Yii::$app->request->queryParams);
 
         return $this->render('operator-programs', [
-            'searchOpenPrograms' => $searchOpenPrograms,
-            'openProgramsProvider' => $openProgramsProvider,
-            'searchWaitPrograms' => $searchWaitPrograms,
-            'waitProgramsProvider' => $waitProgramsProvider,
-            'searchClosedPrograms' => $searchClosedPrograms,
-            'closedProgramsProvider' => $closedProgramsProvider,
+            'searchOpenPrograms'      => $searchOpenPrograms,
+            'openProgramsProvider'    => $openProgramsProvider,
+            'searchWaitPrograms'      => $searchWaitPrograms,
+            'waitProgramsProvider'    => $waitProgramsProvider,
+            'searchClosedPrograms'    => $searchClosedPrograms,
+            'closedProgramsProvider'  => $closedProgramsProvider,
             'allOpenProgramsProvider' => $allOpenProgramsProvider,
             'allWaitProgramsProvider' => $allWaitProgramsProvider,
 
             'ProgramsallProvider' => $ProgramsallProvider,
-            'YearsallProvider' => $YearsallProvider,
-            'GroupsallProvider' => $GroupsallProvider,
+            'YearsallProvider'    => $YearsallProvider,
+            'GroupsallProvider'   => $GroupsallProvider,
         ]);
     }
 
@@ -342,16 +343,16 @@ class PersonalController extends Controller
     {
         $searchCertificates = new CertificatesSearch([
             'enableContractsCount' => true,
-            'onlyPayerIds' => Yii::$app->user->identity->payer->id,
-            'nominal' => '0,150000',
-            'rezerv' => '0,150000',
-            'balance' => '0,150000',
+            'onlyPayerIds'         => Yii::$app->user->identity->payer->id,
+            'nominal'              => '0,150000',
+            'rezerv'               => '0,150000',
+            'balance'              => '0,150000',
         ]);
         $certificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
 
         return $this->render('payer-certificates', [
             'certificatesProvider' => $certificatesProvider,
-            'searchCertificates' => $searchCertificates,
+            'searchCertificates'   => $searchCertificates,
         ]);
     }
 
@@ -364,32 +365,32 @@ class PersonalController extends Controller
         $user = Yii::$app->user->getIdentity();
         $payer = $user->payer;
         $searchActiveContracts = new ContractsSearch([
-            'payer_id' => $payer->id,
-            'status' => Contracts::STATUS_ACTIVE,
-            'paid' => '0,150000',
-            'rezerv' => '0,150000',
+            'payer_id'  => $payer->id,
+            'status'    => Contracts::STATUS_ACTIVE,
+            'paid'      => '0,150000',
+            'rezerv'    => '0,150000',
             'modelName' => 'SearchActiveContracts'
         ]);
         $activeContractsProvider = $searchActiveContracts->search(Yii::$app->request->queryParams);
 
         $searchConfirmedContracts = new ContractsSearch([
-            'payer_id' => $payer->id,
-            'status' => Contracts::STATUS_ACCEPTED,
+            'payer_id'  => $payer->id,
+            'status'    => Contracts::STATUS_ACCEPTED,
             'modelName' => 'SearchConfirmedContracts'
         ]);
         $confirmedContractsProvider = $searchConfirmedContracts->search(Yii::$app->request->queryParams);
 
         $searchPendingContracts = new ContractsSearch([
-            'payer_id' => $payer->id,
-            'status' => Contracts::STATUS_CREATED,
+            'payer_id'  => $payer->id,
+            'status'    => Contracts::STATUS_CREATED,
             'modelName' => 'SearchPendingContracts'
         ]);
         $pendingContractsProvider = $searchPendingContracts->search(Yii::$app->request->queryParams);
 
         $searchDissolvedContracts = new ContractsSearch([
-            'payer_id' => $payer->id,
-            'status' => Contracts::STATUS_CLOSED,
-            'paid' => '0,150000',
+            'payer_id'  => $payer->id,
+            'status'    => Contracts::STATUS_CLOSED,
+            'paid'      => '0,150000',
             'modelName' => 'SearchDissolvedContracts'
         ]);
         $dissolvedContractsProvider = $searchDissolvedContracts->search(Yii::$app->request->queryParams);
@@ -398,13 +399,13 @@ class PersonalController extends Controller
         $ContractsallProvider = $searchContractsall->search(Yii::$app->request->queryParams);
 
         return $this->render('payer-contracts', [
-            'searchActiveContracts' => $searchActiveContracts,
-            'activeContractsProvider' => $activeContractsProvider,
-            'searchConfirmedContracts' => $searchConfirmedContracts,
+            'searchActiveContracts'      => $searchActiveContracts,
+            'activeContractsProvider'    => $activeContractsProvider,
+            'searchConfirmedContracts'   => $searchConfirmedContracts,
             'confirmedContractsProvider' => $confirmedContractsProvider,
-            'searchPendingContracts' => $searchPendingContracts,
-            'pendingContractsProvider' => $pendingContractsProvider,
-            'searchDissolvedContracts' => $searchDissolvedContracts,
+            'searchPendingContracts'     => $searchPendingContracts,
+            'pendingContractsProvider'   => $pendingContractsProvider,
+            'searchDissolvedContracts'   => $searchDissolvedContracts,
             'dissolvedContractsProvider' => $dissolvedContractsProvider,
 
             'ContractsallProvider' => $ContractsallProvider,
@@ -417,51 +418,51 @@ class PersonalController extends Controller
     public function actionPayerOrganizations()
     {
         $searchRegistry = new OrganizationSearch([
-            'statusArray' => [Organization::STATUS_ACTIVE],
-            'cooperateStatus' => Cooperate::STATUS_ACTIVE,
+            'statusArray'      => [Organization::STATUS_ACTIVE],
+            'cooperateStatus'  => Cooperate::STATUS_ACTIVE,
             'cooperatePayerId' => Yii::$app->user->getIdentity()->payer->id,
-            'programs' => '0,1000',
-            'children' => '0,10000',
-            'amount_child' => '0,10000',
-            'raiting' => '0,100',
-            'max_child' => '0,10000',
-            'modelName' => 'SearchRegistry',
+            'programs'         => '0,1000',
+            'children'         => '0,10000',
+            'amount_child'     => '0,10000',
+            'raiting'          => '0,100',
+            'max_child'        => '0,10000',
+            'modelName'        => 'SearchRegistry',
         ]);
         $registryProvider = $searchRegistry->search(Yii::$app->request->queryParams);
 
         $searchRequest = new OrganizationSearch([
-            'statusArray' => [Organization::STATUS_ACTIVE],
-            'cooperateStatus' => Cooperate::STATUS_NEW,
+            'statusArray'      => [Organization::STATUS_ACTIVE],
+            'cooperateStatus'  => Cooperate::STATUS_NEW,
             'cooperatePayerId' => Yii::$app->user->getIdentity()->payer->id,
-            'modelName' => 'SearchRequest',
+            'modelName'        => 'SearchRequest',
         ]);
         $requestProvider = $searchRequest->search(Yii::$app->request->queryParams);
 
         $searchReject = new OrganizationSearch([
-            'statusArray' => [Organization::STATUS_ACTIVE],
-            'cooperateStatus' => [Cooperate::STATUS_REJECTED, Cooperate::STATUS_APPEALED],
+            'statusArray'      => [Organization::STATUS_ACTIVE],
+            'cooperateStatus'  => [Cooperate::STATUS_REJECTED, Cooperate::STATUS_APPEALED],
             'cooperatePayerId' => Yii::$app->user->getIdentity()->payer->id,
-            'modelName' => 'SearchReject',
+            'modelName'        => 'SearchReject',
         ]);
         $rejectProvider = $searchReject->search(Yii::$app->request->queryParams);
 
         $searchConfirm = new OrganizationSearch([
-            'statusArray' => [Organization::STATUS_ACTIVE],
-            'cooperateStatus' => Cooperate::STATUS_CONFIRMED,
+            'statusArray'      => [Organization::STATUS_ACTIVE],
+            'cooperateStatus'  => Cooperate::STATUS_CONFIRMED,
             'cooperatePayerId' => Yii::$app->user->getIdentity()->payer->id,
-            'modelName' => 'SearchConfirm',
+            'modelName'        => 'SearchConfirm',
         ]);
         $confirmProvider = $searchConfirm->search(Yii::$app->request->queryParams);
 
         return $this->render('payer-organizations', [
-            'searchRegistry' => $searchRegistry,
+            'searchRegistry'   => $searchRegistry,
             'registryProvider' => $registryProvider,
-            'searchRequest' => $searchRequest,
-            'requestProvider' => $requestProvider,
-            'searchReject' => $searchReject,
-            'rejectProvider' => $rejectProvider,
-            'searchConfirm' => $searchConfirm,
-            'confirmProvider' => $confirmProvider,
+            'searchRequest'    => $searchRequest,
+            'requestProvider'  => $requestProvider,
+            'searchReject'     => $searchReject,
+            'rejectProvider'   => $rejectProvider,
+            'searchConfirm'    => $searchConfirm,
+            'confirmProvider'  => $confirmProvider,
         ]);
     }
 
@@ -490,7 +491,7 @@ class PersonalController extends Controller
         }
 
         return $this->render('payer-suborder-organizations', [
-            'searchModel' => $searchModel,
+            'searchModel'  => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
@@ -501,7 +502,7 @@ class PersonalController extends Controller
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('payer-all-organizations', [
-            'searchModel' => $searchModel,
+            'searchModel'  => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
@@ -516,17 +517,17 @@ class PersonalController extends Controller
 
         $searchPrograms = new ProgramsSearch([
             'verification' => [2],
-            'payerId' => $user->payer->id,
-            'hours' => '0,2000',
-            'limit' => '0,10000',
-            'rating' => '0,100',
-            'modelName' => '',
+            'payerId'      => $user->payer->id,
+            'hours'        => '0,2000',
+            'limit'        => '0,10000',
+            'rating'       => '0,100',
+            'modelName'    => '',
         ]);
         $programsProvider = $searchPrograms->search(Yii::$app->request->queryParams);
 
         return $this->render('payer-programs', [
             'programsProvider' => $programsProvider,
-            'searchPrograms' => $searchPrograms,
+            'searchPrograms'   => $searchPrograms,
         ]);
     }
 
@@ -539,11 +540,11 @@ class PersonalController extends Controller
         $user = Yii::$app->user->getIdentity();
 
         $searchPrograms = new ProgramsSearch([
-            'payerId' => $user->payer->id,
-            'hours' => '0,2000',
-            'limit' => '0,10000',
-            'rating' => '0,100',
-            'modelName' => 'SearchPrograms',
+            'payerId'         => $user->payer->id,
+            'hours'           => '0,2000',
+            'limit'           => '0,10000',
+            'rating'          => '0,100',
+            'modelName'       => 'SearchPrograms',
             'isMunicipalTask' => true,
         ]);
         $programsProvider = $searchPrograms->search(Yii::$app->request->queryParams);
@@ -568,7 +569,7 @@ class PersonalController extends Controller
         }
 
         return $this->render('payer-municipal-task', [
-            'searchPrograms' => $searchPrograms,
+            'searchPrograms'   => $searchPrograms,
             'programsProvider' => $programsProvider,
         ]);
     }
@@ -583,14 +584,14 @@ class PersonalController extends Controller
 
         $searchInvoices = new InvoicesSearch([
             //'status' => [0, 1, 2],
-            'payers_id' => $user->payer->id,
+            'payers_id'       => $user->payer->id,
             'organization_id' => ArrayHelper::getColumn($user->payer->cooperates, 'organization_id'),
-            'sum' => '0,10000000',
+            'sum'             => '0,10000000',
         ]);
         $invoicesProvider = $searchInvoices->search(Yii::$app->request->queryParams);
 
         return $this->render('payer-invoices', [
-            'searchInvoices' => $searchInvoices,
+            'searchInvoices'   => $searchInvoices,
             'invoicesProvider' => $invoicesProvider,
         ]);
     }
@@ -629,7 +630,7 @@ class PersonalController extends Controller
         }
 
         return $this->render('organization-info', [
-            'organization' => $organization,
+            'organization'         => $organization,
             'organizationSettings' => $organizationSettingsForm,
         ]);
     }
@@ -653,7 +654,7 @@ class PersonalController extends Controller
         $FavoritesProvider = $searchFavorites->search(Yii::$app->request->queryParams);
 
         return $this->render('organization-favorites', [
-            'searchFavorites' => $searchFavorites,
+            'searchFavorites'   => $searchFavorites,
             'FavoritesProvider' => $FavoritesProvider,
         ]);
     }
@@ -665,41 +666,41 @@ class PersonalController extends Controller
     {
         $searchOpenPrograms = new ProgramsSearch([
             'organization_id' => Yii::$app->user->identity->organization->id,
-            'verification' => [2],
-            'hours' => '0,2000',
-            'limit' => '0,10000',
-            'rating' => '0,100',
-            'modelName' => 'SearchOpenPrograms',
+            'verification'    => [2],
+            'hours'           => '0,2000',
+            'limit'           => '0,10000',
+            'rating'          => '0,100',
+            'modelName'       => 'SearchOpenPrograms',
         ]);
         $openProgramsProvider = $searchOpenPrograms->search(Yii::$app->request->queryParams);
 
         $searchWaitPrograms = new ProgramsSearch([
             'organization_id' => Yii::$app->user->identity->organization->id,
-            'verification' => [0, 1],
-            'open' => 0,
-            'hours' => '0,2000',
-            'limit' => '0,10000',
-            'rating' => '0,100',
-            'modelName' => 'SearchWaitPrograms',
+            'verification'    => [0, 1],
+            'open'            => 0,
+            'hours'           => '0,2000',
+            'limit'           => '0,10000',
+            'rating'          => '0,100',
+            'modelName'       => 'SearchWaitPrograms',
         ]);
         $waitProgramsProvider = $searchWaitPrograms->search(Yii::$app->request->queryParams);
 
         $searchClosedPrograms = new ProgramsSearch([
             'organization_id' => Yii::$app->user->identity->organization->id,
-            'verification' => [3],
-            'hours' => '0,2000',
-            'limit' => '0,10000',
-            'rating' => '0,100',
-            'modelName' => 'SearchClosedPrograms',
+            'verification'    => [3],
+            'hours'           => '0,2000',
+            'limit'           => '0,10000',
+            'rating'          => '0,100',
+            'modelName'       => 'SearchClosedPrograms',
         ]);
         $closedProgramsProvider = $searchClosedPrograms->search(Yii::$app->request->queryParams);
 
         return $this->render('organization-programs', [
-            'searchOpenPrograms' => $searchOpenPrograms,
-            'openProgramsProvider' => $openProgramsProvider,
-            'searchWaitPrograms' => $searchWaitPrograms,
-            'waitProgramsProvider' => $waitProgramsProvider,
-            'searchClosedPrograms' => $searchClosedPrograms,
+            'searchOpenPrograms'     => $searchOpenPrograms,
+            'openProgramsProvider'   => $openProgramsProvider,
+            'searchWaitPrograms'     => $searchWaitPrograms,
+            'waitProgramsProvider'   => $waitProgramsProvider,
+            'searchClosedPrograms'   => $searchClosedPrograms,
             'closedProgramsProvider' => $closedProgramsProvider,
         ]);
     }
@@ -711,16 +712,16 @@ class PersonalController extends Controller
     {
         $searchPrograms = new ProgramsSearch([
             'organization_id' => Yii::$app->user->identity->organization->id,
-            'hours' => '0,2000',
-            'limit' => '0,10000',
-            'rating' => '0,100',
-            'modelName' => 'SearchOpenPrograms',
+            'hours'           => '0,2000',
+            'limit'           => '0,10000',
+            'rating'          => '0,100',
+            'modelName'       => 'SearchOpenPrograms',
             'isMunicipalTask' => true,
         ]);
         $programsProvider = $searchPrograms->search(Yii::$app->request->queryParams);
 
         return $this->render('organization-municipal-task', [
-            'searchPrograms' => $searchPrograms,
+            'searchPrograms'   => $searchPrograms,
             'programsProvider' => $programsProvider,
         ]);
     }
@@ -734,42 +735,42 @@ class PersonalController extends Controller
         $user = Yii::$app->user->identity;
 
         $searchActiveContracts = new ContractsSearch([
-            'status' => Contracts::STATUS_ACTIVE,
-            'paid' => '0,150000',
-            'rezerv' => '0,150000',
-            'modelName' => 'SearchActiveContracts',
+            'status'          => Contracts::STATUS_ACTIVE,
+            'paid'            => '0,150000',
+            'rezerv'          => '0,150000',
+            'modelName'       => 'SearchActiveContracts',
             'organization_id' => $user->organization->id,
         ]);
         $activeContractsProvider = $searchActiveContracts->search(Yii::$app->request->queryParams);
 
         $searchConfirmedContracts = new ContractsSearch([
-            'status' => Contracts::STATUS_ACCEPTED,
-            'modelName' => 'SearchConfirmedContracts',
+            'status'          => Contracts::STATUS_ACCEPTED,
+            'modelName'       => 'SearchConfirmedContracts',
             'organization_id' => $user->organization->id,
         ]);
         $confirmedContractsProvider = $searchConfirmedContracts->search(Yii::$app->request->queryParams);
 
         $searchPendingContracts = new ContractsSearch([
-            'status' => Contracts::STATUS_CREATED,
-            'modelName' => 'SearchPendingContracts',
+            'status'          => Contracts::STATUS_CREATED,
+            'modelName'       => 'SearchPendingContracts',
             'organization_id' => $user->organization->id,
         ]);
         $pendingContractsProvider = $searchPendingContracts->search(Yii::$app->request->queryParams);
 
         $searchDissolvedContracts = new ContractsSearch([
-            'status' => Contracts::STATUS_CLOSED,
-            'paid' => '0,150000',
-            'modelName' => 'SearchDissolvedContracts',
+            'status'          => Contracts::STATUS_CLOSED,
+            'paid'            => '0,150000',
+            'modelName'       => 'SearchDissolvedContracts',
             'organization_id' => $user->organization->id,
         ]);
         $dissolvedContractsProvider = $searchDissolvedContracts->search(Yii::$app->request->queryParams);
 
         $searchEndsContracts = new ContractsSearch([
-            'status' => Contracts::STATUS_ACTIVE,
-            'paid' => '0,150000',
-            'rezerv' => '0,150000',
-            'wait_termnate' => 1,
-            'modelName' => 'SearchEndsContracts',
+            'status'          => Contracts::STATUS_ACTIVE,
+            'paid'            => '0,150000',
+            'rezerv'          => '0,150000',
+            'wait_termnate'   => 1,
+            'modelName'       => 'SearchEndsContracts',
             'organization_id' => $user->organization->id,
         ]);
         $endsContractsProvider = $searchEndsContracts->search(Yii::$app->request->queryParams);
@@ -778,16 +779,16 @@ class PersonalController extends Controller
         $ContractsallProvider = $searchContractsall->search(Yii::$app->request->queryParams);
 
         return $this->render('organization-contracts', [
-            'searchActiveContracts' => $searchActiveContracts,
-            'activeContractsProvider' => $activeContractsProvider,
-            'searchConfirmedContracts' => $searchConfirmedContracts,
+            'searchActiveContracts'      => $searchActiveContracts,
+            'activeContractsProvider'    => $activeContractsProvider,
+            'searchConfirmedContracts'   => $searchConfirmedContracts,
             'confirmedContractsProvider' => $confirmedContractsProvider,
-            'searchPendingContracts' => $searchPendingContracts,
-            'pendingContractsProvider' => $pendingContractsProvider,
-            'searchDissolvedContracts' => $searchDissolvedContracts,
+            'searchPendingContracts'     => $searchPendingContracts,
+            'pendingContractsProvider'   => $pendingContractsProvider,
+            'searchDissolvedContracts'   => $searchDissolvedContracts,
             'dissolvedContractsProvider' => $dissolvedContractsProvider,
-            'searchEndsContracts' => $searchEndsContracts,
-            'endsContractsProvider' => $endsContractsProvider,
+            'searchEndsContracts'        => $searchEndsContracts,
+            'endsContractsProvider'      => $endsContractsProvider,
 
             'ContractsallProvider' => $ContractsallProvider,
         ]);
@@ -803,14 +804,14 @@ class PersonalController extends Controller
 
         $searchInvoices = new InvoicesSearch([
             //'status' => [0, 1, 2],
-            'payers_id' => $user->payer->id,
+            'payers_id'       => $user->payer->id,
             'organization_id' => $user->organization->id,
-            'sum' => '0,10000000',
+            'sum'             => '0,10000000',
         ]);
         $invoicesProvider = $searchInvoices->search(Yii::$app->request->queryParams);
 
         return $this->render('organization-invoices', [
-            'searchInvoices' => $searchInvoices,
+            'searchInvoices'   => $searchInvoices,
             'invoicesProvider' => $invoicesProvider,
         ]);
     }
@@ -850,53 +851,53 @@ class PersonalController extends Controller
         $user = Yii::$app->user->getIdentity();
 
         $searchOpenPayers = new PayersSearch([
-            'certificates' => '0,150000',
-            'cooperates' => '0,100',
-            'cooperateStatus' => Cooperate::STATUS_ACTIVE,
+            'certificates'          => '0,150000',
+            'cooperates'            => '0,100',
+            'cooperateStatus'       => Cooperate::STATUS_ACTIVE,
             'cooperateOrganization' => $user->organization->id,
-            'onlyPayers' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
-            'modelName' => 'SearchOpenPayers',
+            'onlyPayers'            => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
+            'modelName'             => 'SearchOpenPayers',
         ]);
         $openPayersProvider = $searchOpenPayers->search(Yii::$app->request->queryParams);
 
         $searchWaitPayers = new PayersSearch([
-            'certificates' => '0,150000',
-            'cooperates' => '0,100',
-            'cooperateStatus' => Cooperate::STATUS_NEW,
+            'certificates'          => '0,150000',
+            'cooperates'            => '0,100',
+            'cooperateStatus'       => Cooperate::STATUS_NEW,
             'cooperateOrganization' => $user->organization->id,
-            'onlyPayers' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
-            'modelName' => 'SearchWaitPayers',
+            'onlyPayers'            => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
+            'modelName'             => 'SearchWaitPayers',
         ]);
         $waitPayersProvider = $searchWaitPayers->search(Yii::$app->request->queryParams);
 
         $searchRejectPayers = new PayersSearch([
-            'certificates' => '0,150000',
-            'cooperates' => '0,100',
-            'cooperateStatus' => [Cooperate::STATUS_REJECTED, Cooperate::STATUS_APPEALED],
+            'certificates'          => '0,150000',
+            'cooperates'            => '0,100',
+            'cooperateStatus'       => [Cooperate::STATUS_REJECTED, Cooperate::STATUS_APPEALED],
             'cooperateOrganization' => $user->organization->id,
-            'onlyPayers' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
-            'modelName' => 'SearchRejectPayers',
+            'onlyPayers'            => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
+            'modelName'             => 'SearchRejectPayers',
         ]);
         $rejectPayersProvider = $searchRejectPayers->search(Yii::$app->request->queryParams);
 
         $searchConfirmPayers = new PayersSearch([
-            'certificates' => '0,150000',
-            'cooperates' => '0,100',
-            'cooperateStatus' => Cooperate::STATUS_CONFIRMED,
+            'certificates'          => '0,150000',
+            'cooperates'            => '0,100',
+            'cooperateStatus'       => Cooperate::STATUS_CONFIRMED,
             'cooperateOrganization' => $user->organization->id,
-            'onlyPayers' => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
-            'modelName' => 'SearchConfirmPayers',
+            'onlyPayers'            => ArrayHelper::getColumn($user->organization->cooperates, 'payer_id'),
+            'modelName'             => 'SearchConfirmPayers',
         ]);
         $confirmPayersProvider = $searchConfirmPayers->search(Yii::$app->request->queryParams);
 
         return $this->render('organization-payers', [
-            'searchOpenPayers' => $searchOpenPayers,
-            'openPayersProvider' => $openPayersProvider,
-            'searchWaitPayers' => $searchWaitPayers,
-            'waitPayersProvider' => $waitPayersProvider,
-            'searchRejectPayers' => $searchRejectPayers,
-            'rejectPayersProvider' => $rejectPayersProvider,
-            'searchConfirmPayers' => $searchConfirmPayers,
+            'searchOpenPayers'      => $searchOpenPayers,
+            'openPayersProvider'    => $openPayersProvider,
+            'searchWaitPayers'      => $searchWaitPayers,
+            'waitPayersProvider'    => $waitPayersProvider,
+            'searchRejectPayers'    => $searchRejectPayers,
+            'rejectPayersProvider'  => $rejectPayersProvider,
+            'searchConfirmPayers'   => $searchConfirmPayers,
             'confirmPayersProvider' => $confirmPayersProvider,
         ]);
     }
@@ -915,7 +916,7 @@ class PersonalController extends Controller
         $groupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
 
         return $this->render('organization-groups', [
-            'searchGroups' => $searchGroups,
+            'searchGroups'   => $searchGroups,
             'groupsProvider' => $groupsProvider,
         ]);
     }
@@ -970,13 +971,13 @@ class PersonalController extends Controller
 
 
         return $this->render('certificate-statistic', [
-            'model' => $model,
-            'contracts_count' => $contracts_count,
-            'contracts_wait_count' => $contracts_wait_count,
+            'model'                  => $model,
+            'contracts_count'        => $contracts_count,
+            'contracts_wait_count'   => $contracts_wait_count,
             'contracts_wait_request' => $contracts_wait_request,
-            'contracts_arhive' => $contracts_arhive,
-            'contracts_previus' => $contracts_previus,
-            'contracts_favorites' => $contracts_favorites,
+            'contracts_arhive'       => $contracts_arhive,
+            'contracts_previus'      => $contracts_previus,
+            'contracts_favorites'    => $contracts_favorites,
         ]);
     }
 
@@ -1016,7 +1017,7 @@ class PersonalController extends Controller
         $Contracts3Provider = $Contracts3Search->search(Yii::$app->request->queryParams);
 
         return $this->render('certificate-wait-contract', [
-            'Contracts3Search' => $Contracts3Search,
+            'Contracts3Search'   => $Contracts3Search,
             'Contracts3Provider' => $Contracts3Provider,
         ]);
     }
@@ -1030,7 +1031,7 @@ class PersonalController extends Controller
         $ContractsnProvider = $ContractsnSearch->search(Yii::$app->request->queryParams);
 
         return $this->render('certificate-wait-request', [
-            'ContractsnSearch' => $ContractsnSearch,
+            'ContractsnSearch'   => $ContractsnSearch,
             'ContractsnProvider' => $ContractsnProvider,
         ]);
     }
@@ -1046,7 +1047,7 @@ class PersonalController extends Controller
         $PrevProvider = $searchPrev->search(Yii::$app->request->queryParams);
 
         return $this->render('certificate-previus', [
-            'searchPrev' => $searchPrev,
+            'searchPrev'   => $searchPrev,
             'PrevProvider' => $PrevProvider,
         ]);
     }
@@ -1061,7 +1062,7 @@ class PersonalController extends Controller
         $Contracts1Provider = $searchContracts1->search(Yii::$app->request->queryParams);
 
         return $this->render('certificate-contracts', [
-            'searchContracts1' => $searchContracts1,
+            'searchContracts1'   => $searchContracts1,
             'Contracts1Provider' => $Contracts1Provider,
         ]);
     }
@@ -1081,9 +1082,9 @@ class PersonalController extends Controller
 
 
         return $this->render('certificate-archive', [
-            'Contracts2Search' => $Contracts2Search,
+            'Contracts2Search'   => $Contracts2Search,
             'Contracts2Provider' => $Contracts2Provider,
-            'Contracts4Search' => $Contracts4Search,
+            'Contracts4Search'   => $Contracts4Search,
             'Contracts4Provider' => $Contracts4Provider,
         ]);
     }
@@ -1099,7 +1100,7 @@ class PersonalController extends Controller
         $FavoritesProvider = $searchFavorites->search(Yii::$app->request->queryParams);
 
         return $this->render('certificate-favorites', [
-            'searchFavorites' => $searchFavorites,
+            'searchFavorites'   => $searchFavorites,
             'FavoritesProvider' => $FavoritesProvider,
         ]);
     }
@@ -1111,33 +1112,37 @@ class PersonalController extends Controller
     {
         $searchModel = new ProgramsSearch([
             'verification' => 2,
-            'hours' => '0,2000',
-            'rating' => '0,100',
-            'mun' => Yii::$app->user->identity->mun_id,
-            'modelName' => '',
+            'hours'        => '0,2000',
+            'rating'       => '0,100',
+            'mun'          => Yii::$app->user->identity->mun_id,
+            'modelName'    => '',
         ]);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        if ($searchModel->organization_id) {
+            Yii::$app->session->setFlash('success', 'Поиск по организации ' . $searchModel->getOrganization()->one()->name);
+        }
+        ProgramsAsset::register($this->view);
 
-        return $this->render('certificate-search', [
+        return $this->render('certificate/list', [
             'dataProvider' => $dataProvider,
-            'searchModel' => $searchModel,
+            'searchModel'  => $searchModel,
         ]);
     }
 
     public function actionCertificateOrganizations()
     {
         $searchOrganization = new OrganizationSearch([
-            'programs' => '0,1000',
-            'children' => '0,10000',
-            'raiting' => '0,100',
-            'max_child' => '0,10000',
-            'modelName' => '',
+            'programs'    => '0,1000',
+            'children'    => '0,10000',
+            'raiting'     => '0,100',
+            'max_child'   => '0,10000',
+            'modelName'   => '',
             'statusArray' => Organization::STATUS_ACTIVE,
         ]);
         $organizationProvider = $searchOrganization->search(Yii::$app->request->queryParams);
 
         return $this->render('certificate-organizations', [
-            'searchOrganization' => $searchOrganization,
+            'searchOrganization'   => $searchOrganization,
             'organizationProvider' => $organizationProvider,
         ]);
     }

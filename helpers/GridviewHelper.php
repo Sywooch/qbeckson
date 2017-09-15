@@ -25,15 +25,17 @@ class GridviewHelper
         array $columns,
         $type = null,
         $excludeType = 'gridView',
-        $excludeAttributes = ['type', 'data', 'searchFilter', 'gridView', 'pluginOptions']
+        $excludeAttributes = ['type', 'data', 'searchFilter', 'gridView', 'pluginOptions'],
+        $customizable = true
     ) {
         /** @var UserIdentity $user */
         $user = Yii::$app->user->identity;
-        if ($userFilter = $user->getFilterSettings($table, $type)) {
+        if ($customizable && ($userFilter = $user->getFilterSettings($table, $type))) {
             $inaccessibleColumns = $userFilter->filter->inaccessibleColumns;
             $otherColumns = $userFilter->columns;
+        } else {
+            $userFilter = null;
         }
-
         foreach ($columns as $index => $column) {
             if (isset($column['type']) && $column['type'] === SearchFilter::TYPE_HIDDEN && null !== $excludeAttributes) {
                 unset($columns[$index]);
@@ -57,6 +59,7 @@ class GridviewHelper
             if (!empty($excludeAttributes)) {
                 foreach ($excludeAttributes as $excludeAttribute) {
                     if (isset($column[$excludeAttribute])) {
+                        Yii::trace($column['attribute'] . ' - Exclude');
                         unset($columns[$index][$excludeAttribute]);
                     }
                 }

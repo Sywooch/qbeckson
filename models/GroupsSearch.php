@@ -2,11 +2,8 @@
 
 namespace app\models;
 
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Groups;
-use app\models\Organization;
 
 
 /**
@@ -45,31 +42,22 @@ class GroupsSearch extends Groups
     {
         $query = Groups::find();
 
-        // add conditions that should always apply here
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
-
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
             $query->where('0=1');
+
             return $dataProvider;
         }
-
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
-
-
         $query->andFilterWhere([
-            'id' => $this->id,
+            'id'              => $this->id,
             'organization_id' => $this->organization_id,
-            'program_id' => $this->program_id,
-            'year_id' => $this->year_id,
+            'program_id'      => $this->program_id,
+            'year_id'         => $this->year_id,
         ]);
-
         $query->andFilterWhere(['like', 'name', $this->name]);
 
         return $dataProvider;

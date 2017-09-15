@@ -1,0 +1,75 @@
+//colors
+$white: #FFFFFF
+$black: #000
+$green: #18b92e
+$blue: #4d78ff
+$orange: #ff872f
+$red: #cb1b1e
+$violet: #913dff
+$yellow: #ffdc00
+$grey: #e2dee0
+
+$color-theme: #0c5eaf
+
+$color-black-default: shade($color-theme, 50%)
+$color-bold-default: shade($color-theme, 30%)
+$color-medium-default: tint($color-theme, 30%)
+$color-light-default: tint($color-theme, 70%)
+$color-ultra-light-default: tint($color-theme, 85%)
+$color-very-light-default: tint($color-theme, 98%)
+
+$default-color: $white
+$primary-color: #0c5eaf
+$success-color: #5cb85c
+$info-color: #5bc0de
+$warning-color: #f0ad4e
+$danger-color: #d9534f
+
+$color-body-bg: $color-very-light-default
+
+//font
+$font-family-default: "Open Sans", sans-serif
+$font-size-default: 14px
+$font-size-h2: round($font-size-default * 3 / 2)
+$font-size-h3: round($font-size-default * 5 / 4)
+$text-height-default: 1.4
+$font-height-element-default: 1
+$font-color-default: #333
+$text-color-aux: $white
+
+//border
+$default-line-width: 1px
+$default-border-radius: 2px
+$top-border-radius: $default-border-radius $default-border-radius 0 0
+$bottom-border-radius: 0 0 $default-border-radius $default-border-radius
+
+$tab-border: $default-line-width solid $color-medium-default
+
+//paddings
+$padding-vert-default: 8px
+$padding-hor-default: $padding-vert-default * 1.5 + $default-border-radius
+$padding-active-element: $padding-vert-default $padding-hor-default
+$padding-panel: $padding-hor-default
+
+//margins
+$margin-hor-default: 12px
+$margin-vert-default: $margin-hor-default
+
+//buttons
+$color-button-text-default: $white
+$color-button-border-default: darken($color-theme, 10%)
+$default-btn-font-weight: 400
+
+//tables
+$table-line-color: #0c5eaf
+
+//card-badges
+$card-badge-size: 42px
+
+//shadow
+$default-shadow: 0 10px rgba($color-theme, 0.2)
+
+//transition
+$transition-duration-default: 300ms
+$transition-animation-default: ease
+$transition-default: $transition-duration-default $transition-animation-default

@@ -1,11 +1,11 @@
 <?php
 
-use app\models\UserIdentity;
-use yii\helpers\Url;
-use yii\helpers\Html;
-use yii\widgets\DetailView;
-use app\models\Payers;
 use app\models\Cooperate;
+use app\models\Payers;
+use app\models\UserIdentity;
+use yii\helpers\Html;
+use yii\helpers\Url;
+use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Organization */
@@ -218,7 +218,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => Html::a(
                     'Сертифицированных программ',
-                    Url::to(['/programs/search', 'org' => $model->id]),
+                    Url::to(['/personal/certificate-programs', 'organization_id' => $model->id]),
                     ['class' => 'blue', 'target' => '_blank']
                 ),
                 'value'=>$model->getCertprogram(),

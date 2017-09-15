@@ -2,31 +2,28 @@
 
 namespace app\controllers;
 
+use app\assets\programsAsset\ProgramsAsset;
+use app\models\AllProgramsSearch;
+use app\models\Cooperate;
 use app\models\forms\ProgramAddressesForm;
-use app\models\ProgramAddressAssignment;
-use Yii;
+use app\models\Informs;
+use app\models\Model;
+use app\models\Organization;
+use app\models\ProgrammeModule;
 use app\models\Programs;
 use app\models\ProgramsallSearch;
-use app\models\ProgramsPreviusSearch;
-use app\models\AllProgramsSearch;
-use app\models\Certificates;
-use app\models\ProgrammeModule;
-use app\models\Groups;
-use yii\web\Controller;
-use yii\web\NotFoundHttpException;
-use yii\web\ForbiddenHttpException;
-use yii\filters\VerbFilter;
-use app\models\Informs;
-use app\models\Organization;
-use app\models\Cooperate;
-use yii\web\UploadedFile;
 use app\models\ProgramsFile;
-use app\models\Model;
-use yii\web\Response;
-use yii\widgets\ActiveForm;
+use app\models\ProgramsPreviusSearch;
+use app\models\UserIdentity;
+use Yii;
+use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
-use app\models\Contracts;
-use app\models\User;
+use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
+use yii\web\NotFoundHttpException;
+use yii\web\Response;
+use yii\web\UploadedFile;
+use yii\widgets\ActiveForm;
 
 /**
  * ProgramsController implements the CRUD actions for Programs model.
@@ -41,7 +38,7 @@ class ProgramsController extends Controller
     {
         return [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class'   => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
                 ],
@@ -51,6 +48,7 @@ class ProgramsController extends Controller
 
     /**
      * @param integer $id
+     *
      * @return string|Response
      */
     public function actionAddAddresses($id)
@@ -69,13 +67,32 @@ class ProgramsController extends Controller
         }
 
         return $this->render('add-addresses', [
-            'model' => $form,
+            'model'   => $form,
             'program' => $program,
         ]);
     }
 
     /**
+     * Finds the Programs model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     *
      * @param integer $id
+     *
+     * @return Programs the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = Programs::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+    }
+
+    /**
+     * @param integer $id
+     *
      * @return string|Response
      */
     public function actionAddPhoto($id)
@@ -101,7 +118,7 @@ class ProgramsController extends Controller
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
-            'searchModel' => $searchModel,
+            'searchModel'  => $searchModel,
         ]);
     }
 
@@ -118,7 +135,7 @@ class ProgramsController extends Controller
 
         return $this->render('search', [
             'dataProvider' => $dataProvider,
-            'searchModel' => $searchModel,
+            'searchModel'  => $searchModel,
         ]);
     }
 
@@ -133,78 +150,59 @@ class ProgramsController extends Controller
 
         return $this->render('previus', [
             'dataProvider' => $dataProvider,
-            'searchModel' => $searchModel,
+            'searchModel'  => $searchModel,
         ]);
     }
 
     /**
      * Displays a single Programs model.
+     *
      * @param integer $id
+     *
      * @return mixed
      * @throws ForbiddenHttpException
      */
     public function actionView($id)
     {
+        /** @var $user UserIdentity */
+        $user = Yii::$app->user->identity;
         $model = $this->findModel($id);
-        $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-        if (isset($roles['organizations'])) {
-            $organizations = new Organization();
-            $organization = $organizations->getOrganization();
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
+            && $user->organization->id !== $model->organization_id) {
 
-            if ($organization['id'] != $model->organization_id) {
-                throw new ForbiddenHttpException('Нет доступа');
-            }
+            throw new ForbiddenHttpException('Нет доступа');
         }
+        $cooperate = null;
+        if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
+            $cooperate = Cooperate::find()->where([
+                Cooperate::tableName() . '.payer_id'        => $user->getCertificate()->select('payer_id'),
+                Cooperate::tableName() . '.organization_id' => $model->organization_id])->all();
 
 
-        $year = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('years')
-            ->where(['program_id' => $id])
-            ->all();
+            /*            $certificate = $user->certificate;
+                        $rows = (new \yii\db\Query())
+                            ->select(['id'])
+                            ->from('cooperate')
+                            ->where(['payer_id' => $certificate->payer_id])
+                            ->andWhere(['organization_id' => $model->organization_id])
+                            ->andWhere(['status' => 1])
+                            ->count();*/
 
-        $i = 0;
-        foreach ($year as $value) {
-            $years[$i] = ProgrammeModule::findOne($value['id']);
-            $i++;
-        }
-
-        if (isset($roles['certificate'])) {
-            $certificates = new Certificates();
-            $certificate = $certificates->getCertificates();
-
-            $cont = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('contracts')
-                ->where(['program_id' => $id])
-                ->andWhere(['certificate_id' => $certificate->id])
-                ->andWhere(['status' => 0])
-                ->one();
-
-            $rows = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('cooperate')
-                ->where(['payer_id' => $certificate['payer_id']])
-                ->andWhere(['organization_id' => $model['organization_id']])
-                ->andWhere(['status' => 1])
-                ->count();
-
-            if ($rows == 0) {
+            if (!count($cooperate)) {
                 Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в организацию, реализующую выбранную программу. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
             }
-
-            return $this->render('view', [
-                'model' => $this->findModel($model['id']),
-                'years' => $years,
-                'cont' => $cont,
-                'cooperate' => $rows,
-            ]);
         }
 
-        return $this->render('view', [
-            'model' => $model,
-            'years' => $years,
-        ]);
+
+        ProgramsAsset::register($this->view);
+
+        return $this->render('view/view', ['model' => $model, 'cooperate' => $cooperate]);
+
+        /* return $this->render('view', [
+             'model'     => $model,
+             'years'     => $model->years,
+             'cooperate' => $rows,
+         ]);*/
     }
 
     /**
@@ -227,19 +225,18 @@ class ProgramsController extends Controller
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
 
-                return ArrayHelper::merge(
+                return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelsYears),
                     ActiveForm::validate($model)
-                );
+                ));
             }
 
 
             $organizations = new Organization();
             $organization = $organizations->getOrganization();
             $model->organization_id = $organization['id'];
-            $model->verification = 0;
+            $model->verification = Programs::VERIFICATION_UNDEFINED;
             $model->open = 0;
             if ($model->ovz == 2) {
                 if (!empty($model->zab)) {
@@ -255,8 +252,8 @@ class ProgramsController extends Controller
                     Yii::$app->session->setFlash('error', 'Пожалуйста, добавьте файл образовательной программы.');
 
                     return $this->render('create', [
-                        'model' => $model,
-                        'file' => $file,
+                        'model'       => $model,
+                        'file'        => $file,
                         'modelsYears' => $modelsYears,
                     ]);
                 }
@@ -394,12 +391,11 @@ class ProgramsController extends Controller
         }
 
         return $this->render('create', [
-            'model' => $model,
-            'file' => $file,
+            'model'       => $model,
+            'file'        => $file,
             'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
         ]);
     }
-
 
     public function actionVerificate($id)
     {
@@ -417,7 +413,7 @@ class ProgramsController extends Controller
             $i++;
         }
 
-        $model->verification = 1;
+        $model->verification = Programs::VERIFICATION_WAIT;
         //$model->zab = explode(',', $model->zab);
 
         if ($model->save()) {
@@ -454,7 +450,7 @@ class ProgramsController extends Controller
             $model->limit = Yii::$app->coefficient->data->blimsoc * $model->year;
         }
 
-        $model->verification = 2;
+        $model->verification = Programs::VERIFICATION_DONE;
 
         //return var_dump($model->limit);
         if ($model->save()) {
@@ -471,7 +467,6 @@ class ProgramsController extends Controller
         }
     }
 
-
     public function actionCertificate($id)
     {
         $model = $this->findModel($id);
@@ -486,12 +481,11 @@ class ProgramsController extends Controller
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
 
-                return ArrayHelper::merge(
+                return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelsYears),
                     ActiveForm::validate($model)
-                );
+                ));
             }
 
             $valid = $model->validate();
@@ -642,7 +636,7 @@ class ProgramsController extends Controller
 
         } else {
             return $this->render('cert', [
-                'model' => $model,
+                'model'       => $model,
                 'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
             ]);
         }
@@ -662,12 +656,11 @@ class ProgramsController extends Controller
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
 
-                return ArrayHelper::merge(
+                return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelsYears),
                     ActiveForm::validate($model)
-                );
+                ));
             }
 
             $valid = $model->validate();
@@ -817,7 +810,7 @@ class ProgramsController extends Controller
 
         } else {
             return $this->render('newnormprice', [
-                'model' => $model,
+                'model'       => $model,
                 'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
             ]);
         }
@@ -845,6 +838,7 @@ class ProgramsController extends Controller
         }
 
         return $this->render('newnormpricesave', [
+            'title' => null,
             'model' => $model,
         ]);
 
@@ -877,10 +871,9 @@ class ProgramsController extends Controller
 
         return $this->render('certificate', [
             'model' => $model,
-            'year' => $year,
+            'year'  => $year,
         ]);
     }
-
 
     public function actionDecertificate($id)
     {
@@ -888,7 +881,7 @@ class ProgramsController extends Controller
         $informs = new Informs();
 
         if ($informs->load(Yii::$app->request->post())) {
-            $model->verification = 3;
+            $model->verification = Programs::VERIFICATION_DENIED;
 
             if ($model->save()) {
                 $informs->program_id = $model->id;
@@ -907,7 +900,7 @@ class ProgramsController extends Controller
 
         return $this->render('/informs/comment', [
             'informs' => $informs,
-            'model' => $model,
+            'model'   => $model,
         ]);
     }
 
@@ -935,7 +928,7 @@ class ProgramsController extends Controller
         }
 
         if (Yii::$app->request->isPost) {
-            if ($model->verification == 1) {
+            if ($model->verification == Programs::VERIFICATION_WAIT) {
                 Yii::$app->session->setFlash('error', 'Редактирование недоступно, программа проходит сертификацию.');
 
                 return $this->redirect(['/personal/organization-programs']);
@@ -958,7 +951,9 @@ class ProgramsController extends Controller
     /**
      * Updates an existing Programs model.
      * If update is successful, the browser will be redirected to the 'view' page.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionUpdate($id)
@@ -966,26 +961,19 @@ class ProgramsController extends Controller
         $model = $this->findModel($id);
         $modelYears = $model->years;
         $file = new ProgramsFile();
+        /** @var $organisation Organization */
         $model->zab = explode(',', $model->zab);
-
-        $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-
-        if (isset($roles['organizations'])) {
-            $organizations = new Organization();
-            $organization = $organizations->getOrganization();
-
-            if ($organization['id'] != $model->organization_id) {
+        $organization = Yii::$app->user->identity->organization;
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
+            && $organization->id !== $model->organization_id) {
                 throw new ForbiddenHttpException('Нет доступа');
-            }
         }
-
         if ($model->load(Yii::$app->request->post())) {
-            if ($model->verification == 1) {
+            if ($model->verification == Programs::VERIFICATION_WAIT) {
                 Yii::$app->session->setFlash('error', 'Редактирование недоступно, программа проходит сертификацию.');
 
                 return $this->redirect(['/personal/organization-programs']);
             }
-
             $file->docFile = UploadedFile::getInstance($file, 'docFile');
             if ($file->docFile) {
                 $datetime = microtime(true); // date("Y-m-d-G-i-s");
@@ -993,7 +981,7 @@ class ProgramsController extends Controller
                 $model->link = $filename;
                 $file->upload($filename);
             }
-            $model->verification = 0;
+            $model->verification = Programs::VERIFICATION_UNDEFINED;
             $model->open = 0;
             if ($model->zab) {
                 $model->zab = implode(',', $model->zab);
@@ -1006,12 +994,11 @@ class ProgramsController extends Controller
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
 
-                return ArrayHelper::merge(
+                return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelYears),
                     ActiveForm::validate($model)
-                );
+                ));
             }
 
             $valid = $model->validate();
@@ -1056,8 +1043,8 @@ class ProgramsController extends Controller
 
         } else {
             return $this->render('update', [
-                'model' => $model,
-                'file' => $file,
+                'model'      => $model,
+                'file'       => $file,
                 'modelYears' => (empty($modelYears)) ? [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])] : $modelYears
             ]);
         }
@@ -1079,12 +1066,11 @@ class ProgramsController extends Controller
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
 
-                return ArrayHelper::merge(
+                return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelYears),
                     ActiveForm::validate($model)
-                );
+                ));
             }
 
             $valid = $model->validate();
@@ -1120,8 +1106,8 @@ class ProgramsController extends Controller
 
         } else {
             return $this->render('edit', [
-                'model' => $model,
-                'file' => $file,
+                'model'      => $model,
+                'file'       => $file,
                 'modelYears' => (empty($modelYears)) ? [new ProgrammeModule] : $modelYears
             ]);
         }
@@ -1241,7 +1227,6 @@ class ProgramsController extends Controller
         return $this->redirect(['/personal/operator-programs']);
     }
 
-
     public function actionRaiting($id)
     {
         $model = $this->findModel($id);
@@ -1315,59 +1300,43 @@ class ProgramsController extends Controller
     }
 
     /**
-     * Deletes an existing Programs model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
+     * Ставит статус верификации "в архиве" программе если нет активных контрактов
+     *
      * @param integer $id
+     *
      * @return mixed
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     * @throws \Exception
+     * @throws \yii\db\StaleObjectException
      */
     public function actionDelete($id)
     {
-        $user = User::findOne(Yii::$app->user->id);
-
+        /** @var $identity UserIdentity */
+        $identity = Yii::$app->user->getIdentity();
+        $user = $identity->getUser()->setShortLoginScenario();
         if ($user->load(Yii::$app->request->post())) {
-            if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
+            if ($user->validate()) {
                 $model = $this->findModel($id);
+                if ($model->setIsArchive()) {
+                    Yii::$app->session->setFlash('success',
+                        sprintf('Программа %s отправлена в архив', $model->name));
 
-                $contracts = Contracts::find()
-                    ->where([
-                        'program_id' => $model->id,
-                        'status' => [0, 2, 3, 4],
-                    ])
-                    ->all();
-
-                foreach ($contracts as $contract) {
-                    $contract->delete();
+                    return $this->redirect(['/personal/organization-programs']);
+                } else {
+                    Yii::$app->session->setFlash('warning',
+                        sprintf('Удалить программу %s нельзя. Есть заявки или договоры на обучение', $model->name));
                 }
 
-                $model->delete();
-
-                return $this->redirect(['/personal/organization-programs']);
             } else {
                 Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
 
-                return $this->redirect(['/personal/organization-programs']);
+
             }
+
+            return $this->redirect(['/programs/view', 'id' => $id]);
         }
 
-        return $this->render('/user/delete', [
-            'user' => $user,
-            'title' => 'Удалить программу',
-        ]);
-    }
-
-    /**
-     * Finds the Programs model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Programs the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Programs::findOne($id)) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
+        throw new ForbiddenHttpException();
     }
 }

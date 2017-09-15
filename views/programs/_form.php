@@ -1,35 +1,59 @@
 <?php
 
+use app\models\Mun;
 use app\models\statics\DirectoryProgramActivity;
 use app\models\statics\DirectoryProgramDirection;
-use yii\helpers\Html;
-use yii\helpers\ArrayHelper;
-use app\models\Mun;
-use kartik\form\ActiveForm;
-use wbraganca\dynamicform\DynamicFormWidget;
 use kartik\field\FieldRange;
 use kartik\file\FileInput;
-use kartik\widgets\DepDrop;
+use kartik\form\ActiveForm;
 use kartik\select2\Select2;
+use kartik\widgets\DepDrop;
+use wbraganca\dynamicform\DynamicFormWidget;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Programs */
 /* @var $form yii\widgets\ActiveForm */
 
-$js = '
-jQuery(".dynamicform_wrapper").on("afterInsert", function(e, item) {
-    jQuery(".dynamicform_wrapper .panel-title").each(function(index) {
+$js = <<<JS
+const wrapper = jQuery(".dynamicform_wrapper");
+const panelTitle = jQuery(".dynamicform_wrapper .panel-title"); 
+wrapper.on("afterInsert", function(e, item) {
+    panelTitle.each(function(index) {
         jQuery(this).html((index + 1) + " модуль")
     });
 });
 
-jQuery(".dynamicform_wrapper").on("afterDelete", function(e) {
-    jQuery(".dynamicform_wrapper .panel-title").each(function(index) {
+wrapper.on("afterDelete", function(e) {
+   panelTitle.each(function(index) {
         jQuery(this).html((index + 1) + " модуль")
     });
 });
-';
+JS;
+$url = Url::to(['activity/add-activity']);
+$changeJS = <<<JS
+function() {
+                        var isNew = $(this).find('[data-select2-tag="true"]');
+                        var name = isNew.val();
+                        var directionId = $('#direction-id').val();
+                        if (isNew.length && name !== "...") {
+                            $.ajax({
+                            	type: "POST",
+                            	url: "$url",
+                            	data: {name: name, directionId: directionId},
+                            	success: function (id) {
+                            	    isNew.replaceWith('<option selected value=' + id +'>' + name + '</option>');
+                            	},
+                            	error: function (xhr, ajaxOptions, thrownError) { }
+                            });
+                        }
+                    }
+JS;
+
+
+
 $this->registerJs($js);
 ?>
 <div class="programs-form" ng-app>
@@ -61,22 +85,7 @@ $this->registerJs($js);
                     'maximumSelectionLength' => 3,
                 ],
                 'pluginEvents' => [
-                    'change' => 'function () {
-                        var isNew = $(this).find("[data-select2-tag=\"true\"]");
-                        var name = isNew.val();
-                        var directionId = $("#direction-id").val();
-                        if (isNew.length && name !== "...") {
-                            $.ajax({
-                            	type: "POST",
-                            	url: "' . Url::to(['activity/add-activity']) . '",
-                            	data: {name: name, directionId: directionId},
-                            	success: function (id) {
-                            	    isNew.replaceWith("<option selected value=" + id +">" + name + "</option>");
-                            	},
-                            	error: function (xhr, ajaxOptions, thrownError) { },
-                            });
-                        }
-                    }',
+                    'change' => new \yii\web\JsExpression($changeJS),
                 ],
             ],
             'pluginOptions' => [
