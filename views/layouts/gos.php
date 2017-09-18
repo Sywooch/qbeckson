@@ -4,7 +4,6 @@
 /* @var $content string */
 
 use app\assets\AppAsset;
-use app\models\Organization;
 use app\widgets\Alert;
 use app\widgets\MainFooter;
 use yii\bootstrap\Nav;
@@ -70,171 +69,6 @@ $user = Yii::$app->user->getIdentity();
                         'class' => 'container-fluid',
                     ],
                 ]);
-
-                if (Yii::$app->user->can('admins')) {
-                    echo Nav::widget([
-                        'options' => ['class' => 'navbar-nav'],
-                        'items' => [
-                            ['label' => 'Главная', 'url' => ['/personal/index']],
-                            [
-                                'label' => 'Ролевая система',
-                                'url' => ['/personal/index'],
-                                'items' => [
-                                    ['label' => 'Правила доступа', 'url' => ['/permit/access/permission']],
-                                    ['label' => 'Управление ролями', 'url' => ['/rbac-access/role']],
-                                    ['label' => 'Список пользователей', 'url' => ['/user/index']],
-                                ],
-                            ],
-                            [
-                                'label' => 'Импорт данных',
-                                'url' => ['/import/index'],
-                                'items' => [
-                                    ['label' => 'Дети (сертификаты)', 'url' => ['/import/children']],
-                                    ['label' => 'Корректировка паролей', 'url' => ['/import/children-password']],
-                                ],
-                            ],
-                            [
-                                'label' => 'Чистка данных',
-                                'url' => ['#'],
-                                'items' => [
-                                    ['label' => 'Удаление договоров', 'url' => ['/admin/cleanup/contract']],
-                                    ['label' => 'Удаление сертификатов', 'url' => ['/admin/cleanup/certificate']],
-                                ],
-                            ],
-                            [
-                                'label' => 'Другое',
-                                'url' => ['#'],
-                                'items' => [
-                                    [
-                                        'label' => 'Направленности программ',
-                                        'url' => ['admin/directory-program-direction/index']
-                                    ],
-                                    [
-                                        'label' => 'Настройки фильтров',
-                                        'url' => ['admin/search-filters/index']
-                                    ],
-                                    [
-                                        'label' => 'Руководство пользователей',
-                                        'url' => ['admin/help/index']
-                                    ],
-                                ],
-
-                            ]
-                        ],
-                    ]);
-                }
-
-                if (Yii::$app->user->can('operators')) {
-                    echo Nav::widget([
-                        'options' => ['class' => 'navbar-nav inner-nav'],
-                        'items' => [
-                            [
-                                'label' => 'Система',
-                                'items' => [
-                                    ['label' => 'Информация', 'url' => ['personal/operator-statistic']],
-                                    ['label' => 'Параметры системы', 'url' => ['operator/operator-settings']],
-
-                                ]
-                            ],
-                            ['label' => 'Коэффициенты', 'items' => [
-                                ['label' => 'Муниципалитеты', 'url' => ['/mun/index']],
-                                ['label' => 'Общие параметры', 'url' => ['/coefficient/update']],
-                                //['label' => 'Настройки системы', 'url' => ['/operators/params']],
-                            ]],
-                            [
-                                'label' => 'Плательщики',
-                                'items' => [
-                                    [
-                                        'label' => 'Уполномоченные Организации',
-                                        'url' => ['personal/operator-payers']
-                                    ],
-                                    ['label' => 'Соглашения', 'url' => ['personal/operator-cooperates']]
-                                ]
-                            ],
-                            ['label' => 'Организации', 'url' => ['/personal/operator-organizations']],
-                            ['label' => 'Сертификаты', 'url' => ['/personal/operator-certificates']],
-                            ['label' => 'Договоры', 'url' => ['/personal/operator-contracts']],
-                            ['label' => 'Программы', 'url' => ['/personal/operator-programs']],
-                        ],
-                    ]);
-                }
-
-                if (Yii::$app->user->can('payer')) {
-                    /** @var \app\models\UserIdentity $user */
-                    $user = Yii::$app->user->getIdentity();
-                    if ($user->payer->findUnconfirmedCooperates()) {
-                        Yii::$app->session->setFlash(
-                            'error',
-                            'У Вас есть просроченные заявки на заключение соглашения/договора с поставщиком образовательных услуг. Пожалуйста, отработайте заявку для получения доступа к полному функционалу системы.'
-                        );
-                        echo Nav::widget([
-                            'options' => ['class' => 'navbar-nav inner-nav'],
-                            'items' => [
-                                ['label' => 'Организации', 'items' => [
-                                    ['label' => 'Реестр ПФДО', 'url' => ['/personal/payer-organizations']],
-                                    //['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
-                                ]],
-                            ],
-                        ]);
-                    } else {
-                        echo Nav::widget([
-                            'options' => ['class' => 'navbar-nav inner-nav'],
-                            'items' => \app\helpers\PermissionHelper::getMenuItems(),
-                        ]);
-                    }
-                }
-
-                if (Yii::$app->user->can('organizations')) {
-                    /** @var \app\models\UserIdentity $user */
-                    $user = Yii::$app->user->getIdentity();
-                    if ($user->organization->hasEmptyInfo()) {
-                        Yii::$app->session->setFlash(
-                            'danger',
-                            $user->organization->type === Organization::TYPE_IP_WITHOUT_WORKERS ? 'Внимание! Перед выставлением первой оферты (подтверждения первой заявки) необходимо заполнить информацию "сведения об организации". Зайдите в указанный раздел меню и нажмите большую синюю кнопку "Создать шапку для договоров-оферт", заполните окончания в предлагаемом диалоговом окне. Без этой процедуры формируемые оферты будут некорректны!' : 'Внимание! Перед выставлением первой оферты (подтверждения первой заявки) необходимо заполнить информацию "сведения об организации". Введите все параметры, нажмите сохранить и заполните окончания в предлагаемом диалоговом окне. Без этой процедуры формируемые оферты будут некорректны!'
-                        );
-                    }
-                    echo Nav::widget([
-                        'options' => ['class' => 'navbar-nav inner-nav'],
-                        'items' => [
-                            ['label' => 'Информация', 'items' => [
-                                [
-                                    'label' => 'Статистическая информация',
-                                    'url' => ['/personal/organization-statistic']
-                                ],
-                                [
-                                    'label' => 'Сведения об организации',
-                                    'url' => ['/personal/organization-info']
-                                ],
-                                /*[
-                                    'label' => 'Предварительные записи',
-                                    'url' => ['/personal/organization-favorites']
-                                ],*/
-                                [
-                                    'label' => 'Адреса реализации образовательных программ',
-                                    'url' => ['organization/address/index']
-                                ],
-                            ]],
-                            ['label' => 'Программы', 'items' => [
-                                [
-                                    'label' => 'Реестр программ',
-                                    'url' => ['personal/organization-programs']
-                                ],
-                                /*[
-                                    'label' => 'Муниципальное задание',
-                                    'url' => ['personal/organization-municipal-task']
-                                ],*/
-                            ]],
-                            ['label' => 'Договоры', 'url' => ['/personal/organization-contracts']],
-                            ['label' => 'Счета', 'url' => ['/personal/organization-invoices']],
-                            ['label' => 'Плательщики', 'items' => [
-                                ['label' => 'Плательщики', 'url' => ['/personal/organization-payers']],
-                                //['label' => 'Подведомственность', 'url' => ['/personal/organization-suborder']],
-                            ]],
-                            ['label' => 'Группы', 'url' => ['/personal/organization-groups']],
-                        ],
-                    ]);
-                }
-
                 if (Yii::$app->user->can('certificate')) {
                     echo "<div class='row cert-menu'>";
                     echo "<div class='col-sm-6 col-md-4 col-sm-offset-1 col-md-offset-2 big-nav'>";
@@ -278,6 +112,11 @@ $user = Yii::$app->user->getIdentity();
                         ]);
                     }
                     echo '</div>';
+                } else {
+                    echo Nav::widget([
+                        'options' => ['class' => 'navbar-nav  inner-nav'],
+                        'items'   => \app\models\Menu::getByCurrentUser()
+                    ]);
                 }
                 NavBar::end();
                 ?>
@@ -307,31 +146,6 @@ $user = Yii::$app->user->getIdentity();
                 ?>
             </div>
             <div class="col-xs-12 col-md-8 col-md-offset-2">
-                <?php
-                if (Yii::$app->user->can('certificate') && $certificate->certGroup->is_special < 1 && Yii::$app->user->identity->certificate->countActiveContracts < 1) {
-                    //Yii::$app->session->setFlash('warning', 'Ваш сертификат не активирован. Необходимо в срок до ' . date('d.m.Y', Yii::$app->user->identity->certificate->updated_cert_group + 20*24*60*60) . ' заключить хотя бы один договор на обучение по сертификату ПФ и подать заявление о смене вида сертификата в организацию, с которой такой договор будет заключен. <a target="_blank" href="' . Url::to(['certificates/group-pdf']) . '"">Открыть заявление (PDF)</a>');
-                }
-
-                // TODO: Убрать всё это говно, ага ;)
-                $organizations = new Organization();
-                $organization = $organizations->getOrganization();
-
-                if (isset($roles['organizations']) and $organization['actual'] == 0) {
-                    Yii::$app->session->setFlash('warning', 'Ваша деятельность приостановлена, обратитесь к оператору');
-                }
-
-                if (isset($roles['operators'])) {
-                    $coef = (new \yii\db\Query())
-                        ->select(['p21v', 'p21s', 'p21o', 'p22v', 'p22s', 'p22o', 'p3v', 'p3s', 'p3n', 'blimrob', 'blimtex', 'blimest', 'blimfiz', 'blimxud', 'blimtur', 'blimsoc', 'minraiting', 'weekyear', 'weekmonth', 'pk', 'norm', 'potenc', 'ngr', 'sgr', 'vgr', 'chr1', 'zmr1', 'chr2', 'zmr2', 'ngrp', 'sgrp', 'vgrp', 'ppchr1', 'ppzm1', 'ppchr2', 'ppzm2', 'ocsootv', 'ocku', 'ocmt', 'obsh', 'ktob', 'vgs', 'sgs', 'pchsrd', 'pzmsrd'])
-                        ->from('coefficient')
-                        ->where(['operator_id' => Yii::$app->operator->identity->id])
-                        ->one();
-                    $res = array_search(0, $coef);
-                    if ($res === true) {
-                        Yii::$app->session->setFlash('warning', 'Необходимо выставить корректные коэффициенты');
-                    }
-                }
-                ?>
                 <?= Alert::widget() ?>
             </div>
             <div class="col-md-12">

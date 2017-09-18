@@ -59,7 +59,6 @@ class GridviewHelper
             if (!empty($excludeAttributes)) {
                 foreach ($excludeAttributes as $excludeAttribute) {
                     if (isset($column[$excludeAttribute])) {
-                        Yii::trace($column['attribute'] . ' - Exclude');
                         unset($columns[$index][$excludeAttribute]);
                     }
                 }

@@ -2,9 +2,9 @@
 
 namespace app\models\search;
 
+use app\models\Invoices;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Invoices;
 
 /**
  * InvoicesSearch represents the model behind the search form about `app\models\Invoices`.
@@ -20,8 +20,8 @@ class InvoicesSearch extends Invoices
     public function rules()
     {
         return [
-            [['id', 'payers_id', 'number'], 'integer'],
-            [['month', 'date', 'link', 'organization', 'status', 'organization_id', 'prepayment', 'sum'], 'safe'],
+            [['id', 'number'], 'integer'],
+            [['month', 'date', 'link', 'organization', 'status', 'organization_id', 'payer', 'prepayment', 'sum'], 'safe'],
         ];
     }
 
@@ -32,7 +32,7 @@ class InvoicesSearch extends Invoices
     {
         return array_merge(parent::attributeLabels(), [
             'organization' => 'Организация',
-            'payer' => 'Плательщик',
+            'payer'        => 'Плательщик',
         ]);
     }
 
@@ -58,36 +58,37 @@ class InvoicesSearch extends Invoices
             ]);
 
         $dataProvider = new ActiveDataProvider([
-            'query' => $query,
+            'query'      => $query,
             'pagination' => [
                 'pageSize' => 50,
             ],
         ]);
 
         $dataProvider->sort->attributes['organization'] = [
-            'asc' => ['organization.name' => SORT_ASC],
+            'asc'  => ['organization.name' => SORT_ASC],
             'desc' => ['organization.name' => SORT_DESC],
         ];
         $dataProvider->sort->attributes['payer'] = [
-            'asc' => ['payers.name' => SORT_ASC],
+            'asc'  => ['payers.name' => SORT_ASC],
             'desc' => ['payers.name' => SORT_DESC],
         ];
-        
+
         $this->load($params);
 
         if (!$this->validate()) {
             $query->where('0=1');
+
             return $dataProvider;
         }
 
         $query->andFilterWhere([
-            'invoices.id' => $this->id,
+            'invoices.id'              => $this->id,
             'invoices.organization_id' => $this->organization_id,
-            'invoices.payers_id' => $this->payers_id,
-            'invoices.number' => $this->number,
-            'invoices.date' => $this->date,
-            'invoices.prepayment' => $this->prepayment,
-            'invoices.status' => $this->status,
+            'invoices.payers_id'       => $this->payers_id,
+            'invoices.number'          => $this->number,
+            'invoices.date'            => $this->date,
+            'invoices.prepayment'      => $this->prepayment,
+            'invoices.status'          => $this->status,
         ]);
 
         $query->andFilterWhere(['like', 'invoices.month', $this->month])
