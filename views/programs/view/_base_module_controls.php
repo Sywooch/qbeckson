@@ -8,7 +8,8 @@ use yii\helpers\Url;
 <div class="btn-row">
 
     <?php
-    if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)) {
+    if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)
+        && $model->program->verification !== \app\models\Programs::VERIFICATION_DENIED) {
         $message = '';
         $url = '#';
         $classButton = 'btn-theme';
@@ -118,7 +119,12 @@ use yii\helpers\Url;
 
         ?>
 
-    <?php } ?>
+    <?php } elseif (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)
+        && $model->program->verification === \app\models\Programs::VERIFICATION_DENIED) {
+        echo \yii\bootstrap\Button::widget(['label'   => 'Недоступно по причине отказа',
+                                            'options' => ['class'    => 'btn btn-theme',
+                                                          'disabled' => 'disabled'],]);
+    } ?>
     <?php /*
 <div class="btn-row">
     <button class="btn btn-theme">Создать группу</button>

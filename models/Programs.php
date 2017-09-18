@@ -530,6 +530,7 @@ class Programs extends ActiveRecord
 
     }
 
+
     public function otkazName($data)
     {
         $rows = (new \yii\db\Query())
