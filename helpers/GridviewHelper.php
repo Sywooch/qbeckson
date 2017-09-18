@@ -96,4 +96,17 @@ class GridviewHelper
 
         return $columns;
     }
+
+    public static function getFileName($type, $datetime = false)
+    {
+        //$str = Yii::$app->security->generateRandomString(12) . '---' . $type;
+        // TODO: вернуть рандомное название с перезаписыванием выписки
+        $str = Yii::$app->user->id . '---' . $type;
+
+        if ($datetime === true) {
+            $str .=  '-' . date('d-m-Y-H-i');
+        }
+
+        return $str;
+    }
 }

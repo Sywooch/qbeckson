@@ -153,7 +153,7 @@ $config = [
             ]
         ]
     ],
-
+    'aliases' => require(__DIR__ . '/aliases.php'),
     'as AccessBehavior' => [
         'class' => AccessBehavior::class,
         'rules' => [
@@ -374,7 +374,6 @@ $config = [
             ]
         ],
     ],
-
     'params' => $params,
 ];
 
