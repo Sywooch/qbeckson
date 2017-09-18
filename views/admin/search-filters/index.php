@@ -1,7 +1,7 @@
 <?php
 
-use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\search\SettingsSearchFiltersSearch */
@@ -20,14 +20,45 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
+        'filterModel'  => $searchModel,
+        'columns'      => [
             'table_name',
-            'table_columns:ntext',
-            'inaccessible_columns:ntext',
-            'is_active:boolean',
+            ['attribute'      => 'table_columns',
+             'format'         => 'ntext',
+             'contentOptions' => [
+                 'style' => [
+                     'word-wrap' => 'break-word',
+                     'max-width' => '400px'
+                 ]
+             ],
+             'headerOptions'  => [
+                 'style' => [
+                     'word-wrap' => 'break-word',
+                     'max-width' => '400px'
+                 ]
+             ],
 
-            ['class' => 'yii\grid\ActionColumn'],
+            ],
+            ['attribute'      => 'inaccessible_columns',
+             'format'         => 'ntext',
+             'contentOptions' => [
+                 'style' => [
+                     'word-wrap' => 'break-word',
+                     'max-width' => '400px'
+                 ]
+             ],
+             'headerOptions'  => [
+                 'style' => [
+                     'word-wrap' => 'break-word',
+                     'max-width' => '400px'
+                 ]
+             ],
+
+            ],
+            'is_active:boolean',
+            'role',
+            ['class'    => 'yii\grid\ActionColumn',
+             'template' => '{update}{delete}'],
         ],
     ]); ?>
 </div>

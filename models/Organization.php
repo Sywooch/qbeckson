@@ -2,8 +2,8 @@
 
 namespace app\models;
 
-use Yii;
 use app\behaviors\UploadBehavior;
+use Yii;
 
 /**
  * This is the model class for table "organization".
@@ -390,7 +390,16 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getContracts()
     {
-        return $this->hasMany(Contracts::className(), ['organization_id' => 'id']);
+        return $this->hasMany(Contracts::className(), ['organization_id' => 'id'])->inverseOf('organization');
+    }
+
+    public function getActiveContracts()
+    {
+        return $this->getContracts()->where([Contracts::tableName() . '.status' => [
+            Contracts::STATUS_CREATED,
+            Contracts::STATUS_ACTIVE,
+            Contracts::STATUS_ACCEPTED
+        ]]);
     }
 
     /**
@@ -483,6 +492,7 @@ class Organization extends \yii\db\ActiveRecord
          return $this->hasOne(OrganizationPayerAssignment::className(), ['organization_id' => 'id']);
     }
 
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -511,7 +521,7 @@ class Organization extends \yii\db\ActiveRecord
 
     public function hasEmptyInfo()
     {
-        if (((empty($this->contractSettings->organization_first_ending) || empty($this->contractSettings->organization_second_ending) || empty($this->contractSettings->director_name_ending)) && $this->type != self::TYPE_IP_WITHOUT_WORKERS) || (empty($this->contractSettings->organization_second_ending) && $this->type == self::TYPE_IP_WITHOUT_WORKERS)) {
+        if (((empty($this->contractSettings->organization_first_ending) || empty($this->contractSettings->organization_second_ending) || empty($this->contractSettings->director_name_ending)) && $this->type != self::TYPE_IP_WITHOUT_WORKERS && $this->type != self::TYPE_IP_WITH_WORKERS) || (empty($this->contractSettings->organization_second_ending) && $this->type == self::TYPE_IP_WITHOUT_WORKERS) || (empty($this->contractSettings->organization_first_ending) && empty($this->contractSettings->organization_second_ending) && $this->type == self::TYPE_IP_WITH_WORKERS)) {
             return true;
         }
 
@@ -627,6 +637,12 @@ class Organization extends \yii\db\ActiveRecord
         $this->actual = 0;
     }
 
+    /** @return bool */
+    public function existsFreePlace()
+    {
+        return $this->max_child > $this->getActiveContracts()->count();
+    }
+
     public function sendRequestEmail()
     {
         $mail = Yii::$app->mailer
@@ -635,7 +651,7 @@ class Organization extends \yii\db\ActiveRecord
                 ['model' => $this]
             )
             ->setTo($this->email)
-            ->setFrom([Yii::$app->params['adminEmail'] => 'PFDO'])
+            ->setFrom([Yii::$app->params['sendEmail'] => 'PFDO'])
             ->setSubject('Заявка на включение в реестр поставщиков зарегистрирована');
 
         if ($mail->send()) {
@@ -656,7 +672,7 @@ class Organization extends \yii\db\ActiveRecord
                 ]
             )
             ->setTo($this->email)
-            ->setFrom([Yii::$app->params['adminEmail'] => 'PFDO'])
+            ->setFrom([Yii::$app->params['sendEmail'] => 'PFDO'])
             ->setSubject($this->isRefused ? 'Заявка на включение в реестр поставщиков отклонена' : 'Заявка на включение в реестр поставщиков одобрена');
 
         if ($mail->send()) {

@@ -2,30 +2,48 @@
 
 namespace app\models;
 
-use Yii;
-use yii\base\Model;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "groups".
  *
- * @property integer $id
- * @property integer $organization_id
- * @property integer $program_id
- * @property integer $year_id
- * @property string $name
- * @property string $datestart
- * @property string $datestop
+ * @property integer         $id
+ * @property integer         $organization_id
+ * @property integer         $program_id
+ * @property integer         $year_id
+ * @property string          $name
+ * @property string          $datestart
+ * @property string          $datestop
+ * @property integer         $status
+ * @property boolean         $isActive
+ * @property string          $fullSchedule
  *
- * @property Organization $organization
- * @property Contracts[] $contracts
+ * @property integer         $freePlaces
+ * @property Organization    $organization
+ * @property Contracts[]     $contracts
  * @property ProgrammeModule $module
- * @property mixed $year
- * @property Programs $program
- * @property GroupClass[] $classes
+ * @property mixed           $year
+ * @property Programs        $program
+ * @property GroupClass[]    $classes
  */
 class Groups extends ActiveRecord
 {
+
+    const STATUS_ARCHIVED = 5;
+    const STATUS_ACTIVE   = 10;
+
+    /**
+     *
+     * @inheritdoc
+     * @return ActiveQuery the newly created [[ActiveQuery]] instance.
+     */
+    public static function find()
+    {
+        return parent::find()->where([self::tableName() . '.status' => self::STATUS_ACTIVE]);
+    }
+
+
     /**
      * @inheritdoc
      */
@@ -41,7 +59,7 @@ class Groups extends ActiveRecord
     {
         return [
             [['name', 'datestart', 'datestop', 'program_id'], 'required'],
-            [['organization_id', 'program_id', 'year_id'], 'integer'],
+            [['organization_id', 'program_id', 'year_id', 'status'], 'integer'],
             [['name'], 'string', 'max' => 255],
             [['address', 'schedule'], 'string'],
             [['datestop', 'datestart'], 'safe'],
@@ -60,15 +78,18 @@ class Groups extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'id'              => 'ID',
             'organization_id' => 'Организация',
-            'program_id' => 'Программа',
-            'year_id' => 'ID Года',
-            'name' => 'Название группы',
-            'address' => 'Адрес',
-            'schedule' => 'Расписание',
-            'datestart' => 'Дата начала обучения',
-            'datestop' => 'Дата окончания обучения',
+            'program_id'      => 'Программа',
+            'year_id'         => 'ID Года',
+            'name'            => 'Название группы',
+            'address'         => 'Адрес',
+            'schedule'        => 'Расписание',
+            'fullSchedule'    => 'Расписание',
+            'datestart'       => 'Дата начала обучения',
+            'datestop'        => 'Дата окончания обучения',
+            'status'          => 'Статус',
+            'freePlaces'      => 'Свободных мест',
         ];
     }
 
@@ -80,10 +101,17 @@ class Groups extends ActiveRecord
         return $this->hasMany(GroupClass::class, ['group_id' => 'id']);
     }
 
+
+    /** свободные места*/
+    public function getFreePlaces(): int
+    {
+        return $this->module->maxchild - $this->getLivingContracts()->count();
+    }
+
     /**
      * @return string
      */
-    public function formatClasses()
+    public function getFullSchedule()
     {
         if ($this->classes) {
             $result = '';
@@ -124,11 +152,23 @@ class Groups extends ActiveRecord
     }
 
     /**
+     * Все контракты
      * @return \yii\db\ActiveQuery
      */
     public function getContracts()
     {
         return $this->hasMany(Contracts::class, ['group_id' => 'id']);
+    }
+
+    /**
+     * Контракты в работе
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLivingContracts()
+    {
+        return $this->getContracts()->andFilterWhere([Contracts::tableName() . '.status' => [Contracts::STATUS_CREATED,
+            Contracts::STATUS_ACTIVE,
+            Contracts::STATUS_ACCEPTED]]);
     }
 
     /**
@@ -151,5 +191,33 @@ class Groups extends ActiveRecord
     public function getYear()
     {
         return $this->hasOne(ProgrammeModule::className(), ['id' => 'year_id']);
+    }
+
+    public function getIsActive()
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
+    /**
+     * можно отправить в архив?
+     * @return boolean
+     */
+    public function canBeArchived()
+    {
+        return !$this->getLivingContracts()->exists();
+    }
+
+    /**
+     * установка флага "в архиве"
+     * @return boolean
+     */
+    public function setIsArchive()
+    {
+        if(!$this->canBeArchived()){
+            return false;
+        }
+        $this->status = self::STATUS_ARCHIVED;
+
+        return $this->save(false);
     }
 }

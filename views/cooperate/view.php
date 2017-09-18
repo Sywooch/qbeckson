@@ -1,9 +1,9 @@
 <?php
 
+use app\models\Cooperate;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
-use app\models\Cooperate;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Cooperate */
@@ -18,19 +18,21 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             [
                 'attribute' => 'number',
-                'label' => 'Реквизиты',
-                'format' => 'raw',
-                'visible' => (in_array($model->status, [Cooperate::STATUS_REJECTED, Cooperate::STATUS_APPEALED])) ? false : true,
-                'value' => function ($model) {
+                'label'     => 'Реквизиты',
+                'format'    => 'raw',
+                'visible'   => (in_array($model->status, [Cooperate::STATUS_REJECTED, Cooperate::STATUS_APPEALED])) ? false : true,
+                'value'     => function ($model)
+                {
                     /** @var \app\models\Cooperate $model */
                     return $model->number . ' от ' . Yii::$app->formatter->asDate($model->date);
                 },
             ],
             [
                 'attribute' => 'organizationName',
-                'label' => 'Организация',
-                'format' => 'raw',
-                'value' => function ($model) {
+                'label'     => 'Организация',
+                'format'    => 'raw',
+                'value'     => function ($model)
+                {
                     /** @var \app\models\Cooperate $model */
                     return Html::a(
                         $model->organization->name,
@@ -54,13 +56,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'reject_reason',
-                'format' => 'ntext',
-                'visible' => (!in_array($model->status, [Cooperate::STATUS_REJECTED, Cooperate::STATUS_APPEALED])) ? false : true,
+                'format'    => 'ntext',
+                'visible'   => (!in_array($model->status, [Cooperate::STATUS_REJECTED, Cooperate::STATUS_APPEALED])) ? false : true,
             ],
             [
                 'attribute' => 'appeal_reason',
-                'format' => 'ntext',
-                'visible' => (!in_array($model->status, [Cooperate::STATUS_REJECTED, Cooperate::STATUS_APPEALED])) ? false : true,
+                'format'    => 'ntext',
+                'visible'   => (!in_array($model->status, [Cooperate::STATUS_REJECTED, Cooperate::STATUS_APPEALED])) ? false : true,
             ],
             'created_date',
             [

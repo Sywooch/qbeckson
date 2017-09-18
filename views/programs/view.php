@@ -1,16 +1,18 @@
 <?php
 
+use app\components\widgets\postButtonWithModalConfirm\PostButtonWithModalConfirm;
+use app\models\Certificates;
+use app\models\GroupsSearch;
+use app\models\Organization;
+use app\models\Payers;
+use app\models\Programs;
 use kartik\tabs\TabsX;
+use yii\bootstrap\ActiveForm;
+use yii\grid\GridView;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\grid\GridView;
 use yii\widgets\DetailView;
-use app\models\Organization;
-use app\models\GroupsSearch;
-use app\models\Payers;
-use app\models\Certificates;
-use yii\bootstrap\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Programs */
@@ -53,7 +55,7 @@ $this->registerJs($js, $this::POS_END);
 <div class="programs-view">
     <div class="clearfix">
         <?php
-        if ($model->verification === 2) {
+        if ($model->verification === Programs::VERIFICATION_DONE) {
             if ($model->rating) {
                 echo '<h1 class="pull-right">' . $model->rating . '%</h1>';
             } else {
@@ -64,7 +66,7 @@ $this->registerJs($js, $this::POS_END);
         <h3><?= Html::encode($this->title) ?></h3>
         <br>
     </div>
-    <?php if (Yii::$app->user->can('organizations') && $model->verification === 2) : ?>
+    <?php if (Yii::$app->user->can('organizations') && $model->verification === Programs::VERIFICATION_DONE) : ?>
         <div class="row">
             <div class="col-md-12">
                 <?php if ($model->getPhoto()) : ?>
@@ -269,7 +271,8 @@ $this->registerJs($js, $this::POS_END);
         <div class="col-md-8">
             <?php
             if (Yii::$app->user->can('organizations')) {
-                if ($model->verification === 2 || $model->verification === 0) {
+                if ($model->verification === Programs::VERIFICATION_DONE
+                    || $model->verification === Programs::VERIFICATION_UNDEFINED) {
                     echo DetailView::widget([
                         'model' => $model,
                         'attributes' => [
@@ -305,7 +308,7 @@ $this->registerJs($js, $this::POS_END);
                             ],
                             [
                                 'attribute' => 'ground',
-                                'value' => $model->groundName($model->ground),
+                                'value'     => $model->groundName,
                             ],
                             [
                                 'attribute' => 'norm_providing',
@@ -314,7 +317,7 @@ $this->registerJs($js, $this::POS_END);
                         ],
                     ]);
                 }
-                if ($model->verification === 1) {
+                if ($model->verification === Programs::VERIFICATION_WAIT) {
                     echo DetailView::widget([
                         'model' => $model,
                         'attributes' => [
@@ -356,7 +359,7 @@ $this->registerJs($js, $this::POS_END);
                             ],
                             [
                                 'attribute' => 'ground',
-                                'value' => $model->groundName($model->ground),
+                                'value'     => $model->groundName,
                             ],
                             [
                                 'attribute' => 'norm_providing',
@@ -365,7 +368,7 @@ $this->registerJs($js, $this::POS_END);
                         ],
                     ]);
                 }
-                if ($model->verification === 3) {
+                if ($model->verification === Programs::VERIFICATION_DENIED) {
                     echo DetailView::widget([
                         'model' => $model,
                         'attributes' => [
@@ -411,7 +414,7 @@ $this->registerJs($js, $this::POS_END);
                             ],
                             [
                                 'attribute' => 'ground',
-                                'value' => $model->groundName($model->ground),
+                                'value'     => $model->groundName,
                             ],
                             [
                                 'attribute' => 'norm_providing',
@@ -424,7 +427,7 @@ $this->registerJs($js, $this::POS_END);
                 }
             } else {
                 if (Yii::$app->user->can('operators')) {
-                    if ($model->verification === 3) {
+                    if ($model->verification === Programs::VERIFICATION_DENIED) {
                         echo DetailView::widget([
                             'model' => $model,
                             'attributes' => [
@@ -480,7 +483,7 @@ $this->registerJs($js, $this::POS_END);
                                 ],
                                 [
                                     'attribute' => 'ground',
-                                    'value' => $model->groundName($model->ground),
+                                    'value'     => $model->groundName,
                                 ],
                                 [
                                     'attribute' => 'norm_providing',
@@ -541,7 +544,7 @@ $this->registerJs($js, $this::POS_END);
                                 ],
                                 [
                                     'attribute' => 'ground',
-                                    'value' => $model->groundName($model->ground),
+                                    'value'     => $model->groundName,
                                 ],
                                 [
                                     'attribute' => 'norm_providing',
@@ -601,7 +604,7 @@ $this->registerJs($js, $this::POS_END);
                             ],
                             [
                                 'attribute' => 'ground',
-                                'value' => $model->groundName($model->ground),
+                                'value'     => $model->groundName,
                             ],
                             [
                                 'attribute' => 'norm_providing',
@@ -625,7 +628,7 @@ $this->registerJs($js, $this::POS_END);
                 $link = 'personal/organization-contracts';
             }
 
-            if ($model->verification === 2 && !Yii::$app->user->can('certificate')) {
+            if ($model->verification === Programs::VERIFICATION_DONE && !Yii::$app->user->can('certificate')) {
                 echo DetailView::widget([
                     'model' => $model,
                     'attributes' => [
@@ -688,6 +691,7 @@ $this->registerJs($js, $this::POS_END);
                         'label' => 'Общая продолжительность, месяцев',
                         'attribute' => 'countMonths',
                     ],
+
                 ],
             ]) ?>
 
@@ -776,7 +780,7 @@ $this->registerJs($js, $this::POS_END);
                         'attributes' => $group,
                     ]);
 
-                    if ($model->verification == 2) {
+                    if ($model->verification === Programs::VERIFICATION_DONE) {
                         $searchGroups = new GroupsSearch();
                         $searchGroups->year_id = $value->id;
                         $GroupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
@@ -876,7 +880,7 @@ $this->registerJs($js, $this::POS_END);
                                                         if (in_array($model['id'], $myprog)) {
                                                             echo '<p>Вы уже подали заявку на программу/заключили договор на обучение</p>';
                                                         } else {
-                                                            echo '<p>Вы можете записаться на программу. Выберете группу:</p>';
+                                                            echo '<p>Вы можете записаться на программу. Выберите группу:</p>';
 
                                                             echo GridView::widget([
                                                                 'dataProvider' => $GroupsProvider,
@@ -1095,10 +1099,23 @@ $this->registerJs($js, $this::POS_END);
                 echo Html::a('Редактировать', Url::to(['/programs/update', 'id' => $model->id]), ['class' => 'btn btn-primary']);
                 echo "&nbsp;";
                 echo "<div class='pull-right'>";
-                echo Html::a('Удалить', Url::to(['/programs/delete', 'id' => $model->id]), ['class' => 'btn btn-danger',
-                    'data' => [
-                        'confirm' => 'Вы уверены, что хотите удалить программу?',
-                        'method' => 'post']]);
+                echo PostButtonWithModalConfirm::widget(['title'        => 'Удалить программу',
+                                                         'url'          => Url::to(['/programs/delete', 'id' => $model->id]),
+                                                         'confirm'      => 'Вы уверены, что хотите удалить программу?',
+                                                         'toggleButton' => ['class' => 'btn btn-danger', 'label' => 'Удалить']]);
+
+
+                echo "</div>";
+            } else {
+
+                echo \yii\bootstrap\Button::widget(['label'   => 'Редактировать Программу нельзя',
+                                                    'options' => ['class'    => 'btn btn-primary',
+                                                                  'disabled' => 'disabled'],]);
+                echo "&nbsp;";
+                echo "<div class='pull-right'>";
+                echo \yii\bootstrap\Button::widget(['label'   => 'Удалить программу нельзя',
+                                                    'options' => ['class'    => 'btn btn-danger',
+                                                                  'disabled' => 'disabled'],]);
                 echo "</div>";
             }
         }

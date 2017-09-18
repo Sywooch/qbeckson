@@ -26,6 +26,7 @@ class SearchFilter extends Widget
     public $action;
     public $type;
     public $role;
+    public $customizable = true;
 
     /**
      * @inheritdoc
@@ -71,11 +72,13 @@ class SearchFilter extends Widget
 
         $userFilter = UserSearchFiltersAssignment::findByFilter($filter);
 
+
         return $this->render('search-filter/_search', [
-            'model' => $this->model,
-            'action' => $this->action,
-            'data' => $this->data,
-            'userFilter' => $userFilter,
+            'model'        => $this->model,
+            'action'       => $this->action,
+            'data'         => $this->data,
+            'userFilter'   => $userFilter,
+            'customizable' => $this->customizable,
         ]);
     }
 }

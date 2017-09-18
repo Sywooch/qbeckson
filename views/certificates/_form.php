@@ -1,11 +1,10 @@
 <?php
 
-use yii\helpers\Html;
+use app\models\CertGroup;
+use kartik\dialog\Dialog;
 use kartik\form\ActiveForm;
 use yii\helpers\ArrayHelper;
-use app\models\CertGroup;
-use app\models\Payers;
-use kartik\dialog\Dialog;
+use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Certificates */
@@ -71,10 +70,10 @@ echo Dialog::widget(['options' => ['title' => 'Предупреждение',]])
         }
 
         echo $form->field($model, 'possible_cert_group')->dropDownList(ArrayHelper::map(CertGroup::getPossibleList($payer->id), 'id', 'group'), [
-            'options' => $dataOptions,
-            'prompt' => 'Выберите группу...',
+            'options'  => $dataOptions,
+            'prompt'   => 'Выберите группу...',
             'onChange' => 'selectGroup($("#select-cert-group"));',
-            'id' => 'possible-cert-group'
+            'id'       => 'possible-cert-group'
         ]);
 
         echo $form->field($model, 'selectCertGroup')->radioList($model->getCertGroupTypes(), [

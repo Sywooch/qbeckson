@@ -2,10 +2,10 @@
 
 namespace app\models\search;
 
+use app\models\Help;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Help;
 use yii\db\Expression;
 
 /**

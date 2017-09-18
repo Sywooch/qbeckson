@@ -2,9 +2,9 @@
 
 namespace app\models\search;
 
+use app\models\Groups;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Groups;
 
 /**
  * GroupsSearch represents the model behind the search form about `app\models\Groups`.
@@ -15,6 +15,7 @@ class GroupsSearch extends Groups
     public $requestsCount;
     public $placesCount;
     public $programName;
+    public $status = Groups::STATUS_ACTIVE;
 
     /**
      * @inheritdoc
@@ -22,7 +23,7 @@ class GroupsSearch extends Groups
     public function rules()
     {
         return [
-            [['id', 'organization_id', 'program_id', 'year_id'], 'integer'],
+            [['id', 'organization_id', 'program_id', 'year_id', 'status'], 'integer'],
             [['studentsCount', 'requestsCount', 'placesCount', 'programName'], 'string'],
             [['name'], 'safe'],
         ];
@@ -34,10 +35,11 @@ class GroupsSearch extends Groups
     public function attributeLabels()
     {
         return array_merge(parent::attributeLabels(), [
-            'programName' => 'Программа',
+            'programName'   => 'Программа',
             'studentsCount' => 'Обучающихся',
             'requestsCount' => 'Заявок',
-            'placesCount' => 'Мест',
+            'placesCount'   => 'Мест',
+            'status'        => 'Статус',
         ]);
     }
 
@@ -71,20 +73,27 @@ class GroupsSearch extends Groups
 
         if (!$this->validate()) {
             $query->where('0=1');
+
             return $dataProvider;
         }
 
+        $query->where(null);
+        if ($this->status == Groups::STATUS_ACTIVE) {
+            $query->andFilterWhere(['groups.status' => Groups::STATUS_ACTIVE]);
+        } elseif ($this->status == Groups::STATUS_ARCHIVED) {
+            $query->andFilterWhere(['groups.status' => Groups::STATUS_ARCHIVED]);
+        }
+
         $query->andFilterWhere([
-            'groups.id' => $this->id,
+            'groups.id'              => $this->id,
             'groups.organization_id' => $this->organization_id,
-            'groups.program_id' => $this->program_id,
-            'groups.year_id' => $this->year_id,
+            'groups.program_id'      => $this->program_id,
+            'groups.year_id'         => $this->year_id,
         ]);
 
         $query
             ->andFilterWhere(['like', 'groups.name', $this->name])
-            ->andFilterWhere(['like', 'programs.name', $this->programName])
-        ;
+            ->andFilterWhere(['like', 'programs.name', $this->programName]);
 
         $query->groupBy(['groups.id']);
 

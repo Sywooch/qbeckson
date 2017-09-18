@@ -2,22 +2,18 @@
 
 namespace app\controllers;
 
-use app\models\forms\CertificateVerificationForm;
+use app\models\Certificates;
+use app\models\Payers;
+use app\models\User;
 use app\traits\AjaxValidationTrait;
+use kartik\mpdf\Pdf;
 use Yii;
-use yii\helpers\Url;
-use yii\web\BadRequestHttpException;
+use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
-use app\models\Certificates;
-use app\models\Organization;
-use app\models\User;
-use app\models\Payers;
-use kartik\mpdf\Pdf;
 
 /**
  * CertificatesController implements the CRUD actions for Certificates model.
@@ -118,9 +114,6 @@ class CertificatesController extends Controller
                     $user->delete();
                 }
             }
-        } elseif (Yii::$app->request->isPost) {
-            print_r(Yii::$app->request->post());exit;
-            print_r($model->errors);exit;
         }
 
         return $this->render('create', [
@@ -308,10 +301,9 @@ class CertificatesController extends Controller
 
             if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
                 $model = $this->findModel($id);
-                if (!$model->hasContracts) {
-                    throw new ForbiddenHttpException('Невозможно совершить действие.');
+                if ($model->hasContracts) {
+                    throw new ForbiddenHttpException('Невозможно удалить сертификат, так как он уже заключил договоры.');
                 }
-
                 User::findOne($model['user_id'])->delete();
 
                 return $this->redirect(['/personal/payer-certificates']);

@@ -1,13 +1,13 @@
 <?php
 
+use app\models\Certificates;
+use app\models\Contracts;
+use app\models\Groups;
+use app\models\Organization;
+use app\models\Programs;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
-use app\models\Programs;
-use app\models\Certificates;
-use app\models\Groups;
-use app\models\Organization;
-use app\models\Contracts;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Contracts */
@@ -121,15 +121,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'name',
                 'module.mainAddress.address',
-                [
-                    'attribute' => 'schedule',
-                    'label' => 'Расписание',
-                    'value' => function ($model) {
-                        /** @var \app\models\Groups $model */
-                        return $model->formatClasses();
-                    },
-                    'format' => 'raw'
-                ],
+                'fullSchedule:raw',
+
             ],
         ]);
     } else {

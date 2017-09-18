@@ -25,7 +25,7 @@ $this->registerJs($js, $this::POS_READY);
 ?>
 <div class="programs-add-picture">
     <?php if ([] === $model->getModel()->program->addresses) : ?>
-        <p class="lead">Необходимо добавить адресы для программы</p>
+        <p class="lead">Необходимо добавить адреса для программы</p>
     <?php else : ?>
         <?php $form = ActiveForm::begin(); ?>
         <div class="row">

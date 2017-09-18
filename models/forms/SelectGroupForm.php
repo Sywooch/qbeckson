@@ -81,7 +81,7 @@ class SelectGroupForm extends Model
             return;
         }
 
-        //Как-то переделать кастыль
+        // TODO: Как-то переделать кастыль
         switch ($program->direction_id) {
             case 1:
                 $directionName = 'directionality_1rob_count';
@@ -107,14 +107,16 @@ class SelectGroupForm extends Model
         }
 
         $payerContractsCount = Contracts::find()
+            ->innerJoinWith('program')
             ->andWhere([
-                'payer_id' => $this->getCertificate()->payer_id,
-                'status' => [0, 1, 3]
+                'payer_id'                => $this->getCertificate()->payer_id,
+                '`programs`.direction_id' => $program->direction_id,
+                'status'                  => [0, 1, 3]
             ])
             ->count();
 
         if ($payerContractsCount >= $this->getCertificate()->payer->$directionName) {
-            $this->addError($attribute, 'Превышен лимит на зачисление плательщиком.');
+            $this->addError($attribute, 'Превышен лимит зачисления на программы аналогичной направленности, установленный программой ПФ.');
             return;
         }
     }

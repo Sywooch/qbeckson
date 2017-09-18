@@ -2,15 +2,15 @@
 
 namespace app\controllers;
 
-use app\models\PayersSearch;
-use Yii;
+use app\models\CertGroup;
 use app\models\Payers;
+use app\models\PayersSearch;
+use app\models\User;
+use Yii;
+use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
-use app\models\User;
-use app\models\CertGroup;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
 
@@ -26,7 +26,7 @@ class PayersController extends Controller
     {
         return [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class'   => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
                 ],
@@ -47,13 +47,13 @@ class PayersController extends Controller
 
         $searchModel = new PayersSearch([
             'certificates' => '0,150000',
-            'cooperates' => '0,100',
-            'id' => array_diff($allPayers, $currentPayers),
+            'cooperates'   => '0,100',
+            'id'           => array_diff($allPayers, $currentPayers),
         ]);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
+            'searchModel'  => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
@@ -119,21 +119,21 @@ class PayersController extends Controller
                     }
 
                     return $this->render('/user/view', [
-                        'model' => $user,
+                        'model'    => $user,
                         'password' => $password,
                     ]);
                 }
             } else {
                 return $this->render('create', [
                     'model' => $model,
-                    'user' => $user,
+                    'user'  => $user,
                 ]);
             }
         }
 
         return $this->render('create', [
             'model' => $model,
-            'user' => $user,
+            'user'  => $user,
         ]);
     }
 
@@ -156,8 +156,7 @@ class PayersController extends Controller
 
         if ($user->load(Yii::$app->request->post())) {
             if ($model->load(Yii::$app->request->post())) {
-                //$model->mun = implode(",", $model->mun);
-                $model->directionality = $model->directionality_1rob . "," . $model->directionality_1 . "," . $model->directionality_2 . "," . $model->directionality_3 . "," . $model->directionality_4 . "," . $model->directionality_5 . "," . $model->directionality_6;
+                $model->populateDirections();
 
                 $model->save();
             }
@@ -220,7 +219,7 @@ class PayersController extends Controller
 
         return $this->render('update', [
             'model' => $model,
-            'user' => $user,
+            'user'  => $user,
         ]);
 
     }
@@ -230,7 +229,7 @@ class PayersController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post())) {
-            $model->directionality = $model->directionality_1rob . "," . $model->directionality_1 . "," . $model->directionality_2 . "," . $model->directionality_3 . "," . $model->directionality_4 . "," . $model->directionality_5 . "," . $model->directionality_6;
+            $model->populateDirections();
 
             if ($model->save()) {
                 Yii::$app->session->setFlash('success', 'Данные успешно сохранены.');

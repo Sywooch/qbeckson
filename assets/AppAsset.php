@@ -22,7 +22,7 @@ class AppAsset extends AssetBundle
         '//fonts.googleapis.com/css?family=Roboto',
     ];
     public $js = [
-        'js/script.js',
+        'js/script.js?r=1fh7834df3jmd',
         '//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js',
     ];
     public $depends = [
