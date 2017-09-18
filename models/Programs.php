@@ -114,13 +114,16 @@ class Programs extends ActiveRecord
 
     public static function find()
     {
-        return parent::find()->where([self::tableName() . '.verification' => [
+        $listCond = [self::tableName() . '.verification' => [
             self::VERIFICATION_UNDEFINED,
             self::VERIFICATION_WAIT,
             self::VERIFICATION_DONE,
             self::VERIFICATION_DENIED
         ]
-        ]);
+        ];
+        $notCond = ['IS', self::tableName() . '.verification', null];
+
+        return parent::find()->where(['OR', $listCond, $notCond]);
     }
 
     /**

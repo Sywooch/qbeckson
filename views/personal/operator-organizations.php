@@ -4,11 +4,11 @@ use app\helpers\GridviewHelper;
 use app\models\Mun;
 use app\models\UserIdentity;
 use app\widgets\SearchFilter;
-use yii\grid\ActionColumn;
-use yii\helpers\Html;
-use kartik\grid\GridView;
 use kartik\export\ExportMenu;
+use kartik\grid\GridView;
+use yii\grid\ActionColumn;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $searchRequest \app\models\search\OrganizationSearch */
@@ -76,7 +76,7 @@ $programs = [
     'attribute' => 'programs',
     'value' => function ($model) {
         /** @var \app\models\Organization $model */
-        $programsCount = $model->getPrograms()->andWhere(['programs.verification' => 2])->count();
+        $programsCount = count(array_filter($model->programs, function ($val) { return $val->verification === \app\models\Programs::VERIFICATION_DONE; }));
         return (int)$programsCount > 0 ? $programsCount : '-';
     },
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
