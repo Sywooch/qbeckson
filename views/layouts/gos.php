@@ -114,7 +114,7 @@ $user = Yii::$app->user->getIdentity();
                     echo '</div>';
                 } else {
                     echo Nav::widget([
-                        'options' => ['class' => 'navbar-nav'],
+                        'options' => ['class' => 'navbar-nav  inner-nav'],
                         'items'   => \app\models\Menu::getByCurrentUser()
                     ]);
                 }

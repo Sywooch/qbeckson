@@ -2,30 +2,30 @@
 
 namespace app\models;
 
+use mPDF;
 use Yii;
 use yii\db\ActiveRecord;
-use mPDF;
 
 
 /**
  * This is the model class for table "invoices".
  *
- * @property integer $id
- * @property integer $month
- * @property integer $organization_id
- * @property integer $payers_id
- * @property integer $contract_id
- * @property integer $sum
- * @property integer $number
- * @property string $date
- * @property string $link
- * @property integer $prepayment
- * @property integer $status
+ * @property integer      $id
+ * @property integer      $month
+ * @property integer      $organization_id
+ * @property integer      $payers_id
+ * @property integer      $contract_id
+ * @property integer      $sum
+ * @property integer      $number
+ * @property string       $date
+ * @property string       $link
+ * @property integer      $prepayment
+ * @property integer      $status
  *
- * @property Contracts $contract
+ * @property Contracts    $contract
  * @property Organization $organization
- * @property Payers $payers
- * @property Payers $payer
+ * @property Payers       $payers
+ * @property Payers       $payer
  */
 class Invoices extends ActiveRecord
 {
@@ -40,10 +40,10 @@ class Invoices extends ActiveRecord
     public static function statuses()
     {
         return [
-            self::STATUS_NOT_VIEWED => 'Не просмотрен',
+            self::STATUS_NOT_VIEWED  => 'Не просмотрен',
             self::STATUS_IN_THE_WORK => 'В работе',
-            self::STATUS_PAID => 'Оплачен',
-            self::STATUS_REMOVED => 'Удален',
+            self::STATUS_PAID        => 'Оплачен',
+            self::STATUS_REMOVED     => 'Удален',
         ];
     }
 
@@ -78,18 +78,19 @@ class Invoices extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'month' => 'Месяц, за который выставлен счет ',
+            'id'              => 'ID',
+            'month'           => 'Месяц, за который выставлен счет ',
             'organization_id' => 'Organization ID',
-            'payers_id' => 'Payers ID',
-            'contracts' => 'Контракты',
-            'sum' => 'Сумма счета',
-            'number' => 'Номер счета',
-            'date' => 'Дата счета',
-            'link' => 'Ссылка на документ ',
-            'prepayment' => 'Аванс',
-            'completeness' => 'ID полноты оказаных услуг',
-            'status' => 'Статус',
+            'payers_id'       => 'Payers ID',
+            'contracts'       => 'Контракты',
+            'sum'             => 'Сумма счета',
+            'number'          => 'Номер счета',
+            'date'            => 'Дата счета',
+            'link'            => 'Ссылка на документ ',
+            'prepayment'      => 'Аванс',
+            'completeness'    => 'ID полноты оказаных услуг',
+            'status'          => 'Статус',
+            'payer'           => 'Плательщик',
         ];
     }
 

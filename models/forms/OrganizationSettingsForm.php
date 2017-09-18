@@ -87,7 +87,7 @@ class OrganizationSettingsForm extends Model
             } else {
                 if (3 === $organization->type) {
                     $text = $organization->full_name . ', осуществляющ';
-                    $text .= '{{organization_second_ending}} ';
+                    $text .= '{{organization_first_ending}} ';
                     $text .= 'образовательную  деятельность на основании лицензии от ';
                     $text .= date('d.m.Y', strtotime($organization->license_date)) . ' г. № ';
                     $text .= $organization->license_number . ', выданной ' . $organization->license_issued_dat . ', именуем';
