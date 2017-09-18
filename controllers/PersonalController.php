@@ -983,6 +983,7 @@ class PersonalController extends Controller
 
     public function actionCertificateInfo()
     {
+        /** @var $model Certificates */
         $model = Yii::$app->user->identity->certificate;
         $model->scenario = Certificates::SCENARIO_CERTIFICATE;
 
@@ -1010,6 +1011,7 @@ class PersonalController extends Controller
 
     public function actionCertificateWaitContract()
     {
+        /** @var $certificate Certificates */
         $certificate = Yii::$app->user->identity->certificate;
 
         $Contracts3Search = new Contracts3Search();
@@ -1024,6 +1026,7 @@ class PersonalController extends Controller
 
     public function actionCertificateWaitRequest()
     {
+        /** @var $certificate Certificates */
         $certificate = Yii::$app->user->identity->certificate;
 
         $ContractsnSearch = new ContractsnSearch();
@@ -1038,8 +1041,8 @@ class PersonalController extends Controller
 
     public function actionCertificatePrevius()
     {
-        $certificates = new Certificates();
-        $certificate = $certificates->getCertificates();
+        /** @var $certificate Certificates */
+        $certificate = Yii::$app->user->identity->certificate;
 
         $searchPrev = new PreviusSearch();
         $searchPrev->certificate_id = $certificate['id'];
@@ -1054,8 +1057,8 @@ class PersonalController extends Controller
 
     public function actionCertificateContracts()
     {
-        $certificates = new Certificates();
-        $certificate = $certificates->getCertificates();
+        /** @var $certificate Certificates */
+        $certificate = Yii::$app->user->identity->certificate;
 
         $searchContracts1 = new ContractsoSearch();
         $searchContracts1->certificate_id = $certificate['id'];
@@ -1069,8 +1072,8 @@ class PersonalController extends Controller
 
     public function actionCertificateArchive()
     {
-        $certificates = new Certificates();
-        $certificate = $certificates->getCertificates();
+        /** @var $certificate Certificates */
+        $certificate = Yii::$app->user->identity->certificate;
 
         $Contracts2Search = new Contracts2Search();
         $Contracts2Search->certificate_id = $certificate['id'];
@@ -1091,9 +1094,8 @@ class PersonalController extends Controller
 
     public function actionCertificateFavorites()
     {
-        $certificates = new Certificates();
-        $certificate = $certificates->getCertificates();
-
+        /** @var $certificate Certificates */
+        $certificate = Yii::$app->user->identity->certificate;
 
         $searchFavorites = new FavoritesSearch();
         $searchFavorites->certificate_id = $certificate['id'];
