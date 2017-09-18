@@ -188,6 +188,24 @@ class ProgramsController extends Controller
             }
         }
 
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+            if ($model->verification === Programs::VERIFICATION_DENIED) {
+                /**@var $inform Informs */
+                $inform = array_pop(
+                    array_filter($model->informs, function ($val)
+                    {
+                        /**@var $val Informs */
+                        return $val->status === Programs::VERIFICATION_DENIED;
+
+                    }
+                    )
+                );
+                if ($inform) {
+                    Yii::$app->session->setFlash('warning', 'Причина отказа: ' . $inform->text);
+                }
+
+            }
+        }
 
         ProgramsAsset::register($this->view);
 
