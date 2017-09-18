@@ -1,6 +1,7 @@
 <?php
-use yii\helpers\Html;
+
 use yii\grid\GridView;
+use yii\helpers\Html;
 use yii\helpers\Url;
 
 /* @var $this yii\web\View */
@@ -81,18 +82,12 @@ $this->title = 'Действующие договоры';
                 ],            
                 [
                     'attribute' => 'program',
-                    'label' => 'Программа',
-                    'format' => 'raw',
-                    'value'=> function($data){
-                        
-                        $program = (new \yii\db\Query())
-                            ->select(['id'])
-                            ->from('programs')
-                            ->where(['name' => $data->program->name])
-                            ->one();
-                        
-                        
-                    return Html::a($data->program->name, Url::to(['/programs/view', 'id' => $program['id']]), ['class' => 'blue', 'target' => '_blank']);
+                    'label'     => 'Программа',
+                    'format'    => 'raw',
+                    'value'     => function ($model)
+                    {
+                        /** @var $model app\models\Contracts */
+                        return Html::a($model->program->name, Url::to(['/programs/view', 'id' => $model->program_id]), ['class' => 'blue', 'target' => '_blank']);
                     },
                 ], 
                 
@@ -101,18 +96,12 @@ $this->title = 'Действующие договоры';
                 //'status_year',
                 [
                     'attribute' => 'organization',
-                    'label' => 'Организация',
-                    'format' => 'raw',
-                    'value'=> function($data){
-                        
-                        $organization = (new \yii\db\Query())
-                            ->select(['id'])
-                            ->from('organization')
-                            ->where(['name' => $data->organization->name])
-                            ->one();
-                        
-                        
-                    return Html::a($data->organization->name, Url::to(['/organization/view', 'id' => $organization['id']]), ['class' => 'blue', 'target' => '_blank']);
+                    'label'     => 'Организация',
+                    'format'    => 'raw',
+                    'value'     => function ($model)
+                    {
+                        /** @var $model app\models\Contracts */
+                        return Html::a($model->organization->name, Url::to(['/organization/view', 'id' => $model->organization_id]), ['class' => 'blue', 'target' => '_blank']);
                     },
                 ],         
                 [
