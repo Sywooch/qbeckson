@@ -369,11 +369,17 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
         ]); ?>
     </div>
     <p class="lead">Экспорт данных:</p>
-    <!--<?= ExportMenu::widget([
+    <?= ExportMenu::widget([
         'dataProvider' => $ContractsallProvider,
-        'filename' => 'all-contracts',
-        'target' => ExportMenu::TARGET_BLANK,
+        'target' => ExportMenu::TARGET_SELF,
         'showColumnSelector' => false,
+        'filename' => GridviewHelper::getFileName('all-contracts'),
+        'stream' => false,
+        'deleteAfterSave' => false,
+        'folder' => '@pfdoroot/uploads/contracts',
+        'linkPath' => '@pfdo/uploads/contracts',
+        'showConfirmAlert' => false,
+        'afterSaveView' => '@app/views/common/export-view',
         'dropdownOptions' => [
             'class' => 'btn btn-success',
             'label' => 'Договоры',
@@ -381,73 +387,18 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
         ],
         'exportConfig' => [
             ExportMenu::FORMAT_TEXT => false,
-            ExportMenu::FORMAT_PDF => false,
             ExportMenu::FORMAT_CSV => false,
             ExportMenu::FORMAT_HTML => false,
-            ExportMenu::FORMAT_EXCEL => false,
+            ExportMenu::FORMAT_PDF => false,
+            ExportMenu::FORMAT_EXCEL_X => false,
         ],
-        'columns' => [
-            'id',
-            'number',
-            'date',
-            'certificate_id',
-            'payer_id',
-            'program_id',
-            'year_id',
-            'organization_id',
-            'group_id',
-            'status',
-            'status_termination',
-            'status_comment',
-            'status_year',
-            'link_doc',
-            'link_ofer',
-            'all_funds',
-            'funds_cert',
-            'all_parents_funds',
-            'start_edu_programm',
-            'funds_gone',
-            'start_edu_contract',
-            'month_start_edu_contract',
-            'stop_edu_contract',
-            'certnumber',
-            'certfio',
-            'sposob',
-            'prodolj_d',
-            'prodolj_m',
-            'prodolj_m_user',
-            'first_m_price',
-            'other_m_price',
-            'first_m_nprice',
-            'other_m_nprice',
-            'change1',
-            'change2',
-            'change_org_fio',
-            'org_position',
-            'org_position_min',
-            'change_doctype',
-            'change_fioparent',
-            'change6',
-            'change_fiochild',
-            'change8',
-            'change9',
-            'change10',
-            'ocen_fact',
-            'ocen_kadr',
-            'ocen_mat',
-            'ocen_obch',
-            'ocenka',
-            'wait_termnate',
-            'date_termnate',
-            'cert_dol',
-            'payer_dol',
-            'rezerv',
-            'paid',
-            'terminator_user',
-            'fontsize',
-            'certificatenumber',
-        ],
-    ]); ?>-->
+        'columns' => GridviewHelper::prepareColumns('contracts', $activeColumns, 'active'),
+    ]); ?>
+    <?php
+    if ($doc = \app\models\ExportFile::findByUserId(Yii::$app->user->id, 'all-contracts')) {
+        echo Html::a('Скачать выписку от ' . Yii::$app->formatter->asDatetime($doc->created_at), Yii::getAlias('@pfdo/uploads/contracts/' . $doc->file), ['class' => 'btn btn-primary']);
+    }
+    ?>
     <p>
         <?php
         $payer = Yii::$app->user->identity->payer;
