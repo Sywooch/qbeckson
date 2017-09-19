@@ -7,15 +7,16 @@ use Yii;
 /**
  * This is the model class for table "informs".
  *
- * @property integer $id
- * @property integer $program_id
- * @property integer $contract_id
- * @property integer $from
- * @property string $text
- * @property string $date
- * @property integer $read
+ * @property integer   $id
+ * @property integer   $program_id
+ * @property integer   $contract_id
+ * @property integer   $from
+ * @property string    $text
+ * @property string    $date
+ * @property integer   $read
+ * @property integer   $status
  *
- * @property Programs $program
+ * @property Programs  $program
  * @property Contracts $contract
  */
 class Informs extends \yii\db\ActiveRecord
