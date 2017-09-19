@@ -167,27 +167,22 @@ class ProgramsController extends Controller
         /** @var $user UserIdentity */
         $user = Yii::$app->user->identity;
         $model = $this->findModel($id);
-        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
-            && $user->organization->id !== $model->organization_id) {
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION) && $user->organization->id !== $model->organization_id) {
 
             throw new ForbiddenHttpException('Нет доступа');
+        }
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
+            || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
+            if ($model->verification === $model::VERIFICATION_DENIED) {
+                Yii::$app->session->setFlash('danger', sprintf('Причина отказа: %s',
+                    $model->getInforms()->andWhere(['status' => $model::VERIFICATION_DENIED])->one()->text));
+            }
         }
         $cooperate = null;
         if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
             $cooperate = Cooperate::find()->where([
                 Cooperate::tableName() . '.payer_id'        => $user->getCertificate()->select('payer_id'),
                 Cooperate::tableName() . '.organization_id' => $model->organization_id])->all();
-
-
-            /*            $certificate = $user->certificate;
-                        $rows = (new \yii\db\Query())
-                            ->select(['id'])
-                            ->from('cooperate')
-                            ->where(['payer_id' => $certificate->payer_id])
-                            ->andWhere(['organization_id' => $model->organization_id])
-                            ->andWhere(['status' => 1])
-                            ->count();*/
-
             if (!count($cooperate)) {
                 Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в организацию, реализующую выбранную программу. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
             }

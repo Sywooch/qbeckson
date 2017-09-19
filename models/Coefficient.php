@@ -2,8 +2,6 @@
 
 namespace app\models;
 
-use Yii;
-
 /**
  * This is the model class for table "coefficient".
  *
@@ -34,24 +32,27 @@ use Yii;
  * @property integer $blimest
  * @property integer $blimfiz
  * @property integer $blimxud
- * @property integer $blimtur
- * @property integer $blimsoc
- * @property integer $ngrp
- * @property integer $sgrp
- * @property integer $vgrp
- * @property integer $ppchr1
- * @property integer $ppzm1
- * @property integer $ppchr2
- * @property integer $ppzm2
- * @property integer $ocsootv
- * @property integer $ocku
- * @property integer $ocmt
- * @property integer $obsh
- * @property integer $ktob
- * @property integer $vgs
- * @property integer $sgs
- * @property integer $pchsrd
- * @property integer $pzmsrd
+ * @property integer   $blimtur
+ * @property integer   $blimsoc
+ * @property integer   $ngrp
+ * @property integer   $sgrp
+ * @property integer   $vgrp
+ * @property integer   $ppchr1
+ * @property integer   $ppzm1
+ * @property integer   $ppchr2
+ * @property integer   $ppzm2
+ * @property integer   $ocsootv
+ * @property integer   $ocku
+ * @property integer   $ocmt
+ * @property integer   $obsh
+ * @property integer   $ktob
+ * @property integer   $vgs
+ * @property integer   $sgs
+ * @property integer   $pchsrd
+ * @property integer   $pzmsrd
+ * @property integer   $operator_id
+ *
+ * @property Operators $operator
  */
 class Coefficient extends \yii\db\ActiveRecord
 {
@@ -128,5 +129,11 @@ class Coefficient extends \yii\db\ActiveRecord
             'pzmsrd' => 'Параметр знаменателя соотношения расторгнутых договоров',
             'minraiting' => 'Минимальная доля оценок для определения рейтинга программы, %',
         ];
+    }
+
+    /** @return \yii\db\ActiveQuery */
+    public function getOperator()
+    {
+        return $this->hasOne(Operators::className(), ['id' => 'operator_id'])->inverseOf('coefficient');
     }
 }
