@@ -14,6 +14,8 @@ use yii\helpers\Html;
 /* @var $searchRequest \app\models\search\OrganizationSearch */
 /* @var $searchRegistry \app\models\search\OrganizationSearch */
 /* @var $registryProvider \yii\data\ActiveDataProvider */
+/* @var $searchRefused\app\models\search\OrganizationSearch */
+/* @var $refusedProvider \yii\data\ActiveDataProvider */
 /* @var $allRegistryProvider \yii\data\ActiveDataProvider */
 /* @var $requestProvider \yii\data\ActiveDataProvider */
 $this->title = 'Поставщики образовательных услуг';
@@ -143,6 +145,23 @@ $registryColumns = [
     $actual,
     $actions,
 ];
+
+$refusedColumns = [
+    $name,
+    $fio_contact,
+    $cratedate,
+    $site,
+    $phone,
+    $max_child,
+    $raiting,
+    $type,
+    $mun,
+    $programs,
+    $children,
+    $amount_child,
+    $actual,
+    $actions,
+];
 $requestColumns = [
     $name,
     $fio_contact,
@@ -165,6 +184,11 @@ $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $reques
     <li>
         <a data-toggle="tab" href="#panel-requests">Заявки
             <span class="badge"><?= $requestProvider->totalCount ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel-refused">Отказы
+            <span class="badge"><?= $refusedProvider->totalCount ?></span>
         </a>
     </li>
 </ul>
@@ -236,6 +260,32 @@ $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $reques
             'columns' => GridviewHelper::prepareColumns(
                 'organization',
                 $requestColumns,
+                'request'
+            )
+        ]); ?>
+    </div>
+    <div id="panel-refused" class="tab-pane fade">
+        <?= SearchFilter::widget([
+            'model'  => $searchRefused,
+            'action' => ['personal/operator-organizations#panel-refused'],
+            'data'   => GridviewHelper::prepareColumns(
+                'organization',
+                $refusedColumns,
+                'request',
+                'searchFilter',
+                null
+            ),
+            'role'   => UserIdentity::ROLE_OPERATOR,
+            'type'   => 'request'
+        ]); ?>
+        <?= GridView::widget([
+            'dataProvider' => $refusedProvider,
+            'filterModel'  => null,
+            'pjax'         => true,
+            'summary'      => false,
+            'columns'      => GridviewHelper::prepareColumns(
+                'organization',
+                $refusedColumns,
                 'request'
             )
         ]); ?>
