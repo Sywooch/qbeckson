@@ -190,7 +190,7 @@ class Menu
     public static function emitFoOrganization()
     {
         !Yii::$app->user->identity->organization->actual
-        && Yii::$app->session->setFlash('warning', 'Ваша деятельность приостановлена, обратитесь к оператору');
+        && Yii::$app->session->setFlash('warning', 'Ваша деятельность приостановлена, обратитесь к оператору, причина:' . Yii::$app->user->identity->organization->refuse_reason);
 
         Yii::$app->user->identity->organization->hasEmptyInfo()
         && Yii::$app->session->setFlash(

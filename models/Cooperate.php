@@ -210,7 +210,7 @@ class Cooperate extends ActiveRecord
      */
     public function getOrganization()
     {
-        return $this->hasOne(Organization::class, ['id' => 'organization_id']);
+        return $this->hasOne(Organization::class, ['id' => 'organization_id'])->inverseOf('cooperates');
     }
 
     /**

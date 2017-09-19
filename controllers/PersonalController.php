@@ -202,11 +202,20 @@ class PersonalController extends Controller
         ]);
         $requestProvider = $searchRequest->search(Yii::$app->request->queryParams);
 
+        $searchRefused = new OrganizationSearch([
+            'statusArray' => [Organization::STATUS_REFUSED],
+            'modelName'   => 'SearchRequest',
+        ]);
+        $refusedProvider = $searchRefused->search(Yii::$app->request->queryParams);
+
         return $this->render('operator-organizations', [
             'searchRegistry'   => $searchRegistry,
             'registryProvider' => $registryProvider,
             'searchRequest'    => $searchRequest,
             'requestProvider'  => $requestProvider,
+
+            'searchRefused'   => $searchRefused,
+            'refusedProvider' => $refusedProvider,
 
             'allRegistryProvider' => $allRegistryProvider,
         ]);
