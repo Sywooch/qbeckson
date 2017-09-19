@@ -18,6 +18,7 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'inaccessible_columns')->textInput() ?>
     <?= $form->field($model, 'is_active')->checkbox() ?>
     <?= $form->field($model, 'role')->dropDownList(UserIdentity::roles(), ['prompt' => 'Выберите роль...']) ?>
+    <?= $form->field($model, 'type') ?>
     <div class="form-group">
         <?= Html::submitButton(
             $model->isNewRecord ? 'Создать' : 'Сохранить',
