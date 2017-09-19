@@ -167,32 +167,45 @@ class ProgramsController extends Controller
         /** @var $user UserIdentity */
         $user = Yii::$app->user->identity;
         $model = $this->findModel($id);
-        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
-            && $user->organization->id !== $model->organization_id) {
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION) && $user->organization->id !== $model->organization_id) {
 
             throw new ForbiddenHttpException('Нет доступа');
+        }
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
+            || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
+            if ($model->verification === $model::VERIFICATION_DENIED) {
+                Yii::$app->session->setFlash('danger', sprintf('Причина отказа: %s',
+                    $model->getInforms()->andWhere(['status' => $model::VERIFICATION_DENIED])->one()->text));
+            }
         }
         $cooperate = null;
         if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
             $cooperate = Cooperate::find()->where([
                 Cooperate::tableName() . '.payer_id'        => $user->getCertificate()->select('payer_id'),
                 Cooperate::tableName() . '.organization_id' => $model->organization_id])->all();
-
-
-            /*            $certificate = $user->certificate;
-                        $rows = (new \yii\db\Query())
-                            ->select(['id'])
-                            ->from('cooperate')
-                            ->where(['payer_id' => $certificate->payer_id])
-                            ->andWhere(['organization_id' => $model->organization_id])
-                            ->andWhere(['status' => 1])
-                            ->count();*/
-
             if (!count($cooperate)) {
                 Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в организацию, реализующую выбранную программу. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
             }
         }
 
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+            if ($model->verification === Programs::VERIFICATION_DENIED) {
+                /**@var $inform Informs */
+                $inform = array_pop(
+                    array_filter($model->informs, function ($val)
+                    {
+                        /**@var $val Informs */
+                        return $val->status === Programs::VERIFICATION_DENIED;
+
+                    }
+                    )
+                );
+                if ($inform) {
+                    Yii::$app->session->setFlash('warning', 'Причина отказа: ' . $inform->text);
+                }
+
+            }
+        }
 
         ProgramsAsset::register($this->view);
 
@@ -966,7 +979,7 @@ class ProgramsController extends Controller
         $organization = Yii::$app->user->identity->organization;
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             && $organization->id !== $model->organization_id) {
-                throw new ForbiddenHttpException('Нет доступа');
+            throw new ForbiddenHttpException('Нет доступа');
         }
         if ($model->load(Yii::$app->request->post())) {
             if ($model->verification == Programs::VERIFICATION_WAIT) {

@@ -10,6 +10,7 @@ use app\models\GroupsPreinvoiceSearch;
 use app\models\GroupsSearch;
 use app\models\Organization;
 use app\models\ProgrammeModule;
+use app\models\Programs;
 use app\models\UserIdentity;
 use Yii;
 use yii\base\Model;
@@ -68,6 +69,24 @@ class GroupsController extends Controller
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
+    }
+
+    /**
+     * Finds the Groups model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     *
+     * @param integer $id
+     *
+     * @return Groups the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = Groups::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
     }
 
     public function actionContracts($id)
@@ -179,6 +198,16 @@ class GroupsController extends Controller
 
     public function actionNewgroup($id)
     {
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+            $module = ProgrammeModule::findOne(['id' => $id]);
+            if (!$module) {
+                throw new NotFoundHttpException();
+            }
+            if ($module->program->verification === Programs::VERIFICATION_DENIED) {
+                throw new ForbiddenHttpException();
+            }
+        }
+
         $model = new Groups();
         $model->year_id = $id;
         $rows = (new \yii\db\Query())
@@ -363,7 +392,7 @@ class GroupsController extends Controller
 
 
                 //$out = ArrayHelper::map(ProgrammeModule::find()->where(['program_id' => $prog_id])->all(), 'id', 'year');
-                //$out = self::getSubCatList($cat_id); 
+                //$out = self::getSubCatList($cat_id);
                 // the getSubCatList function will query the database based on the
                 // cat_id and return an array like below:
                 //$out = [['id'=>'<sub-cat-id-1>', 'name'=>'<sub-cat-name1>'],['id'=>'<sub-cat_id_2>', 'name'=>'<sub-cat-name2>']];
@@ -426,6 +455,8 @@ class GroupsController extends Controller
 
     }
 
+    // Это для декабря (12 месяц)
+
     public function actionPreinvoice()
     {
         $organizations = new Organization();
@@ -443,7 +474,6 @@ class GroupsController extends Controller
 
     }
 
-    // Это для декабря (12 месяц)
     public function actionDec()
     {
         $organizations = new Organization();
@@ -460,23 +490,5 @@ class GroupsController extends Controller
             'GroupsProvider' => $GroupsProvider,
         ]);
 
-    }
-
-    /**
-     * Finds the Groups model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     *
-     * @param integer $id
-     *
-     * @return Groups the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Groups::findOne($id)) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
     }
 }

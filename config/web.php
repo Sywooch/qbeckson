@@ -164,6 +164,11 @@ $config = [
                     'roles'   => ['operators']
                 ],
                 [
+                    'allow'   => true,
+                    'actions' => ['operator-invoices'],
+                    'roles'   => ['operators']
+                ],
+                [
                     'actions' => ['update-municipality'],
                     'allow'   => true,
                     'roles'   => ['certificate']

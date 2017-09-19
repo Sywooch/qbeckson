@@ -13,6 +13,15 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
+$cssFix = <<<CSS
+.bottom {
+    position: absolute;
+    bottom: auto;
+}
+CSS;
+$this->registerCss($cssFix);
+/** todo костыль, избавится при редизайне на пример, site.css - 202 */
+
 $js = <<<JS
 $(".js-ellipsis-title").dotdotdot({
           ellipsis: '... ',

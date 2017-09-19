@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "b59d4ed3d4f211477a8d68ac0397db5c",
+    "content-hash": "5e1524a1c35a216926a5237f994d337f",
     "packages": [
         {
             "name": "2amigos/yii2-ckeditor-widget",
@@ -107,6 +107,29 @@
             ],
             "description": "Extended PHP NumberFormatter class.",
             "time": "2015-11-11T10:47:48+00:00"
+        },
+        {
+            "name": "bower-asset/angular",
+            "version": "v1.5.7",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/angular/bower-angular.git",
+                "reference": "8b7bc41468112797f501b2f6502a2be5c6a1bf5f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/angular/bower-angular/zipball/8b7bc41468112797f501b2f6502a2be5c6a1bf5f",
+                "reference": "8b7bc41468112797f501b2f6502a2be5c6a1bf5f",
+                "shasum": ""
+            },
+            "type": "bower-asset-library",
+            "extra": {
+                "bower-asset-main": "./angular.js",
+                "bower-asset-ignore": []
+            },
+            "license": [
+                "MIT"
+            ]
         },
         {
             "name": "bower-asset/blueimp-canvas-to-blob",
@@ -3060,7 +3083,7 @@
                 "yii",
                 "yii2"
             ],
-            "time": "2016-09-02T08:13:46+00:00"
+            "time": "2016-09-02 08:13:46"
         },
         {
             "name": "moonlandsoft/yii2-phpexcel",
@@ -3310,7 +3333,7 @@
                 "xls",
                 "xlsx"
             ],
-            "time": "2017-03-02T00:38:00+00:00"
+            "time": "2017-03-02 00:38:00"
         },
         {
             "name": "phpoffice/phpword",
@@ -3409,7 +3432,7 @@
                 "word",
                 "writer"
             ],
-            "time": "2017-08-13T20:10:15+00:00"
+            "time": "2017-08-13 20:10:15"
         },
         {
             "name": "psr/http-message",

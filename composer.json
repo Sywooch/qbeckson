@@ -50,7 +50,8 @@
         "moonlandsoft/yii2-phpexcel": "*",
         "kartik-v/yii2-widget-timepicker": "*",
         "intervention/image": "^2.3",
-        "mirocow/yii2-yandex-maps": "@dev"
+        "mirocow/yii2-yandex-maps": "@dev",
+        "bower-asset/angular": "1.5.7"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

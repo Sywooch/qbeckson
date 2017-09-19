@@ -58,6 +58,7 @@ use yii\helpers\ArrayHelper;
  *
  *
  * @property Contracts[]                     $contracts
+ * @property Contracts[]                     $currentActiveContracts
  * @property Favorites[]                     $favorites
  * @property Groups[]                        $groups
  * @property Informs[]                       $informs
@@ -364,6 +365,7 @@ class Programs extends ActiveRecord
             'programPhoto'                 => 'Картинка программы',
             'certificate_accounting_limit' => 'Лимит зачисления',
             'zabAsString'                  => 'Категория детей',
+            'currentActiveContracts'       => 'Обучающиеся в данный момент',
         ];
     }
 
@@ -529,6 +531,7 @@ class Programs extends ActiveRecord
         }
 
     }
+
 
     public function otkazName($data)
     {
@@ -751,6 +754,20 @@ class Programs extends ActiveRecord
             Contracts::STATUS_ACTIVE,
             Contracts::STATUS_ACCEPTED]]);
     }
+
+    /**
+     * Контакты действующие в данный момент.
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCurrentActiveContracts()
+    {
+        $now = (new \DateTime())->format('Y-m-d');
+
+        return $this->getContracts()
+            ->andWhere(['<=', Contracts::tableName() . '.start_edu_contract', $now])
+            ->andWhere(['>=', Contracts::tableName() . '.stop_edu_contract', $now]);
+    }
+
 
     /**
      * @return \yii\db\ActiveQuery

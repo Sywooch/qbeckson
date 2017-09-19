@@ -2,10 +2,12 @@
 
 use app\helpers\AppHelper;
 use app\helpers\GridviewHelper;
+use app\models\Payers;
 use app\models\UserIdentity;
 use app\widgets\SearchFilter;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -25,19 +27,21 @@ $columns = [
     ],
     [
         'attribute' => 'month',
-        'label' => 'Месяц',
-        'value' => function ($model) {
+        'label'     => 'Месяц',
+        'value'     => function ($model)
+        {
             /** @var \app\models\Invoices $model */
             return AppHelper::getMonthName($model->month);
         },
-        'type' => SearchFilter::TYPE_DROPDOWN,
-        'data' => AppHelper::monthes(),
+        'type'      => SearchFilter::TYPE_DROPDOWN,
+        'data'      => AppHelper::monthes(),
     ],
     [
         'attribute' => 'organization',
-        'label' => 'Организация',
-        'format' => 'raw',
-        'value' => function ($model) {
+        'label'     => 'Организация',
+        'format'    => 'raw',
+        'value'     => function ($model)
+        {
             /** @var \app\models\Invoices $model */
             return Html::a(
                 $model->organization->name,
@@ -48,40 +52,43 @@ $columns = [
     ],
     [
         'attribute' => 'prepayment',
-        'label' => 'Тип',
-        'format' => 'raw',
-        'value' => function ($model) {
+        'label'     => 'Тип',
+        'format'    => 'raw',
+        'value'     => function ($model)
+        {
             /** @var \app\models\Invoices $model */
             return $model->prepayment === 1 ? 'Аванс' : 'Счёт';
         },
-        'type' => SearchFilter::TYPE_DROPDOWN,
-        'data' => [
+        'type'      => SearchFilter::TYPE_DROPDOWN,
+        'data'      => [
             0 => 'Счёт',
             1 => 'Аванс',
         ],
     ],
     [
         'attribute' => 'status',
-        'format' => 'raw',
-        'value' => function ($model) {
+        'format'    => 'raw',
+        'value'     => function ($model)
+        {
             /** @var \app\models\Invoices $model */
             return $model::statuses()[$model->status];
         },
-        'type' => SearchFilter::TYPE_DROPDOWN,
-        'data' => $searchInvoices::statuses(),
+        'type'      => SearchFilter::TYPE_DROPDOWN,
+        'data'      => $searchInvoices::statuses(),
     ],
     [
-        'attribute' => 'sum',
-        'type' => SearchFilter::TYPE_RANGE_SLIDER,
+        'attribute'     => 'sum',
+        'type'          => SearchFilter::TYPE_RANGE_SLIDER,
         'pluginOptions' => [
             'max' => 10000000
         ]
     ],
     [
-        'attribute' => 'link',
-        'label' => 'Скачать',
-        'format' => 'raw',
-        'value' => function ($model) {
+        'attribute'    => 'link',
+        'label'        => 'Скачать',
+        'format'       => 'raw',
+        'value'        => function ($model)
+        {
             /** @var \app\models\Invoices $model */
             if ($model->prepayment === 1) {
                 return Html::a('<span class="glyphicon glyphicon-download-alt"></span>', !empty($model->pdf) ? Url::to($model->pdf) : Url::to(['invoices/mpdf', 'id' => $model->id]));
@@ -91,35 +98,45 @@ $columns = [
         },
         'searchFilter' => false,
     ],
+    ['attribute' => 'payer',
+     'value'     => function ($model)
+     {
+         return Html::a($model->payer->name, Url::to(['payers/view', 'id' => $model->payer->id]));
+     },
+     'format'    => 'raw',
+     'type'      => SearchFilter::TYPE_INPUT,
+     'data'      => ArrayHelper::map(Payers::find()->all(), 'id', 'name'),
+    ],
     [
-        'class' => ActionColumn::class,
-        'controller' => 'invoices',
-        'template' => '{view}',
+        'class'        => ActionColumn::class,
+        'controller'   => 'invoices',
+        'template'     => '{view}',
         'searchFilter' => false,
     ],
 ];
 
 $preparedColumns = GridviewHelper::prepareColumns('invoices', $columns);
+
 ?>
 <?php if ($searchInvoices->organization_id && $searchInvoices->organization) : ?>
     <p class="lead">Показаны результаты для организации: <?= $searchInvoices->organization; ?></p>
 <?php endif; ?>
 <?php
 echo SearchFilter::widget([
-    'model' => $searchInvoices,
-    'action' => ['personal/payer-invoices'],
-    'data' => GridviewHelper::prepareColumns(
+    'model'  => $searchInvoices,
+    'action' => ['personal/operator-invoices'],
+    'data'   => GridviewHelper::prepareColumns(
         'invoices',
         $columns,
         null,
         'searchFilter',
         null
     ),
-    'role' => UserIdentity::ROLE_PAYER,
+    'role'   => UserIdentity::ROLE_OPERATOR,
 ]);
 
 echo GridView::widget([
     'dataProvider' => $invoicesProvider,
-    'filterModel' => null,
-    'columns' => $preparedColumns
+    'filterModel'  => null,
+    'columns'      => $preparedColumns
 ]);

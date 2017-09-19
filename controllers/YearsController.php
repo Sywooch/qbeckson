@@ -4,16 +4,18 @@ namespace app\controllers;
 
 use app\models\forms\ModuleAddressForm;
 use app\models\forms\ModuleUpdateForm;
-use app\traits\AjaxValidationTrait;
-use Yii;
-use app\models\ProgrammeModule;
-use app\models\ProgrammeModuleSearch;
-use yii\web\Controller;
-use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use app\models\Groups;
 use app\models\Organization;
+use app\models\ProgrammeModule;
+use app\models\ProgrammeModuleSearch;
 use app\models\Programs;
+use app\models\UserIdentity;
+use app\traits\AjaxValidationTrait;
+use Yii;
+use yii\filters\VerbFilter;
+use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
+use yii\web\NotFoundHttpException;
 
 /**
  * YearsController implements the CRUD actions for ProgrammeModule model.
@@ -113,6 +115,13 @@ class YearsController extends Controller
     public function actionUpdate($id)
     {
         $model = new ModuleUpdateForm($id);
+
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
+            && $model->model->program->verification === Programs::VERIFICATION_DENIED) {
+
+            throw  new ForbiddenHttpException();
+        }
+
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             if ($model->save()) {
                 return $this->redirect(['programs/view', 'id' => $model->getModel()->program->id]);
@@ -152,6 +161,12 @@ class YearsController extends Controller
     public function actionStart($id)
     {
         $model = $this->findModel($id);
+
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
+            && $model->program->verification === Programs::VERIFICATION_DENIED) {
+
+            throw  new ForbiddenHttpException();
+        }
 
         $rows = (new \yii\db\Query())
             ->select(['id'])
@@ -238,6 +253,11 @@ class YearsController extends Controller
     public function actionStop($id)
     {
         $model = $this->findModel($id);
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
+            && $model->program->verification === Programs::VERIFICATION_DENIED) {
+
+            throw  new ForbiddenHttpException();
+        }
         $model->open = 0;
         if ($model->save()) {
             return $this->redirect(['programs/view', 'id' => $model->program_id]);
