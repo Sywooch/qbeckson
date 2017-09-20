@@ -460,7 +460,7 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getMunicipality()
     {
-        return $this->hasOne(Mun::className(), ['id' => 'mun']);
+        return $this->hasOne(Mun::className(), ['id' => 'mun'])->inverseOf('organization');
     }
 
     /**
