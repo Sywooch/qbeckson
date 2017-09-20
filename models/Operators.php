@@ -26,6 +26,9 @@ use yii\db\ActiveRecord;
  * @property OperatorSettings $settings
  * @property Coefficient      $coefficient
  * @property User             $user
+ * @property Organization[]   $organizations
+ * @property Organization[]   $organizationsViaMun
+ * @property Mun[]            $mun
  */
 class Operators extends ActiveRecord
 {
@@ -75,6 +78,7 @@ class Operators extends ActiveRecord
         ];
     }
 
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -113,10 +117,27 @@ class Operators extends ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getMun()
+    {
+        return $this->hasMany(Mun::className(), ['operator_id' => 'id'])->inverseOf('operator');
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getOrganizations()
     {
         return $this->hasMany(Organization::class, ['id' => 'organization_id'])
             ->viaTable('organization_operator_assignment', ['operator_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrganizationsViaMun()
+    {
+        return $this->hasMany(Organization::className(), ['mun' => 'id'])
+            ->via('mun');
     }
 
     /**

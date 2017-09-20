@@ -17,6 +17,7 @@ use app\models\FavoritesSearch;
 use app\models\forms\OrganizationSettingsForm;
 use app\models\GroupsSearch;
 use app\models\Mun;
+use app\models\Operators;
 use app\models\Organization;
 use app\models\OrganizationContractSettings;
 use app\models\OrganizationPayerAssignment;
@@ -147,9 +148,13 @@ class PersonalController extends Controller
      */
     public function actionOperatorInvoices()
     {
+        /** @var $operator Operators */
+        $operator = Yii::$app->user->identity->operator;
+
         $searchInvoices = new InvoicesSearch([
             //'status' => [0, 1, 2],
-            'sum' => '0,10000000',
+            'sum'             => '0,10000000',
+            'organization_id' => array_map(function ($val) { return $val->id; }, $operator->organizationsViaMun)
         ]);
         $invoicesProvider = $searchInvoices->search(Yii::$app->request->queryParams);
 
