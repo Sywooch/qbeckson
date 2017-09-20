@@ -2,12 +2,12 @@
 
 namespace app\models\search;
 
+use app\models\Organization;
 use app\models\OrganizationPayerAssignment;
 use app\models\UserIdentity;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Organization;
 
 /**
  * OrganizationSearch represents the model behind the search form about `app\models\Organization`.
@@ -61,7 +61,7 @@ class OrganizationSearch extends Organization
 
     /**
      * Creates data provider instance with search query applied
-     * @param array $params
+     * @param array   $params
      * @param integer $pageSize
      * @return ActiveDataProvider
      */
@@ -76,8 +76,8 @@ class OrganizationSearch extends Organization
             ->joinWith([
                 'municipality',
                 'programs',
-                'contracts',
-            ]);
+
+            ])->joinWith(['contracts',], false);
 
         $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
 
@@ -94,10 +94,10 @@ class OrganizationSearch extends Organization
         }
 
         $dataProvider = new ActiveDataProvider([
-            'query' => $query,
+            'query'      => $query,
             'pagination' => [
                 'pageSizeLimit' => false,
-                'pageSize' => $pageSize,
+                'pageSize'      => $pageSize,
             ]
         ]);
 
@@ -110,20 +110,20 @@ class OrganizationSearch extends Organization
         }
 
         $query->andFilterWhere([
-            'organization.id' => $this->id,
-            'organization.user_id' => $this->user_id,
-            'organization.actual' => $this->actual,
-            'organization.type' => $this->type,
-            'organization.license_date' => $this->license_date,
+            'organization.id'             => $this->id,
+            'organization.user_id'        => $this->user_id,
+            'organization.actual'         => $this->actual,
+            'organization.type'           => $this->type,
+            'organization.license_date'   => $this->license_date,
             'organization.license_number' => $this->license_number,
-            'organization.bank_bik' => $this->bank_bik,
-            'organization.korr_invoice' => $this->korr_invoice,
-            'organization.inn' => $this->inn,
-            'organization.KPP' => $this->KPP,
-            'organization.OGRN' => $this->OGRN,
-            'organization.okopo' => $this->okopo,
-            'organization.mun' => $this->mun,
-            'organization.status' => $this->statusArray
+            'organization.bank_bik'       => $this->bank_bik,
+            'organization.korr_invoice'   => $this->korr_invoice,
+            'organization.inn'            => $this->inn,
+            'organization.KPP'            => $this->KPP,
+            'organization.OGRN'           => $this->OGRN,
+            'organization.okopo'          => $this->okopo,
+            'organization.mun'            => $this->mun,
+            'organization.status'         => $this->statusArray
         ]);
 
         if (null !== $this->cooperateStatus) {

@@ -8,54 +8,56 @@ use Yii;
 /**
  * This is the model class for table "organization".
  *
- * @property integer $id
- * @property integer $user_id
- * @property integer $actual
- * @property integer $type
- * @property string $name
- * @property string $license_date
- * @property integer $license_number
- * @property string $license_issued
- * @property string $bank_name
- * @property integer $bank_bik
- * @property string $bank_sity
- * @property integer $korr_invoice
- * @property integer $mun
- * @property string $rass_invoice
- * @property string $fio
- * @property string $position
- * @property integer $doc_type
- * @property string $date_proxy
- * @property string $address_legal
- * @property string $address_actual
- * @property string $geocode
- * @property integer $max_child
- * @property integer $amount_child
- * @property integer $inn
- * @property integer $KPP
- * @property integer $OGRN
- * @property integer $okopo
- * @property string $raiting
- * @property string $ground
- * @property string $about
- * @property string $fio_contact
- * @property string $email
- * @property string $full_name
- * @property string $number_proxy
- * @property string $license_issued_dat
- * @property integer $contracts_count
+ * @property integer             $id
+ * @property integer             $status
+ * @property integer             $user_id
+ * @property integer             $actual
+ * @property integer             $type
+ * @property string              $name
+ * @property string              $license_date
+ * @property integer             $license_number
+ * @property string              $license_issued
+ * @property string              $bank_name
+ * @property integer             $bank_bik
+ * @property string              $bank_sity
+ * @property integer             $korr_invoice
+ * @property integer             $mun
+ * @property string              $rass_invoice
+ * @property string              $fio
+ * @property string              $position
+ * @property integer             $doc_type
+ * @property string              $date_proxy
+ * @property string              $address_legal
+ * @property string              $address_actual
+ * @property string              $geocode
+ * @property integer             $max_child
+ * @property integer             $amount_child
+ * @property integer             $inn
+ * @property integer             $KPP
+ * @property integer             $OGRN
+ * @property integer             $okopo
+ * @property string              $raiting
+ * @property string              $ground
+ * @property string              $about
+ * @property string              $fio_contact
+ * @property string              $email
+ * @property string              $full_name
+ * @property string              $number_proxy
+ * @property string              $license_issued_dat
+ * @property string              $refuse_reason
+ * @property integer             $contracts_count
  *
- * @property Contracts[] $contracts
- * @property Cooperate[] $cooperates
- * @property Invoices[] $invoices
- * @property Payers $payer
- * @property User $user
- * @property mixed $certprogram
- * @property mixed $actualOrganization
+ * @property Contracts[]         $contracts
+ * @property Cooperate[]         $cooperates
+ * @property Invoices[]          $invoices
+ * @property Payers              $payer
+ * @property User                $user
+ * @property mixed               $certprogram
+ * @property mixed               $actualOrganization
  * @property \yii\db\ActiveQuery $statement
- * @property string $statusName
- * @property mixed $organization
- * @property bool $isModerating
+ * @property string              $statusName
+ * @property mixed               $organization
+ * @property bool                $isModerating
  * @property \yii\db\ActiveQuery $children
  * @property \yii\db\ActiveQuery $operators
  * @property \yii\db\ActiveQuery $license
@@ -407,8 +409,19 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getCooperates()
     {
-        return $this->hasMany(Cooperate::className(), ['organization_id' => 'id']);
+        return $this->hasMany(Cooperate::className(), ['organization_id' => 'id'])->inverseOf('organization');
     }
+
+
+    public function getCooperatesByPayerId($payerId, $status = null)
+    {
+        return array_filter($this->cooperates, function ($val) use ($payerId, $status)
+        {
+            /** @var $val Cooperate */
+            return (is_null($status) || $val->status === $status) && $val->payer_id === $payerId;
+        });
+    }
+
 
     /**
      * @return \yii\db\ActiveQuery
@@ -447,7 +460,7 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getMunicipality()
     {
-        return $this->hasOne(Mun::className(), ['id' => 'mun']);
+        return $this->hasOne(Mun::className(), ['id' => 'mun'])->inverseOf('organization');
     }
 
     /**

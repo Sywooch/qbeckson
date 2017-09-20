@@ -17,9 +17,11 @@ use app\models\FavoritesSearch;
 use app\models\forms\OrganizationSettingsForm;
 use app\models\GroupsSearch;
 use app\models\Mun;
+use app\models\Operators;
 use app\models\Organization;
 use app\models\OrganizationContractSettings;
 use app\models\OrganizationPayerAssignment;
+use app\models\Payers;
 use app\models\PayersSearch;
 use app\models\PreviusSearch;
 use app\models\ProgrammeModuleSearch;
@@ -147,9 +149,11 @@ class PersonalController extends Controller
      */
     public function actionOperatorInvoices()
     {
+        /** @var $operator Operators */
+        $operator = Yii::$app->user->identity->operator;
         $searchInvoices = new InvoicesSearch([
-            //'status' => [0, 1, 2],
-            'sum' => '0,10000000',
+            'sum'       => '0,10000000',
+            'payers_id' => $operator->getPayersViaMun()->select(Payers::tableName() . '.id'),
         ]);
         $invoicesProvider = $searchInvoices->search(Yii::$app->request->queryParams);
 
@@ -202,11 +206,20 @@ class PersonalController extends Controller
         ]);
         $requestProvider = $searchRequest->search(Yii::$app->request->queryParams);
 
+        $searchRefused = new OrganizationSearch([
+            'statusArray' => [Organization::STATUS_REFUSED],
+            'modelName'   => 'SearchRequest',
+        ]);
+        $refusedProvider = $searchRefused->search(Yii::$app->request->queryParams);
+
         return $this->render('operator-organizations', [
             'searchRegistry'   => $searchRegistry,
             'registryProvider' => $registryProvider,
             'searchRequest'    => $searchRequest,
             'requestProvider'  => $requestProvider,
+
+            'searchRefused'   => $searchRefused,
+            'refusedProvider' => $refusedProvider,
 
             'allRegistryProvider' => $allRegistryProvider,
         ]);
