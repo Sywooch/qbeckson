@@ -20,7 +20,7 @@ if (isset($roles['organizations'])) {
     $this->params['breadcrumbs'][] = 'Организации';
 }
 if (isset($roles['payer'])) {
-    if ($cooperation = $model->getCooperation()) {
+    if ($cooperation = $model->getCooperation() && !empty($cooperation->total_payment_limit)) {
         $commitments = \app\models\Contracts::getCommitments($cooperation->id);
         $summary = \app\models\Invoices::getSummary($cooperation->id);
         $commitmentsNextMonth = \app\models\Contracts::getCommitmentsNextMonth($cooperation->id);

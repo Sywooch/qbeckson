@@ -188,7 +188,7 @@ $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $reques
             'rowOptions' => function ($model) {
                 /** @var \app\models\Cooperate $cooperate */
                 $cooperation = $model->getCooperation();
-                if (null !== $cooperation) {
+                if (null !== $cooperation && !empty($cooperation->total_payment_limit)) {
                     $commitments = \app\models\Contracts::getCommitments($cooperation->id);
                     $summary = \app\models\Invoices::getSummary($cooperation->id);
                     $commitmentsNextMonth = \app\models\Contracts::getCommitmentsNextMonth($cooperation->id);

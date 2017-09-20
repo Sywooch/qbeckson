@@ -586,7 +586,7 @@ class Contracts extends ActiveRecord
 
     public static function getCommitments($cooperateId)
     {
-        $command = Yii::$app->db->createCommand("SELECT SUM(c.paid + c.rezerv) as sum FROM contracts as c WHERE c.`status` = " . static::STATUS_ACTIVE . " AND c.`cooperate_id`= :cooperate_id GROUP BY `cooperate_id`", [
+        $command = Yii::$app->db->createCommand("SELECT SUM(c.paid + c.rezerv) as sum FROM contracts as c WHERE (c.`status` = " . static::STATUS_ACTIVE . " OR c.`status` = " . static::STATUS_CLOSED . ") AND c.`cooperate_id`= :cooperate_id GROUP BY `cooperate_id`", [
             ':cooperate_id' => $cooperateId,
         ]);
 
