@@ -593,6 +593,16 @@ class Contracts extends ActiveRecord
         return $command->queryScalar();
     }
 
+    public static function getCommitmentsNextMonth($cooperateId)
+    {
+        $command = Yii::$app->db->createCommand("SELECT SUM(IF(MONTH(`start_edu_contract`) = :month, c.`payer_first_month_payment`, c.`payer_other_month_payment`)) as sum FROM `contracts` as c WHERE c.`status` = " . static::STATUS_ACTIVE . " AND c.`cooperate_id`= :cooperate_id AND (c.`wait_termnate` < 1 OR c.`wait_termnate` IS NULL) GROUP BY c.`cooperate_id`", [
+            ':cooperate_id' => $cooperateId,
+            ':month' => date('m', strtotime('first day of next month')),
+        ]);
+
+        return $command->queryScalar();
+    }
+
     /**
      * @return array
      */

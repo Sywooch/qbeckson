@@ -185,6 +185,20 @@ $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $reques
         ]); ?>
         <?= GridView::widget([
             'dataProvider' => $registryProvider,
+            'rowOptions' => function ($model) {
+                /** @var \app\models\Cooperate $cooperate */
+                $cooperation = $model->getCooperation();
+                if (null !== $cooperation) {
+                    $commitments = \app\models\Contracts::getCommitments($cooperation->id);
+                    $summary = \app\models\Invoices::getSummary($cooperation->id);
+                    $commitmentsNextMonth = \app\models\Contracts::getCommitmentsNextMonth($cooperation->id);
+                    if ($summary + $commitmentsNextMonth > $cooperation->total_payment_limit) {
+                        return ['class' => 'info'];
+                    } elseif (!empty($commitments) && $cooperation->total_payment_limit > $commitments) {
+                        return ['class' => 'warning'];
+                    }
+                }
+            },
             'filterModel' => null,
             'pjax' => true,
             'summary' => false,

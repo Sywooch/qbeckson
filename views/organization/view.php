@@ -23,6 +23,13 @@ if (isset($roles['payer'])) {
     if ($cooperation = $model->getCooperation()) {
         $commitments = \app\models\Contracts::getCommitments($cooperation->id);
         $summary = \app\models\Invoices::getSummary($cooperation->id);
+        $commitmentsNextMonth = \app\models\Contracts::getCommitmentsNextMonth($cooperation->id);
+
+        if ($summary + $commitmentsNextMonth > $cooperation->total_payment_limit) {
+            Yii::$app->session->setFlash('info', 'В связи с ожидаемым достижением максимальной суммы по заключенному договору рекомендуется заключить дополнительное соглашение к договору, установив максимальную сумму не менее &ndash; ' . round($commitments, 2) . ' рублей');
+        } elseif (!empty($commitments) && $cooperation->total_payment_limit > $commitments) {
+            Yii::$app->session->setFlash('warning', 'Вы можете уменьшить максимальную сумму по договору до &ndash; ' . round($commitments, 2) . ' рублей');
+        }
     }
 }
 $this->params['breadcrumbs'][] = $this->title;
