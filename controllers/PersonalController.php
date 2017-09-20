@@ -21,6 +21,7 @@ use app\models\Operators;
 use app\models\Organization;
 use app\models\OrganizationContractSettings;
 use app\models\OrganizationPayerAssignment;
+use app\models\Payers;
 use app\models\PayersSearch;
 use app\models\PreviusSearch;
 use app\models\ProgrammeModuleSearch;
@@ -150,11 +151,9 @@ class PersonalController extends Controller
     {
         /** @var $operator Operators */
         $operator = Yii::$app->user->identity->operator;
-
         $searchInvoices = new InvoicesSearch([
-            //'status' => [0, 1, 2],
-            'sum'             => '0,10000000',
-            'organization_id' => array_map(function ($val) { return $val->id; }, $operator->organizationsViaMun)
+            'sum'       => '0,10000000',
+            'payers_id' => $operator->getPayersViaMun()->select(Payers::tableName() . '.id'),
         ]);
         $invoicesProvider = $searchInvoices->search(Yii::$app->request->queryParams);
 

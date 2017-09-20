@@ -29,6 +29,7 @@ use yii\db\ActiveRecord;
  * @property Organization[]   $organizations
  * @property Organization[]   $organizationsViaMun
  * @property Mun[]            $mun
+ * @property Payers[]         $payersViaMun
  */
 class Operators extends ActiveRecord
 {
@@ -101,6 +102,16 @@ class Operators extends ActiveRecord
     public function getUser()
     {
         return $this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
+
+    /**
+     * плательщики того же муниципалитета что и оператор
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPayersViaMun()
+    {
+        return $this->hasMany(Payers::className(), ['mun' => 'id'])->via('mun');
     }
 
     /**
