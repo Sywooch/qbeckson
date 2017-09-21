@@ -307,7 +307,7 @@ class PersonalController extends Controller
     public function actionOperatorPrograms()
     {
         $searchOpenPrograms = new ProgramsSearch([
-            'verification' => [2],
+            'verification' => Programs::VERIFICATION_DONE,
             'hours'        => '0,2000',
             'limit'        => '0,10000',
             'rating'       => '0,100',
@@ -317,7 +317,7 @@ class PersonalController extends Controller
         $allOpenProgramsProvider = $searchOpenPrograms->search(Yii::$app->request->queryParams, 99999);
 
         $searchWaitPrograms = new ProgramsSearch([
-            'verification' => [0, 1],
+            'verification' => [Programs::VERIFICATION_UNDEFINED, Programs::VERIFICATION_WAIT],
             'open'         => 0,
             'hours'        => '0,2000',
             'modelName'    => 'SearchWaitPrograms',
@@ -326,7 +326,7 @@ class PersonalController extends Controller
         $allWaitProgramsProvider = $searchWaitPrograms->search(Yii::$app->request->queryParams, 99999);
 
         $searchClosedPrograms = new ProgramsSearch([
-            'verification' => [3],
+            'verification' => [Programs::VERIFICATION_DENIED],
             'hours'        => '0,2000',
             'modelName'    => 'SearchClosedPrograms',
         ]);
@@ -547,7 +547,7 @@ class PersonalController extends Controller
         $user = Yii::$app->user->getIdentity();
 
         $searchPrograms = new ProgramsSearch([
-            'verification' => [2],
+            'verification' => [Programs::VERIFICATION_DONE],
             'payerId'      => $user->payer->id,
             'hours'        => '0,2000',
             'limit'        => '0,10000',
@@ -697,7 +697,7 @@ class PersonalController extends Controller
     {
         $searchOpenPrograms = new ProgramsSearch([
             'organization_id' => Yii::$app->user->identity->organization->id,
-            'verification'    => [2],
+            'verification'    => [Programs::VERIFICATION_DONE],
             'hours'           => '0,2000',
             'limit'           => '0,10000',
             'rating'          => '0,100',
@@ -707,7 +707,7 @@ class PersonalController extends Controller
 
         $searchWaitPrograms = new ProgramsSearch([
             'organization_id' => Yii::$app->user->identity->organization->id,
-            'verification'    => [0, 1],
+            'verification'    => [Programs::VERIFICATION_UNDEFINED, Programs::VERIFICATION_WAIT],
             'open'            => 0,
             'hours'           => '0,2000',
             'limit'           => '0,10000',
@@ -718,7 +718,7 @@ class PersonalController extends Controller
 
         $searchClosedPrograms = new ProgramsSearch([
             'organization_id' => Yii::$app->user->identity->organization->id,
-            'verification'    => [3],
+            'verification'    => [Programs::VERIFICATION_DENIED],
             'hours'           => '0,2000',
             'limit'           => '0,10000',
             'rating'          => '0,100',
@@ -1144,7 +1144,7 @@ class PersonalController extends Controller
     public function actionCertificatePrograms(): string
     {
         $searchModel = new ProgramsSearch([
-            'verification' => 2,
+            'verification' => Programs::VERIFICATION_DONE,
             'hours'        => '0,2000',
             'rating'       => '0,100',
             'mun'          => Yii::$app->user->identity->mun_id,
