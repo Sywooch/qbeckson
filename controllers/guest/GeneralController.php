@@ -22,8 +22,8 @@ class GeneralController extends Controller
     public function actionPrograms(): string
     {
         $model = new ProgramsSearch([
-            'verification' => [2],
-            'modelName' => '',
+            'verification' => [Programs::VERIFICATION_DONE],
+            'modelName'    => '',
         ]);
         $provider = $model->search(Yii::$app->request->queryParams);
 

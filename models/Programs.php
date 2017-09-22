@@ -55,6 +55,7 @@ use yii\helpers\ArrayHelper;
  *
  * @property string                          $iconClass
  * @property string                          $defaultPhoto
+ * @property bool                            $isActive
  *
  *
  * @property Contracts[]                     $contracts
@@ -111,20 +112,6 @@ class Programs extends ActiveRecord
         }
 
         return $query->count();
-    }
-
-    public static function find()
-    {
-        $listCond = [self::tableName() . '.verification' => [
-            self::VERIFICATION_UNDEFINED,
-            self::VERIFICATION_WAIT,
-            self::VERIFICATION_DONE,
-            self::VERIFICATION_DENIED
-        ]
-        ];
-        $notCond = ['IS', self::tableName() . '.verification', null];
-
-        return parent::find()->where(['OR', $listCond, $notCond]);
     }
 
     /**
@@ -614,7 +601,7 @@ class Programs extends ActiveRecord
         ];
     }
 
-    /**/
+    /* @deprecated */
 
     public function zabName($data, $ovz)
     {
