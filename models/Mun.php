@@ -8,22 +8,26 @@ use yii\db\ActiveRecord;
 /**
  * This is the model class for table "mun".
  *
- * @property integer $id
- * @property string $name
- * @property integer $ground
- * @property integer $nopc
- * @property integer $pc
- * @property integer $zp
- * @property integer $dop
- * @property integer $uvel
- * @property integer $otch
- * @property integer $otpusk
- * @property integer $polezn
- * @property integer $stav
- * @property integer $deystv
- * @property integer $lastdeystv
- * @property Payers $payer
- * @property integer $countdet
+ * @property integer        $id
+ * @property string         $name
+ * @property integer        $ground
+ * @property integer        $nopc
+ * @property integer        $pc
+ * @property integer        $zp
+ * @property integer        $dop
+ * @property integer        $uvel
+ * @property integer        $otch
+ * @property integer        $otpusk
+ * @property integer        $polezn
+ * @property integer        $stav
+ * @property integer        $deystv
+ * @property integer        $lastdeystv
+ * @property Payers         $payer
+ * @property integer        $countdet
+ * @property integer        $operator_id
+ *
+ * @property Operators      $operator
+ * @property Organization[] $organization
  */
 class Mun extends ActiveRecord
 {
@@ -93,6 +97,23 @@ class Mun extends ActiveRecord
             'lastdeystv' => 'Число действовавших в предыдущем учебном году сертификатов дополнительного образования',
             'countdet' => 'Общее число детей в возрасте от 5-ти до 18-ти лет, проживающее на территории муниципального района (городского округа)'
         ];
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOperator()
+    {
+        return $this->hasOne(Operators::className(), ['id' => 'operator_id'])->inverseOf('mun');
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrganization()
+    {
+        return $this->hasMany(Organization::className(), ['mun' => 'id'])->inverseOf('municipality');
     }
 
     /**

@@ -167,6 +167,11 @@ class ProgramsController extends Controller
         /** @var $user UserIdentity */
         $user = Yii::$app->user->identity;
         $model = $this->findModel($id);
+
+        if (!$model->isActive) {
+            throw new NotFoundHttpException();
+        }
+
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION) && $user->organization->id !== $model->organization_id) {
 
             throw new ForbiddenHttpException('Нет доступа');
@@ -210,12 +215,6 @@ class ProgramsController extends Controller
         ProgramsAsset::register($this->view);
 
         return $this->render('view/view', ['model' => $model, 'cooperate' => $cooperate]);
-
-        /* return $this->render('view', [
-             'model'     => $model,
-             'years'     => $model->years,
-             'cooperate' => $rows,
-         ]);*/
     }
 
     /**
@@ -972,6 +971,9 @@ class ProgramsController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        if (!$model->isActive) {
+            throw new NotFoundHttpException();
+        }
         $modelYears = $model->years;
         $file = new ProgramsFile();
         /** @var $organisation Organization */
@@ -981,6 +983,7 @@ class ProgramsController extends Controller
             && $organization->id !== $model->organization_id) {
             throw new ForbiddenHttpException('Нет доступа');
         }
+
         if ($model->load(Yii::$app->request->post())) {
             if ($model->verification == Programs::VERIFICATION_WAIT) {
                 Yii::$app->session->setFlash('error', 'Редактирование недоступно, программа проходит сертификацию.');

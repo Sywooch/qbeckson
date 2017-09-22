@@ -11,6 +11,7 @@ use app\models\OrganizationPayerAssignment;
 use app\models\Programs;
 use app\models\search\OrganizationSearch;
 use app\models\User;
+use app\models\UserIdentity;
 use Yii;
 use yii\base\DynamicModel;
 use yii\filters\VerbFilter;
@@ -63,21 +64,14 @@ class OrganizationController extends Controller
     public function actionView($id)
     {
         $model = $this->findModel($id);
+        if (Yii::$app->user->can(UserIdentity::ROLE_OPERATOR) && $model->status === Organization::STATUS_REFUSED) {
+            Yii::$app->session->setFlash('warning', 'Деятельность приостановлена, причина: ' . $model->refuse_reason);
+        }
 
-        $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-        if (isset($roles['certificate'])) {
-
-            $certificates = new Certificates();
-            $certificate = $certificates->getCertificates();
-
-            $rows = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('cooperate')
-                ->where(['payer_id' => $certificate['payer_id']])
-                ->andWhere(['organization_id' => $model['id']])
-                ->andWhere(['status' => 1])
-                ->count();
-            if ($rows == 0) {
+        if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
+            /** @var $certificate Certificates */
+            $certificate = Yii::$app->user->identity->certificate;
+            if (!count($model->getCooperatesByPayerId($certificate->payer_id, 1))) {
                 Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в данную организацию. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
             }
         }

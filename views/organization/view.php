@@ -183,6 +183,7 @@ $this->params['breadcrumbs'][] = $this->title;
         $contracts = count($contracts);
     } else {
 
+
         $amount = (new \yii\db\Query())
             ->select(['certificate_id'])
             ->from('contracts')
@@ -336,7 +337,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div>
         <?php
-        if (isset($roles['operators'])) {
+        if (isset($roles['operators']) && $model->status !== \app\models\Organization::STATUS_REFUSED) {
             if ($model->actual === 0) {
                 echo '<div class="pull-right">';
                 echo Html::a('Разрешить деятельность', Url::to(['/organization/actual', 'id' => $model->id]), ['class' => 'btn btn-success']);
@@ -376,7 +377,33 @@ $this->params['breadcrumbs'][] = $this->title;
                         'confirm' => 'Are you sure you want to delete this item?',
                         'method' => 'post']]);
             }
+        } elseif (isset($roles['operators'])) {
+            ?>
+            <div class="well">
+                <?php if (!empty($model->license)): ?>
+                    <?= Html::a('Лицензия (документ)', $model->license[0]->getUrl()) ?>
+                    <br>
+                <? endif; ?>
+                <?php if (!empty($model->charter)): ?>
+                    <?= Html::a('Устав (документ)', $model->charter[0]->getUrl()) ?>
+                    <br>
+                <? endif; ?>
+                <?php if (!empty($model->statement)): ?>
+                    <?= Html::a('Выписка из ЕГРЮЛ/ЕГРИП (документ)', $model->statement[0]->getUrl()) ?>
+                <? endif; ?>
+                <?php if (!empty($model->documents)): ?>
+                    <h4>Иные документы:</h4>
+                    <?php foreach ($model->documents as $i => $document): ?>
+                        <?= Html::a('Документ ' . ($i + 1), $document->getUrl()) ?><br/>
+                    <? endforeach; ?>
+                <? endif; ?>
+            </div>
+            <?php
+            echo '<br><br>';
+            echo Html::a('Назад', '/personal/operator-organizations', ['class' => 'btn btn-primary']);
+            echo '&nbsp;';
         }
+
         if (isset($roles['organizations'])) {
             echo Html::a('Назад', '/personal/organization-info', ['class' => 'btn btn-primary']);
         }
