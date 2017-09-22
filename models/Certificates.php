@@ -176,7 +176,7 @@ class Certificates extends \yii\db\ActiveRecord
         }
     }
 
-    public function changeBalance($contract)
+    public function changeBalance(Contracts $contract)
     {
         if ($contract->period === Contracts::CURRENT_REALIZATION_PERIOD) {
             $this->balance += $contract->rezerv;

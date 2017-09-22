@@ -3,41 +3,37 @@
 namespace app\controllers;
 
 use app\helpers\FormattingHelper;
+use app\models\Certificates;
+use app\models\Completeness;
+use app\models\Contracts;
+use app\models\ContractsDecInvoiceSearch;
+use app\models\ContractsInvoiceSearch;
+use app\models\ContractspreInvoiceSearch;
 use app\models\Cooperate;
 use app\models\forms\CertificateVerificationForm;
 use app\models\forms\ContractConfirmForm;
 use app\models\forms\ContractRequestForm;
 use app\models\forms\SelectGroupForm;
+use app\models\Groups;
+use app\models\GroupsSearch;
+use app\models\Informs;
+use app\models\Organization;
+use app\models\Payers;
+use app\models\ProgrammeModule;
+use app\models\Programs;
+use app\models\User;
 use app\models\UserIdentity;
 use app\traits\AjaxValidationTrait;
+use kartik\mpdf\Pdf;
+use mPDF;
 use Yii;
-use app\models\Contracts;
-use app\models\User;
-use app\models\ContractsSearch;
-use app\models\ContractsoSearch;
-use app\models\ContractsInvoiceSearch;
-use app\models\ContractsDecInvoiceSearch;
 use yii\base\Response;
-use yii\helpers\ArrayHelper;
+use yii\filters\VerbFilter;
+use yii\helpers\Json;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotAcceptableHttpException;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
-use app\models\Informs;
-use app\models\Programs;
-use app\models\Certificates;
-use app\models\Organization;
-use app\models\Favorites;
-use app\models\ProgrammeModule;
-use app\models\Groups;
-use app\models\GroupsSearch;
-use app\models\Payers;
-use mPDF;
-use kartik\mpdf\Pdf;
-use yii\helpers\Json;
-use app\models\ContractspreInvoiceSearch;
-use app\models\Completeness;
 
 /**
  * ContractsController implements the CRUD actions for Contracts model.
@@ -520,101 +516,55 @@ class ContractsController extends Controller
     public function actionNo($id)
     {
         $model = $this->findModel($id);
-        $informs = new Informs();
-        //TODO добавить транзакцию
-        if ($informs->load(Yii::$app->request->post())) {
-            $cert = Certificates::findOne($model->certificate_id);
-            $cert->changeBalance($model);
-
-            $model->rezerv = 0;
-            $model->status = 2;
-
-            if ($model->save()) {
-                $informs->program_id = $model->program_id;
-                $informs->contract_id = $model->id;
-                $informs->prof_id = $model->organization_id;
-                $informs->text = 'Отказано в записи. Причина: ' . $informs->dop;
-                $informs->from = 3;
-                $informs->date = date("Y-m-d");
-                $informs->read = 0;
-
-                if ($informs->save()) {
-                    $inform = new Informs();
-                    $inform->program_id = $model->program_id;
-                    $inform->contract_id = $model->id;
-                    $inform->prof_id = $model->certificate_id;
-                    $inform->text = 'Отказано в записи. Причина: ' . $informs->dop;
-                    $inform->from = 4;
-                    $inform->date = date("Y-m-d");
-                    $inform->read = 0;
-
-                    if ($inform->save()) {
-                        return $this->redirect('/personal/organization-contracts');
-                    }
-                }
-            }
+        if ($model->status === Contracts::STATUS_REFUSED) {
+            throw new NotAcceptableHttpException('Уже отменена');
+        }
+        if ($model->refusedWithInformer()) {
+            return $this->redirect('/personal/organization-contracts');
         }
 
         return $this->render('/informs/comment', [
-            'informs' => $informs,
+            'informs' => new Informs(),
+            'model'   => $model
         ]);
     }
 
     public function actionTermrequest($id)
     {
         $model = $this->findModel($id);
+        if ($model->status === Contracts::STATUS_REFUSED) {
+            throw new NotAcceptableHttpException('Уже отменена');
+        }
         if (!in_array($model->status, [Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED])) {
             throw new NotAcceptableHttpException('Контракт не может быть расторгнут, поскольку уже переведен в "действующие договоры"');
         }
 
-        $cert = Certificates::findOne($model->certificate_id);
-        $cert->changeBalance($model);
-
-        $model->rezerv = 0;
-        $model->status = 2;
-        if ($model->save()) {
+        if ($model->refusedWithInformer()) {
             return $this->redirect('/personal/certificate-archive#panel2');
         }
+
+        return $this->render('/informs/comment', [
+            'informs' => new Informs(),
+            'model'   => $model
+
+        ]);
     }
 
     public function actionTerminate($id)
     {
         $model = $this->findModel($id);
-        $informs = new Informs();
-        $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-
-        if ($informs->load(Yii::$app->request->post())) {
-            if ($model->wait_termnate > 0) {
-                throw new ForbiddenHttpException('Действие запрещено.');
+        if ($model->terminateWithInformer()) {
+            if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
+                Yii::$app->session->setFlash('info', 'Пожалуйста, оцените программу.');
             }
 
-            if (isset($roles['certificate'])) {
-                $model->terminator_user = 1;
-            }
-            if (isset($roles['organizations'])) {
-                $model->terminator_user = 2;
-            }
-
-            $model->wait_termnate = 1;
-            $model->date_initiate_termination = date('Y-m-d');
-            $model->status_comment = $informs->dop;
-
-            $cert = Certificates::findOne($model->certificate_id);
-            $cert->changeBalance($model);
-
-            $model->rezerv = 0;
-            if ($model->save()) {
-                if (isset($roles['certificate'])) {
-                    Yii::$app->session->setFlash('info', 'Пожалуйста, оцените программу.');
-                }
-
-                return $this->redirect(['contracts/view', 'id' => $model->id]);
-            }
+            return $this->redirect(['contracts/view', 'id' => $model->id]);
         }
-
-        if (isset($roles['certificate'])) {
+        $informs = new Informs();
+        if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
             return $this->render('/informs/comment', [
                 'informs' => $informs,
+                'model'   => $model
             ]);
         }
         if (isset($roles['organizations'])) {
@@ -665,9 +615,10 @@ class ContractsController extends Controller
 
             // return '<pre>'.var_dump($contracts).'</pre>';
             return $this->render('decinvoice', [
-                'payers' => $payers,
-                'searchContracts' => $searchContracts,
+                'payers'            => $payers,
+                'searchContracts'   => $searchContracts,
                 'ContractsProvider' => $ContractsProvider,
+                'payer'             => $payers
             ]);
         }
 
@@ -752,7 +703,7 @@ class ContractsController extends Controller
             $headerText
         );
         $html = <<<EOD
-<div style="font-size:12;" > 
+<div style="font-size:12px;" > 
 <p style="text-align: center;">Договор об образовании №$model->number</p>
 <br>
 <div align="justify">$headerText о нижеследующем:</div>
@@ -1156,6 +1107,10 @@ EOD;
             $model->ocenka = 1;
 
             if ($model->save()) {
+                $ocen_fact_1 = 0;
+                $ocen_kadr_1 = 0;
+                $ocen_mat_1 = 0;
+                $ocen_obch_1 = 0;
 
                 $contracts1 = (new \yii\db\Query())
                     ->select(['id', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch'])
@@ -1194,6 +1149,10 @@ EOD;
                     ->andWhere(['status' => 4])
                     ->count();
 
+                $ocen_fact_2 = 0;
+                $ocen_kadr_2 = 0;
+                $ocen_mat_2 = 0;
+                $ocen_obch_2 = 0;
                 foreach ($contracts2 as $contract) {
                     $ocen_fact_2 += $contract['ocen_fact'];
                     $ocen_kadr_2 += $contract['ocen_kadr'];
@@ -1545,7 +1504,8 @@ EOD;
         }
 
         return $this->render('/user/delete', [
-            'user' => $user,
+            'user'  => $user,
+            'title' => null,
         ]);
     }
 
