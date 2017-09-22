@@ -180,6 +180,14 @@ $columnsNonActive = [
                 'filterModel' => null,
                 'columns' => GridviewHelper::prepareColumns('cooperate', $columns),
             ]); ?>
+            <?php
+            echo $this->render('/common/_export', [
+                'dataProvider' => $activeProvider,
+                'columns' => $columns,
+                'group' => 'operator-cooperates',
+                'table' => 'cooperate',
+            ]);
+            ?>
         </div>
         <div id="panel2" class="tab-pane fade">
             <?= GridView::widget([
