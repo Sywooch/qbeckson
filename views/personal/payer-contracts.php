@@ -368,37 +368,15 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
             'columns' => $preparedDissolvedColumns,
         ]); ?>
     </div>
-    <p class="lead">Экспорт данных:</p>
-    <?= ExportMenu::widget([
-        'dataProvider' => $ContractsallProvider,
-        'target' => ExportMenu::TARGET_SELF,
-        'showColumnSelector' => false,
-        'filename' => GridviewHelper::getFileName('all-contracts'),
-        'stream' => false,
-        'deleteAfterSave' => false,
-        'folder' => '@pfdoroot/uploads/contracts',
-        'linkPath' => '@pfdo/uploads/contracts',
-        'showConfirmAlert' => false,
-        'afterSaveView' => '@app/views/common/export-view',
-        'dropdownOptions' => [
-            'class' => 'btn btn-success',
-            'label' => 'Договоры',
-            'icon' => false,
-        ],
-        'exportConfig' => [
-            ExportMenu::FORMAT_TEXT => false,
-            ExportMenu::FORMAT_CSV => false,
-            ExportMenu::FORMAT_HTML => false,
-            ExportMenu::FORMAT_PDF => false,
-            ExportMenu::FORMAT_EXCEL_X => false,
-        ],
-        'columns' => GridviewHelper::prepareColumns('contracts', $activeColumns, 'active'),
-    ]); ?>
     <?php
-    if ($doc = \app\models\ExportFile::findByUserId(Yii::$app->user->id, 'all-contracts')) {
-        echo Html::a('Скачать выписку от ' . Yii::$app->formatter->asDatetime($doc->created_at), Yii::getAlias('@pfdo/uploads/contracts/' . $doc->file), ['class' => 'btn btn-primary']);
-    }
+    echo $this->render('/common/_export', [
+        'dataProvider' => $ContractsallProvider,
+        'columns' => $activeColumns,
+        'group' => 'all-contracts',
+        'table' => 'contracts',
+    ]);
     ?>
+    <br /><br />
     <p>
         <?php
         $payer = Yii::$app->user->identity->payer;
