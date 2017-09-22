@@ -1,5 +1,6 @@
 <?php
 
+use app\components\widgets\modalCheckLink\ModalCheckLink;
 use app\models\Certificates;
 use app\models\Contracts;
 use app\models\Groups;
@@ -48,6 +49,8 @@ $this->params['breadcrumbs'][] = $this->title;
         echo '<div class="alert alert-warning">Ваша заявка находится на рассмотрении поставщика образовательных услуг. Дождитесь оферты от поставщика на заключения договора. Заявка будет переведена в раздел "Ожидающие договоры" автоматически после получения оферты.</div>';
     } elseif ($model->status == Contracts::STATUS_ACCEPTED) {
         echo '<div class="alert alert-warning">Для того, чтобы завершить заключение договора напишите заявление на обучение в соответствии с <a href="' . Url::to(['application-pdf', 'id' => $model->id]) . '">представленным образцом заявления</a>. Вы можете распечатать образец или переписать от руки на листе бумаги. После написания заявления отнесите его лично или передайте с ребенком поставщику образовательных услуг.</div>';
+    } elseif ($model->status === Contracts::STATUS_REFUSED) {
+        echo '<div class="alert alert-warning">' . array_pop($model->informs)->text . '</div>';
     }
 
     if (isset($roles['certificate']) or isset($roles['operators']) or isset($roles['payer'])) {
@@ -342,11 +345,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 $year = date("Y");
             }
             echo '<div class="pull-right">';
-            echo Html::a('Расторгнуть договор', Url::to(['/contracts/terminate', 'id' => $model->id]), ['class' => 'btn btn-danger',
-                'data' => [
-                    'confirm' => 'Вы собираетесь расторгнуть выбранный договор. Расторжение договора осуществляется с первого дня месяца, следующего за месяцем направления уведомления о расторжении договора. 
+            echo ModalCheckLink::widget([
+                'link'          => Html::a('Расторгнуть договор', Url::to(['/contracts/terminate', 'id' => $model->id]), ['class' => 'btn btn-danger']),
+                'buttonOptions' => ['label' => 'Расторгнуть договор', 'class' => 'btn btn-danger'],
+                'content'       => 'Вы собираетесь расторгнуть выбранный договор. Расторжение договора осуществляется с первого дня месяца, следующего за месяцем направления уведомления о расторжении договора. 
                     В случае если Вы подтвердите расторжение договора будет запущена процедура расторжения договора, которая не имеет обратной силы. Средства сертификата, зарезервированные на оплату договора и не использованные на данный момент, вернутся на баланс Вашего сертификата первого числа следующего месяца.
-                    Вы действительно хотите расторгнуть данный договор с 1.' . $month . '.' . $year . '?']]);
+                    Вы действительно хотите расторгнуть данный договор с 1.' . $month . '.' . $year . '?',
+                'title'         => 'Расторгнуть договор?',
+                'label'         => 'Да, я уверен, что хочу Расторгнуть договор.',
+            ]);
             echo '</div>';
         }
     }
@@ -361,7 +368,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 $year = date("Y");
             }
             echo '<div class="pull-right">';
-            echo Html::a('Отменить заявку', Url::to(['/contracts/termrequest', 'id' => $model->id]), ['class' => 'btn btn-danger']);
+            echo '<div class="pull-right">';
+            echo ModalCheckLink::widget([
+                'link'          => Html::a('Отменить заявку', Url::to(['/contracts/termrequest', 'id' => $model->id]), ['class' => 'btn btn-danger']),
+                'buttonOptions' => ['label' => 'Отменить заявку', 'class' => 'btn btn-danger'],
+                'content'       => 'Отклоняя заявку Вы отказываетесь от заключения договора на обучение по выбранной программе. Деньги, зарезервированные на оплату договора вернутся на сертификат в полном объеме, но передумывать отклонять заявку будет уже поздно. Вы уверены, что хотите отклонить заявку?',
+                'title'         => 'Отменить заявку?',
+                'label'         => 'Да, я уверен, что хочу Отменить заявку.',
+            ]);
             echo '</div>';
         }
     }
@@ -375,7 +389,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 $year = date("Y");
             }
             echo '<div class="pull-right">';
-            echo Html::a('Отменить заявку', Url::to(['/contracts/termrequest', 'id' => $model->id]), ['class' => 'btn btn-danger']);
+            echo ModalCheckLink::widget([
+                'link'          => Html::a('Отменить заявку', Url::to(['/contracts/termrequest', 'id' => $model->id]), ['class' => 'btn btn-danger']),
+                'buttonOptions' => ['label' => 'Отменить заявку', 'class' => 'btn btn-danger'],
+                'content'       => 'Отклоняя заявку Вы отказываетесь от заключения договора на обучение по выбранной программе. Деньги, зарезервированные на оплату договора вернутся на сертификат в полном объеме, но передумывать отклонять заявку будет уже поздно. Вы уверены, что хотите отклонить заявку?',
+                'title'         => 'Отменить заявку?',
+                'label'         => 'Да, я уверен, что хочу Отменить заявку.',
+            ]);
             echo '</div>';
         }
     }
@@ -392,11 +412,15 @@ $this->params['breadcrumbs'][] = $this->title;
             $year = date("Y");
         }
         echo '<div class="pull-right">';
-        echo Html::a('Расторгнуть договор', Url::to(['/contracts/terminate', 'id' => $model->id]), ['class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Вы собираетесь расторгнуть выбранный договор. Расторжение договора осуществляется с первого дня месяца, следующего за месяцем направления уведомления о расторжении договора. 
+        echo ModalCheckLink::widget([
+            'link'          => Html::a('Расторгнуть договор', Url::to(['/contracts/terminate', 'id' => $model->id]), ['class' => 'btn btn-danger']),
+            'buttonOptions' => ['label' => 'Расторгнуть договор', 'class' => 'btn btn-danger'],
+            'content'       => 'Вы собираетесь расторгнуть выбранный договор. Расторжение договора осуществляется с первого дня месяца, следующего за месяцем направления уведомления о расторжении договора. 
 В случае если Вы подтвердите расторжение договора будет запущена процедура расторжения договора, которая не имеет обратной силы. Средства сертификата, зарезервированные на оплату договора и не использованные на данный момент, вернутся на баланс сертификата первого числа следующего месяца.
-Вы действительно хотите расторгнуть данный договор с 1.' . $month . '.' . $year . '?']]);
+Вы действительно хотите расторгнуть данный договор с 1.' . $month . '.' . $year . '?',
+            'title'         => 'Расторгнуть договор?',
+            'label'         => 'Да, я уверен, что хочу расторгнуть договор.',
+        ]);
         echo '</div>';
     } elseif (!$model->canBeTerminated && $model->status == Contracts::STATUS_ACTIVE && $model->wait_termnate < 1) {
         echo '<div class="pull-right text-warning">Договор не может быть расторгнут до начала действия</div>';

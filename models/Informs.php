@@ -22,6 +22,7 @@ use Yii;
 class Informs extends \yii\db\ActiveRecord
 {
     public $dop;
+
     /**
      * @inheritdoc
      */
