@@ -372,6 +372,7 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
     echo $this->render('/common/_export', [
         'dataProvider' => $ContractsallProvider,
         'columns' => $activeColumns,
+        'type' => 'active',
         'group' => 'all-contracts',
         'table' => 'contracts',
     ]);

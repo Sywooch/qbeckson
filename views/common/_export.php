@@ -28,7 +28,7 @@ use yii\helpers\Html;
         ExportMenu::FORMAT_PDF => false,
         ExportMenu::FORMAT_EXCEL_X => false,
     ],
-    'columns' => GridviewHelper::prepareColumns($table, $columns, 'active'),
+    'columns' => GridviewHelper::prepareColumns($table, $columns, empty($type) ? null : $type),
 ]); ?>
 <?php
 if ($doc = \app\models\ExportFile::findByUserId(Yii::$app->user->id, $group)) {

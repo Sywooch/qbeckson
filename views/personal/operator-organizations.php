@@ -224,19 +224,15 @@ $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $reques
             'summary' => false,
             'columns' => $preparedRegistryColumns,
         ]); ?>
-        <p class="lead">Экспорт данных:</p>
-        <?= ExportMenu::widget([
-            'dataProvider' => $allRegistryProvider,
-            'exportConfig' => [
-                ExportMenu::FORMAT_EXCEL => false,
-            ],
-            'target' => ExportMenu::TARGET_BLANK,
-            'columns' => GridviewHelper::prepareExportColumns($registryColumns),
-            'showColumnSelector' => false
-        ]); ?>
-        <br>
-        <br>
-        <p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>
+        <?php
+        echo $this->render('/common/_export', [
+            'dataProvider' => $registryProvider,
+            'columns' => $registryColumns,
+            'type' => 'register',
+            'group' => 'operator-organizations',
+            'table' => 'organization',
+        ]);
+        ?>
     </div>
     <div id="panel-requests" class="tab-pane fade">
         <?= SearchFilter::widget([

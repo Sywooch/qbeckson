@@ -102,16 +102,11 @@ $preparedColumns = GridviewHelper::prepareColumns('payers', $columns);
     'summary' => false,
     'columns' => $preparedColumns,
 ]); ?>
-<p class="lead">Экспорт данных:</p>
-<?= ExportMenu::widget([
-    'dataProvider' => $allPayersProvider,
-    'exportConfig' => [
-        ExportMenu::FORMAT_EXCEL => false,
-    ],
-    'target' => ExportMenu::TARGET_BLANK,
-    'columns' => GridviewHelper::prepareExportColumns($columns),
-    'showColumnSelector' => false
-]); ?>
-<br>
-<br>
-<p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>
+<?php
+echo $this->render('/common/_export', [
+    'dataProvider' => $payersProvider,
+    'columns' => $columns,
+    'group' => 'operator-payers',
+    'table' => 'payers',
+]);
+?>
