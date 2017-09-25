@@ -39,17 +39,11 @@ class InformerBuilder
      */
     public static function CreateFoContractTerminateByCertificate(Contracts $contract)
     {
-        $informs = new Informs();
-        if ($informs->load(Yii::$app->request->post())) {
+        $informs = self::build($contract, '', UserIdentity::ROLE_CERTIFICATE_ID, $contract->certificate_id);
+        if (!$informs->load(Yii::$app->request->post())) {
             return null;
         }
-        $informs->program_id = $contract->program_id;
-        $informs->contract_id = $contract->id;
-        $informs->prof_id = $contract->certificate_id;
         $informs->text = 'Договор расторжен клиентом. Причина: ' . $informs->dop;
-        $informs->from = UserIdentity::ROLE_CERTIFICATE_ID;
-        $informs->date = date("Y-m-d");
-        $informs->read = 0;
         if ($informs->save()) {
 
             return $informs;
@@ -65,17 +59,12 @@ class InformerBuilder
      */
     public static function CreateFoContractTerminateByOrganization(Contracts $contract)
     {
-        $informs = new Informs();
-        if ($informs->load(Yii::$app->request->post())) {
+        $informs = self::build($contract, '', UserIdentity::ROLE_CERTIFICATE_ID, $contract->certificate_id);
+        if (!$informs->load(Yii::$app->request->post())) {
+            Yii::trace($informs->getErrors());
             return null;
         }
-        $informs->program_id = $contract->program_id;
-        $informs->contract_id = $contract->id;
-        $informs->prof_id = $contract->certificate_id;
         $informs->text = 'Договор расторжен поставщиком услуг. Причина: ' . $informs->dop;
-        $informs->from = UserIdentity::ROLE_CERTIFICATE_ID;
-        $informs->date = date("Y-m-d");
-        $informs->read = 0;
         if ($informs->save()) {
 
             return $informs;
@@ -102,23 +91,31 @@ class InformerBuilder
      */
     public static function CreateFoContractRefuseByCertificate(Contracts $contract)
     {
-        $informs = new Informs();
-        if ($informs->load(Yii::$app->request->post())) {
+        $informs = self::build($contract, '', UserIdentity::ROLE_CERTIFICATE_ID, $contract->certificate_id);
+        if (!$informs->load(Yii::$app->request->post())) {
             return null;
         }
-        $informs->program_id = $contract->program_id;
-        $informs->contract_id = $contract->id;
-        $informs->prof_id = $contract->certificate_id;
         $informs->text = 'Заявка отменена клиентом. Причина: ' . $informs->dop;
-        $informs->from = UserIdentity::ROLE_CERTIFICATE_ID;
-        $informs->date = date("Y-m-d");
-        $informs->read = 0;
         if ($informs->save()) {
-
             return $informs;
         }
 
         return null;
+    }
+
+    public static function build(Contracts $contract, $message, $from, $prof): Informs
+    {
+        $informs = new Informs([
+            'program_id'  => $contract->program_id,
+            'contract_id' => $contract->id,
+            'prof_id'     => $prof,
+            'text'        => $message,
+            'from'        => $from,
+            'date'        => date("Y-m-d"),
+            'read'        => 0,
+        ]);
+
+        return $informs;
     }
 
     /**
@@ -128,19 +125,12 @@ class InformerBuilder
      */
     public static function CreateFoContractRefuseByOrganization(Contracts $contract)
     {
-        $informs = new Informs();
-        if ($informs->load(Yii::$app->request->post())) {
+        $informs = self::build($contract, '', UserIdentity::ROLE_ORGANIZATION_ID, $contract->organization_id);
+        if (!$informs->load(Yii::$app->request->post())) {
             return null;
         }
-        $informs->program_id = $contract->program_id;
-        $informs->contract_id = $contract->id;
-        $informs->prof_id = $contract->organization_id;
         $informs->text = 'Заявка отменена поставщиком услуг. Причина: ' . $informs->dop;
-        $informs->from = UserIdentity::ROLE_ORGANIZATION_ID;
-        $informs->date = date("Y-m-d");
-        $informs->read = 0;
         if ($informs->save()) {
-
             return $informs;
         }
 

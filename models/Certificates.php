@@ -477,4 +477,40 @@ class Certificates extends \yii\db\ActiveRecord
         return $query->one();
     }
 
+    public function freez()
+    {
+        if ($this->getContractsModels()->andWhere([Contracts::tableName() . '.status' =>
+                                                       [Contracts::STATUS_ACCEPTED, Contracts::STATUS_ACTIVE]])->exists()) {
+
+            return 'Невозможно заморозить, есть активные контракты';
+        }
+        $contracts = $this->getContractsModels()->andWhere([Contracts::tableName() . '.status' => [Contracts::STATUS_CREATED]])->all();
+        $trans = Yii::$app->db->beginTransaction();
+
+        $result = array_reduce($contracts, function ($acc, $contract)
+        {
+            /**@var $contract Contracts */
+            return $acc && $contract->setRefused('Отклонено в связи с заморозкой сертификата.'
+                    , UserIdentity::ROLE_PAYER_ID
+                    , Yii::$app->user->identity->payer->id);
+        }, true);
+
+        if (!$result) {
+            $trans->rollBack();
+
+            return 'Не удалось отклонить все заявки сертификата.';
+        }
+
+        $this->actual = 0;
+        $this->nominal = 0;
+        if (!$this->save()) {
+            $trans->rollBack();
+
+            return 'Не удалось сохранить.';
+        }
+        $trans->commit();
+
+        return null;
+    }
+
 }

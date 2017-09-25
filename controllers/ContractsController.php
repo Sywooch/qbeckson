@@ -567,7 +567,7 @@ class ContractsController extends Controller
                 'model'   => $model
             ]);
         }
-        if (isset($roles['organizations'])) {
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
             return $this->render('/informs/cause', [
                 'informs' => $informs,
                 'model' => $model,
