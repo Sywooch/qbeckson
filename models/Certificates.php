@@ -7,22 +7,24 @@ use Yii;
 /**
  * This is the model class for table "certificates".
  *
- * @property integer $id
- * @property integer $user_id
- * @property string $number
- * @property string $name
- * @property string $soname
- * @property string $phname
- * @property integer $payer_id
- * @property integer $actual
- * @property string $fio_child
- * @property string $fio_parent
- * @property integer     $nominal_f
- * @property integer     $balance_f
- * @property integer     $rezerv_f
- * @property integer     $nominal
- * @property integer     $balance
- * @property integer     $rezerv
+ * @property integer     $id
+ * @property integer     $user_id
+ * @property string      $number
+ * @property string      $name
+ * @property string      $soname
+ * @property string      $phname
+ * @property integer     $payer_id
+ * @property integer     $actual
+ * @property string      $fio_child
+ * @property string      $fio_parent
+ * @property double      $nominal_f
+ * @property double      $balance_f
+ * @property double      $balance_p
+ * @property double      $rezerv_f
+ * @property double      $rezerv_p
+ * @property double      $nominal
+ * @property double      $balance
+ * @property double      $rezerv
  * @property integer     $contracts
  * @property integer     $directivity1
  * @property integer     $directivity2

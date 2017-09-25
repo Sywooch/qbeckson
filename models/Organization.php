@@ -46,6 +46,8 @@ use Yii;
  * @property string              $license_issued_dat
  * @property string              $refuse_reason
  * @property integer             $contracts_count
+ * @property string              $cratedate
+ * @property string              $anonymous_update_token
  *
  * @property Contracts[]         $contracts
  * @property Cooperate[]         $cooperates
