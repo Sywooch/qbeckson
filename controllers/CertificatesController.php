@@ -258,9 +258,6 @@ class CertificatesController extends Controller
 
     public function actionActual($id)
     {
-        // Недоступно
-        return false;
-
         $model = $this->findModel($id);
         $model->actual = 1;
 
@@ -275,14 +272,10 @@ class CertificatesController extends Controller
 
     public function actionNoactual($id)
     {
-        // Недоступно
-        return false;
-
         $model = $this->findModel($id);
-        $model->actual = 0;
-        $model->nominal = 0;
-
-        $model->save();
+        if ($eventMessage = $model->freez()) {
+            Yii::$app->session->setFlash('error', $eventMessage);
+        }
 
         return $this->redirect(['/certificates/view', 'id' => $id]);
     }

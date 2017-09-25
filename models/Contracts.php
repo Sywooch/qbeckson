@@ -622,6 +622,36 @@ class Contracts extends ActiveRecord
         ];
     }
 
+    public function setRefused($message, $from, $prof)
+    {
+        $trans = Yii::$app->db->beginTransaction();
+        $rollback = function () use ($trans)
+        {
+            $trans->rollBack();
+
+            return false;
+        };
+
+        $informer = InformerBuilder::build($this, $message, $from, $prof);
+        if (!$informer->save()) {
+            return $rollback();
+        }
+
+        $this->rezerv = 0;
+        $this->status = Contracts::STATUS_REFUSED;
+        if (!$this->certificate->changeBalance($this)) {
+
+            return $rollback();
+        }
+        if (!$this->save()) {
+
+            return $rollback();
+        }
+
+
+        $trans->commit();
+    }
+
     public function refusedWithInformer()
     {
 
@@ -677,6 +707,7 @@ class Contracts extends ActiveRecord
         }
 
         if (!($informs = InformerBuilder::CreateFoContractTerminate($this))) {
+            Yii::trace($informs);
             return $rollback();
         }
         if (isset($roles['certificate'])) {
