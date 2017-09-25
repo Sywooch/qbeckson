@@ -33,7 +33,7 @@ class OrganizationController extends Controller
     {
         return [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class'   => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
                 ],
@@ -51,14 +51,16 @@ class OrganizationController extends Controller
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
+            'searchModel'  => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
 
     /**
      * Displays a single Organization model.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionView($id)
@@ -82,8 +84,28 @@ class OrganizationController extends Controller
     }
 
     /**
-     * Displays a single Organization model.
+     * Finds the Organization model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     *
      * @param integer $id
+     *
+     * @return Organization the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = Organization::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+    }
+
+    /**
+     * Displays a single Organization model.
+     *
+     * @param integer $id
+     *
      * @return mixed
      */
     public function actionViewSubordered($id)
@@ -148,7 +170,7 @@ class OrganizationController extends Controller
 
         return $this->render('create', [
             'model' => $model,
-            'user' => $user,
+            'user'  => $user,
         ]);
     }
 
@@ -160,10 +182,10 @@ class OrganizationController extends Controller
         }
 
         $model = new Organization([
-            'status' => Organization::STATUS_NEW,
-            'scenario' => Organization::SCENARIO_GUEST,
-            'actual' => 0,
-            'cratedate' => date("Y-m-d"),
+            'status'                 => Organization::STATUS_NEW,
+            'scenario'               => Organization::SCENARIO_GUEST,
+            'actual'                 => 0,
+            'cratedate'              => date("Y-m-d"),
             'anonymous_update_token' => Yii::$app->security->generateRandomString(10),
         ]);
         $user = new User([
@@ -218,6 +240,15 @@ class OrganizationController extends Controller
         ]);
     }
 
+    protected function findModelByToken($token)
+    {
+        if (($model = Organization::findOne(['anonymous_update_token' => $token])) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+    }
+
     public function actionCheckStatus($token = null)
     {
         // TODO: Разобраться с правами, as accessbehavior из конфига не работает, так что костыль
@@ -245,7 +276,9 @@ class OrganizationController extends Controller
     /**
      * Updates an existing Organization model.
      * If update is successful, the browser will be redirected to the 'view' page.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionUpdate($id)
@@ -267,9 +300,7 @@ class OrganizationController extends Controller
 
         if ($user->load(Yii::$app->request->post()) && ($user->newlogin > 0 || $user->newpass > 0)) {
             $password = null;
-            //print_r($user);exit;
             if ($user->newpass > 0) {
-                //die('f');
                 if (!$user->password) {
                     $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
                     $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
@@ -302,9 +333,14 @@ class OrganizationController extends Controller
 
             if ($showUserInfo === true) {
                 return $this->render('/user/view', [
-                    'model' => $user,
+                    'model'    => $user,
                     'password' => $password,
                 ]);
+            }
+            if ($model->isRefused) {
+                Yii::$app->session->setFlash('success', 'Организации направлен отказ во включении в реестр поставщиков образовательных услуг');
+
+                return $this->redirect('/personal/operator-organizations');
             }
 
             return $this->redirect(['/organization/view', 'id' => $model->id]);
@@ -312,7 +348,7 @@ class OrganizationController extends Controller
 
         return $this->render('update', [
             'model' => $model,
-            'user' => $user,
+            'user'  => $user,
         ]);
     }
 
@@ -451,6 +487,7 @@ class OrganizationController extends Controller
 
             $mun = Mun::findOne($model->mun);
 
+            $coef_raiting = 0;
             if ($model->raiting < Yii::$app->coefficient->data->ngr) {
                 $coef_raiting = 0;
             }
@@ -637,7 +674,7 @@ class OrganizationController extends Controller
         }
 
         return $this->render('/user/delete', [
-            'user' => $user,
+            'user'  => $user,
             'title' => 'Приостановить деятельность организации',
         ]);
     }
@@ -645,7 +682,9 @@ class OrganizationController extends Controller
     /**
      * Deletes an existing Organization model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionDelete($id)
@@ -668,32 +707,8 @@ class OrganizationController extends Controller
         }
 
         return $this->render('/user/delete', [
-            'user' => $user,
+            'user'  => $user,
+            'title' => null
         ]);
-    }
-
-    /**
-     * Finds the Organization model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Organization the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Organization::findOne($id)) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
-    }
-
-    protected function findModelByToken($token)
-    {
-        if (($model = Organization::findOne(['anonymous_update_token' => $token])) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
     }
 }
