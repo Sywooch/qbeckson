@@ -65,7 +65,7 @@ $columns = [
         'format' => 'raw',
         'value' => function ($model) {
             /** @var \app\models\Invoices $model */
-            return $model::statuses()[$model->status];
+            return $model->statusAsString;
         },
         'type' => SearchFilter::TYPE_DROPDOWN,
         'data' => $searchInvoices::statuses(),
