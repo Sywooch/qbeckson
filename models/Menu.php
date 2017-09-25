@@ -20,7 +20,7 @@ class Menu
         } elseif ($webUser->can(UserIdentity::ROLE_ADMINISTRATOR)) {
             self::emitFoAdmin();
 
-            return self::getFoAdmin() + self::exitButton();
+            return array_merge(self::getFoAdmin(), [self::exitButton()]);
         } elseif ($webUser->can(UserIdentity::ROLE_OPERATOR)) {
             self::emitFoOperator();
 
