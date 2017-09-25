@@ -20,23 +20,23 @@ class Menu
         } elseif ($webUser->can(UserIdentity::ROLE_ADMINISTRATOR)) {
             self::emitFoAdmin();
 
-            return self::getFoAdmin();
+            return self::getFoAdmin() + self::exitButton();
         } elseif ($webUser->can(UserIdentity::ROLE_OPERATOR)) {
             self::emitFoOperator();
 
-            return self::getFoOperator();
+            return array_merge(self::getFoOperator(), [self::exitButton()]);
         } elseif ($webUser->can(UserIdentity::ROLE_PAYER)) {
             self::emitFoPayer();
 
-            return self::getFoPayer();
+            return array_merge(self::getFoPayer(), [self::exitButton()]);
         } elseif ($webUser->can(UserIdentity::ROLE_ORGANIZATION)) {
             self::emitFoOrganization();
 
-            return self::getFoOrganization();
+            return array_merge(self::getFoOrganization(), [self::exitButton()]);
         } elseif ($webUser->can(UserIdentity::ROLE_CERTIFICATE)) {
             self::emitFoCerificate();
 
-            return self::getFoCertificate();
+            return array_merge(self::getFoCertificate(), [self::exitButton()]);
         }
 
         return null;
@@ -106,6 +106,24 @@ class Menu
 
             ]
         ];
+    }
+
+    public static function exitButton(): array
+    {
+        if (!Yii::$app->user->isGuest) {
+
+            return [
+                'label'       => 'Выйти(' . Yii::$app->user->identity->username . ')',
+                'url'         => ['site/logout'],
+                'linkOptions' => [
+                    'data-method' => 'post',
+                    'class'       => 'visible-sm visible-xs'
+                ],
+            ];
+
+        } else {
+            return null;
+        }
     }
 
     public static function emitFoOperator()
