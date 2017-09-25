@@ -707,7 +707,6 @@ class Contracts extends ActiveRecord
         }
 
         if (!($informs = InformerBuilder::CreateFoContractTerminate($this))) {
-            Yii::trace($informs);
             return $rollback();
         }
         if (isset($roles['certificate'])) {

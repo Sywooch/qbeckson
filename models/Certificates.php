@@ -448,6 +448,19 @@ class Certificates extends \yii\db\ActiveRecord
         ]);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     * */
+    public function getCurrentActiveContracts()
+    {
+        $now = (new \DateTime())->format('Y-m-d');
+
+        return $this->getContractsModels()
+            ->andWhere(['<=', Contracts::tableName() . '.start_edu_contract', $now])
+            ->andWhere(['>=', Contracts::tableName() . '.stop_edu_contract', $now]);
+    }
+
+
 
     /**
      * @deprecated
@@ -479,7 +492,7 @@ class Certificates extends \yii\db\ActiveRecord
 
     public function freez()
     {
-        if ($this->getContractsModels()->andWhere([Contracts::tableName() . '.status' =>
+        if ($this->getCurrentActiveContracts()->andWhere([Contracts::tableName() . '.status' =>
                                                        [Contracts::STATUS_ACCEPTED, Contracts::STATUS_ACTIVE]])->exists()) {
 
             return 'Невозможно заморозить, есть активные контракты';
