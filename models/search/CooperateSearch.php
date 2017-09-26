@@ -64,7 +64,7 @@ class CooperateSearch extends Cooperate
      * @param array $params
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $pageSize = 50)
     {
         $query = Cooperate::find()
             ->joinWith([
@@ -76,7 +76,8 @@ class CooperateSearch extends Cooperate
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
-                'pageSize' => 50,
+                'pageSizeLimit' => false,
+                'pageSize' => $pageSize,
             ],
         ]);
 

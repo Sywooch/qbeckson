@@ -300,7 +300,7 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
         ]); ?>
         <?php
         echo $this->render('/common/_export', [
-            'dataProvider' => $openProgramsProvider,
+            'dataProvider' => $allOpenProgramsProvider,
             'columns' => $openColumns,
             'type' => 'open',
             'group' => 'operator-open-programs',
@@ -338,7 +338,7 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
         ]); ?>
         <?php
         echo $this->render('/common/_export', [
-            'dataProvider' => $waitProgramsProvider,
+            'dataProvider' => $allWaitProgramsProvider,
             'columns' => $waitColumns,
             'type' => 'wait',
             'group' => 'operator-wait-programs',
@@ -369,7 +369,7 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
         ]); ?>
         <?php
         echo $this->render('/common/_export', [
-            'dataProvider' => $closedProgramsProvider,
+            'dataProvider' => $allClosedProgramsProvider,
             'columns' => $closedPrograms,
             'type' => 'close',
             'group' => 'operator-close-programs',
