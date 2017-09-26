@@ -226,7 +226,7 @@ $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $reques
         ]); ?>
         <?php
         echo $this->render('/common/_export', [
-            'dataProvider' => $registryProvider,
+            'dataProvider' => $allRegistryProvider,
             'columns' => $registryColumns,
             'type' => 'register',
             'group' => 'operator-organizations',

@@ -182,7 +182,7 @@ $columnsNonActive = [
             ]); ?>
             <?php
             echo $this->render('/common/_export', [
-                'dataProvider' => $activeProvider,
+                'dataProvider' => $allActiveProvider,
                 'columns' => $columns,
                 'group' => 'operator-cooperates',
                 'table' => 'cooperate',

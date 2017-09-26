@@ -104,7 +104,7 @@ $preparedColumns = GridviewHelper::prepareColumns('payers', $columns);
 ]); ?>
 <?php
 echo $this->render('/common/_export', [
-    'dataProvider' => $payersProvider,
+    'dataProvider' => $allPayersProvider,
     'columns' => $columns,
     'group' => 'operator-payers',
     'table' => 'payers',

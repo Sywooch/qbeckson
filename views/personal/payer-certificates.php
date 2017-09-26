@@ -106,7 +106,7 @@ $columns = [
 
 <?php
 echo $this->render('/common/_export', [
-    'dataProvider' => $certificatesProvider,
+    'dataProvider' => $allCertificatesProvider,
     'columns' => $columns,
     'group' => 'payer-certificates',
     'table' => 'certificates',
