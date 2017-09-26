@@ -157,9 +157,12 @@ class PersonalController extends Controller
         ]);
         $invoicesProvider = $searchInvoices->search(Yii::$app->request->queryParams);
 
+        $munList = ArrayHelper::map($operator->mun, 'id', 'name');
+
         return $this->render('operator/operator-invoices', [
             'searchInvoices'   => $searchInvoices,
             'invoicesProvider' => $invoicesProvider,
+            'munList'          => $munList
         ]);
     }
 
