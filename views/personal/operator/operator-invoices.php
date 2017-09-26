@@ -123,7 +123,6 @@ $columns = [
 ];
 
 $preparedColumns = GridviewHelper::prepareColumns('invoices', $columns);
-$munList
 ?>
 <?php if ($searchInvoices->organization_id && $searchInvoices->organization) : ?>
     <p class="lead">Показаны результаты для организации: <?= $searchInvoices->organization; ?></p>
