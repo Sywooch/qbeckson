@@ -305,20 +305,15 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
             },
             'columns' => $preparedActiveColumns,
         ]); ?>
-        <p class="lead">Экспорт данных:</p>
-        <?= ExportMenu::widget([
+        <?php
+        echo $this->render('/common/_export', [
             'dataProvider' => $allActiveContractsProvider,
-            'filename' => 'active-contracts',
-            'exportConfig' => [
-                ExportMenu::FORMAT_EXCEL => false,
-            ],
-            'target' => ExportMenu::TARGET_BLANK,
-            'columns' => GridviewHelper::prepareExportColumns($activeColumns),
-            'showColumnSelector' => false
-        ]); ?>
-        <br>
-        <br>
-        <p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>
+            'columns' => $activeColumns,
+            'type' => 'active',
+            'group' => 'operator-contracts',
+            'table' => 'contracts',
+        ]);
+        ?>
     </div>
     <div id="panel2" class="tab-pane fade">
         <?= SearchFilter::widget([
@@ -378,20 +373,6 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
             'summary'      => false,
             'columns'      => $preparedPendingColumns,
         ]); ?>
-        <p class="lead">Экспорт данных:</p>
-        <?= ExportMenu::widget([
-            'dataProvider' => $allPendingContractsProvider,
-            'filename' => 'pending-contracts',
-            'exportConfig' => [
-                ExportMenu::FORMAT_EXCEL => false,
-            ],
-            'target' => ExportMenu::TARGET_BLANK,
-            'columns' => GridviewHelper::prepareExportColumns($pendingColumns),
-            'showColumnSelector' => false
-        ]); ?>
-        <br>
-        <br>
-        <p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>
     </div>
     <div id="panel4" class="tab-pane fade">
         <?= SearchFilter::widget([
@@ -419,99 +400,5 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
             'summary' => false,
             'columns' => $preparedDissolvedColumns,
         ]); ?>
-        <p class="lead">Экспорт данных:</p>
-        <?= ExportMenu::widget([
-            'dataProvider' => $allDissolvedContractsProvider,
-            'filename' => 'dissolved-contracts',
-            'exportConfig' => [
-                ExportMenu::FORMAT_EXCEL => false,
-            ],
-            'target' => ExportMenu::TARGET_BLANK,
-            'columns' => GridviewHelper::prepareExportColumns($dissolvedColumns),
-            'showColumnSelector' => false
-        ]); ?>
-        <br>
-        <br>
-        <p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>
     </div>
-    <br>
-    <?= ExportMenu::widget([
-        'dataProvider' => $allContractsProvider,
-        'target' => ExportMenu::TARGET_BLANK,
-        'showColumnSelector' => false,
-        'filename' => 'contracts',
-        'dropdownOptions' => [
-            'class' => 'btn btn-success',
-            'label' => 'Договоры',
-            'icon' => false,
-        ],
-        'exportConfig' => [
-            ExportMenu::FORMAT_TEXT => false,
-            ExportMenu::FORMAT_PDF => false,
-            ExportMenu::FORMAT_CSV => false,
-            ExportMenu::FORMAT_HTML => false,
-            ExportMenu::FORMAT_EXCEL => false,
-        ],
-        'columns' => [
-            'id',
-            'number',
-            'date',
-            'certificate_id',
-            'payer_id',
-            'program_id',
-            'year_id',
-            'organization_id',
-            'group_id',
-            'status',
-            'status_termination',
-            'status_comment',
-            'status_year',
-            'link_doc',
-            'link_ofer',
-            'all_funds',
-            'funds_cert',
-            'all_parents_funds',
-            'start_edu_programm',
-            'funds_gone',
-            'start_edu_contract',
-            'month_start_edu_contract',
-            'stop_edu_contract',
-            'certnumber',
-            'certfio',
-            'sposob',
-            'prodolj_d',
-            'prodolj_m',
-            'prodolj_m_user',
-            'first_m_price',
-            'other_m_price',
-            'first_m_nprice',
-            'other_m_nprice',
-            'change1',
-            'change2',
-            'change_org_fio',
-            'org_position',
-            'org_position_min',
-            'change_doctype',
-            'change_fioparent',
-            'change6',
-            'change_fiochild',
-            'change8',
-            'change9',
-            'change10',
-            'ocen_fact',
-            'ocen_kadr',
-            'ocen_mat',
-            'ocen_obch',
-            'ocenka',
-            'wait_termnate',
-            'date_termnate',
-            'cert_dol',
-            'payer_dol',
-            'rezerv',
-            'paid',
-            'terminator_user',
-            'fontsize',
-            'certificatenumber',
-        ],
-    ]); ?>
 </div>
