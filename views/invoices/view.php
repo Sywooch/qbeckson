@@ -1,11 +1,11 @@
 <?php
 
+use app\models\Contracts;
+use yii\data\ActiveDataProvider;
+use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
-use yii\grid\GridView;
-use app\models\Contracts;
-use yii\data\ActiveDataProvider;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Invoices */
@@ -424,10 +424,17 @@ $this->params['breadcrumbs'][] = $this->title;
         if (isset($roles['payer'])) {
             echo Html::a('Назад', ['/personal/payer-invoices'], ['class' => 'btn btn-primary']);
             echo '&nbsp;';
-            if ($model->status == 0) {
+            if ($model->status === \app\models\Invoices::STATUS_NOT_VIEWED) {
                 echo Html::a('В работу', ['work', 'id' => $model->id], ['class' => 'btn btn-success']);
             }
-            if ($model->status == 1) {
+            if ($model->status === \app\models\Invoices::STATUS_IN_THE_WORK) {
+                echo Html::a('Вывести из обработки', ['roll-back', 'id' => $model->id], [
+                    'class' => 'btn btn-danger',
+                    'data'  => ['toggle'    => 'tooltip',
+                                'placement' => 'top',
+                                'title'     => 'Статус счета изменится на "Не просмотрен"',
+                    ]
+                ]);
                 echo Html::a('Оплачено', ['complete', 'id' => $model->id], ['class' => 'btn btn-success']);
             }
         }

@@ -107,7 +107,7 @@ $user = Yii::$app->user->getIdentity();
                                     'label' => $certificate['balance'] .
                                         ' руб. <span class="glyphicon glyphicon-user"></span>',
                                     'url' => ['/personal/certificate-info']
-                                ],
+                                ], \app\models\Menu::exitButton()
                             ],
                         ]);
                     }

@@ -7,22 +7,24 @@ use Yii;
 /**
  * This is the model class for table "certificates".
  *
- * @property integer $id
- * @property integer $user_id
- * @property string $number
- * @property string $name
- * @property string $soname
- * @property string $phname
- * @property integer $payer_id
- * @property integer $actual
- * @property string $fio_child
- * @property string $fio_parent
- * @property integer     $nominal_f
- * @property integer     $balance_f
- * @property integer     $rezerv_f
- * @property integer     $nominal
- * @property integer     $balance
- * @property integer     $rezerv
+ * @property integer     $id
+ * @property integer     $user_id
+ * @property string      $number
+ * @property string      $name
+ * @property string      $soname
+ * @property string      $phname
+ * @property integer     $payer_id
+ * @property integer     $actual
+ * @property string      $fio_child
+ * @property string      $fio_parent
+ * @property double      $nominal_f
+ * @property double      $balance_f
+ * @property double      $balance_p
+ * @property double      $rezerv_f
+ * @property double      $rezerv_p
+ * @property double      $nominal
+ * @property double      $balance
+ * @property double      $rezerv
  * @property integer     $contracts
  * @property integer     $directivity1
  * @property integer     $directivity2
@@ -176,7 +178,7 @@ class Certificates extends \yii\db\ActiveRecord
         }
     }
 
-    public function changeBalance($contract)
+    public function changeBalance(Contracts $contract)
     {
         if ($contract->period === Contracts::CURRENT_REALIZATION_PERIOD) {
             $this->balance += $contract->rezerv;
@@ -448,6 +450,19 @@ class Certificates extends \yii\db\ActiveRecord
         ]);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     * */
+    public function getCurrentActiveContracts()
+    {
+        $now = (new \DateTime())->format('Y-m-d');
+
+        return $this->getContractsModels()
+            ->andWhere(['<=', Contracts::tableName() . '.start_edu_contract', $now])
+            ->andWhere(['>=', Contracts::tableName() . '.stop_edu_contract', $now]);
+    }
+
+
 
     /**
      * @deprecated
@@ -475,6 +490,42 @@ class Certificates extends \yii\db\ActiveRecord
         }
 
         return $query->one();
+    }
+
+    public function freez()
+    {
+        if ($this->getCurrentActiveContracts()->andWhere([Contracts::tableName() . '.status' =>
+                                                       [Contracts::STATUS_ACCEPTED, Contracts::STATUS_ACTIVE]])->exists()) {
+
+            return 'Невозможно заморозить, есть активные контракты';
+        }
+        $contracts = $this->getContractsModels()->andWhere([Contracts::tableName() . '.status' => [Contracts::STATUS_CREATED]])->all();
+        $trans = Yii::$app->db->beginTransaction();
+
+        $result = array_reduce($contracts, function ($acc, $contract)
+        {
+            /**@var $contract Contracts */
+            return $acc && $contract->setRefused('Отклонено в связи с заморозкой сертификата.'
+                    , UserIdentity::ROLE_PAYER_ID
+                    , Yii::$app->user->identity->payer->id);
+        }, true);
+
+        if (!$result) {
+            $trans->rollBack();
+
+            return 'Не удалось отклонить все заявки сертификата.';
+        }
+
+        $this->actual = 0;
+        $this->nominal = 0;
+        if (!$this->save()) {
+            $trans->rollBack();
+
+            return 'Не удалось сохранить.';
+        }
+        $trans->commit();
+
+        return null;
     }
 
 }

@@ -42,27 +42,28 @@ use yii\helpers\ArrayHelper;
  * @property string                          $norm_providing
  * @property integer                         $ovz
  * @property integer                         $zab
- * @property string                          $age_group
- * @property integer                         $quality_control
- * @property string                          $link
- * @property string                          $certification_date
- * @property array                           $activity_ids
- * @property integer                         $direction_id
- * @property integer                         $age_group_min
- * @property integer                         $age_group_max
- * @property integer                         $is_municipal_task
- * @property string                          $zabAsString
+ * @property string      $age_group
+ * @property integer     $quality_control
+ * @property string      $link
+ * @property string      $certification_date
+ * @property array       $activity_ids
+ * @property integer     $direction_id
+ * @property integer     $age_group_min
+ * @property integer     $age_group_max
+ * @property integer     $is_municipal_task
+ * @property integer     $last_contracts
+ * @property string      $zabAsString
  *
- * @property string                          $iconClass
- * @property string                          $defaultPhoto
- * @property bool                            $isActive
+ * @property string      $iconClass
+ * @property string      $defaultPhoto
+ * @property bool        $isActive
  *
  *
- * @property Contracts[]                     $contracts
- * @property Contracts[]                     $currentActiveContracts
- * @property Favorites[]                     $favorites
- * @property Groups[]                        $groups
- * @property Informs[]                       $informs
+ * @property Contracts[] $contracts
+ * @property Contracts[] $currentActiveContracts
+ * @property Favorites[] $favorites
+ * @property Groups[]    $groups
+ * @property Informs[]   $informs
  * @property Organization                    $organization
  * @property ProgrammeModule[]               $years
  * @property DirectoryProgramActivity[]|null $activities
