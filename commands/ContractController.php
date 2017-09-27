@@ -61,20 +61,20 @@ class ContractController extends Controller
                 $command = Yii::$app->db->createCommand("UPDATE `certificates` as c INNER JOIN `cert_group` as cg ON c.cert_group = cg.id SET c.nominal_p = c.nominal, c.balance_p = c.balance, c.rezerv_p = c.rezerv, c.nominal = c.nominal_f, c.balance = c.balance_f, c.rezerv = c.rezerv_f, c.nominal_f = cg.nominal_f, c.balance_f = cg.nominal_f, rezerv_f = 0 WHERE c.payer_id IN ($payersIds)");
                 print_r($command->rawSql);
                 echo PHP_EOL . ' --> ' . $command->execute() . PHP_EOL;
+                // Договоры
+                $command = Yii::$app->db->createCommand("UPDATE `contracts` SET period = " . Contracts::PAST_REALIZATION_PERIOD . " WHERE payer_id IN ($payersIds) AND period = " . Contracts::CURRENT_REALIZATION_PERIOD);
+                print_r($command->rawSql);
+                echo PHP_EOL;
+                $command->execute();
+                $command = Yii::$app->db->createCommand("UPDATE `contracts` SET period = " . Contracts::CURRENT_REALIZATION_PERIOD . " WHERE payer_id IN ($payersIds) AND period = " . Contracts::FUTURE_REALIZATION_PERIOD);
+                print_r($command->rawSql);
+                echo PHP_EOL;
+                $command->execute();
             } else {
                 print_r($settings->errors);
+                return Controller::EXIT_CODE_ERROR;
             }
         }
-        // Договоры
-        // TODO: Делать это только для тех договоров, у которых сдвинулся оператор
-        $command = Yii::$app->db->createCommand("UPDATE `contracts` SET period = " . Contracts::PAST_REALIZATION_PERIOD . " WHERE period = " . Contracts::CURRENT_REALIZATION_PERIOD);
-        print_r($command->rawSql);
-        echo PHP_EOL;
-        $command->execute();
-        $command = Yii::$app->db->createCommand("UPDATE `contracts` SET period = " . Contracts::CURRENT_REALIZATION_PERIOD . " WHERE period = " . Contracts::FUTURE_REALIZATION_PERIOD);
-        print_r($command->rawSql);
-        echo PHP_EOL;
-        $command->execute();
         echo 'Done.';
 
         return Controller::EXIT_CODE_NORMAL;

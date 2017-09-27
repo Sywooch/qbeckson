@@ -103,3 +103,12 @@ $columns = [
     'summary' => false,
     'columns' => GridviewHelper::prepareColumns('certificates', $columns),
 ]); ?>
+
+<?php
+echo $this->render('/common/_export', [
+    'dataProvider' => $allCertificatesProvider,
+    'columns' => $columns,
+    'group' => 'payer-certificates',
+    'table' => 'certificates',
+]);
+?>

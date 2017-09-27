@@ -298,22 +298,15 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
             'summary'      => false,
             'columns'      => $preparedOpenColumns,
         ]); ?>
-        <?php array_pop($preparedOpenColumns) ?>
-        <p class="lead">Экспорт данных:</p>
-        <?= ExportMenu::widget([
-            'dataProvider'       => $allOpenProgramsProvider,
-            'exportConfig'       => [
-                ExportMenu::FORMAT_EXCEL => false
-            ],
-            'columns'            => $preparedOpenColumns,
-            'filename'           => 'open-programs',
-            'target'             => ExportMenu::TARGET_BLANK,
-            'showColumnSelector' => false
-        ]); ?>
-        <br>
-        <br>
-        <p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое
-                время.</strong></p>
+        <?php
+        echo $this->render('/common/_export', [
+            'dataProvider' => $allOpenProgramsProvider,
+            'columns' => $openColumns,
+            'type' => 'open',
+            'group' => 'operator-open-programs',
+            'table' => 'programs',
+        ]);
+        ?>
     </div>
     <div id="panel2" class="tab-pane fade">
         <?= SearchFilter::widget([
@@ -343,22 +336,15 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
             'pjax'         => true,
             'columns'      => $preparedWaitColumns,
         ]); ?>
-        <?php array_pop($preparedWaitColumns) ?>
-        <p class="lead">Экспорт данных:</p>
-        <?= ExportMenu::widget([
-            'dataProvider'       => $allWaitProgramsProvider,
-            'filename'           => 'wait-programs',
-            'target'             => ExportMenu::TARGET_BLANK,
-            'showColumnSelector' => false,
-            'exportConfig'       => [
-                ExportMenu::FORMAT_EXCEL => false
-            ],
-            'columns'            => $preparedWaitColumns,
-        ]); ?>
-        <br>
-        <br>
-        <p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое
-                время.</strong></p>
+        <?php
+        echo $this->render('/common/_export', [
+            'dataProvider' => $allWaitProgramsProvider,
+            'columns' => $waitColumns,
+            'type' => 'wait',
+            'group' => 'operator-wait-programs',
+            'table' => 'programs',
+        ]);
+        ?>
     </div>
     <div id="panel3" class="tab-pane fade">
         <?= SearchFilter::widget([
@@ -381,6 +367,15 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
             'pjax'         => true,
             'columns'      => $preparedClosedPrograms,
         ]); ?>
+        <?php
+        echo $this->render('/common/_export', [
+            'dataProvider' => $allClosedProgramsProvider,
+            'columns' => $closedPrograms,
+            'type' => 'close',
+            'group' => 'operator-close-programs',
+            'table' => 'programs',
+        ]);
+        ?>
     </div>
     <br>
     <?php
