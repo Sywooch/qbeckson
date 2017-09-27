@@ -41,9 +41,13 @@ class ContractsPayerclearSearch extends Contracts
      */
     public function search($params)
     {
-        $query = Contracts::find();
+        $query = Contracts::find()
+            ->joinWith([
+                'payer',
+            ]);
 
         // add conditions that should always apply here
+        $query->andWhere(['payers.operator_id' => Yii::$app->operator->identity->id]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -54,11 +58,12 @@ class ContractsPayerclearSearch extends Contracts
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             $query->where('0=1');
+
             return $dataProvider;
         }
-        
+
         $payers = new Payers();
-    $payer = $payers->getPayer();
+        $payer = $payers->getPayer();
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -67,7 +72,7 @@ class ContractsPayerclearSearch extends Contracts
             'date' => $this->date,
             'certificate_id' => $this->certificate_id,
             'organization_id' => $this->organization_id,
-            '`contracts`.status' => [0,1,2,3,4],
+            '`contracts`.status' => [0, 1, 2, 3, 4],
             'payer_id' => $payer->id,
             'status_termination' => $this->status_termination,
             'status_year' => $this->status_year,

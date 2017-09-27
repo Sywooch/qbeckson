@@ -120,16 +120,11 @@ $columns = [
     'pjax' => true,
     'columns' => $preparedColumns,
 ]); ?>
-<p class="lead">Экспорт данных:</p>
-<?= ExportMenu::widget([
+<?php
+echo $this->render('/common/_export', [
     'dataProvider' => $allCertificatesProvider,
-    'exportConfig' => [
-        ExportMenu::FORMAT_EXCEL => false,
-    ],
-    'target' => ExportMenu::TARGET_BLANK,
-    'showColumnSelector' => false,
-    'columns' => GridviewHelper::prepareExportColumns($columns),
-]); ?>
-<br>
-<br>
-<p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>
+    'columns' => $columns,
+    'group' => 'operator-certificates',
+    'table' => 'certificates',
+]);
+?>
