@@ -2,20 +2,20 @@
 
 namespace app\models;
 
-use Yii;
 use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "cert_group".
  *
- * @property integer $id
- * @property integer $payer_id
- * @property string $group
- * @property integer $nominal
- * @property float $nominal_f
- * @property integer $amount
+ * @property integer        $id
+ * @property integer        $payer_id
+ * @property string         $group
+ * @property integer        $nominal
+ * @property float          $nominal_f
+ * @property integer        $amount
+ * @property integer        $is_special
  *
- * @property Payers $payer
+ * @property Payers         $payer
  * @property Certificates[] $certificates
  */
 class CertGroup extends ActiveRecord
@@ -86,6 +86,9 @@ class CertGroup extends ActiveRecord
 
     public function hasVacancy()
     {
+        if ($this->is_special) {
+            return true;
+        }
         $certGroupCount = Certificates::getCountCertGroup($this->id);
 
         if ($this->amount - $certGroupCount > 0) {
@@ -116,7 +119,7 @@ class CertGroup extends ActiveRecord
      */
     public function getCertificates()
     {
-        return $this->hasMany(Certificates::class, ['cert_group' => 'id']);
+        return $this->hasMany(Certificates::class, ['cert_group' => 'id'])->inverseOf('certGroup');
     }
 
     /**
