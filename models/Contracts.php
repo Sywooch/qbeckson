@@ -637,19 +637,20 @@ class Contracts extends ActiveRecord
             return $rollback();
         }
 
-        $this->rezerv = 0;
+
         $this->status = Contracts::STATUS_REFUSED;
         if (!$this->certificate->changeBalance($this)) {
 
             return $rollback();
         }
+        $this->rezerv = 0;
         if (!$this->save()) {
 
             return $rollback();
         }
-
-
         $trans->commit();
+
+        return true;
     }
 
     public function refusedWithInformer()
@@ -664,15 +665,18 @@ class Contracts extends ActiveRecord
             return false;
         };
         if (!InformerBuilder::CreateFoContractRefuse($this)) {
+
             return $rollback();
         }
-        $this->rezerv = 0;
+
         $this->status = Contracts::STATUS_REFUSED;
         if (!$this->certificate->changeBalance($this)) {
 
             return $rollback();
         }
+        $this->rezerv = 0;
         if (!$this->save()) {
+
             return $rollback();
         }
         $trans->commit();
@@ -703,10 +707,12 @@ class Contracts extends ActiveRecord
 
         if ($this->wait_termnate > 0) {
             $rollback();
+
             throw new ForbiddenHttpException('Действие запрещено.');
         }
 
         if (!($informs = InformerBuilder::CreateFoContractTerminate($this))) {
+
             return $rollback();
         }
         if (isset($roles['certificate'])) {
@@ -720,17 +726,16 @@ class Contracts extends ActiveRecord
         $this->wait_termnate = 1;
         $this->date_initiate_termination = date('Y-m-d');
         $this->status_comment = $informs->dop;
-        $this->rezerv = 0;
-
-        if (!$this->save()) {
-            return $rollback();
-        }
 
         if (!$this->certificate->changeBalance($this)) {
 
             return $rollback();
         }
+        $this->rezerv = 0;
+        if (!$this->save()) {
 
+            return $rollback();
+        }
         $trans->commit();
 
         return true;

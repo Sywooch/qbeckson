@@ -147,7 +147,11 @@ class CertificatesController extends Controller
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
                 $model->nominal = $model['oldAttributes']['nominal'];
                 if ($model->canChangeGroup) {
-                    $model->setNominals();
+                    if ($model->canUseGroup($model->possible_cert_group)) {
+                        $model->setNominals();
+                    } else {
+                        Yii::$app->session->setFlash('danger', 'Невозможно установить данную группу, достигнут лимит');
+                    }
                 }
 
                 $model->save();
@@ -259,12 +263,13 @@ class CertificatesController extends Controller
     public function actionActual($id)
     {
         $model = $this->findModel($id);
-        $model->actual = 1;
-
-        if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->save()) {
+        $eventMessage = null;
+        if ($model->load(Yii::$app->request->post()) && $model->validate() && is_null($eventMessage = $model->unFreez())) {
             return $this->redirect(['/certificates/view', 'id' => $id]);
         }
-
+        if ($eventMessage) {
+            Yii::$app->session->setFlash('error', $eventMessage);
+        }
         return $this->render('nominal', [
             'model' => $model,
         ]);
