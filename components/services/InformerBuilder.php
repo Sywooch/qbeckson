@@ -79,6 +79,8 @@ class InformerBuilder
             return self::CreateFoContractRefuseByCertificate($contract);
         } elseif (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
             return self::CreateFoContractRefuseByOrganization($contract);
+        } elseif (Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
+            return self::CreateFoContractRefuseByOperator($contract);
         } else {
             return null;
         }
@@ -116,6 +118,26 @@ class InformerBuilder
         ]);
 
         return $informs;
+    }
+
+    /**
+     * @param Contracts $contract
+     *
+     * @return Informs|null
+     */
+    public static function CreateFoContractRefuseByOperator(Contracts $contract)
+    {
+        $operatpr = Yii::$app->operator->getIdentity();
+        $informs = self::build($contract, '', UserIdentity::ROLE_OPERATOR_ID, $operatpr->id);
+        if (!$informs->load(Yii::$app->request->post())) {
+            return null;
+        }
+        $informs->text = 'Заявка отменена оператором. Причина: ' . $informs->dop;
+        if ($informs->save()) {
+            return $informs;
+        }
+
+        return null;
     }
 
     /**
