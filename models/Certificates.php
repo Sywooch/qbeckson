@@ -190,7 +190,6 @@ class Certificates extends \yii\db\ActiveRecord
             $this->balance_p += $contract->rezerv;
             $this->rezerv_p -= $contract->rezerv;
         }
-
         return $this->save();
     }
 

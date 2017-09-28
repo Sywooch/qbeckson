@@ -10,12 +10,13 @@ use yii\widgets\ActiveForm;
 $this->title = 'Отказ в сертификации ';
 
 $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
+/*
 if (isset($roles['operators'])) {
     $this->params['breadcrumbs'][] = ['label' => 'Программы', 'url' => ['/personal/operator-programs']];
     $this->params['breadcrumbs'][] = ['label' => 'Сертификация - 1 шаг: '.$model->name , 'url' => ['/programs/verificate', 'id' => $model->id]];
     $this->params['breadcrumbs'][] = $this->title;
 }
-
+*/
 ?>
 
 

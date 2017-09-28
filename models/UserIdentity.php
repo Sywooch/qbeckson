@@ -37,6 +37,7 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
     const ROLE_PAYER_ID = 2;
     const ROLE_ORGANIZATION_ID = 3;
     const ROLE_CERTIFICATE_ID = 4;
+    const ROLE_OPERATOR_ID = 5;
 
 
 
