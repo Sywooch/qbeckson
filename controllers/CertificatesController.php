@@ -59,9 +59,8 @@ class CertificatesController extends Controller
         $model = new Certificates();
         $user = new User();
 
-        $payers = new Payers();
-        $payer = $payers->getPayer();
-
+        /** @var $payer Payers */
+        $payer = Yii::$app->user->identity->payer;
         $region = Yii::$app->operator->identity->region;
 
         if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {
@@ -104,15 +103,19 @@ class CertificatesController extends Controller
                 $model->rezerv_f = 0;
                 $model->rezerv = 0;
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
-                $model->setNominals();
-                if ($model->save()) {
-                    return $this->render('/user/view', [
-                        'model' => $user,
-                        'password' => $password,
-                    ]);
+                if ($model->canUseGroup($model->possible_cert_group)) {
+                    $model->setNominals();
+                    if ($model->save()) {
+                        return $this->render('/user/view', [
+                            'model' => $user,
+                            'password' => $password,
+                        ]);
+                    }
+
                 } else {
-                    $user->delete();
+                    Yii::$app->session->setFlash('danger', 'Невозможно установить данную группу, достигнут лимит');
                 }
+                $user->delete();
             }
         }
 
