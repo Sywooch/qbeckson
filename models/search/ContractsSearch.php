@@ -2,10 +2,10 @@
 
 namespace app\models\search;
 
+use app\models\Contracts;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Contracts;
 
 /**
  * ContractsSearch represents the model behind the search form about `app\models\search\Contracts`.
@@ -61,10 +61,10 @@ class ContractsSearch extends Contracts
                 'number', 'date', 'status_termination', 'status_comment', 'link_doc', 'link_ofer', 'start_edu_programm',
                 'stop_edu_contract', 'start_edu_contract', 'change1', 'change2', 'change_org_fio', 'org_position',
                 'org_position_min', 'change_doctype', 'change_fioparent', 'change6', 'change_fiochild', 'change8',
-                'change9', 'change10', 'date_termnate'
+                'change9', 'change10', 'date_termnate', 'all_parents_funds'
             ], 'safe'],
             [[
-                'all_funds', 'funds_cert', 'all_parents_funds', 'first_m_price', 'other_m_price', 'first_m_nprice',
+                'all_funds', 'funds_cert', 'first_m_price', 'other_m_price', 'first_m_nprice',
                 'other_m_nprice', 'cert_dol', 'payer_dol', 'fontsize'
             ], 'number'],
             [[
@@ -85,7 +85,7 @@ class ContractsSearch extends Contracts
     /**
      * Creates data provider instance with search query applied
      * @param array $params
-     * @param int $pageSize
+     * @param int   $pageSize
      * @return ActiveDataProvider
      */
     public function search($params, $pageSize = 50)
@@ -112,6 +112,7 @@ class ContractsSearch extends Contracts
 
         if (!$this->validate()) {
             $query->where('0=1');
+
             return $dataProvider;
         }
 
@@ -129,7 +130,6 @@ class ContractsSearch extends Contracts
             'contracts.status_year' => $this->status_year,
             'contracts.all_funds' => $this->all_funds,
             'contracts.funds_cert' => $this->funds_cert,
-            'contracts.all_parents_funds' => $this->all_parents_funds,
             'contracts.start_edu_programm' => $this->start_edu_programm,
             'contracts.funds_gone' => $this->funds_gone,
             'contracts.stop_edu_contract' => $this->stop_edu_contract,
@@ -155,7 +155,10 @@ class ContractsSearch extends Contracts
             'contracts.fontsize' => $this->fontsize,
             'programs.mun' => $this->programMunicipality,
         ]);
-
+        if (!empty($this->all_parents_funds) && $this->all_parents_funds !== '0,10000') {
+            $all_parents_funds = explode(',', $this->all_parents_funds);
+            $query->andWhere(['and', ['>=', 'all_parents_funds', (int)$all_parents_funds[0]], ['<=', 'all_parents_funds', (int)$all_parents_funds[1]]]);
+        }
         $query->andFilterWhere(['like', 'contracts.number', $this->number])
             ->andFilterWhere(['like', 'contracts.status_comment', $this->status_comment])
             ->andFilterWhere(['like', 'contracts.link_doc', $this->link_doc])
