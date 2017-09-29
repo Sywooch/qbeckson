@@ -134,6 +134,12 @@ $actions = [
     'searchFilter' => false,
 ];
 
+$all_parents_funds = [
+    'attribute' => 'all_parents_funds',
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
+    'pluginOptions' => ['max' => 10000],
+];
+
 $activeColumns = $endsColumns = [
     [
         'attribute' => 'payer_id',
@@ -152,6 +158,7 @@ $activeColumns = $endsColumns = [
     $certificateNumber,
     $programName,
     $payerName,
+    $all_parents_funds,
     $actions,
 ];
 $confirmedColumns = [
@@ -163,6 +170,7 @@ $confirmedColumns = [
     $payerName,
     $start_edu_contract,
     $stop_edu_contract,
+    $all_parents_funds,
     [
         'class' => ActionColumn::class,
         'template' => '{dobr}',
@@ -187,6 +195,7 @@ $pendingColumns = [
     $status,
     $programMunicipality,
     $moduleName,
+    $all_parents_funds,
     [
         'class' => ActionColumn::class,
         'template' => '{dobr}',
@@ -212,6 +221,7 @@ $dissolvedColumns = [
     $date_termnate,
     $programMunicipality,
     $paid,
+    $all_parents_funds,
     $actions,
 ];
 
