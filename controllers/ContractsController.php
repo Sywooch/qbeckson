@@ -161,13 +161,22 @@ class ContractsController extends Controller
 
         $contract = Contracts::findOne(['group_id' => $groupId, 'certificate_id' => $certificateId]);
 
-        if (null !== $contract && null !== $contract->status && $contract->status !== Contracts::STATUS_REFUSED) {
+        if ($contract && $contract->status !== Contracts::STATUS_REFUSED) {
             throw new \DomainException('Контракт уже заключён!');
         }
+        $group = Groups::findOne(['id' => $groupId]);
+        if ($group && !$group->program->existsFreePlace()) {
+            throw new \DomainException('В программе нет свободных мест,');
+        }
+        if ($group && $group->organization->existsFreePlace()) {
+            throw new \DomainException('В организации нет свободных мест,');
+        }
+
 
         $model = new ContractRequestForm($groupId, $certificateId, $contract);
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            if (false === ($contract = $model->save())) {
+            $contract = $model->save();
+            if (!$contract) {
                 Yii::$app->session->setFlash('danger', 'Что-то не так.');
 
                 return $this->refresh();
