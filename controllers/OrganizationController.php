@@ -330,18 +330,18 @@ class OrganizationController extends Controller
             }
 
             $model->save(false);
+            if ($model->isRefused) {
+                Yii::$app->session->setFlash('success', 'Организации направлен отказ во включении в реестр поставщиков образовательных услуг');
 
+                return $this->redirect('/personal/operator-organizations');
+            }
             if ($showUserInfo === true) {
                 return $this->render('/user/view', [
                     'model'    => $user,
                     'password' => $password,
                 ]);
             }
-            if ($model->isRefused) {
-                Yii::$app->session->setFlash('success', 'Организации направлен отказ во включении в реестр поставщиков образовательных услуг');
 
-                return $this->redirect('/personal/operator-organizations');
-            }
 
             return $this->redirect(['/organization/view', 'id' => $model->id]);
         }
