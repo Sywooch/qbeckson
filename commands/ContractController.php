@@ -268,4 +268,30 @@ class ContractController extends Controller
 
         return $monthlyPrice;
     }
+
+    public function actionFindWithoutReserve()
+    {
+        $contracts = Contracts::find()
+            ->where(['>', 'wait_termnate', 0])
+            ->all();
+
+
+        foreach ($contracts as $contract) {
+            $certificateContracts = Contracts::find()
+                ->where(['certificate_id' => $contract->certificate->id])
+                ->all();
+            $balance = 0;
+            foreach ($certificateContracts as $certificateContract) {
+                $balance += $certificateContract->rezerv + $certificateContract->paid;
+            }
+
+            $balance = $contract->certificate->nominal - $balance;
+
+            if (round($balance, 2) != round($contract->certificate->balance, 2)) {
+                echo "certificate_id: {$contract->certificate->id} ===> {$contract->certificate->balance} != {$balance}" . PHP_EOL;
+            }
+        }
+
+        return Controller::EXIT_CODE_NORMAL;
+    }
 }
