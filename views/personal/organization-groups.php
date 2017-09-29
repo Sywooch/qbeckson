@@ -98,11 +98,11 @@ $columns = [
 $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
 $organizations = new Organization();
 $organization = $organizations->getOrganization();
-if ($roles['organizations'] and $organization['actual'] !== 0) {
+/*if ($roles['organizations'] and $organization['actual'] !== 0) {
     echo '<p>';
     echo Html::a('Добавить группу', ['/groups/create'], ['class' => 'btn btn-success']);
     echo '</p>';
-}
+}*/
 ?>
 
 <?= SearchFilter::widget([
