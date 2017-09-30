@@ -258,15 +258,15 @@ class ContractController extends Controller
         return $preinvoice->save();
     }
 
+    /**
+     * @deprecated
+     * @param $contract
+     * @param $date
+     * @return mixed
+     */
     private function monthlyPrice($contract, $date)
     {
-        $monthlyPrice = $contract->other_m_price;
-        $contractStartDate = strtotime($contract->start_edu_contract);
-        if (date('Y-m', $contractStartDate) == date('Y-m', $date)) {
-            $monthlyPrice = $contract->first_m_price;
-        }
-
-        return $monthlyPrice;
+        return $contract->getMonthlyPrice($date);
     }
 
     public function actionFindWithoutReserve()

@@ -255,6 +255,18 @@ class Contracts extends ActiveRecord
         return $query->all();
     }
 
+    public function getPeriodSuffix()
+    {
+        $suffix = '';
+        if ($this->period === self::FUTURE_REALIZATION_PERIOD) {
+            $suffix = '_f';
+        } elseif ($this->period === self::PAST_REALIZATION_PERIOD) {
+            $suffix = '_p';
+        }
+
+        return $suffix;
+    }
+
     public function refoundMoney()
     {
         if ($this->period === self::CURRENT_REALIZATION_PERIOD) {
@@ -582,6 +594,21 @@ class Contracts extends ActiveRecord
         $query->andFilterWhere(['organization_id' => $params['organizationId']]);
 
         return $query->count();
+    }
+
+    /**
+     * @param $date
+     * @return float
+     */
+    public function getMonthlyPrice($date)
+    {
+        $monthlyPrice = $this->other_m_price;
+        $contractStartDate = strtotime($this->start_edu_contract);
+        if (date('Y-m', $contractStartDate) == date('Y-m', $date)) {
+            $monthlyPrice = $this->first_m_price;
+        }
+
+        return $monthlyPrice;
     }
 
     /**

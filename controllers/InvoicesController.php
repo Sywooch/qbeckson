@@ -331,10 +331,11 @@ class InvoicesController extends Controller
     public function actionComplete($id)
     {
         $model = $this->findModel($id);
-
-        $model->status = 2;
+        $model->setAsPaid();
 
         if ($model->save()) {
+            $model->refoundMoney();
+
             return $this->redirect(['view', 'id' => $model->id]);
         }
     }
