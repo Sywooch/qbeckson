@@ -166,10 +166,15 @@ class ContractsController extends Controller
         }
         $group = Groups::findOne(['id' => $groupId]);
         if ($group && !$group->program->existsFreePlace()) {
-            throw new \DomainException('В программе нет свободных мест,');
+            Yii::$app->session->setFlash('modal-danger', 'К сожалению заявка на обучение по программе не будет отправлена, пока Вы ее составляли кто-то опередил Вас и подал заявку раньше, тем самым заняв последнее место в группе. Пожалуйста, посмотрите еще варианты зачисления на обучение (например, места могут оказаться в других группах)');
+
+            return $this->redirect('/personal/certificate-programs');
+
         }
-        if ($group && $group->organization->existsFreePlace()) {
-            throw new \DomainException('В организации нет свободных мест,');
+        if ($group && !$group->organization->existsFreePlace()) {
+            Yii::$app->session->setFlash('modal-danger', 'К сожалению заявка на обучение по программе не будет отправлена, пока Вы ее составляли кто-то опередил Вас и подал заявку раньше, тем самым заняв последнее место в организации. Пожалуйста, посмотрите еще варианты зачисления на обучение.');
+
+            return $this->redirect('/personal/certificate-programs');
         }
 
 
