@@ -46,8 +46,8 @@ class ContractsPayerInvoiceSearch extends Contracts
      */
     public function search($params)
     {
-        $firstDayOfMonth = $this->lastMonth == false ? strtotime('first day of previous month') : strtotime('first day of this month');
-        $lastDayOfMonth = $this->lastMonth == false ? strtotime('last day of previous month') : strtotime('last day of this month');
+        $firstDayOfMonth = $this->lastMonth == true ? strtotime('first day of previous month') : strtotime('first day of this month');
+        $lastDayOfMonth = $this->lastMonth == true ? strtotime('last day of previous month') : strtotime('last day of this month');
 
         $query = Contracts::find()
             ->andWhere(['or', ['and', ['status' => Contracts::STATUS_ACTIVE], ['<=', 'start_edu_contract', date('Y-m-d', $lastDayOfMonth)]], ['and', ['status' => Contracts::STATUS_CLOSED], ['>', 'date_termnate', date('Y-m-d', $firstDayOfMonth)]]]);

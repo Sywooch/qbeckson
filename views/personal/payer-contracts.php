@@ -388,10 +388,13 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
         } else {
             $searchContracts = new ContractsPayerInvoiceSearch(['payer_id' => $payer->id]);
             $invoiceProvider = $searchContracts->search(Yii::$app->request->queryParams);
+
+            $lastMonthDate = strtotime('first day of previous month');
+            $docLastMonth = \app\models\ContractDocument::findByPayer($payer, date('Y', $lastMonthDate), date('m', $lastMonthDate));
             $searchLastMonthContracts = new ContractsPayerInvoiceSearch([
                 'payer_id' => $payer->id,
                 'lastMonth' => true,
-                'excludeContracts' => join(',', ArrayHelper::getColumn($invoiceProvider->models, 'id')),
+                'excludeContracts' => $docLastMonth->contract_list,
             ]);
             $invoiceLastMonthProvider = $searchLastMonthContracts->search(Yii::$app->request->queryParams);
 
@@ -403,7 +406,7 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
                 'dataProvider' => $invoiceProvider,
                 'target' => ExportMenu::TARGET_SELF,
                 'showColumnSelector' => false,
-                'filename' => $invoiceLastMonthProvider->totalCount > 0 ? '_PART1_' . $fileName : $fileName,
+                'filename' => '_PART1_' . $fileName,
                 'stream' => false,
                 'deleteAfterSave' => false,
                 'folder' => '@pfdoroot/uploads/contracts',
@@ -456,7 +459,7 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
                 ],
             ]);
 
-            if (Yii::$app->request->isPost && $invoiceLastMonthProvider->totalCount > 0) {
+            if (Yii::$app->request->isPost) {
                 ExportDocs::widget([
                     'dataProvider' => $invoiceLastMonthProvider,
                     'target' => ExportMenu::TARGET_SELF,
@@ -518,7 +521,6 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
 
             if (Yii::$app->request->isPost) {
                 \app\widgets\MergeExcels::widget([
-                    'merge' => $invoiceLastMonthProvider->totalCount > 0 ? true : false,
                     'fileName' => $fileName,
                     'provider' => $invoiceProvider,
                 ]);
