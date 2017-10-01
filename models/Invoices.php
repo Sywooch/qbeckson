@@ -125,6 +125,25 @@ class Invoices extends ActiveRecord
         $this->cooperate_id = $cooperate->id;
     }
 
+    public function setAsPaid()
+    {
+        $this->status = self::STATUS_PAID;
+    }
+
+    public function refoundMoney()
+    {
+        if ($completenesses = Completeness::findInvoicesByContracts(explode(',', $this->contracts), $this->month, date('Y', strtotime($this->date)))) {
+            foreach ($completenesses as $completeness) {
+                $certificate = $completeness->contract->certificate;
+                $date = join('-', [$completeness->year, $completeness->month, '01']);
+                $monthlyPrice = $completeness->contract->getMonthlyPrice(strtotime($date));
+                $difference = abs($monthlyPrice - $completeness->sum);
+                $certificate->updateCounters(['balance' . $completeness->contract->periodSuffix => $difference]);
+                $completeness->contract->updateCounters(['paid' => -1 * $difference]);
+            }
+        }
+    }
+
     public function generatePrepaid()
     {
         ini_set('memory_limit', '-1');
