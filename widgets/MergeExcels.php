@@ -21,7 +21,7 @@ class MergeExcels extends Widget
     {
         $filenames = [
             Yii::getAlias('@pfdoroot/uploads/contracts/') . '_PART1_' . $this->fileName . '.xls' => \Yii::t('app', '{0, date, LLLL}', strtotime("first day of this month"), 10),
-            Yii::getAlias('@pfdoroot/uploads/contracts/') . '_PART2_' . $this->fileName . '.xls' => \Yii::t('app', '{0, date, LLLL}', strtotime("first day of previous month"), 10),
+            Yii::getAlias('@pfdoroot/uploads/contracts/') . '_PART2_' . $this->fileName . '.xls' => \Yii::t('app', '{0, date, LLLL}', strtotime("first day of previous month"), 10) . ' (доп)',
         ];
         $bigExcel = new \PHPExcel();
         $bigExcel->removeSheetByIndex(0);
