@@ -5,6 +5,7 @@ namespace app\models;
 use mPDF;
 use Yii;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 
 /**
@@ -142,6 +143,28 @@ class Invoices extends ActiveRecord
                 $completeness->contract->updateCounters(['paid' => -1 * $difference]);
             }
         }
+    }
+
+    public static function getSummary($cooperateId)
+    {
+        $command = Yii::$app->db->createCommand("SELECT SUM(i.sum) as sum FROM invoices as i WHERE i.`prepayment` = 0 AND i.`status` = " . static::STATUS_PAID . " AND i.`cooperate_id`= :cooperate_id GROUP BY i.`cooperate_id`", [
+            ':cooperate_id' => $cooperateId,
+        ]);
+        $sum = $command->queryScalar();
+
+        $additionalSum = 0;
+        $command = Yii::$app->db->createCommand("SELECT month, YEAR(`date`) as year FROM invoices as i WHERE i.`prepayment` = 0 AND i.`status` = " . static::STATUS_PAID . " AND i.`cooperate_id`= :cooperate_id", [
+            ':cooperate_id' => $cooperateId,
+        ]);
+        if ($invoices = $command->queryAll()) {
+            $command = Yii::$app->db->createCommand("SELECT SUM(i.sum) as sum FROM invoices as i WHERE i.`prepayment` = 1 AND i.`status` = " . static::STATUS_PAID . " AND i.`cooperate_id`= :cooperate_id AND i.`month` NOT IN (:months) GROUP BY i.`cooperate_id`", [
+                ':cooperate_id' => $cooperateId,
+                ':months' => join(',', ArrayHelper::getColumn($invoices, 'month')),
+            ]);
+            $additionalSum = $command->queryScalar();
+        }
+
+        return $sum + $additionalSum;
     }
 
     public function generatePrepaid()

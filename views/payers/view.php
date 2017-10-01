@@ -17,6 +17,10 @@ if (isset($roles['operators'])) {
 }
 if (isset($roles['organizations'])) {
     $this->params['breadcrumbs'][] = ['label' => 'Плательщики', 'url' => ['/personal/organization-payers']];
+    if ($cooperation = $model->getCooperation()) {
+        $commitments = \app\models\Contracts::getCommitments($cooperation->id);
+        $summary = \app\models\Invoices::getSummary($cooperation->id);
+    }
 }
 if (isset($roles['payer'])) {
     $this->params['breadcrumbs'][] = 'Плательщики';
@@ -210,7 +214,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             }
 
-            if (null !== ($cooperation = $model->getCooperation())) {
+            if (null !== $cooperation) {
                 if (count($cooperation->contracts) < 1) {
                     echo $this->render(
                         '../cooperate/reject-contract',
@@ -254,6 +258,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     null !== $cooperation->date
                 ) {
                     echo '<p>Реквизиты соглашения: от ' . $cooperation->date . ' №' . $cooperation->number . '</p>';
+                }
+                if (!empty($commitments)) {
+                    echo '<div style="margin-top: 20px;">Совокупная сумма подтвержденных обязательств по договору &ndash; ' . round($commitments, 2) . ' рублей</div>';
+                }
+                if (!empty($summary)) {
+                    echo '<div style="margin-top: 20px;">Совокупная сумма оплаченных ранее счетов &ndash; ' . round($summary, 2) . ' рублей</div>';
                 }
             } else {
                 echo ' ';
