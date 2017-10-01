@@ -7,6 +7,7 @@ use app\models\Mun;
 use app\models\UserIdentity;
 use app\widgets\SearchFilter;
 use kartik\export\ExportMenu;
+use app\widgets\ExportDocs;
 use kartik\grid\GridView;
 use yii\grid\ActionColumn;
 use yii\helpers\ArrayHelper;
@@ -390,11 +391,13 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
 
             echo '<div class="alert alert-warning">Внимание! После заказа реестра договоров для формирования заявки на субсидию в текущем месяце до его завершения новый реестр запросить уже не удастся. А это значит, что договоры, которые будут заключены после текущего момента будут включены в заявку уже в следующем месяце. Вы уверены, что сегодня тот самый день?</div>';
 
+            $fileName = Yii::$app->user->id . '_' . date('d-m-Y');
+
             echo ExportMenu::widget([
                 'dataProvider' => $InvoiceProvider,
                 'target' => ExportMenu::TARGET_SELF,
                 'showColumnSelector' => false,
-                'filename' => '_PART1_' . Yii::$app->user->id . '_' . date('d-m-Y'),
+                'filename' => '_PART1_' . $fileName,
                 'stream' => false,
                 'deleteAfterSave' => false,
                 'folder' => '@pfdoroot/uploads/contracts',
@@ -447,63 +450,66 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
                 ],
             ]);
 
-            ExportMenu::widget([
-                'dataProvider' => $InvoiceProvider,
-                'target' => ExportMenu::TARGET_SELF,
-                '_triggerDownload' => true,
-                'showColumnSelector' => false,
-                'filename' => '_PART2_' . Yii::$app->user->id . '_' . date('d-m-Y'),
-                'stream' => false,
-                'deleteAfterSave' => false,
-                'folder' => '@pfdoroot/uploads/contracts',
-                'linkPath' => '@pfdo/uploads/contracts',
-                'dropdownOptions' => [
-                    'class' => 'btn btn-success',
-                    'label' => 'Заказать реестр договоров для субсидии',
-                    'icon' => false,
-                ],
-                'showConfirmAlert' => false,
-                'afterSaveView' => '@app/views/contracts/export-view',
-                'exportConfig' => [
-                    ExportMenu::FORMAT_TEXT => false,
-                    ExportMenu::FORMAT_CSV => false,
-                    ExportMenu::FORMAT_HTML => false,
-                    ExportMenu::FORMAT_PDF => false,
-                    ExportMenu::FORMAT_EXCEL_X => false,
-                ],
-                'columns' => [
-                    ['class' => 'yii\grid\SerialColumn'],
-                    [
-                        'attribute' => 'certificatenumber',
-                        'label' => 'Номер сертификата дополнительного образования',
-                        'format' => 'raw',
+            if (Yii::$app->request->isPost) {
+                ExportDocs::widget([
+                    'dataProvider' => $InvoiceProvider,
+                    'target' => ExportMenu::TARGET_SELF,
+                    'initDownloadOnStart' => true,
+                    'showColumnSelector' => false,
+                    'filename' => '_PART2_' . $fileName,
+                    'stream' => false,
+                    'deleteAfterSave' => false,
+                    'folder' => '@pfdoroot/uploads/contracts',
+                    'linkPath' => '@pfdo/uploads/contracts',
+                    'dropdownOptions' => [
+                        'class' => 'btn btn-success',
+                        'label' => 'Заказать реестр договоров для субсидии',
+                        'icon' => false,
                     ],
-                    [
-                        'attribute' => 'number',
-                        'label' => 'Реквизиты договора об обучении (твердой оферты)',
-                        'format' => 'raw',
-                        'value' => function ($model) {
-                            return '№' . $model->number . ' от ' . Yii::$app->formatter->asDate($model->date);
-                        }
+                    'showConfirmAlert' => false,
+                    'afterSaveView' => '@app/views/contracts/export-view',
+                    'exportConfig' => [
+                        ExportMenu::FORMAT_TEXT => false,
+                        ExportMenu::FORMAT_CSV => false,
+                        ExportMenu::FORMAT_HTML => false,
+                        ExportMenu::FORMAT_PDF => false,
+                        ExportMenu::FORMAT_EXCEL_X => false,
                     ],
-                    [
-                        'label' => 'Объем обязательств Уполномоченной организации за текущий месяц в соответствии с договорами об обучении (твердыми офертами)',
-                        'value' => function ($model) {
-
-                            $start_edu_contract = explode("-", $model->start_edu_contract);
-                            $month = $start_edu_contract[1];
-
-                            if ($month == date('m')) {
-                                $price = $model->payer_first_month_payment;
-                            } else {
-                                $price = $model->payer_other_month_payment;
+                    'columns' => [
+                        ['class' => 'yii\grid\SerialColumn'],
+                        [
+                            'attribute' => 'certificatenumber',
+                            'label' => 'Номер сертификата дополнительного образования',
+                            'format' => 'raw',
+                        ],
+                        [
+                            'attribute' => 'number',
+                            'label' => 'Реквизиты договора об обучении (твердой оферты)',
+                            'format' => 'raw',
+                            'value' => function ($model) {
+                                return '№' . $model->number . ' от ' . Yii::$app->formatter->asDate($model->date);
                             }
+                        ],
+                        [
+                            'label' => 'Объем обязательств Уполномоченной организации за текущий месяц в соответствии с договорами об обучении (твердыми офертами)',
+                            'value' => function ($model) {
 
-                            return $price;
-                        }
+                                $start_edu_contract = explode("-", $model->start_edu_contract);
+                                $month = $start_edu_contract[1];
+
+                                if ($month == date('m')) {
+                                    $price = $model->payer_first_month_payment;
+                                } else {
+                                    $price = $model->payer_other_month_payment;
+                                }
+
+                                return $price;
+                            }
+                        ],
                     ],
-                ],
-            ]);
+                ]);
+                \app\widgets\MergeExcels::widget(['fileName' => $fileName]);
+            }
         }
         ?>
 </div>
