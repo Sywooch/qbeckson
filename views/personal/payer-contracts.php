@@ -383,21 +383,27 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
         <?php
         $payer = Yii::$app->user->identity->payer;
 
-        if ($doc = \app\models\ContractDocument::findByPayer($payer, date('Y'), date('m')) and false) {
-            echo Html::a('Скачать выписку от ' . Yii::$app->formatter->asDate($doc->created_at), '/uploads/contracts/' . $doc->file, ['class' => 'btn btn-primary']);
+        if ($doc = \app\models\ContractDocument::findByPayer($payer, date('Y'), date('m'))) {
+            echo Html::a('Скачать выписку от ' . Yii::$app->formatter->asDate($doc->created_at), Yii::getAlias('@pfdo/uploads/contracts/') . $doc->file, ['class' => 'btn btn-primary', 'id' => 'excel-download']);
         } else {
             $searchContracts = new ContractsPayerInvoiceSearch(['payer_id' => $payer->id]);
-            $InvoiceProvider = $searchContracts->search(Yii::$app->request->queryParams);
+            $invoiceProvider = $searchContracts->search(Yii::$app->request->queryParams);
+            $searchLastMonthContracts = new ContractsPayerInvoiceSearch([
+                'payer_id' => $payer->id,
+                'lastMonth' => true,
+                'excludeContracts' => join(',', ArrayHelper::getColumn($invoiceProvider->models, 'id')),
+            ]);
+            $invoiceLastMonthProvider = $searchLastMonthContracts->search(Yii::$app->request->queryParams);
 
             echo '<div class="alert alert-warning">Внимание! После заказа реестра договоров для формирования заявки на субсидию в текущем месяце до его завершения новый реестр запросить уже не удастся. А это значит, что договоры, которые будут заключены после текущего момента будут включены в заявку уже в следующем месяце. Вы уверены, что сегодня тот самый день?</div>';
 
             $fileName = Yii::$app->user->id . '_' . date('d-m-Y');
 
             echo ExportMenu::widget([
-                'dataProvider' => $InvoiceProvider,
+                'dataProvider' => $invoiceProvider,
                 'target' => ExportMenu::TARGET_SELF,
                 'showColumnSelector' => false,
-                'filename' => '_PART1_' . $fileName,
+                'filename' => $invoiceLastMonthProvider->totalCount > 0 ? '_PART1_' . $fileName : $fileName,
                 'stream' => false,
                 'deleteAfterSave' => false,
                 'folder' => '@pfdoroot/uploads/contracts',
@@ -408,7 +414,7 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
                     'icon' => false,
                 ],
                 'showConfirmAlert' => false,
-                'afterSaveView' => '@app/views/contracts/export-view',
+                'afterSaveView' => false,
                 'exportConfig' => [
                     ExportMenu::FORMAT_TEXT => false,
                     ExportMenu::FORMAT_CSV => false,
@@ -450,9 +456,9 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
                 ],
             ]);
 
-            if (Yii::$app->request->isPost) {
+            if (Yii::$app->request->isPost && $invoiceLastMonthProvider->totalCount > 0) {
                 ExportDocs::widget([
-                    'dataProvider' => $InvoiceProvider,
+                    'dataProvider' => $invoiceLastMonthProvider,
                     'target' => ExportMenu::TARGET_SELF,
                     'initDownloadOnStart' => true,
                     'showColumnSelector' => false,
@@ -467,7 +473,7 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
                         'icon' => false,
                     ],
                     'showConfirmAlert' => false,
-                    'afterSaveView' => '@app/views/contracts/export-view',
+                    'afterSaveView' => false,
                     'exportConfig' => [
                         ExportMenu::FORMAT_TEXT => false,
                         ExportMenu::FORMAT_CSV => false,
@@ -508,7 +514,14 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
                         ],
                     ],
                 ]);
-                \app\widgets\MergeExcels::widget(['fileName' => $fileName]);
+            }
+
+            if (Yii::$app->request->isPost) {
+                \app\widgets\MergeExcels::widget([
+                    'merge' => $invoiceLastMonthProvider->totalCount > 0 ? true : false,
+                    'fileName' => $fileName,
+                    'provider' => $invoiceProvider,
+                ]);
             }
         }
         ?>

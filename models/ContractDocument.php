@@ -75,16 +75,13 @@ class ContractDocument extends \yii\db\ActiveRecord
         return $query->one();
     }
 
-    public static function createInstance($file)
+    public static function createInstance($file, $models)
     {
         $doc = new static([
             'payer_id' => Yii::$app->user->identity->payer->id,
             'file' => $file,
+            'contract_list' => join(',', ArrayHelper::getColumn($models, 'id')),
         ]);
-
-        $searchContracts = new ContractsPayerInvoiceSearch(['payer_id' => Yii::$app->user->identity->payer->id]);
-        $InvoiceProvider = $searchContracts->search(Yii::$app->request->queryParams);
-        $doc->contract_list = join(',', ArrayHelper::map($InvoiceProvider->models, 'id', 'id'));
 
         return $doc->save();
     }

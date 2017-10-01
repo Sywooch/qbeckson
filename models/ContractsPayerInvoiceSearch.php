@@ -13,6 +13,10 @@ use app\models\Certificates;
  */
 class ContractsPayerInvoiceSearch extends Contracts
 {
+    public $lastMonth = false;
+
+    public $excludeContracts = null;
+
     /**
      * @inheritdoc
      */
@@ -42,16 +46,24 @@ class ContractsPayerInvoiceSearch extends Contracts
      */
     public function search($params)
     {
-        $firstDayOfThisMonth = strtotime('first day of this month');
-        $lastDayOfThisMonth = strtotime('last day of this month');
+        $firstDayOfMonth = $this->lastMonth == false ? strtotime('first day of previous month') : strtotime('first day of this month');
+        $lastDayOfMonth = $this->lastMonth == false ? strtotime('last day of previous month') : strtotime('last day of this month');
 
         $query = Contracts::find()
-            ->andWhere(['or', ['and', ['status' => Contracts::STATUS_ACTIVE], ['<=', 'start_edu_contract', date('Y-m-d', $lastDayOfThisMonth)]], ['and', ['status' => Contracts::STATUS_CLOSED], ['>', 'date_termnate', date('Y-m-d', $firstDayOfThisMonth)]]]);
+            ->andWhere(['or', ['and', ['status' => Contracts::STATUS_ACTIVE], ['<=', 'start_edu_contract', date('Y-m-d', $lastDayOfMonth)]], ['and', ['status' => Contracts::STATUS_CLOSED], ['>', 'date_termnate', date('Y-m-d', $firstDayOfMonth)]]]);
+
+        if ($this->lastMonth == true) {
+            $query->andWhere('id NOT IN (' . $this->excludeContracts . ')');
+        }
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'pagination' => [
+                'pageSizeLimit' => false,
+                'pageSize' => 999999,
+            ],
         ]);
 
         $this->load($params);
