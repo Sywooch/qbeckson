@@ -111,7 +111,7 @@ class ContractController extends Controller
         // == Вынимаем действующие контракты, дата начала обучения которых меньше первого числа текущего месяца
         // Для контракта уменьшаем rezerv, увеличиваем paid
         // Для связанного сертификата уменьшаем rezerv
-        $command = Yii::$app->db->createCommand("UPDATE contracts as c CROSS JOIN certificates as crt ON c.certificate_id = crt.id SET crt.rezerv = c.rezerv - c.payer_other_month_payment, c.rezerv = c.rezerv - c.payer_other_month_payment, c.paid = c.paid + c.payer_other_month_payment WHERE c.status = 1 AND c.start_edu_contract < :contract_start", [
+        $command = Yii::$app->db->createCommand("UPDATE contracts as c CROSS JOIN certificates as crt ON c.certificate_id = crt.id SET crt.rezerv = ROUND(crt.rezerv - c.payer_other_month_payment, 2), c.rezerv = ROUND(c.rezerv - c.payer_other_month_payment, 2), c.paid = ROUND(c.paid + c.payer_other_month_payment, 2) WHERE c.status = 1 AND c.start_edu_contract < :contract_start", [
             ':contract_start' => date('Y-m-d', strtotime('first day of this month')),
         ]);
         $command->execute();
@@ -169,6 +169,7 @@ class ContractController extends Controller
 
         $contracts = $query->all();
 
+        $i = 1;
         // создает счета, которые только-только закрылись
         foreach ($contracts as $contract) {
             $completenessExists = Completeness::find()
@@ -191,7 +192,7 @@ class ContractController extends Controller
             // Создаем за предыдущий месяц
             // Если месяц январь - создаваться не будет
             if (!$completenessExists && $contract->start_edu_contract < date('Y-m-d', $currentMonth)) {
-                echo PHP_EOL . 'Создал счет за ' . date('d.m.Y', $previousMonth) . PHP_EOL;
+                echo PHP_EOL . $i++ . '. Создал счет за ' . date('d.m.Y', $previousMonth) . PHP_EOL;
                 if (!$this->createCompleteness($contract, $previousMonth, $this->monthlyPrice($contract, $previousMonth))) {
                     die('Ошибка создание счета.');
                 }
@@ -202,7 +203,7 @@ class ContractController extends Controller
             }
             // Создаем преинвойс
             if (!$preinvoiceExists && $contract->status == Contracts::STATUS_ACTIVE && $contract->start_edu_contract <= date('Y-m-d', $lastDayOfThisMonth)) {
-                echo PHP_EOL . 'Создал аванс за ' . date('d.m.Y') . PHP_EOL;
+                echo PHP_EOL . $i++ . '. Создал аванс за ' . date('d.m.Y') . PHP_EOL;
                 if (!$this->createPreinvoice($contract, $this->monthlyPrice($contract, time()))) {
                     die('Ошибка создание аванса.');
                 }
@@ -258,14 +259,40 @@ class ContractController extends Controller
         return $preinvoice->save();
     }
 
+    /**
+     * @deprecated
+     * @param $contract
+     * @param $date
+     * @return mixed
+     */
     private function monthlyPrice($contract, $date)
     {
-        $monthlyPrice = $contract->other_m_price;
-        $contractStartDate = strtotime($contract->start_edu_contract);
-        if (date('Y-m', $contractStartDate) == date('Y-m', $date)) {
-            $monthlyPrice = $contract->first_m_price;
+        return $contract->getMonthlyPrice($date);
+    }
+
+    public function actionFindWithoutReserve()
+    {
+        $contracts = Contracts::find()
+            ->where(['>', 'wait_termnate', 0])
+            ->all();
+
+
+        foreach ($contracts as $contract) {
+            $certificateContracts = Contracts::find()
+                ->where(['certificate_id' => $contract->certificate->id])
+                ->all();
+            $balance = 0;
+            foreach ($certificateContracts as $certificateContract) {
+                $balance += $certificateContract->rezerv + $certificateContract->paid;
+            }
+
+            $balance = $contract->certificate->nominal - $balance;
+
+            if (round($balance, 2) != round($contract->certificate->balance, 2)) {
+                echo "certificate_id: {$contract->certificate->id} ===> {$contract->certificate->balance} != {$balance}" . PHP_EOL;
+            }
         }
 
-        return $monthlyPrice;
+        return Controller::EXIT_CODE_NORMAL;
     }
 }

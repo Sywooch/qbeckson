@@ -62,6 +62,14 @@ class Completeness extends \yii\db\ActiveRecord
         return $this->hasOne(Groups::className(), ['id' => 'group_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getContract()
+    {
+        return $this->hasOne(Contracts::className(), ['id' => 'contract_id']);
+    }
+
     public static function findPreinvoiceByContract($contractId, $month = null, $year = null)
     {
         $query = static::find()
@@ -76,5 +84,22 @@ class Completeness extends \yii\db\ActiveRecord
         ]);
 
         return $query->one();
+    }
+
+    public static function findInvoicesByContracts($contractIds, $month = null, $year = null)
+    {
+        $query = static::find()
+            ->where([
+                'preinvoice' => 0,
+                'contract_id' => $contractIds,
+            ])
+            ->andWhere(['<', 'completeness', 100]);
+
+        $query->andFilterWhere([
+            'month' => $month,
+            'year' => $year,
+        ]);
+
+        return $query->all();
     }
 }

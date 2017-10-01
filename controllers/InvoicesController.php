@@ -2,20 +2,20 @@
 
 namespace app\controllers;
 
-use app\models\Certificates;
-use app\models\Contracts;
 use app\models\ContractsInvoiceSearch;
 use app\models\ContractspreInvoiceSearch;
+use Yii;
 use app\models\Invoices;
 use app\models\InvoicesSearch;
+use app\models\Contracts;
+use app\models\Programs;
 use app\models\Organization;
-use mPDF;
-use Yii;
+use app\models\Certificates;
+use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\helpers\Json;
-use yii\web\Controller;
-use yii\web\ForbiddenHttpException;
-use yii\web\NotFoundHttpException;
+use mPDF;
 
 /**
  * InvoicesController implements the CRUD actions for Invoices model.
@@ -127,7 +127,6 @@ class InvoicesController extends Controller
                 return $this->redirect(['/invoices/view', 'id' => $model->id]);
             }
         }
-
         // TODO: ELSE написать предупреждалку если нет договоров
 
         return $this->render('number', [
@@ -344,11 +343,13 @@ class InvoicesController extends Controller
     public function actionComplete($id)
     {
         $model = $this->findModel($id);
-        $model->status = Invoices::STATUS_PAID;
-        $model->save() || Yii::$app->session->setFlash('danger', 'Ошибка! сохранить новое состояние счета неудалось!');
+        $model->setAsPaid();
 
-        return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->save()) {
+            $model->refoundMoney();
 
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
     }
 
 
