@@ -146,6 +146,7 @@ class Invoices extends ActiveRecord
     {
         if ($completenesses = Completeness::findInvoicesByContracts(explode(',', $this->contracts), $this->month, date('Y', strtotime($this->date)))) {
             foreach ($completenesses as $completeness) {
+                /** @var $certificate Certificates */
                 $certificate = $completeness->contract->certificate;
                 $date = join('-', [$completeness->year, $completeness->month, '01']);
                 $monthlyPrice = $completeness->contract->getMonthlyPrice(strtotime($date));

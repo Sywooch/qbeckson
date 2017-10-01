@@ -50,7 +50,9 @@ $this->params['breadcrumbs'][] = $this->title;
     } elseif ($model->status == Contracts::STATUS_ACCEPTED) {
         echo '<div class="alert alert-warning">Для того, чтобы завершить заключение договора напишите заявление на обучение в соответствии с <a href="' . Url::to(['application-pdf', 'id' => $model->id]) . '">представленным образцом заявления</a>. Вы можете распечатать образец или переписать от руки на листе бумаги. После написания заявления отнесите его лично или передайте с ребенком поставщику образовательных услуг.</div>';
     } elseif ($model->status === Contracts::STATUS_REFUSED) {
-        echo '<div class="alert alert-warning">' . array_pop($model->informs)->text . '</div>';
+        $msg = array_pop($model->informs)->text;
+        $msg = $msg ?? 'причина отклонения не указана';
+        echo '<div class="alert alert-warning">' . $msg . '</div>';
     }
 
     if (isset($roles['certificate']) or isset($roles['operators']) or isset($roles['payer'])) {

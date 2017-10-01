@@ -2,20 +2,20 @@
 
 namespace app\controllers;
 
+use app\models\Certificates;
+use app\models\Contracts;
 use app\models\ContractsInvoiceSearch;
 use app\models\ContractspreInvoiceSearch;
-use Yii;
 use app\models\Invoices;
 use app\models\InvoicesSearch;
-use app\models\Contracts;
-use app\models\Programs;
 use app\models\Organization;
-use app\models\Certificates;
-use yii\web\Controller;
-use yii\web\NotFoundHttpException;
+use mPDF;
+use Yii;
 use yii\filters\VerbFilter;
 use yii\helpers\Json;
-use mPDF;
+use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
+use yii\web\NotFoundHttpException;
 
 /**
  * InvoicesController implements the CRUD actions for Invoices model.
@@ -127,6 +127,7 @@ class InvoicesController extends Controller
                 return $this->redirect(['/invoices/view', 'id' => $model->id]);
             }
         }
+
         // TODO: ELSE написать предупреждалку если нет договоров
 
         return $this->render('number', [
@@ -347,9 +348,9 @@ class InvoicesController extends Controller
 
         if ($model->save()) {
             $model->refoundMoney();
-
-            return $this->redirect(['view', 'id' => $model->id]);
         }
+
+        return $this->redirect(['view', 'id' => $model->id]);
     }
 
 

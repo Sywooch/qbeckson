@@ -600,6 +600,7 @@ class Contracts extends ActiveRecord
 
     /**
      * @param $date
+     *
      * @return float
      */
     public function getMonthlyPrice($date)

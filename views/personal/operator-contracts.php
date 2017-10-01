@@ -5,7 +5,6 @@ use app\models\Contracts;
 use app\models\Mun;
 use app\models\UserIdentity;
 use app\widgets\SearchFilter;
-use kartik\export\ExportMenu;
 use kartik\grid\GridView;
 use yii\grid\ActionColumn;
 use yii\helpers\ArrayHelper;
@@ -238,11 +237,24 @@ $dissolvedColumns = [
     $paid,
     $actions,
 ];
+$refusedColumns = [
+    $number,
+    $date,
+    $certificateNumber,
+    $programName,
+    $payerName,
+    $moduleName,
+    $date_termnate,
+    $programMunicipality,
+    $paid,
+    $actions,
+];
 
 $preparedActiveColumns = GridviewHelper::prepareColumns('contracts', $activeColumns, 'active');
 $preparedConfirmedColumns = GridviewHelper::prepareColumns('contracts', $confirmedColumns, 'confirmed');
 $preparedPendingColumns = GridviewHelper::prepareColumns('contracts', $pendingColumns, 'pending');
 $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolvedColumns, 'dissolved');
+$preparedRefusedColumns = GridviewHelper::prepareColumns('contracts', $refusedColumns, 'refused');
 ?>
 <ul class="nav nav-tabs">
     <li class="active">
@@ -263,6 +275,11 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
     <li>
         <a data-toggle="tab" href="#panel4">Расторгнутые
             <span class="badge"><?= $dissolvedContractsProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel5">Отклоненные заявки
+            <span class="badge"><?= $refusedContractsProvider->getTotalCount() ?></span>
         </a>
     </li>
 </ul>
@@ -399,6 +416,35 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
             'pjax' => true,
             'summary' => false,
             'columns' => $preparedDissolvedColumns,
+        ]); ?>
+    </div>
+
+    <div id="panel5" class="tab-pane fade">
+        <?= SearchFilter::widget([
+            'model' => $searchRefusedContracts,
+            'action' => ['personal/operator-contracts#panel5'],
+            'data' => GridviewHelper::prepareColumns(
+                'contracts',
+                $refusedColumns,
+                'dissolved',
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_OPERATOR,
+            'type' => 'dissolved'
+        ]); ?>
+        <?= GridView::widget([
+            'dataProvider' => $refusedContractsProvider,
+            'filterModel' => null,
+            'rowOptions' => function ($model, $index, $widget, $grid)
+            {
+                if ($model->wait_termnate === 1) {
+                    return ['class' => 'danger'];
+                }
+            },
+            'pjax' => true,
+            'summary' => false,
+            'columns' => $preparedRefusedColumns,
         ]); ?>
     </div>
 </div>
