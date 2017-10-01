@@ -27,6 +27,12 @@ use app\traits\AjaxValidationTrait;
 use kartik\mpdf\Pdf;
 use mPDF;
 use Yii;
+use app\models\Contracts;
+use app\models\User;
+use app\models\ContractsSearch;
+use app\models\ContractsoSearch;
+use app\models\ContractsInvoiceSearch;
+use app\models\ContractsDecInvoiceSearch;
 use yii\base\Response;
 use yii\filters\VerbFilter;
 use yii\helpers\Json;
@@ -161,7 +167,7 @@ class ContractsController extends Controller
 
         $contract = Contracts::findOne(['group_id' => $groupId, 'certificate_id' => $certificateId]);
 
-        if ($contract && $contract->status !== Contracts::STATUS_REFUSED) {
+        if (null !== $contract && null !== $contract->status && !in_array($contract->status, [Contracts::STATUS_REFUSED, Contracts::STATUS_CLOSED])) {
             throw new \DomainException('Контракт уже заключён!');
         }
         $group = Groups::findOne(['id' => $groupId]);
