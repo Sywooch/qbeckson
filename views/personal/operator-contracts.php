@@ -426,7 +426,7 @@ $preparedRefusedColumns = GridviewHelper::prepareColumns('contracts', $refusedCo
             'data' => GridviewHelper::prepareColumns(
                 'contracts',
                 $refusedColumns,
-                'dissolved',
+                'refused',
                 'searchFilter',
                 null
             ),
