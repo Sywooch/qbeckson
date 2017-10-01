@@ -7,6 +7,7 @@ use app\models\Mun;
 use app\models\UserIdentity;
 use app\widgets\SearchFilter;
 use kartik\export\ExportMenu;
+use app\widgets\ExportDocs;
 use kartik\grid\GridView;
 use yii\grid\ActionColumn;
 use yii\helpers\ArrayHelper;
@@ -383,30 +384,40 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
         $payer = Yii::$app->user->identity->payer;
 
         if ($doc = \app\models\ContractDocument::findByPayer($payer, date('Y'), date('m'))) {
-            echo Html::a('Скачать выписку от ' . Yii::$app->formatter->asDate($doc->created_at), '/uploads/contracts/' . $doc->file, ['class' => 'btn btn-primary']);
+            echo Html::a('Скачать выписку от ' . Yii::$app->formatter->asDate($doc->created_at), Yii::getAlias('@pfdo/uploads/contracts/') . $doc->file, ['class' => 'btn btn-primary', 'id' => 'excel-download']);
         } else {
-            $searchContracts = new ContractsPayerInvoiceSearch();
-            $searchContracts->payer_id = $payer->id;
-            $InvoiceProvider = $searchContracts->search(Yii::$app->request->queryParams);
+            $searchContracts = new ContractsPayerInvoiceSearch(['payer_id' => $payer->id]);
+            $invoiceProvider = $searchContracts->search(Yii::$app->request->queryParams);
+
+            $lastMonthDate = strtotime('first day of previous month');
+            $docLastMonth = \app\models\ContractDocument::findByPayer($payer, date('Y', $lastMonthDate), date('m', $lastMonthDate));
+            $searchLastMonthContracts = new ContractsPayerInvoiceSearch([
+                'payer_id' => $payer->id,
+                'lastMonth' => true,
+                'excludeContracts' => $docLastMonth->contract_list,
+            ]);
+            $invoiceLastMonthProvider = $searchLastMonthContracts->search(Yii::$app->request->queryParams);
 
             echo '<div class="alert alert-warning">Внимание! После заказа реестра договоров для формирования заявки на субсидию в текущем месяце до его завершения новый реестр запросить уже не удастся. А это значит, что договоры, которые будут заключены после текущего момента будут включены в заявку уже в следующем месяце. Вы уверены, что сегодня тот самый день?</div>';
 
+            $fileName = Yii::$app->user->id . '_' . date('d-m-Y');
+
             echo ExportMenu::widget([
-                'dataProvider' => $InvoiceProvider,
+                'dataProvider' => $invoiceProvider,
                 'target' => ExportMenu::TARGET_SELF,
                 'showColumnSelector' => false,
-                'filename' => $payer->id . '_' . date('d-m-Y'),
+                'filename' => '_PART1_' . $fileName,
                 'stream' => false,
                 'deleteAfterSave' => false,
-                'folder' => '@webroot/uploads/contracts',
-                'linkPath' => '@web/uploads/contracts',
+                'folder' => '@pfdoroot/uploads/contracts',
+                'linkPath' => '@pfdo/uploads/contracts',
                 'dropdownOptions' => [
                     'class' => 'btn btn-success',
                     'label' => 'Заказать реестр договоров для субсидии',
                     'icon' => false,
                 ],
                 'showConfirmAlert' => false,
-                'afterSaveView' => '@app/views/contracts/export-view',
+                'afterSaveView' => false,
                 'exportConfig' => [
                     ExportMenu::FORMAT_TEXT => false,
                     ExportMenu::FORMAT_CSV => false,
@@ -447,6 +458,73 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
                     ],
                 ],
             ]);
+
+            if (Yii::$app->request->isPost) {
+                ExportDocs::widget([
+                    'dataProvider' => $invoiceLastMonthProvider,
+                    'target' => ExportMenu::TARGET_SELF,
+                    'initDownloadOnStart' => true,
+                    'showColumnSelector' => false,
+                    'filename' => '_PART2_' . $fileName,
+                    'stream' => false,
+                    'deleteAfterSave' => false,
+                    'folder' => '@pfdoroot/uploads/contracts',
+                    'linkPath' => '@pfdo/uploads/contracts',
+                    'dropdownOptions' => [
+                        'class' => 'btn btn-success',
+                        'label' => 'Заказать реестр договоров для субсидии',
+                        'icon' => false,
+                    ],
+                    'showConfirmAlert' => false,
+                    'afterSaveView' => false,
+                    'exportConfig' => [
+                        ExportMenu::FORMAT_TEXT => false,
+                        ExportMenu::FORMAT_CSV => false,
+                        ExportMenu::FORMAT_HTML => false,
+                        ExportMenu::FORMAT_PDF => false,
+                        ExportMenu::FORMAT_EXCEL_X => false,
+                    ],
+                    'columns' => [
+                        ['class' => 'yii\grid\SerialColumn'],
+                        [
+                            'attribute' => 'certificatenumber',
+                            'label' => 'Номер сертификата дополнительного образования',
+                            'format' => 'raw',
+                        ],
+                        [
+                            'attribute' => 'number',
+                            'label' => 'Реквизиты договора об обучении (твердой оферты)',
+                            'format' => 'raw',
+                            'value' => function ($model) {
+                                return '№' . $model->number . ' от ' . Yii::$app->formatter->asDate($model->date);
+                            }
+                        ],
+                        [
+                            'label' => 'Объем обязательств Уполномоченной организации за текущий месяц в соответствии с договорами об обучении (твердыми офертами)',
+                            'value' => function ($model) {
+
+                                $start_edu_contract = explode("-", $model->start_edu_contract);
+                                $month = $start_edu_contract[1];
+
+                                if ($month == date('m')) {
+                                    $price = $model->payer_first_month_payment;
+                                } else {
+                                    $price = $model->payer_other_month_payment;
+                                }
+
+                                return $price;
+                            }
+                        ],
+                    ],
+                ]);
+            }
+
+            if (Yii::$app->request->isPost) {
+                \app\widgets\MergeExcels::widget([
+                    'fileName' => $fileName,
+                    'provider' => $invoiceProvider,
+                ]);
+            }
         }
         ?>
 </div>
