@@ -146,6 +146,7 @@ $user = Yii::$app->user->getIdentity();
                 ?>
             </div>
             <div class="col-xs-12 col-md-8 col-md-offset-2">
+                <?= \app\components\widgets\AlertModal::widget() ?>
                 <?= Alert::widget() ?>
             </div>
             <div class="col-md-12">

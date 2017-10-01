@@ -241,6 +241,7 @@ class Certificates extends \yii\db\ActiveRecord
             $this->balance_p += $contract->rezerv;
             $this->rezerv_p -= $contract->rezerv;
         }
+
         return $this->save();
     }
 
@@ -518,21 +519,27 @@ class Certificates extends \yii\db\ActiveRecord
 
     public function freez()
     {
-        if ($this->getCurrentActiveContracts()
-            ->andWhere([
-                Contracts::tableName() . '.status' =>
-                    [Contracts::STATUS_ACCEPTED]])
-            ->orWhere([
+        /*запретить заморозку если есть договора статус 3, или договора статус 1 не ожидающие расторжения  */
+        $denyCondition = [
+            'OR',
+            [Contracts::tableName() . '.status' =>
+                [Contracts::STATUS_ACCEPTED]],
+            [
                 'AND',
                 [Contracts::tableName() . '.status' =>
                     [Contracts::STATUS_ACTIVE]],
                 ['!=', Contracts::tableName() . '.wait_termnate', 1]
+            ]
+        ];
 
-            ])->exists()) {
+        /* отменить созданные заявки */
+        $refuseCondition = [Contracts::tableName() . '.status' => [Contracts::STATUS_CREATED]];
+
+        if ($this->getCurrentActiveContracts()->andWhere($denyCondition)->exists()) {
 
             return 'Невозможно заморозить, есть активные контракты';
         }
-        $contracts = $this->getContractsModels()->andWhere([Contracts::tableName() . '.status' => [Contracts::STATUS_CREATED]])->all();
+        $contracts = $this->getContractsModels()->andWhere($refuseCondition)->all();
         $trans = Yii::$app->db->beginTransaction();
 
         $result = array_reduce($contracts, function ($acc, $contract)

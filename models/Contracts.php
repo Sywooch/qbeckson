@@ -256,6 +256,18 @@ class Contracts extends ActiveRecord
         return $query->all();
     }
 
+    public function getPeriodSuffix()
+    {
+        $suffix = '';
+        if ($this->period === self::FUTURE_REALIZATION_PERIOD) {
+            $suffix = '_f';
+        } elseif ($this->period === self::PAST_REALIZATION_PERIOD) {
+            $suffix = '_p';
+        }
+
+        return $suffix;
+    }
+
     public function refoundMoney()
     {
         if ($this->period === self::CURRENT_REALIZATION_PERIOD) {
@@ -483,7 +495,9 @@ class Contracts extends ActiveRecord
 
     public function getCanBeTerminated()
     {
-        if ($this->wait_termnate < 1 && (Yii::$app->user->can('organizations') || Yii::$app->user->can('certificate')) && $this->status == self::STATUS_ACTIVE && $this->start_edu_contract <= date('Y-m-d')) {
+        if ((Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION) || Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE))
+            && $this->wait_termnate < 1
+            /*&& $this->status == self::STATUS_ACTIVE*/ && $this->start_edu_contract <= date('Y-m-d')) {
             return true;
         }
 
@@ -584,6 +598,41 @@ class Contracts extends ActiveRecord
         $query->andFilterWhere(['organization_id' => $params['organizationId']]);
 
         return $query->count();
+    }
+
+    public static function getCommitments($cooperateId)
+    {
+        $command = Yii::$app->db->createCommand("SELECT SUM(c.paid + c.rezerv) as sum FROM contracts as c WHERE (c.`status` = " . static::STATUS_ACTIVE . " OR c.`status` = " . static::STATUS_CLOSED . ") AND c.`cooperate_id`= :cooperate_id GROUP BY `cooperate_id`", [
+            ':cooperate_id' => $cooperateId,
+        ]);
+
+        return $command->queryScalar();
+    }
+
+    public static function getCommitmentsNextMonth($cooperateId)
+    {
+        $command = Yii::$app->db->createCommand("SELECT SUM(IF(MONTH(`start_edu_contract`) = :month, c.`payer_first_month_payment`, c.`payer_other_month_payment`)) as sum FROM `contracts` as c WHERE c.`status` = " . static::STATUS_ACTIVE . " AND c.`cooperate_id`= :cooperate_id AND (c.`wait_termnate` < 1 OR c.`wait_termnate` IS NULL) GROUP BY c.`cooperate_id`", [
+            ':cooperate_id' => $cooperateId,
+            ':month' => date('m', strtotime('first day of next month')),
+        ]);
+
+        return $command->queryScalar();
+    }
+
+    /**
+     * @param $date
+     *
+     * @return float
+     */
+    public function getMonthlyPrice($date)
+    {
+        $monthlyPrice = $this->other_m_price;
+        $contractStartDate = strtotime($this->start_edu_contract);
+        if (date('Y-m', $contractStartDate) == date('Y-m', $date)) {
+            $monthlyPrice = $this->first_m_price;
+        }
+
+        return $monthlyPrice;
     }
 
     /**

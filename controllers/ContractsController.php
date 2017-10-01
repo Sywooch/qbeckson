@@ -27,6 +27,12 @@ use app\traits\AjaxValidationTrait;
 use kartik\mpdf\Pdf;
 use mPDF;
 use Yii;
+use app\models\Contracts;
+use app\models\User;
+use app\models\ContractsSearch;
+use app\models\ContractsoSearch;
+use app\models\ContractsInvoiceSearch;
+use app\models\ContractsDecInvoiceSearch;
 use yii\base\Response;
 use yii\filters\VerbFilter;
 use yii\helpers\Json;
@@ -161,15 +167,20 @@ class ContractsController extends Controller
 
         $contract = Contracts::findOne(['group_id' => $groupId, 'certificate_id' => $certificateId]);
 
-        if ($contract && $contract->status !== Contracts::STATUS_REFUSED) {
+        if (null !== $contract && null !== $contract->status && !in_array($contract->status, [Contracts::STATUS_REFUSED, Contracts::STATUS_CLOSED])) {
             throw new \DomainException('Контракт уже заключён!');
         }
         $group = Groups::findOne(['id' => $groupId]);
         if ($group && !$group->program->existsFreePlace()) {
-            throw new \DomainException('В программе нет свободных мест,');
+            Yii::$app->session->setFlash('modal-danger', 'К сожалению заявка на обучение по программе не будет отправлена, пока Вы ее составляли кто-то опередил Вас и подал заявку раньше, тем самым заняв последнее место в группе. Пожалуйста, посмотрите еще варианты зачисления на обучение (например, места могут оказаться в других группах)');
+
+            return $this->redirect('/personal/certificate-programs');
+
         }
-        if ($group && $group->organization->existsFreePlace()) {
-            throw new \DomainException('В организации нет свободных мест,');
+        if ($group && !$group->organization->existsFreePlace()) {
+            Yii::$app->session->setFlash('modal-danger', 'К сожалению заявка на обучение по программе не будет отправлена, пока Вы ее составляли кто-то опередил Вас и подал заявку раньше, тем самым заняв последнее место в организации. Пожалуйста, посмотрите еще варианты зачисления на обучение.');
+
+            return $this->redirect('/personal/certificate-programs');
         }
 
 

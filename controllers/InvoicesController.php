@@ -344,11 +344,13 @@ class InvoicesController extends Controller
     public function actionComplete($id)
     {
         $model = $this->findModel($id);
-        $model->status = Invoices::STATUS_PAID;
-        $model->save() || Yii::$app->session->setFlash('danger', 'Ошибка! сохранить новое состояние счета неудалось!');
+        $model->setAsPaid();
+
+        if ($model->save()) {
+            $model->refoundMoney();
+        }
 
         return $this->redirect(['view', 'id' => $model->id]);
-
     }
 
 

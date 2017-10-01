@@ -3,9 +3,7 @@
 use app\components\widgets\modalCheckLink\ModalCheckLink;
 use app\models\Certificates;
 use app\models\Contracts;
-use app\models\Groups;
-use app\models\Organization;
-use app\models\Programs;
+use app\models\UserIdentity;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
@@ -21,15 +19,14 @@ if ($model->status == Contracts::STATUS_ACTIVE || $model->status == Contracts::S
     $this->title = 'Просмотр оферты';
 }
 
-$roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-if (isset($roles['operators'])) {
+if (Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
     $this->params['breadcrumbs'][] = ['label' => 'Договоры', 'url' => ['/personal/operator-contracts']];
 }
-if (isset($roles['organizations'])) {
+if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
     $this->params['breadcrumbs'][] = ['label' => 'Договоры', 'url' => ['/personal/organization-contracts']];
 }
 
-if (isset($roles['payer'])) {
+if (Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
     $this->params['breadcrumbs'][] = ['label' => 'Договоры', 'url' => ['/personal/payer-contracts']];
 }
 
@@ -40,36 +37,41 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <?php
-    $cert = Certificates::findOne($model->certificate_id);
-    $program = Programs::findOne($model->program_id);
-    $groups = Groups::findOne($model->group_id);
-    $org = Organization::findOne($model->organization_id);
+    $cert = $model->certificate;
+
 
     if ($model->status == Contracts::STATUS_CREATED) {
         echo '<div class="alert alert-warning">Ваша заявка находится на рассмотрении поставщика образовательных услуг. Дождитесь оферты от поставщика на заключения договора. Заявка будет переведена в раздел "Ожидающие договоры" автоматически после получения оферты.</div>';
     } elseif ($model->status == Contracts::STATUS_ACCEPTED) {
         echo '<div class="alert alert-warning">Для того, чтобы завершить заключение договора напишите заявление на обучение в соответствии с <a href="' . Url::to(['application-pdf', 'id' => $model->id]) . '">представленным образцом заявления</a>. Вы можете распечатать образец или переписать от руки на листе бумаги. После написания заявления отнесите его лично или передайте с ребенком поставщику образовательных услуг.</div>';
     } elseif ($model->status === Contracts::STATUS_REFUSED) {
-        echo '<div class="alert alert-warning">' . array_pop($model->informs)->text . '</div>';
+        $msg = array_pop($model->informs)->text;
+        $msg = $msg ?? 'причина отклонения не указана';
+        echo '<div class="alert alert-warning">' . $msg . '</div>';
     }
 
-    if (isset($roles['certificate']) or isset($roles['operators']) or isset($roles['payer'])) {
+    if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)
+        || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)
+        || Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
         echo DetailView::widget([
-            'model' => $org,
+            'model' => $model->organization,
             'attributes' => [
                 [
                     'attribute' => 'name',
                     'format' => 'raw',
-                    'value' => Html::a($org->name, Url::to(['/organization/view', 'id' => $org->id]), ['class' => 'blue', 'target' => '_blank']),
+                    'value' => Html::a($model->organization->name,
+                        Url::to(['/organization/view', 'id' => $model->organization->id]), ['class' => 'blue', 'target' => '_blank']),
                 ],
 
             ],
         ]);
     }
 
-    if (isset($roles['organizations']) or isset($roles['operators']) or isset($roles['payer'])) {
+    if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
+        || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)
+        || Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
         echo DetailView::widget([
-            'model' => $cert,
+            'model' => $model->certificate,
             'attributes' => [
                 'fio_child',
                 [
@@ -79,7 +81,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'number',
                     'format' => 'raw',
-                    'value' => Html::a($cert->number, Url::to(['/certificates/view', 'id' => $cert->id]), ['class' => 'blue', 'target' => '_blank']),
+                    'value' => Html::a($model->certificate->number,
+                        Url::to(['/certificates/view', 'id' => $model->certificate->id]),
+                        ['class' => 'blue', 'target' => '_blank']),
                 ],
             ],
         ]);
@@ -87,7 +91,11 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
 
     <?php
-    if (!isset($roles['payer']) && !isset($roles['certificate'])) {
+    if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
+        || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)
+        || Yii::$app->user->can(UserIdentity::ROLE_ADMINISTRATOR)
+        || Yii::$app->user->can(UserIdentity::ROLE_MONITOR)
+    ) {
         echo DetailView::widget([
             'model' => $model,
             'attributes' => [
@@ -103,12 +111,12 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
 
     <?= DetailView::widget([
-        'model' => $program,
+        'model' => $model->program,
         'attributes' => [
             [
                 'attribute' => 'name',
                 'format' => 'raw',
-                'value' => Html::a($program->name, Url::to(['/programs/view', 'id' => $program->id]), ['class' => 'blue', 'target' => '_blank']),
+                'value' => Html::a($model->program->name, Url::to(['/programs/view', 'id' => $model->program->id]), ['class' => 'blue', 'target' => '_blank']),
             ],
             [
                 'label' => 'Модуль',
@@ -118,9 +126,9 @@ $this->params['breadcrumbs'][] = $this->title;
     ]) ?>
 
     <?php
-    if (isset($roles['certificate'])) {
+    if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
         echo DetailView::widget([
-            'model' => $groups,
+            'model' => $model->group,
             'attributes' => [
                 'name',
                 'module.mainAddress.address',
@@ -130,12 +138,14 @@ $this->params['breadcrumbs'][] = $this->title;
         ]);
     } else {
         echo DetailView::widget([
-            'model' => $groups,
+            'model' => $model->group,
             'attributes' => [
                 [
                     'attribute' => 'name',
                     'format' => 'raw',
-                    'value' => Html::a($groups->name, Url::to(['/groups/contracts', 'id' => $groups->id]), ['class' => 'blue', 'target' => '_blank']),
+                    'value' => Html::a($model->group->name,
+                        Url::to(['/groups/contracts', 'id' => $model->group->id]),
+                        ['class' => 'blue', 'target' => '_blank']),
                 ],
             ],
         ]);
@@ -143,7 +153,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php
     if ($model->wait_termnate == 1 && $model->status != Contracts::STATUS_CLOSED) {
-         echo '<h3>Ожидается расторжение договора с первого числа следующего месяца</h3>';
+        echo '<h3>Ожидается расторжение договора с первого числа следующего месяца</h3>';
 
         echo DetailView::widget([
             'model' => $model,
@@ -278,131 +288,119 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
     <?php
-    if ($model->ocenka == 1 && !$roles['payer']) {
-        $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-        if (!$roles['organizations']) {
-            echo DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    'ocen_fact',
-                    'ocen_kadr',
-                    'ocen_mat',
-                    'ocen_obch',
-                ],
-            ]);
-        }
+    if ($model->ocenka == 1 && (
+            Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)
+            || Yii::$app->user->can(UserIdentity::ROLE_MONITOR)
+            || Yii::$app->user->can(UserIdentity::ROLE_ADMINISTRATOR)
+            || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)
+        )) {
+
+        echo DetailView::widget([
+            'model' => $model,
+            'attributes' => [
+                'ocen_fact',
+                'ocen_kadr',
+                'ocen_mat',
+                'ocen_obch',
+            ],
+        ]);
+
     }
     ?>
 
 
 
     <?php
-    if (isset($roles['certificate'])) {
-        $certificates = new Certificates();
-        $certificate = $certificates->getCertificates();
+    if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_CERTIFICATE)) {
+        /** @var $certificate Certificates */
+        $certificate = Yii::$app->user->identity->certificate;
 
         echo Html::a('Назад', Url::to(['/personal/certificate-contracts', 'id' => $model->id]), ['class' => 'btn btn-primary']);
         echo '&nbsp;';
 
-        if ($certificate->actual == 1 && $model->status == 1) {
+        if ($certificate->actual === 1 && $model->status === 1) {
             echo Html::a(!$model->ocenka ? 'Оценить программу' : 'Изменить оценку', Url::to(['/contracts/ocenka', 'id' => $model->id]), ['class' => 'btn btn-success']);
-            if ($model->status == 1 or $model->status == 4) {
+            if ($model->status === Contracts::STATUS_ACTIVE || $model->status === Contracts::STATUS_CLOSED) {
                 echo '&nbsp;';
                 echo Html::a('Оставить возражение', Url::to(['/disputes/create', 'id' => $model->id]), ['class' => 'btn btn-warning']);
             }
         }
     }
-    if (isset($roles['organizations'])) {
+    if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
         echo Html::a('Назад', Url::to(['/personal/organization-contracts', 'id' => $model->id]), ['class' => 'btn btn-primary']);
-        if ($model->status == 1 or $model->status == 4) {
+        if ($model->status === Contracts::STATUS_ACTIVE || $model->status === Contracts::STATUS_CLOSED) {
             echo '&nbsp;';
             echo Html::a('Просмотреть возражения', Url::to(['/disputes/create', 'id' => $model->id]), ['class' => 'btn btn-warning']);
         }
     }
-    if (isset($roles['operators'])) {
+    if (Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
         echo Html::a('Назад', Url::to(['/personal/operator-contracts', 'id' => $model->id]), ['class' => 'btn btn-primary']);
-        if ($model->status == 1 or $model->status == 4) {
+        if ($model->status === Contracts::STATUS_ACTIVE || $model->status === Contracts::STATUS_CLOSED) {
             echo '&nbsp;';
             echo Html::a('Просмотреть возражения', Url::to(['/disputes/create', 'id' => $model->id]), ['class' => 'btn btn-warning']);
         }
     }
-    if (isset($roles['payer'])) {
+    if (Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
         echo Html::a('Назад', Url::to(['/personal/payer-contracts', 'id' => $model->id]), ['class' => 'btn btn-primary']);
-        if ($model->status == 1 or $model->status == 4) {
+        if ($model->status === Contracts::STATUS_ACTIVE || $model->status === Contracts::STATUS_CLOSED) {
             echo '&nbsp;';
             echo Html::a('Просмотреть возражения', Url::to(['/disputes/create', 'id' => $model->id]), ['class' => 'btn btn-warning']);
         }
     }
     ?>
     <?php
-    if ($model->canBeTerminated && isset($roles['certificate'])) {
-        if ($certificate->actual == 1) {
-            if (date("m") == 12) {
-                $month = 1;
-                $year = date("Y") + 1;
-            } else {
-                $month = date("m") + 1;
-                $year = date("Y");
-            }
-            echo '<div class="pull-right">';
-            echo ModalCheckLink::widget([
-                'link'          => Html::a('Расторгнуть договор', Url::to(['/contracts/terminate', 'id' => $model->id]), ['class' => 'btn btn-danger']),
-                'buttonOptions' => ['label' => 'Расторгнуть договор', 'class' => 'btn btn-danger'],
-                'content'       => 'Вы собираетесь расторгнуть выбранный договор. Расторжение договора осуществляется с первого дня месяца, следующего за месяцем направления уведомления о расторжении договора. 
+    if ($model->status === Contracts::STATUS_ACTIVE
+        && $model->canBeTerminated
+        && Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)
+        && $certificate->actual) {
+        if (date("m") == 12) {
+            $month = 1;
+            $year = date("Y") + 1;
+        } else {
+            $month = date("m") + 1;
+            $year = date("Y");
+        }
+        echo '<div class="pull-right">';
+        echo ModalCheckLink::widget([
+            'link' => Html::a('Расторгнуть договор', Url::to(['/contracts/terminate', 'id' => $model->id]), ['class' => 'btn btn-danger']),
+            'buttonOptions' => ['label' => 'Расторгнуть договор', 'class' => 'btn btn-danger'],
+            'content' => 'Вы собираетесь расторгнуть выбранный договор. Расторжение договора осуществляется с первого дня месяца, следующего за месяцем направления уведомления о расторжении договора. 
                     В случае если Вы подтвердите расторжение договора будет запущена процедура расторжения договора, которая не имеет обратной силы. Средства сертификата, зарезервированные на оплату договора и не использованные на данный момент, вернутся на баланс Вашего сертификата первого числа следующего месяца.
                     Вы действительно хотите расторгнуть данный договор с 1.' . $month . '.' . $year . '?',
-                'title'         => 'Расторгнуть договор?',
-                'label'         => 'Да, я уверен, что хочу Расторгнуть договор.',
-            ]);
-            echo '</div>';
-        }
+            'title' => 'Расторгнуть договор?',
+            'label' => 'Да, я уверен, что хочу Расторгнуть договор.',
+        ]);
+        echo '</div>';
+
     }
 
-    if (isset($roles['certificate']) && $model->status == 0) {
-        if ($certificate->actual == 1) {
-            if (date("m") == 12) {
-                $month = 1;
-                $year = date("Y") + 1;
-            } else {
-                $month = date("m") + 1;
-                $year = date("Y");
-            }
-            echo '<div class="pull-right">';
-            echo '<div class="pull-right">';
-            echo ModalCheckLink::widget([
-                'link'          => Html::a('Отменить заявку', Url::to(['/contracts/termrequest', 'id' => $model->id]), ['class' => 'btn btn-danger']),
-                'buttonOptions' => ['label' => 'Отменить заявку', 'class' => 'btn btn-danger'],
-                'content'       => 'Отклоняя заявку Вы отказываетесь от заключения договора на обучение по выбранной программе. Деньги, зарезервированные на оплату договора вернутся на сертификат в полном объеме, но передумывать отклонять заявку будет уже поздно. Вы уверены, что хотите отклонить заявку?',
-                'title'         => 'Отменить заявку?',
-                'label'         => 'Да, я уверен, что хочу Отменить заявку.',
-            ]);
-            echo '</div>';
-        }
-    }
-    if (isset($roles['certificate']) && $model->status == 3) {
-        if ($certificate->actual == 1) {
-            if (date("m") == 12) {
-                $month = 1;
-                $year = date("Y") + 1;
-            } else {
-                $month = date("m") + 1;
-                $year = date("Y");
-            }
-            echo '<div class="pull-right">';
-            echo ModalCheckLink::widget([
-                'link'          => Html::a('Отменить заявку', Url::to(['/contracts/termrequest', 'id' => $model->id]), ['class' => 'btn btn-danger']),
-                'buttonOptions' => ['label' => 'Отменить заявку', 'class' => 'btn btn-danger'],
-                'content'       => 'Отклоняя заявку Вы отказываетесь от заключения договора на обучение по выбранной программе. Деньги, зарезервированные на оплату договора вернутся на сертификат в полном объеме, но передумывать отклонять заявку будет уже поздно. Вы уверены, что хотите отклонить заявку?',
-                'title'         => 'Отменить заявку?',
-                'label'         => 'Да, я уверен, что хочу Отменить заявку.',
-            ]);
-            echo '</div>';
-        }
-    }
-    ?> <!-- + 1 месяц !!! -->
+    if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)
+        && $model->status === Contracts::STATUS_CREATED
+        && $certificate->actual
+    ) {
 
-    <?php
-    if ($model->canBeTerminated && isset($roles['organizations'])) {
+        if (date("m") == 12) {
+            $month = 1;
+            $year = date("Y") + 1;
+        } else {
+            $month = date("m") + 1;
+            $year = date("Y");
+        }
+        echo '<div class="pull-right">';
+        echo '<div class="pull-right">';
+        echo ModalCheckLink::widget([
+            'link' => Html::a('Отменить заявку', Url::to(['/contracts/termrequest', 'id' => $model->id]), ['class' => 'btn btn-danger']),
+            'buttonOptions' => ['label' => 'Отменить заявку', 'class' => 'btn btn-danger'],
+            'content' => 'Отклоняя заявку Вы отказываетесь от заключения договора на обучение по выбранной программе. Деньги, зарезервированные на оплату договора вернутся на сертификат в полном объеме, но передумывать отклонять заявку будет уже поздно. Вы уверены, что хотите отклонить заявку?',
+            'title' => 'Отменить заявку?',
+            'label' => 'Да, я уверен, что хочу Отменить заявку.',
+        ]);
+        echo '</div>';
+    }
+    if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)
+        && ($model->status === Contracts::STATUS_ACCEPTED)
+        && $certificate->actual
+    ) {
 
         if (date("m") == 12) {
             $month = 1;
@@ -413,24 +411,50 @@ $this->params['breadcrumbs'][] = $this->title;
         }
         echo '<div class="pull-right">';
         echo ModalCheckLink::widget([
-            'link'          => Html::a('Расторгнуть договор', Url::to(['/contracts/terminate', 'id' => $model->id]), ['class' => 'btn btn-danger']),
-            'buttonOptions' => ['label' => 'Расторгнуть договор', 'class' => 'btn btn-danger'],
-            'content'       => 'Вы собираетесь расторгнуть выбранный договор. Расторжение договора осуществляется с первого дня месяца, следующего за месяцем направления уведомления о расторжении договора. 
-В случае если Вы подтвердите расторжение договора будет запущена процедура расторжения договора, которая не имеет обратной силы. Средства сертификата, зарезервированные на оплату договора и не использованные на данный момент, вернутся на баланс сертификата первого числа следующего месяца.
-Вы действительно хотите расторгнуть данный договор с 1.' . $month . '.' . $year . '?',
-            'title'         => 'Расторгнуть договор?',
-            'label'         => 'Да, я уверен, что хочу расторгнуть договор.',
+            'link' => Html::a('Отменить заявку', Url::to(['/contracts/termrequest', 'id' => $model->id]), ['class' => 'btn btn-danger']),
+            'buttonOptions' => ['label' => 'Отменить заявку', 'class' => 'btn btn-danger'],
+            'content' => 'Отклоняя заявку Вы отказываетесь от заключения договора на обучение по выбранной программе. Деньги, зарезервированные на оплату договора вернутся на сертификат в полном объеме, но передумывать отклонять заявку будет уже поздно. Вы уверены, что хотите отклонить заявку?',
+            'title' => 'Отменить заявку?',
+            'label' => 'Да, я уверен, что хочу Отменить заявку.',
         ]);
         echo '</div>';
-    } elseif (!$model->canBeTerminated && $model->status == Contracts::STATUS_ACTIVE && $model->wait_termnate < 1) {
+
+    }
+    ?> <!-- + 1 месяц !!! -->
+
+    <?php
+    if ($model->canBeTerminated
+        && ($model->status === Contracts::STATUS_CREATED || $model->status === Contracts::STATUS_ACCEPTED)
+        && Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+        if (date("m") == 12) {
+            $month = 1;
+            $year = date("Y") + 1;
+        } else {
+            $month = date("m") + 1;
+            $year = date("Y");
+        }
+        echo '<div class="pull-right">';
+        echo ModalCheckLink::widget([
+            'link' => Html::a('Расторгнуть договор', Url::to(['/contracts/terminate', 'id' => $model->id]), ['class' => 'btn btn-danger']),
+            'buttonOptions' => ['label' => 'Расторгнуть договор', 'class' => 'btn btn-danger'],
+            'content' => 'Вы собираетесь расторгнуть выбранный договор. Расторжение договора осуществляется с первого дня месяца, следующего за месяцем направления уведомления о расторжении договора. 
+В случае если Вы подтвердите расторжение договора будет запущена процедура расторжения договора, которая не имеет обратной силы. Средства сертификата, зарезервированные на оплату договора и не использованные на данный момент, вернутся на баланс сертификата первого числа следующего месяца.
+Вы действительно хотите расторгнуть данный договор с 1.' . $month . '.' . $year . '?',
+            'title' => 'Расторгнуть договор?',
+            'label' => 'Да, я уверен, что хочу расторгнуть договор.',
+        ]);
+        echo '</div>';
+    } elseif (!$model->canBeTerminated && $model->status === Contracts::STATUS_ACTIVE && $model->wait_termnate < 1) {
         echo '<div class="pull-right text-warning">Договор не может быть расторгнут до начала действия</div>';
     }
 
-    if (Yii::$app->user->can($model->terminatorUserRole) && ($model->status == Contracts::STATUS_CLOSED || $model->wait_termnate > 0)) {
+    if (Yii::$app->user->can($model->terminatorUserRole) && ($model->status === Contracts::STATUS_CLOSED || $model->wait_termnate > 0)) {
         echo '<br /><br /><div class="alert alert-warning">Для юридического закрепления расторжения договора заполните <a href="' . Url::to(['application-close-pdf', 'id' => $model->id]) . '">бланк уведомления о расторжении договора</a> и передайте заявление ' . (Yii::$app->user->can('certificate') ? 'Поставщику' : 'Заказчику') . ' услуг</div>';
     }
     ?>
 
-    <br /><br /><p style="font-size: xx-small;">Если Вам необходимо снова распечатать заявление &ndash; <a href="<?= Url::to(['application-pdf', 'id' => $model->id]) ?>">жмите сюда</a></p>
+    <br/><br/>
+    <p style="font-size: xx-small;">Если Вам необходимо снова распечатать заявление &ndash; <a
+                href="<?= Url::to(['application-pdf', 'id' => $model->id]) ?>">жмите сюда</a></p>
 
 </div>

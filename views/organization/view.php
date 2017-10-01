@@ -19,6 +19,19 @@ if (isset($roles['operators'])) {
 if (isset($roles['organizations'])) {
     $this->params['breadcrumbs'][] = 'Организации';
 }
+if (isset($roles['payer'])) {
+    if ($cooperation = $model->getCooperation() && !empty($cooperation->total_payment_limit)) {
+        $commitments = \app\models\Contracts::getCommitments($cooperation->id);
+        $summary = \app\models\Invoices::getSummary($cooperation->id);
+        $commitmentsNextMonth = \app\models\Contracts::getCommitmentsNextMonth($cooperation->id);
+
+        if ($summary + $commitmentsNextMonth > $cooperation->total_payment_limit) {
+            Yii::$app->session->setFlash('info', 'В связи с ожидаемым достижением максимальной суммы по заключенному договору рекомендуется заключить дополнительное соглашение к договору, установив максимальную сумму не менее &ndash; ' . round($commitments, 2) . ' рублей');
+        } elseif (!empty($commitments) && $cooperation->total_payment_limit > $commitments) {
+            Yii::$app->session->setFlash('warning', 'Вы можете уменьшить максимальную сумму по договору до &ndash; ' . round($commitments, 2) . ' рублей');
+        }
+    }
+}
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="organization-view col-md-8 col-md-offset-2">
@@ -411,7 +424,7 @@ $this->params['breadcrumbs'][] = $this->title;
         if (isset($roles['payer'])) {
             echo Html::a('Назад', ['personal/payer-organizations'], ['class' => 'btn btn-primary']);
 
-            if (null !== ($cooperation = $model->getCooperation())) {
+            if (null !== $cooperation) {
                 if (count($cooperation->contracts) < 1 && $cooperation->status === Cooperate::STATUS_ACTIVE) {
                     echo $this->render(
                         '../cooperate/reject-contract',
@@ -454,14 +467,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     $cooperation->status === Cooperate::STATUS_ACTIVE
                 ) {
                     echo '<hr>';
-                    if ($cooperation->status == Cooperate::STATUS_ACTIVE && $cooperation->document_type == Cooperate::DOCUMENT_TYPE_EXTEND && Yii::$app->user->can('payers')) {
-                        echo '<div class="pull-right">Установлена максимальная сумма по договору - ' . $this->render(
-                            '../cooperate/payment-limit',
-                            [
-                                'model' => $cooperation,
-                            ]
-                        ) . '</div>';
-                    }
                     echo $this->render(
                         '../cooperate/requisites',
                         [
@@ -469,6 +474,15 @@ $this->params['breadcrumbs'][] = $this->title;
                             'label' => 'Реквизиты соглашения: от ' . $cooperation->date . ' №' . $cooperation->number,
                         ]
                     );
+
+                    if ($cooperation->status == Cooperate::STATUS_ACTIVE && $cooperation->document_type == Cooperate::DOCUMENT_TYPE_EXTEND && Yii::$app->user->can('payers')) {
+                        echo '<div style="margin-top: 20px;">Установлена максимальная сумма по договору - ' . $this->render(
+                                '../cooperate/payment-limit',
+                                [
+                                    'model' => $cooperation,
+                                ]
+                            ) . '</div>';
+                    }
                 }
                 if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
                     null !== $cooperation->number &&
@@ -480,6 +494,13 @@ $this->params['breadcrumbs'][] = $this->title;
                         ['cooperate/confirm-contract', 'id' => $cooperation->id],
                         ['class' => 'btn btn-primary']
                     );
+                }
+
+                if (!empty($commitments)) {
+                    echo '<div style="margin-top: 20px;">Совокупная сумма подтвержденных обязательств по договору &ndash; ' . round($commitments, 2) . ' рублей</div>';
+                }
+                if (!empty($summary)) {
+                    echo '<div style="margin-top: 20px;">Совокупная сумма оплаченных ранее счетов &ndash; ' . round($summary, 2) . ' рублей</div>';
                 }
             }
         }
