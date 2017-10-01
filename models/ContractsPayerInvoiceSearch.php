@@ -52,8 +52,8 @@ class ContractsPayerInvoiceSearch extends Contracts
         $query = Contracts::find()
             ->andWhere(['or', ['and', ['status' => Contracts::STATUS_ACTIVE], ['<=', 'start_edu_contract', date('Y-m-d', $lastDayOfMonth)]], ['and', ['status' => Contracts::STATUS_CLOSED], ['>', 'date_termnate', date('Y-m-d', $firstDayOfMonth)]]]);
 
-        if ($this->lastMonth == true) {
-            $query->andWhere('id NOT IN (' . $this->excludeContracts . ')');
+        if ($this->lastMonth == true && !empty(trim($this->excludeContracts))) {
+            $query->andWhere('id NOT IN (' . trim($this->excludeContracts) . ')');
         }
 
         // add conditions that should always apply here
