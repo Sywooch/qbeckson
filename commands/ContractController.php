@@ -165,8 +165,6 @@ class ContractController extends Controller
             ->where(['<=', 'start_edu_contract', date('Y-m-d', $lastDayOfThisMonth)])
             ->andWhere(['or', ['status' => Contracts::STATUS_ACTIVE], ['and', ['status' => Contracts::STATUS_CLOSED], ['>=', 'date_termnate', date('Y-m-d', $previousMonth)]]]);
 
-        echo PHP_EOL . $query->prepare(Yii::$app->db->queryBuilder)->createCommand()->rawSql . PHP_EOL;
-
         $contracts = $query->all();
 
         $i = 1;
