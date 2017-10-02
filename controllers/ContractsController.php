@@ -27,12 +27,6 @@ use app\traits\AjaxValidationTrait;
 use kartik\mpdf\Pdf;
 use mPDF;
 use Yii;
-use app\models\Contracts;
-use app\models\User;
-use app\models\ContractsSearch;
-use app\models\ContractsoSearch;
-use app\models\ContractsInvoiceSearch;
-use app\models\ContractsDecInvoiceSearch;
 use yii\base\Response;
 use yii\filters\VerbFilter;
 use yii\helpers\Json;
@@ -156,7 +150,8 @@ class ContractsController extends Controller
 
     /**
      * @param string $groupId
-     * @param null $certificateId
+     * @param null   $certificateId
+     *
      * @return string|\yii\web\Response
      */
     public function actionRequest($groupId, $certificateId = null)
@@ -193,7 +188,7 @@ class ContractsController extends Controller
                 return $this->refresh();
             }
         }
-
+        $confirmForm = null;
         if (null !== $contract) {
             $confirmForm = new ContractConfirmForm($contract, $certificateId);
             if ($confirmForm->load(Yii::$app->request->post()) && $confirmForm->validate()) {
@@ -220,8 +215,9 @@ class ContractsController extends Controller
     }
 
     /**
-     * @param $id
+     * @param             $id
      * @param null|string $certificateId
+     *
      * @return Response
      * @throws NotFoundHttpException
      */
@@ -244,7 +240,9 @@ class ContractsController extends Controller
 
     /**
      * Displays a single Contracts model.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionView($id)
@@ -252,6 +250,24 @@ class ContractsController extends Controller
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
+    }
+
+    /**
+     * Finds the Contracts model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     *
+     * @param integer $id
+     *
+     * @return Contracts the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = Contracts::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
     }
 
     public function actionGroup($id)
@@ -304,6 +320,11 @@ class ContractsController extends Controller
     {
         $model = $this->findModel($id);
         $model->scenario = Contracts::SCENARIO_CREATE_DATE;
+        $cert = $model->certificate;
+        $group = $model->group;
+        $program = $model->program;
+
+        $org = $model->organization;
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             if (empty($model->date)) {
@@ -339,10 +360,7 @@ class ContractsController extends Controller
                 }
             }
 
-            $cert = Certificates::findOne($model->certificate_id);
-            $program = Programs::findOne($model->program_id);
 
-            $org = Organization::findOne($model->organization_id);
 
             $org->amount_child = $org->amount_child + 1;
 
@@ -457,10 +475,6 @@ class ContractsController extends Controller
             }
         }
 
-        $cert = Certificates::findOne($model->certificate_id);
-        $group = Groups::findOne($model->group_id);
-        $program = Programs::findOne($model->program_id);
-
         return $this->render('verificate', [
             'model' => $model,
             'cert' => $cert,
@@ -545,7 +559,7 @@ class ContractsController extends Controller
 
         return $this->render('/informs/comment', [
             'informs' => new Informs(),
-            'model'   => $model
+            'model' => $model
         ]);
     }
 
@@ -565,7 +579,7 @@ class ContractsController extends Controller
 
         return $this->render('/informs/comment', [
             'informs' => new Informs(),
-            'model'   => $model
+            'model' => $model
 
         ]);
     }
@@ -584,7 +598,7 @@ class ContractsController extends Controller
         if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
             return $this->render('/informs/comment', [
                 'informs' => $informs,
-                'model'   => $model
+                'model' => $model
             ]);
         }
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
@@ -593,14 +607,13 @@ class ContractsController extends Controller
                 'model' => $model,
             ]);
         }
+
+        throw new NotFoundHttpException();
     }
 
     public function actionInvoice()
     {
         $payers = new Contracts();
-
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
 
         if ($payers->load(Yii::$app->request->post())) {
             $searchContracts = new ContractsInvoiceSearch();
@@ -609,14 +622,12 @@ class ContractsController extends Controller
 
             return $this->render('invoice', [
                 'payers' => $payers,
-                'searchContracts' => $searchContracts,
                 'ContractsProvider' => $ContractsProvider,
             ]);
         }
 
         return $this->render('payer', [
             'payers' => $payers,
-            'organization' => $organization,
         ]);
     }
 
@@ -624,8 +635,6 @@ class ContractsController extends Controller
     {
         $payers = new Contracts();
 
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
 
         if ($payers->load(Yii::$app->request->post())) {
 
@@ -633,44 +642,34 @@ class ContractsController extends Controller
             $searchContracts->payer_id = $payers->payer_id;
             $ContractsProvider = $searchContracts->search(Yii::$app->request->queryParams);
 
-            // return '<pre>'.var_dump($contracts).'</pre>';
             return $this->render('decinvoice', [
-                'payers'            => $payers,
-                'searchContracts'   => $searchContracts,
+                'payers' => $payers,
                 'ContractsProvider' => $ContractsProvider,
-                'payer'             => $payers
+                'payer' => $payers
             ]);
         }
 
         return $this->render('decpayer', [
             'payers' => $payers,
-            'organization' => $organization,
         ]);
     }
 
     public function actionPreinvoice()
     {
         $payers = new Contracts();
-
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
-
         if ($payers->load(Yii::$app->request->post())) {
-
             $searchContracts = new ContractspreInvoiceSearch();
             $searchContracts->payer_id = $payers->payer_id;
             $ContractsProvider = $searchContracts->search(Yii::$app->request->queryParams);
 
             return $this->render('preinvoice', [
                 'payers' => $payers,
-                'searchContracts' => $searchContracts,
                 'ContractsProvider' => $ContractsProvider,
             ]);
         }
 
         return $this->render('prepayer', [
             'payers' => $payers,
-            'organization' => $organization,
         ]);
     }
 
@@ -680,11 +679,11 @@ class ContractsController extends Controller
         set_time_limit(0);
 
         $model = $this->findModel($id);
-        $organization = Organization::findOne($model->organization_id);
-        $program = Programs::findOne($model->program_id);
-        $group = Groups::findOne($model->group_id);
-        $year = ProgrammeModule::findOne($model->year_id);
-        $payer = Payers::findOne($model->payer_id);
+        $organization = $model->organization;
+        $program = $model->program;
+        $group = $model->group;
+        $year = $model->year;
+        $payer = $model->payer;
 
         $date_elements_user = explode("-", $model->start_edu_contract);
 
@@ -1089,7 +1088,9 @@ EOD;
     /**
      * Updates an existing Contracts model.
      * If update is successful, the browser will be redirected to the 'view' page.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionUpdate($id)
@@ -1193,10 +1194,9 @@ EOD;
                 $program->ocen_mat = (($ocen_mat_1 + 2 * $ocen_mat_2) / ($count1 + (2 * $count2)));
                 $program->ocen_obch = (($ocen_obch_1 + 2 * $ocen_obch_2) / ($count1 + (2 * $count2)));
 
-                if ($program->save()) {
-                    return $this->redirect(['view', 'id' => $model->id]);
-                }
+                $program->save() || Yii::$app->session->setFlash('error', 'Не удалось сохранить!!!');
 
+                return $this->redirect(['view', 'id' => $model->id]);
             }
 
             /*
@@ -1483,7 +1483,9 @@ EOD;
     /**
      * Deletes an existing Contracts model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionDelete($id)
@@ -1497,8 +1499,8 @@ EOD;
                 $cont = $this->findModel($id);
                 // return var_dump($id);
 
-                $certificates = new Certificates();
-                $certificate = $certificates->getCertificates();
+                /** @var $certificate Certificates */
+                $certificate = Yii::$app->user->identity->certificate;
 
 
                 $cert = Certificates::findOne($certificate->id);
@@ -1524,11 +1526,10 @@ EOD;
         }
 
         return $this->render('/user/delete', [
-            'user'  => $user,
+            'user' => $user,
             'title' => null,
         ]);
     }
-
 
     public function actionUpdatescert()
     {
@@ -1622,21 +1623,5 @@ EOD;
         }
         echo "OK!";
 
-    }
-
-    /**
-     * Finds the Contracts model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Contracts the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Contracts::findOne($id)) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
     }
 }
