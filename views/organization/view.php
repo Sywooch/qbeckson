@@ -424,7 +424,7 @@ $this->params['breadcrumbs'][] = $this->title;
         if (isset($roles['payer'])) {
             echo Html::a('Назад', ['personal/payer-organizations'], ['class' => 'btn btn-primary']);
 
-            if (null !== $cooperation) {
+            if (!empty($cooperation)) {
                 if (count($cooperation->contracts) < 1 && $cooperation->status === Cooperate::STATUS_ACTIVE) {
                     echo $this->render(
                         '../cooperate/reject-contract',
