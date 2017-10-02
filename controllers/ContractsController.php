@@ -345,13 +345,17 @@ class ContractsController extends Controller
                 ]);
             }
 
-            $model->paid = $model->payer_first_month_payment;
-            $model->rezerv = $model->rezerv - ($model->payer_first_month_payment);
-            $model->status = 1;
-
             $previousMonth = strtotime('first day of previous month');
             $currentMonth = strtotime('first day of this month');
             $nextMonth = strtotime('first day of next month');
+            $lastDayOfMonth = strtotime('last day of this month');
+
+            $model->paid = $model->payer_first_month_payment;
+            $model->rezerv = $model->rezerv - ($model->payer_first_month_payment);
+            $model->status = 1;
+            if ($model->stop_edu_contract <= date('Y-m-d', $lastDayOfMonth)) {
+                $model->wait_termnate = 1;
+            }
 
             if ($model->save()) {
                 $completeness = new Completeness();
