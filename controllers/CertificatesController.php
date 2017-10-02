@@ -39,7 +39,9 @@ class CertificatesController extends Controller
 
     /**
      * Displays a single Certificates model.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionView($id)
@@ -103,21 +105,20 @@ class CertificatesController extends Controller
                 $model->rezerv_f = 0;
                 $model->rezerv = 0;
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
-                if ($model->canUseGroup($model->possible_cert_group)) {
-                    $model->setNominals();
-                    if ($model->save()) {
-                        return $this->render('/user/view', [
-                            'model' => $user,
-                            'password' => $password,
-                        ]);
-                    }
+                if ($model->canUseGroup() && $model->setNominals() && $model->save()) {
 
+                    return $this->render('/user/view', [
+                        'model' => $user,
+                        'password' => $password,
+                    ]);
                 } else {
                     Yii::$app->session->setFlash('danger', 'Невозможно установить данную группу, достигнут лимит');
                 }
                 $user->delete();
             }
         }
+        $user->username = mb_substr($user->username, mb_strlen($region) + mb_strlen($payer->code));
+        $user->password = '';
 
         return $this->render('create', [
             'model' => $model,
@@ -130,7 +131,9 @@ class CertificatesController extends Controller
     /**
      * Updates an existing Certificates model.
      * If update is successful, the browser will be redirected to the 'view' page.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionUpdate($id)
@@ -273,6 +276,7 @@ class CertificatesController extends Controller
         if ($eventMessage) {
             Yii::$app->session->setFlash('error', $eventMessage);
         }
+
         return $this->render('nominal', [
             'model' => $model,
         ]);
@@ -291,7 +295,9 @@ class CertificatesController extends Controller
     /**
      * Deletes an existing Certificates model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionDelete($id)
@@ -421,7 +427,9 @@ class CertificatesController extends Controller
     /**
      * Finds the Certificates model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
+     *
      * @param integer $id
+     *
      * @return Certificates the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
