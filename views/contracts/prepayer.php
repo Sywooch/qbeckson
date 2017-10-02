@@ -1,10 +1,6 @@
 <?php
 use yii\helpers\Html;
-use yii\grid\GridView;
 use yii\widgets\ActiveForm;
-use yii\helpers\Url;
-use app\models\Organization;
-use app\models\Payers;
 use app\models\Cooperate;
 use yii\helpers\ArrayHelper;
 
