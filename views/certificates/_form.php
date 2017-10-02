@@ -11,13 +11,17 @@ use yii\helpers\Html;
 /* @var $form yii\widgets\ActiveForm */
 
 echo Dialog::widget(['options' => ['title' => 'Предупреждение',]]);
+
+
+
 ?>
 
 <div class="certificates-form" ng-app>
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ActiveForm::begin( ['enableAjaxValidation' => true]); ?>
 
     <?php
+    $formId = $form->getId();
     $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
     if (isset($roles['payer'])) {
 
@@ -69,10 +73,10 @@ echo Dialog::widget(['options' => ['title' => 'Предупреждение',]])
             $dataOptions[$index] = ['data-nominal' => $value];
         }
 
-        echo $form->field($model, 'possible_cert_group')->dropDownList(ArrayHelper::map(CertGroup::getPossibleList($payer->id), 'id', 'group'), [
+        echo $form->field($model, 'possible_cert_group' )->dropDownList(ArrayHelper::map(CertGroup::getPossibleList($payer->id), 'id', 'group'), [
             'options'  => $dataOptions,
             'prompt'   => 'Выберите группу...',
-            'onChange' => 'selectGroup($("#select-cert-group"));',
+            'onChange' => 'selectGroup($("#select-cert-group")); ',
             'id'       => 'possible-cert-group'
         ]);
 
@@ -105,3 +109,14 @@ echo Dialog::widget(['options' => ['title' => 'Предупреждение',]])
     <?php ActiveForm::end(); ?>
 
 </div>
+<?php
+$js = <<<JS
+$("#possible-cert-group").on('change',function(){
+   $('#$formId').yiiActiveForm('validate');
+});
+$("#select-cert-group").on('change',function(){
+   $('#$formId').yiiActiveForm('validate');
+});
+JS;
+$this->registerJs($js);
+?>

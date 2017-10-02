@@ -141,6 +141,7 @@ class Certificates extends \yii\db\ActiveRecord
             [['payer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payers::className(), 'targetAttribute' => ['payer_id' => 'id']],
             [['contractCount'], 'safe'],
             [['selectCertGroup', 'possible_cert_group'], 'required', 'on' => self::SCENARIO_DEFAULT],
+            [['selectCertGroup', 'possible_cert_group'], 'validatePossibleCertGroup'],
             ['selectCertGroup', 'in', 'range' => [self::TYPE_PF, self::TYPE_ACCOUNTING]],
         ];
     }
@@ -191,6 +192,16 @@ class Certificates extends \yii\db\ActiveRecord
             'possible_cert_group' => 'Группа сертификата',
         ];
     }
+
+    public function validatePossibleCertGroup($attribute, $param, $validator){
+
+        if(!$this->canUseGroup()){
+            $this->addError($attribute,'Невозможно установить данную группу, достигнут лимит');
+        }else{
+            $this->clearErrors();
+        }
+    }
+
 
     public function afterFind()
     {

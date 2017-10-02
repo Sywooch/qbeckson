@@ -52,6 +52,24 @@ class CertificatesController extends Controller
     }
 
     /**
+     * Finds the Certificates model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     *
+     * @param integer $id
+     *
+     * @return Certificates the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = Certificates::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+    }
+
+    /**
      * Creates a new Certificates model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
@@ -64,12 +82,16 @@ class CertificatesController extends Controller
         /** @var $payer Payers */
         $payer = Yii::$app->user->identity->payer;
         $region = Yii::$app->operator->identity->region;
-        if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {
-            $user->username = $region . $payer->code . $user->username;
-            Yii::$app->response->format = Response::FORMAT_JSON;
 
-            return ActiveForm::validate($user);
+        if (Yii::$app->request->isAjax) {
+            $user->load(Yii::$app->request->post());
+            $user->username = $region . $payer->code . $user->username;
+            $model->load(Yii::$app->request->post());
+            $result = $this->asJson(array_merge(ActiveForm::validate($user), ActiveForm::validate($model)));
+
+            return $result;
         }
+
 
         if ($user->load(Yii::$app->request->post()) && $model->load(Yii::$app->request->post()) && $model->validate()) {
 
@@ -117,7 +139,7 @@ class CertificatesController extends Controller
             }
         }
         $user->username = mb_substr($user->username, mb_strlen($region) + mb_strlen($payer->code));
-        $user->password ='';
+        $user->password = '';
 
         return $this->render('create', [
             'model' => $model,
@@ -152,7 +174,7 @@ class CertificatesController extends Controller
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
                 $model->nominal = $model['oldAttributes']['nominal'];
                 ($model->canChangeGroup && $model->canUseGroup() && $model->setNominals() && $model->save()
-                    && (Yii::$app->session->setFlash('success', 'Изменена группа и пересчитаны номиналы')) || true)
+                    && (Yii::$app->session->setFlash('success', 'Изменена группа и пересчитаны номиналы') || true))
                 || Yii::$app->session->setFlash('danger', 'Невозможно установить данную группу, достигнут лимит');
             }
             if ($user->load(Yii::$app->request->post())) {
@@ -347,7 +369,6 @@ class CertificatesController extends Controller
         return $this->redirect(['/personal/payer-certificates']);
     }
 
-
     public function actionImport()
     {
         ini_set('memory_limit', '-1');
@@ -413,24 +434,6 @@ class CertificatesController extends Controller
             $model->save();
 
             print_r($model->getErrors());
-        }
-    }
-
-    /**
-     * Finds the Certificates model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     *
-     * @param integer $id
-     *
-     * @return Certificates the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Certificates::findOne($id)) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
 }
