@@ -141,6 +141,7 @@ class Certificates extends \yii\db\ActiveRecord
             [['payer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payers::className(), 'targetAttribute' => ['payer_id' => 'id']],
             [['contractCount'], 'safe'],
             [['selectCertGroup', 'possible_cert_group'], 'required', 'on' => self::SCENARIO_DEFAULT],
+            [['selectCertGroup', 'possible_cert_group'], 'validatePossibleCertGroup'],
             ['selectCertGroup', 'in', 'range' => [self::TYPE_PF, self::TYPE_ACCOUNTING]],
         ];
     }
@@ -192,6 +193,16 @@ class Certificates extends \yii\db\ActiveRecord
         ];
     }
 
+    public function validatePossibleCertGroup($attribute, $param, $validator){
+
+        if(!$this->canUseGroup()){
+            $this->addError($attribute,'Невозможно установить данную группу, достигнут лимит');
+        }else{
+            $this->clearErrors();
+        }
+    }
+
+
     public function afterFind()
     {
         parent::afterFind();
@@ -210,17 +221,29 @@ class Certificates extends \yii\db\ActiveRecord
             $this->nominal_f = $this->possibleCertGroup->nominal_f;
             $this->balance = $this->nominal;
             $this->balance_f = $this->nominal_f;
+
+            return true;
         } elseif (!empty($this->selectCertGroup) && $certGroup = $this->payers->getCertGroups(1)->one()) {
             $this->cert_group = $certGroup->id;
             $this->nominal = 0;
             $this->nominal_f = 0;
             $this->balance = 0;
             $this->balance_f = 0;
+
+            return true;
         }
+
+        return false;
     }
 
-    public function canUseGroup($groupId)
+    public function canUseGroup()
     {
+        if ($this->selectCertGroup && $this->selectCertGroup == self::TYPE_ACCOUNTING) {
+
+            return true;
+        }
+
+        $groupId = $this->possible_cert_group;
         $group = CertGroup::findOne(['id' => $groupId]);
         if (!$group) {
             throw  new Exception('Группа не найдена');

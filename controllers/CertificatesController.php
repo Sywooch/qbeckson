@@ -39,7 +39,9 @@ class CertificatesController extends Controller
 
     /**
      * Displays a single Certificates model.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionView($id)
@@ -47,6 +49,24 @@ class CertificatesController extends Controller
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
+    }
+
+    /**
+     * Finds the Certificates model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     *
+     * @param integer $id
+     *
+     * @return Certificates the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = Certificates::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
     }
 
     /**
@@ -63,12 +83,15 @@ class CertificatesController extends Controller
         $payer = Yii::$app->user->identity->payer;
         $region = Yii::$app->operator->identity->region;
 
-        if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {
+        if (Yii::$app->request->isAjax) {
+            $user->load(Yii::$app->request->post());
             $user->username = $region . $payer->code . $user->username;
-            Yii::$app->response->format = Response::FORMAT_JSON;
+            $model->load(Yii::$app->request->post());
+            $result = $this->asJson(array_merge(ActiveForm::validate($user), ActiveForm::validate($model)));
 
-            return ActiveForm::validate($user);
+            return $result;
         }
+
 
         if ($user->load(Yii::$app->request->post()) && $model->load(Yii::$app->request->post()) && $model->validate()) {
 
@@ -103,21 +126,20 @@ class CertificatesController extends Controller
                 $model->rezerv_f = 0;
                 $model->rezerv = 0;
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
-                if ($model->canUseGroup($model->possible_cert_group)) {
-                    $model->setNominals();
-                    if ($model->save()) {
-                        return $this->render('/user/view', [
-                            'model' => $user,
-                            'password' => $password,
-                        ]);
-                    }
+                if ($model->canUseGroup() && $model->setNominals() && $model->save()) {
 
+                    return $this->render('/user/view', [
+                        'model' => $user,
+                        'password' => $password,
+                    ]);
                 } else {
                     Yii::$app->session->setFlash('danger', 'Невозможно установить данную группу, достигнут лимит');
                 }
                 $user->delete();
             }
         }
+        $user->username = mb_substr($user->username, mb_strlen($region) + mb_strlen($payer->code));
+        $user->password = '';
 
         return $this->render('create', [
             'model' => $model,
@@ -130,7 +152,9 @@ class CertificatesController extends Controller
     /**
      * Updates an existing Certificates model.
      * If update is successful, the browser will be redirected to the 'view' page.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionUpdate($id)
@@ -149,17 +173,10 @@ class CertificatesController extends Controller
             if ($model->load(Yii::$app->request->post())) {
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
                 $model->nominal = $model['oldAttributes']['nominal'];
-                if ($model->canChangeGroup) {
-                    if ($model->canUseGroup($model->possible_cert_group)) {
-                        $model->setNominals();
-                    } else {
-                        Yii::$app->session->setFlash('danger', 'Невозможно установить данную группу, достигнут лимит');
-                    }
-                }
-
-                $model->save();
+                ($model->canChangeGroup && $model->canUseGroup() && $model->setNominals() && $model->save()
+                    && (Yii::$app->session->setFlash('success', 'Изменена группа и пересчитаны номиналы') || true))
+                || Yii::$app->session->setFlash('danger', 'Невозможно установить данную группу, достигнут лимит');
             }
-
             if ($user->load(Yii::$app->request->post())) {
                 $password = null;
                 if ($user->newlogin == 1 || $user->newpass == 1) {
@@ -273,6 +290,7 @@ class CertificatesController extends Controller
         if ($eventMessage) {
             Yii::$app->session->setFlash('error', $eventMessage);
         }
+
         return $this->render('nominal', [
             'model' => $model,
         ]);
@@ -291,7 +309,9 @@ class CertificatesController extends Controller
     /**
      * Deletes an existing Certificates model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionDelete($id)
@@ -348,7 +368,6 @@ class CertificatesController extends Controller
 
         return $this->redirect(['/personal/payer-certificates']);
     }
-
 
     public function actionImport()
     {
@@ -415,22 +434,6 @@ class CertificatesController extends Controller
             $model->save();
 
             print_r($model->getErrors());
-        }
-    }
-
-    /**
-     * Finds the Certificates model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Certificates the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Certificates::findOne($id)) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
 }
