@@ -64,7 +64,6 @@ class CertificatesController extends Controller
         /** @var $payer Payers */
         $payer = Yii::$app->user->identity->payer;
         $region = Yii::$app->operator->identity->region;
-
         if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {
             $user->username = $region . $payer->code . $user->username;
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -118,7 +117,7 @@ class CertificatesController extends Controller
             }
         }
         $user->username = mb_substr($user->username, mb_strlen($region) + mb_strlen($payer->code));
-        $user->password = '';
+        $user->password ='';
 
         return $this->render('create', [
             'model' => $model,
@@ -152,17 +151,10 @@ class CertificatesController extends Controller
             if ($model->load(Yii::$app->request->post())) {
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
                 $model->nominal = $model['oldAttributes']['nominal'];
-                if ($model->canChangeGroup) {
-                    if ($model->canUseGroup($model->possible_cert_group)) {
-                        $model->setNominals();
-                    } else {
-                        Yii::$app->session->setFlash('danger', 'Невозможно установить данную группу, достигнут лимит');
-                    }
-                }
-
-                $model->save();
+                ($model->canChangeGroup && $model->canUseGroup() && $model->setNominals() && $model->save()
+                    && (Yii::$app->session->setFlash('success', 'Изменена группа и пересчитаны номиналы')) || true)
+                || Yii::$app->session->setFlash('danger', 'Невозможно установить данную группу, достигнут лимит');
             }
-
             if ($user->load(Yii::$app->request->post())) {
                 $password = null;
                 if ($user->newlogin == 1 || $user->newpass == 1) {
