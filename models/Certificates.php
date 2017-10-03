@@ -46,6 +46,8 @@ use yii\db\Exception;
  */
 class Certificates extends \yii\db\ActiveRecord
 {
+    const SCENARIO_CREATE_EDIT = 'sceanario_create_edit';
+
     const FLAG_GROUP_HAS_NOT_BEEN_CHANGED = 10;
 
     const FLAG_GROUP_HAS_BEEN_CHANGED = 20;
@@ -141,7 +143,8 @@ class Certificates extends \yii\db\ActiveRecord
             [['payer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payers::className(), 'targetAttribute' => ['payer_id' => 'id']],
             [['contractCount'], 'safe'],
             [['selectCertGroup', 'possible_cert_group'], 'required', 'on' => self::SCENARIO_DEFAULT],
-            [['selectCertGroup', 'possible_cert_group'], 'validatePossibleCertGroup'],
+            [['selectCertGroup'], 'validatePossibleCertGroup', 'on' => self::SCENARIO_CREATE_EDIT, 'message' => 'Невозможно установить данный тип, достигнут лимит'],
+            [['possible_cert_group'], 'validatePossibleCertGroup', 'on' => self::SCENARIO_CREATE_EDIT],
             ['selectCertGroup', 'in', 'range' => [self::TYPE_PF, self::TYPE_ACCOUNTING]],
         ];
     }
@@ -194,11 +197,9 @@ class Certificates extends \yii\db\ActiveRecord
     }
 
     public function validatePossibleCertGroup($attribute, $param, $validator){
-
         if(!$this->canUseGroup()){
-            $this->addError($attribute,'Невозможно установить данную группу, достигнут лимит');
-        }else{
-            $this->clearErrors();
+            $msg = $validator->message ?? 'Невозможно установить данную группу, достигнут лимит';
+            $this->addError($attribute, $msg);
         }
     }
 
@@ -242,7 +243,10 @@ class Certificates extends \yii\db\ActiveRecord
 
             return true;
         }
+        if (!$this->isNewRecord && (int)$this->oldAttributes['possible_cert_group'] === (int)$this->possible_cert_group) {
 
+            return true;
+        }
         $groupId = $this->possible_cert_group;
         $group = CertGroup::findOne(['id' => $groupId]);
         if (!$group) {
@@ -264,8 +268,11 @@ class Certificates extends \yii\db\ActiveRecord
             $this->balance_p += $contract->rezerv;
             $this->rezerv_p -= $contract->rezerv;
         }
-
-        return $this->save();
+        $result = $this->save();
+        if(!$result){
+            Yii::trace($this->getErrors());
+        }
+        return $result;
     }
 
     public function getCertGroupTypes()
@@ -369,7 +376,8 @@ class Certificates extends \yii\db\ActiveRecord
      */
     public function getCertGroupsQueue()
     {
-        return $this->hasMany(CertGroup::className(), ['id' => 'cert_group_id'])->viaTable('certificate_group_queue', ['certificate_id' => 'id']);
+        return $this->hasMany(CertGroup::className(), ['id' => 'cert_group_id'])
+            ->viaTable('certificate_group_queue', ['certificate_id' => 'id']);
     }
 
     public function getCanChangeGroup()
