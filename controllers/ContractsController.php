@@ -18,7 +18,6 @@ use app\models\Groups;
 use app\models\GroupsSearch;
 use app\models\Informs;
 use app\models\Organization;
-use app\models\Payers;
 use app\models\ProgrammeModule;
 use app\models\Programs;
 use app\models\User;
@@ -166,7 +165,7 @@ class ContractsController extends Controller
             throw new \DomainException('Контракт уже заключён!');
         }
         $group = Groups::findOne(['id' => $groupId]);
-        if ($group && !$group->program->existsFreePlace()) {
+        if ($group && !$group->freePlaces) {
             Yii::$app->session->setFlash('modal-danger', 'К сожалению заявка на обучение по программе не будет отправлена, пока Вы ее составляли кто-то опередил Вас и подал заявку раньше, тем самым заняв последнее место в группе. Пожалуйста, посмотрите еще варианты зачисления на обучение (например, места могут оказаться в других группах)');
 
             return $this->redirect('/personal/certificate-programs');

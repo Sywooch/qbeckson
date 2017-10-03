@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "5e1524a1c35a216926a5237f994d337f",
+    "content-hash": "78ad4a1b56c56c1c1a4a16ee6e040130",
     "packages": [
         {
             "name": "2amigos/yii2-ckeditor-widget",
@@ -3083,7 +3083,7 @@
                 "yii",
                 "yii2"
             ],
-            "time": "2016-09-02 08:13:46"
+            "time": "2016-09-02T08:13:46+00:00"
         },
         {
             "name": "moonlandsoft/yii2-phpexcel",
@@ -3333,7 +3333,7 @@
                 "xls",
                 "xlsx"
             ],
-            "time": "2017-03-02 00:38:00"
+            "time": "2017-03-02T00:38:00+00:00"
         },
         {
             "name": "phpoffice/phpword",
@@ -3432,7 +3432,7 @@
                 "word",
                 "writer"
             ],
-            "time": "2017-08-13 20:10:15"
+            "time": "2017-08-13T20:10:15+00:00"
         },
         {
             "name": "psr/http-message",

@@ -12,7 +12,6 @@ use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
-use yii\web\Response;
 use yii\widgets\ActiveForm;
 
 /**
@@ -88,9 +87,7 @@ class CertificatesController extends Controller
             $user->load(Yii::$app->request->post());
             $user->username = $region . $payer->code . $user->username;
             $model->load(Yii::$app->request->post());
-            $modelResult = ['possible_cert_group' => '', 'selectCertGroup' => ''];
-            Yii::trace(ActiveForm::validate($model));
-            $result = $this->asJson(array_merge(ActiveForm::validate($user), array_merge($modelResult ,ActiveForm::validate($model))));
+            $result = $this->asJson(array_merge(ActiveForm::validate($user), ActiveForm::validate($model)));
 
             return $result;
         }
@@ -163,13 +160,17 @@ class CertificatesController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $model->setScenario($model::SCENARIO_CREATE_EDIT);
 
         $user = User::findOne($model->user_id);
 
-        if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
 
-            return ActiveForm::validate($user);
+        if (Yii::$app->request->isAjax) {
+            $user->load(Yii::$app->request->post());
+            $model->load(Yii::$app->request->post());
+            $result = $this->asJson(array_merge(ActiveForm::validate($user), ActiveForm::validate($model)));
+
+            return $result;
         }
 
         if (Yii::$app->request->isPost) {
