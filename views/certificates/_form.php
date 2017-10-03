@@ -114,9 +114,33 @@ $js = <<<JS
 $("#possible-cert-group").on('change',function(){
    $('#$formId').yiiActiveForm('validate');
 });
-$("#select-cert-group").on('change',function(){
-   $('#$formId').yiiActiveForm('validate');
-});
+var form = $('#$formId');
+var validationHandler = function () {
+     
+     var data = form.data('yiiActiveForm');
+     data.submitting = true;
+     data.shouldSubmit = false;
+     form.off('afterValidate', validationHandler);
+     form.on('beforeSubmit', function () {
+               //var data = $('#criar-tarefa-form').data('yiiActiveForm');
+               if (!data.shouldSubmit) {
+                     data.shouldSubmit = true;
+                     return false;
+               }
+     });
+     form.yiiActiveForm('validate', false);
+};
+
+const t = function() {
+  setTimeout(function() {
+      //console.log(form.yiiActiveForm('find', 'certificates-possible_cert_group'));
+      //form.yiiActiveForm('find', 'certificates-possible_cert_group').validate(true);
+     validationHandler();
+      $("#select-cert-group").on('click', t);
+    }, 0);
+  $("#select-cert-group").off('click', t);
+};
+$("#select-cert-group").on('click', t);
 JS;
 $this->registerJs($js);
 ?>

@@ -79,6 +79,7 @@ class CertificatesController extends Controller
         $model = new Certificates();
         $user = new User();
 
+        $model->setScenario($model::SCENARIO_CREATE_EDIT);
         /** @var $payer Payers */
         $payer = Yii::$app->user->identity->payer;
         $region = Yii::$app->operator->identity->region;
@@ -87,7 +88,9 @@ class CertificatesController extends Controller
             $user->load(Yii::$app->request->post());
             $user->username = $region . $payer->code . $user->username;
             $model->load(Yii::$app->request->post());
-            $result = $this->asJson(array_merge(ActiveForm::validate($user), ActiveForm::validate($model)));
+            $modelResult = ['possible_cert_group' => '', 'selectCertGroup' => ''];
+            Yii::trace(ActiveForm::validate($model));
+            $result = $this->asJson(array_merge(ActiveForm::validate($user), array_merge($modelResult ,ActiveForm::validate($model))));
 
             return $result;
         }

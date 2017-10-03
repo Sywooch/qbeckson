@@ -46,6 +46,8 @@ use yii\db\Exception;
  */
 class Certificates extends \yii\db\ActiveRecord
 {
+    const SCENARIO_CREATE_EDIT = 'sceanario_create_edit';
+
     const FLAG_GROUP_HAS_NOT_BEEN_CHANGED = 10;
 
     const FLAG_GROUP_HAS_BEEN_CHANGED = 20;
@@ -141,7 +143,7 @@ class Certificates extends \yii\db\ActiveRecord
             [['payer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payers::className(), 'targetAttribute' => ['payer_id' => 'id']],
             [['contractCount'], 'safe'],
             [['selectCertGroup', 'possible_cert_group'], 'required', 'on' => self::SCENARIO_DEFAULT],
-            [['selectCertGroup', 'possible_cert_group'], 'validatePossibleCertGroup'],
+            [['selectCertGroup', 'possible_cert_group'], 'validatePossibleCertGroup', 'on'=>self::SCENARIO_CREATE_EDIT],
             ['selectCertGroup', 'in', 'range' => [self::TYPE_PF, self::TYPE_ACCOUNTING]],
         ];
     }
@@ -264,8 +266,11 @@ class Certificates extends \yii\db\ActiveRecord
             $this->balance_p += $contract->rezerv;
             $this->rezerv_p -= $contract->rezerv;
         }
-
-        return $this->save();
+        $result = $this->save();
+        if(!$result){
+            Yii::trace($this->getErrors());
+        }
+        return $result;
     }
 
     public function getCertGroupTypes()
