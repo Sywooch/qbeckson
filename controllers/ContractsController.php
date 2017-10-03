@@ -165,7 +165,7 @@ class ContractsController extends Controller
 
         $contract = Contracts::findOne(['group_id' => $groupId, 'certificate_id' => $certificateId]);
 
-        if (null !== $contract && null !== $contract->status && $contract->status !== Contracts::STATUS_REFUSED) {
+        if (null !== $contract && null !== $contract->status && !in_array($contract->status, [Contracts::STATUS_REFUSED, Contracts::STATUS_CLOSED])) {
             throw new \DomainException('Контракт уже заключён!');
         }
 
@@ -345,13 +345,17 @@ class ContractsController extends Controller
                 ]);
             }
 
-            $model->paid = $model->payer_first_month_payment;
-            $model->rezerv = $model->rezerv - ($model->payer_first_month_payment);
-            $model->status = 1;
-
             $previousMonth = strtotime('first day of previous month');
             $currentMonth = strtotime('first day of this month');
             $nextMonth = strtotime('first day of next month');
+            $lastDayOfMonth = strtotime('last day of this month');
+
+            $model->paid = $model->payer_first_month_payment;
+            $model->rezerv = $model->rezerv - ($model->payer_first_month_payment);
+            $model->status = 1;
+            if ($model->stop_edu_contract <= date('Y-m-d', $lastDayOfMonth)) {
+                $model->wait_termnate = 1;
+            }
 
             if ($model->save()) {
                 $completeness = new Completeness();

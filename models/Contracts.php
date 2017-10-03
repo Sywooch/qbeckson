@@ -621,10 +621,10 @@ class Contracts extends ActiveRecord
      */
     public function getMonthlyPrice($date)
     {
-        $monthlyPrice = $this->other_m_price;
+        $monthlyPrice = $this->payer_other_month_payment;
         $contractStartDate = strtotime($this->start_edu_contract);
         if (date('Y-m', $contractStartDate) == date('Y-m', $date)) {
-            $monthlyPrice = $this->first_m_price;
+            $monthlyPrice = $this->payer_first_month_payment;
         }
 
         return $monthlyPrice;

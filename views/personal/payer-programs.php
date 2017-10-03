@@ -21,22 +21,10 @@ $zab = [
     'type' => SearchFilter::TYPE_SELECT2,
     'data' => $searchPrograms::illnesses(),
     'attribute' => 'zab',
-    'label' => 'Категория детей',
-    'value' => function ($model) {
-        /** @var \app\models\Programs $model */
-        $zab = explode(',', $model->zab);
-        $display = '';
-        if (is_array($zab)) {
-            foreach ($zab as $value) {
-                $display .= ', ' . $model::illnesses()[$value];
-            }
-            $display = mb_substr($display, 2);
-        }
-        if ($display === '') {
-            return 'без ОВЗ';
-        }
-
-        return $display;
+    'label'     => 'Категория детей',
+    'value'     => function ($model)
+    {
+        return $model->illnessesList;
     }
 ];
 $year = [
