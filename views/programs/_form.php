@@ -144,7 +144,7 @@ $this->registerJs($js);
     <?= $form->field($model, 'ovz')->dropDownList([1 => 'Без ОВЗ', 2 => 'С ОВЗ'], ['onChange' => 'selectOvz(this.value);']) ?>
 
     <div id="zab" style="display: <?= $model->ovz == 2 ? 'block' : 'none' ?>">
-        <?= $form->field($model, 'zab')->checkboxList(\Yii::$app->params['sick']) ?>
+        <?= $form->field($model, 'zab')->checkboxList(\app\models\Programs::illnesses()) ?>
     </div>
 
     <div class="panel panel-default">

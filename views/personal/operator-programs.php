@@ -35,20 +35,7 @@ $zab = [
     'label'     => 'Категория детей',
     'value'     => function ($model)
     {
-        /** @var \app\models\Programs $model */
-        $zab = explode(',', $model->zab);
-        $display = '';
-        if (is_array($zab)) {
-            foreach ($zab as $value) {
-                $display .= ', ' . $model::illnesses()[$value];
-            }
-            $display = mb_substr($display, 2);
-        }
-        if ($display === '') {
-            return 'без ОВЗ';
-        }
-
-        return $display;
+        return $model->illnessesList;
     }
 ];
 $year = [

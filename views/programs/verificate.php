@@ -61,10 +61,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'age_group_min',
             'age_group_max',
-            [
-                'label' => 'Категория детей',
-                'value' => $model->zabName($model->zab, $model->ovz),
-            ],
+            'illnessesList',
             'norm_providing',
         ],
     ]) ?>
