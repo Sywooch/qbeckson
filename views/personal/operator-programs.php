@@ -152,6 +152,8 @@ $count = [
         return count($model->currentActiveContracts);
     },
     'searchFilter' => false,
+    // TODO: Временно убрал из экспорта, надо вернуть (расширение картика не обрабатывает value как closure, похоже)
+    'export' => false,
 ];
 
 $openColumns = [
