@@ -25,7 +25,7 @@ class GridviewHelper
         array $columns,
         $type = null,
         $excludeType = 'gridView',
-        $excludeAttributes = ['type', 'data', 'searchFilter', 'gridView', 'pluginOptions'],
+        $excludeAttributes = ['type', 'data', 'searchFilter', 'gridView', 'pluginOptions', 'export'],
         $customizable = true
     ) {
         /** @var UserIdentity $user */
