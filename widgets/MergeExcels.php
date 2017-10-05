@@ -43,7 +43,7 @@ class MergeExcels extends Widget
         $writer = \PHPExcel_IOFactory::createWriter($bigExcel, 'Excel5');
         $writer->save(Yii::getAlias('@pfdoroot/uploads/contracts/') . $this->fileName . '.xls');
         foreach ($filenames as $filename => $title) {
-            //unlink($filename);
+            unlink($filename);
         }
 
         \app\models\ContractDocument::createInstance($this->fileName . '.xls', $this->provider->models);
