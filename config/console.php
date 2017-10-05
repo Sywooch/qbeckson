@@ -44,6 +44,9 @@ $config = [
         'db' => $db,
     ],
     'modules' => [
+        'gridview'    => [
+            'class' => '\kartik\grid\Module'
+        ],
         'permit' => [
             'class' => 'developeruz\db_rbac\Yii2DbRbac',
             'params' => [
@@ -51,6 +54,7 @@ $config = [
             ]
         ],
     ],
+    'aliases' => require(__DIR__ . '/aliases.php'),
     'params' => $params,
     /*
     'controllerMap' => [
