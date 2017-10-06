@@ -548,9 +548,9 @@ class Certificates extends \yii\db\ActiveRecord
         }
     }
 
-    public function freez()
+    public function canFreez()
     {
-        /*запретить заморозку если есть договора статус 3, или договора статус 1 не ожидающие расторжения  */
+        /*запретить заморозку если есть договора статус 3, или договора статус 1 не ожидающие расторжения при */
         $denyCondition = [
             'OR',
             [Contracts::tableName() . '.status' =>
@@ -563,10 +563,17 @@ class Certificates extends \yii\db\ActiveRecord
             ]
         ];
 
+        return !$this->getCurrentActiveContracts()->andWhere($denyCondition)->exists();
+    }
+
+    public function freez()
+    {
+
+
         /* отменить созданные заявки */
         $refuseCondition = [Contracts::tableName() . '.status' => [Contracts::STATUS_CREATED]];
 
-        if ($this->getCurrentActiveContracts()->andWhere($denyCondition)->exists()) {
+        if (!$this->canFreez()) {
 
             return 'Невозможно заморозить, есть активные контракты';
         }

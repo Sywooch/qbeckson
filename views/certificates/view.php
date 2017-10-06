@@ -75,7 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         if (Yii::$app->user->can('payer')) {
             echo '<div class="pull-right">';
-            if (PermissionHelper::checkMonitorUrl('/certificates/actual')) {
+            if (PermissionHelper::checkMonitorUrl('/certificates/actual') && $model->canFreez()) {
                 if ($model->actual == 0) {
                     echo Html::a('Активировать', Url::to(['/certificates/actual', 'id' => $model->id]), ['class' => 'btn btn-success']);
                 } else {
