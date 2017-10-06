@@ -40,11 +40,7 @@ $programAttributes = [
         'label' => 'Возраст детей',
         'value' => 'с ' . $model->age_group_min . ' лет до ' . $model->age_group_max . ' лет',
     ],
-    [
-        'attribute' => 'zab',
-        'label' => 'Категория детей',
-        'value' => $model->zabName($model->zab, $model->ovz),
-    ],
+    'illnessesList',
     'task:ntext',
     'annotation:ntext',
     [

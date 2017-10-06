@@ -17,7 +17,7 @@ $fStrings['ageGroupFull'] = Yii::t('app', 'Рекомендуемый возра
     ['min' => $model->age_group_min, 'max' => $model->age_group_max]);
 if ($model->zab && mb_strlen($model->zab) > 0) {
     $fStrings['zabShort'] = 'С' . PHP_EOL . 'ОВЗ';
-    $fStrings['zabFull'] = $model->zabAsString;
+    $fStrings['zabFull'] = $model->illnessesList;
 } else {
     $fStrings['zabShort'] = 'Без' . PHP_EOL . 'ОВЗ';
     $fStrings['zabFull'] = 'Не предусмотрено обучение учащихся с ОВЗ';
