@@ -435,6 +435,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'title'     => 'Статус счета изменится на "Не просмотрен"',
                     ]
                 ]);
+                echo '&nbsp;';
                 echo Html::a('Оплачено', ['complete', 'id' => $model->id], ['class' => 'btn btn-success']);
             }
         }
