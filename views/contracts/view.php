@@ -444,7 +444,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'label' => 'Да, я уверен, что хочу расторгнуть договор.',
         ]);
         echo '</div>';
-    } elseif (!$model->canBeTerminated && $model->status === Contracts::STATUS_ACTIVE && $model->wait_termnate < 1) {
+    } elseif ((!$model->canBeTerminated && $model->status === Contracts::STATUS_ACTIVE && $model->wait_termnate < 1)
+        && (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION))) {
         echo '<div class="pull-right text-warning">Договор не может быть расторгнут до начала действия</div>';
     }
 

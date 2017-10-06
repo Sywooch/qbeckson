@@ -119,15 +119,21 @@ if ($model->status === \app\models\Contracts::STATUS_REFUSED) {
     }
     ?>
     <div class="pull-right">
-        <?= $model->status !== \app\models\Contracts::STATUS_REFUSED ? ModalCheckLink::widget([
-            'link'          => Html::a('Отказать', Url::to(['/contracts/no', 'id' => $model->id]), ['class' => 'btn btn-danger']),
-            'buttonOptions' => ['label' => 'Отказать', 'class' => 'btn btn-danger'],
-            'content'       => 'Отклоняя заявку Вы отказываетесь от заключения договора на обучение по выбранной программе. Деньги, зарезервированные на оплату договора вернутся на сертификат в полном объеме, но передумывать отклонять заявку будет уже поздно. Вы уверены, что хотите отклонить заявку?',
-            'label'         => 'Да, я уверен, что хочу отклонить заявку',
-            'title'         => 'Отклонить заявку на обучение?'
-        ]) : \yii\bootstrap\Button::widget(['label'   => 'Уже отказано',
-                                            'options' => ['class'    => 'btn btn-danger',
-                                                          'disabled' => 'disabled'],]) ?>
+        <?php if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_CERTIFICATE)
+            || Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)
+            || Yii::$app->user->can(\app\models\UserIdentity::ROLE_MONITOR)
+            || Yii::$app->user->can(\app\models\UserIdentity::ROLE_ADMINISTRATOR)): ?>
+
+            <?= $model->status !== \app\models\Contracts::STATUS_REFUSED ? ModalCheckLink::widget([
+                'link'          => Html::a('Отказать', Url::to(['/contracts/no', 'id' => $model->id]), ['class' => 'btn btn-danger']),
+                'buttonOptions' => ['label' => 'Отказать', 'class' => 'btn btn-danger'],
+                'content'       => 'Отклоняя заявку Вы отказываетесь от заключения договора на обучение по выбранной программе. Деньги, зарезервированные на оплату договора вернутся на сертификат в полном объеме, но передумывать отклонять заявку будет уже поздно. Вы уверены, что хотите отклонить заявку?',
+                'label'         => 'Да, я уверен, что хочу отклонить заявку',
+                'title'         => 'Отклонить заявку на обучение?'
+            ]) : \yii\bootstrap\Button::widget(['label'   => 'Уже отказано',
+                'options' => ['class'    => 'btn btn-danger',
+                    'disabled' => 'disabled'],]) ?>
+        <?php endif; ?>
 
     </div>
     <?php ActiveForm::end(); ?>

@@ -1,7 +1,9 @@
 <?php
+
 use app\helpers\GridviewHelper;
 use kartik\export\ExportMenu;
 use yii\helpers\Html;
+
 ?>
 
 <p class="lead">Экспорт данных:</p>
