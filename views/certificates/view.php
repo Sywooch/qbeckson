@@ -8,6 +8,7 @@ use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Certificates */
+/* @var $freezer \app\models\certificates\FreezeUnFreezeCertificate */
 
 $this->title = $model->number;
 
@@ -75,11 +76,28 @@ $this->params['breadcrumbs'][] = $this->title;
 
         if (Yii::$app->user->can('payer')) {
             echo '<div class="pull-right">';
-            if (PermissionHelper::checkMonitorUrl('/certificates/actual') && $model->canFreez()) {
-                if ($model->actual == 0) {
-                    echo Html::a('Активировать', Url::to(['/certificates/actual', 'id' => $model->id]), ['class' => 'btn btn-success']);
-                } else {
+            if (PermissionHelper::checkMonitorUrl('/certificates/actual') /*&& $model->canFreez()*/) {
+                if ($model->actual) {
                     echo Html::a('Заморозить', Url::to(['/certificates/noactual', 'id' => $model->id]), ['class' => 'btn btn-danger']);
+                } else {
+                    if ($freezer->canUnFreeze) {
+                        echo Html::a('Активировать', Url::to(['/certificates/actual', 'id' => $model->id]), ['class' => 'btn btn-success']);
+                    } else {
+                        echo Html::tag('span',
+                            \yii\bootstrap\Button::widget(['label' => 'Активировать',
+                                'options' => [
+                                    'class' => 'btn btn-theme',
+                                    'disabled' => 'disabled'
+                                ],
+                            ]), [
+                                'data' => [
+                                    'toggle' => 'tooltip',
+                                    'placement' => 'top',
+
+                                ],
+                                'title' => $freezer->firstErrorAsString
+                            ]);
+                    }
                 }
                 echo '&nbsp;';
             }

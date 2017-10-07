@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Certificates;
+use app\models\certificates\FreezeUnFreezeCertificate;
 use app\models\Payers;
 use app\models\User;
 use app\traits\AjaxValidationTrait;
@@ -45,8 +46,10 @@ class CertificatesController extends Controller
      */
     public function actionView($id)
     {
+        $freezer = new FreezeUnFreezeCertificate($id);
         return $this->render('view', [
             'model' => $this->findModel($id),
+            'freezer' => $freezer
         ]);
     }
 
@@ -91,7 +94,6 @@ class CertificatesController extends Controller
 
             return $result;
         }
-
 
         if ($user->load(Yii::$app->request->post()) && $model->load(Yii::$app->request->post()) && $model->validate()) {
 
@@ -174,6 +176,11 @@ class CertificatesController extends Controller
         }
 
         if (Yii::$app->request->isPost) {
+            if (!$model->actual) {
+                Yii::$app->session->setFlash('danger', 'Сертификат заморожен, невозможно сохранить!!! Надо сначала активировать.');
+
+                return $this->redirect(['/certificates/view', 'id' => $model->id]);
+            }
             if ($model->load(Yii::$app->request->post())) {
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
                 $model->nominal = $model['oldAttributes']['nominal'];
@@ -208,6 +215,10 @@ class CertificatesController extends Controller
             return $this->redirect(['/certificates/view', 'id' => $model->id]);
         }
 
+        if (!$model->actual) {
+            Yii::$app->session->setFlash('danger', 'Сертификат заморожен');
+        }
+
         return $this->render('update', [
             'model' => $model,
             'user' => $user,
@@ -216,6 +227,7 @@ class CertificatesController extends Controller
 
     public function actionEdit()
     {
+        /** @var $model Certificates */
         $model = Yii::$app->user->identity->certificate;
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
@@ -254,9 +266,8 @@ class CertificatesController extends Controller
 
     public function actionPassword()
     {
-        $certificate = Yii::$app->user->identity->certificate;
-
-        $user = User::findOne($certificate['user_id']);
+        /** @var $user User */
+        $user = $certificate = Yii::$app->user->identity->certificate->user;
 
         if ($user->load(Yii::$app->request->post()) && $user->validate()) {
             if (Yii::$app->getSecurity()->validatePassword($user->oldpassword, $user->password)) {
@@ -287,12 +298,23 @@ class CertificatesController extends Controller
     public function actionActual($id)
     {
         $model = $this->findModel($id);
-        $eventMessage = null;
-        if ($model->load(Yii::$app->request->post()) && $model->validate() && is_null($eventMessage = $model->unFreez())) {
+        $freezer = FreezeUnFreezeCertificate::getUnFreezer($model);
+
+        if (!$freezer->getCanUnFreeze(true)) {
+            Yii::$app->session->setFlash('error', $freezer->firstErrorAsString);
+
             return $this->redirect(['/certificates/view', 'id' => $id]);
         }
-        if ($eventMessage) {
-            Yii::$app->session->setFlash('error', $eventMessage);
+        if ($model->load(Yii::$app->request->post())
+            && $model->validate()
+            && $freezer->save()) { /*не явно сохраняет модель*/
+            return $this->redirect(['/certificates/view', 'id' => $id]);
+        }
+        if ($model->hasErrors()) {
+            Yii::$app->session->setFlash('error', array_shift($model->getFirstErrors()));
+        }
+        if ($freezer->hasErrors()) {
+            Yii::$app->session->setFlash('error', $freezer->firstErrorAsString);
         }
 
         return $this->render('nominal', [
@@ -302,9 +324,15 @@ class CertificatesController extends Controller
 
     public function actionNoactual($id)
     {
-        $model = $this->findModel($id);
-        if ($eventMessage = $model->freez()) {
-            Yii::$app->session->setFlash('error', $eventMessage);
+        $freezer = FreezeUnFreezeCertificate::getFreezer($id);
+        if (!$freezer->getCanFreeze(true)) {
+            Yii::$app->session->setFlash('error', $freezer->firstErrorAsString);
+
+            return $this->redirect(['/certificates/view', 'id' => $id]);
+        }
+
+        if (!$freezer->save()) {
+            Yii::$app->session->setFlash('error', $freezer->firstErrorAsString);
         }
 
         return $this->redirect(['/certificates/view', 'id' => $id]);
@@ -341,6 +369,7 @@ class CertificatesController extends Controller
 
         return $this->render('/user/delete', [
             'user' => $user,
+            'title' => null,
         ]);
     }
 
