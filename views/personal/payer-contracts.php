@@ -506,7 +506,7 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
                                 $start_edu_contract = explode("-", $model->start_edu_contract);
                                 $month = $start_edu_contract[1];
 
-                                if ($month == date('m')) {
+                                if ($month == date('m', strtotime('first day of previous month'))) {
                                     $price = $model->payer_first_month_payment;
                                 } else {
                                     $price = $model->payer_other_month_payment;
