@@ -299,7 +299,14 @@ $config = [
                     'actions' => ['group-pdf', 'password'],
                     'allow'   => true,
                     'roles'   => ['certificate'],
+
+
                 ],
+                [
+                    'actions' => ['nerf-nominal'],
+                    'allow' => true,
+                    'roles' => ['payer'],
+                ]
             ],
             'site/save-filter'                  => [
                 [
