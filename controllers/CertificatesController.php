@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Certificates;
+use app\models\certificates\CertificateNerfNominal;
 use app\models\certificates\FreezeUnFreezeCertificate;
 use app\models\Payers;
 use app\models\User;
@@ -46,10 +47,12 @@ class CertificatesController extends Controller
      */
     public function actionView($id)
     {
+        $nerfer = new CertificateNerfNominal($id);
         $freezer = new FreezeUnFreezeCertificate($id);
         return $this->render('view', [
             'model' => $this->findModel($id),
-            'freezer' => $freezer
+            'freezer' => $freezer,
+            'nerfer' => $nerfer,
         ]);
     }
 
@@ -319,6 +322,29 @@ class CertificatesController extends Controller
 
         return $this->render('nominal', [
             'model' => $model,
+        ]);
+    }
+
+    public function actionNerfNominal($id)
+    {
+        $nerfer = new CertificateNerfNominal($id);
+        if (is_null($nerfer->certificate)) {
+            throw new NotFoundHttpException();
+        }
+
+        if ($nerfer->load(Yii::$app->request->post())
+            && $nerfer->save()) {
+            return $this->redirect(['/certificates/view', 'id' => $id]);
+        }
+        if ($nerfer->certificate->hasErrors()) {
+            Yii::$app->session->setFlash('error', array_shift($nerfer->certificate->getFirstErrors()));
+        }
+        if ($nerfer->hasErrors('certificate')) {
+            Yii::$app->session->setFlash('error', $nerfer->getFirstError('certificate'));
+        }
+
+        return $this->render('nerf_nominal', [
+            'nerfer' => $nerfer,
         ]);
     }
 

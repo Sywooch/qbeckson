@@ -9,6 +9,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\Certificates */
 /* @var $freezer \app\models\certificates\FreezeUnFreezeCertificate */
+/* @var $nerfer \app\models\certificates\CertificateNerfNominal */
 
 $this->title = $model->number;
 
@@ -79,7 +80,11 @@ $this->params['breadcrumbs'][] = $this->title;
             if (PermissionHelper::checkMonitorUrl('/certificates/actual') /*&& $model->canFreez()*/) {
                 if ($model->actual) {
                     if ($freezer->canFreeze) {
-                        echo Html::a('Заморозить', Url::to(['/certificates/noactual', 'id' => $model->id]), ['class' => 'btn btn-danger']);
+                        echo Html::a('Заморозить', Url::to(['/certificates/noactual', 'id' => $model->id]),
+                            ['class' => 'btn btn-danger',
+                                'data' => [
+                                    'confirm' => 'Уверены, что хотите заморозить сертификат?',
+                                ]]);
                     } else {
                         echo \app\components\widgets\ButtonWithInfo::widget([
                             'label' => 'Заморозить',
@@ -88,6 +93,20 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'class' => 'btn btn-theme',]
                         ]);
                     }
+                    echo '&nbsp;';
+                    if ($nerfer->canNerf) {
+
+                        echo Html::a('Уменьшить номинал', Url::to(['/certificates/nerf-nominal', 'id' => $model->id]), ['class' => 'btn btn-primary']);
+                    } else {
+                        echo \app\components\widgets\ButtonWithInfo::widget([
+                            'label' => 'Уменьшить номинал',
+                            'message' => $nerfer->firstErrorAsString,
+                            'options' => ['disabled' => 'disabled',
+                                'class' => 'btn btn-primary',]
+                        ]);
+                    }
+
+
 
                 } else {
                     if ($freezer->canUnFreeze) {
@@ -97,7 +116,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'label' => 'Активировать',
                             'message' => $freezer->firstErrorAsString,
                             'options' => ['disabled' => 'disabled',
-                                'class' => 'btn btn-theme',]
+                                'class' => 'btn btn-primary',]
                         ]);
                     }
                 }

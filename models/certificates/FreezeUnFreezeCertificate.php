@@ -12,10 +12,8 @@ namespace app\models\certificates;
 use app\components\validators\RequiredXOR;
 use app\models\Certificates;
 use app\models\Contracts;
-use app\models\Model;
 use app\models\UserIdentity;
 use yii;
-use yii\base\InvalidParamException;
 
 /**
  * Class FreezeUnFreezeCertificate
@@ -23,10 +21,8 @@ use yii\base\InvalidParamException;
  *
  * @property bool $canFreeze
  * @property bool $canUnFreeze
- * @property string $firstErrorAsString
- * @property Certificates $certificate
  */
-class FreezeUnFreezeCertificate extends Model
+class FreezeUnFreezeCertificate extends CertificateActions
 {
     /**
      * @var bool
@@ -36,27 +32,6 @@ class FreezeUnFreezeCertificate extends Model
      * @var bool
      */
     public $unFreeze;
-
-    /**
-     * @var Certificates || null
-     */
-    private $_certificate;
-
-
-    /**
-     * FreezeUnFreezeCertificate constructor.
-     *
-     * @param array $config
-     */
-    public function __construct($config = [])
-    {
-        if (!is_array($config)) {
-            parent::__construct(['certificate' => $config]);
-
-            return;
-        }
-        parent::__construct($config);
-    }
 
     /**
      * @param $certificate Certificates || integer
@@ -89,13 +64,14 @@ class FreezeUnFreezeCertificate extends Model
      */
     public function rules()
     {
-        return [
-            [['certificate'], 'required'],
-            [['freeze', 'unFreeze'], 'boolean'],
-            [['unFreeze'], 'unFreezeValidator'],
-            [['freeze'], 'freezeValidator'],
-            [['freeze', 'unFreeze'], RequiredXOR::className(), 'requiredValue' => true, 'strict' => true],
-        ];
+        return yii\helpers\ArrayHelper::merge(parent::rules(),
+            [
+                [['freeze', 'unFreeze'], 'boolean'],
+                [['unFreeze'], 'unFreezeValidator'],
+                [['freeze'], 'freezeValidator'],
+                [['freeze', 'unFreeze'], RequiredXOR::className(), 'requiredValue' => true, 'strict' => true],
+            ]);
+
     }
 
     /**
@@ -179,54 +155,9 @@ class FreezeUnFreezeCertificate extends Model
         return true;
     }
 
-    /**
-     * @return Certificates|null
-     */
-    public function getCertificate()
+
+    public function saveActions(\Closure $rollback, bool $validate): bool
     {
-        return $this->_certificate;
-    }
-
-    /**
-     *
-     * @param Certificates||integer $certificate
-     *
-     * @throws InvalidParamException
-     *
-     */
-    public function setCertificate($certificate)
-    {
-        if ($certificate instanceof Certificates) {
-            $this->_certificate = $certificate;
-        } elseif (is_scalar($certificate)) {
-            $this->_certificate = Certificates::findOne(['id' => $certificate]);
-        } else {
-            throw new InvalidParamException('Параметр должен быть экземпляром ' .
-                Certificates::className() .
-                ' либо целым числом (идентификатором сертификата)');
-        }
-    }
-
-    /**
-     * @param bool $validate
-     *
-     * @return bool
-     * @throws yii\base\Exception
-     * @throws yii\db\Exception
-     */
-    public function save($validate = true)
-    {
-
-        if ($validate && !$this->validate()) {
-            return false;
-        }
-        $trans = Yii::$app->db->beginTransaction();
-        $rollback = function () use ($trans)
-        {
-            $trans->rollBack();
-
-            return false;
-        };
         if ($this->freeze) {
             if (!$this->setFreeze()) {
                 return $rollback();
@@ -240,14 +171,10 @@ class FreezeUnFreezeCertificate extends Model
 
             throw new yii\base\Exception('не выбрано действие freeze/unfreeze');
         }
-        if ($this->certificate->save($validate)) {
-            $trans->commit();
 
-            return true;
-        }
-
-        return $rollback();
+        return true;
     }
+
 
     private function setFreeze()
     {
@@ -289,14 +216,5 @@ class FreezeUnFreezeCertificate extends Model
         return true;
     }
 
-
-    public function getFirstErrorAsString()
-    {
-        if ($this->hasErrors()) {
-            return array_shift($this->getFirstErrors());
-        }
-
-        return null;
-    }
 
 }
