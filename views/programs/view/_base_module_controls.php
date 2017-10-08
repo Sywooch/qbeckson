@@ -75,17 +75,23 @@ use yii\helpers\Url;
         if ($active) {
             echo Html::a($message, $url, ['class' => 'btn ' . $classButton]);
         } else {
-            echo \yii\bootstrap\Button::widget(['label'   => $message,
-                                                'options' => ['class'    => 'btn btn-theme',
-                                                              'disabled' => 'disabled'],]);
+            echo \app\components\widgets\ButtonWithInfo::widget([
+                'label' => 'Зачисление',
+                'message' => $message,
+                'options' => ['disabled' => 'disabled',
+                    'class' => 'btn btn-theme',]
+            ]);
         }
 
         /** установка цены */
         if ($model->price) {
             if ($model->open && $model->price) {
-                echo \yii\bootstrap\Button::widget(['label'   => 'Нельзя изменить цену',
-                                                    'options' => ['class'    => 'btn btn-theme',
-                                                                  'disabled' => 'disabled'],]);
+                echo \app\components\widgets\ButtonWithInfo::widget([
+                    'label' => 'Изменить цену',
+                    'message' => 'Невозможно мзмнеть цену когда открыто зачисление',
+                    'options' => ['disabled' => 'disabled',
+                        'class' => 'btn btn-theme',]
+                ]);
             } else {
                 echo Html::a('Изменить цену', Url::to(['years/update', 'id' => $model->id]), ['class' => 'btn btn-theme']);
             }
@@ -121,16 +127,12 @@ use yii\helpers\Url;
 
     <?php } elseif (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)
         && $model->program->verification === \app\models\Programs::VERIFICATION_DENIED) {
-        echo \yii\bootstrap\Button::widget(['label'   => 'Недоступно по причине отказа',
-                                            'options' => ['class'    => 'btn btn-theme',
-                                                          'disabled' => 'disabled'],]);
+
+        echo \app\components\widgets\ButtonWithInfo::widget([
+            'label' => 'Действия',
+            'message' => 'Недоступно по причине отказа',
+            'options' => ['disabled' => 'disabled',
+                'class' => 'btn btn-theme',]
+        ]);
     } ?>
-    <?php /*
-<div class="btn-row">
-    <button class="btn btn-theme">Создать группу</button>
-    <button class="btn btn-theme">Записаться</button>
-    <button class="btn btn-theme">Установить цену</button>
-</div>
-*/
-    ?>
 </div>
