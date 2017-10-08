@@ -40,4 +40,13 @@ class Model extends \yii\base\Model
 
         return $models;
     }
+
+    public function getFirstErrorAsString()
+    {
+        if ($this->hasErrors()) {
+            return array_shift($this->getFirstErrors());
+        }
+
+        return null;
+    }
 }
