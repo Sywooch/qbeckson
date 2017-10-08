@@ -78,25 +78,27 @@ $this->params['breadcrumbs'][] = $this->title;
             echo '<div class="pull-right">';
             if (PermissionHelper::checkMonitorUrl('/certificates/actual') /*&& $model->canFreez()*/) {
                 if ($model->actual) {
-                    echo Html::a('Заморозить', Url::to(['/certificates/noactual', 'id' => $model->id]), ['class' => 'btn btn-danger']);
+                    if ($freezer->canFreeze) {
+                        echo Html::a('Заморозить', Url::to(['/certificates/noactual', 'id' => $model->id]), ['class' => 'btn btn-danger']);
+                    } else {
+                        echo \app\components\widgets\ButtonWithInfo::widget([
+                            'label' => 'Заморозить',
+                            'message' => $freezer->firstErrorAsString,
+                            'options' => ['disabled' => 'disabled',
+                                'class' => 'btn btn-theme',]
+                        ]);
+                    }
+
                 } else {
                     if ($freezer->canUnFreeze) {
                         echo Html::a('Активировать', Url::to(['/certificates/actual', 'id' => $model->id]), ['class' => 'btn btn-success']);
                     } else {
-                        echo Html::tag('span',
-                            \yii\bootstrap\Button::widget(['label' => 'Активировать',
-                                'options' => [
-                                    'class' => 'btn btn-theme',
-                                    'disabled' => 'disabled'
-                                ],
-                            ]), [
-                                'data' => [
-                                    'toggle' => 'tooltip',
-                                    'placement' => 'top',
-
-                                ],
-                                'title' => $freezer->firstErrorAsString
-                            ]);
+                        echo \app\components\widgets\ButtonWithInfo::widget([
+                            'label' => 'Активировать',
+                            'message' => $freezer->firstErrorAsString,
+                            'options' => ['disabled' => 'disabled',
+                                'class' => 'btn btn-theme',]
+                        ]);
                     }
                 }
                 echo '&nbsp;';
