@@ -67,5 +67,9 @@ class ExportController extends Controller
                 ],
             ],
         ]);
+
+        echo "done.";
+
+        return 0;
     }
 }

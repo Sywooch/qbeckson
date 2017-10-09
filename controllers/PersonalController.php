@@ -366,6 +366,8 @@ class PersonalController extends Controller
      */
     public function actionPayerStatistic()
     {
+        //exec("php " . Yii::getAlias('@app') . "\yii export/make 2>&1", $resultArray);
+
         return $this->render('payer-statistic', [
             'payer' => Yii::$app->user->identity->payer,
         ]);
