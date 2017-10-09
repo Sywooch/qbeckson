@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\behaviors\ArrayOrStringBehavior;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\BlameableBehavior;
@@ -17,11 +18,19 @@ use yii\helpers\ArrayHelper;
  * @property string $path
  * @property string $file
  * @property integer $created_at
+ * $property integer $status
+ * @property string $search_model
+ * @property string $columns
+ * @property string $group
+ * @property string $table
  *
  * @property User $user
  */
 class ExportFile extends \yii\db\ActiveRecord
 {
+    const STATUS_PROCESS = 0;
+    const STATUS_READY = 10;
+
     /**
      * @inheritdoc
      */
@@ -42,6 +51,11 @@ class ExportFile extends \yii\db\ActiveRecord
                 'createdByAttribute' => 'user_id',
                 'updatedByAttribute' => false,
             ],
+            'array2string' => [
+                'class' => ArrayOrStringBehavior::className(),
+                'attributes1' => ['search_model', 'columns'],
+                'attributes2' => ['search_model', 'columns'],
+            ],
         ];
     }
 
@@ -51,11 +65,11 @@ class ExportFile extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id'], 'integer'],
-            [['item_list'], 'string'],
+            [['user_id', 'status'], 'integer'],
+            [['item_list', 'group', 'table'], 'string'],
             [['path', 'file', 'export_type'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
-            [['created_at'], 'safe'],
+            [['created_at', 'search_model', 'columns'], 'safe'],
         ];
     }
 
@@ -82,7 +96,7 @@ class ExportFile extends \yii\db\ActiveRecord
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 
-    public static function findByUserId($userId, $type)
+    public static function findByUserId($userId, $type, $status = null)
     {
         $query = static::find()
             ->where([
@@ -90,19 +104,23 @@ class ExportFile extends \yii\db\ActiveRecord
                 'export_type' => $type,
             ]);
 
+        $query->andFilterWhere(['status' => $status]);
+
         return $query->one();
     }
 
-    public static function createInstance($file, $path)
+    public static function createInstance($file, $group, $table, $searchModel, $columns)
     {
-        $type = static::getExportTypeFromFile($file);
-        if ($doc = static::findByUserId(Yii::$app->user->id, $type)) {
+        if ($doc = static::findByUserId(Yii::$app->user->id, $group)) {
             $doc->created_at = time();
         } else {
             $doc = new static([
                 'file' => $file,
-                'path' => $path,
-                'export_type' => $type,
+                'export_type' => $group,
+                'group' => $group,
+                'columns' => $columns,
+                'search_model' => $searchModel,
+                'table' => $table,
             ]);
         }
 

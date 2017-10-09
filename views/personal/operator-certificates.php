@@ -121,8 +121,8 @@ $columns = [
     'columns' => $preparedColumns,
 ]); ?>
 <?php
-echo $this->render('/common/_export', [
-    'dataProvider' => $allCertificatesProvider,
+echo \app\widgets\Export::widget([
+    'searchModel' => $searchCertificates,
     'columns' => $columns,
     'group' => 'operator-certificates',
     'table' => 'certificates',

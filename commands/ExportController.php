@@ -2,6 +2,7 @@
 
 namespace app\commands;
 
+use app\helpers\GridviewHelper;
 use app\models\ContractsPayerInvoiceSearch;
 use app\widgets\ExportDocs;
 use yii;
@@ -9,27 +10,23 @@ use yii\console\Controller;
 
 class ExportController extends Controller
 {
-    public function actionMake()
+    public function actionMake($exportId)
     {
         $searchLastMonthContracts = new ContractsPayerInvoiceSearch([
             'payer_id' => 51,
         ]);
-        $invoiceLastMonthProvider = $searchLastMonthContracts->search(null);
+        $dataProvider = $searchLastMonthContracts->search(null);
+
         ExportDocs::widget([
-            'dataProvider' => $invoiceLastMonthProvider,
+            'dataProvider' => $dataProvider,
             'target' => ExportDocs::TARGET_SELF,
-            'initDownloadOnStart' => true,
             'showColumnSelector' => false,
-            'filename' => '_TEST_TEST_TEST_51',
+            'filename' => GridviewHelper::getFileName($group),
+            'initDownloadOnStart' => true,
             'stream' => false,
             'deleteAfterSave' => false,
-            'folder' => '@pfdoroot/uploads/contracts',
-            'linkPath' => '@pfdo/uploads/contracts',
-            'dropdownOptions' => [
-                'class' => 'btn btn-success',
-                'label' => 'Заказать реестр договоров для субсидии',
-                'icon' => false,
-            ],
+            'folder' => '@pfdoroot/uploads/' . $table,
+            'linkPath' => '@pfdo/uploads/' . $table,
             'showConfirmAlert' => false,
             'afterSaveView' => false,
             'exportConfig' => [
@@ -39,33 +36,7 @@ class ExportController extends Controller
                 ExportDocs::FORMAT_PDF => false,
                 ExportDocs::FORMAT_EXCEL_X => false,
             ],
-            'columns' => [
-                ['class' => 'yii\grid\SerialColumn'],
-                [
-                    'attribute' => 'number',
-                    'label' => 'Реквизиты договора об обучении (твердой оферты)',
-                    'format' => 'raw',
-                    'value' => function ($model) {
-                        return '№' . $model->number . ' от ' . Yii::$app->formatter->asDate($model->date);
-                    }
-                ],
-                [
-                    'label' => 'Объем обязательств Уполномоченной организации за текущий месяц в соответствии с договорами об обучении (твердыми офертами)',
-                    'value' => function ($model) {
-
-                        $start_edu_contract = explode("-", $model->start_edu_contract);
-                        $month = $start_edu_contract[1];
-
-                        if ($month == date('m')) {
-                            $price = $model->payer_first_month_payment;
-                        } else {
-                            $price = $model->payer_other_month_payment;
-                        }
-
-                        return $price;
-                    }
-                ],
-            ],
+            'columns' => GridviewHelper::prepareColumns($table, $columns, empty($type) ? null : $type, 'export'),
         ]);
 
         echo "done.";
