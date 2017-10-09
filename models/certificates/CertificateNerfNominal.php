@@ -73,7 +73,7 @@ class CertificateNerfNominal extends CertificateActions
                 ['certificate', 'validateBalance'],
                 ['certificate', 'validateContracts'],
                 ['newNominal', 'required'],
-                ['newNominal', 'number', 'max' => $this->certificate->nominal],
+                ['newNominal', 'number', 'max' => $this->certificate->nominal, 'min' => 0],
                 //      ['newNominal', 'compare', 'operator' => '<' , 'compareValue' => $this->certificate->nominal],
             ]
         );
