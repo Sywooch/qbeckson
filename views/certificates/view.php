@@ -44,7 +44,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'nominal',
                 'certGroup.group',
-                'rezerv',
+                [
+                    'attribute' => 'rezerv',
+                    'value' => round($model->rezerv, 2),
+                ],
                 'balance',
                 [
                     'label'=> Html::a(
