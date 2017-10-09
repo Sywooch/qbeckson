@@ -299,8 +299,6 @@ $config = [
                     'actions' => ['group-pdf', 'password'],
                     'allow'   => true,
                     'roles'   => ['certificate'],
-
-
                 ],
                 [
                     'actions' => ['nerf-nominal'],
