@@ -80,11 +80,14 @@ $this->params['breadcrumbs'][] = $this->title;
             if (PermissionHelper::checkMonitorUrl('/certificates/actual') /*&& $model->canFreez()*/) {
                 if ($model->actual) {
                     if ($freezer->canFreeze) {
-                        echo Html::a('Заморозить', Url::to(['/certificates/noactual', 'id' => $model->id]),
-                            ['class' => 'btn btn-danger',
-                                'data' => [
-                                    'confirm' => 'Уверены, что хотите заморозить сертификат?',
-                                ]]);
+                        echo \app\components\widgets\modalCheckLink\ModalCheckLink::widget([
+                            'link' => Html::a('Заморозить', Url::to(['/certificates/noactual', 'id' => $model->id]),
+                                ['class' => 'btn btn-danger']),
+                            'buttonOptions' => ['label' => 'Заморозить', 'class' => 'btn btn-danger'],
+                            'content' => 'В случае если Вы заморозите сертификат все средства его баланс будет обнулен. Повторно разморозить сертификат не удастся до наступления следующего периода программы персонифицированного финансирования. Вы уверены, что имеете достаточные основания для заморозки сертификата в соответствии с правилами персонифицированного финансирования?',
+                            'label' => 'Да, я уверен, что хочу заморозить сертификат.',
+                            'title' => 'Заморозить сертификат?'
+                        ]);
                     } else {
                         echo \app\components\widgets\ButtonWithInfo::widget([
                             'label' => 'Заморозить',
