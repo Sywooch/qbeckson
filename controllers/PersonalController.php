@@ -159,9 +159,12 @@ class PersonalController extends Controller
         ]);
         $invoicesProvider = $searchInvoices->search(Yii::$app->request->queryParams);
 
+        $munList = ArrayHelper::map($operator->mun, 'id', 'name');
+
         return $this->render('operator/operator-invoices', [
             'searchInvoices' => $searchInvoices,
             'invoicesProvider' => $invoicesProvider,
+            'munList'          => $munList
         ]);
     }
 
@@ -284,6 +287,15 @@ class PersonalController extends Controller
         $dissolvedContractsProvider = $searchDissolvedContracts->search(Yii::$app->request->queryParams);
         $allDissolvedContractsProvider = $searchDissolvedContracts->search(Yii::$app->request->queryParams, 99999);
 
+        $searchRefusedContracts = new ContractsSearch([
+            'status' => Contracts::STATUS_REFUSED,
+            'paid' => '0,150000',
+            'modelName' => 'SearchDissolvedContracts'
+        ]);
+        $refusedContractsProvider = $searchRefusedContracts->search(Yii::$app->request->queryParams);
+        $allRefusedContractsProvider = $searchRefusedContracts->search(Yii::$app->request->queryParams, 99999);
+
+
         $allContractsProvider = (new ContractsSearch())->search(Yii::$app->request->queryParams, 99999);
 
         return $this->render('operator-contracts', [
@@ -296,10 +308,15 @@ class PersonalController extends Controller
             'searchDissolvedContracts' => $searchDissolvedContracts,
             'dissolvedContractsProvider' => $dissolvedContractsProvider,
 
+            'searchRefusedContracts' => $searchRefusedContracts,
+            'refusedContractsProvider' => $refusedContractsProvider,
+
+
             'allActiveContractsProvider' => $allActiveContractsProvider,
             'allPendingContractsProvider' => $allPendingContractsProvider,
             'allDissolvedContractsProvider' => $allDissolvedContractsProvider,
             'allContractsProvider' => $allContractsProvider,
+            'allRefusedContractsProvider' => $allRefusedContractsProvider
         ]);
     }
 

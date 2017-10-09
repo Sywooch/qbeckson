@@ -7,24 +7,24 @@ use Yii;
 /**
  * This is the model class for table "payers".
  *
- * @property integer $id
- * @property integer $user_id
- * @property string $name
- * @property integer $OGRN
- * @property integer $INN
- * @property integer $KPP
- * @property integer $OKPO
- * @property string $address_legal
- * @property string $address_actual
- * @property string $phone
- * @property string $email
- * @property string $position
- * @property string $fio
- * @property integer $mun
- * @property string $directionality
- * @property integer $directionality_1_count
- * @property integer $directionality_2_count
- * @property integer $directionality_3_count
+ * @property integer                $id
+ * @property integer                $user_id
+ * @property string                 $name
+ * @property integer                $OGRN
+ * @property integer                $INN
+ * @property integer                $KPP
+ * @property integer                $OKPO
+ * @property string                 $address_legal
+ * @property string                 $address_actual
+ * @property string                 $phone
+ * @property string                 $email
+ * @property string                 $position
+ * @property string                 $fio
+ * @property integer                $mun
+ * @property string                 $directionality
+ * @property integer                $directionality_1_count
+ * @property integer                $directionality_2_count
+ * @property integer                $directionality_3_count
  * @property integer                $directionality_4_count
  * @property integer                $directionality_5_count
  * @property integer                $directionality_6_count
@@ -52,19 +52,11 @@ class Payers extends \yii\db\ActiveRecord
     public $directionality_6;
 
     /**
-     * @return array
+     * @inheritdoc
      */
-    public static function directionalityAttributes($counters = false): array
+    public static function tableName()
     {
-        return [
-            'directionality_1rob' => !$counters ? 'Техническая (робототехника)' : 'directionality_1rob_count',
-            'directionality_1'    => !$counters ? 'Техническая (иная)' : 'directionality_1_count',
-            'directionality_2'    => !$counters ? 'Естественнонаучная' : 'directionality_2_count',
-            'directionality_3'    => !$counters ? 'Физкультурно-спортивная' : 'directionality_3_count',
-            'directionality_4'    => !$counters ? 'Художественная' : 'directionality_4_count',
-            'directionality_5'    => !$counters ? 'Туристско-краеведческая' : 'directionality_5_count',
-            'directionality_6'    => !$counters ? 'Социально-педагогическая' : 'directionality_6_count',
-        ];
+        return 'payers';
     }
 
     public function populateDirections()
@@ -83,11 +75,19 @@ class Payers extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * @return array
      */
-    public static function tableName()
+    public static function directionalityAttributes($counters = false): array
     {
-        return 'payers';
+        return [
+            'directionality_1rob' => !$counters ? 'Техническая (робототехника)' : 'directionality_1rob_count',
+            'directionality_1'    => !$counters ? 'Техническая (иная)' : 'directionality_1_count',
+            'directionality_2'    => !$counters ? 'Естественнонаучная' : 'directionality_2_count',
+            'directionality_3'    => !$counters ? 'Физкультурно-спортивная' : 'directionality_3_count',
+            'directionality_4'    => !$counters ? 'Художественная' : 'directionality_4_count',
+            'directionality_5'    => !$counters ? 'Туристско-краеведческая' : 'directionality_5_count',
+            'directionality_6'    => !$counters ? 'Социально-педагогическая' : 'directionality_6_count',
+        ];
     }
 
     /**
@@ -114,32 +114,32 @@ class Payers extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID Плательщика',
-            'user_id' => 'ID Пользователя',
-            'name' => 'Наименование',
-            'name_dat' => 'Наименование в творительном падеже',
-            'code' => 'Код плательщика',
-            'OGRN' => 'ОГРН',
-            'INN' => 'ИНН',
-            'KPP' => 'КПП',
-            'OKPO' => 'ОКПО',
-            'address_legal' => 'Адрес юридический',
-            'address_actual' => 'Адрес фактический',
-            'phone' => 'Телефон',
-            'email' => 'Email',
-            'position' => 'Должность ответственного лица',
-            'fio' => 'ФИО ответственного лица',
-            'mun' => 'Муниципальный район',
-            'directionality' => 'Оплачивает направленности',
-            'directionality_1rob_count' => 'Максимальное число детей в "Технической (робототехника)" направленности',
-            'directionality_1_count' => 'Максимальное число детей в "Технической (иная)" направленности',
-            'directionality_2_count' => 'Максимальное число детей в "Естественнонаучной" направленности',
-            'directionality_3_count' => 'Максимальное число детей в "Физкультурно-спортивной" направленности',
-            'directionality_4_count' => 'Максимальное число детей в "Художественной" направленности',
-            'directionality_5_count' => 'Максимальное число детей в "Туристско-краеведческой" направленности',
-            'directionality_6_count' => 'Максимальное число детей в "Социально-педагогической" направленности',
-            'cooperates' => 'Число заключенных соглашений',
-            'certificates' => 'Число выданных сертификатов',
+            'id'                                 => 'ID Плательщика',
+            'user_id'                            => 'ID Пользователя',
+            'name'                               => 'Наименование',
+            'name_dat'                           => 'Наименование в творительном падеже',
+            'code'                               => 'Код плательщика',
+            'OGRN'                               => 'ОГРН',
+            'INN'                                => 'ИНН',
+            'KPP'                                => 'КПП',
+            'OKPO'                               => 'ОКПО',
+            'address_legal'                      => 'Адрес юридический',
+            'address_actual'                     => 'Адрес фактический',
+            'phone'                              => 'Телефон',
+            'email'                              => 'Email',
+            'position'                           => 'Должность ответственного лица',
+            'fio'                                => 'ФИО ответственного лица',
+            'mun'                                => 'Муниципальный район',
+            'directionality'                     => 'Оплачивает направленности',
+            'directionality_1rob_count'          => 'Максимальное число детей в "Технической (робототехника)" направленности',
+            'directionality_1_count'             => 'Максимальное число детей в "Технической (иная)" направленности',
+            'directionality_2_count'             => 'Максимальное число детей в "Естественнонаучной" направленности',
+            'directionality_3_count'             => 'Максимальное число детей в "Физкультурно-спортивной" направленности',
+            'directionality_4_count'             => 'Максимальное число детей в "Художественной" направленности',
+            'directionality_5_count'             => 'Максимальное число детей в "Туристско-краеведческой" направленности',
+            'directionality_6_count'             => 'Максимальное число детей в "Социально-педагогической" направленности',
+            'cooperates'                         => 'Число заключенных соглашений',
+            'certificates'                       => 'Число выданных сертификатов',
             'certificate_can_use_future_balance' => 'Установите возможность заключения договоров за счет средств сертификатов, предусмотренных на период от ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_from) . ' до ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_to),
         ];
     }
@@ -183,14 +183,15 @@ class Payers extends \yii\db\ActiveRecord
     {
         return $this->hasOne(CertificateInformation::class, ['payer_id' => 'id']);
     }
-    
-    public function munName($data) {
-         $rows = (new \yii\db\Query())
-                ->select(['name'])
-                ->from('mun')
-                ->where(['id'=> $data])
-                ->one();
-        
+
+    public function munName($data)
+    {
+        $rows = (new \yii\db\Query())
+            ->select(['name'])
+            ->from('mun')
+            ->where(['id' => $data])
+            ->one();
+
         return $rows['name'];
     }
 
@@ -373,7 +374,7 @@ class Payers extends \yii\db\ActiveRecord
         $relation = $this->hasMany(OrganizationPayerAssignment::className(), ['payer_id' => 'id'])
             ->andFilterWhere([
                 'organization_id' => $organizationId,
-                'status' => $status,
+                'status'          => $status,
             ]);
 
         return $relation;
@@ -384,11 +385,12 @@ class Payers extends \yii\db\ActiveRecord
      */
     public function getOrganizations($organizationId = null, $status = null)
     {
-        $relation = $this->hasMany(Organization::className(), ['id' => 'organization_id'])->viaTable('organization_payer_assignment', ['payer_id' => 'id'], function ($query) use ($organizationId, $status) {
+        $relation = $this->hasMany(Organization::className(), ['id' => 'organization_id'])->viaTable('organization_payer_assignment', ['payer_id' => 'id'], function ($query) use ($organizationId, $status)
+        {
             /* @var $query \yii\db\ActiveQuery */
             $query->andFilterWhere([
                 'organization_id' => $organizationId,
-                'status' => $status,
+                'status'          => $status,
             ]);
         });
 
@@ -436,7 +438,6 @@ class Payers extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Mun::className(), ['id' => 'mun']);
     }
-
 
 
     /**

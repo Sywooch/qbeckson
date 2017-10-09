@@ -33,12 +33,18 @@ use yii\helpers\Url;
 
         if ($model->getLivingContracts()->exists() || $model->getModules()->andWhere(['open' => 1])->exists()) {
 
-            echo \yii\bootstrap\Button::widget(['label'   => 'Редактировать Программу нельзя',
-                                                'options' => ['class'    => 'btn btn-theme',
-                                                              'disabled' => 'disabled'],]);
-            echo \yii\bootstrap\Button::widget(['label'   => 'Удалить программу нельзя',
-                                                'options' => ['class'    => 'btn btn-danger',
-                                                              'disabled' => 'disabled'],]);
+            echo \app\components\widgets\ButtonWithInfo::widget([
+                'label' => 'Редактировать',
+                'message' => 'Невозможно, существуют контракты и/или открыто зачисление в одном или нескольких модулях',
+                'options' => ['disabled' => 'disabled',
+                    'class' => 'btn btn-theme',]
+            ]);
+            echo \app\components\widgets\ButtonWithInfo::widget([
+                'label' => 'Удалить',
+                'message' => 'Невозможно, существуют контракты и/или открыто зачисление в одном или нескольких модулях',
+                'options' => ['disabled' => 'disabled',
+                    'class' => 'btn btn-danger',]
+            ]);
         } else {
             echo Html::a('Редактировать', Url::to(['/programs/update', 'id' => $model->id]), ['class' => 'btn btn-theme']);
             echo PostButtonWithModalConfirm::widget(['title'        => 'Удалить программу',

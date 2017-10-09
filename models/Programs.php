@@ -570,7 +570,8 @@ class Programs extends ActiveRecord
             return 'без ОВЗ';
         }
         $zabArray = explode(',', $this->zab);
-        $zabNamesArray = array_filter(self::illnesses(), function ($val) use ($zabArray) {
+        $zabNamesArray = array_filter(self::illnesses(), function ($val) use ($zabArray)
+        {
 
             return in_array($val, $zabArray);
         }, ARRAY_FILTER_USE_KEY);
@@ -610,7 +611,8 @@ class Programs extends ActiveRecord
         }
         $illnessesKeysArray = explode(',', $this->zab);
         $illnessesArray = array_map(
-            function ($key) {
+            function ($key)
+            {
                 return static::illnesses()[$key];
             },
             $illnessesKeysArray

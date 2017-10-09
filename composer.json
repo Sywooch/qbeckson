@@ -1,88 +1,93 @@
 {
-    "name": "yiisoft/yii2-app-basic",
-    "description": "Yii 2 Basic Project Template",
-    "keywords": ["yii2", "framework", "basic", "project template"],
-    "homepage": "http://www.yiiframework.com/",
-    "type": "project",
-    "license": "BSD-3-Clause",
-    "support": {
-        "issues": "https://github.com/yiisoft/yii2/issues?state=open",
-        "forum": "http://www.yiiframework.com/forum/",
-        "wiki": "http://www.yiiframework.com/wiki/",
-        "irc": "irc://irc.freenode.net/yii",
-        "source": "https://github.com/yiisoft/yii2"
-    },
-    "minimum-stability": "stable",
-    "require": {
-        "php": ">=7.0",
-        "yiisoft/yii2": ">=2.0.5",
-        "yiisoft/yii2-bootstrap": "*",
-        "yiisoft/yii2-swiftmailer": "*",
-        "developeruz/yii2-db-rbac": "*",
-        "yiisoft/yii2-jui": "^2.0",
-        "kartik-v/yii2-grid": "*",
-        "kartik-v/yii2-mpdf": "*",
-        "kartik-v/yii2-widget-datepicker": "*",
-        "kartik-v/yii2-widget-activeform": "*",
-        "kartik-v/yii2-datecontrol": "*",
-        "kartik-v/yii2-field-range": "*",
-        "wbraganca/yii2-dynamicform": "*",
-        "kartik-v/yii2-widget-touchspin": "*",
-        "kartik-v/yii2-widget-spinner": "*",
-        "kartik-v/yii2-widgets": "*",
-        "kartik-v/yii2-dynagrid": "*",
-        "kartik-v/yii2-dialog": "*",
-        "kartik-v/yii2-krajee-base": "*",
-        "kartik-v/yii2-helpers": "*",
-        "kartik-v/yii2-slider": "*",
-        "kartik-v/yii2-editable": "*",
-        "phpoffice/phpword": "dev-develop",
-        "arius/number-formatter": "1.*",
-        "2amigos/yii2-ckeditor-widget" : "2.0",
-        "trntv/yii2-file-kit": "^1.2",
-        "voskobovich/yii2-linker-behavior": "^4.0",
-        "kartik-v/yii2-widget-depdrop": "*",
-        "kartik-v/yii2-widget-select2": "*",
-        "mpdf/mpdf": "6.1.3",
-        "phpoffice/phpexcel": "1.8.x-dev",
-        "kartik-v/yii2-export": "*",
-        "kartik-v/yii2-tabs-x": "*",
-        "moonlandsoft/yii2-phpexcel": "*",
-        "kartik-v/yii2-widget-timepicker": "*",
-        "intervention/image": "^2.3",
-        "mirocow/yii2-yandex-maps": "@dev",
-        "bower-asset/angular": "1.5.7"
-    },
-    "require-dev": {
-        "yiisoft/yii2-codeception": "*",
-        "yiisoft/yii2-debug": "*",
-        "yiisoft/yii2-gii": "*",
-        "yiisoft/yii2-faker": "*"
-    },
-    "config": {
-        "process-timeout": 1800
-    },
-    "scripts": {
-        "post-create-project-cmd": [
-            "yii\\composer\\Installer::postCreateProject"
-        ]
-    },
-    "extra": {
-        "yii\\composer\\Installer::postCreateProject": {
-            "setPermission": [
-                {
-                    "runtime": "0777",
-                    "web/assets": "0777",
-                    "yii": "0755"
-                }
-            ],
-            "generateCookieValidationKey": [
-                "config/web.php"
-            ]
-        },
-        "asset-installer-paths": {
-            "npm-asset-library": "vendor/npm",
-            "bower-asset-library": "vendor/bower"
+  "name": "yiisoft/yii2-app-basic",
+  "description": "Yii 2 Basic Project Template",
+  "keywords": [
+    "yii2",
+    "framework",
+    "basic",
+    "project template"
+  ],
+  "homepage": "http://www.yiiframework.com/",
+  "type": "project",
+  "license": "BSD-3-Clause",
+  "support": {
+    "issues": "https://github.com/yiisoft/yii2/issues?state=open",
+    "forum": "http://www.yiiframework.com/forum/",
+    "wiki": "http://www.yiiframework.com/wiki/",
+    "irc": "irc://irc.freenode.net/yii",
+    "source": "https://github.com/yiisoft/yii2"
+  },
+  "minimum-stability": "stable",
+  "require": {
+    "php": ">=7.0",
+    "yiisoft/yii2": "~2.0.12",
+    "yiisoft/yii2-bootstrap": "*",
+    "yiisoft/yii2-swiftmailer": "*",
+    "developeruz/yii2-db-rbac": "*",
+    "yiisoft/yii2-jui": "^2.0",
+    "kartik-v/yii2-grid": "*",
+    "kartik-v/yii2-mpdf": "*",
+    "kartik-v/yii2-widget-datepicker": "*",
+    "kartik-v/yii2-widget-activeform": "*",
+    "kartik-v/yii2-datecontrol": "*",
+    "kartik-v/yii2-field-range": "*",
+    "wbraganca/yii2-dynamicform": "*",
+    "kartik-v/yii2-widget-touchspin": "*",
+    "kartik-v/yii2-widget-spinner": "*",
+    "kartik-v/yii2-widgets": "*",
+    "kartik-v/yii2-dynagrid": "*",
+    "kartik-v/yii2-dialog": "*",
+    "kartik-v/yii2-krajee-base": "*",
+    "kartik-v/yii2-helpers": "*",
+    "kartik-v/yii2-slider": "*",
+    "kartik-v/yii2-editable": "*",
+    "phpoffice/phpword": "dev-develop",
+    "arius/number-formatter": "1.*",
+    "2amigos/yii2-ckeditor-widget": "2.0",
+    "trntv/yii2-file-kit": "^1.2",
+    "voskobovich/yii2-linker-behavior": "^4.0",
+    "kartik-v/yii2-widget-depdrop": "*",
+    "kartik-v/yii2-widget-select2": "*",
+    "mpdf/mpdf": "6.1.3",
+    "phpoffice/phpexcel": "1.8.x-dev",
+    "kartik-v/yii2-export": "*",
+    "kartik-v/yii2-tabs-x": "*",
+    "moonlandsoft/yii2-phpexcel": "*",
+    "kartik-v/yii2-widget-timepicker": "*",
+    "intervention/image": "^2.3",
+    "mirocow/yii2-yandex-maps": "@dev",
+    "bower-asset/angular": "1.5.7"
+  },
+  "require-dev": {
+    "yiisoft/yii2-codeception": "*",
+    "yiisoft/yii2-debug": "*",
+    "yiisoft/yii2-gii": "*",
+    "yiisoft/yii2-faker": "*"
+  },
+  "config": {
+    "process-timeout": 1800
+  },
+  "scripts": {
+    "post-create-project-cmd": [
+      "yii\\composer\\Installer::postCreateProject"
+    ]
+  },
+  "extra": {
+    "yii\\composer\\Installer::postCreateProject": {
+      "setPermission": [
+        {
+          "runtime": "0777",
+          "web/assets": "0777",
+          "yii": "0755"
         }
+      ],
+      "generateCookieValidationKey": [
+        "config/web.php"
+      ]
+    },
+    "asset-installer-paths": {
+      "npm-asset-library": "vendor/npm",
+      "bower-asset-library": "vendor/bower"
     }
+  }
 }

@@ -20,6 +20,7 @@ class AngularAsset extends AssetBundle
     public $publishOptions = [
         'only' => [
             'angular.min.js',
+            'angular.min.js.map',
         ],
     ];
 

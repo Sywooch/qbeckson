@@ -3,6 +3,7 @@
 namespace app\models\search;
 
 use app\models\Invoices;
+use app\models\Payers;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
@@ -13,6 +14,7 @@ class InvoicesSearch extends Invoices
 {
     public $organization;
     public $payer;
+    public $mun;
 
     /**
      * @inheritdoc
@@ -21,7 +23,7 @@ class InvoicesSearch extends Invoices
     {
         return [
             [['id', 'number'], 'integer'],
-            [['month', 'date', 'link', 'organization', 'status', 'organization_id', 'payer', 'prepayment', 'sum'], 'safe'],
+            [['month', 'date', 'link', 'organization', 'status', 'organization_id', 'payer', 'prepayment', 'sum', 'mun'], 'safe'],
         ];
     }
 
@@ -32,6 +34,7 @@ class InvoicesSearch extends Invoices
     {
         return array_merge(parent::attributeLabels(), [
             'organization' => 'Организация',
+            'mun'          => 'Муниципалитет',
             'payer'        => 'Плательщик',
         ]);
     }
@@ -90,6 +93,12 @@ class InvoicesSearch extends Invoices
             'invoices.prepayment'      => $this->prepayment,
             'invoices.status'          => $this->status,
         ]);
+
+        if ($this->mun) {
+            $query->andFilterWhere([
+                Payers::tableName() . '.mun' => $this->mun,
+            ]);
+        }
 
         $query->andFilterWhere(['like', 'invoices.month', $this->month])
             ->andFilterWhere(['like', 'invoices.link', $this->link])

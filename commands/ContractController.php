@@ -1,15 +1,12 @@
 <?php
 namespace app\commands;
 
+use app\models\Completeness;
+use app\models\Contracts;
 use app\models\Operators;
 use app\models\Payers;
 use yii;
 use yii\console\Controller;
-use app\models\Contracts;
-use app\models\Programs;
-use app\models\Certificates;
-use app\models\Organization;
-use app\models\Completeness;
 
 /*
 php yii contract/close
@@ -72,6 +69,7 @@ class ContractController extends Controller
                 $command->execute();
             } else {
                 print_r($settings->errors);
+
                 return Controller::EXIT_CODE_ERROR;
             }
         }
@@ -259,8 +257,10 @@ class ContractController extends Controller
 
     /**
      * @deprecated
+     *
      * @param $contract
      * @param $date
+     *
      * @return mixed
      */
     private function monthlyPrice($contract, $date)

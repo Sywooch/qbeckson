@@ -157,7 +157,7 @@ $config = [
     'as AccessBehavior' => [
         'class' => AccessBehavior::class,
         'rules' => [
-            'personal'                          => [
+            'personal'      => [
                 [
                     'allow'   => true,
                     'actions' => ['operator-cooperates'],
@@ -184,25 +184,32 @@ $config = [
                     'roles'   => ['payers']
                 ],
             ],
-            'file-storage'                      => [
+            'invoices'      => [
+                [
+                    'allow'   => true,
+                    'actions' => ['roll-back'],
+                    'roles'   => ['payers']
+                ],
+            ],
+            'file-storage'  => [
                 [
                     'allow' => true,
                 ],
             ],
-            'site'                              =>
+            'site'          =>
                 [
                     [
                         'allow' => true,
                     ],
                 ],
-            'import'                            =>
+            'import'        =>
                 [
                     [
                         'allow' => true,
                         'roles' => ['admins'],
                     ],
                 ],
-            'admin/cleanup'                     =>
+            'admin/cleanup' =>
                 [
                     [
                         'allow' => true,
@@ -293,6 +300,11 @@ $config = [
                     'allow'   => true,
                     'roles'   => ['certificate'],
                 ],
+                [
+                    'actions' => ['nerf-nominal'],
+                    'allow' => true,
+                    'roles' => ['payer'],
+                ]
             ],
             'site/save-filter'                  => [
                 [

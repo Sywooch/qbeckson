@@ -3,41 +3,36 @@
 namespace app\controllers;
 
 use app\helpers\FormattingHelper;
+use app\models\Certificates;
+use app\models\Completeness;
+use app\models\Contracts;
+use app\models\ContractsDecInvoiceSearch;
+use app\models\ContractsInvoiceSearch;
+use app\models\ContractspreInvoiceSearch;
 use app\models\Cooperate;
 use app\models\forms\CertificateVerificationForm;
 use app\models\forms\ContractConfirmForm;
 use app\models\forms\ContractRequestForm;
 use app\models\forms\SelectGroupForm;
+use app\models\Groups;
+use app\models\GroupsSearch;
+use app\models\Informs;
+use app\models\Organization;
+use app\models\ProgrammeModule;
+use app\models\Programs;
+use app\models\User;
 use app\models\UserIdentity;
 use app\traits\AjaxValidationTrait;
+use kartik\mpdf\Pdf;
+use mPDF;
 use Yii;
-use app\models\Contracts;
-use app\models\User;
-use app\models\ContractsSearch;
-use app\models\ContractsoSearch;
-use app\models\ContractsInvoiceSearch;
-use app\models\ContractsDecInvoiceSearch;
 use yii\base\Response;
-use yii\helpers\ArrayHelper;
+use yii\filters\VerbFilter;
+use yii\helpers\Json;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotAcceptableHttpException;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
-use app\models\Informs;
-use app\models\Programs;
-use app\models\Certificates;
-use app\models\Organization;
-use app\models\Favorites;
-use app\models\ProgrammeModule;
-use app\models\Groups;
-use app\models\GroupsSearch;
-use app\models\Payers;
-use mPDF;
-use kartik\mpdf\Pdf;
-use yii\helpers\Json;
-use app\models\ContractspreInvoiceSearch;
-use app\models\Completeness;
 
 /**
  * ContractsController implements the CRUD actions for Contracts model.
@@ -154,7 +149,8 @@ class ContractsController extends Controller
 
     /**
      * @param string $groupId
-     * @param null $certificateId
+     * @param null   $certificateId
+     *
      * @return string|\yii\web\Response
      */
     public function actionRequest($groupId, $certificateId = null)
@@ -168,16 +164,30 @@ class ContractsController extends Controller
         if (null !== $contract && null !== $contract->status && !in_array($contract->status, [Contracts::STATUS_REFUSED, Contracts::STATUS_CLOSED])) {
             throw new \DomainException('Контракт уже заключён!');
         }
+        $group = Groups::findOne(['id' => $groupId]);
+        if ($group && !$group->freePlaces) {
+            Yii::$app->session->setFlash('modal-danger', 'К сожалению заявка на обучение по программе не будет отправлена, пока Вы ее составляли кто-то опередил Вас и подал заявку раньше, тем самым заняв последнее место в группе. Пожалуйста, посмотрите еще варианты зачисления на обучение (например, места могут оказаться в других группах)');
+
+            return $this->redirect('/personal/certificate-programs');
+
+        }
+        if ($group && !$group->organization->existsFreePlace()) {
+            Yii::$app->session->setFlash('modal-danger', 'К сожалению заявка на обучение по программе не будет отправлена, пока Вы ее составляли кто-то опередил Вас и подал заявку раньше, тем самым заняв последнее место в организации. Пожалуйста, посмотрите еще варианты зачисления на обучение.');
+
+            return $this->redirect('/personal/certificate-programs');
+        }
+
 
         $model = new ContractRequestForm($groupId, $certificateId, $contract);
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            if (false === ($contract = $model->save())) {
+            $contract = $model->save();
+            if (!$contract) {
                 Yii::$app->session->setFlash('danger', 'Что-то не так.');
 
                 return $this->refresh();
             }
         }
-
+        $confirmForm = null;
         if (null !== $contract) {
             $confirmForm = new ContractConfirmForm($contract, $certificateId);
             if ($confirmForm->load(Yii::$app->request->post()) && $confirmForm->validate()) {
@@ -204,8 +214,9 @@ class ContractsController extends Controller
     }
 
     /**
-     * @param $id
+     * @param             $id
      * @param null|string $certificateId
+     *
      * @return Response
      * @throws NotFoundHttpException
      */
@@ -228,7 +239,9 @@ class ContractsController extends Controller
 
     /**
      * Displays a single Contracts model.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionView($id)
@@ -236,6 +249,24 @@ class ContractsController extends Controller
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
+    }
+
+    /**
+     * Finds the Contracts model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     *
+     * @param integer $id
+     *
+     * @return Contracts the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = Contracts::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
     }
 
     public function actionGroup($id)
@@ -288,6 +319,11 @@ class ContractsController extends Controller
     {
         $model = $this->findModel($id);
         $model->scenario = Contracts::SCENARIO_CREATE_DATE;
+        $cert = $model->certificate;
+        $group = $model->group;
+        $program = $model->program;
+
+        $org = $model->organization;
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             if (empty($model->date)) {
@@ -323,10 +359,7 @@ class ContractsController extends Controller
                 }
             }
 
-            $cert = Certificates::findOne($model->certificate_id);
-            $program = Programs::findOne($model->program_id);
 
-            $org = Organization::findOne($model->organization_id);
 
             $org->amount_child = $org->amount_child + 1;
 
@@ -445,10 +478,6 @@ class ContractsController extends Controller
             }
         }
 
-        $cert = Certificates::findOne($model->certificate_id);
-        $group = Groups::findOne($model->group_id);
-        $program = Programs::findOne($model->program_id);
-
         return $this->render('verificate', [
             'model' => $model,
             'cert' => $cert,
@@ -524,117 +553,70 @@ class ContractsController extends Controller
     public function actionNo($id)
     {
         $model = $this->findModel($id);
-        $informs = new Informs();
-        //TODO добавить транзакцию
-        if ($informs->load(Yii::$app->request->post())) {
-            $cert = Certificates::findOne($model->certificate_id);
-            $cert->changeBalance($model);
-
-            $model->rezerv = 0;
-            $model->status = 2;
-
-            if ($model->save()) {
-                $informs->program_id = $model->program_id;
-                $informs->contract_id = $model->id;
-                $informs->prof_id = $model->organization_id;
-                $informs->text = 'Отказано в записи. Причина: ' . $informs->dop;
-                $informs->from = 3;
-                $informs->date = date("Y-m-d");
-                $informs->read = 0;
-
-                if ($informs->save()) {
-                    $inform = new Informs();
-                    $inform->program_id = $model->program_id;
-                    $inform->contract_id = $model->id;
-                    $inform->prof_id = $model->certificate_id;
-                    $inform->text = 'Отказано в записи. Причина: ' . $informs->dop;
-                    $inform->from = 4;
-                    $inform->date = date("Y-m-d");
-                    $inform->read = 0;
-
-                    if ($inform->save()) {
-                        return $this->redirect('/personal/organization-contracts');
-                    }
-                }
-            }
+        if ($model->status === Contracts::STATUS_REFUSED) {
+            throw new NotAcceptableHttpException('Уже отменена');
+        }
+        if ($model->refusedWithInformer()) {
+            return $this->redirect('/personal/organization-contracts');
         }
 
         return $this->render('/informs/comment', [
-            'informs' => $informs,
+            'informs' => new Informs(),
+            'model' => $model
         ]);
     }
 
     public function actionTermrequest($id)
     {
         $model = $this->findModel($id);
+        if ($model->status === Contracts::STATUS_REFUSED) {
+            throw new NotAcceptableHttpException('Уже отменена');
+        }
         if (!in_array($model->status, [Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED])) {
             throw new NotAcceptableHttpException('Контракт не может быть расторгнут, поскольку уже переведен в "действующие договоры"');
         }
 
-        $cert = Certificates::findOne($model->certificate_id);
-        $cert->changeBalance($model);
-
-        $model->rezerv = 0;
-        $model->status = 2;
-        if ($model->save()) {
+        if ($model->refusedWithInformer()) {
             return $this->redirect('/personal/certificate-archive#panel2');
         }
+
+        return $this->render('/informs/comment', [
+            'informs' => new Informs(),
+            'model' => $model
+
+        ]);
     }
 
     public function actionTerminate($id)
     {
         $model = $this->findModel($id);
-        $informs = new Informs();
-        $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-
-        if ($informs->load(Yii::$app->request->post())) {
-            if ($model->wait_termnate > 0) {
-                throw new ForbiddenHttpException('Действие запрещено.');
+        if ($model->terminateWithInformer()) {
+            if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
+                Yii::$app->session->setFlash('info', 'Пожалуйста, оцените программу.');
             }
 
-            if (isset($roles['certificate'])) {
-                $model->terminator_user = 1;
-            }
-            if (isset($roles['organizations'])) {
-                $model->terminator_user = 2;
-            }
-
-            $model->wait_termnate = 1;
-            $model->date_initiate_termination = date('Y-m-d');
-            $model->status_comment = $informs->dop;
-
-            $cert = Certificates::findOne($model->certificate_id);
-            $cert->changeBalance($model);
-
-            $model->rezerv = 0;
-            if ($model->save()) {
-                if (isset($roles['certificate'])) {
-                    Yii::$app->session->setFlash('info', 'Пожалуйста, оцените программу.');
-                }
-
-                return $this->redirect(['contracts/view', 'id' => $model->id]);
-            }
+            return $this->redirect(['contracts/view', 'id' => $model->id]);
         }
-
-        if (isset($roles['certificate'])) {
+        $informs = new Informs();
+        if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
             return $this->render('/informs/comment', [
                 'informs' => $informs,
+                'model' => $model
             ]);
         }
-        if (isset($roles['organizations'])) {
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
             return $this->render('/informs/cause', [
                 'informs' => $informs,
                 'model' => $model,
             ]);
         }
+
+        throw new NotFoundHttpException();
     }
 
     public function actionInvoice()
     {
         $payers = new Contracts();
-
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
 
         if ($payers->load(Yii::$app->request->post())) {
             $searchContracts = new ContractsInvoiceSearch();
@@ -643,14 +625,12 @@ class ContractsController extends Controller
 
             return $this->render('invoice', [
                 'payers' => $payers,
-                'searchContracts' => $searchContracts,
                 'ContractsProvider' => $ContractsProvider,
             ]);
         }
 
         return $this->render('payer', [
             'payers' => $payers,
-            'organization' => $organization,
         ]);
     }
 
@@ -658,8 +638,6 @@ class ContractsController extends Controller
     {
         $payers = new Contracts();
 
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
 
         if ($payers->load(Yii::$app->request->post())) {
 
@@ -667,43 +645,34 @@ class ContractsController extends Controller
             $searchContracts->payer_id = $payers->payer_id;
             $ContractsProvider = $searchContracts->search(Yii::$app->request->queryParams);
 
-            // return '<pre>'.var_dump($contracts).'</pre>';
             return $this->render('decinvoice', [
                 'payers' => $payers,
-                'searchContracts' => $searchContracts,
                 'ContractsProvider' => $ContractsProvider,
+                'payer' => $payers
             ]);
         }
 
         return $this->render('decpayer', [
             'payers' => $payers,
-            'organization' => $organization,
         ]);
     }
 
     public function actionPreinvoice()
     {
         $payers = new Contracts();
-
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
-
         if ($payers->load(Yii::$app->request->post())) {
-
             $searchContracts = new ContractspreInvoiceSearch();
             $searchContracts->payer_id = $payers->payer_id;
             $ContractsProvider = $searchContracts->search(Yii::$app->request->queryParams);
 
             return $this->render('preinvoice', [
                 'payers' => $payers,
-                'searchContracts' => $searchContracts,
                 'ContractsProvider' => $ContractsProvider,
             ]);
         }
 
         return $this->render('prepayer', [
             'payers' => $payers,
-            'organization' => $organization,
         ]);
     }
 
@@ -713,11 +682,11 @@ class ContractsController extends Controller
         set_time_limit(0);
 
         $model = $this->findModel($id);
-        $organization = Organization::findOne($model->organization_id);
-        $program = Programs::findOne($model->program_id);
-        $group = Groups::findOne($model->group_id);
-        $year = ProgrammeModule::findOne($model->year_id);
-        $payer = Payers::findOne($model->payer_id);
+        $organization = $model->organization;
+        $program = $model->program;
+        $group = $model->group;
+        $year = $model->year;
+        $payer = $model->payer;
 
         $date_elements_user = explode("-", $model->start_edu_contract);
 
@@ -756,7 +725,7 @@ class ContractsController extends Controller
             $headerText
         );
         $html = <<<EOD
-<div style="font-size:12;" > 
+<div style="font-size:12px;" > 
 <p style="text-align: center;">Договор об образовании №$model->number</p>
 <br>
 <div align="justify">$headerText о нижеследующем:</div>
@@ -1122,7 +1091,9 @@ EOD;
     /**
      * Updates an existing Contracts model.
      * If update is successful, the browser will be redirected to the 'view' page.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionUpdate($id)
@@ -1160,6 +1131,10 @@ EOD;
             $model->ocenka = 1;
 
             if ($model->save()) {
+                $ocen_fact_1 = 0;
+                $ocen_kadr_1 = 0;
+                $ocen_mat_1 = 0;
+                $ocen_obch_1 = 0;
 
                 $contracts1 = (new \yii\db\Query())
                     ->select(['id', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch'])
@@ -1198,6 +1173,10 @@ EOD;
                     ->andWhere(['status' => 4])
                     ->count();
 
+                $ocen_fact_2 = 0;
+                $ocen_kadr_2 = 0;
+                $ocen_mat_2 = 0;
+                $ocen_obch_2 = 0;
                 foreach ($contracts2 as $contract) {
                     $ocen_fact_2 += $contract['ocen_fact'];
                     $ocen_kadr_2 += $contract['ocen_kadr'];
@@ -1218,10 +1197,9 @@ EOD;
                 $program->ocen_mat = (($ocen_mat_1 + 2 * $ocen_mat_2) / ($count1 + (2 * $count2)));
                 $program->ocen_obch = (($ocen_obch_1 + 2 * $ocen_obch_2) / ($count1 + (2 * $count2)));
 
-                if ($program->save()) {
-                    return $this->redirect(['view', 'id' => $model->id]);
-                }
+                $program->save() || Yii::$app->session->setFlash('error', 'Не удалось сохранить!!!');
 
+                return $this->redirect(['view', 'id' => $model->id]);
             }
 
             /*
@@ -1508,7 +1486,9 @@ EOD;
     /**
      * Deletes an existing Contracts model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionDelete($id)
@@ -1522,8 +1502,8 @@ EOD;
                 $cont = $this->findModel($id);
                 // return var_dump($id);
 
-                $certificates = new Certificates();
-                $certificate = $certificates->getCertificates();
+                /** @var $certificate Certificates */
+                $certificate = Yii::$app->user->identity->certificate;
 
 
                 $cert = Certificates::findOne($certificate->id);
@@ -1550,9 +1530,9 @@ EOD;
 
         return $this->render('/user/delete', [
             'user' => $user,
+            'title' => null,
         ]);
     }
-
 
     public function actionUpdatescert()
     {
@@ -1646,21 +1626,5 @@ EOD;
         }
         echo "OK!";
 
-    }
-
-    /**
-     * Finds the Contracts model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Contracts the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Contracts::findOne($id)) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
     }
 }

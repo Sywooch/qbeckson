@@ -15,6 +15,7 @@ use Yii;
  * @property string    $date
  * @property integer   $read
  * @property integer   $status
+ * @property integer   $prof_id
  *
  * @property Programs  $program
  * @property Contracts $contract
@@ -22,6 +23,7 @@ use Yii;
 class Informs extends \yii\db\ActiveRecord
 {
     public $dop;
+
     /**
      * @inheritdoc
      */
@@ -37,7 +39,7 @@ class Informs extends \yii\db\ActiveRecord
     {
         return [
             [['program_id'], 'required'],
-            [['program_id', 'contract_id', 'from', 'read', 'status'], 'integer'],
+            [['program_id', 'contract_id', 'from', 'read', 'status', 'prof_id'], 'integer'],
             [['text', 'dop'], 'string'],
             [['date'], 'safe'],
             [['program_id'], 'exist', 'skipOnError' => true, 'targetClass' => Programs::className(), 'targetAttribute' => ['program_id' => 'id']],

@@ -3,6 +3,8 @@
 namespace app\controllers;
 
 use app\models\Certificates;
+use app\models\certificates\CertificateNerfNominal;
+use app\models\certificates\FreezeUnFreezeCertificate;
 use app\models\Payers;
 use app\models\User;
 use app\traits\AjaxValidationTrait;
@@ -12,7 +14,6 @@ use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
-use yii\web\Response;
 use yii\widgets\ActiveForm;
 
 /**
@@ -39,14 +40,38 @@ class CertificatesController extends Controller
 
     /**
      * Displays a single Certificates model.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionView($id)
     {
+        $nerfer = new CertificateNerfNominal($id);
+        $freezer = new FreezeUnFreezeCertificate($id);
         return $this->render('view', [
             'model' => $this->findModel($id),
+            'freezer' => $freezer,
+            'nerfer' => $nerfer,
         ]);
+    }
+
+    /**
+     * Finds the Certificates model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     *
+     * @param integer $id
+     *
+     * @return Certificates the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = Certificates::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
     }
 
     /**
@@ -59,16 +84,18 @@ class CertificatesController extends Controller
         $model = new Certificates();
         $user = new User();
 
-        $payers = new Payers();
-        $payer = $payers->getPayer();
-
+        $model->setScenario($model::SCENARIO_CREATE_EDIT);
+        /** @var $payer Payers */
+        $payer = Yii::$app->user->identity->payer;
         $region = Yii::$app->operator->identity->region;
 
-        if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {
+        if (Yii::$app->request->isAjax) {
+            $user->load(Yii::$app->request->post());
             $user->username = $region . $payer->code . $user->username;
-            Yii::$app->response->format = Response::FORMAT_JSON;
+            $model->load(Yii::$app->request->post());
+            $result = $this->asJson(array_merge(ActiveForm::validate($user), ActiveForm::validate($model)));
 
-            return ActiveForm::validate($user);
+            return $result;
         }
 
         if ($user->load(Yii::$app->request->post()) && $model->load(Yii::$app->request->post()) && $model->validate()) {
@@ -104,17 +131,20 @@ class CertificatesController extends Controller
                 $model->rezerv_f = 0;
                 $model->rezerv = 0;
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
-                $model->setNominals();
-                if ($model->save()) {
+                if ($model->canUseGroup() && $model->setNominals() && $model->save()) {
+
                     return $this->render('/user/view', [
                         'model' => $user,
                         'password' => $password,
                     ]);
                 } else {
-                    $user->delete();
+                    Yii::$app->session->setFlash('danger', 'Невозможно установить данную группу, достигнут лимит');
                 }
+                $user->delete();
             }
         }
+        $user->username = mb_substr($user->username, mb_strlen($region) + mb_strlen($payer->code));
+        $user->password = '';
 
         return $this->render('create', [
             'model' => $model,
@@ -127,32 +157,40 @@ class CertificatesController extends Controller
     /**
      * Updates an existing Certificates model.
      * If update is successful, the browser will be redirected to the 'view' page.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $model->setScenario($model::SCENARIO_CREATE_EDIT);
 
         $user = User::findOne($model->user_id);
 
-        if (Yii::$app->request->isAjax && $user->load(Yii::$app->request->post())) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
 
-            return ActiveForm::validate($user);
+        if (Yii::$app->request->isAjax) {
+            $user->load(Yii::$app->request->post());
+            $model->load(Yii::$app->request->post());
+            $result = $this->asJson(array_merge(ActiveForm::validate($user), ActiveForm::validate($model)));
+
+            return $result;
         }
 
         if (Yii::$app->request->isPost) {
+            if (!$model->actual) {
+                Yii::$app->session->setFlash('danger', 'Сертификат заморожен, невозможно сохранить!!! Надо сначала активировать.');
+
+                return $this->redirect(['/certificates/view', 'id' => $model->id]);
+            }
             if ($model->load(Yii::$app->request->post())) {
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
                 $model->nominal = $model['oldAttributes']['nominal'];
-                if ($model->canChangeGroup) {
-                    $model->setNominals();
-                }
-
-                $model->save();
+                ($model->canChangeGroup && $model->canUseGroup() && $model->setNominals() && $model->save()
+                    && (Yii::$app->session->setFlash('success', 'Изменена группа и пересчитаны номиналы') || true))
+                || Yii::$app->session->setFlash('danger', 'Невозможно установить данную группу, достигнут лимит');
             }
-
             if ($user->load(Yii::$app->request->post())) {
                 $password = null;
                 if ($user->newlogin == 1 || $user->newpass == 1) {
@@ -180,6 +218,10 @@ class CertificatesController extends Controller
             return $this->redirect(['/certificates/view', 'id' => $model->id]);
         }
 
+        if (!$model->actual) {
+            Yii::$app->session->setFlash('danger', 'Сертификат заморожен');
+        }
+
         return $this->render('update', [
             'model' => $model,
             'user' => $user,
@@ -188,6 +230,7 @@ class CertificatesController extends Controller
 
     public function actionEdit()
     {
+        /** @var $model Certificates */
         $model = Yii::$app->user->identity->certificate;
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
@@ -226,9 +269,8 @@ class CertificatesController extends Controller
 
     public function actionPassword()
     {
-        $certificate = Yii::$app->user->identity->certificate;
-
-        $user = User::findOne($certificate['user_id']);
+        /** @var $user User */
+        $user = $certificate = Yii::$app->user->identity->certificate->user;
 
         if ($user->load(Yii::$app->request->post()) && $user->validate()) {
             if (Yii::$app->getSecurity()->validatePassword($user->oldpassword, $user->password)) {
@@ -258,14 +300,24 @@ class CertificatesController extends Controller
 
     public function actionActual($id)
     {
-        // Недоступно
-        return false;
-
         $model = $this->findModel($id);
-        $model->actual = 1;
+        $freezer = FreezeUnFreezeCertificate::getUnFreezer($model);
 
-        if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->save()) {
+        if (!$freezer->getCanUnFreeze(true)) {
+            Yii::$app->session->setFlash('error', $freezer->firstErrorAsString);
+
             return $this->redirect(['/certificates/view', 'id' => $id]);
+        }
+        if ($model->load(Yii::$app->request->post())
+            && $model->validate()
+            && $freezer->save()) { /*не явно сохраняет модель*/
+            return $this->redirect(['/certificates/view', 'id' => $id]);
+        }
+        if ($model->hasErrors()) {
+            Yii::$app->session->setFlash('error', array_shift($model->getFirstErrors()));
+        }
+        if ($freezer->hasErrors()) {
+            Yii::$app->session->setFlash('error', $freezer->firstErrorAsString);
         }
 
         return $this->render('nominal', [
@@ -273,16 +325,41 @@ class CertificatesController extends Controller
         ]);
     }
 
+    public function actionNerfNominal($id)
+    {
+        $nerfer = new CertificateNerfNominal($id);
+        if (is_null($nerfer->certificate)) {
+            throw new NotFoundHttpException();
+        }
+
+        if ($nerfer->load(Yii::$app->request->post())
+            && $nerfer->save()) {
+            return $this->redirect(['/certificates/view', 'id' => $id]);
+        }
+        if ($nerfer->certificate->hasErrors()) {
+            Yii::$app->session->setFlash('error', array_shift($nerfer->certificate->getFirstErrors()));
+        }
+        if ($nerfer->hasErrors('certificate')) {
+            Yii::$app->session->setFlash('error', $nerfer->getFirstError('certificate'));
+        }
+
+        return $this->render('nerf_nominal', [
+            'nerfer' => $nerfer,
+        ]);
+    }
+
     public function actionNoactual($id)
     {
-        // Недоступно
-        return false;
+        $freezer = FreezeUnFreezeCertificate::getFreezer($id);
+        if (!$freezer->getCanFreeze(true)) {
+            Yii::$app->session->setFlash('error', $freezer->firstErrorAsString);
 
-        $model = $this->findModel($id);
-        $model->actual = 0;
-        $model->nominal = 0;
+            return $this->redirect(['/certificates/view', 'id' => $id]);
+        }
 
-        $model->save();
+        if (!$freezer->save()) {
+            Yii::$app->session->setFlash('error', $freezer->firstErrorAsString);
+        }
 
         return $this->redirect(['/certificates/view', 'id' => $id]);
     }
@@ -290,7 +367,9 @@ class CertificatesController extends Controller
     /**
      * Deletes an existing Certificates model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
+     *
      * @param integer $id
+     *
      * @return mixed
      */
     public function actionDelete($id)
@@ -316,6 +395,7 @@ class CertificatesController extends Controller
 
         return $this->render('/user/delete', [
             'user' => $user,
+            'title' => null,
         ]);
     }
 
@@ -347,7 +427,6 @@ class CertificatesController extends Controller
 
         return $this->redirect(['/personal/payer-certificates']);
     }
-
 
     public function actionImport()
     {
@@ -414,22 +493,6 @@ class CertificatesController extends Controller
             $model->save();
 
             print_r($model->getErrors());
-        }
-    }
-
-    /**
-     * Finds the Certificates model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Certificates the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Certificates::findOne($id)) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
 }
