@@ -349,10 +349,7 @@ $this->params['breadcrumbs'][] = $this->title;
     }
     ?>
     <?php
-    if ($model->status === Contracts::STATUS_ACTIVE
-        && $model->canBeTerminated
-        && Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)
-        && $certificate->actual) {
+    if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE) && $model->canBeTerminated && $certificate->actual > 0) {
         if (date("m") == 12) {
             $month = 1;
             $year = date("Y") + 1;
@@ -375,57 +372,29 @@ $this->params['breadcrumbs'][] = $this->title;
     }
 
     if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)
-        && $model->status === Contracts::STATUS_CREATED
-        && $certificate->actual
-    ) {
-
-        if (date("m") == 12) {
-            $month = 1;
-            $year = date("Y") + 1;
-        } else {
-            $month = date("m") + 1;
-            $year = date("Y");
-        }
-        echo '<div class="pull-right">';
-        echo '<div class="pull-right">';
-        echo ModalCheckLink::widget([
-            'link' => Html::a('Отменить заявку', Url::to(['/contracts/termrequest', 'id' => $model->id]), ['class' => 'btn btn-danger']),
-            'buttonOptions' => ['label' => 'Отменить заявку', 'class' => 'btn btn-danger'],
-            'content' => 'Отклоняя заявку Вы отказываетесь от заключения договора на обучение по выбранной программе. Деньги, зарезервированные на оплату договора вернутся на сертификат в полном объеме, но передумывать отклонять заявку будет уже поздно. Вы уверены, что хотите отклонить заявку?',
-            'title' => 'Отменить заявку?',
-            'label' => 'Да, я уверен, что хочу Отменить заявку.',
-        ]);
-        echo '</div>';
-    }
-    if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)
-        && ($model->status === Contracts::STATUS_ACCEPTED)
-        && $certificate->actual
-    ) {
-
-        if (date("m") == 12) {
-            $month = 1;
-            $year = date("Y") + 1;
-        } else {
-            $month = date("m") + 1;
-            $year = date("Y");
-        }
-        echo '<div class="pull-right">';
-        echo ModalCheckLink::widget([
-            'link' => Html::a('Отменить заявку', Url::to(['/contracts/termrequest', 'id' => $model->id]), ['class' => 'btn btn-danger']),
-            'buttonOptions' => ['label' => 'Отменить заявку', 'class' => 'btn btn-danger'],
-            'content' => 'Отклоняя заявку Вы отказываетесь от заключения договора на обучение по выбранной программе. Деньги, зарезервированные на оплату договора вернутся на сертификат в полном объеме, но передумывать отклонять заявку будет уже поздно. Вы уверены, что хотите отклонить заявку?',
-            'title' => 'Отменить заявку?',
-            'label' => 'Да, я уверен, что хочу Отменить заявку.',
-        ]);
-        echo '</div>';
-
-    }
-    ?> <!-- + 1 месяц !!! -->
-
-    <?php
-    if ($model->canBeTerminated
         && ($model->status === Contracts::STATUS_CREATED || $model->status === Contracts::STATUS_ACCEPTED)
-        && Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+        && $certificate->actual
+    ) {
+
+        if (date("m") == 12) {
+            $month = 1;
+            $year = date("Y") + 1;
+        } else {
+            $month = date("m") + 1;
+            $year = date("Y");
+        }
+        echo '<div class="pull-right">';
+        echo ModalCheckLink::widget([
+            'link' => Html::a('Отменить заявку', Url::to(['/contracts/termrequest', 'id' => $model->id]), ['class' => 'btn btn-danger']),
+            'buttonOptions' => ['label' => 'Отменить заявку', 'class' => 'btn btn-danger'],
+            'content' => 'Отклоняя заявку Вы отказываетесь от заключения договора на обучение по выбранной программе. Деньги, зарезервированные на оплату договора вернутся на сертификат в полном объеме, но передумывать отклонять заявку будет уже поздно. Вы уверены, что хотите отклонить заявку?',
+            'title' => 'Отменить заявку?',
+            'label' => 'Да, я уверен, что хочу Отменить заявку.',
+        ]);
+        echo '</div>';
+    }
+
+    if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION) && $model->canBeTerminated) {
         if (date("m") == 12) {
             $month = 1;
             $year = date("Y") + 1;

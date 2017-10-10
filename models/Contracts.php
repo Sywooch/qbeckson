@@ -497,7 +497,8 @@ class Contracts extends ActiveRecord
     {
         if ((Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION) || Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE))
             && $this->wait_termnate < 1
-            /*&& $this->status == self::STATUS_ACTIVE*/ && $this->start_edu_contract <= date('Y-m-d')) {
+            && $this->status == self::STATUS_ACTIVE
+            && $this->start_edu_contract <= date('Y-m-d')) {
             return true;
         }
 
