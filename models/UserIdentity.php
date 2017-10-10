@@ -27,6 +27,9 @@ use yii\web\IdentityInterface;
  */
 class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacInterface
 {
+    const STATUS_ACTIVE = 10;
+    const STATUS_BLOCKED = 30;
+
     const ROLE_ADMINISTRATOR = 'admins';
     const ROLE_CERTIFICATE = 'certificate';
     const ROLE_PAYER = 'payer';
@@ -273,5 +276,26 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
         $user->setAttributes(array_intersect_key($this->attributes, $user->attributes));
 
         return $user;
+    }
+
+    public function getIsActive()
+    {
+        return $this->status == self::STATUS_ACTIVE;
+    }
+
+    public function getIsBlocked()
+    {
+        return $this->status == self::STATUS_BLOCKED;
+    }
+
+    /**
+     * @return array
+     */
+    public static function statuses()
+    {
+        return [
+            self::STATUS_ACTIVE => 'Активен',
+            self::STATUS_BLOCKED => 'Заблокирован',
+        ];
     }
 }

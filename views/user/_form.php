@@ -16,12 +16,12 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'password')->passwordInput(['maxlength' => true]) ?>
 
-    <?php /* <?= $form->field($model, 'access_token')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'status')->dropDownList(\app\models\UserIdentity::statuses()) ?>
 
-    <?= $form->field($model, 'auth_key')->textInput(['maxlength' => true]) */ ?>
+    <?= $form->field($model, 'blockReason')->textarea() ?>
 
     <div class="form-group">
-        <?= Html::submitButton($model->isNewRecord ? 'Create' : 'Update', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
+        <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>
