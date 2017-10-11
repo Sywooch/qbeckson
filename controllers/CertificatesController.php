@@ -180,16 +180,24 @@ class CertificatesController extends Controller
 
         if (Yii::$app->request->isPost) {
             if (!$model->actual) {
-                Yii::$app->session->setFlash('danger', 'Сертификат заморожен, невозможно сохранить!!! Надо сначала активировать.');
+                Yii::$app->session->setFlash('danger', 'Сертификат заморожен, невозможно сохранить! Надо сначала активировать.');
 
                 return $this->redirect(['/certificates/view', 'id' => $model->id]);
             }
-            if ($model->load(Yii::$app->request->post())) {
+            if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 $model->fio_child = $model->soname . ' ' . $model->name . ' ' . $model->phname;
                 $model->nominal = $model['oldAttributes']['nominal'];
-                ($model->canChangeGroup && $model->canUseGroup() && $model->setNominals() && $model->save()
-                    && (Yii::$app->session->setFlash('success', 'Изменена группа и пересчитаны номиналы') || true))
-                || Yii::$app->session->setFlash('danger', 'Невозможно установить данную группу, достигнут лимит');
+                if (!$model->canChangeGroup) {
+                    // TODO нужно ввести сценарии или отдельные модели - сейчас юзеры могут изменять любые поля в базе
+                    $model->setOldGroups();
+                } else {
+                    $model->setNominals();
+                }
+                if ($model->save()) {
+                    Yii::$app->session->setFlash('success', 'Изменена группа и пересчитаны номиналы');
+                } else {
+                    Yii::$app->session->setFlash('danger', 'Невозможно установить данную группу, достигнут лимит');
+                }
             }
             if ($user->load(Yii::$app->request->post())) {
                 $password = null;

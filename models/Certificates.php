@@ -144,7 +144,6 @@ class Certificates extends \yii\db\ActiveRecord
             [['contractCount'], 'safe'],
             [['selectCertGroup', 'possible_cert_group'], 'required', 'on' => self::SCENARIO_DEFAULT],
             [['selectCertGroup'], 'validatePossibleCertGroup', 'on' => self::SCENARIO_CREATE_EDIT, 'message' => 'Невозможно установить данный тип, достигнут лимит'],
-            [['possible_cert_group'], 'validatePossibleCertGroup', 'on' => self::SCENARIO_CREATE_EDIT],
             ['selectCertGroup', 'in', 'range' => [self::TYPE_PF, self::TYPE_ACCOUNTING]],
         ];
     }
@@ -196,8 +195,9 @@ class Certificates extends \yii\db\ActiveRecord
         ];
     }
 
-    public function validatePossibleCertGroup($attribute, $param, $validator){
-        if(!$this->canUseGroup()){
+    public function validatePossibleCertGroup($attribute, $param, $validator)
+    {
+        if (!$this->canUseGroup()) {
             $msg = $validator->message ?? 'Невозможно установить данную группу, достигнут лимит';
             $this->addError($attribute, $msg);
         }
@@ -212,6 +212,13 @@ class Certificates extends \yii\db\ActiveRecord
         } else {
             $this->selectCertGroup = self::TYPE_PF;
         }
+    }
+
+    public function setOldGroups()
+    {
+        $this->nominal = $this['oldAttributes']['nominal'];
+        $this->possible_cert_group = $this['oldAttributes']['possible_cert_group'];
+        $this->cert_group = $this['oldAttributes']['cert_group'];
     }
 
     public function setNominals()
@@ -250,7 +257,7 @@ class Certificates extends \yii\db\ActiveRecord
         $groupId = $this->possible_cert_group;
         $group = CertGroup::findOne(['id' => $groupId]);
         if (!$group) {
-            throw  new Exception('Группа не найдена');
+            throw new Exception('Группа не найдена');
         }
 
         return $group->hasVacancy();
@@ -380,12 +387,14 @@ class Certificates extends \yii\db\ActiveRecord
             ->viaTable('certificate_group_queue', ['certificate_id' => 'id']);
     }
 
+    /**
+     * @return bool
+     */
     public function getCanChangeGroup()
     {
         if ($this->isNewRecord) {
             return true;
         }
-
         if ($this->nominal == $this->balance && $this->nominal_f == $this->balance_f) {
             return true;
         }
