@@ -1,10 +1,11 @@
 <?php
 
-use yii\helpers\Html;
 use kartik\form\ActiveForm;
+use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Certificates */
+/* @var $freezer \app\models\certificates\FreezeUnFreezeCertificate */
 
 $this->title = 'Редактировать сертификат: ' . $model->number;
 
@@ -31,7 +32,7 @@ $this->params['breadcrumbs'][] = 'Редактировать';
         if ($roles['payer']) {
             echo Html::a('Отменить', ['view', 'id' => $model->id], ['class' => 'btn btn-danger']);
         }
-        ?>    
+       ?>
         <?= Html::submitButton($model->isNewRecord ? 'Создать' : 'Обновить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
     </div>
 

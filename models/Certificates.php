@@ -3,26 +3,29 @@
 namespace app\models;
 
 use Yii;
+use yii\db\Exception;
 
 /**
  * This is the model class for table "certificates".
  *
- * @property integer $id
- * @property integer $user_id
- * @property string $number
- * @property string $name
- * @property string $soname
- * @property string $phname
- * @property integer $payer_id
- * @property integer $actual
- * @property string $fio_child
- * @property string $fio_parent
- * @property integer     $nominal_f
- * @property integer     $balance_f
- * @property integer     $rezerv_f
- * @property integer     $nominal
- * @property integer     $balance
- * @property integer     $rezerv
+ * @property integer     $id
+ * @property integer     $user_id
+ * @property string      $number
+ * @property string      $name
+ * @property string      $soname
+ * @property string      $phname
+ * @property integer     $payer_id
+ * @property integer     $actual
+ * @property string      $fio_child
+ * @property string      $fio_parent
+ * @property double      $nominal_f
+ * @property double      $balance_f
+ * @property double      $balance_p
+ * @property double      $rezerv_f
+ * @property double      $rezerv_p
+ * @property double      $nominal
+ * @property double      $balance
+ * @property double      $rezerv
  * @property integer     $contracts
  * @property integer     $directivity1
  * @property integer     $directivity2
@@ -30,14 +33,21 @@ use Yii;
  * @property integer     $directivity4
  * @property integer     $directivity5
  * @property integer     $directivity6
+ * @property string      $friezed_at
+ * @property string      $friezed_ballance
+ * @property integer     $possible_cert_group
+ * @property integer     $cert_group
  *
  * @property User        $user
  * @property Payers      $payers
  * @property Payers      $payer
  * @property Contracts[] $contractsModels
+ * @property CertGroup   $certGroup
  */
 class Certificates extends \yii\db\ActiveRecord
 {
+    const SCENARIO_CREATE_EDIT = 'sceanario_create_edit';
+
     const FLAG_GROUP_HAS_NOT_BEEN_CHANGED = 10;
 
     const FLAG_GROUP_HAS_BEEN_CHANGED = 20;
@@ -72,6 +82,40 @@ class Certificates extends \yii\db\ActiveRecord
         return 'certificates';
     }
 
+    public static function getCountCertGroup($certGroupId)
+    {
+        $query = static::find()
+            ->where(['cert_group' => $certGroupId]);
+
+        return $query->count();
+    }
+
+    public static function getCountCertificates($payerId = null)
+    {
+        $query = static::find()
+            ->joinWith(['payers'])
+            ->where(['actual' => 1])
+            ->andWhere('`payers`.operator_id = ' . Yii::$app->operator->identity->id);
+
+        $query->andFilterWhere(['payer_id' => $payerId]);
+
+        return $query->count();
+    }
+
+    public static function getSumCertificates($payerId = null)
+    {
+        $query = static::find()
+            ->joinWith(['payers'])
+            ->where(['actual' => 1])
+            ->andWhere('`payers`.operator_id = ' . Yii::$app->operator->identity->id);
+
+        if (!empty($payerId)) {
+            $query->andWhere(['payer_id' => $payerId]);
+        }
+
+        return $query->sum('nominal');
+    }
+
     public function scenarios()
     {
         $scenarios = parent::scenarios();
@@ -90,14 +134,16 @@ class Certificates extends \yii\db\ActiveRecord
             [['user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'cert_group', 'pasport_s', 'pasport_n', 'pasport_v', 'phone', 'possible_cert_group', 'updated_cert_group'], 'integer'],
             [['nominal', 'nominal_f'], 'number', 'max' => 100000],
             [['number'], 'string', 'length' => [10, 10]],
-            [['balance', 'balance_f', 'rezerv', 'rezerv_f'], 'number'],
+            [['balance', 'balance_f', 'rezerv', 'rezerv_f', 'friezed_ballance'], 'number'],
             [['number'], 'unique'],
+            [['friezed_at'], 'date', 'format' => 'Y-m-d'],
             [['fio_child', 'fio_parent', 'birthday', 'address'], 'string', 'max' => 255],
             [['name', 'soname', 'phname'], 'string', 'max' => 50],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
             [['payer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payers::className(), 'targetAttribute' => ['payer_id' => 'id']],
             [['contractCount'], 'safe'],
             [['selectCertGroup', 'possible_cert_group'], 'required', 'on' => self::SCENARIO_DEFAULT],
+            [['selectCertGroup'], 'validatePossibleCertGroup', 'on' => self::SCENARIO_CREATE_EDIT, 'message' => 'Невозможно установить данный тип, достигнут лимит'],
             ['selectCertGroup', 'in', 'range' => [self::TYPE_PF, self::TYPE_ACCOUNTING]],
         ];
     }
@@ -149,6 +195,15 @@ class Certificates extends \yii\db\ActiveRecord
         ];
     }
 
+    public function validatePossibleCertGroup($attribute, $param, $validator)
+    {
+        if (!$this->canUseGroup()) {
+            $msg = $validator->message ?? 'Невозможно установить данную группу, достигнут лимит';
+            $this->addError($attribute, $msg);
+        }
+    }
+
+
     public function afterFind()
     {
         parent::afterFind();
@@ -159,6 +214,13 @@ class Certificates extends \yii\db\ActiveRecord
         }
     }
 
+    public function setOldGroups()
+    {
+        $this->nominal = $this['oldAttributes']['nominal'];
+        $this->possible_cert_group = $this['oldAttributes']['possible_cert_group'];
+        $this->cert_group = $this['oldAttributes']['cert_group'];
+    }
+
     public function setNominals()
     {
         if (!empty($this->selectCertGroup) && $this->selectCertGroup == self::TYPE_PF) {
@@ -167,16 +229,41 @@ class Certificates extends \yii\db\ActiveRecord
             $this->nominal_f = $this->possibleCertGroup->nominal_f;
             $this->balance = $this->nominal;
             $this->balance_f = $this->nominal_f;
+
+            return true;
         } elseif (!empty($this->selectCertGroup) && $certGroup = $this->payers->getCertGroups(1)->one()) {
             $this->cert_group = $certGroup->id;
             $this->nominal = 0;
             $this->nominal_f = 0;
             $this->balance = 0;
             $this->balance_f = 0;
+
+            return true;
         }
+
+        return false;
     }
 
-    public function changeBalance($contract)
+    public function canUseGroup()
+    {
+        if ($this->selectCertGroup && $this->selectCertGroup == self::TYPE_ACCOUNTING) {
+
+            return true;
+        }
+        if (!$this->isNewRecord && (int)$this->oldAttributes['possible_cert_group'] === (int)$this->possible_cert_group) {
+
+            return true;
+        }
+        $groupId = $this->possible_cert_group;
+        $group = CertGroup::findOne(['id' => $groupId]);
+        if (!$group) {
+            throw new Exception('Группа не найдена');
+        }
+
+        return $group->hasVacancy();
+    }
+
+    public function changeBalance(Contracts $contract)
     {
         if ($contract->period === Contracts::CURRENT_REALIZATION_PERIOD) {
             $this->balance += $contract->rezerv;
@@ -188,8 +275,11 @@ class Certificates extends \yii\db\ActiveRecord
             $this->balance_p += $contract->rezerv;
             $this->rezerv_p -= $contract->rezerv;
         }
-
-        return $this->save();
+        $result = $this->save();
+        if(!$result){
+            Yii::trace($this->getErrors());
+        }
+        return $result;
     }
 
     public function getCertGroupTypes()
@@ -216,7 +306,7 @@ class Certificates extends \yii\db\ActiveRecord
     public function getHasContracts()
     {
         if (Contracts::getCountContracts([
-            'status'        => [
+            'status' => [
                 Contracts::STATUS_CREATED,
                 Contracts::STATUS_ACTIVE,
                 Contracts::STATUS_REFUSED,
@@ -259,17 +349,9 @@ class Certificates extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getContractsModels()
-    {
-        return $this->hasMany(Contracts::className(), ['certificate_id' => 'id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
     public function getCertGroup()
     {
-        return $this->hasOne(CertGroup::className(), ['id' => 'cert_group']);
+        return $this->hasOne(CertGroup::className(), ['id' => 'cert_group'])->inverseOf('certificates');
     }
 
     /**
@@ -299,32 +381,20 @@ class Certificates extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCertificateGroupQueues($certificateId = null, $certGroupId = null)
+    public function getCertGroupsQueue()
     {
-        $relation = $this->hasMany(CertificateGroupQueue::className(), ['certificate_id' => 'id']);
-
-        $relation->andFilterWhere([
-            'certificate_id' => $certificateId,
-            'cert_group_id' => $certGroupId,
-        ]);
-
-        return $relation;
+        return $this->hasMany(CertGroup::className(), ['id' => 'cert_group_id'])
+            ->viaTable('certificate_group_queue', ['certificate_id' => 'id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return bool
      */
-    public function getCertGroupsQueue()
-    {
-        return $this->hasMany(CertGroup::className(), ['id' => 'cert_group_id'])->viaTable('certificate_group_queue', ['certificate_id' => 'id']);
-    }
-
     public function getCanChangeGroup()
     {
         if ($this->isNewRecord) {
             return true;
         }
-
         if ($this->nominal == $this->balance && $this->nominal_f == $this->balance_f) {
             return true;
         }
@@ -397,38 +467,19 @@ class Certificates extends \yii\db\ActiveRecord
         }
     }
 
-    public static function getCountCertGroup($certGroupId)
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCertificateGroupQueues($certificateId = null, $certGroupId = null)
     {
-        $query = static::find()
-            ->where(['cert_group' => $certGroupId]);
+        $relation = $this->hasMany(CertificateGroupQueue::className(), ['certificate_id' => 'id']);
 
-        return $query->count();
-    }
+        $relation->andFilterWhere([
+            'certificate_id' => $certificateId,
+            'cert_group_id' => $certGroupId,
+        ]);
 
-    public static function getCountCertificates($payerId = null)
-    {
-        $query = static::find()
-            ->joinWith(['payers'])
-            ->where(['actual' => 1])
-            ->andWhere('`payers`.operator_id = ' . Yii::$app->operator->identity->id);
-
-        $query->andFilterWhere(['payer_id' => $payerId]);
-
-        return $query->count();
-    }
-
-    public static function getSumCertificates($payerId = null)
-    {
-        $query = static::find()
-            ->joinWith(['payers'])
-            ->where(['actual' => 1])
-            ->andWhere('`payers`.operator_id = ' . Yii::$app->operator->identity->id);
-
-        if (!empty($payerId)) {
-            $query->andWhere(['payer_id' => $payerId]);
-        }
-
-        return $query->sum('nominal');
+        return $relation;
     }
 
     /**
@@ -439,7 +490,7 @@ class Certificates extends \yii\db\ActiveRecord
     public function getActiveContractsByProgram($programId)
     {
         return $this->getContractsModels()->where([
-            Contracts::tableName() . '.status'     => [
+            Contracts::tableName() . '.status' => [
                 Contracts::STATUS_CREATED,
                 Contracts::STATUS_ACTIVE,
                 Contracts::STATUS_ACCEPTED
@@ -448,6 +499,13 @@ class Certificates extends \yii\db\ActiveRecord
         ]);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getContractsModels()
+    {
+        return $this->hasMany(Contracts::className(), ['certificate_id' => 'id']);
+    }
 
     /**
      * @deprecated
@@ -475,6 +533,18 @@ class Certificates extends \yii\db\ActiveRecord
         }
 
         return $query->one();
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     * */
+    public function getCurrentActiveContracts()
+    {
+        $now = (new \DateTime())->format('Y-m-d');
+
+        return $this->getContractsModels()
+            ->andWhere(['<=', Contracts::tableName() . '.start_edu_contract', $now])
+            ->andWhere(['>=', Contracts::tableName() . '.stop_edu_contract', $now]);
     }
 
 }

@@ -101,7 +101,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'options' => ['id' => 'invoices'],
         'dataProvider' => $ContractsProvider,
-        //'filterModel' => $searchContracts,
         //'showPageSummary' => true,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],

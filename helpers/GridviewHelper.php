@@ -70,8 +70,10 @@ class GridviewHelper
 
     /**
      * @deprecated
+     *
      * @param array $columns
      * @param array $excludeAttributes
+     *
      * @return array
      */
     public static function prepareExportColumns(

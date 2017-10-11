@@ -8,6 +8,8 @@ use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Certificates */
+/* @var $freezer \app\models\certificates\FreezeUnFreezeCertificate */
+/* @var $nerfer \app\models\certificates\CertificateNerfNominal */
 
 $this->title = $model->number;
 
@@ -42,7 +44,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'nominal',
                 'certGroup.group',
-                'rezerv',
+                [
+                    'attribute' => 'rezerv',
+                    'value' => round($model->rezerv, 2),
+                ],
                 'balance',
                 [
                     'label'=> Html::a(
@@ -75,6 +80,54 @@ $this->params['breadcrumbs'][] = $this->title;
 
         if (Yii::$app->user->can('payer')) {
             echo '<div class="pull-right">';
+            if (PermissionHelper::checkMonitorUrl('/certificates/actual') /*&& $model->canFreez()*/) {
+                if ($model->actual) {
+                    if ($freezer->canFreeze) {
+                        echo \app\components\widgets\modalCheckLink\ModalCheckLink::widget([
+                            'link' => Html::a('Заморозить', Url::to(['/certificates/noactual', 'id' => $model->id]),
+                                ['class' => 'btn btn-danger']),
+                            'buttonOptions' => ['label' => 'Заморозить', 'class' => 'btn btn-danger'],
+                            'content' => 'В случае если Вы заморозите сертификат все средства его баланс будет обнулен. Повторно разморозить сертификат не удастся до наступления следующего периода программы персонифицированного финансирования. Вы уверены, что имеете достаточные основания для заморозки сертификата в соответствии с правилами персонифицированного финансирования?',
+                            'label' => 'Да, я уверен, что хочу заморозить сертификат.',
+                            'title' => 'Заморозить сертификат?'
+                        ]);
+                    } else {
+                        echo \app\components\widgets\ButtonWithInfo::widget([
+                            'label' => 'Заморозить',
+                            'message' => $freezer->firstErrorAsString,
+                            'options' => ['disabled' => 'disabled',
+                                'class' => 'btn btn-theme',]
+                        ]);
+                    }
+                    echo '&nbsp;';
+                    if ($nerfer->canNerf) {
+
+                        echo Html::a('Уменьшить номинал', Url::to(['/certificates/nerf-nominal', 'id' => $model->id]), ['class' => 'btn btn-primary']);
+                    } else {
+                        echo \app\components\widgets\ButtonWithInfo::widget([
+                            'label' => 'Уменьшить номинал',
+                            'message' => $nerfer->firstErrorAsString,
+                            'options' => ['disabled' => 'disabled',
+                                'class' => 'btn btn-primary',]
+                        ]);
+                    }
+
+
+
+                } else {
+                    if ($freezer->canUnFreeze) {
+                        echo Html::a('Активировать', Url::to(['/certificates/actual', 'id' => $model->id]), ['class' => 'btn btn-success']);
+                    } else {
+                        echo \app\components\widgets\ButtonWithInfo::widget([
+                            'label' => 'Активировать',
+                            'message' => $freezer->firstErrorAsString,
+                            'options' => ['disabled' => 'disabled',
+                                'class' => 'btn btn-primary',]
+                        ]);
+                    }
+                }
+                echo '&nbsp;';
+            }
             if (!$model->hasContracts && PermissionHelper::checkMonitorUrl('/certificates/delete')) {
                 echo Html::a('Удалить', Url::to(['/certificates/delete', 'id' => $model->id]), ['class' => 'btn btn-danger',
                     'data' => [

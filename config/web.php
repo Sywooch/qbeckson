@@ -184,7 +184,14 @@ $config = [
                     'roles' => ['payers']
                 ],
             ],
-            'file-storage' => [
+            'invoices'      => [
+                [
+                    'allow'   => true,
+                    'actions' => ['roll-back'],
+                    'roles'   => ['payers']
+                ],
+            ],
+            'file-storage'  => [
                 [
                     'allow' => true,
                 ],
@@ -293,6 +300,11 @@ $config = [
                     'allow' => true,
                     'roles' => ['certificate'],
                 ],
+                [
+                    'actions' => ['nerf-nominal'],
+                    'allow' => true,
+                    'roles' => ['payer'],
+                ]
             ],
             'site/save-filter' => [
                 [

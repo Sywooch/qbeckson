@@ -22,6 +22,8 @@ use yii\helpers\ArrayHelper;
  * @property string       $link
  * @property integer      $prepayment
  * @property integer      $status
+ * @property String       $statusAsString
+ *
  *
  * @property Contracts    $contract
  * @property Organization $organization
@@ -91,10 +93,20 @@ class Invoices extends ActiveRecord
             'prepayment'      => 'Аванс',
             'completeness'    => 'ID полноты оказаных услуг',
             'status'          => 'Статус',
+            'statusAsString'  => 'Статус',
             'payer'           => 'Плательщик',
         ];
     }
 
+    /** @return string */
+    public function getStatusAsString()
+    {
+        if (array_key_exists($this->status, self::statuses())) {
+            return self::statuses()[$this->status];
+        } else {
+            return '---';
+        }
+    }
 
     /**
      * @return \yii\db\ActiveQuery
@@ -135,6 +147,7 @@ class Invoices extends ActiveRecord
     {
         if ($completenesses = Completeness::findInvoicesByContracts(explode(',', $this->contracts), $this->month, date('Y', strtotime($this->date)))) {
             foreach ($completenesses as $completeness) {
+                /** @var $certificate Certificates */
                 $certificate = $completeness->contract->certificate;
                 $date = join('-', [$completeness->year, $completeness->month, '01']);
                 $monthlyPrice = $completeness->contract->getMonthlyPrice(strtotime($date));

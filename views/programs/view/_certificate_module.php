@@ -131,7 +131,13 @@ if (count($cooperate)) {
                                          ]);
                                  }
 
-                                 return false;
+                                 return \app\components\widgets\ButtonWithInfo::widget([
+                                     'label' => 'Выбрать',
+                                     'message' => !$model->freePlaces ? 'Нет свободных мест' : 'Ваш сертификат заморожен',
+                                     'options' => ['disabled' => 'disabled',
+                                         'class' => 'btn btn-default',
+                                         'style' => ['color' => '#333'],]
+                                 ]);
                              },
 
                          ]

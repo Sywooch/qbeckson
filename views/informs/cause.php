@@ -6,6 +6,7 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model app\models\Informs */
 /* @var $form yii\widgets\ActiveForm */
+/* @var $informs \app\models\Informs */
 ?>
 
 <div class="informs-form">

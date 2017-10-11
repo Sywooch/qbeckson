@@ -16,7 +16,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
 /* @var $this yii\web\View */
 /* @var $searchInvoices \app\models\search\InvoicesSearch */
-/* @var $invoicesProvider \yii\data\ActiveDataProvider */
+/* @var $searchInvoices \app\models\search\InvoicesSearch */
+/* @var $munList array */
 
 $columns = [
     [
@@ -113,10 +114,15 @@ $columns = [
         'template'     => '{view}',
         'searchFilter' => false,
     ],
+    [
+        'attribute' => 'mun',
+        'type'      => SearchFilter::TYPE_DROPDOWN,
+        'data'      => $munList,
+        'visible'   => false
+    ],
 ];
 
 $preparedColumns = GridviewHelper::prepareColumns('invoices', $columns);
-
 ?>
 <?php if ($searchInvoices->organization_id && $searchInvoices->organization) : ?>
     <p class="lead">Показаны результаты для организации: <?= $searchInvoices->organization; ?></p>

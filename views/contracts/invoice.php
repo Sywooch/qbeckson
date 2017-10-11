@@ -1,9 +1,8 @@
 <?php
 
 use yii\helpers\Html;
-//use yii\grid\GridView;
 use yii\grid\GridView;
-use app\models\Organization;
+use app\models\UserIdentity;
 use app\models\Contracts;
 
 /* @var $this yii\web\View */
@@ -35,9 +34,10 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="invoices-index">
     
     <?php
-    $organizations = new Organization();
-        $organization = $organizations->getOrganization();
-    
+    /** @var $identity UserIdentity */
+    $identity = Yii::$app->user->identity;
+    $organization = $identity->organization;
+
     $lmonth = date('m')-1;
             $start = date('Y').'-'.$lmonth.'-01';
             
@@ -124,7 +124,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'options' => ['id' => 'invoices'],
         'dataProvider' => $ContractsProvider,
-        //'filterModel' => $searchContracts,
         'summary' => false,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
