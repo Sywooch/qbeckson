@@ -14,7 +14,7 @@ use yii\widgets\ActiveForm;
  */
 class Export extends Widget
 {
-    public $searchModel;
+    public $dataProvider;
 
     public $group;
 
@@ -28,14 +28,18 @@ class Export extends Widget
     public function run()
     {
         if (Yii::$app->request->isPost && !empty(Yii::$app->request->post('initExport')) && Yii::$app->request->post('initExport') == 1) {
-            print_r(GridviewHelper::prepareColumns($this->table, $this->columns, empty($this->group) ? null : $this->group, 'export'));exit;
-            ExportFile::createInstance(GridviewHelper::getFileName($this->group), $this->group, $this->table, $this->searchModel, $this->columns);
+            $doc = ExportFile::createInstance(GridviewHelper::getFileName($this->group), $this->group, $this->table, $this->dataProvider, $this->columns);
+            if (!empty($doc)) {
+                exec("php " . Yii::getAlias('@app') . '\yii export/make ' . $doc->id . ' > /dev/null 2>&1 &', $resultArray);
+            }
             $this->view->context->redirect(['personal/' . $this->group, '#' => 'excel-download']);
             Yii::$app->end();
         }
 
-        if (0) {
-            echo '<p>Пожалуйста, обновите эту страницу через несколько минут &ndash; ваша выписка уже почти готова.</p>';
+        echo '<span id="excel-download"></span>';
+        $doc = ExportFile::findByUserId(Yii::$app->user->id, $this->group);
+        if (!empty($doc) && $doc->status == ExportFile::STATUS_PROCESS) {
+            echo '<div class="well text-warning">Пожалуйста, обновите эту страницу через несколько минут &ndash; ваша выписка уже почти готова.</div>';
         } else {
             $form = ActiveForm::begin();
             echo Html::hiddenInput('initExport', 1);
@@ -43,8 +47,8 @@ class Export extends Widget
             ActiveForm::end();
         }
 
-        if ($doc = \app\models\ExportFile::findByUserId(Yii::$app->user->id, $this->group)) {
-            echo '&nbsp;&nbsp;' . Html::a('Скачать выписку от ' . Yii::$app->formatter->asDatetime($doc->created_at), Yii::getAlias('@pfdo/uploads/' . $this->table . '/' . $doc->file), ['class' => 'btn btn-primary']);
+        if (!empty($doc) && $doc->status == ExportFile::STATUS_READY) {
+            echo '<br />' . Html::a('Скачать выписку от ' . Yii::$app->formatter->asDatetime($doc->created_at), Yii::getAlias('@pfdo/uploads/' . $this->table . '/' . $doc->file . '.xls'), ['class' => 'btn btn-primary']);
         }
     }
 }

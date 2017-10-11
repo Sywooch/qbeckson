@@ -122,8 +122,8 @@ $columns = [
 ]); ?>
 <?php
 echo \app\widgets\Export::widget([
-    'searchModel' => $searchCertificates,
-    'columns' => $columns,
+    'dataProvider' => $searchCertificates->search(Yii::$app->request->queryParams, 999999),
+    'columns' => GridviewHelper::prepareColumns('certificates', $columns, null, 'export'),
     'group' => 'operator-certificates',
     'table' => 'certificates',
 ]);

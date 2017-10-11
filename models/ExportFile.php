@@ -19,7 +19,7 @@ use yii\helpers\ArrayHelper;
  * @property string $file
  * @property integer $created_at
  * $property integer $status
- * @property string $search_model
+ * @property string $data_provider
  * @property string $columns
  * @property string $group
  * @property string $table
@@ -53,8 +53,9 @@ class ExportFile extends \yii\db\ActiveRecord
             ],
             'array2string' => [
                 'class' => ArrayOrStringBehavior::className(),
-                'attributes1' => ['search_model', 'columns'],
-                'attributes2' => ['search_model', 'columns'],
+                'attributes1' => ['data_provider', 'columns'],
+                'attributes2' => ['data_provider', 'columns'],
+                'useClosureSerializator' => true,
             ],
         ];
     }
@@ -69,7 +70,7 @@ class ExportFile extends \yii\db\ActiveRecord
             [['item_list', 'group', 'table'], 'string'],
             [['path', 'file', 'export_type'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
-            [['created_at', 'search_model', 'columns'], 'safe'],
+            [['created_at', 'data_provider', 'columns'], 'safe'],
         ];
     }
 
@@ -109,22 +110,27 @@ class ExportFile extends \yii\db\ActiveRecord
         return $query->one();
     }
 
-    public static function createInstance($file, $group, $table, $searchModel, $columns)
+    public static function createInstance($file, $group, $table, $dataProvider, $columns)
     {
         if ($doc = static::findByUserId(Yii::$app->user->id, $group)) {
             $doc->created_at = time();
+            $doc->status = static::STATUS_PROCESS;
         } else {
             $doc = new static([
                 'file' => $file,
                 'export_type' => $group,
                 'group' => $group,
                 'columns' => $columns,
-                'search_model' => $searchModel,
+                'data_provider' => $dataProvider,
                 'table' => $table,
             ]);
         }
 
-        return $doc->save();
+        if ($doc->save()) {
+            return $doc;
+        }
+
+        return null;
     }
 
     public static function getExportTypeFromFile($file)
@@ -134,5 +140,11 @@ class ExportFile extends \yii\db\ActiveRecord
         $pieces = explode('.', $typeWithExtension);
 
         return trim($pieces[0]);
+    }
+
+    public function setReady() {
+        $this->status = self::STATUS_READY;
+
+        return $this->save(false, ['status']);
     }
 }

@@ -16,6 +16,10 @@ $config = [
         'authManager' => [
             'class' => 'yii\rbac\DbManager',
         ],
+        'urlManager' => [
+            'class' => 'yii\web\UrlManager',
+            'scriptUrl' => 'http://hmao.pfdo.ru',
+        ],
         'operator' => [
             'class' => 'app\components\Operator',
         ],
