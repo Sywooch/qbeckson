@@ -30,7 +30,12 @@ class Export extends Widget
         if (Yii::$app->request->isPost && !empty(Yii::$app->request->post('initExport')) && Yii::$app->request->post('initExport') == 1) {
             $doc = ExportFile::createInstance(GridviewHelper::getFileName($this->group), $this->group, $this->table, $this->dataProvider, $this->columns);
             if (!empty($doc)) {
-                exec("php " . Yii::getAlias('@app') . '\yii export/make ' . $doc->id . ' > /dev/null 2>&1 &', $resultArray);
+                $filepath = Yii::getAlias('@pfdoroot/uploads/') . $doc->table . '/' . $doc->file . '.xls';
+                if (file_exists($filepath))
+                {
+                    @unlink($filepath);
+                }
+                exec("php " . Yii::getAlias('@app') . '/yii export/make ' . $doc->id . ' > /dev/null 2>&1 &', $resultArray);
             }
             $this->view->context->redirect(['personal/' . $this->group, '#' => 'excel-download']);
             Yii::$app->end();
