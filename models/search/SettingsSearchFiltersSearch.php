@@ -2,10 +2,9 @@
 
 namespace app\models\search;
 
-use Yii;
+use app\models\SettingsSearchFilters;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\SettingsSearchFilters;
 
 /**
  * SettingsSearchFiltersSearch represents the model behind the search form about `app\models\SettingsSearchFilters`.
@@ -19,7 +18,7 @@ class SettingsSearchFiltersSearch extends SettingsSearchFilters
     {
         return [
             [['id', 'is_active'], 'integer'],
-            [['table_name', 'table_columns'], 'safe'],
+            [['table_name', 'table_columns', 'type'], 'safe'],
         ];
     }
 

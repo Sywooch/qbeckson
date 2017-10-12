@@ -246,10 +246,19 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
         $query = UserSearchFiltersAssignment::find()
             ->joinWith(['filter'])
             ->andWhere([
+                'settings_search_filters.role' => array_shift(Yii::$app->authManager->getRolesByUser(Yii::$app->user->id))->name,
                 'user_search_filters_assignment.user_id' => Yii::$app->user->id,
                 'settings_search_filters.table_name'     => $tableName,
-                'settings_search_filters.type'           => $type
             ]);
+        if (is_null($type) || strlen($type) < 1) {
+            $query->andWhere(['OR', [
+                'settings_search_filters.type' => null
+            ], [
+                'settings_search_filters.type' => ''
+            ]]);
+        } else {
+            $query->andWhere(['settings_search_filters.type' => $type]);
+        }
 
         return $query->one();
     }
