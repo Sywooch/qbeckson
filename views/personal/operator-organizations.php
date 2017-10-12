@@ -224,15 +224,12 @@ $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $reques
             'summary' => false,
             'columns' => $preparedRegistryColumns,
         ]); ?>
-        <?php
-        echo $this->render('/common/_export', [
-            'dataProvider' => $allRegistryProvider,
-            'columns' => $registryColumns,
-            'type' => 'register',
+        <?= \app\widgets\Export::widget([
+            'dataProvider' => $searchRegistry->search(Yii::$app->request->queryParams, 999999),
+            'columns' => GridviewHelper::prepareColumns('organization', $registryColumns, 'register', 'export'),
             'group' => 'operator-organizations',
             'table' => 'organization',
-        ]);
-        ?>
+        ]); ?>
     </div>
     <div id="panel-requests" class="tab-pane fade">
         <?= SearchFilter::widget([

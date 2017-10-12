@@ -4,6 +4,9 @@ use trntv\filekit\Storage;
 
 Yii::setAlias('@tests', dirname(__DIR__) . '/tests/codeception');
 
+// TODO на на что не влияет, лишь выдает ошибку (программы, экспорт) - убрать, когда все картинки будут сохраняться на @pfdoroot
+Yii::setAlias('@webroot', dirname(__DIR__) . '/runtime');
+
 $params = require(__DIR__ . '/params.php');
 $db = require(__DIR__ . '/db.php');
 

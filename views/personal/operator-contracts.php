@@ -322,15 +322,12 @@ $preparedRefusedColumns = GridviewHelper::prepareColumns('contracts', $refusedCo
             },
             'columns' => $preparedActiveColumns,
         ]); ?>
-        <?php
-        echo $this->render('/common/_export', [
-            'dataProvider' => $allActiveContractsProvider,
-            'columns' => $activeColumns,
-            'type' => 'active',
+        <?= \app\widgets\Export::widget([
+            'dataProvider' => $searchActiveContracts->search(Yii::$app->request->queryParams, 999999),
+            'columns' => GridviewHelper::prepareColumns('contracts', $activeColumns, 'active', 'export'),
             'group' => 'operator-contracts',
             'table' => 'contracts',
-        ]);
-        ?>
+        ]); ?>
     </div>
     <div id="panel2" class="tab-pane fade">
         <?= SearchFilter::widget([

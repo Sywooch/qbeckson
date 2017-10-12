@@ -39,7 +39,7 @@ class ContractsOrgclearSearch extends Contracts
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $pageSize = 50)
     {
         $query = Contracts::find();
 
@@ -47,6 +47,10 @@ class ContractsOrgclearSearch extends Contracts
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'pagination' => [
+                'defaultPageSize' => false,
+                'pageSize' => $pageSize,
+            ]
         ]);
 
         $this->load($params);

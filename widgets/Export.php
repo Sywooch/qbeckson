@@ -22,12 +22,14 @@ class Export extends Widget
 
     public $table;
 
+    public $redirectUrl;
+
     /**
      * @return string
      */
     public function run()
     {
-        if (Yii::$app->request->isPost && !empty(Yii::$app->request->post('initExport')) && Yii::$app->request->post('initExport') == 1) {
+        if (Yii::$app->request->isPost && !empty(Yii::$app->request->post('initExport')) && Yii::$app->request->post('initExport') == $this->group) {
             $doc = ExportFile::createInstance(GridviewHelper::getFileName($this->group), $this->group, $this->table, $this->dataProvider, $this->columns);
             if (!empty($doc)) {
                 $filepath = Yii::getAlias('@pfdoroot/uploads/') . $doc->table . '/' . $doc->file . '.xls';
@@ -35,9 +37,10 @@ class Export extends Widget
                 {
                     @unlink($filepath);
                 }
-                exec("php " . Yii::getAlias('@app') . '/yii export/make ' . $doc->id . ' > /dev/null 2>&1 &', $resultArray);
+                //exec("php " . Yii::getAlias('@app') . '/yii export/make ' . $doc->id . ' > /dev/null 2>&1 &', $resultArray);
+                exec("php " . Yii::getAlias('@app') . '/yii export/make ' . $doc->id, $resultArray);
             }
-            $this->view->context->redirect(['personal/' . $this->group, '#' => 'excel-download']);
+            $this->view->context->redirect(['personal/' . (!empty($this->redirectUrl) ? $this->redirectUrl : $this->group), '#' => 'excel-download']);
             Yii::$app->end();
         }
 
@@ -47,7 +50,8 @@ class Export extends Widget
             echo '<div class="well text-warning">Пожалуйста, обновите эту страницу через несколько минут &ndash; ваша выписка уже почти готова.</div>';
         } else {
             $form = ActiveForm::begin();
-            echo Html::hiddenInput('initExport', 1);
+            echo Html::hiddenInput('initExport', $this->group);
+            echo "<p class=\"lead\">Экспорт данных:</p>";
             echo Html::submitButton('Сформировать новую выписку из реестра', ['class' => 'btn btn-success']) ;
             ActiveForm::end();
         }

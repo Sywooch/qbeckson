@@ -180,14 +180,12 @@ $columnsNonActive = [
                 'filterModel' => null,
                 'columns' => GridviewHelper::prepareColumns('cooperate', $columns),
             ]); ?>
-            <?php
-            echo $this->render('/common/_export', [
-                'dataProvider' => $allActiveProvider,
-                'columns' => $columns,
+            <?= \app\widgets\Export::widget([
+                'dataProvider' => $searchActive->search(Yii::$app->request->queryParams, 999999),
+                'columns' => GridviewHelper::prepareColumns('cooperate', $columns, null, 'export'),
                 'group' => 'operator-cooperates',
                 'table' => 'cooperate',
-            ]);
-            ?>
+            ]); ?>
         </div>
         <div id="panel2" class="tab-pane fade">
             <?= GridView::widget([

@@ -102,11 +102,9 @@ $preparedColumns = GridviewHelper::prepareColumns('payers', $columns);
     'summary' => false,
     'columns' => $preparedColumns,
 ]); ?>
-<?php
-echo $this->render('/common/_export', [
-    'dataProvider' => $allPayersProvider,
-    'columns' => $columns,
+<?= \app\widgets\Export::widget([
+    'dataProvider' => $searchPayers->search(Yii::$app->request->queryParams, 999999),
+    'columns' => GridviewHelper::prepareColumns('payers', $columns, null, 'export'),
     'group' => 'operator-payers',
     'table' => 'payers',
-]);
-?>
+]); ?>
