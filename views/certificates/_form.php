@@ -12,13 +12,9 @@ use yii\helpers\Html;
 
 echo Dialog::widget(['options' => ['title' => 'Предупреждение',]]);
 
-
 ?>
-
     <div class="certificates-form" ng-app>
-
         <?php $form = ActiveForm::begin(['enableAjaxValidation' => true]); ?>
-
         <?php
         $formId = $form->getId();
         $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);

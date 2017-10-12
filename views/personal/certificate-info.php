@@ -52,7 +52,7 @@ $this->params['breadcrumbs'][] = ['label' => 'Персональная инфо�
                         <strong class="bignumbers"><?= $certificate->balance_p ?></strong>
                     </p>
                     <p class="lead">Зарезервировано на оплату договоров в прошлом периоде<br>
-                        <strong class="bignumbers"><?= $certificate->rezerv_p ?></strong>
+                        <strong class="bignumbers"><?= round($certificate->rezerv_p, 2) ?></strong>
                     </p>
                 </div>
                 <div role="tabpanel" class="tab-pane active" id="current">
@@ -63,7 +63,7 @@ $this->params['breadcrumbs'][] = ['label' => 'Персональная инфо�
                         <strong class="bignumbers"><?= $certificate->balance ?></strong>
                     </p>
                     <p class="lead">Зарезервировано на оплату договоров<br>
-                        <strong class="bignumbers"><?= $certificate->rezerv ?></strong>
+                        <strong class="bignumbers"><?= round($certificate->rezerv, 2) ?></strong>
                     </p>
                 </div>
                 <div role="tabpanel" class="tab-pane" id="future">
@@ -75,7 +75,7 @@ $this->params['breadcrumbs'][] = ['label' => 'Персональная инфо�
                             <strong class="bignumbers"><?= $certificate->balance_f ?></strong>
                         </p>
                         <p class="lead">Зарезервировано на оплату договоров на будущий период<br>
-                            <strong class="bignumbers"><?= $certificate->rezerv_f ?></strong>
+                            <strong class="bignumbers"><?= round($certificate->rezerv_f, 2) ?></strong>
                         </p>
                     <?php else: ?>
                         <p>Номинал на будущий период пока не определен.</p>

@@ -15,6 +15,8 @@ class UserForm extends Model
 {
     public $password;
     public $username;
+    public $status;
+    public $blockReason;
     public $accessRights;
 
     private $model;
@@ -36,6 +38,8 @@ class UserForm extends Model
                     }
                 }
             ],
+            ['status', 'in', 'range' => array_keys(UserIdentity::statuses())],
+            ['blockReason', 'string'],
             ['accessRights', 'safe'],
         ];
     }
@@ -48,6 +52,8 @@ class UserForm extends Model
         return [
             'username' => 'Имя пользователя',
             'password' => 'Пароль',
+            'status' => 'Текущий статус',
+            'blockReason' => 'Причина блокировки',
             'accessRights' => 'Права доступа',
         ];
     }
@@ -110,6 +116,8 @@ class UserForm extends Model
     {
         if ($this->validate() && ($user = $this->getModel())) {
             $user->username = $this->username;
+            $user->status = $this->status;
+            $user->block_reason = $this->blockReason;
             if ($this->password) {
                 $user->setPassword($this->password);
             }
@@ -127,6 +135,8 @@ class UserForm extends Model
     {
         $this->model = $model;
         $this->username = $model->username;
+        $this->status = $model->status;
+        $this->blockReason = $model->block_reason;
         $this->accessRights = $model->userMonitorAssignment->access_rights;
     }
 
