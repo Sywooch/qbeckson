@@ -37,8 +37,8 @@ class Export extends Widget
                 {
                     @unlink($filepath);
                 }
-                //exec("php " . Yii::getAlias('@app') . '/yii export/make ' . $doc->id . ' > /dev/null 2>&1 &', $resultArray);
-                exec("php " . Yii::getAlias('@app') . '/yii export/make ' . $doc->id, $resultArray);
+                exec("php " . Yii::getAlias('@app') . '/yii export/make ' . $doc->id . ' > /dev/null 2>&1 &', $resultArray);
+                //exec("php " . Yii::getAlias('@app') . '/yii export/make ' . $doc->id, $resultArray);
             }
             $this->view->context->redirect(['personal/' . (!empty($this->redirectUrl) ? $this->redirectUrl : $this->group), '#' => 'excel-download']);
             Yii::$app->end();

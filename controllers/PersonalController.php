@@ -242,10 +242,12 @@ class PersonalController extends Controller
             'balance' => '0,150000',
         ]);
         $certificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
+        $allCertificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams, 999999);
 
         return $this->render('operator-certificates', [
             'searchCertificates' => $searchCertificates,
             'certificatesProvider' => $certificatesProvider,
+            'allCertificatesProvider' => $allCertificatesProvider,
         ]);
     }
 

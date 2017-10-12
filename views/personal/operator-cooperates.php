@@ -181,7 +181,7 @@ $columnsNonActive = [
                 'columns' => GridviewHelper::prepareColumns('cooperate', $columns),
             ]); ?>
             <?= \app\widgets\Export::widget([
-                'dataProvider' => $searchActive->search(Yii::$app->request->queryParams, 999999),
+                'dataProvider' => $allActiveProvider,
                 'columns' => GridviewHelper::prepareColumns('cooperate', $columns, null, 'export'),
                 'group' => 'operator-cooperates',
                 'table' => 'cooperate',

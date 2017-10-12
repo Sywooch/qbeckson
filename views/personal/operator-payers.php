@@ -8,7 +8,6 @@ use yii\grid\ActionColumn;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use kartik\grid\GridView;
-use kartik\export\ExportMenu;
 
 $this->title = 'Плательщики';
 $this->params['breadcrumbs'][] = 'Плательщики';
@@ -103,7 +102,7 @@ $preparedColumns = GridviewHelper::prepareColumns('payers', $columns);
     'columns' => $preparedColumns,
 ]); ?>
 <?= \app\widgets\Export::widget([
-    'dataProvider' => $searchPayers->search(Yii::$app->request->queryParams, 999999),
+    'dataProvider' => $allPayersProvider,
     'columns' => GridviewHelper::prepareColumns('payers', $columns, null, 'export'),
     'group' => 'operator-payers',
     'table' => 'payers',

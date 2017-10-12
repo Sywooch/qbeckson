@@ -120,7 +120,7 @@ $columns = [
     'columns' => $preparedColumns,
 ]); ?>
 <?= \app\widgets\Export::widget([
-    'dataProvider' => $searchCertificates->search(Yii::$app->request->queryParams, 999999),
+    'dataProvider' => $allCertificatesProvider,
     'columns' => GridviewHelper::prepareColumns('certificates', $columns, null, 'export'),
     'group' => 'operator-certificates',
     'table' => 'certificates',

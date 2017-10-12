@@ -4,7 +4,6 @@ use app\helpers\GridviewHelper;
 use app\models\Mun;
 use app\models\UserIdentity;
 use app\widgets\SearchFilter;
-use kartik\export\ExportMenu;
 use kartik\grid\GridView;
 use yii\grid\ActionColumn;
 use yii\helpers\ArrayHelper;
@@ -225,7 +224,7 @@ $preparedRequestColumns = GridviewHelper::prepareColumns('organization', $reques
             'columns' => $preparedRegistryColumns,
         ]); ?>
         <?= \app\widgets\Export::widget([
-            'dataProvider' => $searchRegistry->search(Yii::$app->request->queryParams, 999999),
+            'dataProvider' => $allRegistryProvider,
             'columns' => GridviewHelper::prepareColumns('organization', $registryColumns, 'register', 'export'),
             'group' => 'operator-organizations',
             'table' => 'organization',

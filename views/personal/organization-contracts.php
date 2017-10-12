@@ -6,7 +6,6 @@ use app\models\Mun;
 use app\models\Organization;
 use app\models\UserIdentity;
 use app\widgets\SearchFilter;
-use kartik\export\ExportMenu;
 use kartik\grid\GridView;
 use yii\grid\ActionColumn;
 use yii\helpers\ArrayHelper;

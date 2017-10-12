@@ -288,7 +288,7 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
             'columns'      => $preparedOpenColumns,
         ]); ?>
         <?= \app\widgets\Export::widget([
-            'dataProvider' => $searchOpenPrograms->search(Yii::$app->request->queryParams, 999999),
+            'dataProvider' => $allOpenProgramsProvider,
             'columns' => GridviewHelper::prepareColumns('programs', $openColumns, 'open', 'export'),
             'group' => 'operator-open-programs',
             'table' => 'programs',
@@ -324,7 +324,7 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
             'columns'      => $preparedWaitColumns,
         ]); ?>
         <?= \app\widgets\Export::widget([
-            'dataProvider' => $searchWaitPrograms->search(Yii::$app->request->queryParams, 999999),
+            'dataProvider' => $allWaitProgramsProvider,
             'columns' => GridviewHelper::prepareColumns('programs', $waitColumns, 'wait', 'export'),
             'group' => 'operator-wait-programs',
             'table' => 'programs',
@@ -353,7 +353,7 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
             'columns'      => $preparedClosedPrograms,
         ]); ?>
         <?= \app\widgets\Export::widget([
-            'dataProvider' => $searchClosedPrograms->search(Yii::$app->request->queryParams, 999999),
+            'dataProvider' => $allClosedProgramsProvider,
             'columns' => GridviewHelper::prepareColumns('programs', $closedPrograms, 'close', 'export'),
             'group' => 'operator-close-programs',
             'table' => 'programs',

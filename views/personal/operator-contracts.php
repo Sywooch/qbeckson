@@ -323,7 +323,7 @@ $preparedRefusedColumns = GridviewHelper::prepareColumns('contracts', $refusedCo
             'columns' => $preparedActiveColumns,
         ]); ?>
         <?= \app\widgets\Export::widget([
-            'dataProvider' => $searchActiveContracts->search(Yii::$app->request->queryParams, 999999),
+            'dataProvider' => $allActiveContractsProvider,
             'columns' => GridviewHelper::prepareColumns('contracts', $activeColumns, 'active', 'export'),
             'group' => 'operator-contracts',
             'table' => 'contracts',
