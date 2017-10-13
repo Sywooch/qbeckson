@@ -413,7 +413,7 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
     </div>
 </div>
 <?= \app\widgets\Export::widget([
-    'dataProvider' => $searchContractsall->search(Yii::$app->request->queryParams, 999999),
+    'dataProvider' => $ContractsallProvider,
     'columns' => GridviewHelper::prepareColumns('contracts', $activeColumns, 'active', 'export'),
     'group' => 'organization-contracts',
     'table' => 'contracts',

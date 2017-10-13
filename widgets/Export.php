@@ -48,8 +48,8 @@ class Export extends Widget
                 {
                     @unlink($filepath);
                 }
-                //exec("php " . Yii::getAlias('@app') . '/yii export/make ' . $newDoc->id . ' > /dev/null 2>&1 &', $resultArray);
-                exec("php " . Yii::getAlias('@app') . '/yii export/make ' . $newDoc->id, $resultArray);
+                exec("php " . Yii::getAlias('@app') . '/yii export/make ' . $newDoc->id . ' > /dev/null 2>&1 &', $resultArray);
+                //exec("php " . Yii::getAlias('@app') . '/yii export/make ' . $newDoc->id, $resultArray);
             }
 
             $this->redirect();
