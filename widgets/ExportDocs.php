@@ -21,7 +21,7 @@ class ExportDocs extends ExportMenu
             if (!$this->_doNotStream) {
                 Yii::$app->controller->layout = false;
             }
-            $this->_exportType = self::FORMAT_EXCEL;
+            $this->_exportType = self::FORMAT_EXCEL_X;
             $this->_columnSelectorEnabled = false;
             $this->initSelectedColumns();
         }

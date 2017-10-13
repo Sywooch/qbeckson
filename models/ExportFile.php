@@ -133,18 +133,24 @@ class ExportFile extends \yii\db\ActiveRecord
         return null;
     }
 
-    public static function getExportTypeFromFile($file)
-    {
-        $pieces = explode('---', $file, 2);
-        $typeWithExtension = trim($pieces[1]);
-        $pieces = explode('.', $typeWithExtension);
-
-        return trim($pieces[0]);
-    }
-
     public function setReady() {
         $this->status = self::STATUS_READY;
 
         return $this->save(false, ['status']);
+    }
+
+    public function getCannotBeUpdated() {
+        $coefficient = 5;
+        if (YII_ENV_DEV) {
+            $coefficient = 500;
+        }
+
+        $newTime = $this->created_at + $this->data_provider->totalCount / $coefficient;
+
+        if ($newTime > time()) {
+            return $newTime;
+        }
+
+        return false;
     }
 }

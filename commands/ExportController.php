@@ -33,7 +33,7 @@ class ExportController extends Controller
                 ExportDocs::FORMAT_CSV => false,
                 ExportDocs::FORMAT_HTML => false,
                 ExportDocs::FORMAT_PDF => false,
-                ExportDocs::FORMAT_EXCEL_X => false,
+                ExportDocs::FORMAT_EXCEL => false,
             ],
             'columns' => $doc->columns,
         ]);
