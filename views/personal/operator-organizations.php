@@ -93,7 +93,8 @@ $children = [
             $model->getChildren()->andWhere(['contracts.status' => 1])->asArray()->all()
         ));*/
 
-        return $childrenCount > 0 ? $childrenCount : '-';
+        //return $childrenCount > 0 ? $childrenCount : '-';
+        return 0;
     },
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
     'pluginOptions' => [
