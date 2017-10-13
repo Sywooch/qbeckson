@@ -1,14 +1,17 @@
 <?php
 namespace app\behaviors;
 
+use yii;
 use yii\base\Behavior;
 use yii\db\ActiveRecord;
+use function \Opis\Closure\{serialize as srls, unserialize as unsrls};
 
 class ArrayOrStringBehavior extends Behavior
 {
     public $attributes1 = [];
     public $attributes2 = [];
     public $serialize = true;
+    public $useClosureSerializator = false;
 
     public function events()
     {
@@ -21,9 +24,7 @@ class ArrayOrStringBehavior extends Behavior
     public function convertArray($event)
     {
         foreach ($this->attributes1 as $attr) {
-            if (is_array($this->owner->{$attr})) {
-                $this->owner->{$attr} = $this->serialize === true ? serialize($this->owner->{$attr}) : join(',', $this->owner->{$attr});
-            }
+            $this->owner->{$attr} = $this->serialize === true ? ($this->useClosureSerializator === false ? serialize($this->owner->{$attr}) : srls($this->owner->{$attr})) : join(',', $this->owner->{$attr});
         }
     }
 
@@ -31,7 +32,7 @@ class ArrayOrStringBehavior extends Behavior
     {
         foreach ($this->attributes2 as $attr) {
             if ($this->owner->{$attr}) {
-                $this->owner->{$attr} = $this->serialize === true ? unserialize($this->owner->{$attr}) : explode(',', $this->owner->{$attr});
+                $this->owner->{$attr} = $this->serialize === true ? ($this->useClosureSerializator === false ? unserialize($this->owner->{$attr}) : unsrls($this->owner->{$attr})) : explode(',', $this->owner->{$attr});
             }
         }
     }

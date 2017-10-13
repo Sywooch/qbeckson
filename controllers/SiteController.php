@@ -161,7 +161,7 @@ class SiteController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $model->columns = $post['columns'];
             $model->save(false);
-            Yii::$app->session->setFlash('success', 'Настройки поиска; успешно сохранены.');
+            Yii::$app->session->setFlash('success', 'Настройки поиска успешно сохранены.');
         } else {
             Yii::$app->session->setFlash('danger', 'Ошибка при сохранении настроек поиска.');
         }

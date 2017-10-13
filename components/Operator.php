@@ -23,6 +23,11 @@ class Operator extends Component
 
     private function getOperator()
     {
+        // Для консольных скриптов
+        if (!isset(Yii::$app->user)) {
+            return Operators::find()->one()->id;
+        }
+
         if (Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
             $operatorId = Yii::$app->user->identity->operator->id;
         } elseif (Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {

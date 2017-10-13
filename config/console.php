@@ -4,6 +4,9 @@ use trntv\filekit\Storage;
 
 Yii::setAlias('@tests', dirname(__DIR__) . '/tests/codeception');
 
+// TODO на на что не влияет, лишь выдает ошибку (программы, экспорт) - убрать, когда все картинки будут сохраняться на @pfdoroot
+Yii::setAlias('@webroot', dirname(__DIR__) . '/runtime');
+
 $params = require(__DIR__ . '/params.php');
 $db = require(__DIR__ . '/db.php');
 
@@ -15,6 +18,10 @@ $config = [
     'components' => [
         'authManager' => [
             'class' => 'yii\rbac\DbManager',
+        ],
+        'urlManager' => [
+            'class' => 'yii\web\UrlManager',
+            'scriptUrl' => 'http://hmao.pfdo.ru',
         ],
         'operator' => [
             'class' => 'app\components\Operator',
@@ -44,6 +51,9 @@ $config = [
         'db' => $db,
     ],
     'modules' => [
+        'gridview'    => [
+            'class' => '\kartik\grid\Module'
+        ],
         'permit' => [
             'class' => 'developeruz\db_rbac\Yii2DbRbac',
             'params' => [
@@ -51,6 +61,7 @@ $config = [
             ]
         ],
     ],
+    'aliases' => require(__DIR__ . '/aliases.php'),
     'params' => $params,
     /*
     'controllerMap' => [
