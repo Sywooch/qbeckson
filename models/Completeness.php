@@ -5,11 +5,21 @@ namespace app\models;
 /**
  * This is the model class for table "completeness".
  *
+ * Платеж по договору в конкретном месяце
+ *
+ * В каждом договоре прописывается платеж за первый и прочие месяцы, на каждый месяц идет два  платежа (авансовый комплитнесс "в
+ * сентябре 80% денег за сентябрь" и счетовой комплитнесс "в октябре 100% за сентябрь").
+ * Комплитнессы создаются когда договор переводится в действующие (в статус 1) и при  наступлении нового месяца (крон)
+ *
  * @property integer $id
  * @property integer $group_id
+ * @property integer $contract_id
  * @property integer $month
  * @property integer $year
  * @property integer $completeness
+ * @property float $sum
+ * @property integer $preinvoice   0 - окончательный расчет,  1 - авансовый
+ *
  *
  * @property Groups $group
  */

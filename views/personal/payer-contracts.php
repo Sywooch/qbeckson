@@ -369,16 +369,13 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
             'columns' => $preparedDissolvedColumns,
         ]); ?>
     </div>
-    <?php
-    echo $this->render('/common/_export', [
+    <?= \app\widgets\Export::widget([
         'dataProvider' => $ContractsallProvider,
-        'columns' => $activeColumns,
-        'type' => 'active',
-        'group' => 'all-contracts',
+        'columns' => GridviewHelper::prepareColumns('contracts', $activeColumns, 'active', 'export'),
+        'group' => 'payer-contracts',
         'table' => 'contracts',
-    ]);
-    ?>
-    <br /><br />
+    ]); ?>
+    <br />
     <p>
         <?php
         $payer = Yii::$app->user->identity->payer;

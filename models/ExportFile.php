@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\behaviors\ArrayOrStringBehavior;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\BlameableBehavior;
@@ -17,11 +18,19 @@ use yii\helpers\ArrayHelper;
  * @property string $path
  * @property string $file
  * @property integer $created_at
+ * $property integer $status
+ * @property string $data_provider
+ * @property string $columns
+ * @property string $group
+ * @property string $table
  *
  * @property User $user
  */
 class ExportFile extends \yii\db\ActiveRecord
 {
+    const STATUS_PROCESS = 0;
+    const STATUS_READY = 10;
+
     /**
      * @inheritdoc
      */
@@ -42,6 +51,12 @@ class ExportFile extends \yii\db\ActiveRecord
                 'createdByAttribute' => 'user_id',
                 'updatedByAttribute' => false,
             ],
+            'array2string' => [
+                'class' => ArrayOrStringBehavior::className(),
+                'attributes1' => ['data_provider', 'columns'],
+                'attributes2' => ['data_provider', 'columns'],
+                'useClosureSerializator' => true,
+            ],
         ];
     }
 
@@ -51,11 +66,11 @@ class ExportFile extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id'], 'integer'],
-            [['item_list'], 'string'],
+            [['user_id', 'status'], 'integer'],
+            [['item_list', 'group', 'table'], 'string'],
             [['path', 'file', 'export_type'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
-            [['created_at'], 'safe'],
+            [['created_at', 'data_provider', 'columns'], 'safe'],
         ];
     }
 
@@ -82,7 +97,7 @@ class ExportFile extends \yii\db\ActiveRecord
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 
-    public static function findByUserId($userId, $type)
+    public static function findByUserId($userId, $type, $status = null)
     {
         $query = static::find()
             ->where([
@@ -90,31 +105,52 @@ class ExportFile extends \yii\db\ActiveRecord
                 'export_type' => $type,
             ]);
 
+        $query->andFilterWhere(['status' => $status]);
+
         return $query->one();
     }
 
-    public static function createInstance($file, $path)
+    public static function createInstance($file, $group, $table, $dataProvider, $columns)
     {
-        $type = static::getExportTypeFromFile($file);
-        if ($doc = static::findByUserId(Yii::$app->user->id, $type)) {
+        if ($doc = static::findByUserId(Yii::$app->user->id, $group)) {
             $doc->created_at = time();
+            $doc->status = static::STATUS_PROCESS;
         } else {
             $doc = new static([
                 'file' => $file,
-                'path' => $path,
-                'export_type' => $type,
+                'export_type' => $group,
+                'group' => $group,
+                'columns' => $columns,
+                'data_provider' => $dataProvider,
+                'table' => $table,
             ]);
         }
 
-        return $doc->save();
+        if ($doc->save()) {
+            return $doc;
+        }
+
+        return null;
     }
 
-    public static function getExportTypeFromFile($file)
-    {
-        $pieces = explode('---', $file, 2);
-        $typeWithExtension = trim($pieces[1]);
-        $pieces = explode('.', $typeWithExtension);
+    public function setReady() {
+        $this->status = self::STATUS_READY;
 
-        return trim($pieces[0]);
+        return $this->save(false, ['status']);
+    }
+
+    public function getCannotBeUpdated() {
+        $coefficient = 5;
+        if (YII_ENV_DEV) {
+            $coefficient = 500;
+        }
+
+        $newTime = $this->created_at + $this->data_provider->totalCount / $coefficient;
+
+        if ($newTime > time()) {
+            return $newTime;
+        }
+
+        return false;
     }
 }

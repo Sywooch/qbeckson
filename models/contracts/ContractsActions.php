@@ -2,32 +2,34 @@
 /**
  * Created by PhpStorm.
  * User: student4
- * Date: 08.10.2017
- * Time: 12:03
+ * Date: 13.10.2017
+ * Time: 20:24
  */
 
-namespace app\models\certificates;
+namespace app\models\contracts;
 
 
 use app\components\SingleModelActions;
-use app\models\Certificates;
-use yii;
+use app\models\Contracts;
 use yii\base\InvalidParamException;
+use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
 /**
- * Class CertificateActions
- * @package app\models\certificates
+ * Class ContractsActions
  *
- * @property string $firstErrorAsString
- * @property Certificates $certificate
+ * @package app\models\contracts
+ *
+ * @property Contracts $contract
  */
-abstract class CertificateActions extends SingleModelActions
+abstract class ContractsActions extends SingleModelActions
 {
-
+    /**
+     * @return string
+     */
     public static function getTargetModelClass(): string
     {
-        return Certificates::className();
+        return Contracts::className();
     }
 
     /**
@@ -36,14 +38,14 @@ abstract class CertificateActions extends SingleModelActions
     public function attributeLabels()
     {
         return ArrayHelper::merge(parent::attributeLabels(), [
-            'certificate' => 'Сертификат',
+            'contract' => 'Договор',
         ]);
     }
 
     /**
-     * @return yii\db\ActiveRecord|null
+     * @return ActiveRecord|null
      */
-    public function getCertificate()
+    public function getContract()
     {
         return $this->targetModel;
     }
@@ -55,9 +57,8 @@ abstract class CertificateActions extends SingleModelActions
      * @throws InvalidParamException
      *
      */
-    public function setCertificate($certificate)
+    public function setContract($group)
     {
-        return parent::setTargetModel($certificate);
+        parent::setTargetModel($group);
     }
-
 }

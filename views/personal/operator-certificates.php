@@ -6,7 +6,6 @@ use app\models\Mun;
 use app\models\UserIdentity;
 use app\widgets\SearchFilter;
 use kartik\grid\GridView;
-use kartik\export\ExportMenu;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -120,11 +119,9 @@ $columns = [
     'pjax' => true,
     'columns' => $preparedColumns,
 ]); ?>
-<?php
-echo $this->render('/common/_export', [
+<?= \app\widgets\Export::widget([
     'dataProvider' => $allCertificatesProvider,
-    'columns' => $columns,
+    'columns' => GridviewHelper::prepareColumns('certificates', $columns, null, 'export'),
     'group' => 'operator-certificates',
     'table' => 'certificates',
-]);
-?>
+]); ?>

@@ -70,6 +70,12 @@ class OrganizationController extends Controller
             Yii::$app->session->setFlash('warning', 'Деятельность приостановлена, причина: ' . $model->refuse_reason);
         }
 
+        if (Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)
+            && $model->status === Organization::STATUS_NEW
+            && $model->refuse_reason) {
+            Yii::$app->session->setFlash('info', 'Причина предыдущего отказа: ' . $model->refuse_reason);
+        }
+
         if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
             /** @var $certificate Certificates */
             $certificate = Yii::$app->user->identity->certificate;
@@ -294,6 +300,12 @@ class OrganizationController extends Controller
             Yii::$app->response->format = Response::FORMAT_JSON;
 
             return ActiveForm::validate($user);
+        }
+
+        if (Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)
+            && $model->status === Organization::STATUS_NEW
+            && $model->refuse_reason) {
+            Yii::$app->session->setFlash('info', 'Причина предыдущего отказа: ' . $model->refuse_reason);
         }
 
         $showUserInfo = false;

@@ -38,7 +38,7 @@ class ProgramsController extends Controller
     {
         return [
             'verbs' => [
-                'class'   => VerbFilter::className(),
+                'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
                 ],
@@ -67,7 +67,7 @@ class ProgramsController extends Controller
         }
 
         return $this->render('add-addresses', [
-            'model'   => $form,
+            'model' => $form,
             'program' => $program,
         ]);
     }
@@ -118,7 +118,7 @@ class ProgramsController extends Controller
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
-            'searchModel'  => $searchModel,
+            'searchModel' => $searchModel,
         ]);
     }
 
@@ -135,7 +135,7 @@ class ProgramsController extends Controller
 
         return $this->render('search', [
             'dataProvider' => $dataProvider,
-            'searchModel'  => $searchModel,
+            'searchModel' => $searchModel,
         ]);
     }
 
@@ -150,7 +150,7 @@ class ProgramsController extends Controller
 
         return $this->render('previus', [
             'dataProvider' => $dataProvider,
-            'searchModel'  => $searchModel,
+            'searchModel' => $searchModel,
         ]);
     }
 
@@ -186,7 +186,7 @@ class ProgramsController extends Controller
         $cooperate = null;
         if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
             $cooperate = Cooperate::find()->where([
-                Cooperate::tableName() . '.payer_id'        => $user->getCertificate()->select('payer_id'),
+                Cooperate::tableName() . '.payer_id' => $user->getCertificate()->select('payer_id'),
                 Cooperate::tableName() . '.organization_id' => $model->organization_id])->all();
             if (!count($cooperate)) {
                 Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в организацию, реализующую выбранную программу. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
@@ -264,8 +264,8 @@ class ProgramsController extends Controller
                     Yii::$app->session->setFlash('error', 'Пожалуйста, добавьте файл образовательной программы.');
 
                     return $this->render('create', [
-                        'model'       => $model,
-                        'file'        => $file,
+                        'model' => $model,
+                        'file' => $file,
                         'modelsYears' => $modelsYears,
                     ]);
                 }
@@ -403,8 +403,8 @@ class ProgramsController extends Controller
         }
 
         return $this->render('create', [
-            'model'       => $model,
-            'file'        => $file,
+            'model' => $model,
+            'file' => $file,
             'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
         ]);
     }
@@ -413,25 +413,25 @@ class ProgramsController extends Controller
     {
         $model = $this->findModel($id);
 
-        $rows = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('years')
-            ->where(['program_id' => $id])
-            ->all();
+        if (Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)
+            && count($model->informs) > 0) {
+            $message = array_pop(
+                array_filter($model->informs, function ($val)
+                {
+                    /**@var $val Informs */
+                    return $val->status === Programs::VERIFICATION_DENIED;
+                })
+            )
+                ->text;
 
-        $i = 0;
-        foreach ($rows as $value) {
-            $years[$i] = ProgrammeModule::findOne($value['id']);
-            $i++;
+            Yii::$app->session->setFlash('info', 'Причина предыдущего отказа: ' . $message);
         }
 
         $model->verification = Programs::VERIFICATION_WAIT;
-        //$model->zab = explode(',', $model->zab);
 
         if ($model->save()) {
             return $this->render('verificate', [
                 'model' => $model,
-                'years' => $years,
             ]);
         }
     }
@@ -648,7 +648,7 @@ class ProgramsController extends Controller
 
         } else {
             return $this->render('cert', [
-                'model'       => $model,
+                'model' => $model,
                 'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
             ]);
         }
@@ -822,7 +822,7 @@ class ProgramsController extends Controller
 
         } else {
             return $this->render('newnormprice', [
-                'model'       => $model,
+                'model' => $model,
                 'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
             ]);
         }
@@ -883,7 +883,7 @@ class ProgramsController extends Controller
 
         return $this->render('certificate', [
             'model' => $model,
-            'year'  => $year,
+            'year' => $year,
         ]);
     }
 
@@ -900,8 +900,8 @@ class ProgramsController extends Controller
                 $informs->prof_id = $model->organization_id;
                 //$informs->text = 'Программа не сертифицированна. Причина: '.$informs->dop;
                 $informs->text = $informs->dop;
-                $informs->from = 3;
-                $informs->status = 3;
+                $informs->from = UserIdentity::ROLE_OPERATOR_ID;
+                $informs->status = Programs::VERIFICATION_DENIED;
                 $informs->date = date("Y-m-d");
                 $informs->read = 0;
                 $informs->save();
@@ -912,7 +912,7 @@ class ProgramsController extends Controller
 
         return $this->render('/informs/comment', [
             'informs' => $informs,
-            'model'   => $model,
+            'model' => $model,
         ]);
     }
 
@@ -1059,8 +1059,8 @@ class ProgramsController extends Controller
 
         } else {
             return $this->render('update', [
-                'model'      => $model,
-                'file'       => $file,
+                'model' => $model,
+                'file' => $file,
                 'modelYears' => (empty($modelYears)) ? [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])] : $modelYears
             ]);
         }
@@ -1122,8 +1122,8 @@ class ProgramsController extends Controller
 
         } else {
             return $this->render('edit', [
-                'model'      => $model,
-                'file'       => $file,
+                'model' => $model,
+                'file' => $file,
                 'modelYears' => (empty($modelYears)) ? [new ProgrammeModule] : $modelYears
             ]);
         }
