@@ -6,7 +6,6 @@ use app\models\Mun;
 use app\models\Organization;
 use app\models\UserIdentity;
 use app\widgets\SearchFilter;
-use kartik\export\ExportMenu;
 use kartik\grid\GridView;
 use yii\grid\ActionColumn;
 use yii\helpers\ArrayHelper;
@@ -412,87 +411,10 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
             'columns' => $preparedEndsColumns,
         ]); ?>
     </div>
-    <p class="lead">Экспорт данных:</p>
-    <?= ExportMenu::widget([
-        'dataProvider' => $ContractsallProvider,
-        'target' => ExportMenu::TARGET_BLANK,
-        'showColumnSelector' => false,
-        'filename' => 'contracts',
-        'dropdownOptions' => [
-            'class' => 'btn btn-success',
-            'label' => 'Договоры',
-            'icon' => false,
-        ],
-        'exportConfig' => [
-            ExportMenu::FORMAT_TEXT => false,
-            ExportMenu::FORMAT_PDF => false,
-            ExportMenu::FORMAT_CSV => false,
-            ExportMenu::FORMAT_HTML => false,
-            ExportMenu::FORMAT_EXCEL => false,
-        ],
-        'columns' => [
-            'id',
-            'number',
-            'date',
-            'certificate_id',
-            'payer_id',
-            'program_id',
-            'year_id',
-            'organization_id',
-            'group_id',
-            'status',
-            'status_termination',
-            'status_comment',
-            'status_year',
-            'link_doc',
-            'link_ofer',
-            'all_funds',
-            'funds_cert',
-            'all_parents_funds',
-            'start_edu_programm',
-            'funds_gone',
-            'start_edu_contract',
-            'month_start_edu_contract',
-            'stop_edu_contract',
-            'certnumber',
-            'certfio',
-            'sposob',
-            'prodolj_d',
-            'prodolj_m',
-            'prodolj_m_user',
-            'first_m_price',
-            'other_m_price',
-            'first_m_nprice',
-            'other_m_nprice',
-            'change1',
-            'change2',
-            'change_org_fio',
-            'org_position',
-            'org_position_min',
-            'change_doctype',
-            'change_fioparent',
-            'change6',
-            'change_fiochild',
-            'change8',
-            'change9',
-            'change10',
-            'ocen_fact',
-            'ocen_kadr',
-            'ocen_mat',
-            'ocen_obch',
-            'ocenka',
-            'wait_termnate',
-            'date_termnate',
-            'cert_dol',
-            'payer_dol',
-            'rezerv',
-            'paid',
-            'terminator_user',
-            'fontsize',
-            'certificatenumber',
-        ],
-    ]); ?>
-    <br>
-    <br>
-    <p class=""><strong><span class="warning">*</span> Загрузка начнётся в новом окне и может занять некоторое время.</strong></p>
 </div>
+<?= \app\widgets\Export::widget([
+    'dataProvider' => $ContractsallProvider,
+    'columns' => GridviewHelper::prepareColumns('contracts', $activeColumns, 'active', 'export'),
+    'group' => 'organization-contracts',
+    'table' => 'contracts',
+]); ?>

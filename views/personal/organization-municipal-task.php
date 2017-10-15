@@ -7,7 +7,6 @@ use app\widgets\SearchFilter;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 use yii\helpers\Url;
-use kartik\export\ExportMenu;
 use yii\helpers\ArrayHelper;
 use app\models\Mun;
 

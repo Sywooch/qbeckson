@@ -247,7 +247,6 @@ class PersonalController extends Controller
         return $this->render('operator-certificates', [
             'searchCertificates' => $searchCertificates,
             'certificatesProvider' => $certificatesProvider,
-
             'allCertificatesProvider' => $allCertificatesProvider,
         ]);
     }

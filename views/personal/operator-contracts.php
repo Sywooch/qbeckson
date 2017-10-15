@@ -322,15 +322,12 @@ $preparedRefusedColumns = GridviewHelper::prepareColumns('contracts', $refusedCo
             },
             'columns' => $preparedActiveColumns,
         ]); ?>
-        <?php
-        echo $this->render('/common/_export', [
+        <?= \app\widgets\Export::widget([
             'dataProvider' => $allActiveContractsProvider,
-            'columns' => $activeColumns,
-            'type' => 'active',
+            'columns' => GridviewHelper::prepareColumns('contracts', $activeColumns, 'active', 'export'),
             'group' => 'operator-contracts',
             'table' => 'contracts',
-        ]);
-        ?>
+        ]); ?>
     </div>
     <div id="panel2" class="tab-pane fade">
         <?= SearchFilter::widget([

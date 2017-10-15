@@ -287,15 +287,13 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
             'summary'      => false,
             'columns'      => $preparedOpenColumns,
         ]); ?>
-        <?php
-        echo $this->render('/common/_export', [
+        <?= \app\widgets\Export::widget([
             'dataProvider' => $allOpenProgramsProvider,
-            'columns' => $openColumns,
-            'type' => 'open',
+            'columns' => GridviewHelper::prepareColumns('programs', $openColumns, 'open', 'export'),
             'group' => 'operator-open-programs',
             'table' => 'programs',
-        ]);
-        ?>
+            'redirectUrl' => 'operator-programs'
+        ]); ?>
     </div>
     <div id="panel2" class="tab-pane fade">
         <?= SearchFilter::widget([
@@ -325,15 +323,13 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
             'pjax'         => true,
             'columns'      => $preparedWaitColumns,
         ]); ?>
-        <?php
-        echo $this->render('/common/_export', [
+        <?= \app\widgets\Export::widget([
             'dataProvider' => $allWaitProgramsProvider,
-            'columns' => $waitColumns,
-            'type' => 'wait',
+            'columns' => GridviewHelper::prepareColumns('programs', $waitColumns, 'wait', 'export'),
             'group' => 'operator-wait-programs',
             'table' => 'programs',
-        ]);
-        ?>
+            'redirectUrl' => 'operator-programs'
+        ]); ?>
     </div>
     <div id="panel3" class="tab-pane fade">
         <?= SearchFilter::widget([
@@ -356,71 +352,16 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
             'pjax'         => true,
             'columns'      => $preparedClosedPrograms,
         ]); ?>
-        <?php
-        echo $this->render('/common/_export', [
+        <?= \app\widgets\Export::widget([
             'dataProvider' => $allClosedProgramsProvider,
-            'columns' => $closedPrograms,
-            'type' => 'close',
+            'columns' => GridviewHelper::prepareColumns('programs', $closedPrograms, 'close', 'export'),
             'group' => 'operator-close-programs',
             'table' => 'programs',
-        ]);
-        ?>
+            'redirectUrl' => 'operator-programs'
+        ]); ?>
     </div>
     <br>
     <?php
-    echo ExportMenu::widget([
-        'dataProvider'       => $ProgramsallProvider,
-        'target'             => '_self',
-        'showColumnSelector' => false,
-        'filename'           => 'programs',
-        'dropdownOptions'    => [
-            'class' => 'btn btn-success',
-            'label' => 'Программы',
-            'icon'  => false,
-        ],
-        'exportConfig'       => [
-            ExportMenu::FORMAT_TEXT  => false,
-            ExportMenu::FORMAT_PDF   => false,
-            ExportMenu::FORMAT_CSV   => false,
-            ExportMenu::FORMAT_HTML  => false,
-            ExportMenu::FORMAT_EXCEL => false,
-        ],
-        'columns'            => [
-            'id',
-            'organization_id',
-            'verification',
-            'form',
-            'name',
-            'directivity',
-            'vid',
-            'mun',
-            'annotation',
-            'task',
-            'age_group_min',
-            'age_group_max',
-            'ovz',
-            'zab',
-            'year',
-            'norm_providing',
-            'ground',
-            'rating',
-            'limit',
-            'link',
-            'edit',
-            'p3z',
-            'study',
-            'last_contracts',
-            'last_s_contracts',
-            'last_s_contracts_rod',
-            'quality_control',
-            'ocen_fact',
-            'ocen_kadr',
-            'ocen_mat',
-            'ocen_obch',
-        ],
-
-    ]);
-    echo '&nbsp;';
     echo ExportMenu::widget([
         'dataProvider'       => $YearsallProvider,
         'target'             => '_self',
