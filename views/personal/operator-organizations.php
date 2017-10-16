@@ -142,6 +142,7 @@ $registryColumns = [
     $children,
     $amount_child,
     $actual,
+    $email,
     $actions,
 ];
 
