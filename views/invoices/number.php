@@ -1,11 +1,13 @@
 <?php
 
+use app\components\widgets\modalCheckLink\ModalCheckLink;
+use kartik\datecontrol\DateControl;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use kartik\datecontrol\DateControl;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Invoices */
+/* @var $contractsToRefuse \app\models\Contracts[] */
 
 
 $date=explode(".", date("d.m.Y"));
@@ -52,7 +54,23 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="form-group">
        <?= Html::a('Отмена', ['/personal/organization-invoices'], ['class' => 'btn btn-danger']) ?>
 &nbsp;
-        <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
+        <?php
+        if (count($contractsToRefuse) > 0) {
+            echo ModalCheckLink::widget([
+                'link' => Html::submitButton('Сохранить', ['class' => 'btn btn-success']),
+                'buttonOptions' => ['label' => 'Сохранить', 'class' => 'btn btn-success'],
+                'content' => Yii::t('yii', 'Внимание! Есть заявки на обучение и неакцептированные договоры со сроком начала обучения в
+{m}
+. Если Вы продолжите, то они будут автоматически отклонены, поскольку в ином случае проплата по ним не пройдет. Вы уверены, что хотите создать счет и потерять указанные заявки?', ['m' => $m]),
+                'title' => 'Сохранить счет',
+                'label' => 'Да, я уверен, что хочу сохранить счет.',
+            ]);
+        } else {
+            echo Html::submitButton('Сохранить', ['class' => 'btn btn-success']);
+        }
+
+
+        ?>
     </div>
 
     <?php ActiveForm::end(); ?>

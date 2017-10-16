@@ -7,8 +7,10 @@ use app\models\Contracts;
 use app\models\ContractsInvoiceSearch;
 use app\models\ContractspreInvoiceSearch;
 use app\models\Invoices;
+use app\models\invoices\InvoiceBuilder;
 use app\models\InvoicesSearch;
 use app\models\Organization;
+use app\models\UserIdentity;
 use mPDF;
 use Yii;
 use yii\filters\VerbFilter;
@@ -86,15 +88,39 @@ class InvoicesController extends Controller
     {
         //$action=Yii::$app->request->post('action');
         // $selection=(array)Yii::$app->request->post('selection');
+
+        $builder = InvoiceBuilder::createInstance();
+
+        Yii::trace($builder->haveOutOfRangeContracts);
+
+        return;
+        $rFrom = new datetime('first day of -6 month midnight');
+        $rTo = new datetime('last day of -6 month midnight');
         $model = new Invoices();
 
         $model->date = date("Y-m-d");
 
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
+        $organization = Yii::$app->user->identity->organization;
+        /**@var $organization Organization */
+
+        $contractsToRefuse = $organization->getContracts()
+            ->andWhere([Contracts::tableName() . '.status' => [Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED]])
+            ->all();
+
 
         if ($model->load(Yii::$app->request->post())) {
             $lmonth = date('m') - 1;
+
+            if (count($contractsToRefuse) > 0) {
+                array_map(function ($val)
+                {
+                    /**@var $val Contracts */
+                    $message = $val->status === Contracts::STATUS_ACCEPTED
+                        ? 'оферта отозвана исполнителем в связи с истечением срока ожидания акцепта.'
+                        : 'истек срок рассмотрения заявки со стороны организации, пожалуйста, сформируйте новую.';
+                    $val->setRefused($message, UserIdentity::ROLE_ORGANIZATION_ID, $val->organization_id);
+                }, $contractsToRefuse);
+            }
 
             $searchContracts = new ContractsInvoiceSearch(['pagination' => false]);
             $searchContracts->payer_id = $payer;
@@ -132,6 +158,7 @@ class InvoicesController extends Controller
 
         return $this->render('number', [
             'model' => $model,
+            'contractsToRefuse' => $contractsToRefuse
         ]);
     }
 
