@@ -370,7 +370,7 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
         ]); ?>
     </div>
     <?= \app\widgets\Export::widget([
-        'dataProvider' => $ContractsallProvider,
+        'dataProvider' => $activeContractsProvider,
         'columns' => GridviewHelper::prepareColumns('contracts', $activeColumns, 'active', 'export'),
         'group' => 'payer-contracts',
         'table' => 'contracts',
