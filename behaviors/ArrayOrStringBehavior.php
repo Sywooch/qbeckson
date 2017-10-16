@@ -24,7 +24,9 @@ class ArrayOrStringBehavior extends Behavior
     public function convertArray($event)
     {
         foreach ($this->attributes1 as $attr) {
-            $this->owner->{$attr} = $this->serialize === true ? ($this->useClosureSerializator === false ? serialize($this->owner->{$attr}) : srls($this->owner->{$attr})) : join(',', $this->owner->{$attr});
+            if ($this->owner->{$attr}) {
+                $this->owner->{$attr} = $this->serialize === true ? ($this->useClosureSerializator === false ? serialize($this->owner->{$attr}) : srls($this->owner->{$attr})) : join(',', $this->owner->{$attr});
+            }
         }
     }
 
