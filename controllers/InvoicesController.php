@@ -89,9 +89,11 @@ class InvoicesController extends Controller
         //$action=Yii::$app->request->post('action');
         // $selection=(array)Yii::$app->request->post('selection');
 
-        $builder = InvoiceBuilder::createInstance();
+        $builder = InvoiceBuilder::createInstance(['payer_id' => $payer]);
 
-        Yii::trace($builder->haveOutOfRangeContracts);
+        $builder->save(false);
+
+        //Yii::trace($builder->getContractsData());
 
         return;
         $rFrom = new datetime('first day of -6 month midnight');

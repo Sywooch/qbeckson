@@ -23,6 +23,7 @@ use yii\helpers\ArrayHelper;
  * @property integer      $prepayment
  * @property integer      $status
  * @property String       $statusAsString
+ * @property String $contracts
  *
  *
  * @property Contracts    $contract
