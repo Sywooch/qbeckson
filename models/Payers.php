@@ -67,6 +67,9 @@ class Payers extends \yii\db\ActiveRecord
 
         foreach ($directionsArray as $index => $value) {
             if (!empty($this->$index)) {
+                if (!$this->{$directionCountersArray[$index]}) {
+                    $this->{$directionCountersArray[$index]} = 1000000;
+                }
                 $this->directionality = join(',', [$this->directionality, $value]);
             } else {
                 $this->{$directionCountersArray[$index]} = 0;
@@ -204,7 +207,7 @@ class Payers extends \yii\db\ActiveRecord
             ->one();
         $directionality = explode(',', $rows['directionality']);
         if (in_array('Техническая (робототехника)', $directionality)) {
-            if ($rows['directionality_1rob_count'] > 0) {
+            if ($rows['directionality_1rob_count'] > 0 && $rows['directionality_1rob_count'] < 1000000 ) {
                 $display = $rows['directionality_1rob_count'];
             } else {
                 $display = 'без ограничений';
@@ -225,7 +228,7 @@ class Payers extends \yii\db\ActiveRecord
             ->one();
         $directionality = explode(',', $rows['directionality']);
         if (in_array('Техническая (иная)', $directionality)) {
-            if ($rows['directionality_1_count'] > 0) {
+            if ($rows['directionality_1_count'] > 0 && $rows['directionality_1_count'] < 1000000) {
                 $display = $rows['directionality_1_count'];
             } else {
                 $display = 'без ограничений';
@@ -246,7 +249,7 @@ class Payers extends \yii\db\ActiveRecord
             ->one();
         $directionality = explode(',', $rows['directionality']);
         if (in_array('Естественнонаучная', $directionality)) {
-            if ($rows['directionality_2_count'] > 0) {
+            if ($rows['directionality_2_count'] > 0 && $rows['directionality_2_count'] < 1000000) {
                 $display = $rows['directionality_2_count'];
             } else {
                 $display = 'без ограничений';
@@ -267,7 +270,7 @@ class Payers extends \yii\db\ActiveRecord
             ->one();
         $directionality = explode(',', $rows['directionality']);
         if (in_array('Физкультурно-спортивная', $directionality)) {
-            if ($rows['directionality_3_count'] > 0) {
+            if ($rows['directionality_3_count'] > 0 && $rows['directionality_3_count'] < 1000000) {
                 $display = $rows['directionality_3_count'];
             } else {
                 $display = 'без ограничений';
@@ -288,7 +291,7 @@ class Payers extends \yii\db\ActiveRecord
             ->one();
         $directionality = explode(',', $rows['directionality']);
         if (in_array('Художественная', $directionality)) {
-            if ($rows['directionality_4_count'] > 0) {
+            if ($rows['directionality_4_count'] > 0 && $rows['directionality_4_count'] < 1000000) {
                 $display = $rows['directionality_4_count'];
             } else {
                 $display = 'без ограничений';
@@ -309,7 +312,7 @@ class Payers extends \yii\db\ActiveRecord
             ->one();
         $directionality = explode(',', $rows['directionality']);
         if (in_array('Туристско-краеведческая', $directionality)) {
-            if ($rows['directionality_5_count'] > 0) {
+            if ($rows['directionality_5_count'] > 0 && $rows['directionality_5_count'] < 1000000) {
                 $display = $rows['directionality_5_count'];
             } else {
                 $display = 'без ограничений';
@@ -330,7 +333,7 @@ class Payers extends \yii\db\ActiveRecord
             ->one();
         $directionality = explode(',', $rows['directionality']);
         if (in_array('Социально-педагогическая', $directionality)) {
-            if ($rows['directionality_6_count'] > 0) {
+            if ($rows['directionality_6_count'] > 0 && $rows['directionality_6_count'] < 1000000) {
                 $display = $rows['directionality_6_count'];
             } else {
                 $display = 'без ограничений';
