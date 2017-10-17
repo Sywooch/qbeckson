@@ -29,6 +29,14 @@ class HelpSearch extends Help
     /**
      * @inheritdoc
      */
+    public function behaviors()
+    {
+        return [];
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function scenarios()
     {
         // bypass scenarios() implementation in the parent class

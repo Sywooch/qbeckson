@@ -413,7 +413,7 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
     </div>
 </div>
 <?= \app\widgets\Export::widget([
-    'dataProvider' => $ContractsallProvider,
+    'dataProvider' => $activeContractsProvider,
     'columns' => GridviewHelper::prepareColumns('contracts', $activeColumns, 'active', 'export'),
     'group' => 'organization-contracts',
     'table' => 'contracts',
