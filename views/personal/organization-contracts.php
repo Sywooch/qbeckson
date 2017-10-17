@@ -100,7 +100,7 @@ $payerName = [
     'value' => function ($data) {
         return Html::a(
             $data->payers->name,
-            Url::to(['payers/view', 'id' => $data->payer->name]),
+            Url::to(['payers/view', 'id' => $data->payer->id]),
             ['target' => '_blank', 'data-pjax' => '0']
         );
     }

@@ -831,6 +831,7 @@ class PersonalController extends Controller
             'status' => Contracts::STATUS_ACTIVE,
             'paid' => '0,150000',
             'rezerv' => '0,150000',
+            'all_parents_funds' => '0,10000',
             'modelName' => 'SearchActiveContracts',
             'organization_id' => $user->organization->id,
         ]);
