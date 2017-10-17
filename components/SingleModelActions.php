@@ -94,7 +94,7 @@ abstract class SingleModelActions extends Model
      */
     public function save($validate = true)
     {
-        if ($validate && (!$this->validate() || !$this->targetModel->validate())) {
+        if ($validate && !$this->validate()) {
             return false;
         }
         $trans = Yii::$app->db->beginTransaction();
@@ -110,7 +110,7 @@ abstract class SingleModelActions extends Model
 
             return true;
         }
-
+        Yii::trace($this->targetModel->getErrors());
         return $rollback();
 
 

@@ -4,13 +4,11 @@ namespace app\controllers;
 
 use app\models\Certificates;
 use app\models\Contracts;
-use app\models\ContractsInvoiceSearch;
 use app\models\ContractspreInvoiceSearch;
 use app\models\Invoices;
 use app\models\invoices\InvoiceBuilder;
 use app\models\InvoicesSearch;
 use app\models\Organization;
-use app\models\UserIdentity;
 use mPDF;
 use Yii;
 use yii\filters\VerbFilter;
@@ -86,81 +84,18 @@ class InvoicesController extends Controller
 
     public function actionNew($payer)
     {
-        //$action=Yii::$app->request->post('action');
-        // $selection=(array)Yii::$app->request->post('selection');
-
         $builder = InvoiceBuilder::createInstance(['payer_id' => $payer]);
 
-        $builder->save(false);
-
-        //Yii::trace($builder->getContractsData());
-
-        return;
-        $rFrom = new datetime('first day of -6 month midnight');
-        $rTo = new datetime('last day of -6 month midnight');
-        $model = new Invoices();
-
-        $model->date = date("Y-m-d");
-
-        $organization = Yii::$app->user->identity->organization;
-        /**@var $organization Organization */
-
-        $contractsToRefuse = $organization->getContracts()
-            ->andWhere([Contracts::tableName() . '.status' => [Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED]])
-            ->all();
-
-
-        if ($model->load(Yii::$app->request->post())) {
-            $lmonth = date('m') - 1;
-
-            if (count($contractsToRefuse) > 0) {
-                array_map(function ($val)
-                {
-                    /**@var $val Contracts */
-                    $message = $val->status === Contracts::STATUS_ACCEPTED
-                        ? 'оферта отозвана исполнителем в связи с истечением срока ожидания акцепта.'
-                        : 'истек срок рассмотрения заявки со стороны организации, пожалуйста, сформируйте новую.';
-                    $val->setRefused($message, UserIdentity::ROLE_ORGANIZATION_ID, $val->organization_id);
-                }, $contractsToRefuse);
-            }
-
-            $searchContracts = new ContractsInvoiceSearch(['pagination' => false]);
-            $searchContracts->payer_id = $payer;
-            $ContractsProvider = $searchContracts->search(Yii::$app->request->queryParams);
-
-            $contracts = [];
-            $sum = 0;
-            foreach ($ContractsProvider->models as $contract) {
-                $completeness = (new \yii\db\Query())
-                    ->select(['sum'])
-                    ->from('completeness')
-                    ->where(['contract_id' => $contract->id])
-                    ->andWhere(['preinvoice' => 0])
-                    ->andWhere(['month' => $lmonth])
-                    ->one();
-
-                $sum += $completeness['sum'];
-                $model->payers_id = $contract->payer_id;
-                array_push($contracts, $contract->id);
-            }
-            $model->contracts = implode(",", $contracts);
-            $model->sum = $sum;
-            $model->month = $lmonth;
-            $model->prepayment = 0;
-            $model->status = 0;
-            $model->organization_id = $organization->id;
-            $model->setCooperate();
-            $model->pdf = $model->generateInvoice();
-            if ($model->save()) {
-                return $this->redirect(['/invoices/view', 'id' => $model->id]);
-            }
+        if ($builder->load(Yii::$app->request->post()) && $builder->save()) {
+            return $this->redirect(['/invoices/view', 'id' => $builder->invoice->id]);
         }
 
-        // TODO: ELSE написать предупреждалку если нет договоров
+        if (mb_strlen($builder->contractsData['contracts']) < 1) {
+            Yii::$app->session->setFlash('danger', 'Не обнаружено не одного договора');
+        }
 
         return $this->render('number', [
-            'model' => $model,
-            'contractsToRefuse' => $contractsToRefuse
+            'model' => $builder,
         ]);
     }
 
