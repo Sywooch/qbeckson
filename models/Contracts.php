@@ -481,7 +481,7 @@ class Contracts extends ActiveRecord
     }
 
     /**
-     * DEPRECATED
+     * @deprecated
      * Use getStatusName() instead
      */
     public function statusName($id)
