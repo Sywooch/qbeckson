@@ -446,15 +446,14 @@ class Invoices extends ActiveRecord
 
         $mpdf = new mPDF();
         $mpdf->WriteHtml($html);
-        $d = DIRECTORY_SEPARATOR;
         $filename = "invoice-" . $model->number . '_' . $model->date . '_' . $model->organization_id . '.pdf';
-        $dir = "{$d}uploads{$d}invoices{$d}";
+        $dir = "/uploads/invoices/";
         if (!file_exists(Yii::getAlias('@webroot') . $dir)) {
             mkdir(Yii::getAlias('@webroot') . $dir, 0755, true);
         }
 
         $mpdf->Output(Yii::getAlias('@webroot') . $dir . $filename, 'F');
 
-        return $filename;
+        return $dir . $filename;
     }
 }
