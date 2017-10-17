@@ -115,6 +115,9 @@ class ExportFile extends \yii\db\ActiveRecord
         if ($doc = static::findByUserId(Yii::$app->user->id, $group)) {
             $doc->created_at = time();
             $doc->status = static::STATUS_PROCESS;
+            $doc->data_provider = $dataProvider;
+            $doc->columns = $columns;
+            $doc->file = $file;
         } else {
             $doc = new static([
                 'file' => $file,

@@ -1,13 +1,15 @@
 <?php
+
+use app\components\halpers\DeclinationOfMonths;
+use app\helpers\AppHelper;
 use app\helpers\GridviewHelper;
 use app\models\Organization;
 use app\models\UserIdentity;
 use app\widgets\SearchFilter;
 use yii\db\Query;
 use yii\grid\ActionColumn;
-use app\helpers\AppHelper;
-use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Html;
 use yii\helpers\Url;
 
 $this->title = 'Счета';
@@ -168,47 +170,23 @@ $preparedColumns = GridviewHelper::prepareColumns('invoices', $columns);
             }
             }
 
-        
-        $date_last=explode(".", date("d.m.Y"));
-            switch ($date_last[1] - 1){
-            case 1: $m='январь'; break;
-            case 2: $m='февраль'; break;
-            case 3: $m='март'; break;
-            case 4: $m='апрель'; break;
-            case 5: $m='май'; break;
-            case 6: $m='июнь'; break;
-            case 7: $m='июль'; break;
-            case 8: $m='август'; break;
-            case 9: $m='сентябрь'; break;
-            case 10: $m='октябрь'; break;
-            case 11: $m='ноябрь'; break;
-            case 12: $m='декабрь'; break;
-            }
-        
-        $date_now=explode(".", date("d.m.Y"));
-            switch ($date_now[1]){
-            case 1: $m_now='январь'; break;
-            case 2: $m_now='февраль'; break;
-            case 3: $m_now='март'; break;
-            case 4: $m_now='апрель'; break;
-            case 5: $m_now='май'; break;
-            case 6: $m_now='июнь'; break;
-            case 7: $m_now='июль'; break;
-            case 8: $m_now='август'; break;
-            case 9: $m_now='сентябрь'; break;
-            case 10: $m_now='октябрь'; break;
-            case 11: $m_now='ноябрь'; break;
-            case 12: $m_now='декабрь'; break;
-            }
+        $month_last = DeclinationOfMonths::getMonthNameByNumberAsNominative(
+            (int)(new DateTime())->modify('previous month')->format('m')
+        );
+
+        $month_now = DeclinationOfMonths::getMonthNameByNumberAsNominative(
+            (int)(new DateTime())->format('m')
+        );
+
             
         
         echo "<p>";
         if ($invoice && date('m') != 1) {
-            echo Html::a('Создать счет за '.$m , ['groups/invoice'], ['class' => 'btn btn-success']);
+            echo Html::a('Создать счет за ' . $month_last, ['groups/invoice'], ['class' => 'btn btn-success']);
         }
         if ($preinvoice) {
             echo "&nbsp;";
-            echo Html::a('Создать аванс за '.$m_now , ['groups/preinvoice'], ['class' => 'btn btn-success']);
+            echo Html::a('Создать аванс за ' . $month_now, ['groups/preinvoice'], ['class' => 'btn btn-success']);
         }
         if (!empty($dec)) {
             echo Html::a('Создать счет за декабрь', ['groups/dec'], ['class' => 'btn btn-warning pull-right']);

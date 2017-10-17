@@ -4,9 +4,9 @@ namespace app\controllers;
 
 use app\models\Certificates;
 use app\models\Contracts;
-use app\models\ContractsInvoiceSearch;
 use app\models\ContractspreInvoiceSearch;
 use app\models\Invoices;
+use app\models\invoices\InvoiceBuilder;
 use app\models\InvoicesSearch;
 use app\models\Organization;
 use mPDF;
@@ -84,54 +84,18 @@ class InvoicesController extends Controller
 
     public function actionNew($payer)
     {
-        //$action=Yii::$app->request->post('action');
-        // $selection=(array)Yii::$app->request->post('selection');
-        $model = new Invoices();
+        $builder = InvoiceBuilder::createInstance(['payer_id' => $payer]);
 
-        $model->date = date("Y-m-d");
-
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
-
-        if ($model->load(Yii::$app->request->post())) {
-            $lmonth = date('m') - 1;
-
-            $searchContracts = new ContractsInvoiceSearch(['pagination' => false]);
-            $searchContracts->payer_id = $payer;
-            $ContractsProvider = $searchContracts->search(Yii::$app->request->queryParams);
-
-            $contracts = [];
-            $sum = 0;
-            foreach ($ContractsProvider->models as $contract) {
-                $completeness = (new \yii\db\Query())
-                    ->select(['sum'])
-                    ->from('completeness')
-                    ->where(['contract_id' => $contract->id])
-                    ->andWhere(['preinvoice' => 0])
-                    ->andWhere(['month' => $lmonth])
-                    ->one();
-
-                $sum += $completeness['sum'];
-                $model->payers_id = $contract->payer_id;
-                array_push($contracts, $contract->id);
-            }
-            $model->contracts = implode(",", $contracts);
-            $model->sum = $sum;
-            $model->month = $lmonth;
-            $model->prepayment = 0;
-            $model->status = 0;
-            $model->organization_id = $organization->id;
-            $model->setCooperate();
-            $model->pdf = $model->generateInvoice();
-            if ($model->save()) {
-                return $this->redirect(['/invoices/view', 'id' => $model->id]);
-            }
+        if ($builder->load(Yii::$app->request->post()) && $builder->save()) {
+            return $this->redirect(['/invoices/view', 'id' => $builder->invoice->id]);
         }
 
-        // TODO: ELSE написать предупреждалку если нет договоров
+        if (mb_strlen($builder->contractsData['contracts']) < 1) {
+            Yii::$app->session->setFlash('danger', 'Не обнаружено не одного договора');
+        }
 
         return $this->render('number', [
-            'model' => $model,
+            'model' => $builder,
         ]);
     }
 

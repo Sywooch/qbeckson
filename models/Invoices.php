@@ -23,6 +23,7 @@ use yii\helpers\ArrayHelper;
  * @property integer      $prepayment
  * @property integer      $status
  * @property String       $statusAsString
+ * @property String $contracts
  *
  *
  * @property Contracts    $contract
@@ -445,10 +446,14 @@ class Invoices extends ActiveRecord
 
         $mpdf = new mPDF();
         $mpdf->WriteHtml($html);
+        $filename = "invoice-" . $model->number . '_' . $model->date . '_' . $model->organization_id . '.pdf';
+        $dir = "/uploads/invoices/";
+        if (!file_exists(Yii::getAlias('@webroot') . $dir)) {
+            mkdir(Yii::getAlias('@webroot') . $dir, 0755, true);
+        }
 
-        $filename = '/uploads/invoices/invoice-' . $model->number . '_' . $model->date . '_' . $model->organization_id . '.pdf';
-        $mpdf->Output(Yii::getAlias('@webroot' . $filename), 'F');
+        $mpdf->Output(Yii::getAlias('@webroot') . $dir . $filename, 'F');
 
-        return $filename;
+        return $dir . $filename;
     }
 }
