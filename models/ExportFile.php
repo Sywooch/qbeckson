@@ -147,10 +147,12 @@ class ExportFile extends \yii\db\ActiveRecord
             $coefficient = 500;
         }
 
-        $newTime = $this->created_at + $this->data_provider->totalCount / $coefficient;
+        if ($this->data_provider) {
+            $newTime = $this->created_at + $this->data_provider->totalCount / $coefficient;
 
-        if ($newTime > time()) {
-            return $newTime;
+            if ($newTime > time()) {
+                return $newTime;
+            }
         }
 
         return false;

@@ -78,9 +78,7 @@ $children = [
     'attribute' => 'children',
     'value' => function ($model) {
         /** @var \app\models\Organization $model */
-        return count(array_unique(ArrayHelper::toArray(
-            $model->getChildren()->andWhere(['contracts.status' => 1])->all()
-        )));
+        return $model->getChildren()->select('certificates.id')->distinct()->leftJoin(Certificates::tableName(), 'certificates.id = contracts.certificate_id')->andWhere(['contracts.status' => 1])->count();
     },
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
     'pluginOptions' => [
@@ -89,6 +87,10 @@ $children = [
 ];
 $amount_child = [
     'attribute' => 'amount_child',
+    'value' => function ($model) {
+        /** @var \app\models\Organization $model */
+        return $model->getChildren()->andWhere(['contracts.status' => 1])->count();
+    },
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
     'pluginOptions' => [
         'max' => 10000
