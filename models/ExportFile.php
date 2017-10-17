@@ -117,6 +117,7 @@ class ExportFile extends \yii\db\ActiveRecord
             $doc->status = static::STATUS_PROCESS;
             $doc->data_provider = $dataProvider;
             $doc->columns = $columns;
+            $doc->file = $file;
         } else {
             $doc = new static([
                 'file' => $file,
