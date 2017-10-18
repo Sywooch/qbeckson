@@ -122,7 +122,7 @@ class Contracts extends ActiveRecord
      */
     public static function tableName()
     {
-        return 'contracts';
+        return '{{%contracts}}';
     }
 
     /**

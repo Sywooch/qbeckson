@@ -71,7 +71,7 @@ class ContractsInvoiceSearch extends Contracts
         $start = date('Y') . '-' . $lmonth . '-01'; /*начало предыдущего месяца  */
             
             $cal_days_in_month = cal_days_in_month(CAL_GREGORIAN, $lmonth, date('Y'));
-
+        \Yii::trace($cal_days_in_month);
         $stop = date('Y') . '-' . $lmonth . '-' . $cal_days_in_month; /* конец предыдущего месяца*/
         
          $contracts_all = (new \yii\db\Query())

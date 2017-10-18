@@ -118,6 +118,8 @@ class ExportFile extends \yii\db\ActiveRecord
             $doc->data_provider = $dataProvider;
             $doc->columns = $columns;
             $doc->file = $file;
+            $doc->group = $group;
+            $doc->table = $table;
         } else {
             $doc = new static([
                 'file' => $file,

@@ -30,7 +30,7 @@ class Completeness extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'completeness';
+        return '{{%completeness}}';
     }
 
     /**
