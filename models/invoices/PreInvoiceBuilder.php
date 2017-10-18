@@ -9,7 +9,6 @@ use app\models\Contracts;
 use app\models\Invoices;
 use app\models\Organization;
 use app\models\Payers;
-use app\models\UserIdentity;
 use DateTime;
 use Yii;
 use yii\base\InvalidParamException;
@@ -25,18 +24,14 @@ use yii\validators\InlineValidator;
  * @property integer $number
  *
  * @property array $contractsData
- * @property integer $datePrevMonthNumber
- * @property DateTime $datePrevMonthBeginning
- * @property DateTime $datePrevMonthEnd
- * @property Contracts[] $outOfRangeContracts
- * @property boolean $haveOutOfRangeContracts
+ * @property integer $dateCurrentMonthNumber
+ * @property DateTime $dateCurrentMonthBeginning
+ * @property DateTime $dateCurrentMonthEnd
  *
  */
-class InvoiceBuilder extends InvoicesActions
+class PreInvoiceBuilder extends InvoicesActions
 {
 
-    const MSG_REFUZE_NEW_CONTRACT = 'Истек срок рассмотрения заявки со стороны организации, пожалуйста, сформируйте новую.';
-    const MSG_REFUZE_ACCEPTED_CONTRACT = 'Оферта отозвана исполнителем в связи с истечением срока ожидания акцепта.';
     public $date;
     public $number;
     public $payer_id;
@@ -47,7 +42,6 @@ class InvoiceBuilder extends InvoicesActions
     /**
      * @var Contracts[]
      */
-    private $_outOfRangeContracts;
 
     private $_contractsData;
 
@@ -96,20 +90,20 @@ class InvoiceBuilder extends InvoicesActions
             [['number', 'date'], 'required'],
             ['number', 'integer'],
             ['date', 'safe'],
-            ['date', 'invoiceExistsValidator']
+            ['date', 'preInvoiceExistsValidator']
         ]);
     }
 
 
     /**Существует в этом месяце, этом году, для этого плательщика у этой организации, и статус не "удален"*/
-    public function invoiceExistsValidator($attribute, $params, InlineValidator $validator)
+    public function preInvoiceExistsValidator($attribute, $params, InlineValidator $validator)
     {
         if (Invoices::find()
             ->where([
                 'payers_id' => $this->payer_id,
                 'organization_id' => $this->organization->id,
-                'month' => $this->datePrevMonthNumber,
-                'prepayment' => 0,
+                'month' => $this->dateCurrentMonthNumber,
+                'prepayment' => 1,
             ])
             ->andWhere([
                 '<=', 'date', (new \DateTime($this->date))->format('Y') . '-12-31'
@@ -120,9 +114,9 @@ class InvoiceBuilder extends InvoicesActions
             ->andWhere(['!=', 'status', Invoices::STATUS_REMOVED])
             ->exists()) {
 
-            $msg = 'За {mothDateStr} в {year} уже существует счет для {payer}';
+            $msg = 'За {mothDateStr} в {year} уже существует предоплата для {payer}';
             $msgParams = [
-                'mothDateStr' => DeclinationOfMonths::getMonthNameByNumberAsNominative($this->datePrevMonthNumber),
+                'mothDateStr' => DeclinationOfMonths::getMonthNameByNumberAsNominative($this->dateCurrentMonthNumber),
                 'year' => (new \DateTime($this->date))->format('Y'),
                 'payer' => Payers::findOne($this->payer_id)->name
             ];
@@ -131,48 +125,15 @@ class InvoiceBuilder extends InvoicesActions
 
     }
 
-    public function getOutOfRangeContracts()
-    {
-        if (is_null($this->_outOfRangeContracts)) {
-            $this->buildOutOfRangeContracts();
-        }
-
-        return $this->_outOfRangeContracts;
-    }
-
-    private function buildOutOfRangeContracts()
-    {
-        $this->_outOfRangeContracts = $this->organization
-            ->getContracts()
-            ->andWhere([
-                Contracts::tableName() . '.status' => [
-                    Contracts::STATUS_CREATED,
-                    Contracts::STATUS_ACCEPTED
-                ]
-            ])
-            ->andWhere([Contracts::tableName() . '.payer_id' => $this->payer_id])
-            ->andWhere(['<=', 'start_edu_contract', $this->datePrevMonthEnd])
-            ->all();
-    }
-
-    public function getHaveOutOfRangeContracts(): bool
-    {
-        if (is_null($this->_outOfRangeContracts)) {
-            $this->buildOutOfRangeContracts();
-        }
-
-        return count($this->outOfRangeContracts) > 0;
-    }
-
-    public function getDatePrevMonthEnd(): string
+    public function getDateCurrentMonthEnd(): string
     {
         $date = new DateTime();
-        $date->modify('last day of previous month');
+        $date->modify('last day of this month');
 
         return $date->format('Y-m-d');
     }
 
-    public function getDatePrevMonthBeginning(): string
+    public function getDateCurrentMonthBeginning(): string
     {
         $date = new DateTime();
         $date->modify('first day of previous month');
@@ -180,10 +141,9 @@ class InvoiceBuilder extends InvoicesActions
         return $date->format('Y-m-d');
     }
 
-    public function getDatePrevMonthNumber(): int
+    public function getDateCurrentMonthNumber(): int
     {
         $date = new DateTime();
-        $date->modify('first day of previous month');
 
         return (int)$date->format('m');
     }
@@ -202,12 +162,7 @@ class InvoiceBuilder extends InvoicesActions
         $this->invoice->setAttributes($this->getContractsData()); /*заполняем данные договоров*/
         $this->fillFieldsOfInvoice();             /* заполняем скалярные данные*/
         $this->invoice->setCooperate();
-
-        if (!$this->refuseNotActiveContracts()) {
-            return $transactionTerminator();
-        }
-
-        $this->invoice->pdf = $this->invoice->generateInvoice();  /* Генерируем файл отчета */
+        $this->invoice->pdf = $this->invoice->generatePrepaid();  /* Генерируем файл отчета */
 
         return true;
 
@@ -222,26 +177,12 @@ class InvoiceBuilder extends InvoicesActions
                     'sum' => new Expression('SUM(' . Completeness::tableName() . '.{{sum}})')
                 ])
                 ->innerJoin(Completeness::tableName(), ['contract_id' => new Expression(Contracts::tableName() . '.{{id}}')])
-                ->andWhere(['preinvoice' => 0])
-                ->andWhere(['month' => $this->datePrevMonthNumber])
-                ->andWhere(['<=', 'start_edu_contract', $this->datePrevMonthEnd])
-                ->andWhere(['>=', 'stop_edu_contract', $this->datePrevMonthBeginning])
-                /* если договор закрыт, учитываем так же дату закрытия, а если активен то НЕ учитываем */
-                ->andWhere(['OR', [
-                    'AND', ['<=', 'date_termnate', $this->datePrevMonthEnd], ['`contracts`.status' => Contracts::STATUS_CLOSED]
-                ], [
-                    '`contracts`.status' => Contracts::STATUS_ACTIVE
-                ]
-                ])
-                ->andWhere(['OR', [
-                    'AND', ['>=', 'date_termnate', $this->datePrevMonthBeginning], ['`contracts`.status' => Contracts::STATUS_CLOSED]
-                ], [
-                    '`contracts`.status' => Contracts::STATUS_ACTIVE
-                ]
-                ])
-                /******************************************************/
+                ->andWhere([Completeness::tableName() . '.preinvoice' => 1])
+                ->andWhere([Completeness::tableName() . '.month' => $this->dateCurrentMonthNumber])
+                ->andWhere(['<=', 'start_edu_contract', $this->dateCurrentMonthEnd])
                 ->andWhere([Contracts::tableName() . '.organization_id' => $this->organization->id])
                 ->andWhere([Contracts::tableName() . '.payer_id' => $this->payer_id])
+                ->andWhere([Contracts::tableName() . '.status' => Contracts::STATUS_ACTIVE])
                 ->andWhere(['>', 'all_funds', 0])
                 ->asArray()
                 ->one();
@@ -254,28 +195,10 @@ class InvoiceBuilder extends InvoicesActions
     private function fillFieldsOfInvoice()
     {
         $this->invoice->date = $this->date;
-        $this->invoice->month = $this->datePrevMonthNumber;
-        $this->invoice->prepayment = 0;
+        $this->invoice->month = $this->dateCurrentMonthNumber;
+        $this->invoice->prepayment = 1;
         $this->invoice->status = Invoices::STATUS_NOT_VIEWED;
         $this->invoice->organization_id = $this->organization->id;
         $this->invoice->payers_id = $this->payer_id;
-    }
-
-    private function refuseNotActiveContracts()
-    {
-        if ($this->haveOutOfRangeContracts) {
-            foreach ($this->outOfRangeContracts AS $contract) {
-                $message = $contract->status === Contracts::STATUS_ACCEPTED
-                    ? self::MSG_REFUZE_ACCEPTED_CONTRACT
-                    : self::MSG_REFUZE_NEW_CONTRACT;
-                if (!$contract->setRefused($message, UserIdentity::ROLE_ORGANIZATION_ID, $contract->organization_id)) {
-                    $this->addError('outOfRangeContracts', 'Не удалось расторгнуть договор ' . $contract->id);
-
-                    return false;
-                }
-            }
-        }
-
-        return true;
     }
 }

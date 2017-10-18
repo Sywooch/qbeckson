@@ -4,9 +4,9 @@ namespace app\controllers;
 
 use app\models\Certificates;
 use app\models\Contracts;
-use app\models\ContractspreInvoiceSearch;
 use app\models\Invoices;
 use app\models\invoices\InvoiceBuilder;
+use app\models\invoices\PreInvoiceBuilder;
 use app\models\InvoicesSearch;
 use app\models\Organization;
 use mPDF;
@@ -192,64 +192,19 @@ class InvoicesController extends Controller
 
     public function actionPreinvoice($payer)
     {
-        ini_set('memory_limit', '-1');
-        set_time_limit(0);
 
-        //$action=Yii::$app->request->post('action');
-        // $selection=(array)Yii::$app->request->post('selection');
-
-        $model = new Invoices();
-
-        $model->date = date("Y-m-d");
-
-        if ($model->load(Yii::$app->request->post())) {
-
-            $organizations = new Organization();
-            $organization = $organizations->getOrganization();
-
-            $searchContracts = new ContractspreInvoiceSearch(['pagination' => false]);
-            $searchContracts->payer_id = $payer;
-            $ContractsProvider = $searchContracts->search(Yii::$app->request->queryParams);
-
-            $sum = 0;
-            $contracts = [];
-            foreach ($ContractsProvider->models as $contract) {
-
-                $completeness = (new \yii\db\Query())
-                    ->select(['sum'])
-                    ->from('completeness')
-                    ->where(['contract_id' => $contract->id])
-                    ->andWhere(['preinvoice' => 1])
-                    ->andWhere(['month' => date('m')])
-                    ->one();
-
-
-                $sum += $completeness['sum'];
-
-                //$model->completeness = $completeness['completeness'];  
-                $model->payers_id = $contract->payer_id;
-                array_push($contracts, $contract->id);
-            }
-            $model->contracts = implode(",", $contracts);
-
-
-            $model->sum = $sum;
-            $model->month = date("m");
-            $model->prepayment = 1;
-            $model->status = 0;
-            $model->organization_id = $organization->id;
-            $model->setCooperate();
-            $model->pdf = $model->generatePrepaid();
-
-            if ($model->save()) {
-                return $this->redirect(['/invoices/view', 'id' => $model->id]);
-            }
-        } else {
-            return $this->render('prenumber', [
-                'model' => $model,
-            ]);
+        $builder = PreInvoiceBuilder::createInstance(['payer_id' => $payer]);
+        if ($builder->load(Yii::$app->request->post()) && $builder->save()) {
+            return $this->redirect(['/invoices/view', 'id' => $builder->invoice->id]);
         }
 
+        if (mb_strlen($builder->contractsData['contracts']) < 1) {
+            Yii::$app->session->setFlash('danger', 'Не обнаружено не одного договора');
+        }
+
+        return $this->render('prenumber', [
+            'model' => $builder,
+        ]);
     }
 
     /**

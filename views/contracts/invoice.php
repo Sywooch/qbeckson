@@ -1,9 +1,9 @@
 <?php
 
-use yii\helpers\Html;
-use yii\grid\GridView;
-use app\models\UserIdentity;
 use app\models\Contracts;
+use app\models\UserIdentity;
+use yii\grid\GridView;
+use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\InvoicesSearch */
@@ -50,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ->select(['id'])
                 ->from('contracts')
                 ->where(['<=', 'start_edu_contract', $start])
-                ->andWhere(['>=', 'stop_edu_contract', $start])
+                ->andWhere(['>=', 'stop_edu_contract', $start])/** todo тут нет случайно ошибки? */
                 ->andWhere(['organization_id' => $organization->id])
                 ->andWhere(['payer_id' => $payers])
                 ->andWhere(['status' => 1])
