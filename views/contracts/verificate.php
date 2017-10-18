@@ -95,7 +95,8 @@ if ($model->status === \app\models\Contracts::STATUS_REFUSED) {
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?php if ($model->status === 3) : ?>
+    <?php if ($model->status === \app\models\Contracts::STATUS_ACCEPTED
+        && \Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)) : ?>
     <?= $form->field($model, 'applicationIsReceived')->checkbox(['onClick' => 'if ($(this).prop(\'checked\')) $("#vform").show(); else $("#vform").hide();']) ?>
     <div id="vform" style="<?= ($model->applicationIsReceived > 0 ? '' : 'display:none;')?>">
         <?= $form->field($model, 'number')->textInput(['readonly' => true]) ?>

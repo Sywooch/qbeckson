@@ -16,6 +16,7 @@ use app\models\ProgramsFile;
 use app\models\ProgramsPreviusSearch;
 use app\models\UserIdentity;
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
@@ -179,8 +180,19 @@ class ProgramsController extends Controller
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
             if ($model->verification === $model::VERIFICATION_DENIED) {
-                Yii::$app->session->setFlash('danger', sprintf('Причина отказа: %s',
-                    $model->getInforms()->andWhere(['status' => $model::VERIFICATION_DENIED])->one()->text));
+//                Yii::$app->session->setFlash('danger', sprintf('Причина отказа: %s',
+//                    $model->getInforms()->andWhere(['status' => $model::VERIFICATION_DENIED])->one()->text));
+                Yii::$app->session->setFlash('danger',
+                    $this->renderPartial('informers/list_of_reazon',
+                        [
+                            'dataProvider' => new ActiveDataProvider([
+                                    'query' => $model->getInforms()
+                                        ->andWhere(['status' => $model::VERIFICATION_DENIED]),
+                                    'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
+                                ]
+                            )
+                        ]
+                    ));
             }
         }
         $cooperate = null;
