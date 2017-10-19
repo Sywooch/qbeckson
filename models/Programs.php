@@ -771,6 +771,16 @@ class Programs extends ActiveRecord
         return null;
     }
 
+    public function getProgramFile()
+    {
+        $filename = $this->link;
+        if (strstr($filename, 'programs/')) {
+            $filename = str_replace('programs/', '', $filename);
+        }
+
+        return Yii::getAlias('@pfdo/uploads/programs/') . $filename;
+    }
+
     /**
      * доступна ли данная программа для зачисления указанному пользователю
      *

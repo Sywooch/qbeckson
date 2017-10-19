@@ -110,7 +110,7 @@ $this->registerJs($js);
             'showUpload' => false
         ]]);
     } else {
-        echo '<a href="/' . $model->link . '"><span class="glyphicon glyphicon-download-alt"></span> Скачать программу</a>';
+        echo '<a href="' . $model->programFile . '"><span class="glyphicon glyphicon-download-alt"></span> Скачать программу</a>';
         echo $form->field($file, 'newprogram')->checkbox(['value' => 1, 'ng-model' => 'newprogram']);
         echo '<div ng-show="newprogram">';
         echo $form->field($file, 'docFile')->widget(FileInput::class, ['pluginOptions' => [

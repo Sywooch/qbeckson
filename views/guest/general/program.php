@@ -48,7 +48,7 @@ $programAttributes = [
         'format' => 'raw',
         'value' => Html::a(
             '<span class="glyphicon glyphicon-download-alt"></span>',
-            ['/' . $model->link]
+            [$model->programFile]
         ),
     ],
     [
