@@ -156,7 +156,6 @@ class PayersController extends Controller
 
         if ($user->load(Yii::$app->request->post())) {
             if ($model->load(Yii::$app->request->post())) {
-                $model->populateDirections();
 
                 $model->save();
             }
@@ -184,7 +183,6 @@ class PayersController extends Controller
         }
 
         if ($model->load(Yii::$app->request->post())) {
-            $model->populateDirections();
 
             if ($model->save()) {
                 return $this->redirect(['/payers/view', 'id' => $model->id]);
@@ -229,7 +227,6 @@ class PayersController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post())) {
-            $model->populateDirections();
 
             if ($model->save()) {
                 Yii::$app->session->setFlash('success', 'Данные успешно сохранены.');

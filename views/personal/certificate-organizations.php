@@ -41,9 +41,7 @@ $children = [
     'attribute' => 'children',
     'value' => function ($model) {
         /** @var \app\models\Organization $model */
-        $childrenCount = count(array_unique(
-            $model->getChildren()->andWhere(['contracts.status' => [1]])->asArray()->all()
-        ));
+        $childrenCount = $model->getChildrenCount();
         return $childrenCount > 0 ? $childrenCount : '-';
     },
     'type' => SearchFilter::TYPE_RANGE_SLIDER,

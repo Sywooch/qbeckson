@@ -594,9 +594,9 @@ class Contracts extends ActiveRecord
             $query->andWhere(['status' => $params['status']]);
         }
 
-        $query->andFilterWhere(['payer_id' => $params['payerId']]);
-        $query->andFilterWhere(['certificate_id' => $params['certificateId']]);
-        $query->andFilterWhere(['organization_id' => $params['organizationId']]);
+        $query->andFilterWhere(['payer_id' => isset($params['payerId']) ? $params['payerId'] : null ]);
+        $query->andFilterWhere(['certificate_id' => isset($params['certificateId']) ? $params['certificateId'] : null ]);
+        $query->andFilterWhere(['organization_id' => isset($params['organizationId']) ? $params['organizationId'] : null ]);
 
         return $query->count();
     }
