@@ -73,7 +73,7 @@ if (count($cooperate)) {
                 'class' => 'text-info-lines'],
             'template'   => '<li><strong>{label}:</strong>{value}</li>',
             'model'      => $model,
-            'attributes' => [
+            'attributes' => array_merge([
                 ['attribute' => 'month',
                  'label'     => 'Продолжительность (месяцев)'
                 ],
@@ -97,7 +97,22 @@ if (count($cooperate)) {
                     'format'    => 'currency',
                 ],
 
-            ]
+            ], call_user_func(function ($model): array
+            {
+                /**@var $model \app\models\ProgrammeModule */
+                $result = [];
+                if ($model->hoursindivid) {
+                    array_push($result, ['attribute' => 'hoursindivid']);
+                }
+                if ($model->hoursdop) {
+                    array_push($result, ['attribute' => 'hoursdop']);
+                    if ($model->kvdop) {
+                        array_push($result, ['attribute' => 'kvdop']);
+                    }
+                }
+
+                return $result;
+            }, $model))
         ]) ?>
         <?= $message; ?>
         <?php if ($canViewGroups): ?>
