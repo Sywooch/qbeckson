@@ -9,15 +9,27 @@ use yii\db\ActiveRecord;
  * This is the model class for table "years".
  *
  * @property integer                          $id
+ * @property string $name
  * @property integer                          $program_id
- * @property integer                          $year
- * @property integer                          $month
- * @property integer                          $previus
- * @property integer                          $open
- * @property integer                          $price
- * @property integer                          $normative_price
+ * @property integer $year  порядковый номер модуля
+ * @property integer $month Число месяцев реализации
+ * @property integer $hours
+ * @property string $kvfirst  Квалификация пед работника
+ * @property string $kvdop    Квалификация дополнительно пед работника
+ * @property integer $hoursindivid
+ * @property integer $hoursdop
  * @property integer                          $maxchild
  * @property integer                          $minchild
+ * @property float $price
+ * @property float $normative_price
+ * @property integer $rating
+ * @property integer $limits
+ * @property integer $open
+ * @property integer $previus
+ * @property integer $quality_control
+ * @property integer $p21z
+ * @property integer $p22z
+ * @property string $results
  * @property string                           $fullname
  *
  * @property Programs                         $program

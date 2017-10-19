@@ -12,7 +12,7 @@ class m170817_103649_update_data_in_cert_group_table extends Migration
 
     public function safeDown()
     {
-        $this->dropColumn('cert_group', 'nominal_p');
+        $this->dropColumn('cert_group', 'nominal_p'); /*todo что то не так*/
     }
 
     /*
