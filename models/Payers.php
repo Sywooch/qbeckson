@@ -78,6 +78,16 @@ class Payers extends \yii\db\ActiveRecord
     }
 
     /**
+     * @inheritdoc
+     */
+    public function beforeSave($insert)
+    {
+        $this->populateDirections();
+
+        return parent::beforeSave($insert);
+    }
+
+    /**
      * @return array
      */
     public static function directionalityAttributes($counters = false): array
