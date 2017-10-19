@@ -11,7 +11,7 @@ class m170822_064747_update_contracts_table extends Migration
 
     public function safeDown()
     {
-        $this->addColumn('contracts', 'date_initiate_termination');
+        $this->dropColumn('contracts', 'date_initiate_termination');
     }
 
     /*
