@@ -120,10 +120,8 @@ if ($model->status === \app\models\Contracts::STATUS_REFUSED) {
     }
     ?>
     <div class="pull-right">
-        <?php if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_CERTIFICATE)
-            || Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)
-            || Yii::$app->user->can(\app\models\UserIdentity::ROLE_MONITOR)
-            || Yii::$app->user->can(\app\models\UserIdentity::ROLE_ADMINISTRATOR)): ?>
+        <?php if (!Yii::$app->user->can(\app\models\UserIdentity::ROLE_PAYER)
+            & !Yii::$app->user->can(\app\models\UserIdentity::ROLE_OPERATOR)): ?>
 
             <?= $model->status !== \app\models\Contracts::STATUS_REFUSED ? ModalCheckLink::widget([
                 'link'          => Html::a('Отказать', Url::to(['/contracts/no', 'id' => $model->id]), ['class' => 'btn btn-danger']),
