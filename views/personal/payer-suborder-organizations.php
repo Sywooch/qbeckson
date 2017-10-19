@@ -1,4 +1,6 @@
 <?php
+
+use app\models\Organization;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 use yii\helpers\Url;
@@ -22,7 +24,7 @@ $this->title = 'Подведомственные организации';
         [
             'attribute' => 'type',
             'value' => function ($model) {
-                /** @var \app\models\Organization $model */
+                /** @var Organization $model */
                 return $model::types()[$model->type];
             },
         ],
@@ -45,18 +47,9 @@ $this->title = 'Подведомственные организации';
             'value' => function ($data) {
                 $payer = Yii::$app->user->identity->payer;
 
-                $cert = (new \yii\db\Query())
-                    ->select(['certificate_id'])
-                    ->from('contracts')
-                    ->where(['organization_id' => $data->id])
-                    ->andWhere(['status' => 1])
-                    ->andWhere(['payer_id' => $payer])
-                    ->column();
+                $organization = Organization::findOne($data->id);
 
-                $cert = array_unique($cert);
-                $cert = count($cert);
-
-                return $cert;
+                return $cert = $organization ? $organization->getChildrenCount($payer) : null;
             }
         ],
         [
@@ -64,17 +57,9 @@ $this->title = 'Подведомственные организации';
             'value' => function ($data) {
                 $payer = Yii::$app->user->identity->payer;
 
-                $cert = (new \yii\db\Query())
-                    ->select(['id'])
-                    ->from('contracts')
-                    ->where(['organization_id' => $data->id])
-                    ->andWhere(['status' => 1])
-                    ->andWhere(['payer_id' => $payer])
-                    ->column();
-                $cert = array_unique($cert);
-                $cert = count($cert);
+                $organization = Organization::findOne($data->id);
 
-                return $cert;
+                return $organization ? $organization->getContractsCount($payer) : null;
             }
         ],
         'raiting',

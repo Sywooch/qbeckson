@@ -174,49 +174,12 @@ $this->params['breadcrumbs'][] = $this->title;
         $payers = new Payers();
         $payer = $payers->getPayer();
 
-        $amount = (new \yii\db\Query())
-            ->select(['certificate_id'])
-            ->from('contracts')
-            ->where(['organization_id' => $model->id])
-            ->andWhere(['status' => 1])
-            ->andWhere(['payer_id' => $payer])
-            ->column();
+        $amount = $model->getChildrenCount($payer);
+        $contracts = $model->getContractsCount($payer);
 
-        $amount = array_unique($amount);
-        $amount = count($amount);
-
-        $contracts = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('contracts')
-            ->where(['organization_id' => $model->id])
-            ->andWhere(['status' => 1])
-            ->andWhere(['payer_id' => $payer])
-            ->column();
-
-        $contracts = array_unique($contracts);
-        $contracts = count($contracts);
     } else {
-
-
-        $amount = (new \yii\db\Query())
-            ->select(['certificate_id'])
-            ->from('contracts')
-            ->where(['organization_id' => $model->id])
-            ->andWhere(['status' => 1])
-            ->column();
-
-        $amount = array_unique($amount);
-        $amount = count($amount);
-
-        $contracts = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('contracts')
-            ->where(['organization_id' => $model->id])
-            ->andWhere(['status' => 1])
-            ->column();
-
-        $contracts = array_unique($contracts);
-        $contracts = count($contracts);
+        $amount = $model->getChildrenCount();
+        $contracts = $model->getContractsCount();
     }
     ?>
 

@@ -88,8 +88,9 @@ class OrganizationSearch extends Organization
         }
 
         if ($this->subordered === true) {
+            $payerId = Yii::$app->user->identity->payer ? Yii::$app->user->identity->payer->id : '';
             $query->innerJoinWith('suborderPayer')
-                ->andWhere('organization_payer_assignment.payer_id = ' . Yii::$app->user->identity->payer->id)
+                ->andWhere('organization_payer_assignment.payer_id = ' . $payerId)
                 ->andWhere('organization_payer_assignment.status = ' . OrganizationPayerAssignment::STATUS_ACTIVE . ' OR organization_payer_assignment.status = ' . OrganizationPayerAssignment::STATUS_PENDING);
         }
 
