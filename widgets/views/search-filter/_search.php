@@ -64,7 +64,7 @@ use yii\helpers\Html;
                 ?>
                 <?= $form->field($userFilter, 'filter_id')->hiddenInput()->label(false) ?>
                 <?= $form->field($userFilter, 'columns')->widget(Select2::class, [
-                    'data'          => array_combine($userFilter->filter->columnsForUser, $columnLabels),
+                    'data' => array_combine(array_unique($userFilter->filter->columnsForUser), array_unique($columnLabels)),
                     'options'       => [
                         'placeholder' => 'Выберите..',
                         'id'          => Yii::$app->security->generateRandomString(6)
