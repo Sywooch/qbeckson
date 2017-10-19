@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'amount_child',
                 'value' => function ($model) {
                     /** @var \app\models\Organization $model */
-                    return $model->getChildren()->where('status = 1')->count();
+                    return $model->getContractsCount();
                 }
             ],
             'inn',

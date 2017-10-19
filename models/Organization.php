@@ -358,6 +358,39 @@ class Organization extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * получить кол-во обучающихся
+     *
+     * @param null $payerId - иденитификатор плательщика
+     *
+     * @return int
+     */
+    public function getChildrenCount($payerId = null)
+    {
+        return $this->getChildren()
+            ->select('certificates.id')
+            ->distinct()
+            ->leftJoin(Certificates::tableName(), 'certificates.id = contracts.certificate_id')
+            ->andWhere(['contracts.status' => 1])
+            ->andFilterWhere(['contracts.payer_id' => $payerId])
+            ->count();
+    }
+
+    /**
+     * получить кол-во договоров
+     *
+     * @param null $payerId - иденитификатор плательщика
+     *
+     * @return integer
+     */
+    public function getContractsCount($payerId = null)
+    {
+        return $this->getChildren()
+            ->andWhere(['contracts.status' => 1])
+            ->andFilterWhere(['contracts.payer_id' => $payerId])
+            ->count();
+    }
+
     public function getStatusName()
     {
         $title = '';

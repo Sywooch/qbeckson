@@ -1,7 +1,6 @@
 <?php
 
 use app\helpers\GridviewHelper;
-use app\models\Certificates;
 use app\models\Mun;
 use app\models\UserIdentity;
 use app\widgets\SearchFilter;
@@ -90,7 +89,7 @@ $children = [
     'attribute' => 'children',
     'value' => function ($model) {
         /** @var \app\models\Organization $model */
-        $childrenCount = $model->getChildren()->select('certificates.id')->distinct()->leftJoin(Certificates::tableName(), 'certificates.id = contracts.certificate_id')->andWhere(['contracts.status' => 1])->count();
+        $childrenCount = $model->getChildrenCount();
         return $childrenCount > 0 ? $childrenCount : '-';
     },
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
@@ -102,8 +101,8 @@ $amount_child = [
     'attribute' => 'amount_child',
     'value' => function ($model) {
         /** @var \app\models\Organization $model */
-        $childrenCount = $model->getChildren()->andWhere(['contracts.status' => 1])->count();
-        return $childrenCount > 0 ? $childrenCount : '-';
+        $contractsCount = $model->getContractsCount();
+        return $contractsCount > 0 ? $contractsCount : '-';
     },
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
     'pluginOptions' => [

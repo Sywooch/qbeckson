@@ -41,7 +41,7 @@ $children = [
     'attribute' => 'children',
     'value' => function ($model) {
         /** @var \app\models\Organization $model */
-        $childrenCount = $model->getChildren()->select('certificates.id')->distinct()->leftJoin(Certificates::tableName(), 'certificates.id = contracts.certificate_id')->andWhere(['contracts.status' => 1])->count();
+        $childrenCount = $model->getChildrenCount();
         return $childrenCount > 0 ? $childrenCount : '-';
     },
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
