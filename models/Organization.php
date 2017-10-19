@@ -367,7 +367,13 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getChildrenCount($payerId = null)
     {
-        return $this->getChildren()->select('certificates.id')->distinct()->leftJoin(Certificates::tableName(), 'certificates.id = contracts.certificate_id')->andWhere(['contracts.status' => 1])->andFilterWhere(['contracts.payer_id' => $payerId])->count();
+        return $this->getChildren()
+            ->select('certificates.id')
+            ->distinct()
+            ->leftJoin(Certificates::tableName(), 'certificates.id = contracts.certificate_id')
+            ->andWhere(['contracts.status' => 1])
+            ->andFilterWhere(['contracts.payer_id' => $payerId])
+            ->count();
     }
 
     /**
@@ -379,7 +385,10 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getContractsCount($payerId = null)
     {
-        return $this->getChildren()->andWhere(['contracts.status' => 1])->andFilterWhere(['contracts.payer_id' => $payerId])->count();
+        return $this->getChildren()
+            ->andWhere(['contracts.status' => 1])
+            ->andFilterWhere(['contracts.payer_id' => $payerId])
+            ->count();
     }
 
     public function getStatusName()
