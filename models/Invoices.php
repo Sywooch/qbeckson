@@ -271,7 +271,7 @@ class Invoices extends ActiveRecord
 
         $filename = 'prepaid-' . $model->number . '_' . $model->date . '_' . $model->organization_id . '.pdf';
         if (!file_exists(Yii::getAlias('@webroot') . self::DIR_OF_PDF_REPORTS)) {
-            mkdir(Yii::getAlias('@webroot') . self::DIR_OF_PDF_REPORTS, 0755, true);
+            mkdir(Yii::getAlias('@webroot') . self::DIR_OF_PDF_REPORTS, 0777, true);
         }
         $mpdf->Output(Yii::getAlias('@webroot') . self::DIR_OF_PDF_REPORTS . $filename, 'F');
 
@@ -381,7 +381,7 @@ class Invoices extends ActiveRecord
         $mpdf->WriteHtml($html);
         $filename = "invoice-" . $model->number . '_' . $model->date . '_' . $model->organization_id . '.pdf';
         if (!file_exists(Yii::getAlias('@webroot') . self::DIR_OF_PDF_REPORTS)) {
-            mkdir(Yii::getAlias('@webroot') . self::DIR_OF_PDF_REPORTS, 0755, true);
+            mkdir(Yii::getAlias('@webroot') . self::DIR_OF_PDF_REPORTS, 0777, true);
         }
         $mpdf->Output(Yii::getAlias('@webroot') . self::DIR_OF_PDF_REPORTS . $filename, 'F');
 
