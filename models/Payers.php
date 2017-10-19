@@ -70,7 +70,7 @@ class Payers extends \yii\db\ActiveRecord
                 if (!$this->{$directionCountersArray[$index]}) {
                     $this->{$directionCountersArray[$index]} = 1000000;
                 }
-                $this->directionality = join(',', [$this->directionality, $value]);
+                $this->directionality = $this->directionality ? join(',', [$this->directionality, $value]) : $value;
             } else {
                 $this->{$directionCountersArray[$index]} = 0;
             }
