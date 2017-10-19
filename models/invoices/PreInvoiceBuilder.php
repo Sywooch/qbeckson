@@ -90,10 +90,18 @@ class PreInvoiceBuilder extends InvoicesActions
             [['number', 'date'], 'required'],
             ['number', 'integer'],
             ['date', 'safe'],
-            ['date', 'preInvoiceExistsValidator']
+            ['date', 'preInvoiceExistsValidator'],
+            ['date', 'contractsValidator']
         ]);
     }
 
+
+    public function contractsValidator($attribute, $params, InlineValidator $validator)
+    {
+        if (mb_strlen($this->contractsData['contracts']) < 1) {
+            $this->addError($attribute, 'Не обнаружено не одного договора');
+        }
+    }
 
     /**Существует в этом месяце, этом году, для этого плательщика у этой организации, и статус не "удален"*/
     public function preInvoiceExistsValidator($attribute, $params, InlineValidator $validator)
