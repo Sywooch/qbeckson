@@ -35,7 +35,7 @@ class SettingsSearchFilters extends ActiveRecord
         return [
             [['role'], 'required'],
             [['role'], 'string', 'max' => 50],
-            [['table_columns', 'inaccessible_columns'], 'safe'],
+            [['table_columns', 'inaccessible_columns', 'type'], 'safe'],
             [['is_active'], 'integer'],
             [['table_name'], 'string', 'max' => 255],
             //[['table_name'], 'unique'],

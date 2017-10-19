@@ -181,7 +181,7 @@ class Contracts extends ActiveRecord
             'link_ofer'                => 'Ссылка на оферту',
             'all_funds'                => 'Cовокупный объем средств, необходимый для оплаты договора',
             'funds_cert'               => 'Объем платежей, покрываемый за счет сертификата',
-            'all_parents_funds'        => 'Объем платежей, покрываемый за счет родителей',
+            'all_parents_funds' => 'Родительская плата',
             'start_edu_programm'       => 'Дата начала обучения по программе',
             'funds_gone'               => 'Объем средств, ушедших в уплату договора ',
             'start_edu_contract'       => 'Дата начала обучения по договору',
@@ -481,7 +481,7 @@ class Contracts extends ActiveRecord
     }
 
     /**
-     * DEPRECATED
+     * @deprecated
      * Use getStatusName() instead
      */
     public function statusName($id)

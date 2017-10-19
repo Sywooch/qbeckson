@@ -11,6 +11,9 @@ class Manual extends Component
     public function init()
     {
         parent::init();
+        if (Yii::$app->user->isGuest) {
+            return null;
+        }
 
         $userRoles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
         if (!strpos(Yii::$app->request->url, 'site/manual') && $mans = Help::getCountUncheckedMans(array_shift($userRoles))) {

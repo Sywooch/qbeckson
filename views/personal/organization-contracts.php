@@ -100,7 +100,7 @@ $payerName = [
     'value' => function ($data) {
         return Html::a(
             $data->payers->name,
-            Url::to(['payers/view', 'id' => $data->payer->name]),
+            Url::to(['payers/view', 'id' => $data->payer->id]),
             ['target' => '_blank', 'data-pjax' => '0']
         );
     }
@@ -413,7 +413,7 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
     </div>
 </div>
 <?= \app\widgets\Export::widget([
-    'dataProvider' => $ContractsallProvider,
+    'dataProvider' => $activeContractsProvider,
     'columns' => GridviewHelper::prepareColumns('contracts', $activeColumns, 'active', 'export'),
     'group' => 'organization-contracts',
     'table' => 'contracts',
