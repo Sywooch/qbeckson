@@ -88,9 +88,11 @@ class OrganizationSearch extends Organization
         }
 
         if ($this->subordered === true) {
-            $query->innerJoinWith('suborderPayer')
-                ->andWhere('organization_payer_assignment.payer_id = ' . Yii::$app->user->identity->payer->id)
-                ->andWhere('organization_payer_assignment.status = ' . OrganizationPayerAssignment::STATUS_ACTIVE . ' OR organization_payer_assignment.status = ' . OrganizationPayerAssignment::STATUS_PENDING);
+            if ($payer = Yii::$app->user->identity->payer) {
+                $query->innerJoinWith('suborderPayer')
+                    ->andWhere('organization_payer_assignment.payer_id = ' . $payer->id)
+                    ->andWhere('organization_payer_assignment.status = ' . OrganizationPayerAssignment::STATUS_ACTIVE . ' OR organization_payer_assignment.status = ' . OrganizationPayerAssignment::STATUS_PENDING);
+            }
         }
 
         $dataProvider = new ActiveDataProvider([
