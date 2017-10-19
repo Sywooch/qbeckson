@@ -61,7 +61,24 @@ use yii\helpers\Url;
                         'label'          => sprintf('Адрес %d', $index + 1),
                         'value'          => $address->address,
                         'captionOptions' => ['style' => ['padding-left' => '20px']]];
-                }, array_keys($model->addresses), $model->addresses))
+                }, array_keys($model->addresses), $model->addresses),
+                call_user_func(function ($model): array
+                {
+                    /**@var $model \app\models\ProgrammeModule */
+                    $result = [];
+                    if ($model->hoursindivid) {
+                        array_push($result, ['attribute' => 'hoursindivid']);
+                    }
+                    if ($model->hoursdop) {
+                        array_push($result, ['attribute' => 'hoursdop']);
+                        if ($model->kvdop) {
+                            array_push($result, ['attribute' => 'kvdop']);
+                        }
+                    }
+
+                    return $result;
+                }, $model)
+            )
         ]) ?>
         <?= \yii\grid\GridView::widget([
             'dataProvider' => new \yii\data\ActiveDataProvider(['query' => $model->getGroups()]),
