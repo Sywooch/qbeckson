@@ -38,7 +38,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'address_legal',
             //'geocode',
             //'max_child',
-            'amount_child',
+            [
+                'attribute' => 'amount_child',
+                'value' => function ($model) {
+                    /** @var \app\models\Organization $model */
+                    return $model->getContractsCount();
+                }
+            ],
             'inn',
             'okopo',
             'raiting',

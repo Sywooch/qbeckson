@@ -12,10 +12,10 @@ use app\models\Certificates;
 use app\models\User;
 use app\tests\codeception\fixtures\certificate\CertificatesFixture;
 use app\tests\codeception\fixtures\user\UserFixture;
-use yii\codeception\DbTestCase;
+use Codeception\Test\Unit;
 
 
-class CertificateBaseValidationTest extends DbTestCase
+class CertificateBaseValidationTest extends Unit
 {
     /**
      * @var \UnitTester
@@ -24,7 +24,8 @@ class CertificateBaseValidationTest extends DbTestCase
 
     protected $users = [];
 
-    public function fixtures()
+
+    public function _fixtures()
     {
         return [
             'user' => [
@@ -58,9 +59,6 @@ class CertificateBaseValidationTest extends DbTestCase
         $user->username = '555444';
         $user->password = 'qwerty';
         expect('не валидируется с не уникальным именем', $user->validate())->false();
-
-        $user->username = '555444';
-        $user->password = 'qwerty';
 
         $user->username = 'wwwww';
         $user->password = 'qwerty';

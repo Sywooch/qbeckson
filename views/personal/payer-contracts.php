@@ -381,7 +381,9 @@ $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolv
         $payer = Yii::$app->user->identity->payer;
 
         if ($doc = \app\models\ContractDocument::findByPayer($payer, date('Y'), date('m'))) {
-            echo Html::a('Скачать выписку от ' . Yii::$app->formatter->asDate($doc->created_at), Yii::getAlias('@pfdo/uploads/contracts/') . $doc->file, ['class' => 'btn btn-primary', 'id' => 'excel-download']);
+            $month_name = \Yii::t('app', '{0, date, LLLL}', mktime(0, 0, 0, date('n'), 10));
+            echo '<div class="alert alert-warning">Реестр договоров за ' . $month_name . ' сформирован, Вы можете его скачать, нажав на кнопку внизу:</div>';
+            echo Html::a('Скачать реестр договоров за ' . $month_name . ' (сформирован ' . Yii::$app->formatter->asDate($doc->created_at) . ')', Yii::getAlias('@pfdo/uploads/contracts/') . $doc->file, ['class' => 'btn btn-primary', 'id' => 'excel-download']);
         } else {
             $searchContracts = new ContractsPayerInvoiceSearch(['payer_id' => $payer->id]);
             $invoiceProvider = $searchContracts->search(Yii::$app->request->queryParams);

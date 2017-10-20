@@ -4,11 +4,12 @@
 # RUN `build` COMMAND AFTER ADDING/REMOVING MODULES.
 
 actor: UnitTester
-bootstrap: false
+#bootstrap: false
 modules:
     enabled:
         - Asserts
-        #- \Helper\Unit
+        - \Helper\Unit
+        - \Helper\Acceptance
         - Yii2:
             part: [orm, email, fixtures]
             configFile: 'codeception/config/unit.php'

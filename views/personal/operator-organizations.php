@@ -89,9 +89,7 @@ $children = [
     'attribute' => 'children',
     'value' => function ($model) {
         /** @var \app\models\Organization $model */
-        $childrenCount = count(array_unique(
-            $model->getChildren()->andWhere(['contracts.status' => 1])->asArray()->all()
-        ));
+        $childrenCount = $model->getChildrenCount();
         return $childrenCount > 0 ? $childrenCount : '-';
     },
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
@@ -101,6 +99,11 @@ $children = [
 ];
 $amount_child = [
     'attribute' => 'amount_child',
+    'value' => function ($model) {
+        /** @var \app\models\Organization $model */
+        $contractsCount = $model->getContractsCount();
+        return $contractsCount > 0 ? $contractsCount : '-';
+    },
     'type' => SearchFilter::TYPE_RANGE_SLIDER,
     'pluginOptions' => [
         'max' => 10000
