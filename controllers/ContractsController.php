@@ -1070,8 +1070,8 @@ EOD;
 </div>');
 
         if ($ok) {
-            $mpdf->Output(Yii::getAlias('@webroot/uploads/contracts/') . $model->url, 'F');
-            Yii::$app->session->setFlash('success', 'Оферта успешно оправлена заказчику.');
+            $mpdf->Output(Yii::getAlias('@pfdoroot/uploads/contracts/') . $model->url, 'F');
+            Yii::$app->session->setFlash('success', 'Оферта успешно отправлена заказчику.');
 
             return $this->redirect(['verificate', 'id' => $model->id]);
         }
