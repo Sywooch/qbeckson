@@ -1,14 +1,17 @@
 <?php
+
 namespace app\widgets;
 
 use app\models\SettingsSearchFilters;
 use app\models\UserSearchFiltersAssignment;
+use yii\base\Exception;
 use yii\base\Widget;
 use yii\db\ActiveRecord;
 
 /**
  * Class SearchFilter
  * @package app\widgets
+ * @property  ActiveRecord $model
  */
 class SearchFilter extends Widget
 {
@@ -62,22 +65,38 @@ class SearchFilter extends Widget
      */
     public function run()
     {
+        $table = $this->model->getTableSchema()->fullName;
         $filter = SettingsSearchFilters::find()
             ->andWhere(['>', 'is_active', 0])
             ->andWhere([
-                'table_name' => $this->model->tableName(),
-                'type' => $this->type,
+                'table_name' => $table,
                 'role' => $this->role
-            ])
-            ->one();
-        $userFilter = UserSearchFiltersAssignment::findByFilter($filter);
+            ]);
 
+        if (is_null($this->type) || strlen($this->type) < 1) {
+            $filter->andWhere(['OR', [
+                'type' => null
+            ], [
+                'type' => ''
+            ]]);
+        } else {
+            $filter->andWhere(['type' => $this->type]);
+        }
+        $result = $filter->one();
+        $userFilter = null;
+        if (is_null($result) && defined('YII_ENV') && YII_ENV === 'dev') {
+            $template = 'нужны настройки фильтра, либо фильтр не активен: role: %s; table: %s; type: %s';
+            $message = sprintf($template, $this->role, $table, $this->type);
+            throw new Exception($message);
+        } else {
+            $userFilter = UserSearchFiltersAssignment::findByFilter($result);
+        }
 
         return $this->render('search-filter/_search', [
-            'model'        => $this->model,
-            'action'       => $this->action,
-            'data'         => $this->data,
-            'userFilter'   => $userFilter,
+            'model' => $this->model,
+            'action' => $this->action,
+            'data' => $this->data,
+            'userFilter' => $userFilter,
             'customizable' => $this->customizable,
         ]);
     }
