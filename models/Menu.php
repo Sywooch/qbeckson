@@ -240,13 +240,16 @@ class Menu
                     'label' => 'Реестр программ',
                     'url'   => ['personal/organization-programs']
                 ],
-
+                [
+                    'label' => 'Муниципальное задание',
+                    'url'   => ['personal/organization-municipal-task']
+                ],
             ]],
             ['label' => 'Договоры', 'url' => ['/personal/organization-contracts']],
             ['label' => 'Счета', 'url' => ['/personal/organization-invoices']],
             ['label' => 'Плательщики', 'items' => [
                 ['label' => 'Плательщики', 'url' => ['/personal/organization-payers']],
-                //['label' => 'Подведомственность', 'url' => ['/personal/organization-suborder']],
+                ['label' => 'Подведомственность', 'url' => ['/personal/organization-suborder']],
             ]],
             ['label' => 'Группы', 'url' => ['/personal/organization-groups']],
         ];
