@@ -6,6 +6,7 @@ use app\assets\programsAsset\ProgramsAsset;
 use app\models\AllProgramsSearch;
 use app\models\Cooperate;
 use app\models\forms\ProgramAddressesForm;
+use app\models\forms\ProgramSectionForm;
 use app\models\Informs;
 use app\models\Model;
 use app\models\Organization;
@@ -18,6 +19,7 @@ use app\models\UserIdentity;
 use Yii;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -154,7 +156,26 @@ class ProgramsController extends Controller
         ]);
     }
 
-    /**
+    public function actionUpdateTask($id)
+    {
+        $program = $this->findModel($id);
+        if (!$program->isMunicipalTask) {
+            throw new BadRequestHttpException();
+        }
+        $model = new ProgramSectionForm($program);
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', 'Муниципальное задание успешно обновлено.');
+
+            $this->redirect(['view', 'id' => $id]);
+        }
+
+        return $this->render('update-task', [
+            'model' => $model,
+        ]);
+    }
+
+        /**
      * Displays a single Programs model.
      *
      * @param integer $id

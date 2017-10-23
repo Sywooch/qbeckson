@@ -241,6 +241,11 @@ $config = [
                         'actions' => ['index', 'view'],
                         'allow' => true,
                     ],
+                    [
+                        'actions' => ['update-task'],
+                        'allow'   => true,
+                        'roles'   => ['payer']
+                    ],
                 ],
             'user' =>
                 [
