@@ -16,6 +16,7 @@ use yii\db\Expression;
  *
  * @property HelpUserAssignment[] $helpUserAssignments
  * @property User[] $users
+ * @property int    $order_id [int(11)]  идентификатор для сортировки
  */
 class Help extends \yii\db\ActiveRecord
 {
@@ -60,6 +61,7 @@ class Help extends \yii\db\ActiveRecord
             [['body', 'name'], 'required'],
             [['body', 'applied_to'], 'string'],
             [['name'], 'string', 'max' => 255],
+            ['order_id', 'integer'],
             ['checked', 'safe'],
             ['checked', 'required', 'on' => self::SCENARIO_CHECK, 'requiredValue' => 1, 'message' => false],
         ];
@@ -72,6 +74,7 @@ class Help extends \yii\db\ActiveRecord
     {
         return [
             'id'         => 'ID',
+            'order_id'   => 'номер для сортировки',
             'name'       => 'Название',
             'body'       => 'Текст',
             'applied_to' => 'Кто должен поставить "галочки" о прочтении',
@@ -134,5 +137,25 @@ class Help extends \yii\db\ActiveRecord
             ->addParams([':role' => $role->name]);
 
         return $query->count();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isOrderMin()
+    {
+        $orderMin = Help::find()->min('order_id');
+
+        return $this->order_id == $orderMin;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isOrderMax()
+    {
+       $orderMax = Help::find()->max('order_id');
+
+        return $this->order_id == $orderMax;
     }
 }

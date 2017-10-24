@@ -93,6 +93,20 @@ class SiteController extends Controller
         ]);
     }
 
+    /**
+     * List all manuals for role
+     * @return string
+     */
+    public function actionManuals()
+    {
+        $userRoles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
+        $searchModel = new HelpSearch(['role' => array_shift($userRoles)]);
+        $dataProvider = $searchModel->search(null);
+        $models = $dataProvider->models;
+
+        return $this->render('manuals', ['models' => $models]);
+    }
+
     public function actionManual($id)
     {
         if (!$model = Help::findOne($id)) {
