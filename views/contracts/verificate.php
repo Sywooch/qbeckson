@@ -87,7 +87,8 @@ if ($model->status === \app\models\Contracts::STATUS_REFUSED) {
     }
     ?>
 
-    <?php if ($model->status === 3) : ?>
+    <?php if ($model->status === \app\models\Contracts::STATUS_ACCEPTED
+        && \Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)) : ?>
         <p class="text-justify">
             Вами выставлена оферта на заключение договора Заказчику, после получения заявления на зачисление по требуемой <a href="<?= Url::to(['application-pdf', 'id' => $model->id]) ?>"><b>форме</b></a> Вы можете зарегистрировать договор.
         </p>

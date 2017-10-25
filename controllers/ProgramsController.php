@@ -205,25 +205,6 @@ class ProgramsController extends Controller
             }
         }
 
-        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
-            if ($model->verification === Programs::VERIFICATION_DENIED) {
-                /**@var $inform Informs */
-                $inform = array_pop(
-                    array_filter($model->informs, function ($val)
-                    {
-                        /**@var $val Informs */
-                        return $val->status === Programs::VERIFICATION_DENIED;
-
-                    }
-                    )
-                );
-                if ($inform) {
-                    Yii::$app->session->setFlash('warning', 'Причина отказа: ' . $inform->text);
-                }
-
-            }
-        }
-
         ProgramsAsset::register($this->view);
 
         return $this->render('view/view', ['model' => $model, 'cooperate' => $cooperate]);
@@ -426,17 +407,22 @@ class ProgramsController extends Controller
         $model = $this->findModel($id);
 
         if (Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)
-            && count($model->informs) > 0) {
-            $message = array_pop(
-                array_filter($model->informs, function ($val)
-                {
-                    /**@var $val Informs */
-                    return $val->status === Programs::VERIFICATION_DENIED;
-                })
-            )
-                ->text;
+            && count(array_filter($model->informs, function ($val) {
+                /**@var $val Informs */
+                return $val->status === Programs::VERIFICATION_DENIED;
+            })) > 0) {
+            Yii::$app->session->setFlash('danger',
+                $this->renderPartial('informers/list_of_reazon',
+                    [
+                        'dataProvider' => new ActiveDataProvider([
+                                'query' => $model->getInforms()
+                                    ->andWhere(['status' => $model::VERIFICATION_DENIED]),
+                                'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
+                            ]
+                        )
+                    ]
+                ));
 
-            Yii::$app->session->setFlash('info', 'Причина предыдущего отказа: ' . $message);
         }
 
         $model->verification = Programs::VERIFICATION_WAIT;
