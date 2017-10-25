@@ -15,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="programs-form">
         <?php $form = ActiveForm::begin(); ?>
-        <?= $form->field($model, 'section')->dropDownList(\app\models\Programs::getMunicipalTaskSection()) ?>
+        <?= $form->field($model, 'section')->dropDownList(\yii\helpers\ArrayHelper::map(\app\models\MunicipalTaskMatrix::find()->all(), 'id', 'name')) ?>
         <?php
         echo '<div class="form-group">';
         echo Html::submitButton('Сохранить', ['class' => 'btn btn-success']);

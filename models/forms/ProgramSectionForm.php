@@ -50,8 +50,8 @@ class ProgramSectionForm extends Model
     public function save(): bool
     {
         if ($this->getModel() && $this->validate()) {
-            $this->model->municipal_task_section = $this->section;
-            if ($this->model->save(fasle, ['municipal_task_section'])) {
+            $this->model->municipal_task_matrix_id = $this->section;
+            if ($this->model->save(false, ['municipal_task_matrix_id'])) {
                 return true;
             }
         }
@@ -73,6 +73,6 @@ class ProgramSectionForm extends Model
     public function setModel(Programs $model)
     {
         $this->model = $model;
-        $this->section = $model->municipal_task_section;
+        $this->section = $model->municipal_task_matrix_id;
     }
 }

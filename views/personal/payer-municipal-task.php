@@ -180,11 +180,13 @@ echo SearchFilter::widget([
         null
     ),
     'role' => UserIdentity::ROLE_PAYER,
-]);
-echo GridView::widget([
+]); ?>
+<p>
+    <?= Html::a('Настроить параметры', ['/matrix/params'], ['class' => 'btn btn-success']) ?>
+</p>
+<?php echo GridView::widget([
     'dataProvider' => $programsProvider,
     'filterModel' => null,
     'pjax' => true,
     'columns' => $preparedColumns,
-]);
-?>
+]); ?>

@@ -209,6 +209,13 @@ $config = [
                         'roles' => ['admins'],
                     ],
                 ],
+            'matrix' =>
+                [
+                    [
+                        'allow' => true,
+                        'roles' => ['payer'],
+                    ],
+                ],
             'admin/cleanup' =>
                 [
                     [

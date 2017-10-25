@@ -90,10 +90,6 @@ class Programs extends ActiveRecord
     const VERIFICATION_DENIED = 3;
     const VERIFICATION_IN_ARCHIVE = 10;
 
-    const MUNICIPAL_TASK_PROFESSIONAL = 10;
-    const MUNICIPAL_TASK_IMPORTANT = 20;
-    const MUNICIPAL_TASK_PARENTS = 30;
-
     const ICON_DEFAULT = 'icon-socped';
     const ICON_KEY_IN_PARAMS = 'directivityIconsClass';
 
@@ -148,7 +144,7 @@ class Programs extends ActiveRecord
     {
         return [
             [['direction_id', 'name', 'task', 'annotation', 'ovz', 'norm_providing', 'age_group_min', 'age_group_max', 'ground'], 'required'],
-            [['organization_id', 'ovz', 'mun', 'year', 'ground', 'age_group_min', 'age_group_max', 'verification', 'form', 'p3z', 'study', 'last_contracts', 'limit', 'last_s_contracts', 'quality_control', 'last_s_contracts_rod', 'direction_id', 'is_municipal_task', 'certificate_accounting_limit', 'municipal_task_section'], 'integer'],
+            [['organization_id', 'ovz', 'mun', 'year', 'ground', 'age_group_min', 'age_group_max', 'verification', 'form', 'p3z', 'study', 'last_contracts', 'limit', 'last_s_contracts', 'quality_control', 'last_s_contracts_rod', 'direction_id', 'is_municipal_task', 'certificate_accounting_limit', 'municipal_task_matrix_id'], 'integer'],
             [['rating', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch'], 'number'],
             [['task', 'annotation', 'vid', 'norm_providing', 'search', 'photo_path', 'photo_base_url'], 'string'],
             [['name', 'zab'], 'string', 'max' => 255],
@@ -358,7 +354,7 @@ class Programs extends ActiveRecord
             'zabAsString' => 'Категория детей',
             'illnessesList' => 'Категория детей',
             'currentActiveContracts' => 'Обучающиеся в данный момент',
-            'municipal_task_section' => 'Раздел муниципального задания',
+            'municipal_task_matrix_id' => 'Раздел муниципального задания',
         ];
     }
 
@@ -624,18 +620,6 @@ class Programs extends ActiveRecord
         );
 
         return join(',', $illnessesArray);
-    }
-
-    /**
-     * @return array
-     */
-    public static function getMunicipalTaskSection()
-    {
-        return [
-            static::MUNICIPAL_TASK_PROFESSIONAL => 'предпрофессиональные программы',
-            static::MUNICIPAL_TASK_IMPORTANT => 'программы, значимые для муниципалитета',
-            static::MUNICIPAL_TASK_PARENTS => 'программы для родителей, но на муниципальном задании',
-        ];
     }
 
     public function yearName($data)
