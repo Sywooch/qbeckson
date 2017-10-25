@@ -18,6 +18,9 @@ use Yii;
  */
 class MunicipalTaskPayerMatrixAssignment extends \yii\db\ActiveRecord
 {
+    const CERTIFICATE_TYPE_PF = 1;
+    const CERTIFICATE_TYPE_AC = 2;
+
     /**
      * @inheritdoc
      */
@@ -32,8 +35,8 @@ class MunicipalTaskPayerMatrixAssignment extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['payer_id', 'matrix_id'], 'required'],
-            [['payer_id', 'matrix_id', 'can_be_chosen', 'number', 'number_type'], 'integer'],
+            [['payer_id', 'matrix_id', 'certificate_type'], 'required'],
+            [['payer_id', 'matrix_id', 'can_be_chosen', 'number', 'number_type', 'certificate_type'], 'integer'],
             [['payer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payers::className(), 'targetAttribute' => ['payer_id' => 'id']],
             [['matrix_id'], 'exist', 'skipOnError' => true, 'targetClass' => MunicipalTaskMatrix::className(), 'targetAttribute' => ['matrix_id' => 'id']],
         ];
@@ -67,5 +70,12 @@ class MunicipalTaskPayerMatrixAssignment extends \yii\db\ActiveRecord
     public function getMatrix()
     {
         return $this->hasOne(MunicipalTaskMatrix::className(), ['id' => 'matrix_id']);
+    }
+
+    public static function findByPayerId($payerId)
+    {
+        return static::find()
+            ->where(['payer_id' => $payerId])
+            ->all();
     }
 }

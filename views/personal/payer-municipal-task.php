@@ -182,7 +182,7 @@ echo SearchFilter::widget([
     'role' => UserIdentity::ROLE_PAYER,
 ]); ?>
 <p>
-    <?= Html::a('Настроить параметры', ['/matrix/params'], ['class' => 'btn btn-success']) ?>
+    <?= Html::a('Настроить параметры', ['/payer/matrix/params'], ['class' => 'btn btn-success']) ?>
 </p>
 <?php echo GridView::widget([
     'dataProvider' => $programsProvider,

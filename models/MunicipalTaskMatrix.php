@@ -19,6 +19,9 @@ use Yii;
  */
 class MunicipalTaskMatrix extends \yii\db\ActiveRecord
 {
+    const CERTIFICATE_TYPE_PREFIX_PF = 'pf';
+    const CERTIFICATE_TYPE_PREFIX_AC = 'ac';
+
     /**
      * @inheritdoc
      */
@@ -67,5 +70,12 @@ class MunicipalTaskMatrix extends \yii\db\ActiveRecord
     public function getPayers()
     {
         return $this->hasMany(Payers::className(), ['id' => 'payer_id'])->viaTable('municipal_task_payer_matrix_assignment', ['matrix_id' => 'id']);
+    }
+
+    public static function findByCertificateType($certificateType = self::CERTIFICATE_TYPE_PREFIX_PF)
+    {
+        return static::find()
+            ->where(['can_choose_' . $certificateType => 1])
+            ->all();
     }
 }
