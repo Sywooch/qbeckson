@@ -73,10 +73,13 @@ $user = Yii::$app->user->getIdentity();
                 ]);
                 if (Yii::$app->user->can('certificate')) {
                     echo "<div class='row cert-menu'>";
-                    echo "<div class='col-sm-6 col-md-4 col-sm-offset-1 col-md-offset-2 big-nav'>";
+                    echo "<div class='col-sm-6 col-md-6 col-sm-offset-1 col-md-offset-1 big-nav'>";
                     echo Nav::widget([
                         'options' => ['class' => 'navbar-nav'],
                         'items' => [
+                            ['label' => 'Информация', 'items' => [
+                                ['label' => 'О работе в ИС ПФДО', 'url' => ['site/manuals']]
+                            ]],
                             ['label' => 'Программы', 'url' => ['/personal/certificate-programs']],
                             ['label' => 'Организации', 'url' => ['/personal/certificate-organizations']],
                         ],
