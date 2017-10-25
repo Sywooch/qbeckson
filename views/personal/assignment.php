@@ -42,10 +42,10 @@ $this->registerJs($js, $this::POS_READY);
                     'buttons' => [
                         'assign' => function ($url, $model, $key) use($assignedMunList) {
                             if (in_array($model->id, $assignedMunList)) {
-                                return Html::button('удалить связь', ['class' => 'remove-assign-mun', 'data' => ['mun-id' => $model->id]]);
+                                return Html::button('удалить связь', ['class' => 'btn btn-danger remove-assign-mun', 'data' => ['mun-id' => $model->id]]);
                             }
 
-                            return Html::button('объединить', ['class' => 'assign-mun', 'data' => ['mun-id' => $model->id]]);
+                            return Html::button('объединить', ['class' => 'btn btn-primary assign-mun', 'data' => ['mun-id' => $model->id]]);
                         },
                     ],
                     'template' => '{assign}',
