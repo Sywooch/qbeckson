@@ -22,6 +22,7 @@ use yii\db\ActiveRecord;
  *
  * @property string $extendDocumentUrl
  * @property string $generalDocumentUrl
+ * @property integer $module_max_price [int(11)]  максимальное значение цены модуля от нормативной стоимости в %
  */
 class OperatorSettings extends ActiveRecord
 {
@@ -53,7 +54,7 @@ class OperatorSettings extends ActiveRecord
             ], 'string', 'max' => 255],
             [[
                 'extendDocument', 'generalDocument', 'current_program_date_from', 'current_program_date_to',
-                'future_program_date_from', 'future_program_date_to'
+                'future_program_date_from', 'future_program_date_to', 'module_max_price'
             ], 'safe'],
         ];
     }
@@ -115,6 +116,7 @@ class OperatorSettings extends ActiveRecord
 
             'extendDocument' => 'Типовой договор с суммой',
             'generalDocument' => 'Типовой договор без суммы',
+            'module_max_price' => 'Максимальное значение цены модуля от нормативной стоимости',
         ];
     }
 }
