@@ -40,7 +40,10 @@ $this->params['breadcrumbs'][] = $this->title;
     $cert = $model->certificate;
 
 
-    if ($model->status == Contracts::STATUS_CREATED) {
+    if ($model->status == Contracts::STATUS_CREATED
+        && (!Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)
+            && !Yii::$app->user->can(UserIdentity::ROLE_PAYER)
+        )) {
         echo '<div class="alert alert-warning">Ваша заявка находится на рассмотрении поставщика образовательных услуг. Дождитесь оферты от поставщика на заключения договора. Заявка будет переведена в раздел "Ожидающие договоры" автоматически после получения оферты.</div>';
     } elseif ($model->status == Contracts::STATUS_ACCEPTED) {
         echo '<div class="alert alert-warning">Для того, чтобы завершить заключение договора напишите заявление на обучение в соответствии с <a href="' . Url::to(['application-pdf', 'id' => $model->id]) . '">представленным образцом заявления</a>. Вы можете распечатать образец или переписать от руки на листе бумаги. После написания заявления отнесите его лично или передайте с ребенком поставщику образовательных услуг.</div>';
