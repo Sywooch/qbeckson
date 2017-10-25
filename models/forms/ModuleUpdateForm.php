@@ -82,11 +82,23 @@ class ModuleUpdateForm extends Model
 
     /**
      * @param $attribute
+     *
+     * @return bool
      */
     public function validateData($attribute)
     {
-        if ($this->getModel()->getContracts()->andWhere(['contracts.status' => [0,1,3]])->count() > 0) {
+        $programmeModule = $this->getModel();
+
+        if ($programmeModule->getContracts()->andWhere(['contracts.status' => [0,1,3]])->count() > 0) {
             $this->addError($attribute, 'Нельзя изменить цену программы, есть заявка на эту программу');
+
+            return false;
+        }
+
+        $moduleMaxPrice = $programmeModule->program->municipality->operator->settings->module_max_price;
+
+        if ($this->price > $programmeModule->normative_price * $moduleMaxPrice/100) {
+            $this->addError($attribute, "Цена не может быть установлена в размере более {$moduleMaxPrice}% от нормативной стоимости");
         }
     }
 
