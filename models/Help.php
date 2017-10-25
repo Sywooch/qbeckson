@@ -72,13 +72,15 @@ class Help extends \yii\db\ActiveRecord
      */
     public function attributeLabels()
     {
+        $checkedLabel = Yii::$app->user->can('certificate') ? 'буду его учитывать в работе с ЛК.' : 'специалисты будут учитывать.';
+
         return [
             'id'         => 'ID',
             'order_id'   => 'номер для сортировки',
             'name'       => 'Название',
             'body'       => 'Текст',
             'applied_to' => 'Кто должен поставить "галочки" о прочтении',
-            'checked'    => 'Раздел «<a target="_blank" href="' . \yii\helpers\Url::to(['site/manual', 'id' => $this->id]) . '">' . $this->name . '</a>» прочитан. Специалисты, имеющие доступ в личный кабинет, учитывают его содержание при работе с системой.',
+            'checked'    => 'C разделом «<a target="_blank" href="' . \yii\helpers\Url::to(['site/manual', 'id' => $this->id]) . '">' . $this->name . '</a>» ознакомлен, ' . $checkedLabel,
         ];
     }
 
