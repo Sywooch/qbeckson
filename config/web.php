@@ -179,7 +179,7 @@ $config = [
                     'roles' => ['organizations']
                 ],
                 [
-                    'actions' => ['payer-suborder-organizations', 'payer-all-organizations', 'payer-municipal-task'],
+                    'actions' => ['payer-suborder-organizations', 'payer-all-organizations', 'payer-municipal-task', 'user-personal-assign', 'remove-user-personal-assign', 'assigned-user-login'],
                     'allow' => true,
                     'roles' => ['payers']
                 ],

@@ -4,6 +4,7 @@
 /* @var $content string */
 
 use app\assets\AppAsset;
+use app\models\PersonalAssignmentViewHelper;
 use app\widgets\Alert;
 use app\widgets\MainFooter;
 use yii\bootstrap\Nav;
@@ -31,17 +32,18 @@ $user = Yii::$app->user->getIdentity();
 <div class="wrap">
     <div class="container-fluid">
         <div class="top-line row">
-            <div class="col-md-10 col-md-offset-1 text-center">
+            <div class="col-md-7 col-md-offset-1 text-center">
                 <a href="<?= Url::home() ?>">
                     Портал персонифицированного финансирования дополнительного образования детей
                 </a>
             </div>
-            <div class="col-md-1">
+            <div class="col-md-4">
                 <?php
                 if (!Yii::$app->user->isGuest) {
                     echo Nav::widget([
                         'options' => ['class' => 'navbar-nav navbar-right header-nav'],
                         'items' => [
+                            PersonalAssignmentViewHelper::getAssignedUsersNavItems(),
                             [
                                 'label' => 'Выйти(' . $user->username . ')',
                                 'url' => ['site/logout'],

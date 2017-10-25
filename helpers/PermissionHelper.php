@@ -56,6 +56,7 @@ class PermissionHelper
                 ['label' => 'Общая статистика', 'url' => ['/personal/payer-statistic']],
                 ['label' => 'Уполномоченные организации', 'url' => ['/monitor/index']],
                 ['label' => 'О работе в ИС ПФДО', 'url' => ['site/manuals']],
+                ['label' => 'Объединение кабинетов', 'url' => ['/personal/user-personal-assign']],
             ]],
             ['label' => 'Номиналы групп', 'url' => ['/cert-group/index']],
             ['label' => 'Сертификаты', 'url' => ['/personal/payer-certificates']],
