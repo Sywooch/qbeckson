@@ -1,7 +1,5 @@
 <?php
 
-use yii\bootstrap\ActiveForm;
-
 /* @var $this yii\web\View */
 /* @var $models \app\models\Help[] */
 
@@ -13,11 +11,11 @@ $this->title = 'Основные правила работы';
         <h3><?= $this->title ?></h3><br/>
         <ul>
             <?php foreach ($models as $index => $model): ?>
-                <li><?= $model->getAttributeLabel('checked') ?></li>
+                <li>Раздел «<a target="_blank" href="<?= \yii\helpers\Url::to(['site/manual', 'id' => $model->id]) ?>"><?= $model->name ?></a>».</li>
             <?php endforeach; ?>
         </ul>
         <?php else: ?>
-            <h3>Нет разделов для ознакомления</h3>
+            <h3>Правил работы не найдено.</h3>
         <?php endif; ?>
     </div>
 </div>
