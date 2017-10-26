@@ -71,7 +71,7 @@ use yii\helpers\Url;
 
     }
 
-    echo Html::a('Открыть текст программы', '/' . $model->link, ['class' => 'btn btn-theme']);
+    echo Html::a('Открыть текст программы', $model->programFile, ['class' => 'btn btn-theme']);
     ?>
 </div>
 

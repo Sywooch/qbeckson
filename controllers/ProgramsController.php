@@ -263,8 +263,8 @@ class ProgramsController extends Controller
                     ]);
                 }
 
-                $datetime = microtime(true); // date("Y-m-d-G-i-s");
-                $filename = 'programs/program-' . $organization['id'] . '-' . $datetime . '.' . $file->docFile->extension;
+                $datetime = time();
+                $filename = 'program-' . $organization['id'] . '-' . $datetime . '.' . $file->docFile->extension;
                 $model->link = $filename;
                 $model->year = count($modelsYears);
 
@@ -387,7 +387,7 @@ class ProgramsController extends Controller
 
                                 return $this->redirect($model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']);
                             }
-                        } catch (Exception $e) {
+                        } catch (\Exception $e) {
                             $transaction->rollBack();
                         }
                     }
