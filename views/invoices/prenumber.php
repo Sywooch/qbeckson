@@ -1,33 +1,20 @@
 <?php
 
+use app\components\halpers\DeclinationOfMonths;
+use kartik\datecontrol\DateControl;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use kartik\datecontrol\DateControl;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Invoices */
 
 
-
-$date=explode(".", date("d.m.Y"));
-            switch ($date[1]){
-            case 1: $m='январь'; break;
-            case 2: $m='февраль'; break;
-            case 3: $m='март'; break;
-            case 4: $m='апрель'; break;
-            case 5: $m='май'; break;
-            case 6: $m='июнь'; break;
-            case 7: $m='июль'; break;
-            case 8: $m='август'; break;
-            case 9: $m='сентябрь'; break;
-            case 10: $m='октябрь'; break;
-            case 11: $m='ноябрь'; break;
-            case 12: $m='декабрь'; break;
-            }
-
+$month = DeclinationOfMonths::getMonthNameByNumberAsNominative(
+    (int)(new DateTime())->format('m')
+);
 $this->title = 'Введите номер для реестра авансов:';
   $this->params['breadcrumbs'][] = ['label' => 'Счета', 'url' => ['/personal/organization-invoices']];
-  $this->params['breadcrumbs'][] = ['label' => 'Авансировать за '.$m , 'url' => ['/groups/preinvoice']];
+$this->params['breadcrumbs'][] = ['label' => 'Авансировать за ' . $month, 'url' => ['/groups/preinvoice']];
 $this->params['breadcrumbs'][] = ['label' => 'Выберите плательщика', 'url' => ['/contracts/preinvoice']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>

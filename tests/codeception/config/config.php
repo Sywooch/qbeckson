@@ -14,7 +14,9 @@ return [
     ],
     'components' => [
         'db' => [
-            'dsn' => 'mysql:host=localhost;dbname=yii2_basic_tests',
+            'dsn' => 'mysql:host=localhost;dbname=pfdo-test',
+            'username' => 'pfdo-test',
+            'password' => 'pfdo-test',
         ],
         'mailer' => [
             'useFileTransport' => true,

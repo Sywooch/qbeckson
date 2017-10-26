@@ -33,14 +33,14 @@ $this->params['breadcrumbs'][] = $this->title;
         $sum = 'Сумма счета';
         $number = 'Номер счета';
         $date = 'Дата счета';
-        $link = '/invoices/invoice';
+        $link = '@pfdo/uploads/invoices/invoice';
         $inv = 'счет';
     } else {
         $month = 'Месяц, за который выставлен аванс';
         $sum = 'Сумма аванса';
         $number = 'Номер аванса';
         $date = 'Дата аванса';
-        $link = '/invoices/mpdf';
+        $link = '@pfdo/uploads/invoices/prepaid';
         $inv = 'аванс';
     }
 
@@ -115,7 +115,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'link',
                     'format' => 'raw',
-                    'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', !empty($model->pdf) ? Url::to($model->pdf) : Url::to([$link, 'id' => $model->id])),
+                    'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', !empty($model->pdf) ? Url::to($model->pdf) : Url::to(['@pfdo/' . $link, 'id' => $model->id])),
 
                 ],
                 /*[
@@ -157,7 +157,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'link',
                     'format' => 'raw',
-                    'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', !empty($model->pdf) ? Url::to($model->pdf) : Url::to([$link, 'id' => $model->id])),
+                    'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', !empty($model->pdf) ? Url::to($model->pdf) : Url::to(['@pfdo/uploads' . $link, 'id' => $model->id])),
 
                 ],
                 /*[

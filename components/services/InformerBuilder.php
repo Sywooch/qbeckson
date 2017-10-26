@@ -145,10 +145,12 @@ class InformerBuilder
      *
      * @return Informs|null
      */
-    public static function CreateFoContractRefuseByOrganization(Contracts $contract)
+    public static function CreateFoContractRefuseByOrganization(Contracts $contract, $message = null)
     {
         $informs = self::build($contract, '', UserIdentity::ROLE_ORGANIZATION_ID, $contract->organization_id);
-        if (!$informs->load(Yii::$app->request->post())) {
+        if ($message) {
+            $informs->text = $message;
+        } elseif (!$informs->load(Yii::$app->request->post())) {
             return null;
         }
         $informs->text = 'Заявка отменена поставщиком услуг. Причина: ' . $informs->dop;
@@ -158,4 +160,6 @@ class InformerBuilder
 
         return null;
     }
+
+
 }
