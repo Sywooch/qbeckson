@@ -991,7 +991,7 @@ class ProgramsController extends Controller
             $file->docFile = UploadedFile::getInstance($file, 'docFile');
             if ($file->docFile) {
                 $datetime = microtime(true); // date("Y-m-d-G-i-s");
-                $filename = 'programs/program-' . $organization['id'] . '-' . $datetime . '.' . $file->docFile->extension;
+                $filename = 'program-' . $organization['id'] . '-' . $datetime . '.' . $file->docFile->extension;
                 $model->link = $filename;
                 $file->upload($filename);
             }
