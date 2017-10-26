@@ -31,7 +31,7 @@ class ProgramsFile extends Model
     public function upload($filename)
     {
         if ($this->validate()) {
-            $this->docFile->saveAs(\Yii::getAlias('@pfdoroot/uploads/programs/') . $filename);
+            $this->docFile->saveAs(\Yii::getAlias('@pfdoroot/uploads/') . $filename);
             
             return true;
         } else {
