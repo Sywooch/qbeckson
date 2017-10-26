@@ -4,6 +4,7 @@
 /* @var $content string */
 
 use app\assets\AppAsset;
+use app\models\PersonalAssignmentViewHelper;
 use app\widgets\Alert;
 use app\widgets\MainFooter;
 use yii\bootstrap\Nav;
@@ -31,17 +32,18 @@ $user = Yii::$app->user->getIdentity();
 <div class="wrap">
     <div class="container-fluid">
         <div class="top-line row">
-            <div class="col-md-10 col-md-offset-1 text-center">
+            <div class="col-md-7 col-md-offset-1 text-center">
                 <a href="<?= Url::home() ?>">
                     Портал персонифицированного финансирования дополнительного образования детей
                 </a>
             </div>
-            <div class="col-md-1">
+            <div class="col-md-4">
                 <?php
                 if (!Yii::$app->user->isGuest) {
                     echo Nav::widget([
                         'options' => ['class' => 'navbar-nav navbar-right header-nav'],
                         'items' => [
+                            PersonalAssignmentViewHelper::getAssignedUsersNavItems(),
                             [
                                 'label' => 'Выйти(' . $user->username . ')',
                                 'url' => ['site/logout'],
@@ -127,14 +129,23 @@ $user = Yii::$app->user->getIdentity();
             <div class="col-md-12">
                 <?php
                 $links = isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [];
-                $links = array_merge($links, [[
-                    'label' => 'Видео-уроки',
-                    'url' => ['controller/action'],
-                    'template' =>
-                        '<li class="breadcrumbs-help-icon"><a href="' .
-                        Url::to(['site/help']) .
-                        '"><span class="glyphicon glyphicon-film"></span> Видео-уроки</a></li>'
-                ]]);
+                $links = array_merge($links,
+                    [[
+                         'label' => 'Видео-уроки',
+                         'url' => ['controller/action'],
+                         'template' =>
+                             '<li class="breadcrumbs-help-icon"><a href="' .
+                             Url::to(['site/help']) .
+                             '"><span class="glyphicon glyphicon-film"></span> Видео-уроки</a></li>'
+                     ]],
+                    [[
+                        'label' => 'О работе в ИС ПФДО',
+                        'url' => ['site/manuals'],
+                        'template' =>
+                            '<li class="breadcrumbs-help-icon"><a href="' .
+                            Url::to(['site/manuals']) .
+                            '"><span class="glyphicon glyphicon-info-sign"></span> О работе в ИС ПФДО </a>&nbsp&nbsp</li>'
+                     ]]);
                 echo Breadcrumbs::widget([
                     'homeLink' => [
                         'label' => 'Главная',
