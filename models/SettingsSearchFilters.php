@@ -36,12 +36,22 @@ class SettingsSearchFilters extends ActiveRecord
             [['role'], 'required'],
             [['role'], 'string', 'max' => 50],
             [['table_columns', 'inaccessible_columns', 'type'], 'safe'],
+            [['table_columns', 'inaccessible_columns'], 'uniqueColumnsValidator'],
             [['is_active'], 'integer'],
             [['table_name'], 'string', 'max' => 255],
             //[['table_name'], 'unique'],
             ['role', 'in', 'range' => array_keys(UserIdentity::roles())],
         ];
     }
+
+    public function uniqueColumnsValidator($attribute, $params, \yii\validators\InlineValidator $validator)
+    {
+        $arr = $this->split($this->$attribute);
+        if (count($arr) !== count(array_unique($arr))) {
+            $this->addError($attribute, 'Столбцы должны быть уникальны!');
+        }
+    }
+
 
     /**
      * @inheritdoc
@@ -63,7 +73,12 @@ class SettingsSearchFilters extends ActiveRecord
      */
     public function getTableColumns()
     {
-        return preg_split('/[\s*,\s*]*,+[\s*,\s*]*/', $this->table_columns);
+        return $this->split($this->table_columns);
+    }
+
+    public function split(string $string): array
+    {
+        return preg_split('/[\s*,\s*]*,+[\s*,\s*]*/', $string);
     }
 
     /**
@@ -71,7 +86,7 @@ class SettingsSearchFilters extends ActiveRecord
      */
     public function getInaccessibleColumns()
     {
-        return preg_split('/[\s*,\s*]*,+[\s*,\s*]*/', $this->inaccessible_columns);
+        return $this->split($this->inaccessible_columns);
     }
 
     /**

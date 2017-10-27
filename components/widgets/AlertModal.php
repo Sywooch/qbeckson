@@ -37,7 +37,7 @@ class AlertModal extends \yii\bootstrap\Widget
      * - $value is the bootstrap alert type (i.e. danger, success, info, warning)
      */
     public $alertTypes = [
-        'modal-error' => 'alert-danger',
+        'modal-error' => 'alert-error',
         'modal-danger' => 'alert-danger',
         'modal-success' => 'alert-success',
         'modal-info' => 'alert-info',
@@ -74,10 +74,9 @@ class AlertModal extends \yii\bootstrap\Widget
 
                     $message = (empty($this->bodyPrependText[$type]) ? null : $this->bodyPrependText[$type]) . ' ' . $message;
 
-                    echo Modal::widget([
-                        'header' => 'Внимание!',
-
-                    ]);
+//                    echo Modal::widget([
+//                        'header' => 'Внимание!',
+//                    ]);
                     Modal::begin([
                         'id' => 'modal-' . $this->options['id'],
                         'header' => '<h2>Внимание</h2>',

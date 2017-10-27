@@ -6,6 +6,7 @@ use app\helpers\FormattingHelper;
 use app\models\Certificates;
 use app\models\Completeness;
 use app\models\Contracts;
+use app\models\contracts\GroupSwitcher;
 use app\models\ContractsDecInvoiceSearch;
 use app\models\ContractsInvoiceSearch;
 use app\models\ContractspreInvoiceSearch;
@@ -28,11 +29,13 @@ use mPDF;
 use Yii;
 use yii\base\Response;
 use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotAcceptableHttpException;
 use yii\web\NotFoundHttpException;
+use yii\widgets\ActiveForm;
 
 /**
  * ContractsController implements the CRUD actions for Contracts model.
@@ -293,18 +296,23 @@ class ContractsController extends Controller
 
     public function actionNewgroup($id)
     {
-        $model = $this->findModel($id);
+        $switcher = new GroupSwitcher($id);
+        $groupsList = ArrayHelper::map($switcher->contractGroups, 'id', 'name');
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $preinvoice = Completeness::findPreinvoiceByContract($model->id, date('n'), date('Y'));
-            $preinvoice->group_id = $model->group_id;
-            $preinvoice->save(false, ['group_id']);
+        if (Yii::$app->request->isAjax && $switcher->load(Yii::$app->request->post())) {
 
-            return $this->redirect(['/groups/contracts', 'id' => $model->group_id]);
+            return $this->asJson(ActiveForm::validate($switcher));
+        }
+
+        if ($switcher->load(Yii::$app->request->post()) && $switcher->save()) {
+
+            return $this->redirect(['/groups/contracts', 'id' => $switcher->group_id]);
+
         }
 
         return $this->render('newgroup', [
-            'model' => $model,
+            'model' => $switcher,
+            'groupsList' => $groupsList,
         ]);
     }
 
@@ -1070,8 +1078,8 @@ EOD;
 </div>');
 
         if ($ok) {
-            $mpdf->Output(Yii::getAlias('@webroot/uploads/contracts/') . $model->url, 'F');
-            Yii::$app->session->setFlash('success', 'Оферта успешно оправлена заказчику.');
+            $mpdf->Output(Yii::getAlias('@pfdoroot/uploads/contracts/') . $model->url, 'F');
+            Yii::$app->session->setFlash('success', 'Оферта успешно отправлена заказчику.');
 
             return $this->redirect(['verificate', 'id' => $model->id]);
         }

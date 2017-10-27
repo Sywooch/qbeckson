@@ -1,21 +1,27 @@
 <?php
+
+use app\components\halpers\DeclinationOfMonths;
+use app\helpers\AppHelper;
 use app\helpers\GridviewHelper;
 use app\models\Organization;
 use app\models\UserIdentity;
 use app\widgets\SearchFilter;
 use yii\db\Query;
 use yii\grid\ActionColumn;
-use app\helpers\AppHelper;
-use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Html;
 use yii\helpers\Url;
 
 $this->title = 'Счета';
 $this->params['breadcrumbs'][] = $this->title;
 
 /* @var $this yii\web\View */
-/* @var $searchInvoices \app\models\search\InvoicesSearch */
-/* @var $invoicesProvider \yii\data\ActiveDataProvider */
+/* @var $exposedSearchInvoices \app\models\search\InvoicesSearch */
+/* @var $exposedInvoicesProvider \yii\data\ActiveDataProvider */
+/* @var $paidSearchInvoices \app\models\search\InvoicesSearch */
+/* @var $paidInvoicesProvider \yii\data\ActiveDataProvider */
+/* @var $removedSearchInvoices \app\models\search\InvoicesSearch */
+/* @var $removedInvoicesProvider \yii\data\ActiveDataProvider */
 
 $columns = [
     [
@@ -69,7 +75,7 @@ $columns = [
             return $model::statuses()[$model->status];
         },
         'type' => SearchFilter::TYPE_DROPDOWN,
-        'data' => $searchInvoices::statuses(),
+        'data' => $exposedSearchInvoices::statuses(),
     ],
     [
         'attribute' => 'sum',
@@ -168,47 +174,23 @@ $preparedColumns = GridviewHelper::prepareColumns('invoices', $columns);
             }
             }
 
-        
-        $date_last=explode(".", date("d.m.Y"));
-            switch ($date_last[1] - 1){
-            case 1: $m='январь'; break;
-            case 2: $m='февраль'; break;
-            case 3: $m='март'; break;
-            case 4: $m='апрель'; break;
-            case 5: $m='май'; break;
-            case 6: $m='июнь'; break;
-            case 7: $m='июль'; break;
-            case 8: $m='август'; break;
-            case 9: $m='сентябрь'; break;
-            case 10: $m='октябрь'; break;
-            case 11: $m='ноябрь'; break;
-            case 12: $m='декабрь'; break;
-            }
-        
-        $date_now=explode(".", date("d.m.Y"));
-            switch ($date_now[1]){
-            case 1: $m_now='январь'; break;
-            case 2: $m_now='февраль'; break;
-            case 3: $m_now='март'; break;
-            case 4: $m_now='апрель'; break;
-            case 5: $m_now='май'; break;
-            case 6: $m_now='июнь'; break;
-            case 7: $m_now='июль'; break;
-            case 8: $m_now='август'; break;
-            case 9: $m_now='сентябрь'; break;
-            case 10: $m_now='октябрь'; break;
-            case 11: $m_now='ноябрь'; break;
-            case 12: $m_now='декабрь'; break;
-            }
+        $month_last = DeclinationOfMonths::getMonthNameByNumberAsNominative(
+            (int)(new DateTime())->modify('previous month')->format('m')
+        );
+
+        $month_now = DeclinationOfMonths::getMonthNameByNumberAsNominative(
+            (int)(new DateTime())->format('m')
+        );
+
             
         
         echo "<p>";
         if ($invoice && date('m') != 1) {
-            echo Html::a('Создать счет за '.$m , ['groups/invoice'], ['class' => 'btn btn-success']);
+            echo Html::a('Создать счет за ' . $month_last, ['groups/invoice'], ['class' => 'btn btn-success']);
         }
         if ($preinvoice) {
             echo "&nbsp;";
-            echo Html::a('Создать аванс за '.$m_now , ['groups/preinvoice'], ['class' => 'btn btn-success']);
+            echo Html::a('Создать аванс за ' . $month_now, ['groups/preinvoice'], ['class' => 'btn btn-success']);
         }
         if (!empty($dec)) {
             echo Html::a('Создать счет за декабрь', ['groups/dec'], ['class' => 'btn btn-warning pull-right']);
@@ -219,23 +201,91 @@ $preparedColumns = GridviewHelper::prepareColumns('invoices', $columns);
     }
     ?>
 
-<?php
-echo SearchFilter::widget([
-    'model' => $searchInvoices,
-    'action' => ['personal/organization-invoices'],
-    'data' => GridviewHelper::prepareColumns(
-        'invoices',
-        $columns,
-        null,
-        'searchFilter',
-        null
-    ),
-    'role' => UserIdentity::ROLE_ORGANIZATION,
-]);
+<ul class="nav nav-tabs">
+    <li class="active">
+        <a data-toggle="tab" href="#panel1">Выставленные
+            <span class="badge"><?= $exposedInvoicesProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel2">Оплаченные
+            <span class="badge"><?= $paidInvoicesProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel3">Удаленные
+            <span class="badge"><?= $removedInvoicesProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+</ul>
 
-echo GridView::widget([
-    'dataProvider' => $invoicesProvider,
-    'filterModel' => null,
-    'columns' => $preparedColumns
-]);
-?>
+<div class="tab-content">
+    <div id="panel1" class="tab-pane fade in active">
+        <?php
+        echo SearchFilter::widget([
+            'model' => $exposedSearchInvoices,
+            'action' => ['personal/organization-invoices'],
+            'data' => GridviewHelper::prepareColumns(
+                'invoices',
+                $columns,
+                null,
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_ORGANIZATION,
+        ]);
+
+        echo GridView::widget([
+            'dataProvider' => $exposedInvoicesProvider,
+            'filterModel' => null,
+            'columns' => $preparedColumns
+        ]);
+        ?>
+    </div>
+
+    <div id="panel2" class="tab-pane fade">
+        <?php
+        echo SearchFilter::widget([
+            'model' => $paidSearchInvoices,
+            'action' => ['personal/organization-invoices'],
+            'data' => GridviewHelper::prepareColumns(
+                'invoices',
+                $columns,
+                null,
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_ORGANIZATION,
+        ]);
+
+        echo GridView::widget([
+            'dataProvider' => $paidInvoicesProvider,
+            'filterModel' => null,
+            'columns' => $preparedColumns
+        ]);
+        ?>
+    </div>
+
+    <div id="panel3" class="tab-pane fade">
+        <?php
+        echo SearchFilter::widget([
+            'model' => $removedSearchInvoices,
+            'action' => ['personal/organization-invoices'],
+            'data' => GridviewHelper::prepareColumns(
+                'invoices',
+                $columns,
+                null,
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_ORGANIZATION,
+        ]);
+
+        echo GridView::widget([
+            'dataProvider' => $removedInvoicesProvider,
+            'filterModel' => null,
+            'columns' => $preparedColumns
+        ]);
+        ?>
+    </div>
+</div>

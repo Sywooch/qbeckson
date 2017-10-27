@@ -34,11 +34,25 @@ use yii\helpers\Url;
             echo Html::a($model->addresses ? 'Изменить адреса для программы' : 'Указать адреса для программы', ['add-addresses', 'id' => $model->id], ['class' => 'btn btn-theme']);
         }
 
-        if ($model->getLivingContracts()->exists() || $model->getModules()->andWhere(['open' => 1])->exists()) {
+        if ($model->verification === \app\models\Programs::VERIFICATION_WAIT) {
+            echo \app\components\widgets\ButtonWithInfo::widget([
+                'label' => 'Редактировать',
+                'message' => 'Невозможно. Оператор запустил процедуру сертификации',
+                'options' => ['disabled' => 'disabled',
+                    'class' => 'btn btn-theme',]
+            ]);
+            echo \app\components\widgets\ButtonWithInfo::widget([
+                'label' => 'Удалить',
+                'message' => 'Невозможно. Оператор запустил процедуру сертификации',
+                'options' => ['disabled' => 'disabled',
+                    'class' => 'btn btn-danger',]
+            ]);
+
+        } elseif ($model->getLivingContracts()->exists() || $model->getModules()->andWhere(['open' => 1])->exists()) {
 
             echo \app\components\widgets\ButtonWithInfo::widget([
                 'label' => 'Редактировать',
-                'message' => 'Невозможно, существуют контракты и/или открыто зачисление в одном или нескольких модулях',
+                'message' => 'Невозможно, существуют контракты и/или открыто зачисление в одном или нескольких модулях, либо оператор запустил процедуру сертификации',
                 'options' => ['disabled' => 'disabled',
                     'class' => 'btn btn-theme',]
             ]);
@@ -60,7 +74,7 @@ use yii\helpers\Url;
 
     }
 
-    echo Html::a('Открыть текст программы', '/' . $model->link, ['class' => 'btn btn-theme']);
+    echo Html::a('Открыть текст программы', $model->programFile, ['class' => 'btn btn-theme']);
     ?>
 </div>
 

@@ -286,7 +286,7 @@ class Programs extends ActiveRecord
 
     public function getDirectivity()
     {
-        return $this->direction->old_name;
+        return $this->direction ? $this->direction->old_name : null;
     }
 
     public function getCommonActivities()
@@ -770,6 +770,16 @@ class Programs extends ActiveRecord
         }
 
         return null;
+    }
+
+    public function getProgramFile()
+    {
+        $filename = $this->link;
+        if (strstr($filename, 'programs/')) {
+            $filename = str_replace('programs/', '', $filename);
+        }
+
+        return Yii::getAlias('@pfdo/uploads/programs/') . $filename;
     }
 
     /**

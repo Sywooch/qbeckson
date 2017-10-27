@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\halpers\DeclinationOfMonths;
 use mPDF;
 use Yii;
 use yii\db\ActiveRecord;
@@ -23,6 +24,7 @@ use yii\helpers\ArrayHelper;
  * @property integer      $prepayment
  * @property integer      $status
  * @property String       $statusAsString
+ * @property String $contracts
  *
  *
  * @property Contracts    $contract
@@ -36,6 +38,8 @@ class Invoices extends ActiveRecord
     const STATUS_IN_THE_WORK = 1;
     const STATUS_PAID = 2;
     const STATUS_REMOVED = 3;
+
+    const DIR_OF_PDF_REPORTS = "/uploads/invoices/";
 
     /**
      * @return array
@@ -202,45 +206,8 @@ class Invoices extends ActiveRecord
         $html = '<p style="text-align: center;">Приложение к счету от ' . $date_invoice[2] . '.' . $date_invoice[1] . '.' . $date_invoice[0] . ' №' . $model->number . '</p>';
         $html = $html . '<p style="text-align: center;">по договору ' . $cooperate['number'] . ' от ' . $date_cooperate[2] . '.' . $date_cooperate[1] . '.' . $date_cooperate[0] . '</p>';
 
+        $m = DeclinationOfMonths::getMonthNameByNumberAsNominative((int)$model->month);
 
-        switch ($model->month) {
-            case 1:
-                $m = 'январь';
-                break;
-            case 2:
-                $m = 'февраль';
-                break;
-            case 3:
-                $m = 'март';
-                break;
-            case 4:
-                $m = 'апрель';
-                break;
-            case 5:
-                $m = 'май';
-                break;
-            case 6:
-                $m = 'июнь';
-                break;
-            case 7:
-                $m = 'июль';
-                break;
-            case 8:
-                $m = 'август';
-                break;
-            case 9:
-                $m = 'сентябрь';
-                break;
-            case 10:
-                $m = 'октябрь';
-                break;
-            case 11:
-                $m = 'ноябрь';
-                break;
-            case 12:
-                $m = 'декабрь';
-                break;
-        }
         $html = $html . '<p>Месяц, за который сформирован аванс: ' . $m . ' ' . date('Y') . '</p>';
         $html = $html . '<p>Наименование поставщика образовательных услуг: ' . $organization->name . '</p>';
         $html = $html . '<p>ОГРН/ОГРНИП поставщика образовательных услуг:  ' . $organization->OGRN . '</p>';
@@ -301,10 +268,14 @@ class Invoices extends ActiveRecord
 
         $mpdf = new mPDF();
         $mpdf->WriteHtml($html);
-        $filename = '/uploads/invoices/prepaid-' . $model->number . '_' . $model->date . '_' . $model->organization_id . '.pdf';
-        $mpdf->Output(Yii::getAlias('@webroot' . $filename), 'F');
+        $filename = 'prepaid-' . $model->number . '_' . $model->date . '_' . $model->organization_id . '.pdf';
+        if (!file_exists(Yii::getAlias('@pfdoroot') . self::DIR_OF_PDF_REPORTS)) {
+            Yii::trace(Yii::getAlias('@pfdoroot') . self::DIR_OF_PDF_REPORTS);
+            mkdir(Yii::getAlias('@pfdoroot') . self::DIR_OF_PDF_REPORTS, 0777, true);
+        }
+        $mpdf->Output(Yii::getAlias('@pfdoroot') . self::DIR_OF_PDF_REPORTS . $filename, 'F');
 
-        return $filename;
+        return self::DIR_OF_PDF_REPORTS . $filename;
     }
 
     public function generateInvoice()
@@ -338,45 +309,8 @@ class Invoices extends ActiveRecord
         $html = '<p style="text-align: center;">Приложение к счету от ' . $date_invoice[2] . '.' . $date_invoice[1] . '.' . $date_invoice[0] . ' №' . $model->number . '</p>';
         $html = $html . '<p style="text-align: center;">по договору ' . $cooperate['number'] . ' от ' . $date_cooperate[2] . '.' . $date_cooperate[1] . '.' . $date_cooperate[0] . '</p>';
 
-        $month = $model->month;
-        switch ($month) {
-            case 1:
-                $m = 'январь';
-                break;
-            case 2:
-                $m = 'февраль';
-                break;
-            case 3:
-                $m = 'март';
-                break;
-            case 4:
-                $m = 'апрель';
-                break;
-            case 5:
-                $m = 'май';
-                break;
-            case 6:
-                $m = 'июнь';
-                break;
-            case 7:
-                $m = 'июль';
-                break;
-            case 8:
-                $m = 'август';
-                break;
-            case 9:
-                $m = 'сентябрь';
-                break;
-            case 10:
-                $m = 'октябрь';
-                break;
-            case 11:
-                $m = 'ноябрь';
-                break;
-            case 12:
-                $m = 'декабрь';
-                break;
-        }
+        $m = DeclinationOfMonths::getMonthNameByNumberAsNominative((int)$model->month);
+
         $html = $html . '<p>Месяц, за который сформирован счет: ' . $m . ' ' . date('Y') . '</p>';
         $html = $html . '<p>Наименование поставщика образовательных услуг: ' . $organization->full_name . '</p>';
         $html = $html . '<p>ОГРН/ОГРНИП поставщика образовательных услуг:  ' . $organization->OGRN . '</p>';
@@ -445,10 +379,13 @@ class Invoices extends ActiveRecord
 
         $mpdf = new mPDF();
         $mpdf->WriteHtml($html);
+        $filename = "invoice-" . $model->number . '_' . $model->date . '_' . $model->organization_id . '.pdf';
+        if (!file_exists(Yii::getAlias('@pfdoroot') . self::DIR_OF_PDF_REPORTS)) {
+            Yii::trace(Yii::getAlias('@pfdoroot') . self::DIR_OF_PDF_REPORTS);
+            mkdir(Yii::getAlias('@pfdoroot') . self::DIR_OF_PDF_REPORTS, 0777, true);
+        }
+        $mpdf->Output(Yii::getAlias('@pfdoroot') . self::DIR_OF_PDF_REPORTS . $filename, 'F');
 
-        $filename = '/uploads/invoices/invoice-' . $model->number . '_' . $model->date . '_' . $model->organization_id . '.pdf';
-        $mpdf->Output(Yii::getAlias('@webroot' . $filename), 'F');
-
-        return $filename;
+        return self::DIR_OF_PDF_REPORTS . $filename;
     }
 }

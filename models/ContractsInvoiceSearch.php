@@ -2,11 +2,8 @@
 
 namespace app\models;
 
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Contracts;
-use app\models\Certificates;
 
 /**
  * ContractsSearch represents the model behind the search form about `app\models\Contracts`.
@@ -71,11 +68,11 @@ class ContractsInvoiceSearch extends Contracts
         $organization = $organizations->getOrganization();
 
         $lmonth = date('m')-1;
-            $start = date('Y').'-'.$lmonth.'-01';
+        $start = date('Y') . '-' . $lmonth . '-01'; /*начало предыдущего месяца  */
             
             $cal_days_in_month = cal_days_in_month(CAL_GREGORIAN, $lmonth, date('Y'));
-
-            $stop = date('Y').'-'.$lmonth.'-'.$cal_days_in_month;
+        \Yii::trace($cal_days_in_month);
+        $stop = date('Y') . '-' . $lmonth . '-' . $cal_days_in_month; /* конец предыдущего месяца*/
         
          $contracts_all = (new \yii\db\Query())
                 ->select(['id'])

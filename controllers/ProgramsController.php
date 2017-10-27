@@ -17,6 +17,7 @@ use app\models\ProgramsFile;
 use app\models\ProgramsPreviusSearch;
 use app\models\UserIdentity;
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
@@ -40,7 +41,7 @@ class ProgramsController extends Controller
     {
         return [
             'verbs' => [
-                'class'   => VerbFilter::className(),
+                'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
                 ],
@@ -69,7 +70,7 @@ class ProgramsController extends Controller
         }
 
         return $this->render('add-addresses', [
-            'model'   => $form,
+            'model' => $form,
             'program' => $program,
         ]);
     }
@@ -120,7 +121,7 @@ class ProgramsController extends Controller
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
-            'searchModel'  => $searchModel,
+            'searchModel' => $searchModel,
         ]);
     }
 
@@ -137,7 +138,7 @@ class ProgramsController extends Controller
 
         return $this->render('search', [
             'dataProvider' => $dataProvider,
-            'searchModel'  => $searchModel,
+            'searchModel' => $searchModel,
         ]);
     }
 
@@ -152,7 +153,7 @@ class ProgramsController extends Controller
 
         return $this->render('previus', [
             'dataProvider' => $dataProvider,
-            'searchModel'  => $searchModel,
+            'searchModel' => $searchModel,
         ]);
     }
 
@@ -200,36 +201,28 @@ class ProgramsController extends Controller
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
             if ($model->verification === $model::VERIFICATION_DENIED) {
-                Yii::$app->session->setFlash('danger', sprintf('Причина отказа: %s',
-                    $model->getInforms()->andWhere(['status' => $model::VERIFICATION_DENIED])->one()->text));
+//                Yii::$app->session->setFlash('danger', sprintf('Причина отказа: %s',
+//                    $model->getInforms()->andWhere(['status' => $model::VERIFICATION_DENIED])->one()->text));
+                Yii::$app->session->setFlash('danger',
+                    $this->renderPartial('informers/list_of_reazon',
+                        [
+                            'dataProvider' => new ActiveDataProvider([
+                                    'query' => $model->getInforms()
+                                        ->andWhere(['status' => $model::VERIFICATION_DENIED]),
+                                    'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
+                                ]
+                            )
+                        ]
+                    ));
             }
         }
         $cooperate = null;
         if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
             $cooperate = Cooperate::find()->where([
-                Cooperate::tableName() . '.payer_id'        => $user->getCertificate()->select('payer_id'),
+                Cooperate::tableName() . '.payer_id' => $user->getCertificate()->select('payer_id'),
                 Cooperate::tableName() . '.organization_id' => $model->organization_id])->all();
             if (!count($cooperate)) {
                 Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в организацию, реализующую выбранную программу. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
-            }
-        }
-
-        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
-            if ($model->verification === Programs::VERIFICATION_DENIED) {
-                /**@var $inform Informs */
-                $inform = array_pop(
-                    array_filter($model->informs, function ($val)
-                    {
-                        /**@var $val Informs */
-                        return $val->status === Programs::VERIFICATION_DENIED;
-
-                    }
-                    )
-                );
-                if ($inform) {
-                    Yii::$app->session->setFlash('warning', 'Причина отказа: ' . $inform->text);
-                }
-
             }
         }
 
@@ -285,14 +278,14 @@ class ProgramsController extends Controller
                     Yii::$app->session->setFlash('error', 'Пожалуйста, добавьте файл образовательной программы.');
 
                     return $this->render('create', [
-                        'model'       => $model,
-                        'file'        => $file,
+                        'model' => $model,
+                        'file' => $file,
                         'modelsYears' => $modelsYears,
                     ]);
                 }
 
-                $datetime = microtime(true); // date("Y-m-d-G-i-s");
-                $filename = 'programs/program-' . $organization['id'] . '-' . $datetime . '.' . $file->docFile->extension;
+                $datetime = time();
+                $filename = 'program-' . $organization['id'] . '-' . $datetime . '.' . $file->docFile->extension;
                 $model->link = $filename;
                 $model->year = count($modelsYears);
 
@@ -415,7 +408,7 @@ class ProgramsController extends Controller
 
                                 return $this->redirect($model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']);
                             }
-                        } catch (Exception $e) {
+                        } catch (\Exception $e) {
                             $transaction->rollBack();
                         }
                     }
@@ -424,8 +417,8 @@ class ProgramsController extends Controller
         }
 
         return $this->render('create', [
-            'model'       => $model,
-            'file'        => $file,
+            'model' => $model,
+            'file' => $file,
             'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
         ]);
     }
@@ -434,25 +427,30 @@ class ProgramsController extends Controller
     {
         $model = $this->findModel($id);
 
-        $rows = (new \yii\db\Query())
-            ->select(['id'])
-            ->from('years')
-            ->where(['program_id' => $id])
-            ->all();
+        if (Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)
+            && count(array_filter($model->informs, function ($val) {
+                /**@var $val Informs */
+                return $val->status === Programs::VERIFICATION_DENIED;
+            })) > 0) {
+            Yii::$app->session->setFlash('danger',
+                $this->renderPartial('informers/list_of_reazon',
+                    [
+                        'dataProvider' => new ActiveDataProvider([
+                                'query' => $model->getInforms()
+                                    ->andWhere(['status' => $model::VERIFICATION_DENIED]),
+                                'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
+                            ]
+                        )
+                    ]
+                ));
 
-        $i = 0;
-        foreach ($rows as $value) {
-            $years[$i] = ProgrammeModule::findOne($value['id']);
-            $i++;
         }
 
         $model->verification = Programs::VERIFICATION_WAIT;
-        //$model->zab = explode(',', $model->zab);
 
         if ($model->save()) {
             return $this->render('verificate', [
                 'model' => $model,
-                'years' => $years,
             ]);
         }
     }
@@ -669,7 +667,7 @@ class ProgramsController extends Controller
 
         } else {
             return $this->render('cert', [
-                'model'       => $model,
+                'model' => $model,
                 'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
             ]);
         }
@@ -843,7 +841,7 @@ class ProgramsController extends Controller
 
         } else {
             return $this->render('newnormprice', [
-                'model'       => $model,
+                'model' => $model,
                 'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
             ]);
         }
@@ -904,7 +902,7 @@ class ProgramsController extends Controller
 
         return $this->render('certificate', [
             'model' => $model,
-            'year'  => $year,
+            'year' => $year,
         ]);
     }
 
@@ -921,8 +919,8 @@ class ProgramsController extends Controller
                 $informs->prof_id = $model->organization_id;
                 //$informs->text = 'Программа не сертифицированна. Причина: '.$informs->dop;
                 $informs->text = $informs->dop;
-                $informs->from = 3;
-                $informs->status = 3;
+                $informs->from = UserIdentity::ROLE_OPERATOR_ID;
+                $informs->status = Programs::VERIFICATION_DENIED;
                 $informs->date = date("Y-m-d");
                 $informs->read = 0;
                 $informs->save();
@@ -933,7 +931,7 @@ class ProgramsController extends Controller
 
         return $this->render('/informs/comment', [
             'informs' => $informs,
-            'model'   => $model,
+            'model' => $model,
         ]);
     }
 
@@ -1014,7 +1012,7 @@ class ProgramsController extends Controller
             $file->docFile = UploadedFile::getInstance($file, 'docFile');
             if ($file->docFile) {
                 $datetime = microtime(true); // date("Y-m-d-G-i-s");
-                $filename = 'programs/program-' . $organization['id'] . '-' . $datetime . '.' . $file->docFile->extension;
+                $filename = 'program-' . $organization['id'] . '-' . $datetime . '.' . $file->docFile->extension;
                 $model->link = $filename;
                 $file->upload($filename);
             }
@@ -1080,8 +1078,8 @@ class ProgramsController extends Controller
 
         } else {
             return $this->render('update', [
-                'model'      => $model,
-                'file'       => $file,
+                'model' => $model,
+                'file' => $file,
                 'modelYears' => (empty($modelYears)) ? [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])] : $modelYears
             ]);
         }
@@ -1143,8 +1141,8 @@ class ProgramsController extends Controller
 
         } else {
             return $this->render('edit', [
-                'model'      => $model,
-                'file'       => $file,
+                'model' => $model,
+                'file' => $file,
                 'modelYears' => (empty($modelYears)) ? [new ProgrammeModule] : $modelYears
             ]);
         }

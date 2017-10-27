@@ -142,7 +142,7 @@ $columns = [
     ],
     $actions,
 ];
-$preparedColumns = GridviewHelper::prepareColumns('programs', $columns, 'open');
+$preparedColumns = GridviewHelper::prepareColumns('programs', $columns, null);
 ?>
 <?php if ($searchPrograms->organization_id && $searchPrograms->organization) : ?>
     <p class="lead">Показаны результаты для организации: <?= $searchPrograms->organization; ?></p>

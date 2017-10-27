@@ -89,6 +89,10 @@ $amount_child = [
     'attribute' => 'amount_child',
     'value' => function ($model) {
         /** @var \app\models\Organization $model */
+        return $model->getChildren()->andWhere(['contracts.status' => 1])->count();
+    },
+    'value' => function ($model) {
+        /** @var \app\models\Organization $model */
         return $model->getContractsCount();
     },
     'type' => SearchFilter::TYPE_RANGE_SLIDER,

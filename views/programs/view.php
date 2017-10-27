@@ -291,7 +291,7 @@ $this->registerJs($js, $this::POS_END);
                                 'format' => 'raw',
                                 'value' => Html::a(
                                     '<span class="glyphicon glyphicon-download-alt"></span>',
-                                    '/' . $model->link
+                                    $model->programFile
                                 ),
                             ],
                             [
@@ -339,7 +339,7 @@ $this->registerJs($js, $this::POS_END);
                             [
                                 'attribute' => 'link',
                                 'format' => 'raw',
-                                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', '/' . $model->link),
+                                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $model->programFile),
                             ],
                             [
                                 'attribute' => 'mun',
@@ -390,7 +390,7 @@ $this->registerJs($js, $this::POS_END);
                             [
                                 'attribute' => 'link',
                                 'format' => 'raw',
-                                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', '/' . $model->link),
+                                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $model->programFile),
                             ],
                             [
                                 'attribute' => 'mun',
@@ -451,7 +451,7 @@ $this->registerJs($js, $this::POS_END);
                                 [
                                     'attribute' => 'link',
                                     'format' => 'raw',
-                                    'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', '/' . $model->link),
+                                    'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $model->programFile),
                                 ],
                                 [
                                     'attribute' => 'mun',
@@ -508,7 +508,7 @@ $this->registerJs($js, $this::POS_END);
                                 [
                                     'attribute' => 'link',
                                     'format' => 'raw',
-                                    'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', '/' . $model->link),
+                                    'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $model->programFile),
                                 ],
                                 [
                                     'attribute' => 'mun',
@@ -567,7 +567,7 @@ $this->registerJs($js, $this::POS_END);
                                 'format' => 'raw',
                                 'value' => Html::a(
                                     '<span class="glyphicon glyphicon-download-alt"></span>',
-                                    '/' . $model->link
+                                    $model->programFile
                                 ),
                             ],
                             [

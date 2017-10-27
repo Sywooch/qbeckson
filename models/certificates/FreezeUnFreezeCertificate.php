@@ -100,7 +100,7 @@ class FreezeUnFreezeCertificate extends CertificateActions
             return false;
         }
         $contractsExists = $this->certificate->getContractsModels()
-            ->where(['OR', ['status' => Contracts::STATUS_ACTIVE], ['wait_termnate' => 1]])
+            ->andWhere(['AND', ['status' => Contracts::STATUS_ACTIVE], ['!=', 'wait_termnate', 1]])
             ->exists();
 
         if ($contractsExists) {
