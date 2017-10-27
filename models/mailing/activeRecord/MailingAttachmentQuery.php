@@ -1,6 +1,6 @@
 <?php
 
-namespace app\models\mailing;
+namespace app\models\mailing\activeRecord;
 
 /**
  * This is the ActiveQuery class for [[MailingAttachment]].

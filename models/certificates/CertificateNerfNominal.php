@@ -74,7 +74,9 @@ class CertificateNerfNominal extends CertificateActions
                 ['certificate', 'validateContracts'],
                 ['newNominal', 'required'],
                 ['newNominal', 'number', 'max' => $this->certificate->nominal, 'min' => 0,
-                    'message' => 'Значение должно быть числом. Используйте в качестве разделителя десятичных долей точку.'],
+                    'message' => 'Значение должно быть числом.'
+                        . ' Используйте в качестве разделителя десятичных долей точку.'
+                ],
                 //      ['newNominal', 'compare', 'operator' => '<' , 'compareValue' => $this->certificate->nominal],
             ]
         );

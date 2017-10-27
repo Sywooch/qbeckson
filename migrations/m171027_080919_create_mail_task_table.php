@@ -21,7 +21,7 @@ class m171027_080919_create_mail_task_table extends Migration
             'updated_at' => $this->integer()->notNull(),
             'log_message' => $this->string(255)->null(),
             'email' => $this->string(255)->notNull(),
-            'target_type' => $this->integer()->notNull(),
+            'target_type' => $this->integer()->comment('10 - organization, 20 - payer')->notNull(),
         ]);
         $this->createIndex('idx_mail_task_status', '{{%mail_task}}', 'status');
         $this->addForeignKey(

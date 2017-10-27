@@ -1,6 +1,6 @@
 <?php
 
-namespace app\models\mailing;
+namespace app\models\mailing\activeRecord;
 
 use app\models\User;
 use Yii;

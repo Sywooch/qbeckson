@@ -17,8 +17,7 @@ use yii\helpers\ArrayHelper;
  */
 abstract class SingleModelActions extends Model
 {
-    public $_targetModel;
-
+    private $targetModel;
 
     /**
      * CertificateActions constructor.
@@ -40,9 +39,12 @@ abstract class SingleModelActions extends Model
      */
     public function attributeLabels()
     {
-        return ArrayHelper::merge(parent::attributeLabels(), [
-            'targetModel' => 'Модель',
-        ]);
+        return ArrayHelper::merge(
+            parent::attributeLabels(),
+            $this->targetModel->attributeLabels(),
+            [
+                'targetModel' => 'Модель',
+            ]);
     }
 
     /**
@@ -60,7 +62,7 @@ abstract class SingleModelActions extends Model
      */
     public function getTargetModel()
     {
-        return $this->_targetModel;
+        return $this->targetModel;
     }
 
     /**
@@ -73,9 +75,9 @@ abstract class SingleModelActions extends Model
     public function setTargetModel($targetModel)
     {
         if (is_a($targetModel, static::getTargetModelClass())) {
-            $this->_targetModel = $targetModel;
+            $this->targetModel = $targetModel;
         } elseif (is_scalar($targetModel)) {
-            $this->_targetModel = call_user_func([static::getTargetModelClass(), 'findOne'], ['id' => $targetModel]);
+            $this->targetModel = call_user_func([static::getTargetModelClass(), 'findOne'], ['id' => $targetModel]);
         } else {
             throw new InvalidParamException('Параметр должен быть экземпляром ' .
                 static::getTargetModelClass() .

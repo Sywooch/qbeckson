@@ -1,9 +1,8 @@
 <?php
 
-namespace app\models\mailing;
+namespace app\models\mailing\activeRecord;
 
 use app\models\User;
-use Yii;
 
 /**
  * This is the model class for table "{{%mailing_list}}".
@@ -58,11 +57,11 @@ class MailingList extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => Yii::t('app', 'ID'),
-            'created_by' => Yii::t('app', 'Created By'),
-            'created_at' => Yii::t('app', 'Created At'),
-            'subject' => Yii::t('app', 'Subject'),
-            'message' => Yii::t('app', 'Message'),
+            'id' => 'ID',
+            'created_by' => 'Автор',
+            'created_at' => 'Создано',
+            'subject' => 'Тема письма',
+            'message' => 'Сообщение',
         ];
     }
 
