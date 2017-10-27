@@ -6,6 +6,7 @@ use app\models\MunicipalTaskMatrix;
 use app\models\MunicipalTaskPayerMatrixAssignment;
 use yii\base\Model;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class MatrixForm
@@ -13,15 +14,15 @@ use Yii;
  */
 class MatrixForm extends Model
 {
-    private $matrix;
+    private $matrix = [];
 
     /**
      * MatrixForm constructor.
      * @param array $config
      */
-    public function __construct($config = [])
+    public function __construct($payerId, $config = [])
     {
-        $this->setMatrix();
+        $this->setMatrix($payerId);
         parent::__construct($config);
     }
 
@@ -48,7 +49,7 @@ class MatrixForm extends Model
      */
     public function save(): bool
     {
-        if ($this->getModel() && $this->validate()) {
+        if ($this->getMatrix() && $this->validate()) {
             $this->model->municipal_task_matrix_id = $this->section;
             if ($this->model->save(false, ['municipal_task_matrix_id'])) {
                 return true;
@@ -59,33 +60,36 @@ class MatrixForm extends Model
     }
 
     /**
-     * @return MunicipalTaskMatrix|null
+     * @return array
      */
     public function getMatrix()
     {
         return $this->matrix;
     }
 
-    public function setMatrix()
+    public function setMatrix($payerId)
     {
-        $assignments = MunicipalTaskPayerMatrixAssignment::findByPayerId(Yii::$app->user->identity->payer->id);
-        $models = MunicipalTaskMatrix::findByCertificateType();
-        $this->matrix[MunicipalTaskMatrix::CERTIFICATE_TYPE_PREFIX_PF] = $this->setMatrixModels($models, $assignments, MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_PF);
-        $models = MunicipalTaskMatrix::findByCertificateType(MunicipalTaskMatrix::CERTIFICATE_TYPE_PREFIX_AC);
-        $this->matrix[MunicipalTaskMatrix::CERTIFICATE_TYPE_PREFIX_AC] = $this->setMatrixModels($models, $assignments, MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_AC);
+        $assignments = MunicipalTaskPayerMatrixAssignment::findByPayerId($payerId);
+        $models = MunicipalTaskMatrix::find()->all();
+        foreach ($models as $model) {
+            $item = $this->setMatrixModel($payerId, $model, $assignments, MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_PF);
+            $this->matrix[$item->id] = $item;
+            $item = $this->setMatrixModel($payerId, $model, $assignments, MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_AC);
+            $this->matrix[$item->id] = $item;
+        }
     }
 
-    private function setMatrixModels($models, $assignments, $certificateType)
+    private function setMatrixModel($payerId, $model, $assignments, $certificateType)
     {
-        $matrix = [];
-        foreach ($models as $model) {
-            $matrix[] = new MunicipalTaskPayerMatrixAssignment([
-                'payer_id' => Yii::$app->user->identity->payer->id,
-                'matrix_id' => $model->id,
-                'certificate_type' => $certificateType,
-            ]);
+        $id = join('_', [$payerId, $model->id, $certificateType]);
+        if (isset($assignments[$id]) && $assignments[$id] instanceof MunicipalTaskPayerMatrixAssignment) {
+            return $assignments[$id];
         }
 
-        return $matrix;
+        return new MunicipalTaskPayerMatrixAssignment([
+            'payer_id' => $payerId,
+            'matrix_id' => $model->id,
+            'certificate_type' => $certificateType,
+        ]);
     }
 }

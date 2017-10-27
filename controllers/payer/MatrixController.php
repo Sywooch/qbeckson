@@ -2,8 +2,8 @@
 
 namespace app\controllers\payer;
 
+use yii\base\Model;
 use app\models\forms\MatrixForm;
-use app\models\MunicipalTaskMatrix;
 use Yii;
 use yii\web\Controller;
 
@@ -11,15 +11,19 @@ class MatrixController extends Controller
 {
     public function actionParams()
     {
-        $model = new MatrixForm();
-        print_r($model->matrix);exit;
+        $model = new MatrixForm(Yii::$app->user->identity->payer->id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['index']);
-        } else {
-            return $this->render('index', [
-                'model' => $model,
-            ]);
+        if (Model::loadMultiple($model->matrix, Yii::$app->request->post()) && Model::validateMultiple($model->matrix)) {
+            foreach ($model->matrix as $item) {
+                $item->save(false);
+            }
+            Yii::$app->session->setFlash('success', 'Параметры успешно обновлены.');
+
+            return $this->refresh();
         }
+
+        return $this->render('params', [
+            'model' => $model,
+        ]);
     }
 }
