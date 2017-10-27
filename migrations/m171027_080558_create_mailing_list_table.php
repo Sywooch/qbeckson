@@ -21,6 +21,13 @@ class m171027_080558_create_mailing_list_table extends Migration
         ]);
         $this->createIndex('idx_mailing_list_created_by', '{{%mailing_list}}', 'created_by');
         $this->createIndex('idx_mailing_list_created_at', '{{%mailing_list}}', 'created_at');
+        $this->addForeignKey(
+            'fk_mailing_list_created_by_user_user_id',
+            '{{%mailing_list}}',
+            'created_by',
+            '{{%user}}',
+            'id'
+        );
     }
 
     /**
@@ -28,6 +35,10 @@ class m171027_080558_create_mailing_list_table extends Migration
      */
     public function down()
     {
+        $this->dropForeignKey(
+            'fk_mailing_list_created_by_user_user_id',
+            '{{%mailing_list}}'
+        );
         $this->dropTable('{{%mailing_list}}');
     }
 }

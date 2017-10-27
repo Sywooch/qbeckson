@@ -15,7 +15,8 @@ class m171027_080919_create_mail_task_table extends Migration
         $this->createTable('{{%mail_task}}', [
             'id' => $this->primaryKey(),
             'mailing_list_id' => $this->integer()->notNull(),
-            'status' => $this->integer()->notNull()->comment('1 - created; 10 - inQueue  30 - finish; 40 - has errors; '),
+            'status' => $this->integer()->notNull()
+                ->comment('1 - created; 10 - inQueue  30 - finish; 40 - has errors; '),
             'target_user_id' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
             'log_message' => $this->string(255)->null(),
@@ -28,6 +29,13 @@ class m171027_080919_create_mail_task_table extends Migration
             '{{%mail_task}}',
             'mailing_list_id',
             '{{%mailing_list}}',
+            'id'
+        );
+        $this->addForeignKey(
+            'fk_mail_task_target_user_id_user_id',
+            '{{%mail_task}}',
+            'target_user_id',
+            '{{%user}}',
             'id'
         );
     }
