@@ -9,7 +9,8 @@ use yii\helpers\Url;
 
     <?php
     if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)
-        && $model->program->verification !== \app\models\Programs::VERIFICATION_DENIED) {
+        && ($model->program->verification !== \app\models\Programs::VERIFICATION_DENIED
+            || $model->program->verification !== \app\models\Programs::VERIFICATION_WAIT)) {
         $message = '';
         $url = '#';
         $classButton = 'btn-theme';
@@ -126,7 +127,8 @@ use yii\helpers\Url;
         ?>
 
     <?php } elseif (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)
-        && $model->program->verification === \app\models\Programs::VERIFICATION_DENIED) {
+        && ($model->program->verification === \app\models\Programs::VERIFICATION_DENIED
+            || $model->program->verification === \app\models\Programs::VERIFICATION_WAIT)) {
 
         echo \app\components\widgets\ButtonWithInfo::widget([
             'label' => 'Действия',

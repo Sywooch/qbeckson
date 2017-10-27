@@ -1,9 +1,9 @@
 <?php
-use yii\helpers\Html;
-use yii\grid\GridView;
-use yii\widgets\ActiveForm;
-use yii\helpers\Url;
+
 use app\models\Organization;
+use yii\grid\GridView;
+use yii\helpers\Html;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 
@@ -23,18 +23,19 @@ switch ($date[1] - 1){
     case 12: $m='декабре'; break;
 }
 
-
 $this->title = 'Полнота оказаных услуг в '.$m;
 
 $this->params['breadcrumbs'][] = ['label' => 'Счета', 'url' => ['/personal/organization-invoices']];
 $this->params['breadcrumbs'][] = $this->title;
+
+/** ii::t('kvenum', '{n, plural, one{one year} other{# years}}', ['n' => $interval]); */
 ?>
 
 
 <?php
 $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-$organizations = new Organization();
-$organization = $organizations->getOrganization();
+$organization = Yii::$app->user->identity->organization;
+/**@var $organization Organization */
 ?>
 <div class="col-md-10 col-md-offset-1">
     <h1><?= Html::encode($this->title) ?></h1>
@@ -94,6 +95,7 @@ $organization = $organizations->getOrganization();
     &nbsp;
     <?php
     if ($GroupsProvider->getTotalCount() > 0) {
+
         echo Html::a('Продолжить', ['contracts/invoice'], ['class' => 'btn btn-success']);
     }
     ?>

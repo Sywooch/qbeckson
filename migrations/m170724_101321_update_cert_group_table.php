@@ -11,7 +11,7 @@ class m170724_101321_update_cert_group_table extends Migration
 
     public function safeDown()
     {
-        $this->dropColumn('cert_group', 'amount', $this->integer());
+        $this->dropColumn('cert_group', 'amount');
     }
 
     /*
