@@ -105,7 +105,7 @@ $config = [
             'baseUrl' => '@web/uploads',
             'filesystem' => [
                 'class' => LocalFlysystemBuilder::class,
-                'path' => '@webroot/uploads'
+                'path' => '@pfdoroot/uploads'
             ],
         ],
     ],
@@ -388,6 +388,13 @@ $config = [
                     'allow' => true,
                     'roles' => ['?']
                 ],
+            ],
+            'file' => [
+                [
+                    'allow' => true,
+                    'roles' => ['operators'],
+                    'actions' => ['contract'],
+                ]
             ]
         ],
     ],

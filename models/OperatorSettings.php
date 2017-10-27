@@ -86,8 +86,11 @@ class OperatorSettings extends ActiveRecord
      */
     public function getGeneralDocumentUrl()
     {
-        return null !== $this->general_document_base_url ?
-            $this->general_document_base_url . '/' . $this->general_document_path : null;
+        if ($this->general_document_base_url && file_exists(\Yii::getAlias('@pfdoroot') . $this->general_document_base_url . '/' . $this->general_document_path)) {
+            return '/file/contract?path=' . $this->general_document_base_url . '/' . $this->general_document_path;
+        }
+
+        return null;
     }
 
     /**
@@ -95,8 +98,11 @@ class OperatorSettings extends ActiveRecord
      */
     public function getExtendDocumentUrl()
     {
-        return null !== $this->extend_document_base_url ?
-            $this->extend_document_base_url . '/' . $this->extend_document_path : null;
+        if ($this->extend_document_base_url && file_exists(\Yii::getAlias('@pfdoroot') . $this->extend_document_base_url . '/' . $this->extend_document_path)) {
+            return '/file/contract?path=' . $this->extend_document_base_url . '/' . $this->extend_document_path;
+        }
+
+        return null;
     }
 
     /**

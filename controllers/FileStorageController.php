@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\trntv\TrntvUploadAction;
 use Intervention\Image\ImageManager;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -36,7 +37,7 @@ class FileStorageController extends Controller
     {
         return [
             'upload' => [
-                'class' => UploadAction::class,
+                'class' => TrntvUploadAction::class,
                 'deleteRoute' => 'delete'
             ],
             'delete' => [
