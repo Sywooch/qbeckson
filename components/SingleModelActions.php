@@ -98,8 +98,7 @@ abstract class SingleModelActions extends Model
             return false;
         }
         $trans = Yii::$app->db->beginTransaction();
-        $rollback = function () use ($trans)
-        {
+        $rollback = function () use ($trans) {
             $trans->rollBack();
 
             return false;
@@ -111,6 +110,7 @@ abstract class SingleModelActions extends Model
             return true;
         }
         Yii::trace($this->targetModel->getErrors());
+
         return $rollback();
 
 
