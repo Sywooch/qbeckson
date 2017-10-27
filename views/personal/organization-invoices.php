@@ -16,8 +16,12 @@ $this->title = 'Счета';
 $this->params['breadcrumbs'][] = $this->title;
 
 /* @var $this yii\web\View */
-/* @var $searchInvoices \app\models\search\InvoicesSearch */
-/* @var $invoicesProvider \yii\data\ActiveDataProvider */
+/* @var $exposedSearchInvoices \app\models\search\InvoicesSearch */
+/* @var $exposedInvoicesProvider \yii\data\ActiveDataProvider */
+/* @var $paidSearchInvoices \app\models\search\InvoicesSearch */
+/* @var $paidInvoicesProvider \yii\data\ActiveDataProvider */
+/* @var $removedSearchInvoices \app\models\search\InvoicesSearch */
+/* @var $removedInvoicesProvider \yii\data\ActiveDataProvider */
 
 $columns = [
     [
@@ -71,7 +75,7 @@ $columns = [
             return $model::statuses()[$model->status];
         },
         'type' => SearchFilter::TYPE_DROPDOWN,
-        'data' => $searchInvoices::statuses(),
+        'data' => $exposedSearchInvoices::statuses(),
     ],
     [
         'attribute' => 'sum',
@@ -197,23 +201,91 @@ $preparedColumns = GridviewHelper::prepareColumns('invoices', $columns);
     }
     ?>
 
-<?php
-echo SearchFilter::widget([
-    'model' => $searchInvoices,
-    'action' => ['personal/organization-invoices'],
-    'data' => GridviewHelper::prepareColumns(
-        'invoices',
-        $columns,
-        null,
-        'searchFilter',
-        null
-    ),
-    'role' => UserIdentity::ROLE_ORGANIZATION,
-]);
+<ul class="nav nav-tabs">
+    <li class="active">
+        <a data-toggle="tab" href="#panel1">Выставленные
+            <span class="badge"><?= $exposedInvoicesProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel2">Оплаченные
+            <span class="badge"><?= $paidInvoicesProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel3">Удаленные
+            <span class="badge"><?= $removedInvoicesProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+</ul>
 
-echo GridView::widget([
-    'dataProvider' => $invoicesProvider,
-    'filterModel' => null,
-    'columns' => $preparedColumns
-]);
-?>
+<div class="tab-content">
+    <div id="panel1" class="tab-pane fade in active">
+        <?php
+        echo SearchFilter::widget([
+            'model' => $exposedSearchInvoices,
+            'action' => ['personal/organization-invoices'],
+            'data' => GridviewHelper::prepareColumns(
+                'invoices',
+                $columns,
+                null,
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_ORGANIZATION,
+        ]);
+
+        echo GridView::widget([
+            'dataProvider' => $exposedInvoicesProvider,
+            'filterModel' => null,
+            'columns' => $preparedColumns
+        ]);
+        ?>
+    </div>
+
+    <div id="panel2" class="tab-pane fade">
+        <?php
+        echo SearchFilter::widget([
+            'model' => $paidSearchInvoices,
+            'action' => ['personal/organization-invoices'],
+            'data' => GridviewHelper::prepareColumns(
+                'invoices',
+                $columns,
+                null,
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_ORGANIZATION,
+        ]);
+
+        echo GridView::widget([
+            'dataProvider' => $paidInvoicesProvider,
+            'filterModel' => null,
+            'columns' => $preparedColumns
+        ]);
+        ?>
+    </div>
+
+    <div id="panel3" class="tab-pane fade">
+        <?php
+        echo SearchFilter::widget([
+            'model' => $removedSearchInvoices,
+            'action' => ['personal/organization-invoices'],
+            'data' => GridviewHelper::prepareColumns(
+                'invoices',
+                $columns,
+                null,
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_ORGANIZATION,
+        ]);
+
+        echo GridView::widget([
+            'dataProvider' => $removedInvoicesProvider,
+            'filterModel' => null,
+            'columns' => $preparedColumns
+        ]);
+        ?>
+    </div>
+</div>

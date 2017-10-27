@@ -57,7 +57,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'link',
                 'format' => 'raw',
-                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', '/' . $model->link),
+                'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $model->programFile),
             ],
             'age_group_min',
             'age_group_max',

@@ -1,5 +1,6 @@
 <?php
 
+use app\models\Help;
 use yii\helpers\Html;
 use yii\grid\GridView;
 
@@ -23,6 +24,21 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             'id',
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'header' => 'сортировка',
+                'buttons' => [
+                    'order-increase' => function ($url, $model) {
+                        /** @var Help $model */
+                        return !$model->isOrderMax() ? Html::a('', $url, ['class' => 'glyphicon glyphicon-arrow-down']) : '';
+                    },
+                    'order-reduce' => function ($url, $model) {
+                        /** @var Help $model */
+                        return !$model->isOrderMin() ? Html::a('', $url, ['class' => 'glyphicon glyphicon-arrow-up']) : '';
+                    }
+                ],
+                'template' => '{order-reduce} {order-increase}',
+            ],
             'name',
             [
                 'class' => 'yii\grid\ActionColumn',

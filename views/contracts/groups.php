@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute'=>'link',
                 'format'=>'raw',
-                'value'=>Html::a('<span class="glyphicon glyphicon-download-alt"></span>', '/'.$program->link),
+                'value'=>Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $program->programFile),
             ],
         ],
     ])

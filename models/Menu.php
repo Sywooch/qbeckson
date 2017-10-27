@@ -196,6 +196,7 @@ class Menu
             return [
                 ['label' => 'Организации', 'items' => [
                     ['label' => 'Реестр ПФДО', 'url' => ['/personal/payer-organizations']],
+                    ['label' => 'О работе в ИС ПФДО', 'url' => ['site/manuals']],
                     //['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
                 ]],
             ];
@@ -233,6 +234,10 @@ class Menu
                 [
                     'label' => 'Адреса реализации образовательных программ',
                     'url'   => ['organization/address/index']
+                ],
+                [
+                    'label' => 'О работе в ИС ПФДО',
+                    'url' => ['site/manuals']
                 ],
             ]],
             ['label' => 'Программы', 'items' => [

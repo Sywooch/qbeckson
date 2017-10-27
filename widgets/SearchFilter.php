@@ -19,6 +19,7 @@ class SearchFilter extends Widget
     const TYPE_RANGE_SLIDER = 'range-slider';
     const TYPE_TOUCH_SPIN = 'touch-spin';
     const TYPE_DROPDOWN = 'drop-down';
+    const TYPE_DROPDOWN_MULTIPLE = 'drop-down-multiple';
     const TYPE_SELECT2 = 'select2';
     const TYPE_SELECT2SINGLE = 'select2single';
     const TYPE_HIDDEN = 'hiddenInput';

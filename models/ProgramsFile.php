@@ -16,9 +16,6 @@ class ProgramsFile extends Model
     public function rules()
     {
         return [
-             /*['docFile', 'required', 'when' => function($model) {
-                return $model->newprogram == '1';
-            }], */
             [['docFile'], 'file', 'skipOnEmpty' => true, 'extensions' => 'doc, docx, pdf', 'maxSize' => 1024 * 1024 * 20],
         ];
     }
@@ -34,7 +31,8 @@ class ProgramsFile extends Model
     public function upload($filename)
     {
         if ($this->validate()) {
-            $this->docFile->saveAs($filename);
+            $this->docFile->saveAs(\Yii::getAlias('@pfdoroot/uploads/programs/') . $filename);
+            
             return true;
         } else {
             return false;

@@ -268,7 +268,6 @@ class Invoices extends ActiveRecord
 
         $mpdf = new mPDF();
         $mpdf->WriteHtml($html);
-
         $filename = 'prepaid-' . $model->number . '_' . $model->date . '_' . $model->organization_id . '.pdf';
         if (!file_exists(Yii::getAlias('@pfdoroot') . self::DIR_OF_PDF_REPORTS)) {
             Yii::trace(Yii::getAlias('@pfdoroot') . self::DIR_OF_PDF_REPORTS);

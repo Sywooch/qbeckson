@@ -15,8 +15,12 @@ $this->title = 'Счета';
 $this->params['breadcrumbs'][] = $this->title;
 
 /* @var $this yii\web\View */
-/* @var $searchInvoices \app\models\search\InvoicesSearch */
-/* @var $searchInvoices \app\models\search\InvoicesSearch */
+/* @var $exposedSearchInvoices \app\models\search\InvoicesSearch */
+/* @var $exposedInvoicesProvider yii\data\ActiveDataProvider */
+/* @var $paidSearchInvoices \app\models\search\InvoicesSearch */
+/* @var $paidInvoicesProvider yii\data\ActiveDataProvider */
+/* @var $removedSearchInvoices \app\models\search\InvoicesSearch */
+/* @var $removedInvoicesProvider yii\data\ActiveDataProvider */
 /* @var $munList array */
 
 $columns = [
@@ -75,7 +79,7 @@ $columns = [
             return $model::statuses()[$model->status];
         },
         'type'      => SearchFilter::TYPE_DROPDOWN,
-        'data'      => $searchInvoices::statuses(),
+        'data'      => $exposedSearchInvoices::statuses(),
     ],
     [
         'attribute'     => 'sum',
@@ -124,25 +128,96 @@ $columns = [
 
 $preparedColumns = GridviewHelper::prepareColumns('invoices', $columns);
 ?>
-<?php if ($searchInvoices->organization_id && $searchInvoices->organization) : ?>
-    <p class="lead">Показаны результаты для организации: <?= $searchInvoices->organization; ?></p>
-<?php endif; ?>
-<?php
-echo SearchFilter::widget([
-    'model'  => $searchInvoices,
-    'action' => ['personal/operator-invoices'],
-    'data'   => GridviewHelper::prepareColumns(
-        'invoices',
-        $columns,
-        null,
-        'searchFilter',
-        null
-    ),
-    'role'   => UserIdentity::ROLE_OPERATOR,
-]);
 
-echo GridView::widget([
-    'dataProvider' => $invoicesProvider,
-    'filterModel'  => null,
-    'columns'      => $preparedColumns
-]);
+<ul class="nav nav-tabs">
+    <li class="active">
+        <a data-toggle="tab" href="#panel1">Выставленные
+            <span class="badge"><?= $exposedInvoicesProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel2">Оплаченные
+            <span class="badge"><?= $paidInvoicesProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel3">Удаленные
+            <span class="badge"><?= $removedInvoicesProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div id="panel1" class="tab-pane fade in active">
+        <?php if ($exposedSearchInvoices->organization_id && $exposedSearchInvoices->organization) : ?>
+            <p class="lead">Показаны результаты для организации: <?= $exposedSearchInvoices->organization; ?></p>
+        <?php endif; ?>
+
+        <?php echo SearchFilter::widget([
+            'model' => $exposedSearchInvoices,
+            'action' => ['personal/operator-invoices'],
+            'data' => GridviewHelper::prepareColumns(
+                'invoices',
+                $columns,
+                null,
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_OPERATOR,
+        ]);
+
+        echo GridView::widget([
+            'dataProvider' => $exposedInvoicesProvider,
+            'filterModel' => null,
+            'columns' => $preparedColumns
+        ]); ?>
+    </div>
+    <div id="panel2" class="tab-pane fade">
+        <?php if ($paidSearchInvoices->organization_id && $paidSearchInvoices->organization) : ?>
+            <p class="lead">Показаны результаты для организации: <?= $paidSearchInvoices->organization; ?></p>
+        <?php endif; ?>
+
+        <?php echo SearchFilter::widget([
+            'model' => $paidSearchInvoices,
+            'action' => ['personal/operator-invoices'],
+            'data' => GridviewHelper::prepareColumns(
+                'invoices',
+                $columns,
+                null,
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_OPERATOR,
+        ]);
+
+        echo GridView::widget([
+            'dataProvider' => $paidInvoicesProvider,
+            'filterModel' => null,
+            'columns' => $preparedColumns
+        ]); ?>
+    </div>
+    <div id="panel3" class="tab-pane fade">
+        <?php if ($removedSearchInvoices->organization_id && $removedSearchInvoices->organization) : ?>
+            <p class="lead">Показаны результаты для организации: <?= $removedSearchInvoices->organization; ?></p>
+        <?php endif; ?>
+
+        <?php echo SearchFilter::widget([
+            'model' => $removedSearchInvoices,
+            'action' => ['personal/operator-invoices'],
+            'data' => GridviewHelper::prepareColumns(
+                'invoices',
+                $columns,
+                null,
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_OPERATOR,
+        ]);
+
+        echo GridView::widget([
+            'dataProvider' => $removedInvoicesProvider,
+            'filterModel' => null,
+            'columns' => $preparedColumns
+        ]); ?>
+    </div>
+</div>

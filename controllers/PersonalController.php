@@ -16,6 +16,8 @@ use app\models\Cooperate;
 use app\models\FavoritesSearch;
 use app\models\forms\OrganizationSettingsForm;
 use app\models\GroupsSearch;
+use app\models\LoginForm;
+use app\models\Invoices;
 use app\models\Mun;
 use app\models\Operators;
 use app\models\Organization;
@@ -23,6 +25,7 @@ use app\models\OrganizationContractSettings;
 use app\models\OrganizationPayerAssignment;
 use app\models\Payers;
 use app\models\PayersSearch;
+use app\models\PersonalAssignment;
 use app\models\PreviusSearch;
 use app\models\ProgrammeModuleSearch;
 use app\models\Programs;
@@ -34,6 +37,7 @@ use app\models\search\InvoicesSearch;
 use app\models\search\OrganizationSearch;
 use app\models\search\ProgramsSearch;
 use app\models\UserIdentity;
+use kartik\form\ActiveForm;
 use Yii;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
@@ -153,18 +157,37 @@ class PersonalController extends Controller
     {
         /** @var $operator Operators */
         $operator = Yii::$app->user->identity->operator;
-        $searchInvoices = new InvoicesSearch([
+        $exposedSearchInvoices = new InvoicesSearch([
             'sum' => '0,10000000',
+            'status' => [Invoices::STATUS_NOT_VIEWED, Invoices::STATUS_IN_THE_WORK],
             'payers_id' => $operator->getPayersViaMun()->select(Payers::tableName() . '.id'),
         ]);
-        $invoicesProvider = $searchInvoices->search(Yii::$app->request->queryParams);
+        $exposedInvoicesProvider = $exposedSearchInvoices->search(Yii::$app->request->queryParams);
+
+        $paidSearchInvoices = new InvoicesSearch([
+            'sum' => '0,10000000',
+            'status' => [Invoices::STATUS_PAID],
+            'payers_id' => $operator->getPayersViaMun()->select(Payers::tableName() . '.id'),
+        ]);
+        $paidInvoicesProvider = $paidSearchInvoices->search(Yii::$app->request->queryParams);
+
+        $removedSearchInvoices = new InvoicesSearch([
+            'sum' => '0,10000000',
+            'status' => [Invoices::STATUS_REMOVED],
+            'payers_id' => $operator->getPayersViaMun()->select(Payers::tableName() . '.id'),
+        ]);
+        $removedInvoicesProvider = $removedSearchInvoices->search(Yii::$app->request->queryParams);
 
         $munList = ArrayHelper::map($operator->mun, 'id', 'name');
 
         return $this->render('operator/operator-invoices', [
-            'searchInvoices' => $searchInvoices,
-            'invoicesProvider' => $invoicesProvider,
-            'munList'          => $munList
+            'exposedSearchInvoices' => $exposedSearchInvoices,
+            'exposedInvoicesProvider' => $exposedInvoicesProvider,
+            'paidSearchInvoices' => $paidSearchInvoices,
+            'paidInvoicesProvider' => $paidInvoicesProvider,
+            'removedSearchInvoices' => $removedSearchInvoices,
+            'removedInvoicesProvider' => $removedInvoicesProvider,
+            'munList' => $munList
         ]);
     }
 
@@ -635,17 +658,37 @@ class PersonalController extends Controller
         /** @var UserIdentity $user */
         $user = Yii::$app->user->getIdentity();
 
-        $searchInvoices = new InvoicesSearch([
-            //'status' => [0, 1, 2],
+        $exposedSearchInvoices = new InvoicesSearch([
+            'status' => [Invoices::STATUS_NOT_VIEWED, Invoices::STATUS_IN_THE_WORK],
             'payers_id' => $user->payer->id,
             'organization_id' => ArrayHelper::getColumn($user->payer->cooperates, 'organization_id'),
             'sum' => '0,10000000',
         ]);
-        $invoicesProvider = $searchInvoices->search(Yii::$app->request->queryParams);
+        $exposedInvoicesProvider = $exposedSearchInvoices->search(Yii::$app->request->queryParams);
+
+        $paidSearchInvoices = new InvoicesSearch([
+            'status' => [Invoices::STATUS_PAID],
+            'payers_id' => $user->payer->id,
+            'organization_id' => ArrayHelper::getColumn($user->payer->cooperates, 'organization_id'),
+            'sum' => '0,10000000',
+        ]);
+        $paidInvoicesProvider = $paidSearchInvoices->search(Yii::$app->request->queryParams);
+
+        $removedSearchInvoices = new InvoicesSearch([
+            'status' => [Invoices::STATUS_REMOVED],
+            'payers_id' => $user->payer->id,
+            'organization_id' => ArrayHelper::getColumn($user->payer->cooperates, 'organization_id'),
+            'sum' => '0,10000000',
+        ]);
+        $removedInvoicesProvider = $removedSearchInvoices->search(Yii::$app->request->queryParams);
 
         return $this->render('payer-invoices', [
-            'searchInvoices' => $searchInvoices,
-            'invoicesProvider' => $invoicesProvider,
+            'exposedSearchInvoices' => $exposedSearchInvoices,
+            'exposedInvoicesProvider' => $exposedInvoicesProvider,
+            'paidSearchInvoices' => $paidSearchInvoices,
+            'paidInvoicesProvider' => $paidInvoicesProvider,
+            'removedSearchInvoices' => $removedSearchInvoices,
+            'removedInvoicesProvider' => $removedInvoicesProvider,
         ]);
     }
 
@@ -856,17 +899,37 @@ class PersonalController extends Controller
         /** @var UserIdentity $user */
         $user = Yii::$app->user->getIdentity();
 
-        $searchInvoices = new InvoicesSearch([
-            //'status' => [0, 1, 2],
+        $exposedSearchInvoices = new InvoicesSearch([
+            'status' => [Invoices::STATUS_NOT_VIEWED, Invoices::STATUS_IN_THE_WORK],
             'payers_id' => $user->payer->id,
             'organization_id' => $user->organization->id,
             'sum' => '0,10000000',
         ]);
-        $invoicesProvider = $searchInvoices->search(Yii::$app->request->queryParams);
+        $exposedInvoicesProvider = $exposedSearchInvoices->search(Yii::$app->request->queryParams);
+
+        $paidSearchInvoices = new InvoicesSearch([
+            'status' => [Invoices::STATUS_PAID],
+            'payers_id' => $user->payer->id,
+            'organization_id' => $user->organization->id,
+            'sum' => '0,10000000',
+        ]);
+        $paidInvoicesProvider = $paidSearchInvoices->search(Yii::$app->request->queryParams);
+
+        $removedSearchInvoices = new InvoicesSearch([
+            'status' => [Invoices::STATUS_REMOVED],
+            'payers_id' => $user->payer->id,
+            'organization_id' => $user->organization->id,
+            'sum' => '0,10000000',
+        ]);
+        $removedInvoicesProvider = $removedSearchInvoices->search(Yii::$app->request->queryParams);
 
         return $this->render('organization-invoices', [
-            'searchInvoices' => $searchInvoices,
-            'invoicesProvider' => $invoicesProvider,
+            'exposedSearchInvoices' => $exposedSearchInvoices,
+            'exposedInvoicesProvider' => $exposedInvoicesProvider,
+            'paidSearchInvoices' => $paidSearchInvoices,
+            'paidInvoicesProvider' => $paidInvoicesProvider,
+            'removedSearchInvoices' => $removedSearchInvoices,
+            'removedInvoicesProvider' => $removedInvoicesProvider,
         ]);
     }
 
@@ -1201,5 +1264,68 @@ class PersonalController extends Controller
             'searchOrganization' => $searchOrganization,
             'organizationProvider' => $organizationProvider,
         ]);
+    }
+
+    /**
+     * assign user personal
+     *
+     * @param null $munId
+     *
+     * @return string
+     */
+    public function actionUserPersonalAssign($munId = null)
+    {
+        $mun = Mun::findOne($munId);
+
+        $loginForm = new LoginForm;
+        if (Yii::$app->request->isAjax && $loginForm->load(Yii::$app->request->post())) {
+            $loginForm->username = $mun->payer->user->username;
+
+            if ($loginForm->validate()) {
+                PersonalAssignment::assignUserPersonalByMunId($munId);
+            }
+
+            return $this->asJson(ActiveForm::validate($loginForm));
+        }
+
+        $dataProvider = PersonalAssignment::getDataProviderForMunList();
+
+        $assignedMunList = PersonalAssignment::getAssignedMunList();
+
+        return $this->render('assignment', ['dataProvider' => $dataProvider, 'loginForm' => $loginForm, 'assignedMunList' => $assignedMunList]);
+    }
+
+    /**
+     * remove user personal assign
+     *
+     * @param $munId
+     *
+     * @return Response
+     */
+    public function actionRemoveUserPersonalAssign($munId)
+    {
+        PersonalAssignment::removeAssignUserPersonalByMunId($munId);
+
+        return $this->redirect('/personal/user-personal-assign');
+    }
+
+    /**
+     * login under assigned user
+     *
+     * @param $userId
+     *
+     * @return Response
+     */
+    public function actionAssignedUserLogin($userId)
+    {
+        if (in_array($userId, PersonalAssignment::getAssignedUserIdList())) {
+            Yii::$app->user->login(UserIdentity::findIdentity($userId));
+
+            return $this->goHome();
+        } else {
+            Yii::$app->session->addFlash('danger', 'Указанный личный кабинет не объединен');
+
+            return $this->goHome();
+        }
     }
 }
