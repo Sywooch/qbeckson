@@ -3,7 +3,7 @@
 use app\models\Cooperate;
 use kartik\widgets\DatePicker;
 use trntv\filekit\widget\Upload;
-use yii\bootstrap\ActiveForm;
+use kartik\widgets\ActiveForm;
 use yii\helpers\Html;
 use yii\web\JsExpression;
 
@@ -71,6 +71,15 @@ $this->params['breadcrumbs'][] = $this->title;
             ]) ?>
         </div>
     </div>
+    <hr>
+
+    <!-- максимальное значение цены модуля от нормативной стоимости -->
+    <div class="row">
+        <div class="col-md-6">
+            <?= $form->field($model, 'module_max_price', ['addon' => ['append' => ['content'=>'%']]])->textInput(); ?>
+        </div>
+    </div>
+
     <div class="form-group">
         <?= Html::submitButton(
             'Задать',

@@ -67,7 +67,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ]) ?>
 
     <?php
-    foreach ($years as $value) {
+    foreach ($model->modules as $value) {
         echo "<h3>$value->year модуль</h3>";
         echo DetailView::widget([
             'model' => $value,

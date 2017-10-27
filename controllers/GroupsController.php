@@ -440,11 +440,12 @@ class GroupsController extends Controller
 
     public function actionInvoice()
     {
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
+
+        $organization = Yii::$app->user->identity->organization;
+        /**@var $organization Organization */
 
         $searchGroups = new GroupsInvoiceSearch(['invoice' => true]);
-        $searchGroups->organization_id = $organization['id'];
+        $searchGroups->organization_id = $organization->id;
 
         $GroupsProvider = $searchGroups->search(Yii::$app->request->queryParams);
 

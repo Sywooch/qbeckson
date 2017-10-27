@@ -286,7 +286,7 @@ class Programs extends ActiveRecord
 
     public function getDirectivity()
     {
-        return $this->direction->old_name;
+        return $this->direction ? $this->direction->old_name : null;
     }
 
     public function getCommonActivities()

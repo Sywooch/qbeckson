@@ -13,13 +13,8 @@ class m170713_184938_update_settings_search_filters extends Migration
             'string(20) NOT NULL DEFAULT "' . UserIdentity::ROLE_PAYER . '"'
         );
 
-        $this->addForeignKey(
-            'fk-settings_search_filters-role-auth_item-name',
-            'settings_search_filters',
-            'role',
-            'auth_item',
-            'name'
-        );
+        $this->createIndex('fk-settings_search_filters-role-auth_item-name', 'settings_search_filters', 'role');
+
     }
 
     public function safeDown()

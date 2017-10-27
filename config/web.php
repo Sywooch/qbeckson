@@ -179,7 +179,7 @@ $config = [
                     'roles' => ['organizations']
                 ],
                 [
-                    'actions' => ['payer-suborder-organizations', 'payer-all-organizations', 'payer-municipal-task'],
+                    'actions' => ['payer-suborder-organizations', 'payer-all-organizations', 'payer-municipal-task', 'user-personal-assign', 'remove-user-personal-assign', 'assigned-user-login'],
                     'allow' => true,
                     'roles' => ['payers']
                 ],
@@ -405,6 +405,11 @@ if (YII_ENV_DEV) {
     $config['bootstrap'][] = 'gii';
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
+        'generators' => [
+            'fixture' => [
+                'class' => 'elisdn\gii\fixture\Generator',
+            ],
+        ],
     ];
 }
 

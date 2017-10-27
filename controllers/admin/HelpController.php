@@ -2,6 +2,7 @@
 
 namespace app\controllers\admin;
 
+use app\models\HelpOrdering;
 use Yii;
 use app\models\Help;
 use app\models\search\HelpSearch;
@@ -35,6 +36,8 @@ class HelpController extends Controller
      */
     public function actionIndex()
     {
+        HelpOrdering::setOrderIds();
+
         $searchModel = new HelpSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
@@ -90,6 +93,34 @@ class HelpController extends Controller
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
+
+        return $this->redirect(['index']);
+    }
+
+    /**
+     * Increases order_id
+     *
+     * @param $id
+     *
+     * @return \yii\web\Response
+     */
+    public function actionOrderIncrease($id)
+    {
+        HelpOrdering::changeOrder($id, true);
+
+        return $this->redirect(['index']);
+    }
+
+    /**
+     * Reduces order_id
+     *
+     * @param $id
+     *
+     * @return \yii\web\Response
+     */
+    public function actionOrderReduce($id)
+    {
+        HelpOrdering::changeOrder($id, false);
 
         return $this->redirect(['index']);
     }
