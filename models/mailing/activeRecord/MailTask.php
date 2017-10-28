@@ -9,7 +9,7 @@ use Yii;
  * This is the model class for table "{{%mail_task}}".
  *
  * @property integer $id
- * @property integer $mailing_list_id
+ * @property integer $mailing_list_id  1 - created; 10 - inQueue  30 - finish; 40 - has errors;
  * @property integer $status
  * @property integer $target_user_id
  * @property integer $updated_at

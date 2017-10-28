@@ -3,6 +3,8 @@
 namespace app\models\mailing\activeRecord;
 
 use app\models\User;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "{{%mailing_list}}".
@@ -27,6 +29,23 @@ class MailingList extends \yii\db\ActiveRecord
         return '{{%mailing_list}}';
     }
 
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => TimestampBehavior::className(),
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => false,
+            ],
+            [
+                'class' => BlameableBehavior::className(),
+                'createdByAttribute' => 'created_by',
+                'updatedByAttribute' => false
+            ],
+
+        ];
+    }
+
     /**
      * @inheritdoc
      * @return MailingListQuery the active query used by this AR class.
@@ -42,7 +61,7 @@ class MailingList extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['created_by', 'created_at', 'subject', 'message'], 'required'],
+            [['subject', 'message'], 'required'],
             [['created_by', 'created_at'], 'integer'],
             [['message'], 'string'],
             [['subject'], 'string', 'max' => 40],
@@ -62,6 +81,9 @@ class MailingList extends \yii\db\ActiveRecord
             'created_at' => 'Создано',
             'subject' => 'Тема письма',
             'message' => 'Сообщение',
+            'mun' => 'Мунициалитет',
+            'target' => 'Тип получателя',
+            'state' => 'Состояние',
         ];
     }
 

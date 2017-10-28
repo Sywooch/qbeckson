@@ -5,7 +5,6 @@ namespace app\models\mailing\services;
 
 use app\components\SingleModelActions;
 use app\models\mailing\activeRecord\MailingList;
-use app\models\mailing\repository\MailingListRepository;
 
 /**
  * Class MailingActions
@@ -18,7 +17,7 @@ abstract class MailingActions extends SingleModelActions
     /** класс модели над которой производятся действия */
     public static function getTargetModelClass(): string
     {
-        return MailingListRepository::className();
+        return MailingList::className();
     }
 
     public function rules()
