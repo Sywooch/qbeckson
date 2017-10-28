@@ -76,14 +76,7 @@ class MailingList extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'created_by' => 'Автор',
-            'created_at' => 'Создано',
-            'subject' => 'Тема письма',
-            'message' => 'Сообщение',
-            'mun' => 'Мунициалитет',
-            'target' => 'Тип получателя',
-            'state' => 'Состояние',
+
         ];
     }
 

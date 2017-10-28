@@ -9,8 +9,7 @@
 namespace app\controllers;
 
 
-use app\models\mailing\activeRecord\MailingList;
-use app\models\mailing\decorators\MailingListDecorator;
+use app\models\mailing\repository\MailingListWithTasks;
 use app\models\mailing\services\MailingBuilder;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -35,8 +34,8 @@ class MailingController extends Controller
 
     public function actionView($id)
     {
-        $model = $this->findModelMailingListDecorated($id);
-
+        $model = $this->findModelMailingListWithTask($id);
+        \Yii::trace($model->getCountByStatuses());
         return $this->render('view', ['model' => $model]);
     }
 
@@ -60,13 +59,13 @@ class MailingController extends Controller
      *
      * @param integer $id
      *
-     * @return MailingListDecorator the loaded model
+     * @return MailingListWithTasks
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModelMailingListDecorated($id)
+    protected function findModelMailingListWithTask($id)
     {
-        if (($model = MailingList::findOne($id)) !== null) {
-            return MailingListDecorator::decorate($model);
+        if (($model = MailingListWithTasks::findOne($id)) !== null) {
+            return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }

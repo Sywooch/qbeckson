@@ -40,7 +40,13 @@ class MailingAttachment extends \yii\db\ActiveRecord
             [['mailing_list_id', 'local_file_name', 'original_file_name'], 'required'],
             [['mailing_list_id'], 'integer'],
             [['local_file_name', 'original_file_name'], 'string', 'max' => 255],
-            [['mailing_list_id'], 'exist', 'skipOnError' => true, 'targetClass' => MailingList::className(), 'targetAttribute' => ['mailing_list_id' => 'id']],
+            [
+                ['mailing_list_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => MailingList::className(),
+                'targetAttribute' => ['mailing_list_id' => 'id']
+            ],
         ];
     }
 

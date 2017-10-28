@@ -82,6 +82,10 @@ TEXT;
         }
     }
 
+    public function attributeLabels()
+    {
+        return MailingStaticData::attributeListLabels();
+    }
 
     /**
      * @return array

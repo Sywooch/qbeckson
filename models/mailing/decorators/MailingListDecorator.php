@@ -5,7 +5,6 @@ namespace app\models\mailing\decorators;
 
 use app\components\Decorator;
 use app\models\mailing\activeRecord\MailingAttachment;
-use app\models\mailing\activeRecord\MailingList;
 use app\models\mailing\activeRecord\MailTask;
 use app\models\User;
 
@@ -22,11 +21,6 @@ use app\models\User;
  */
 class MailingListDecorator extends Decorator
 {
-    public function __construct(MailingList $entity)
-    {
-        parent::__construct($entity);
-    }
-
     public function getStatus()
     {
         return 'status';

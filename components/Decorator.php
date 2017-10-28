@@ -3,20 +3,17 @@
 namespace app\components;
 
 
+use app\models\Model;
 use yii\base\InvalidCallException;
 
-class Decorator
+class Decorator extends Model
 {
-    protected $entity;
-
-    public function __construct($entity)
-    {
-        $this->entity = $entity;
-    }
+    public $entity;
 
     public static function decorate($entity)
     {
-        return new static($entity);
+
+        return new static(['entity' => $entity]);
     }
 
     public function __get($name)

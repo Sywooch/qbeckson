@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model \app\models\mailing\decorators\MailingListDecorator */
 
-$this->title = $model->name;
+$this->title = $model->subject;
 $this->params['breadcrumbs'][] = 'Список рассылки';
 ?>
 <div class="operators-view">
@@ -16,7 +16,9 @@ $this->params['breadcrumbs'][] = 'Список рассылки';
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            'status'
+            'state',
+            'subject',
+            'created_at:datetime'
         ],
     ]) ?>
 
