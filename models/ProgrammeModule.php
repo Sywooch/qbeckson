@@ -249,5 +249,11 @@ class ProgrammeModule extends ActiveRecord
         return array_unique($rows);
     }
 
-
+    /**
+     * @return integer|null
+     */
+    public function getChildrenAverage()
+    {
+        return $this->program->municipality->operator->settings->children_average;
+    }
 }

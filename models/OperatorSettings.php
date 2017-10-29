@@ -23,6 +23,7 @@ use yii\db\ActiveRecord;
  * @property string $extendDocumentUrl
  * @property string $generalDocumentUrl
  * @property integer $module_max_price [int(11)]  максимальное значение цены модуля от нормативной стоимости в %
+ * @property int     $children_average [int(11)]  среднее значение кол-ва детей
  */
 class OperatorSettings extends ActiveRecord
 {
@@ -47,7 +48,7 @@ class OperatorSettings extends ActiveRecord
                 'operator_id', 'document_name', 'current_program_date_from', 'current_program_date_to',
                 'future_program_date_from', 'future_program_date_to', 'extendDocument', 'generalDocument'
             ], 'required'],
-            [['operator_id'], 'integer'],
+            [['operator_id', 'children_average'], 'integer'],
             [[
                 'general_document_path', 'general_document_base_url', 'document_name', 'extend_document_path',
                 'extend_document_base_url'
@@ -117,6 +118,7 @@ class OperatorSettings extends ActiveRecord
             'extendDocument' => 'Типовой договор с суммой',
             'generalDocument' => 'Типовой договор без суммы',
             'module_max_price' => 'Максимальное значение цены модуля от нормативной стоимости',
+            'children_average' => 'Среднее значение кол-ва детей',
         ];
     }
 }
