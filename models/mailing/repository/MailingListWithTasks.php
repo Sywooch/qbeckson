@@ -10,43 +10,36 @@ use yii\helpers\ArrayHelper;
 
 class MailingListWithTasks extends MailingList
 {
+
+    private $state;
+
     /**
-     * Подсчитать статус рассылки исходя из количества и состояния его задачь по рассылке
+     * Подсчитать статус рассылки исходя из количества и состояний его задачь по рассылке
      * @return string  текст статуса, получаемый из MailingStaticData::getTaskStateLabels()
      * @throws Exception Задача принимает не более 3 состояний иначе ошибка
      */
     public function getState()
     {
-        if ($this->getErrorTasks()->exists()) {
-            return MailingStaticData::getTaskStateLabels()[MailingStaticData::TASK_STATUS_HAS_ERRORS];
+        if ($this->state) {
+            return $this->state;
         }
-        $statusTotals = $this->getCountByStatuses();
-        if (!$this->statusesIsValid($statusTotals)) {
+
+        $stateTotals = $this->getCountByStatuses();
+        if (count($notValidStates = $this->getNotValidState($stateTotals)) > 0) {
             throw new Exception('среди задач рассылки обнаружены задачи с неожиданными статусами:'
-                . array_shift($statusTotals)['status']);
+                . print_r($notValidStates, true));
         }
-        if (count($statusTotals) < 2) {
-            return MailingStaticData::getTaskStateLabels()[array_shift($statusTotals)['status']];
+        if (count($stateTotals) === 1) {
+            $this->state = MailingStaticData::getTaskStateLabels()[array_shift($stateTotals)['status']];
+        } else {
+            $this->state = $this->getComplexState($stateTotals);
         }
-        $map = ArrayHelper::map($statusTotals, 'status', 'count');
-        $resultStatusTemplate = 'Выполнено %d из %d';
 
-        return sprintf(
-            $resultStatusTemplate,
-            $map[MailingStaticData::TASK_STATUS_FINISH],
-            $map[MailingStaticData::TASK_STATUS_FINISH] + $map[MailingStaticData::TASK_STATUS_CREATED]
-        );
+        return $this->state;
     }
 
     /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getErrorTasks()
-    {
-        return $this->getMailTasks()->andWhere(['status' => MailingStaticData::TASK_STATUS_HAS_ERRORS]);
-    }
-
-    /**
+     * Возвращает количество задач группированых по их состояниям
      * @return array
      */
     public function getCountByStatuses(): array
@@ -62,20 +55,52 @@ class MailingListWithTasks extends MailingList
             ->groupBy(['status'])->asArray()->all();
     }
 
-    private function statusesIsValid(array $statuses): bool
+    /**
+     * Возвращает массив неожиданных состояний
+     *
+     * @param array $statuses
+     *
+     * @return array
+     */
+    private function getNotValidState(array $statuses): array
     {
-        $result = array_filter(
+        return array_filter(
             $statuses,
             function ($val) {
                 return (int)$val['status'] !== MailingStaticData::TASK_STATUS_FINISH
-                    && (int)$val['status'] !== MailingStaticData::TASK_STATUS_CREATED;
+                    && (int)$val['status'] !== MailingStaticData::TASK_STATUS_CREATED
+                    && (int)$val['status'] !== MailingStaticData::TASK_STATUS_HAS_ERRORS;
             }
         );
-        if (count($result) > 0) {
-            return false;
-        }
+    }
 
-        return true;
+    /**
+     * возвращает строчное представление состояния рассылки на основании состояний ее задачь задачь
+     *
+     * @param $stateTotals array
+     *
+     * @return string
+     */
+    private function getComplexState(array $stateTotals)
+    {
+        $resultStatusTemplate = 'Выполнено %d из %d, ошибок %d';
+        $map = ArrayHelper::map($stateTotals, 'status', 'count');
+
+        return sprintf(
+            $resultStatusTemplate,
+            $map[MailingStaticData::TASK_STATUS_FINISH] ?? 0,
+            $map[MailingStaticData::TASK_STATUS_FINISH] ?? 0
+            + $map[MailingStaticData::TASK_STATUS_CREATED] ?? 0,
+            $map[MailingStaticData::TASK_STATUS_HAS_ERRORS] ?? 0
+        );
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getErrorTasks()
+    {
+        return $this->getMailTasks()->andWhere(['status' => MailingStaticData::TASK_STATUS_HAS_ERRORS]);
     }
 
     /**

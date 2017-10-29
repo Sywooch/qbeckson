@@ -35,7 +35,6 @@ class MailingController extends Controller
     public function actionView($id)
     {
         $model = $this->findModelMailingListWithTask($id);
-        \Yii::trace($model->getCountByStatuses());
         return $this->render('view', ['model' => $model]);
     }
 
@@ -47,7 +46,7 @@ class MailingController extends Controller
             && $builder->validate()
             && $builder->save()
         ) {
-
+            return $this->redirect(['view', $builder->mailingListId]);
         }
 
         return $this->render('create', ['model' => $builder]);

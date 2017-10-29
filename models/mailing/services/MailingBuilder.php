@@ -19,6 +19,7 @@ use yii\validators\InlineValidator;
  * @property array $munsToSelect
  * @property array $targetsToSelect
  * @property Operators $operator
+ * @property int $mailingListId
  */
 class MailingBuilder extends MailingActions
 {
@@ -217,6 +218,11 @@ TEXT;
                 $this->getFieldsForSelectQuery($mailing_list_id, MailingStaticData::TARGET_PAYER)
             )
             ->where(['mun' => $muns]);
+    }
+
+    public function getMailingListId()
+    {
+        return $this->mailingList->id;
     }
 
 }
