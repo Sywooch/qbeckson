@@ -80,6 +80,13 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     </div>
 
+    <!-- среднее значение кол-ва детей -->
+    <div class="row">
+        <div class="col-md-6">
+            <?= $form->field($model, 'children_average')->textInput(); ?>
+        </div>
+    </div>
+
     <div class="form-group">
         <?= Html::submitButton(
             'Задать',
