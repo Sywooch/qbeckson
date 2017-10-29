@@ -5,6 +5,7 @@
  *
  */
 
+use dosamigos\ckeditor\CKEditor;
 use kartik\select2\Select2;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -25,7 +26,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'multiple' => true,
             ],
         ]) ?>
-        <?= $form->field($model, 'message')->textarea(['rows' => 10]) ?>
+        <?= $form->field($model, 'message')->widget(CKEditor::className(), [
+            'options' => ['rows' => 10],
+        ]) ?>
         <div class="form-group">
             <?= Html::submitButton(
                 'Запустить рассылку',

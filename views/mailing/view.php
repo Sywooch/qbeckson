@@ -4,9 +4,10 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model \app\models\mailing\decorators\MailingListDecorator */
+/* @var $model \app\models\mailing\repository\MailingListWithTasks */
 
 $this->title = $model->subject;
+$this->params['breadcrumbs'][] = ['label' => 'Рассылки', 'url' => ['index']];
 $this->params['breadcrumbs'][] = 'Список рассылки';
 ?>
 <div class="operators-view">
@@ -17,8 +18,13 @@ $this->params['breadcrumbs'][] = 'Список рассылки';
         'model' => $model,
         'attributes' => [
             'state',
+            'created_at:datetime',
+            'countAllTasks',
             'subject',
-            'created_at:datetime'
+            'message:html',
+            'munsString',
+            'targetsString',
+            'lastActionTime:datetime'
         ],
     ]) ?>
 

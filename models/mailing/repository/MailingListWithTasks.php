@@ -4,14 +4,17 @@ namespace app\models\mailing\repository;
 
 use app\models\mailing\activeRecord\MailingList;
 use app\models\mailing\MailingStaticData;
+use app\models\Mun;
+use app\models\Organization;
+use app\models\Payers;
 use yii\base\Exception;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 
 class MailingListWithTasks extends MailingList
 {
-
     private $state;
+
 
     /**
      * Подсчитать статус рассылки исходя из количества и состояний его задачь по рассылке
@@ -27,7 +30,7 @@ class MailingListWithTasks extends MailingList
         $stateTotals = $this->getCountByStatuses();
         if (count($notValidStates = $this->getNotValidState($stateTotals)) > 0) {
             throw new Exception('среди задач рассылки обнаружены задачи с неожиданными статусами:'
-                . print_r($notValidStates, true));
+                . print_r(ArrayHelper::map($notValidStates, 'status', 'count'), true));
         }
         if (count($stateTotals) === 1) {
             $this->state = MailingStaticData::getTaskStateLabels()[array_shift($stateTotals)['status']];
@@ -89,8 +92,8 @@ class MailingListWithTasks extends MailingList
         return sprintf(
             $resultStatusTemplate,
             $map[MailingStaticData::TASK_STATUS_FINISH] ?? 0,
-            $map[MailingStaticData::TASK_STATUS_FINISH] ?? 0
-            + $map[MailingStaticData::TASK_STATUS_CREATED] ?? 0,
+            ($map[MailingStaticData::TASK_STATUS_FINISH] ?? 0)
+            + ($map[MailingStaticData::TASK_STATUS_CREATED] ?? 0),
             $map[MailingStaticData::TASK_STATUS_HAS_ERRORS] ?? 0
         );
     }
@@ -123,4 +126,69 @@ class MailingListWithTasks extends MailingList
     {
         return MailingStaticData::attributeListLabels();
     }
+
+    /**@return int */
+    public function getCountAllTasks()
+    {
+        return $this->getMailTasks()->count();
+    }
+
+    /** строка перечисление муниципалитетов участвующих в рассылке */
+    public function getMunsString()
+    {
+        $whereSubQueryOrganization = $this
+            ->getMailTasks()
+            ->select(['target_user_id'])
+            ->where(['target_type' => MailingStaticData::TARGET_ORGANIZATION]);
+
+        $whereSubQueryPayer = $this
+            ->getMailTasks()
+            ->select('target_user_id')
+            ->where(['target_type' => MailingStaticData::TARGET_PAYER]);
+
+        $payerSubQueryFoUnion = Payers::find()
+            ->leftJoin(
+                Mun::tableName(),
+                ['mun' => new Expression(Mun::tableName() . '.[[id]]')]
+            )
+            ->select([Mun::tableName() . '.[[name]]'])
+            ->where(['user_id' => $whereSubQueryPayer]);
+
+        $organizationSubQueryFoUnion = Organization::find()
+            ->leftJoin(
+                Mun::tableName(),
+                ['mun' => new Expression(Mun::tableName() . '.[[id]]')]
+            )
+            ->select([Mun::tableName() . '.[[name]]'])
+            ->where(['user_id' => $whereSubQueryOrganization]);
+
+        $result = $organizationSubQueryFoUnion
+            ->union($payerSubQueryFoUnion)
+            ->groupBy([Mun::tableName() . '.[[name]]'])
+            ->column();
+
+        return implode('; ', $result);
+    }
+
+    public function getTargetsString()
+    {
+        $result = $this
+            ->getMailTasks()
+            ->select(['target_type'])
+            ->groupBy(['target_type'])
+            ->column();
+
+        return implode('; ', array_map(
+            function ($val) {
+                return MailingStaticData::getTargetNames()[$val];
+            },
+            $result
+        ));
+    }
+
+    public function getLastActionTime(): int
+    {
+        return array_shift($this->getMailTasks()->select('MAX([[updated_at]])')->asArray()->one());
+    }
+
 }

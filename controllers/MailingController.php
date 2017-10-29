@@ -10,6 +10,7 @@ namespace app\controllers;
 
 
 use app\models\mailing\repository\MailingListWithTasks;
+use app\models\mailing\repository\MailingListWithTasksSearch;
 use app\models\mailing\services\MailingBuilder;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -29,6 +30,14 @@ class MailingController extends Controller
     public function actionIndex()
     {
 
+        $searchModel = new MailingListWithTasksSearch();
+        $searchModel->created_by = \Yii::$app->user->id;
+        $dataProvider = $searchModel->search(\Yii::$app->request->queryParams);
+
+        return $this->render('index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
 
     }
 
@@ -46,7 +55,7 @@ class MailingController extends Controller
             && $builder->validate()
             && $builder->save()
         ) {
-            return $this->redirect(['view', $builder->mailingListId]);
+            return $this->redirect(['view', 'id' => $builder->mailingListId]);
         }
 
         return $this->render('create', ['model' => $builder]);

@@ -23,6 +23,31 @@ class MailingStaticData
         ];
     }
 
+    public static function getTargetNames()
+    {
+        return [
+            self::TARGET_ORGANIZATION => 'Организации',
+            self::TARGET_PAYER => 'Плательщики',
+        ];
+    }
+
+    /**
+     * @return string
+     */
+    public static function getTemplateMessage()
+    {
+        return <<<HTML
+<p style="text-align: left;">
+    <br>    
+    <br>
+    <hr>
+    <p>
+Пожалуйста, не отвечайте на данное информационное письмо, для обратной связи с оператором существуют другие способы.
+    </p>
+</p>
+HTML;
+    }
+
     public static function attributeListLabels()
     {
         return [
@@ -33,7 +58,12 @@ class MailingStaticData
             'message' => 'Сообщение',
             'mun' => 'Мунициалитет',
             'target' => 'Тип получателя',
+            'countAllTasks' => 'Всего получателей',
             'state' => 'Состояние',
+            'targetsString' => 'Типы получателей',
+            'munsString' => 'Муниципалитеты получателей',
+            'lastActionTime' => 'Последняя активность',
+
         ];
     }
 }

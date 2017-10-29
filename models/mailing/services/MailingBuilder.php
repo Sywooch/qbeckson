@@ -42,22 +42,9 @@ class MailingBuilder extends MailingActions
             'mailingList' => new MailingList(),
             'operator' => $operators,
         ]);
-        $instance->message = $instance->getTemplateMessage();
+        $instance->message = MailingStaticData::getTemplateMessage();
 
         return $instance;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTemplateMessage()
-    {
-        return <<<TEXT
-        
-        
-----------------
-Пожалуйста, не отвечайте на данное информационное письмо, для обратной связи с оператором существуют другие способы.
-TEXT;
     }
 
     /**
@@ -155,7 +142,6 @@ TEXT;
         $addQuery = ((int)$currentTarget === MailingStaticData::TARGET_ORGANIZATION
             ? $this->getOrganisationQuery($this->mailingList->id, $this->mun)
             : $this->getPayerQuery($this->mailingList->id, $this->mun));
-
         if (is_null($query)) {
             $resultQuery = $addQuery;
         } else {
