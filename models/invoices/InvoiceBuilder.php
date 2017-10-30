@@ -226,7 +226,7 @@ class InvoiceBuilder extends InvoicesActions
             $this->_contractsData = Contracts::find()
                 ->select([
                     'contracts' => new Expression('GROUP_CONCAT(' . Contracts::tableName() . '.{{id}},\', \')'),
-                    'sum' => new Expression('SUM(' . Completeness::tableName() . '.{{sum}})')
+                    'sum' => new Expression('ROUND(SUM(' . Completeness::tableName() . '.{{sum}}), 2)')
                 ])
                 ->innerJoin(Completeness::tableName(), ['contract_id' => new Expression(Contracts::tableName() . '.{{id}}')])
                 ->andWhere(['preinvoice' => 0])

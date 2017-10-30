@@ -16,6 +16,7 @@ use app\models\ProgramsallSearch;
 use app\models\ProgramsFile;
 use app\models\ProgramsPreviusSearch;
 use app\models\UserIdentity;
+use app\models\Years;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
@@ -299,6 +300,9 @@ class ProgramsController extends Controller
                         try {
                             if ($flag = $model->save(false)) {
                                 $i = 1;
+                                /**
+                                 * @var $modelYears ProgrammeModule
+                                 */
                                 foreach ($modelsYears as $modelYears) {
                                     $modelYears->program_id = $model->id;
                                     $modelYears->year = $i;
@@ -384,7 +388,8 @@ class ProgramsController extends Controller
                                     $p21 = Yii::$app->coefficient->data->p21v;
                                     $p22 = Yii::$app->coefficient->data->p22v;
 
-                                    $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / (($modelYears->maxchild + $modelYears->minchild) / 2)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) / ($p11 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * $p5;
+                                    $childAverage = $modelYears->getChildrenAverage() ? $modelYears->getChildrenAverage() : ($modelYears->maxchild + $modelYears->minchild) / 2;
+                                    $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / ($childAverage)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * ($childAverage)) / ($p11 * ($childAverage))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * ($childAverage)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * ($childAverage))) * $p5;
 
                                     $modelYears->normative_price = round($nprice);
                                     $modelYears->previus = 1;
@@ -530,6 +535,9 @@ class ProgramsController extends Controller
                         if (!empty($deletedIDs)) {
                             ProgrammeModule::deleteAll(['id' => $deletedIDs]);
                         }
+                        /**
+                         * @var $modelYears ProgrammeModule
+                         */
                         foreach ($modelsYears as $modelYears) {
 
 
@@ -644,7 +652,8 @@ class ProgramsController extends Controller
                             }
                             $p22 = Yii::$app->coefficient->data->$p2y;
 
-                            $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / (($modelYears->maxchild + $modelYears->minchild) / 2)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) / ($p11 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * $p5;
+                            $childrenAverage = $modelYears->getChildrenAverage() ? $modelYears->getChildrenAverage() : ($modelYears->maxchild + $modelYears->minchild) / 2;
+                            $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / ($childrenAverage)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * ($childrenAverage)) / ($p11 * ($childrenAverage))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * ($childrenAverage)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * ($childrenAverage))) * $p5;
 
                             $modelYears->normative_price = round($nprice);
 
@@ -705,6 +714,9 @@ class ProgramsController extends Controller
                         if (!empty($deletedIDs)) {
                             ProgrammeModule::deleteAll(['id' => $deletedIDs]);
                         }
+                        /**
+                         * @var $modelYears ProgrammeModule
+                         */
                         foreach ($modelsYears as $modelYears) {
 
                             if ($model->p3z == 1) {
@@ -819,7 +831,8 @@ class ProgramsController extends Controller
 
                             $p22 = Yii::$app->coefficient->data->$p2y;
 
-                            $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / (($modelYears->maxchild + $modelYears->minchild) / 2)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) / ($p11 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * (($modelYears->maxchild + $modelYears->minchild) / 2)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * (($modelYears->maxchild + $modelYears->minchild) / 2))) * $p5;
+                            $childAverage = $modelYears->getChildrenAverage() ? $modelYears->getChildrenAverage() : ($modelYears->maxchild + $modelYears->minchild) / 2;
+                            $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / ($childAverage)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * ($childAverage)) / ($p11 * ($childAverage))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * ($childAverage)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * ($childAverage))) * $p5;
 
                             $modelYears->normative_price = round($nprice);
 
