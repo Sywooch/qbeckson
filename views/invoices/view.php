@@ -115,7 +115,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'link',
                     'format' => 'raw',
-                    'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', !empty($model->pdf) ? Url::to($model->pdf) : Url::to(['@pfdo/' . $link, 'id' => $model->id])),
+                    'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', !empty($model->pdf) ? Url::to('@pfdo' . $model->pdf) : Url::to(['@pfdo/' . $link, 'id' => $model->id])),
 
                 ],
                 /*[
@@ -157,7 +157,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'link',
                     'format' => 'raw',
-                    'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', !empty($model->pdf) ? Url::to($model->pdf) : Url::to(['@pfdo/uploads' . $link, 'id' => $model->id])),
+                    'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', !empty($model->pdf) ? Url::to('@pfdo' . $model->pdf) : Url::to(['@pfdo/uploads' . $link, 'id' => $model->id])),
 
                 ],
                 /*[
