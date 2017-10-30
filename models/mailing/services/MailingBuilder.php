@@ -38,13 +38,10 @@ class MailingBuilder extends MailingActions
      */
     public static function getBuilderWithOperator(Operators $operators)
     {
-        $instance = new self([
+        return new self([
             'mailingList' => new MailingList(),
             'operator' => $operators,
         ]);
-        $instance->message = MailingStaticData::getTemplateMessage();
-
-        return $instance;
     }
 
     /**

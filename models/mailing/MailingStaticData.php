@@ -34,10 +34,10 @@ class MailingStaticData
     /**
      * @return string
      */
-    public static function getTemplateMessage()
+    public static function getPSMessage()
     {
         return <<<HTML
-<p style="text-align: left;">
+<p>
     <br>    
     <br>
     <hr>
