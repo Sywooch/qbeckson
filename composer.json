@@ -57,7 +57,8 @@
     "intervention/image": "^2.3",
     "mirocow/yii2-yandex-maps": "@dev",
     "bower-asset/angular": "1.5.7",
-    "opis/closure": "^3.0.6"
+    "opis/closure": "^3.0.6",
+    "squizlabs/php_codesniffer": "^3.1"
   },
   "require-dev": {
     "yiisoft/yii2-debug": "*",
