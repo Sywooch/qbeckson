@@ -376,23 +376,33 @@ class ContractsController extends Controller
             $program->last_contracts = $program->last_contracts + 1;
             $program->save();
 
+            $currentMonth = strtotime('first day of this month');
+            $nextMonth = strtotime('first day of next month');
+            $lastDayOfMonth = strtotime('last day of this month');
+
             if ($model->period == Contracts::CURRENT_REALIZATION_PERIOD) {
                 $cert->updateCounters([
                     'rezerv' => $model->payer_first_month_payment * -1,
                 ]);
+
+                if ($model->start_edu_contract < date('Y-m-d', $currentMonth) && $model->prodolj_m_user > 1) {
+                    $cert->updateCounters([
+                        'rezerv' => $model->payer_other_month_payment * -1,
+                    ]);
+                }
             } elseif ($model->period == Contracts::FUTURE_REALIZATION_PERIOD) {
                 $cert->updateCounters([
                     'rezerv_f' => $model->payer_first_month_payment * -1,
                 ]);
             }
 
-            $previousMonth = strtotime('first day of previous month');
-            $currentMonth = strtotime('first day of this month');
-            $nextMonth = strtotime('first day of next month');
-            $lastDayOfMonth = strtotime('last day of this month');
-
             $model->paid = $model->payer_first_month_payment;
             $model->rezerv = $model->rezerv - ($model->payer_first_month_payment);
+            if ($model->start_edu_contract < date('Y-m-d', $currentMonth) && $model->prodolj_m_user > 1) {
+                $model->paid += $model->payer_other_month_payment;
+                $model->rezerv -= $model->payer_other_month_payment;
+            }
+
             $model->status = 1;
             if ($model->stop_edu_contract <= date('Y-m-d', $lastDayOfMonth)) {
                 $model->wait_termnate = 1;
