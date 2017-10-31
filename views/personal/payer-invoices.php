@@ -87,11 +87,11 @@ $columns = [
         'format' => 'raw',
         'value' => function ($model) {
             /** @var \app\models\Invoices $model */
-            if ($model->prepayment === 1) {
-                return Html::a('<span class="glyphicon glyphicon-download-alt"></span>', !empty($model->pdf) ? Url::to($model->pdf) : Url::to(['invoices/mpdf', 'id' => $model->id]));
+            if ($model->prepayment == 1) {
+                return Html::a('<span class="glyphicon glyphicon-download-alt"></span>', !empty($model->pdf) ? Url::to('@pfdo' . $model->pdf) : Url::to(['invoices/mpdf', 'id' => $model->id]));
             }
 
-            return Html::a('<span class="glyphicon glyphicon-download-alt"></span>', !empty($model->pdf) ? Url::to($model->pdf) : Url::to(['invoices/invoice', 'id' => $model->id]));
+            return Html::a('<span class="glyphicon glyphicon-download-alt"></span>', !empty($model->pdf) ? Url::to('@pfdo' . $model->pdf) : Url::to(['invoices/invoice', 'id' => $model->id]));
         },
         'searchFilter' => false,
     ],
