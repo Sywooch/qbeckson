@@ -22,28 +22,22 @@ class MailingTaskGenerator implements \IteratorAggregate
     }
 
     /**
-     * **Внимание** Эта функция запускает потенциально бесконечную рекурсию,
-     *  У обработанной задачи в обязательном порядке состояние должно отличаться от TASK_STATUS_CREATED - 1
-     *  И должно быть сохранено в текущем источнике данных.
-     *  Возможно переполнение стека, при нгрузке > 10 000 заданий за раз
-     * @inheritDoc
+     * @see \IteratorAggregate
+     * Возвращает объекты MailTaskInterface, до тех пор пока есть данные в источнике
      */
     public function getIterator()
     {
-        $dataSource = MailTaskRepository::getRepository()
-            ->getCreatedTasksWithMailingList();
-        if (count($dataSource) < 1) {
-            return;
+        while (count(($dataSource = MailTaskRepository::getRepository()
+                ->getCreatedTasksWithMailingList())) > 0) {
+            foreach ($dataSource as $mailTaskAR) {
+                yield $this->buildTransportObject($mailTaskAR);
+            }
         }
-        foreach ($dataSource as $mailTaskAR) {
-            yield $this->buildTransportObject($mailTaskAR);
-        }
-        $this->getIterator();
     }
 
-    public function buildTransportObject(MailTask $mailTaskAR)
+    public function buildTransportObject(MailTask $mailTaskAR): MailTaskInterface
     {
-        return \Yii::createObject($this->transportClass, ['model' => $mailTaskAR]);
+        return new $this->transportClass($mailTaskAR);
     }
 
 

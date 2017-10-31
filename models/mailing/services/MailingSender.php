@@ -2,6 +2,8 @@
 
 namespace app\models\mailing\services;
 
+use Yii;
+
 class MailingSender
 {
     private $dataSource;
@@ -25,6 +27,25 @@ class MailingSender
 
     public function send(MailTaskInterface $task)
     {
-        return;
+        $mail = Yii::$app->mailer
+            ->compose(
+                ['html' => 'operatorMailing-html', 'text' => 'operatorMailing-text'],
+                ['htmlMessage' => $task->getBodyHtml(), 'textMessage' => $task->getBodyText()]
+            )
+            ->setTo($task->getRecipientEmail())
+            ->setFrom([$task->getSenderEmail() => $task->getSenderName()])
+            ->setSubject($task->getSubject());
+        try {
+            $result = $mail->send();
+        } catch (\Exception $exception) {
+            $task->setError($exception->getCode());
+
+            return;
+        }
+        if ($result) {
+            $task->setSuccess();
+        } else {
+            $task->setError('не удалось отправить');
+        }
     }
 }

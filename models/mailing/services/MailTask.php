@@ -61,13 +61,15 @@ class MailTask implements MailTaskInterface
 
     public function getBodyHtml(): string
     {
-        return $this->getModel()->mailingList->message;
+        return $this->getModel()->mailingList->message
+            . MailingStaticData::getTargetNames();
     }
 
     public function getBodyText(): string
     {
         return (new Html2Text(
             $this->getModel()->mailingList->message
+            . MailingStaticData::getTargetNames()
         ))
             ->getText();
     }
