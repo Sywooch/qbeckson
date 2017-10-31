@@ -1,6 +1,5 @@
 <?php
 
-use app\components\halpers\DeclinationOfMonths;
 use app\helpers\AppHelper;
 use app\helpers\GridviewHelper;
 use app\models\Organization;
@@ -174,23 +173,17 @@ $preparedColumns = GridviewHelper::prepareColumns('invoices', $columns);
             }
             }
 
-        $month_last = DeclinationOfMonths::getMonthNameByNumberAsNominative(
-            (int)(new DateTime())->modify('previous month')->format('m')
-        );
+        $month_last = \app\helpers\AppHelper::getMonthName(date('n', strtotime('first day of previous month')));
 
-        $month_now = DeclinationOfMonths::getMonthNameByNumberAsNominative(
-            (int)(new DateTime())->format('m')
-        );
+        $month_now = \app\helpers\AppHelper::getMonthName(date('n'));
 
-            
-        
         echo "<p>";
         if ($invoice && date('m') != 1) {
-            echo Html::a('Создать счет за ' . $month_last, ['groups/invoice'], ['class' => 'btn btn-success']);
+            echo Html::a('Создать счет за ' . mb_strtolower($month_last), ['groups/invoice'], ['class' => 'btn btn-success']);
         }
         if ($preinvoice) {
             echo "&nbsp;";
-            echo Html::a('Создать аванс за ' . $month_now, ['groups/preinvoice'], ['class' => 'btn btn-success']);
+            echo Html::a('Создать аванс за ' . mb_strtolower($month_now), ['groups/preinvoice'], ['class' => 'btn btn-success']);
         }
         if (!empty($dec)) {
             echo Html::a('Создать счет за декабрь', ['groups/dec'], ['class' => 'btn btn-warning pull-right']);
