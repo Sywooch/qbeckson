@@ -5,6 +5,7 @@ use app\models\Completeness;
 use app\models\Contracts;
 use app\models\Operators;
 use app\models\Payers;
+use app\models\UserIdentity;
 use yii;
 use yii\console\Controller;
 
@@ -225,6 +226,26 @@ class ContractController extends Controller
         $command->execute();
     }
 
+    /**
+     * Отклонение всех подтвержденных договоров и заявок,
+     * дата которых меньше чем 1-е число прошлого месяца
+     * с мотивировкой о невозможности заключения договоров задним числом
+     */
+    public function actionContractsRefuse()
+    {
+        $previousMonth = date('m', strtotime('-2 month'));
+
+        $contracts = Contracts::find()
+            ->where('MONTH(start_edu_contract) = ' . $previousMonth)
+            ->andWhere('status = ' . Contracts::STATUS_CREATED .' or status = ' . Contracts::STATUS_ACCEPTED)
+            ->all();
+
+        /** @var Contracts $contract */
+        foreach ($contracts as $contract) {
+            $contract->setRefused('Оферта отозвана в связи с превышением сроков акцепта (невозможно заключить договор задним числом)', UserIdentity::ROLE_OPERATOR_ID, null);
+        }
+    }
+    
     private function createCompleteness($contract, $date, $price)
     {
         $completeness = new Completeness([
