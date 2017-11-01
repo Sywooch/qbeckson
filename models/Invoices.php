@@ -241,7 +241,7 @@ class Invoices extends ActiveRecord
                     ->one();
 
                 $html = $html . '<tr>
-            <td style="text-align: center;">' . $i . '</td>
+            <td style="text-align: center;">' . $i++ . '</td>
             <td style="text-align: center;">' . $contract->number . '</td>
             <td style="text-align: center;">' . $date_contract[2] . '.' . $date_contract[1] . '.' . $date_contract[0] . '</td>
             <td style="text-align: center;">' . $cert->number . '</td>
@@ -249,7 +249,6 @@ class Invoices extends ActiveRecord
             <td style="text-align: center;">' . round($completeness["sum"], 2) . '</td>
             </tr>';
             }
-            $i++;
         }
 
         $html = $html . '</table>';
@@ -353,15 +352,13 @@ class Invoices extends ActiveRecord
             $sum = round($completeness['sum'], 2);
 
             $html = $html . '<tr>
-            <td style="text-align: center;">' . $i . '</td>
+            <td style="text-align: center;">' . $i++ . '</td>
             <td style="text-align: center;">' . $contract->number . '</td>
             <td style="text-align: center;">' . $date_contract[2] . '.' . $date_contract[1] . '.' . $date_contract[0] . '</td>
             <td style="text-align: center;">' . $cert->number . '</td>
             <td style="text-align: center;">' . $completeness["completeness"] . '</td>
             <td style="text-align: center;">' . $sum . '</td>
             </tr>';
-
-            $i++;
         }
 
         $html = $html . '</table>';
