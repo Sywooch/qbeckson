@@ -1,6 +1,6 @@
 <?php
 
-use app\components\halpers\DeclinationOfMonths;
+use app\helpers\DeclinationOfMonths;
 use kartik\datecontrol\DateControl;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
