@@ -181,7 +181,7 @@ class PreInvoiceBuilder extends InvoicesActions
         if (!$this->_contractsData) {
             $this->_contractsData = Contracts::find()
                 ->select([
-                    'contracts' => new Expression('GROUP_CONCAT(' . Contracts::tableName() . '.{{id}},\', \')'),
+                    'contracts' => new Expression('GROUP_CONCAT(' . Contracts::tableName() . '.{{id}})'),
                     'sum' => new Expression('ROUND(SUM(' . Completeness::tableName() . '.{{sum}}), 2)')
                 ])
                 ->innerJoin(Completeness::tableName(), ['contract_id' => new Expression(Contracts::tableName() . '.{{id}}')])
@@ -203,6 +203,7 @@ class PreInvoiceBuilder extends InvoicesActions
     private function fillFieldsOfInvoice()
     {
         $this->invoice->date = $this->date;
+        $this->invoice->number = $this->number;
         $this->invoice->month = $this->dateCurrentMonthNumber;
         $this->invoice->prepayment = 1;
         $this->invoice->status = Invoices::STATUS_NOT_VIEWED;
