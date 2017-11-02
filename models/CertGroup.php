@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
@@ -15,8 +16,11 @@ use yii\db\ActiveRecord;
  * @property integer        $amount
  * @property integer        $is_special
  *
+ * @property integer $countActualCertificates
+ *
  * @property Payers         $payer
  * @property Certificates[] $certificates
+ * @property Certificates[] $actualCertificates
  */
 class CertGroup extends ActiveRecord
 {
@@ -80,6 +84,7 @@ class CertGroup extends ActiveRecord
             'nominal' => 'Номинал',
             'nominal_f' => 'Номинал будущего периода',
             'countCertificates' => 'Количество используемых сертификатов',
+            'countActualCertificates' => 'Количество используемых сертификатов',
             'amount' => 'Лимит',
         ];
     }
@@ -89,21 +94,27 @@ class CertGroup extends ActiveRecord
         if ($this->is_special) {
             return true;
         }
-        $certGroupCount = Certificates::getCountCertGroup($this->id);
-
-        if ($this->amount - $certGroupCount > 0) {
+        if ($this->amount - $this->countActualCertificates > 0) {
             return true;
         }
 
         return false;
     }
 
-    public function getCountCertificates()
+    /**
+     * @return int
+     */
+    public function getCountActualCertificates(): int
     {
-        $query = Certificates::find()
-            ->where(['cert_group' => $this->id]);
+        return $this->getActualCertificates()->count();
+    }
 
-        return $query->count();
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getActualCertificates(): ActiveQuery
+    {
+        return $this->getCertificates()->andWhere(['actual' => 1]);
     }
 
     /**

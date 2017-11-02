@@ -38,6 +38,8 @@ use yii\db\Exception;
  * @property integer     $possible_cert_group
  * @property integer     $cert_group
  *
+ * @property bool $canChangeGroup
+ *
  * @property User        $user
  * @property Payers      $payers
  * @property Payers      $payer
@@ -80,14 +82,6 @@ class Certificates extends \yii\db\ActiveRecord
     public static function tableName()
     {
         return 'certificates';
-    }
-
-    public static function getCountCertGroup($certGroupId)
-    {
-        $query = static::find()
-            ->where(['cert_group' => $certGroupId]);
-
-        return $query->count();
     }
 
     public static function getCountCertificates($payerId = null)
@@ -247,11 +241,10 @@ class Certificates extends \yii\db\ActiveRecord
     public function canUseGroup()
     {
         if ($this->selectCertGroup && $this->selectCertGroup == self::TYPE_ACCOUNTING) {
-
             return true;
         }
-        if (!$this->isNewRecord && (int)$this->oldAttributes['possible_cert_group'] === (int)$this->possible_cert_group) {
-
+        if (!$this->isNewRecord
+            && (int)$this->oldAttributes['possible_cert_group'] === (int)$this->possible_cert_group) {
             return true;
         }
         $groupId = $this->possible_cert_group;
