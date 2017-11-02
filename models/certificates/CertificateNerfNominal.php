@@ -114,7 +114,11 @@ class CertificateNerfNominal extends CertificateActions
     public function validateContracts($attribute, $params, InlineValidator $validator)
     {
         $contractsExists = $this->certificate->getContractsModels()
-            ->andWhere(['AND', ['status' => Contracts::STATUS_ACTIVE], ['!=', 'wait_termnate', 1]])
+            ->andWhere(['AND', ['status' => Contracts::STATUS_ACTIVE], [
+                'OR',
+                ['!=', 'wait_termnate', 1],
+                ['wait_termnate' => null]
+            ]])
             ->exists();
 
         if ($contractsExists) {
