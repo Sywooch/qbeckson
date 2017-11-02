@@ -87,7 +87,17 @@ function selectGroup(obj) {
 
 function showNextContainer(obj) {
     if ($(obj).prop('checked') == true) {
-        $(obj).parents(".checkbox-container").next().show();
+        var nextShow = true;
+
+        // отобразить все отмеченные разделы до первого не отмеченного
+        $(obj).parents(".checkbox-container").nextAll().each(function () {
+            if (nextShow) {
+                $(this).show();
+            }
+            if (0 in $(this).find('input[type="checkbox"]') && !$(this).find('input[type="checkbox"]')[0].checked) {
+                nextShow = false;
+            }
+        });
     } else {
         $(obj).parents(".checkbox-container").nextAll().hide();
         $(obj).parents(".checkbox-container").nextAll().find('input').attr('checked', false);
