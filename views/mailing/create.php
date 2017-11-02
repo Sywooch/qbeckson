@@ -42,7 +42,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     ['name' => 'links'],
                     ['name' => 'others'],
                 ],
-                'removeButtons' => 'Smiley,Iframe'],
+                'removeButtons' => 'Smiley,Iframe'
+            ],
             'preset' => 'custom'
         ]) ?>
         <div class="form-group">
