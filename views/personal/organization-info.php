@@ -77,7 +77,7 @@ $this->registerJs($js, $this::POS_READY);
                     <h3 class="text-center">Для договора</h3>
                     <div class="form-group field-organization-license">
                         <label class="control-label" for="organization-type">
-                        Сведения о лицензии от ' . date('m.d.Y', strtotime($organization->license_date)) .
+                        Сведения о лицензии от ' . date('d.m.Y', strtotime($organization->license_date)) .
                         ' №' . $organization->license_number . ':</label>
                         <div class="container-fluid">
                             <div class="row">
