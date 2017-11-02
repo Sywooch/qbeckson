@@ -27,7 +27,24 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
         <?= $form->field($model, 'message')->widget(CKEditor::className(), [
-            'options' => ['rows' => 10],
+            'clientOptions' => [
+                'rows' => 10,
+                'height' => 300,
+                'toolbarGroups' => [
+                    ['name' => 'clipboard', 'groups' => ['mode', 'undo', 'selection', 'clipboard', 'doctools']],
+                    ['name' => 'editing', 'groups' => ['tools', 'about']],
+
+                    ['name' => 'paragraph', 'groups' => ['templates', 'list', 'indent', 'align']],
+                    ['name' => 'insert'],
+
+                    ['name' => 'basicstyles', 'groups' => ['basicstyles', 'cleanup']],
+                    ['name' => 'colors'],
+                    ['name' => 'links'],
+                    ['name' => 'others'],
+                ],
+                'removeButtons' => 'Smiley,Iframe'
+            ],
+            'preset' => 'custom'
         ]) ?>
         <div class="form-group">
             <?= Html::submitButton(
