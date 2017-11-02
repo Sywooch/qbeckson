@@ -115,6 +115,17 @@ class ContractController extends Controller
         ]);
         $command->execute();
 
+        // new
+        /*$command = Yii::$app->db->createCommand("UPDATE `certificates` W
+            INNER JOIN (
+                SELECT B.certificate_id, SUM(B.rezerv) AS summa
+                FROM `certificates` A
+                INNER JOIN `contracts` B ON A.id = B.certificate_id
+                WHERE B.period = 1 AND B.status != 2
+                GROUP BY B.certificate_id) B ON W.id = B.certificate_id
+                SET W.rezerv = CAST(B.summa as DECIMAL(10, 2))");
+        */
+
         return Controller::EXIT_CODE_NORMAL;
     }
 
