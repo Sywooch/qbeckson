@@ -23,6 +23,9 @@ use yii\validators\InlineValidator;
 class ContractOrganizationVerificator extends ContractsActions
 {
     public $date;
+    private $currentMonth;
+    private $nextMonth;
+    private $lastDayOfMonth;
 
     public static function build($config): self
     {
@@ -33,6 +36,9 @@ class ContractOrganizationVerificator extends ContractsActions
     {
         parent::init();
         $this->date = $this->contract->date;
+        $this->currentMonth = strtotime('first day of this month');
+        $this->nextMonth = strtotime('first day of next month');
+        $this->lastDayOfMonth = strtotime('last day of this month');
     }
 
     public function rules()
@@ -108,23 +114,11 @@ class ContractOrganizationVerificator extends ContractsActions
     {
     }
 
-    private function organizationChildAmountInc(Organization $organization)
-    {
-        $organization->amount_child++;
-
-        return $organization->save();
-    }
-
-    private function programLastContractsInc(Programs $programs)
-    {
-        $programs->last_contracts++;
-
-        return $programs->save();
-    }
-
     /**
      * Все манипуляции внутри этой функции происходят в трансзакции, можно прервать трансзакцию из нутри.
      * для успешного завершения вернуть true
+     *
+     * Реализовано на основе механизма ленивых вычислений.
      *
      * @param \Closure $transactionTerminator
      * @param bool $validate
@@ -133,18 +127,119 @@ class ContractOrganizationVerificator extends ContractsActions
      */
     public function saveActions(\Closure $transactionTerminator, bool $validate): bool
     {
-        if (!$this->organizationChildAmountInc($this->contract->organization)) {
-            $this->addError('contract', 'Не удалось установить amount_child у организации');
+        return (
+                (
+                    $this->organizationChildAmountInc($this->contract->organization)
+                    || $this->addError('contract', 'Не удалось установить amount_child у организации')
+                )
+                && (
+                    $this->organizationChildAmountInc($this->contract->organization)
+                    || $this->addError('contract', 'Не удалось установить amount_child у организации')
+                )
+                && (
+                    $this->programLastContractsInc($this->contract->program)
+                    || $this->addError('contract', 'Не удалось установить last_contracts у программы')
+                )
+                && (
+                    $this->certificateRezervDec($this->contract->certificate)
+                    || $this->addError('contract', 'Не удалось установить пересчитать резерв сертификата')
+                )
+                && (
+                    $this->contractCalcRezervAndPaid()
+                    || $this->addError('contract', 'Не удалось пересчитать резервы договора')
+                )
+                && (
+                    $this->contractCalcStatusAndTerminateState()
+                    || $this->addError('contract', 'Не удалось установить статус договора')
+                )
 
-            return $transactionTerminator();
-        }
-        if (!$this->programLastContractsInc($this->contract->program)) {
-            $this->addError('contract', 'Не удалось установить last_contracts у программы');
 
-            return $transactionTerminator();
+            )
+            || $transactionTerminator();
+    }
+
+    private function organizationChildAmountInc(Organization $organization): bool
+    {
+        $organization->amount_child++;
+
+        return $organization->save();
+    }
+
+    private function programLastContractsInc(Programs $programs): bool
+    {
+        $programs->last_contracts++;
+
+        return $programs->save();
+    }
+
+    /**
+     * todo добавить описание происходящего и назначения полей
+     *
+     * @param Certificates $certificates
+     *
+     * @return bool
+     */
+    private function certificateRezervDec(Certificates $certificates): bool
+    {
+        $result = true;
+        if ($this->contract->period == Contracts::CURRENT_REALIZATION_PERIOD) {
+            $result = $result && $certificates->updateCounters([
+                    'rezerv' => $this->contract->payer_first_month_payment * -1,
+                ]);
+
+            if ($this->isExtensionContract($this->contract)) {
+                $result = $result && $certificates->updateCounters([
+                        'rezerv' => $this->contract->payer_other_month_payment * -1,
+                    ]);
+            }
+        } elseif ($this->contract->period == Contracts::FUTURE_REALIZATION_PERIOD) {
+            $result = $result && $certificates->updateCounters([
+                    'rezerv_f' => $this->contract->payer_first_month_payment * -1,
+                ]);
         }
+
+        return $result;
+    }
+
+
+    /**
+     * Договор находится в режиме продления?
+     *
+     * @param Contracts $contracts
+     *
+     * @return bool
+     */
+    private function isExtensionContract(Contracts $contracts): bool
+    {
+        return $contracts->start_edu_contract < date('Y-m-d', $this->currentMonth)
+            && $contracts->prodolj_m_user > 1;
+    }
+
+    private function contractCalcRezervAndPaid(): bool
+    {
+        $this->contract->paid = $this->contract->payer_first_month_payment;
+        $this->contract->rezerv = $this->contract->rezerv - ($this->contract->payer_first_month_payment);
+        if ($this->isExtensionContract($this->contract)) {
+            $this->contract->paid += $this->contract->payer_other_month_payment;
+            $this->contract->rezerv -= $this->contract->payer_other_month_payment;
+        }
+
+        return true;
+    }
+
+    private function contractCalcStatusAndTerminateState(): bool
+    {
+        $this->contract->status = Contracts::STATUS_ACTIVE;
+        if ($this->contract->stop_edu_contract <= date('Y-m-d', $this->lastDayOfMonth)) {
+            $this->contract->wait_termnate = 1;
+        }
+
+        return true;
+    }
+
+    private function buildAndSaveCompleteness(): bool
+    {
         
-
     }
 
 }
