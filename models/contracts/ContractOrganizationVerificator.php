@@ -4,6 +4,7 @@ namespace app\models\contracts;
 
 
 use app\models\Certificates;
+use app\models\Completeness;
 use app\models\Contracts;
 use app\models\Groups;
 use app\models\Organization;
@@ -152,6 +153,21 @@ class ContractOrganizationVerificator extends ContractsActions
                     $this->contractCalcStatusAndTerminateState()
                     || $this->addError('contract', 'Не удалось установить статус договора')
                 )
+                && (
+                    ((date('m') == 1 || $this->contract->start_edu_contract >= date('Y-m-d', $this->currentMonth))
+                        || $this->buildAndSaveCompleteness())
+                    || $this->addError('contract', 'Не удалось создать и сохранить completeness')
+                )
+                && (
+                (($this->contract->start_edu_contract >= date('Y-m-d', $this->nextMonth))
+                    || (($this->buildAndSavePreinvoice()
+                            || $this->addError('contract', 'Не удалось создать и сохранить Preinvoice'))
+                        && (
+                        true/**  todo доделать */
+                        ))
+                )
+
+                )
 
 
             )
@@ -239,7 +255,64 @@ class ContractOrganizationVerificator extends ContractsActions
 
     private function buildAndSaveCompleteness(): bool
     {
-        
+        if (date('m') == 1 || $this->contract->start_edu_contract >= date('Y-m-d', $this->currentMonth)) {
+            return true;
+        }
+
+        $completeness = new Completeness();
+        $completeness->group_id = $this->contract->group_id;
+        $completeness->contract_id = $this->contract->id;
+
+        $start_edu_contract = explode("-", $this->contract->start_edu_contract);
+
+        if (date('m') == 12) {
+            $completeness->month = date('m');
+            $completeness->year = $start_edu_contract[0];
+        } else {
+            $completeness->month = date('m') - 1;
+            $completeness->year = $start_edu_contract[0];
+        }
+        $completeness->preinvoice = 0;
+        $completeness->completeness = 100;
+
+        $month = $start_edu_contract[1];
+
+        if (date('m') == 12) {
+            if ($month == 12) {
+                $price = $this->contract->payer_first_month_payment;
+            } else {
+                $price = $this->contract->payer_other_month_payment;
+            }
+        } else {
+            if ($month == date('m') - 1) {
+                $price = $this->contract->payer_first_month_payment;
+            } else {
+                $price = $this->contract->payer_other_month_payment;
+            }
+        }
+        $completeness->sum = round(($price * $completeness->completeness) / 100, 2);
+
+        return $completeness->save();
     }
 
+    private function buildAndSavePreinvoice(): bool
+    {
+        $preinvoice = new Completeness();
+        $preinvoice->group_id = $this->contract->group_id;
+        $preinvoice->contract_id = $this->contract->id;
+        $preinvoice->month = date('m');
+        $preinvoice->year = $this->start_edu_contract[0];
+        $preinvoice->preinvoice = 1;
+        $preinvoice->completeness = 80;
+        $month = $this->start_edu_contract[1];
+
+        if ($month == date('m')) {
+            $price = $this->contract->payer_first_month_payment;
+        } else {
+            $price = $this->contract->payer_other_month_payment;
+        }
+        $preinvoice->sum = round(($price * $preinvoice->completeness) / 100, 2);
+
+        return $preinvoice->save();
+    }
 }
