@@ -6,7 +6,7 @@ use app\helpers\FormattingHelper;
 use app\models\Certificates;
 use app\models\Completeness;
 use app\models\Contracts;
-use app\models\contracts\ContractVerificator;
+use app\models\contracts\ContractOrganizationVerificator;
 use app\models\contracts\GroupSwitcher;
 use app\models\ContractsDecInvoiceSearch;
 use app\models\ContractsInvoiceSearch;
@@ -326,7 +326,7 @@ class ContractsController extends Controller
 
     public function actionVerificate($id)
     {
-        $verificator = ContractVerificator::build($id);
+        $verificator = ContractOrganizationVerificator::build($id);
         $verificator->load(Yii::$app->request->post());
         $verificator->validate();
 

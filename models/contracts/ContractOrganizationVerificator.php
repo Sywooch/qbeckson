@@ -6,6 +6,7 @@ namespace app\models\contracts;
 use app\models\Certificates;
 use app\models\Contracts;
 use app\models\Groups;
+use app\models\Organization;
 use app\models\Programs;
 use yii\validators\InlineValidator;
 
@@ -19,7 +20,7 @@ use yii\validators\InlineValidator;
  * @property Groups $group
  * @property Programs $program
  */
-class ContractVerificator extends ContractsActions
+class ContractOrganizationVerificator extends ContractsActions
 {
     public $date;
 
@@ -41,9 +42,7 @@ class ContractVerificator extends ContractsActions
             ['applicationIsReceived', 'required', 'requiredValue' => 1,],
             ['date', 'date', 'format' => 'php:Y-m-d'],
             ['number', 'string'],
-            // ['applicationIsReceived', 'integer', 'except' => 1],
             ['number', 'contractNumberValidator'],
-            //[],
         ]);
     }
 
@@ -109,6 +108,20 @@ class ContractVerificator extends ContractsActions
     {
     }
 
+    private function organizationChildAmountInc(Organization $organization)
+    {
+        $organization->amount_child++;
+
+        return $organization->save();
+    }
+
+    private function programLastContractsInc(Programs $programs)
+    {
+        $programs->last_contracts++;
+
+        return $programs->save();
+    }
+
     /**
      * Все манипуляции внутри этой функции происходят в трансзакции, можно прервать трансзакцию из нутри.
      * для успешного завершения вернуть true
@@ -120,7 +133,18 @@ class ContractVerificator extends ContractsActions
      */
     public function saveActions(\Closure $transactionTerminator, bool $validate): bool
     {
-        // TODO: Implement saveActions() method.
+        if (!$this->organizationChildAmountInc($this->contract->organization)) {
+            $this->addError('contract', 'Не удалось установить amount_child у организации');
+
+            return $transactionTerminator();
+        }
+        if (!$this->programLastContractsInc($this->contract->program)) {
+            $this->addError('contract', 'Не удалось установить last_contracts у программы');
+
+            return $transactionTerminator();
+        }
+        
+
     }
 
 }
