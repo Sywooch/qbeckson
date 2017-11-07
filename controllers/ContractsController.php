@@ -167,7 +167,7 @@ class ContractsController extends Controller
             'certificate_id' => $certificateId,
             ]);
 
-        if (null !== $contract && null !== $contract->status && !in_array($contract->status, [Contracts::STATUS_REFUSED, Contracts::STATUS_CLOSED]) && (int)$contract->wait_termnate != 1) {
+        if (null !== $contract && null !== $contract->status && !in_array($contract->status, [Contracts::STATUS_REFUSED, Contracts::STATUS_CLOSED])) {
             throw new \DomainException('Контракт уже заключён!');
         }
         $group = Groups::findOne(['id' => $groupId]);
