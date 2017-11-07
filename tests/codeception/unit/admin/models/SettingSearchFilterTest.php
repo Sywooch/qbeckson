@@ -2,7 +2,6 @@
 
 namespace app\tests\codeception\unit\admin\models;
 
-
 use app\models\SettingsSearchFilters;
 use app\models\UserIdentity;
 
@@ -38,8 +37,8 @@ class SettingSearchFilterTest extends \Codeception\Test\Unit
         expect('ожидаем не эквивалентный массив при разбиении запятыми', $model->split($str1))->notEquals($wrongArr1);
         expect('ожидаем не эквивалентный массив при разбиении пробелами', $model->split($str2))->notEquals($arr1);
         expect('ожидаем не эквивалентный массив при разбиении табами', $model->split($str3))->notEquals($arr1);
-        expect('ожидаем не эквивалентный массив при разбиении табами и запятой', $model->split($str4))->notEquals($arr1);
-
+        expect('ожидаем не эквивалентный массив при разбиении табами и запятой', $model->split($str4))
+            ->notEquals($arr1);
     }
 
     // tests
@@ -54,33 +53,48 @@ class SettingSearchFilterTest extends \Codeception\Test\Unit
         $model->inaccessible_columns = $correctColumns;
         $model->table_columns = $correctColumns;
 
-        expect('модель валидируется с корректными столбцами',
-            $model->validate(['inaccessible_columns', 'table_columns']))->true();
+        expect(
+            'модель валидируется с корректными столбцами',
+            $model->validate(['inaccessible_columns', 'table_columns'])
+        )->true();
 
         $model->inaccessible_columns = $unCorrectColumns;
-        expect('модель не валидируется с ошибочными столбцами',
-            $model->validate(['inaccessible_columns', 'table_columns']))->false();
+        expect(
+            'модель не валидируется с ошибочными столбцами',
+            $model->validate(['inaccessible_columns', 'table_columns'])
+        )->false();
 
         $model->inaccessible_columns = $correctColumns;
         $model->table_columns = $unCorrectColumns;
-        expect('модель не валидируется с ошибочными столбцами',
-            $model->validate(['inaccessible_columns', 'table_columns']))->false();
+        expect(
+            'модель не валидируется с ошибочными столбцами',
+            $model->validate(['inaccessible_columns', 'table_columns'])
+        )->false();
 
         $model->inaccessible_columns = $correctColumns;
         $model->table_columns = $unCorrectColumns1;
-        expect('модель не валидируется с ошибочными столбцами',
-            $model->validate(['inaccessible_columns', 'table_columns']))->false();
+        expect(
+            'модель не валидируется с ошибочными столбцами',
+            $model->validate(['inaccessible_columns', 'table_columns'])
+        )->false();
 
         $model->inaccessible_columns = $unCorrectColumns1;
         $model->table_columns = $unCorrectColumns1;
-        expect('модель не валидируется с ошибочными столбцами',
-            $model->validate(['inaccessible_columns', 'table_columns']))->false();
+        expect(
+            'модель не валидируется с ошибочными столбцами',
+            $model->validate(['inaccessible_columns', 'table_columns'])
+        )->false();
 
-        expect('присутствует сообщение об ошибке inaccessible_columns', $model->getFirstError('inaccessible_columns'))
+        expect(
+            'присутствует сообщение об ошибке inaccessible_columns',
+            $model->getFirstError('inaccessible_columns')
+        )
             ->equals('Столбцы должны быть уникальны!');
-        expect('присутствует сообщение об ошибке table_columns', $model->getFirstError('table_columns'))
+        expect(
+            'присутствует сообщение об ошибке table_columns',
+            $model->getFirstError('table_columns')
+        )
             ->equals('Столбцы должны быть уникальны!');
-
     }
 
     protected function _before()

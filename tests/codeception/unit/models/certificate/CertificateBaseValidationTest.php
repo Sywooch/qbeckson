@@ -74,8 +74,10 @@ class CertificateBaseValidationTest extends Unit
         expect('name в списке ошибок', $certificate->getErrors('name'))->notEmpty();
         expect('soname в списке ошибок', $certificate->getErrors('soname'))->notEmpty();
 
-        expect('possible_cert_group в списке ошибок'
-            , $certificate->getErrors('possible_cert_group'))->notEmpty();
+        expect(
+            'possible_cert_group в списке ошибок',
+            $certificate->getErrors('possible_cert_group')
+        )->notEmpty();
         expect('selectCertGroup в списке ошибок', $certificate->getErrors('selectCertGroup'))->notEmpty();
 
 

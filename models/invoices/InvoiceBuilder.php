@@ -3,7 +3,7 @@
 namespace app\models\invoices;
 
 
-use app\components\halpers\DeclinationOfMonths;
+use app\helpers\DeclinationOfMonths;
 use app\models\Completeness;
 use app\models\Contracts;
 use app\models\Invoices;
@@ -153,7 +153,7 @@ class InvoiceBuilder extends InvoicesActions
             ->getContracts()
             ->andWhere([
                 Contracts::tableName() . '.status' => [
-                    Contracts::STATUS_CREATED,
+                    Contracts::STATUS_REQUESTED,
                     Contracts::STATUS_ACCEPTED
                 ]
             ])

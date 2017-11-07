@@ -29,6 +29,12 @@ use Yii;
  * @property integer                $directionality_5_count
  * @property integer                $directionality_6_count
  * @property integer                $certificate_can_use_future_balance
+ * @property int                    $operator_id
+ * @property string                 $code
+ * @property string                 $name_dat
+ * @property int                    $directionality_1rob_count
+ * @property int                    $days_to_first_contract_request         кол-во дней для создания первой заявки после создания сертификата или перевод в тип ПФ
+ * @property int                    $days_to_contract_request_after_refused кол-во дней для создания новой заявки после отклонения предыдущей
  *
  * @property Certificates[]         $certificates
  * @property Invoices[]             $invoices
@@ -118,6 +124,8 @@ class Payers extends \yii\db\ActiveRecord
             [['email'], 'email'],
             [['name', 'name_dat', 'address_legal', 'address_actual', 'phone', 'position', 'fio'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
+            ['days_to_first_contract_request', 'integer', 'min' => 5],
+            ['days_to_contract_request_after_refused', 'integer', 'min' => 10],
         ];
     }
 
@@ -127,33 +135,35 @@ class Payers extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id'                                 => 'ID Плательщика',
-            'user_id'                            => 'ID Пользователя',
-            'name'                               => 'Наименование',
-            'name_dat'                           => 'Наименование в творительном падеже',
-            'code'                               => 'Код плательщика',
-            'OGRN'                               => 'ОГРН',
-            'INN'                                => 'ИНН',
-            'KPP'                                => 'КПП',
-            'OKPO'                               => 'ОКПО',
-            'address_legal'                      => 'Адрес юридический',
-            'address_actual'                     => 'Адрес фактический',
-            'phone'                              => 'Телефон',
-            'email'                              => 'Email',
-            'position'                           => 'Должность ответственного лица',
-            'fio'                                => 'ФИО ответственного лица',
-            'mun'                                => 'Муниципальный район',
-            'directionality'                     => 'Оплачивает направленности',
-            'directionality_1rob_count'          => 'Максимальное число детей в "Технической (робототехника)" направленности',
-            'directionality_1_count'             => 'Максимальное число детей в "Технической (иная)" направленности',
-            'directionality_2_count'             => 'Максимальное число детей в "Естественнонаучной" направленности',
-            'directionality_3_count'             => 'Максимальное число детей в "Физкультурно-спортивной" направленности',
-            'directionality_4_count'             => 'Максимальное число детей в "Художественной" направленности',
-            'directionality_5_count'             => 'Максимальное число детей в "Туристско-краеведческой" направленности',
-            'directionality_6_count'             => 'Максимальное число детей в "Социально-педагогической" направленности',
-            'cooperates'                         => 'Число заключенных соглашений',
-            'certificates'                       => 'Число выданных сертификатов',
-            'certificate_can_use_future_balance' => 'Установите возможность заключения договоров за счет средств сертификатов, предусмотренных на период от ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_from) . ' до ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_to),
+            'id'                                     => 'ID Плательщика',
+            'user_id'                                => 'ID Пользователя',
+            'name'                                   => 'Наименование',
+            'name_dat'                               => 'Наименование в творительном падеже',
+            'code'                                   => 'Код плательщика',
+            'OGRN'                                   => 'ОГРН',
+            'INN'                                    => 'ИНН',
+            'KPP'                                    => 'КПП',
+            'OKPO'                                   => 'ОКПО',
+            'address_legal'                          => 'Адрес юридический',
+            'address_actual'                         => 'Адрес фактический',
+            'phone'                                  => 'Телефон',
+            'email'                                  => 'Email',
+            'position'                               => 'Должность ответственного лица',
+            'fio'                                    => 'ФИО ответственного лица',
+            'mun'                                    => 'Муниципальный район',
+            'directionality'                         => 'Оплачивает направленности',
+            'directionality_1rob_count'              => 'Максимальное число детей в "Технической (робототехника)" направленности',
+            'directionality_1_count'                 => 'Максимальное число детей в "Технической (иная)" направленности',
+            'directionality_2_count'                 => 'Максимальное число детей в "Естественнонаучной" направленности',
+            'directionality_3_count'                 => 'Максимальное число детей в "Физкультурно-спортивной" направленности',
+            'directionality_4_count'                 => 'Максимальное число детей в "Художественной" направленности',
+            'directionality_5_count'                 => 'Максимальное число детей в "Туристско-краеведческой" направленности',
+            'directionality_6_count'                 => 'Максимальное число детей в "Социально-педагогической" направленности',
+            'cooperates'                             => 'Число заключенных соглашений',
+            'certificates'                           => 'Число выданных сертификатов',
+            'certificate_can_use_future_balance'     => 'Установите возможность заключения договоров за счет средств сертификатов, предусмотренных на период от ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_from) . ' до ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_to),
+            'days_to_first_contract_request'         => 'кол-во дней для создания первой заявки после создания сертификата или перевода в тип ПФ',
+            'days_to_contract_request_after_refused' => 'кол-во дней для создания новой заявки после отклонения предыдущей',
         ];
     }
 
@@ -495,7 +505,7 @@ class Payers extends \yii\db\ActiveRecord
             ->where([
                 Contracts::tableName() . '.program_id' => $programId,
                 Contracts::tableName() . '.status'     => [
-                    Contracts::STATUS_CREATED,
+                    Contracts::STATUS_REQUESTED,
                     Contracts::STATUS_ACTIVE,
                     Contracts::STATUS_ACCEPTED
                 ]

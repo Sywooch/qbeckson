@@ -1,12 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: student4
- * Date: 17.10.2017
- * Time: 17:05
- */
 
-namespace app\components\halpers;
+namespace app\helpers;
 
 
 class DeclinationOfMonths

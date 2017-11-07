@@ -2,15 +2,15 @@
 
 namespace app\controllers;
 
+use app\models\CertGroup;
 use app\models\CertificateGroupQueue;
-use app\models\Certificates;
+use app\models\Payers;
+use app\models\search\CertGroupSearch;
 use app\services\PayerService;
 use Yii;
-use yii\web\Response;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use app\models\CertGroup;
-use app\models\search\CertGroupSearch;
+use yii\web\Response;
 
 /**
  * CertGroupController implements the CRUD actions for CertGroup model.
@@ -53,19 +53,21 @@ class CertGroupController extends Controller
                 }
 
                 if ($model->oldAttributes['nominal'] !== $model->nominal) {
-                    if (true !== ($result = $this->payerService->updateCertificateNominal($model->id, $model->nominal))) {
+                    if (($result = $this->payerService->updateCertificateNominal($model->id, $model->nominal))
+                        !== true) {
                         return ['output' => '', 'message' => $result];
                     }
                 }
 
                 if ($model->oldAttributes['nominal_f'] !== $model->nominal_f) {
-                    if (true !== ($result = $this->payerService->updateCertificateNominal($model->id, $model->nominal_f, '_f'))) {
+                    if (($result = $this->payerService->updateCertificateNominal($model->id, $model->nominal_f, '_f'))
+                        !== true) {
                         return ['output' => '', 'message' => $result];
                     }
                 }
 
                 if ($model->oldAttributes['amount'] !== $model->amount) {
-                    $certGroupCount = Certificates::getCountCertGroup($model->id);
+                    $certGroupCount = $model->countActualCertificates;
                     $vacancies = $model->amount - $certGroupCount;
                     if ($vacancies > 0 && $queue = CertificateGroupQueue::getByCertGroup($model->id, $vacancies)) {
                         foreach ($queue as $item) {
@@ -83,10 +85,17 @@ class CertGroupController extends Controller
 
             return $out;
         }
+        $payer = Payers::findOne(Yii::$app->user->identity->payer->id);
+        /** @var Payers $payer */
+
+        if ($payer && $payer->load(Yii::$app->request->post())) {
+            $payer->save();
+        }
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'payer' => $payer,
         ]);
     }
 

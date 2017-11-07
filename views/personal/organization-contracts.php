@@ -175,10 +175,18 @@ $confirmedColumns = [
         'template' => '{dobr}',
         'buttons' => [
             'dobr' => function ($url, $model) {
+                /** @var Contracts $model */
+                if ($model->passedTooLongTimeAfterAccepted()) {
+                    $style = 'glyphicon-alert';
+                    $option = ['class' => 'btn btn-warning','title' => 'Оферта слишком долго находится в ожидании. Пожалуйста или подтвердите или отклоните ее!', 'data-toggle' => 'tooltip'];
+                } else {
+                    $style = 'glyphicon-check';
+                    $option = ['title' => 'Ok'];
+                }
                 return Html::a(
-                    '<span class="glyphicon glyphicon-check"></span>',
+                    '<span class="glyphicon ' . $style . '"></span>',
                     Url::to(['contracts/verificate', 'id' => $model->id]),
-                    ['title' => 'Ok']
+                    $option
                 );
             },
         ],
@@ -200,10 +208,18 @@ $pendingColumns = [
         'template' => '{dobr}',
         'buttons' => [
             'dobr' => function ($url, $model) {
+                /** @var Contracts $model */
+                if ($model->passedTooLongTimeAfterRequested()) {
+                    $style = 'glyphicon-alert';
+                    $option = ['class' => 'btn btn-warning','title' => 'Заявка слишком долго находится в ожидании. Пожалуйста сформируйте оферту!', 'data-toggle' => 'tooltip'];
+                } else {
+                    $style = 'glyphicon-check';
+                    $option = ['title' => 'Ok'];
+                }
                 return Html::a(
-                    '<span class="glyphicon glyphicon-check"></span>',
+                    '<span class="glyphicon ' . $style . '"></span>',
                     Url::to(['contracts/verificate', 'id' => $model->id]),
-                    ['title' => 'Ok']
+                    $option
                 );
             },
         ],
@@ -296,7 +312,7 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
             'rowOptions' => function ($model, $index, $widget, $grid) {
                 if ($model->wait_termnate > 0) {
                     return ['class' => 'danger'];
-                } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
+                } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_REQUESTED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
                     return ['class' => 'warning'];
                 }
             },
@@ -323,7 +339,7 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
             'rowOptions' => function ($model, $index, $widget, $grid) {
                 if ($model->wait_termnate === 1) {
                     return ['class' => 'danger'];
-                } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
+                } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_REQUESTED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
                     return ['class' => 'warning'];
                 }
             },
@@ -354,7 +370,7 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
             {
                 if ($model->wait_termnate === 1) {
                     return ['class' => 'danger'];
-                } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
+                } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_REQUESTED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
                     return ['class' => 'warning'];
                 }
             },
