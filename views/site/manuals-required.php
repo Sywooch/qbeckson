@@ -12,12 +12,13 @@ $this->title = 'Для продолжения работы в системе п�
         <h3><?= $this->title ?></h3><br/>
         <?php
         $form = ActiveForm::begin();
-        $i = 0;
+        $nextShow = true;
         ?>
         <?php foreach ($models as $index => $model): ?>
-            <div class="checkbox-container" style="display: <?= (!$i++ || $model->checked > 0) ? 'block' : 'none'; ?>">
+            <div class="checkbox-container" style="display: <?= ($nextShow) ? 'block' : 'none'; ?>">
                 <?= $form->field($model, "[$index]checked")->checkbox(['onClick' => 'showNextContainer(this);'])->label($model->getAttributeLabel('checked')) ?>
             </div>
+            <?php $nextShow = $model->checked ? $nextShow : false; ?>
         <?php endforeach; ?>
         <div class="checkbox-container save-button" style="display: none;">
             <?= Html::submitButton('Сохранить и продолжить', ['class' => 'btn btn-primary']) ?>
