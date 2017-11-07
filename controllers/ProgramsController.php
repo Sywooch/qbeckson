@@ -169,7 +169,7 @@ class ProgramsController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             Yii::$app->session->setFlash('success', 'Муниципальное задание успешно обновлено.');
 
-            $this->redirect(['view', 'id' => $id]);
+            $this->redirect(['view-task', 'id' => $id]);
         }
 
         return $this->render('update-task', [
@@ -177,7 +177,7 @@ class ProgramsController extends Controller
         ]);
     }
 
-        /**
+     /**
      * Displays a single Programs model.
      *
      * @param integer $id
@@ -230,6 +230,29 @@ class ProgramsController extends Controller
         ProgramsAsset::register($this->view);
 
         return $this->render('view/view', ['model' => $model, 'cooperate' => $cooperate]);
+    }
+
+    /**
+     * Displays a single Programs model.
+     *
+     * @param integer $id
+     *
+     * @return mixed
+     * @throws ForbiddenHttpException
+     */
+    public function actionViewTask($id)
+    {
+        /** @var $user UserIdentity */
+        $user = Yii::$app->user->identity;
+        $model = $this->findModel($id);
+
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION) && $user->organization->id !== $model->organization_id) {
+            throw new ForbiddenHttpException('Нет доступа');
+        }
+
+        ProgramsAsset::register($this->view);
+
+        return $this->render('task/view', ['model' => $model, 'cooperate' => $cooperate]);
     }
 
     /**
@@ -1007,6 +1030,7 @@ class ProgramsController extends Controller
             throw new NotFoundHttpException();
         }
         $modelYears = $model->years;
+
         $file = new ProgramsFile();
         /** @var $organisation Organization */
         $model->zab = explode(',', $model->zab);

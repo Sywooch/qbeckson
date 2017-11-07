@@ -2,6 +2,7 @@
 
 namespace app\models\search;
 
+use app\models\OrganizationPayerAssignment;
 use app\models\Programs;
 use app\models\UserIdentity;
 use Yii;
@@ -22,6 +23,7 @@ class ProgramsSearch extends Programs
 
     public $modelName;
     public $payerId;
+    public $taskPayerId;
 
     /**
      * @return string
@@ -40,7 +42,7 @@ class ProgramsSearch extends Programs
             [['id', 'form', 'mun', 'ground', 'price', 'study', 'last_contracts', 'direction_id',
                 'last_s_contracts', 'last_s_contracts_rod', 'year', 'both_teachers', 'ovz', 'quality_control', 'p3z', 'municipality', 'age', 'municipal_task_matrix_id'], 'integer'],
             [['name', 'vid', 'colse_date', 'task', 'annotation', 'fullness', 'complexity', 'norm_providing',
-                'zab', 'link', 'certification_date', 'verification', 'organization_id', 'payerId', 'activity_ids'], 'safe'],
+                'zab', 'link', 'certification_date', 'verification', 'organization_id', 'payerId', 'activity_ids', 'taskPayerId'], 'safe'],
             [['ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch'], 'number'],
             [['organization', 'hours', 'age_group_min', 'age_group_max', 'limit', 'rating'], 'string'],
             ['open', 'safe'],
@@ -126,6 +128,18 @@ class ProgramsSearch extends Programs
             /** @var UserIdentity $user */
             $user = Yii::$app->user->getIdentity();
             $organizationIds = ArrayHelper::getColumn($user->payer->cooperates, 'organization_id');
+            if ($this->organization_id && $organizationIds && $this->organization_id !== 'Array') {
+                $this->organization_id = ArrayHelper::isIn($this->organization_id, $organizationIds) ?
+                    $this->organization_id : 0;
+            } else {
+                $this->organization_id = $organizationIds ?: 0;
+            }
+        }
+
+        if ($this->taskPayerId) {
+            /** @var UserIdentity $user */
+            $user = Yii::$app->user->getIdentity();
+            $organizationIds = ArrayHelper::getColumn($user->payer->getOrganizations(null, OrganizationPayerAssignment::STATUS_ACTIVE)->all(), 'id');
             if ($this->organization_id && $organizationIds && $this->organization_id !== 'Array') {
                 $this->organization_id = ArrayHelper::isIn($this->organization_id, $organizationIds) ?
                     $this->organization_id : 0;

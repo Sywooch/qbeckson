@@ -51,7 +51,8 @@ class ProgramSectionForm extends Model
     {
         if ($this->getModel() && $this->validate()) {
             $this->model->municipal_task_matrix_id = $this->section;
-            if ($this->model->save(false, ['municipal_task_matrix_id'])) {
+            $this->model->verification = Programs::VERIFICATION_DONE;
+            if ($this->model->save(false, ['municipal_task_matrix_id', 'verification'])) {
                 return true;
             }
         }

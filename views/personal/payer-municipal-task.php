@@ -130,6 +130,11 @@ $actions = [
     'class' => ActionColumn::class,
     'controller' => 'programs',
     'template' => '{view}',
+    'buttons' => [
+        'view' => function ($url, $model, $key) {
+            return '<a href="' . Url::to(['/programs/view-task', 'id' => $model->id]) . '" title="Просмотр" aria-label="Просмотр" data-pjax="0"><span class="glyphicon glyphicon-eye-open"></span></a>';
+        },
+    ],
     'searchFilter' => false,
 ];
 $columns = [

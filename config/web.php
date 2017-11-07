@@ -262,7 +262,7 @@ $config = [
             'programs' =>
                 [
                     [
-                        'actions' => ['index', 'view'],
+                        'actions' => ['index', 'view', 'view-task'],
                         'allow' => true,
                     ],
                     [

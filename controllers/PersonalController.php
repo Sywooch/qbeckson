@@ -617,7 +617,7 @@ class PersonalController extends Controller
         $user = Yii::$app->user->getIdentity();
 
         $searchWaitTasks = new ProgramsSearch([
-            'payerId' => $user->payer->id,
+            'taskPayerId' => $user->payer->id,
             'hours' => '0,2000',
             'limit' => '0,10000',
             'rating' => '0,100',
@@ -631,7 +631,7 @@ class PersonalController extends Controller
         $tabs = [];
         foreach ($matrix as $item) {
             $searchTasks = new ProgramsSearch([
-                'payerId' => $user->payer->id,
+                'taskPayerId' => $user->payer->id,
                 'hours' => '0,2000',
                 'limit' => '0,10000',
                 'rating' => '0,100',
