@@ -1,5 +1,6 @@
 <?php
 
+use app\models\Payers;
 use kartik\grid\EditableColumn;
 use kartik\grid\GridView;
 use yii\bootstrap\ActiveForm;
@@ -8,6 +9,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\CertGroupSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $payer Payers */
 
 $this->title = 'Номиналы групп';
 $this->params['breadcrumbs'][] = $this->title;
@@ -119,7 +121,11 @@ $this->registerJs("jQuery('#payers-certificate_can_use_future_balance').click(fu
     ]); ?>
 
     <?php $form = ActiveForm::begin(); ?>
+    <?= $form->field($payer, 'days_to_first_contract_request')->textInput() ?>
+    <?= $form->field($payer, 'days_to_contract_request_after_refused')->textInput() ?>
     <?= $form->field(Yii::$app->user->identity->payer, 'certificate_can_use_future_balance')->checkbox() ?>
+
+    <?= Html::submitButton('сохранить', ['class' => 'btn btn-primary']) ?>
     <?php ActiveForm::end(); ?>
 
 </div>

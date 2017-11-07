@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\CertGroup;
 use app\models\CertificateGroupQueue;
+use app\models\Payers;
 use app\models\search\CertGroupSearch;
 use app\services\PayerService;
 use Yii;
@@ -84,10 +85,17 @@ class CertGroupController extends Controller
 
             return $out;
         }
+        $payer = Payers::findOne(Yii::$app->user->identity->payer->id);
+        /** @var Payers $payer */
+
+        if ($payer && $payer->load(Yii::$app->request->post())) {
+            $payer->save();
+        }
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'payer' => $payer,
         ]);
     }
 

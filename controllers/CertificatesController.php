@@ -30,7 +30,7 @@ class CertificatesController extends Controller
     {
         return [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class'   => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
                 ],
@@ -49,10 +49,11 @@ class CertificatesController extends Controller
     {
         $nerfer = new CertificateNerfNominal($id);
         $freezer = new FreezeUnFreezeCertificate($id);
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model'   => $this->findModel($id),
             'freezer' => $freezer,
-            'nerfer' => $nerfer,
+            'nerfer'  => $nerfer,
         ]);
     }
 
@@ -134,7 +135,7 @@ class CertificatesController extends Controller
                 if ($model->canUseGroup() && $model->setNominals() && $model->save()) {
 
                     return $this->render('/user/view', [
-                        'model' => $user,
+                        'model'    => $user,
                         'password' => $password,
                     ]);
                 } else {
@@ -147,10 +148,10 @@ class CertificatesController extends Controller
         $user->password = '';
 
         return $this->render('create', [
-            'model' => $model,
-            'user' => $user,
+            'model'  => $model,
+            'user'   => $user,
             'region' => $region,
-            'payer' => $payer,
+            'payer'  => $payer,
         ]);
     }
 
@@ -216,7 +217,7 @@ class CertificatesController extends Controller
 
                     if ($user->save()) {
                         return $this->render('/user/view', [
-                            'model' => $user,
+                            'model'    => $user,
                             'password' => $password,
                         ]);
                     }
@@ -232,7 +233,7 @@ class CertificatesController extends Controller
 
         return $this->render('update', [
             'model' => $model,
-            'user' => $user,
+            'user'  => $user,
         ]);
     }
 
@@ -262,12 +263,12 @@ class CertificatesController extends Controller
         $model = Yii::$app->user->identity->certificate;
 
         $pdf = new Pdf([
-            'mode' => Pdf::MODE_UTF8,
+            'mode'        => Pdf::MODE_UTF8,
             'destination' => Pdf::DEST_BROWSER,
-            'content' => $content,
-            'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
-            'options' => ['title' => 'Заявление на смену группы сертификата'],
-            'methods' => [
+            'content'     => $content,
+            'cssFile'     => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
+            'options'     => ['title' => 'Заявление на смену группы сертификата'],
+            'methods'     => [
                 'SetHeader' => ['Заявление на смену группы сертификата'],
             ]
         ]);
@@ -402,7 +403,7 @@ class CertificatesController extends Controller
         }
 
         return $this->render('/user/delete', [
-            'user' => $user,
+            'user'  => $user,
             'title' => null,
         ]);
     }
@@ -502,5 +503,19 @@ class CertificatesController extends Controller
 
             print_r($model->getErrors());
         }
+    }
+
+    /**
+     * перевести неиспользуемые сертификаты в сертификаты учета
+     */
+    public function actionChangeToAccountingType()
+    {
+        $changedCount = Certificates::changeToAccountingType();
+
+        if ($changedCount) {
+            Yii::$app->session->addFlash('warning', 'В сертификаты учета ' . Yii::$app->i18n->format('{n, plural, =0{ни один сертификат не переведен} =1{переведен один сертификат} one{переведен # сертификат} few{переведены # сертификата} many{переведено # сертификатов} other{переведен # сертификат}}!', ['n' => $changedCount], 'ru_RU'));
+        }
+
+        return $this->redirect('/personal/payer-certificates');
     }
 }

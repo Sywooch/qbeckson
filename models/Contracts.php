@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\components\services\InformerBuilder;
 use Yii;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -74,6 +75,14 @@ use yii\web\ForbiddenHttpException;
  * @property float           $payer_other_month_payment
  * @property integer         $payment_order
  * @property integer         $period
+ * @property int             $cooperate_id
+ * @property string          $created_at                    дата и время создания договора
+ * @property string          $requested_at                  дата и время создания заявки
+ * @property string          $refused_at                    дата и время отклонения заявки
+ * @property string          $accepted_at                   дата и время подтверждения заявки
+ * @property string          $activated_at                  дата и время заключения договора
+ * @property string          $termination_initiated_at      дата и время перевода в статус ожидания расторжения (wait_termnate = 1)
+ *
  * @property float           $balance
  * @property Disputes[]      $disputes
  * @property string          $statusName
@@ -87,13 +96,13 @@ use yii\web\ForbiddenHttpException;
  * @property mixed           $programname
  * @property mixed           $year
  * @property Informs[]       $informs
- *
  * @property Certificates    $certificate
  * @property Organization    $organization
  * @property Payers          $payer
  * @property Programs        $program
  * @property ProgrammeModule $module
  * @property Groups          $group
+ * @property string          $terminatorUserRole
  */
 class Contracts extends ActiveRecord
 {
@@ -101,7 +110,7 @@ class Contracts extends ActiveRecord
     const FUTURE_REALIZATION_PERIOD = 2;
     const PAST_REALIZATION_PERIOD = 3;
 
-    const STATUS_CREATED = 0;
+    const STATUS_REQUESTED = 0;
     const STATUS_ACTIVE = 1;
     const STATUS_REFUSED = 2;
     const STATUS_ACCEPTED = 3;
@@ -128,13 +137,28 @@ class Contracts extends ActiveRecord
     /**
      * @inheritdoc
      */
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => TimestampBehavior::className(),
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => null,
+                'value' => date('Y-m-d H:i:s', time()),
+            ]
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function rules()
     {
         return [
             [['certificate_id', 'program_id', 'organization_id', 'status', 'status_year', 'funds_gone', 'group_id', 'year_id', 'sposob', 'prodolj_d', 'prodolj_m', 'prodolj_m_user', 'ocenka', 'wait_termnate', 'terminator_user', 'payment_order', 'period', 'cooperate_id'], 'integer'],
             [['all_funds', 'funds_cert', 'all_parents_funds', 'first_m_price', 'other_m_price', 'first_m_nprice', 'other_m_nprice', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch', 'cert_dol', 'payer_dol', 'rezerv', 'paid', 'fontsize', 'balance', 'payer_first_month_payment', 'payer_other_month_payment', 'parents_other_month_payment', 'parents_first_month_payment'], 'number'],
             [['date', 'status_termination', 'start_edu_programm', 'stop_edu_contract', 'start_edu_contract', 'date_termnate', 'applicationIsReceived'], 'safe'],
-            ['date_initiate_termination', 'date', 'format' => 'php:Y-m-d'],
+            [['created_at', 'requested_at', 'refused_at', 'accepted_at', 'activated_at', 'termination_initiated_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
             ['date', 'validateDate'],
             ['date', 'required', 'on' => self::SCENARIO_CREATE_DATE],
             [['status_comment', 'number', 'certnumber', 'certfio', 'change1', 'change2', 'change_org_fio', 'org_position', 'org_position_min', 'change_doctype', 'change_fioparent', 'change6', 'change_fiochild', 'change8', 'change9', 'change10', 'month_start_edu_contract', 'url'], 'string'],
@@ -225,6 +249,12 @@ class Contracts extends ActiveRecord
             'certificatenumber'        => 'Номер сертификата',
             'payment_order'            => 'Порядок оплаты',
             'applicationIsReceived'    => 'заявление от Заказчика получено',
+            'created_at'               => 'дата и время создания договора',
+            'requested_at'             => 'дата и время создания заявки',
+            'refused_at'               => 'дата и время отклонения заявки',
+            'accepted_at'              => 'дата и время подтверждения заявки',
+            'activated_at'             => 'дата и время заключения договора',
+            'termination_initiated_at' => 'дата и время перевода в статус ожидания расторжения',
         ];
     }
 
@@ -514,7 +544,7 @@ class Contracts extends ActiveRecord
     {
         $statusName = '';
         switch ($this->status) {
-            case self::STATUS_CREATED:
+            case self::STATUS_REQUESTED:
                 $statusName = 'Создан, ожидает подтверждения';
                 break;
             case self::STATUS_ACTIVE:
@@ -642,11 +672,11 @@ class Contracts extends ActiveRecord
     public static function statuses()
     {
         return [
-            self::STATUS_CREATED  => 'Ожидает',
-            self::STATUS_ACTIVE   => 'Действующий',
-            self::STATUS_REFUSED  => 'Отклонён',
-            self::STATUS_ACCEPTED => 'Подтверждён',
-            self::STATUS_CLOSED   => 'Расторгнут',
+            self::STATUS_REQUESTED => 'Ожидает',
+            self::STATUS_ACTIVE    => 'Действующий',
+            self::STATUS_REFUSED   => 'Отклонён',
+            self::STATUS_ACCEPTED  => 'Подтверждён',
+            self::STATUS_CLOSED    => 'Расторгнут',
         ];
     }
 
@@ -720,6 +750,7 @@ class Contracts extends ActiveRecord
         }
 
         $this->status = Contracts::STATUS_REFUSED;
+        $this->refused_at = date('Y-m-d H:i:s');
         if (!$this->certificate->changeBalance($this)) {
 
             return $rollback();
@@ -774,7 +805,7 @@ class Contracts extends ActiveRecord
         }
 
         $this->wait_termnate = 1;
-        $this->date_initiate_termination = date('Y-m-d');
+        $this->termination_initiated_at = date('Y-m-d H:i:s');
         $this->status_comment = $informs->dop;
 
         if (!$this->certificate->changeBalance($this)) {
@@ -791,4 +822,33 @@ class Contracts extends ActiveRecord
         return true;
     }
 
+    /**
+     * после подтверждения заявки прошло много времени
+     *
+     * @return boolean
+     */
+    public function passedTooLongTimeAfterAccepted()
+    {
+        $tooLongTime = 10;
+
+        $now = new \DateTime();
+        $accepted = new \DateTime($this->accepted_at);
+
+        return date_diff($now, $accepted)->days > $tooLongTime;
+    }
+
+    /**
+     * после создания заявки прошло много времени
+     *
+     * @return boolean
+     */
+    public function passedTooLongTimeAfterRequested()
+    {
+        $tooLongTime = 5;
+
+        $now = new \DateTime();
+        $requested = new \DateTime($this->requested_at);
+
+        return date_diff($now, $requested)->days > $tooLongTime;
+    }
 }
