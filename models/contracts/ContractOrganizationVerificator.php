@@ -3,12 +3,14 @@
 namespace app\models\contracts;
 
 
+use app\components\services\InformerBuilder;
 use app\models\Certificates;
 use app\models\Completeness;
 use app\models\Contracts;
 use app\models\Groups;
 use app\models\Organization;
 use app\models\Programs;
+use app\models\UserIdentity;
 use yii\validators\InlineValidator;
 
 /**
@@ -20,6 +22,8 @@ use yii\validators\InlineValidator;
  * @property Certificates $certificate
  * @property Groups $group
  * @property Programs $program
+ * @property array $start_edu_contract
+ *
  */
 class ContractOrganizationVerificator extends ContractsActions
 {
@@ -40,6 +44,11 @@ class ContractOrganizationVerificator extends ContractsActions
         $this->currentMonth = strtotime('first day of this month');
         $this->nextMonth = strtotime('first day of next month');
         $this->lastDayOfMonth = strtotime('last day of this month');
+    }
+
+    public function getStart_edu_contract()
+    {
+        return explode("-", $this->contract->start_edu_contract);
     }
 
     public function rules()
@@ -119,7 +128,7 @@ class ContractOrganizationVerificator extends ContractsActions
      * Все манипуляции внутри этой функции происходят в трансзакции, можно прервать трансзакцию из нутри.
      * для успешного завершения вернуть true
      *
-     * Реализовано на основе механизма ленивых вычислений.
+     * Реализовано на основе механизма ленивых вычислений по шаблону waterfall.
      *
      * @param \Closure $transactionTerminator
      * @param bool $validate
@@ -130,10 +139,6 @@ class ContractOrganizationVerificator extends ContractsActions
     {
         return (
                 (
-                    $this->organizationChildAmountInc($this->contract->organization)
-                    || $this->addError('contract', 'Не удалось установить amount_child у организации')
-                )
-                && (
                     $this->organizationChildAmountInc($this->contract->organization)
                     || $this->addError('contract', 'Не удалось установить amount_child у организации')
                 )
@@ -163,15 +168,32 @@ class ContractOrganizationVerificator extends ContractsActions
                     || (($this->buildAndSavePreinvoice()
                             || $this->addError('contract', 'Не удалось создать и сохранить Preinvoice'))
                         && (
-                        true/**  todo доделать */
+                            $this->buildInforms()
+                            || $this->addError('contract', 'Не удалось создать и сохранить Оповещения')
                         ))
                 )
 
                 )
-
-
             )
             || $transactionTerminator();
+    }
+
+    private function buildInforms(): bool
+    {
+        return InformerBuilder::build(
+                $this->contract,
+                ' Заключен договор',
+                UserIdentity::ROLE_PAYER_ID,
+                $this->contract->payer_id
+            )
+                ->save()
+            && InformerBuilder::build(
+                $this->contract,
+                ' Заключен договор',
+                UserIdentity::ROLE_CERTIFICATE_ID,
+                $this->contract->certificate_id
+            )
+                ->save();
     }
 
     private function organizationChildAmountInc(Organization $organization): bool
@@ -263,19 +285,17 @@ class ContractOrganizationVerificator extends ContractsActions
         $completeness->group_id = $this->contract->group_id;
         $completeness->contract_id = $this->contract->id;
 
-        $start_edu_contract = explode("-", $this->contract->start_edu_contract);
-
         if (date('m') == 12) {
             $completeness->month = date('m');
-            $completeness->year = $start_edu_contract[0];
+            $completeness->year = $this->start_edu_contract[0];
         } else {
             $completeness->month = date('m') - 1;
-            $completeness->year = $start_edu_contract[0];
+            $completeness->year = $this->start_edu_contract[0];
         }
         $completeness->preinvoice = 0;
         $completeness->completeness = 100;
 
-        $month = $start_edu_contract[1];
+        $month = $this->start_edu_contract[1];
 
         if (date('m') == 12) {
             if ($month == 12) {
