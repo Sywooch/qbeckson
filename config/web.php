@@ -157,6 +157,13 @@ $config = [
     'as AccessBehavior' => [
         'class' => AccessBehavior::class,
         'rules' => [
+            'mailing' => [
+                [
+                    'allow' => true,
+                    'actions' => ['index', 'create', 'view'],
+                    'roles' => ['operators']
+                ],
+            ],
             'personal' => [
                 [
                     'allow' => true,
@@ -174,12 +181,22 @@ $config = [
                     'roles' => ['certificate']
                 ],
                 [
-                    'actions' => ['organization-suborder', 'organization-set-suborder-status', 'organization-municipal-task'],
+                    'actions' => [
+                        'organization-suborder',
+                        'organization-set-suborder-status',
+                        'organization-municipal-task'],
                     'allow' => true,
                     'roles' => ['organizations']
                 ],
                 [
-                    'actions' => ['payer-suborder-organizations', 'payer-all-organizations', 'payer-municipal-task', 'user-personal-assign', 'remove-user-personal-assign', 'assigned-user-login'],
+                    'actions' => [
+                        'payer-suborder-organizations',
+                        'payer-all-organizations',
+                        'payer-municipal-task',
+                        'user-personal-assign',
+                        'remove-user-personal-assign',
+                        'assigned-user-login'
+                    ],
                     'allow' => true,
                     'roles' => ['payers']
                 ],
@@ -330,7 +347,14 @@ $config = [
                 ],
                 [
                     'allow' => true,
-                    'actions' => ['confirm-request', 'reject-request', 'reject-contract', 'confirm-contract', 'requisites', 'payment-limit'],
+                    'actions' => [
+                        'confirm-request',
+                        'reject-request',
+                        'reject-contract',
+                        'confirm-contract',
+                        'requisites',
+                        'payment-limit'
+                    ],
                     'roles' => ['payer'],
                 ],
                 [
@@ -375,7 +399,13 @@ $config = [
                 [
                     'allow' => true,
                     'roles' => ['certificate'],
-                    'actions' => ['request', 'reject-request', 'application-close-pdf', 'application-pdf', 'termrequest']
+                    'actions' => [
+                        'request',
+                        'reject-request',
+                        'application-close-pdf',
+                        'application-pdf',
+                        'termrequest'
+                    ]
                 ],
                 [
                     'allow' => true,

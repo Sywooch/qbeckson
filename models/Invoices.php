@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use app\components\halpers\DeclinationOfMonths;
+use app\helpers\DeclinationOfMonths;
 use mPDF;
 use Yii;
 use yii\db\ActiveRecord;

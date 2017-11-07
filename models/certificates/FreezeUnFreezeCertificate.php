@@ -94,18 +94,26 @@ class FreezeUnFreezeCertificate extends CertificateActions
     public function getCanFreeze($emitErrors = true): bool
     {
         if (!$this->certificate->actual) {
-            $emitErrors && $this->addError('freeze',
-                'Невозможно заморозить, сертификат заморожен в настоящий момент');
+            $emitErrors && $this->addError(
+                'freeze',
+                'Невозможно заморозить, сертификат заморожен в настоящий момент'
+            );
 
             return false;
         }
         $contractsExists = $this->certificate->getContractsModels()
-            ->andWhere(['AND', ['status' => Contracts::STATUS_ACTIVE], ['!=', 'wait_termnate', 1]])
+            ->andWhere(['AND', ['status' => Contracts::STATUS_ACTIVE], [
+                'OR',
+                ['!=', 'wait_termnate', 1],
+                ['wait_termnate' => null]
+            ]])
             ->exists();
 
         if ($contractsExists) {
-            $emitErrors && $this->addError('freeze',
-                'Невозможно заморозить, существуют активные контракты');
+            $emitErrors && $this->addError(
+                'freeze',
+                'Невозможно заморозить, существуют активные контракты'
+            );
 
             return false;
         }
@@ -133,23 +141,28 @@ class FreezeUnFreezeCertificate extends CertificateActions
     public function getCanUnFreeze($emitErrors = true): bool
     {
         if ($this->certificate->actual) {
-            $emitErrors && $this->addError('unFreeze',
-                'Невозможно активировать, сертификат актуален в настоящий момент');
+            $emitErrors && $this->addError(
+                'unFreeze',
+                'Невозможно активировать, сертификат актуален в настоящий момент'
+            );
 
             return false;
         }
         if ($this->certificate->friezed_at >= Yii::$app->operator->identity->settings->current_program_date_from) {
-            $emitErrors && $this->addError('unFreeze',
-                'Невозможно активировать, сертификат заморожен в этом периоде, будет доступно в следующем.');
+            $emitErrors && $this->addError(
+                'unFreeze',
+                'Невозможно активировать, сертификат заморожен в этом периоде, будет доступно в следующем.'
+            );
 
             return false;
         }
         if ($this->certificate->certGroup->hasVacancy()) {
-            $emitErrors && $this->addError('unFreeze',
-                'Невозможно активировать, достигнут лимит активынх сертификатов.');
+            $emitErrors && $this->addError(
+                'unFreeze',
+                'Невозможно активировать, достигнут лимит активынх сертификатов.'
+            );
 
             return false;
-
         }
 
         return true;
@@ -187,15 +200,19 @@ class FreezeUnFreezeCertificate extends CertificateActions
         $refuseCondition = [Contracts::tableName() . '.status' => [Contracts::STATUS_CREATED]];
         $contracts = $this->certificate->getContractsModels()->andWhere($refuseCondition)->all();
 
-        return array_reduce($contracts, function ($acc, $contract)
-            {
+        return array_reduce(
+                $contracts,
+                function ($acc, $contract) {
                 /**@var $contract Contracts */
-                return $acc && $contract->setRefused('Отклонено в связи с заморозкой сертификата.'
-                        , UserIdentity::ROLE_PAYER_ID
-                        , Yii::$app->user->identity->payer->id);
-            }, true)
+                    return $acc && $contract->setRefused(
+                            'Отклонено в связи с заморозкой сертификата.',
+                            UserIdentity::ROLE_PAYER_ID,
+                            Yii::$app->user->identity->payer->id
+                        );
+                },
+                true
+            )
             || $this->addError('certificate', 'Не удалось отклонить все заявки сертификата.');
-
     }
 
     private function setFriezedData()

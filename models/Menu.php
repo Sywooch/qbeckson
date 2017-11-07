@@ -148,6 +148,7 @@ class Menu
                 'items' => [
                     ['label' => 'Информация', 'url' => ['personal/operator-statistic']],
                     ['label' => 'Параметры системы', 'url' => ['operator/operator-settings']],
+                    //['label' => 'Информационная рассылка', 'url' => ['/mailing']],
 
                 ]
             ],

@@ -1,4 +1,5 @@
 <?php
+
 use app\components\LocalFlysystemBuilder;
 use trntv\filekit\Storage;
 
@@ -38,6 +39,18 @@ $config = [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
                 ],
+            ],
+        ],
+        'mailer' => [
+            'class' => 'yii\swiftmailer\Mailer',
+            'useFileTransport' => false,
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                'host' => 'smtp.mail.ru',
+                'username' => 'noreply.pfdo@mail.ru',
+                'password' => 'qwerty123456',
+                'port' => '465',
+                'encryption' => 'ssl',
             ],
         ],
         'fileStorage' => [

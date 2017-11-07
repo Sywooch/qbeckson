@@ -3,7 +3,7 @@
 namespace app\models\invoices;
 
 
-use app\components\halpers\DeclinationOfMonths;
+use app\helpers\DeclinationOfMonths;
 use app\models\Completeness;
 use app\models\Contracts;
 use app\models\Invoices;

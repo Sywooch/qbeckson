@@ -1,9 +1,9 @@
 <?php
 
 use kartik\grid\EditableColumn;
-use yii\helpers\Html;
-use yii\bootstrap\ActiveForm;
 use kartik\grid\GridView;
+use yii\bootstrap\ActiveForm;
+use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\CertGroupSearch */
@@ -95,7 +95,7 @@ $this->registerJs("jQuery('#payers-certificate_can_use_future_balance').click(fu
                     return false;
                 },
             ],
-            'countCertificates',
+            'countActualCertificates',
             [
                 'class' => 'kartik\grid\EditableColumn',
                 'attribute' => 'amount',
