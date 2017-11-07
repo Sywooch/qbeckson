@@ -38,7 +38,7 @@ class ProgramsSearch extends Programs
     {
         return [
             [['id', 'form', 'mun', 'ground', 'price', 'study', 'last_contracts', 'direction_id',
-                'last_s_contracts', 'last_s_contracts_rod', 'year', 'both_teachers', 'ovz', 'quality_control', 'p3z', 'municipality', 'age'], 'integer'],
+                'last_s_contracts', 'last_s_contracts_rod', 'year', 'both_teachers', 'ovz', 'quality_control', 'p3z', 'municipality', 'age', 'municipal_task_matrix_id'], 'integer'],
             [['name', 'vid', 'colse_date', 'task', 'annotation', 'fullness', 'complexity', 'norm_providing',
                 'zab', 'link', 'certification_date', 'verification', 'organization_id', 'payerId', 'activity_ids'], 'safe'],
             [['ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch'], 'number'],
@@ -53,14 +53,14 @@ class ProgramsSearch extends Programs
     public function attributeLabels(): array
     {
         return array_merge(parent::attributeLabels(), [
-            'age_group_min'  => 'Возраст от',
-            'age_group_max'  => 'Возраст до',
-            'hours'          => 'Кол-во часов',
-            'organization'   => 'Название организации',
-            'mun'            => 'Муниципалитет',
+            'age_group_min' => 'Возраст от',
+            'age_group_max' => 'Возраст до',
+            'hours' => 'Кол-во часов',
+            'organization' => 'Название организации',
+            'mun' => 'Муниципалитет',
             'normativePrice' => 'НС*',
-            'price'          => 'Цена*',
-            'age'            => 'Возраст'
+            'price' => 'Цена*',
+            'age' => 'Возраст'
         ]);
     }
 
@@ -76,7 +76,7 @@ class ProgramsSearch extends Programs
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     * @param int   $pageSize
+     * @param int $pageSize
      *
      * @return ActiveDataProvider
      */
@@ -107,10 +107,10 @@ class ProgramsSearch extends Programs
         }
 
         $dataProvider = new ActiveDataProvider([
-            'query'      => $query,
+            'query' => $query,
             'pagination' => [
                 'pageSizeLimit' => false,
-                'pageSize'      => $pageSize,
+                'pageSize' => $pageSize,
             ]
         ]);
 
@@ -139,30 +139,31 @@ class ProgramsSearch extends Programs
         }
 
         $query->andFilterWhere([
-            'programs.id'                   => $this->id,
-            'programs.organization_id'      => $this->organization_id,
-            'programs.verification'         => $this->verification,
-            'programs.form'                 => $this->form,
-            'programs.mun'                  => $this->mun,
-            'programs.ground'               => $this->ground,
-            'programs.price'                => $this->price,
-            'programs.study'                => $this->study,
-            'programs.last_contracts'       => $this->last_contracts,
-            'programs.last_s_contracts'     => $this->last_s_contracts,
+            'programs.id' => $this->id,
+            'programs.organization_id' => $this->organization_id,
+            'programs.verification' => $this->verification,
+            'programs.form' => $this->form,
+            'programs.mun' => $this->mun,
+            'programs.ground' => $this->ground,
+            'programs.price' => $this->price,
+            'programs.study' => $this->study,
+            'programs.last_contracts' => $this->last_contracts,
+            'programs.last_s_contracts' => $this->last_s_contracts,
             'programs.last_s_contracts_rod' => $this->last_s_contracts_rod,
-            'programs.colse_date'           => $this->colse_date,
-            'programs.year'                 => $this->year,
-            'programs.both_teachers'        => $this->both_teachers,
-            'programs.ovz'                  => $this->ovz,
-            'programs.quality_control'      => $this->quality_control,
-            'programs.certification_date'   => $this->certification_date,
-            'programs.p3z'                  => $this->p3z,
-            'programs.ocen_fact'            => $this->ocen_fact,
-            'programs.ocen_kadr'            => $this->ocen_kadr,
-            'programs.ocen_mat'             => $this->ocen_mat,
-            'programs.ocen_obch'            => $this->ocen_obch,
-            'programs.direction_id'         => $this->direction_id,
-            'organization.mun'              => $this->municipality,
+            'programs.colse_date' => $this->colse_date,
+            'programs.year' => $this->year,
+            'programs.both_teachers' => $this->both_teachers,
+            'programs.ovz' => $this->ovz,
+            'programs.quality_control' => $this->quality_control,
+            'programs.certification_date' => $this->certification_date,
+            'programs.p3z' => $this->p3z,
+            'programs.ocen_fact' => $this->ocen_fact,
+            'programs.ocen_kadr' => $this->ocen_kadr,
+            'programs.ocen_mat' => $this->ocen_mat,
+            'programs.ocen_obch' => $this->ocen_obch,
+            'programs.direction_id' => $this->direction_id,
+            'programs.municipal_task_matrix_id' => $this->municipal_task_matrix_id,
+            'organization.mun' => $this->municipality,
         ]);
 
         $query->andFilterWhere(['<=', 'programs.age_group_min', $this->age]);
@@ -184,8 +185,7 @@ class ProgramsSearch extends Programs
         }
 
         if ($this->activity_ids) {
-            $query->andWhere(array_reduce($this->activity_ids, function ($acc, $value)
-                {
+            $query->andWhere(array_reduce($this->activity_ids, function ($acc, $value) {
                     $acc[] = ['directory_program_activity.id' => $value];
 
                     return $acc;

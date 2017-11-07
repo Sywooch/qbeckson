@@ -247,7 +247,7 @@ class ProgramsController extends Controller
         $modelsYears = [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])];
 
         if ($model->load(Yii::$app->request->post())) {
-            $modelsYears = Model::createMultiple(ProgrammeModule::classname());
+            $modelsYears = Model::createMultiple(ProgrammeModule::classname(), [], ProgrammeModule::SCENARIO_MUNICIPAL_TASK);
             Model::loadMultiple($modelsYears, Yii::$app->request->post());
 
             // ajax validation

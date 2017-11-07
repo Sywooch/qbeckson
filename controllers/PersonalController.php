@@ -19,6 +19,7 @@ use app\models\GroupsSearch;
 use app\models\LoginForm;
 use app\models\Invoices;
 use app\models\Mun;
+use app\models\MunicipalTaskMatrix;
 use app\models\Operators;
 use app\models\Organization;
 use app\models\OrganizationContractSettings;
@@ -615,20 +616,37 @@ class PersonalController extends Controller
         /** @var UserIdentity $user */
         $user = Yii::$app->user->getIdentity();
 
-        $searchPrograms = new ProgramsSearch([
+        $searchWaitTasks = new ProgramsSearch([
             'payerId' => $user->payer->id,
             'hours' => '0,2000',
             'limit' => '0,10000',
             'rating' => '0,100',
-            'modelName' => 'SearchPrograms',
+            'modelName' => 'SearchTasks',
+            'verification' => 0,
             'isMunicipalTask' => true,
         ]);
-        $programsProvider = $searchPrograms->search(Yii::$app->request->queryParams);
+        $waitTasksProvider = $searchWaitTasks->search(Yii::$app->request->queryParams);
+
+        $matrix = MunicipalTaskMatrix::find()->all();
+        $tabs = [];
+        foreach ($matrix as $item) {
+            $searchTasks = new ProgramsSearch([
+                'payerId' => $user->payer->id,
+                'hours' => '0,2000',
+                'limit' => '0,10000',
+                'rating' => '0,100',
+                'modelName' => 'SearchTasks',
+                'verification' => 2,
+                'isMunicipalTask' => true,
+                'municipal_task_matrix_id' => $item->id,
+            ]);
+            $tasksProvider = $searchTasks->search(Yii::$app->request->queryParams);
+            array_push($tabs, ['item' => $item, 'searchModel' => $searchTasks, 'provider' => $tasksProvider]);
+        }
 
         if (Yii::$app->request->isAjax && Yii::$app->request->post('hasEditable')) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $model = Programs::findOne(Yii::$app->request->post('editableKey'));
-            //$model->scenario = Organization::SCENARIO_PAYER;
             $post = Yii::$app->request->post();
 
             $out = ['output' => '', 'message' => ''];
@@ -645,8 +663,9 @@ class PersonalController extends Controller
         }
 
         return $this->render('payer-municipal-task', [
-            'searchPrograms' => $searchPrograms,
-            'programsProvider' => $programsProvider,
+            'searchWaitTasks' => $searchWaitTasks,
+            'waitTasksProvider' => $waitTasksProvider,
+            'tabs' => $tabs,
         ]);
     }
 

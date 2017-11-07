@@ -11,15 +11,15 @@ use yii\helpers\ArrayHelper;
 use app\models\Mun;
 
 /* @var $this yii\web\View */
-/* @var $searchPrograms \app\models\search\ProgramsSearch */
-/* @var $programsProvider \yii\data\ActiveDataProvider */
+/* @var $searchWaitTasks \app\models\search\ProgramsSearch */
+/* @var $waitTasksProvider \yii\data\ActiveDataProvider */
 
 $this->title = 'Муниципальные задания';
 $this->params['breadcrumbs'][] = $this->title;
 
 $zab = [
     'type' => SearchFilter::TYPE_SELECT2,
-    'data' => $searchPrograms::illnesses(),
+    'data' => $searchWaitTasks::illnesses(),
     'attribute' => 'zab',
     'label' => 'Категория детей',
     'value' => function ($model) {
@@ -124,7 +124,7 @@ $form = [
         return $model::forms()[$model->form];
     },
     'type' => SearchFilter::TYPE_DROPDOWN,
-    'data' => $searchPrograms::forms(),
+    'data' => $searchWaitTasks::forms(),
 ];
 $actions = [
     'class' => ActionColumn::class,
@@ -163,30 +163,54 @@ $columns = [
     ],
     $actions,
 ];
-$preparedColumns = GridviewHelper::prepareColumns('programs', $columns, 'open');
+$preparedColumns = GridviewHelper::prepareColumns('programs', $columns);
 ?>
-<?php if ($searchPrograms->organization_id && $searchPrograms->organization) : ?>
-    <p class="lead">Показаны результаты для организации: <?= $searchPrograms->organization; ?></p>
+<?php if ($searchWaitTasks->organization_id && $searchWaitTasks->organization) : ?>
+    <p class="lead">Показаны результаты для организации: <?= $searchWaitTasks->organization; ?></p>
 <?php endif; ?>
-<?php
-echo SearchFilter::widget([
-    'model' => $searchPrograms,
-    'action' => ['personal/payer-programs'],
-    'data' => GridviewHelper::prepareColumns(
-        'programs',
-        $columns,
-        null,
-        'searchFilter',
-        null
-    ),
-    'role' => UserIdentity::ROLE_PAYER,
-]); ?>
 <p>
     <?= Html::a('Настроить параметры', ['/payer/matrix/params'], ['class' => 'btn btn-success']) ?>
 </p>
-<?php echo GridView::widget([
-    'dataProvider' => $programsProvider,
-    'filterModel' => null,
-    'pjax' => true,
-    'columns' => $preparedColumns,
-]); ?>
+<ul class="nav nav-tabs">
+    <li class="active">
+        <a data-toggle="tab" href="#panel0">Неразобранные
+            <span class="badge"><?= $waitTasksProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <?php
+    foreach ($tabs as $index => $tab) {
+    ?>
+        <li>
+            <a data-toggle="tab" href="#panel<?= $index + 1 ?>"><?= $tab['item']->name ?>
+                <span class="badge"><?= $tab['provider']->getTotalCount() ?></span>
+            </a>
+        </li>
+    <?php
+    }
+    ?>
+</ul>
+<br/>
+<div class="tab-content">
+    <div id="panel0" class="tab-pane fade in active">
+        <?php echo GridView::widget([
+            'dataProvider' => $waitTasksProvider,
+            'filterModel' => null,
+            'pjax' => true,
+            'columns' => $preparedColumns,
+        ]); ?>
+    </div>
+    <?php
+    foreach ($tabs as $index => $tab) {
+    ?>
+        <div id="panel<?= $index + 1 ?>" class="tab-pane fade in">
+            <?php echo GridView::widget([
+                'dataProvider' => $tab['provider'],
+                'filterModel' => null,
+                'pjax' => true,
+                'columns' => $preparedColumns,
+            ]); ?>
+        </div>
+    <?php
+    }
+    ?>
+</div>

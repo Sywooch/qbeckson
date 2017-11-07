@@ -1,5 +1,6 @@
 <?php
 
+use app\models\ProgrammeModule;
 use app\models\Mun;
 use app\models\statics\DirectoryProgramActivity;
 use app\models\statics\DirectoryProgramDirection;
@@ -199,11 +200,11 @@ $this->registerJs($js);
 
                                     <?= $form->field($modelYears, "[{$i}]kvfirst")->textInput(['maxlength' => true]) ?>
 
-                                    <?= $form->field($modelYears, "[{$i}]hoursindivid")->textInput(['maxlength' => true]) ?>
-
-                                    <?= $form->field($modelYears, "[{$i}]hoursdop")->textInput(['maxlength' => true]) ?>
-
-                                    <?= $form->field($modelYears, "[{$i}]kvdop")->textInput(['maxlength' => true]) ?>
+                                    <?php if ($modelYears->scenario != ProgrammeModule::SCENARIO_MUNICIPAL_TASK) {
+                                        echo $form->field($modelYears, "[{$i}]hoursindivid")->textInput(['maxlength' => true]);
+                                        echo $form->field($modelYears, "[{$i}]hoursdop")->textInput(['maxlength' => true]);
+                                        echo $form->field($modelYears, "[{$i}]kvdop")->textInput(['maxlength' => true]);
+} ?>
 
                                     <?= $form->field($modelYears, "[{$i}]minchild")->textInput() ?>
 
