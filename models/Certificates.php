@@ -610,7 +610,7 @@ class Certificates extends \yii\db\ActiveRecord
                 ->andWhere('cert_group.id = certificates.possible_cert_group')
                 ->andWhere('TIMESTAMPDIFF(DAY, certificates.created_at, "' . date('Y-m-d H:i:s') . '") > payers.days_to_first_contract_request and (certificates.type_changed_at is null || TIMESTAMPDIFF(DAY, certificates.type_changed_at, "' . date('Y-m-d H:i:s') . '") > payers.days_to_first_contract_request)')
                 ->andWhere('contracts.id is null')
-                ->limit(1)->all();
+                ->all();
 
             if (!$certificates) {
                 return 0;
