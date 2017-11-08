@@ -202,11 +202,13 @@ class FreezeUnFreezeCertificate extends CertificateActions
         ];
         $contracts = $this->certificate->getContractsModels()->andWhere($refuseCondition)->all();
 
-        return array_reduce(
+        return
+            array_reduce(
                 $contracts,
                 function ($acc, $contract) {
                     /**@var $contract Contracts */
-                    return $acc && $contract->setRefused(
+                    return $acc
+                        && $contract->setRefused(
                             'Отклонено в связи с заморозкой сертификата.',
                             UserIdentity::ROLE_PAYER_ID,
                             Yii::$app->user->identity->payer->id
