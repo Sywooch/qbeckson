@@ -28,6 +28,7 @@ use app\models\Payers;
 use app\models\PayersSearch;
 use app\models\PersonalAssignment;
 use app\models\PreviusSearch;
+use app\models\ProgrammeModule;
 use app\models\ProgrammeModuleSearch;
 use app\models\Programs;
 use app\models\ProgramsclearSearch;
@@ -622,10 +623,21 @@ class PersonalController extends Controller
             'limit' => '0,10000',
             'rating' => '0,100',
             'modelName' => 'SearchTasks',
-            'verification' => 0,
+            'verification' => Programs::VERIFICATION_UNDEFINED,
             'isMunicipalTask' => true,
         ]);
         $waitTasksProvider = $searchWaitTasks->search(Yii::$app->request->queryParams);
+
+        $searchRefusedTasks = new ProgramsSearch([
+            'taskPayerId' => $user->payer->id,
+            'hours' => '0,2000',
+            'limit' => '0,10000',
+            'rating' => '0,100',
+            'modelName' => 'SearchTasks',
+            'verification' => Programs::VERIFICATION_DENIED,
+            'isMunicipalTask' => true,
+        ]);
+        $refusedTasksProvider = $searchRefusedTasks->search(Yii::$app->request->queryParams);
 
         $matrix = MunicipalTaskMatrix::find()->all();
         $tabs = [];
@@ -665,6 +677,8 @@ class PersonalController extends Controller
         return $this->render('payer-municipal-task', [
             'searchWaitTasks' => $searchWaitTasks,
             'waitTasksProvider' => $waitTasksProvider,
+            'searchRefusedTasks' => $searchRefusedTasks,
+            'refusedTasksProvider' => $refusedTasksProvider,
             'tabs' => $tabs,
         ]);
     }
@@ -832,12 +846,39 @@ class PersonalController extends Controller
             'rating' => '0,100',
             'modelName' => 'SearchOpenPrograms',
             'isMunicipalTask' => true,
+            'verification' => Programs::VERIFICATION_DONE,
         ]);
         $programsProvider = $searchPrograms->search(Yii::$app->request->queryParams);
+
+        $searchWaitPrograms = new ProgramsSearch([
+            'organization_id' => Yii::$app->user->identity->organization->id,
+            'hours' => '0,2000',
+            'limit' => '0,10000',
+            'rating' => '0,100',
+            'modelName' => 'SearchOpenPrograms',
+            'isMunicipalTask' => true,
+            'verification' => Programs::VERIFICATION_UNDEFINED,
+        ]);
+        $waitProgramsProvider = $searchWaitPrograms->search(Yii::$app->request->queryParams);
+
+        $searchDeniedPrograms = new ProgramsSearch([
+            'organization_id' => Yii::$app->user->identity->organization->id,
+            'hours' => '0,2000',
+            'limit' => '0,10000',
+            'rating' => '0,100',
+            'modelName' => 'SearchOpenPrograms',
+            'isMunicipalTask' => true,
+            'verification' => Programs::VERIFICATION_DENIED,
+        ]);
+        $deniedProgramsProvider = $searchDeniedPrograms->search(Yii::$app->request->queryParams);
 
         return $this->render('organization-municipal-task', [
             'searchPrograms' => $searchPrograms,
             'programsProvider' => $programsProvider,
+            'searchWaitPrograms' => $searchWaitPrograms,
+            'waitProgramsProvider' => $waitProgramsProvider,
+            'searchDeniedPrograms' => $searchDeniedPrograms,
+            'deniedProgramsProvider' => $deniedProgramsProvider,
         ]);
     }
 

@@ -22,7 +22,12 @@ use yii\helpers\Url;
 
     if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_PAYER)) {
         echo Html::a('К списку заданий', '/personal/payer-municipal-task', ['class' => 'btn btn-theme']);
-        echo Html::a('Определить категорию', ['/programs/update-task', 'id' => $model->id], ['class' => 'btn btn-theme']);
+        if ($model->verification == \app\models\Programs::VERIFICATION_UNDEFINED) {
+            echo Html::a('Одобрить', ['/programs/update-task', 'id' => $model->id], ['class' => 'btn btn-success']);
+            echo Html::a('Отказать', ['/programs/refuse-task', 'id' => $model->id], ['class' => 'btn btn-danger']);
+        } else {
+            echo Html::a('Изменить раздел', ['/programs/update-task', 'id' => $model->id], ['class' => 'btn btn-theme']);
+        }
     }
 
     if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)) {

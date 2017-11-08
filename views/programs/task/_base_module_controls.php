@@ -72,6 +72,7 @@ use yii\helpers\Url;
             $message = 'Деятельность приостановлена';
         }
 
+        if (!$model->program->isMunicipalTask) {
         /** Зачисление отккыть/закрыть */
         if ($active) {
             echo Html::a($message, $url, ['class' => 'btn ' . $classButton]);
@@ -98,6 +99,7 @@ use yii\helpers\Url;
             }
         } else {
             echo Html::a('Установить цену', Url::to(['years/update', 'id' => $model->id]), ['class' => 'btn btn-theme']);
+        }
         }
 
         /** предварительные записи */

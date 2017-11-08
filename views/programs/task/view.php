@@ -19,6 +19,10 @@ if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)) {
 }
 
 $this->params['breadcrumbs'][] = $this->title;
+
+if ($model->isMunicipalTask && $model->verification == app\models\Programs::VERIFICATION_DENIED && !empty($model->refuse_reason)) {
+    echo '<div class="alert alert-danger">Муниципальное задание отклонено. Причина: ' . nl2br($model->refuse_reason) . '</div>';
+}
 ?>
 <div class="row">
     <div class="col-xs-12">

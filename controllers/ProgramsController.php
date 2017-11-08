@@ -177,7 +177,27 @@ class ProgramsController extends Controller
         ]);
     }
 
-     /**
+    public function actionRefuseTask($id)
+    {
+        $program = $this->findModel($id);
+        if (!$program->isMunicipalTask) {
+            throw new BadRequestHttpException();
+        }
+        $model = new ProgramSectionForm($program);
+        $model->scenario = ProgramSectionForm::SCENARIO_REFUSE;
+
+        if ($model->load(Yii::$app->request->post()) && $model->refuse()) {
+            Yii::$app->session->setFlash('success', 'Задание успешно отклонено.');
+
+            $this->redirect(['/personal/payer-municipal-task']);
+        }
+
+        return $this->render('refuse-task', [
+            'model' => $model,
+        ]);
+    }
+
+    /**
      * Displays a single Programs model.
      *
      * @param integer $id
@@ -267,10 +287,10 @@ class ProgramsController extends Controller
         ]);
 
         $file = new ProgramsFile();
-        $modelsYears = [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])];
+        $modelsYears = [new ProgrammeModule(['scenario' => $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : ProgrammeModule::SCENARIO_CREATE])];
 
         if ($model->load(Yii::$app->request->post())) {
-            $modelsYears = Model::createMultiple(ProgrammeModule::classname(), [], ProgrammeModule::SCENARIO_MUNICIPAL_TASK);
+            $modelsYears = Model::createMultiple(ProgrammeModule::classname(), [], $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : null);
             Model::loadMultiple($modelsYears, Yii::$app->request->post());
 
             // ajax validation
@@ -1030,6 +1050,11 @@ class ProgramsController extends Controller
             throw new NotFoundHttpException();
         }
         $modelYears = $model->years;
+        if ($model->isMunicipalTask) {
+            foreach ($modelYears as $index => $item) {
+                $modelYears[$index]->scenario = ProgrammeModule::SCENARIO_MUNICIPAL_TASK;
+            }
+        }
 
         $file = new ProgramsFile();
         /** @var $organisation Organization */
@@ -1060,7 +1085,7 @@ class ProgramsController extends Controller
             }
 
             $oldIDs = ArrayHelper::map($modelYears, 'id', 'id');
-            $modelYears = Model::createMultiple(ProgrammeModule::classname(), $modelYears);
+            $modelYears = Model::createMultiple(ProgrammeModule::classname(), $modelYears, $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : null);
             Model::loadMultiple($modelYears, Yii::$app->request->post());
             $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelYears, 'id', 'id')));
 
@@ -1106,7 +1131,7 @@ class ProgramsController extends Controller
                         $informs->read = 0;
                         $informs->save();
 
-                        return $this->redirect(['/personal/organization-programs']);
+                        return $this->redirect($model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']);
                     }
                 } catch (Exception $e) {
                     $transaction->rollBack();

@@ -141,36 +141,51 @@ $preparedOpenColumns = GridviewHelper::prepareColumns('programs', $openColumns, 
 ?>
 <ul class="nav nav-tabs">
     <li class="active">
-        <a data-toggle="tab" href="#panel1">Реестр заданий
+        <a data-toggle="tab" href="#panel1">Действующие
             <span class="badge"><?= $programsProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel2">Ожидающие
+            <span class="badge"><?= $waitProgramsProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel3">Отклонённые
+            <span class="badge"><?= $deniedProgramsProvider->getTotalCount() ?></span>
         </a>
     </li>
 </ul>
 <br>
+<?php
+if (Yii::$app->user->can('organizations') && Yii::$app->user->identity->organization->actual > 0) {
+    echo "<p>";
+    echo Html::a('Добавить задание', ['programs/create', 'isTask' => 1], ['class' => 'btn btn-success']);
+    echo "</p>";
+}
+?>
 <div class="tab-content">
-    <?php
-    if (Yii::$app->user->can('organizations') && Yii::$app->user->identity->organization->actual > 0) {
-        echo "<p>";
-        echo Html::a('Добавить задание', ['programs/create', 'isTask' => 1], ['class' => 'btn btn-success']);
-        echo "</p>";
-    }
-    ?>
     <div id="panel1" class="tab-pane fade in active">
-        <?= SearchFilter::widget([
-            'model' => $searchPrograms,
-            'action' => ['personal/organization-programs'],
-            'data' => GridviewHelper::prepareColumns(
-                'programs',
-                $openColumns,
-                'open',
-                'searchFilter',
-                null
-            ),
-            'role' => UserIdentity::ROLE_ORGANIZATION,
-            'type' => 'open'
-        ]); ?>
         <?= GridView::widget([
             'dataProvider' => $programsProvider,
+            'filterModel' => null,
+            'pjax' => true,
+            'summary' => false,
+            'columns' => $preparedOpenColumns,
+        ]); ?>
+    </div>
+    <div id="panel2" class="tab-pane fade in">
+        <?= GridView::widget([
+            'dataProvider' => $waitProgramsProvider,
+            'filterModel' => null,
+            'pjax' => true,
+            'summary' => false,
+            'columns' => $preparedOpenColumns,
+        ]); ?>
+    </div>
+    <div id="panel3" class="tab-pane fade in">
+        <?= GridView::widget([
+            'dataProvider' => $deniedProgramsProvider,
             'filterModel' => null,
             'pjax' => true,
             'summary' => false,

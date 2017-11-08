@@ -193,6 +193,11 @@ $preparedColumns = GridviewHelper::prepareColumns('programs', $columns);
     <?php
     }
     ?>
+    <li>
+        <a data-toggle="tab" href="#panel_refused">Отклонённые
+            <span class="badge"><?= $refusedTasksProvider->getTotalCount() ?></span>
+        </a>
+    </li>
 </ul>
 <br/>
 <div class="tab-content">
@@ -218,4 +223,12 @@ $preparedColumns = GridviewHelper::prepareColumns('programs', $columns);
     <?php
     }
     ?>
+    <div id="panel_refused" class="tab-pane fade in">
+        <?php echo GridView::widget([
+            'dataProvider' => $refusedTasksProvider,
+            'filterModel' => null,
+            'pjax' => true,
+            'columns' => $preparedColumns,
+        ]); ?>
+    </div>
 </div>

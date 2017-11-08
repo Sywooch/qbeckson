@@ -11,7 +11,11 @@ use yii\base\Model;
  */
 class ProgramSectionForm extends Model
 {
+    const SCENARIO_REFUSE = 'refuse';
+
     public $section;
+
+    public $refuse_reason;
 
     private $model;
 
@@ -33,6 +37,8 @@ class ProgramSectionForm extends Model
     {
         return [
             [['section'], 'integer'],
+            [['refuse_reason'], 'string'],
+            ['refuse_reason', 'required', 'on' => self::SCENARIO_REFUSE],
         ];
     }
 
@@ -40,9 +46,17 @@ class ProgramSectionForm extends Model
     {
         return [
             'section' => 'Раздел муниципального задания',
+            'refuse_reason' => 'Причина отказа',
         ];
     }
 
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_REFUSE] = $scenarios[self::SCENARIO_DEFAULT];
+
+        return $scenarios;
+    }
 
     /**
      * @return bool
@@ -52,7 +66,25 @@ class ProgramSectionForm extends Model
         if ($this->getModel() && $this->validate()) {
             $this->model->municipal_task_matrix_id = $this->section;
             $this->model->verification = Programs::VERIFICATION_DONE;
-            if ($this->model->save(false, ['municipal_task_matrix_id', 'verification'])) {
+            $this->model->open = 1;
+            if ($this->model->save(false, ['municipal_task_matrix_id', 'verification', 'open'])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function refuse(): bool
+    {
+        if ($this->getModel() && $this->validate()) {
+            $this->model->refuse_reason = $this->refuse_reason;
+            $this->model->verification = Programs::VERIFICATION_DENIED;
+            $this->model->open = 0;
+            if ($this->model->save(false, ['refuse_reason', 'verification', 'open'])) {
                 return true;
             }
         }
