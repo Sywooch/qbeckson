@@ -194,7 +194,7 @@ class ContractsController extends Controller
             }
         }
         $confirmForm = null;
-        if (null !== $contract) {
+        if (null !== $contract && $contract->status == null) {
             $confirmForm = new ContractConfirmForm($contract, $certificateId);
             if ($confirmForm->load(Yii::$app->request->post()) && $confirmForm->validate()) {
                 if ($confirmForm->save()) {
