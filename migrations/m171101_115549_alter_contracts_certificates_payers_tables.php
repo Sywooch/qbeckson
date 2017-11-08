@@ -25,7 +25,6 @@ class m171101_115549_alter_contracts_certificates_payers_tables extends Migratio
     {
         $this->alterColumn('contracts', 'termination_initiated_at', $this->date());
         $this->renameColumn('contracts', 'termination_initiated_at', 'date_initiate_termination');
-        $this->dropColumn('contracts', 'wait_termnate_init_at');
         $this->dropColumn('contracts', 'activated_at');
         $this->dropColumn('contracts', 'accepted_at');
         $this->dropColumn('contracts', 'refused_at');
