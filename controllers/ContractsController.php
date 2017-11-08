@@ -184,7 +184,7 @@ class ContractsController extends Controller
         }
 
 
-        $model = new ContractRequestForm($groupId, $certificateId, $contract);
+        $model = new ContractRequestForm($groupId, $certificateId);
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $contract = $model->save();
             if (!$contract) {
