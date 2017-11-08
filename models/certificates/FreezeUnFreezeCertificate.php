@@ -102,7 +102,7 @@ class FreezeUnFreezeCertificate extends CertificateActions
             return false;
         }
         $contractsExists = $this->certificate->getContractsModels()
-            ->andWhere(['AND', ['status' => Contracts::STATUS_ACTIVE], [
+            ->andWhere(['AND', ['status' => [Contracts::STATUS_ACTIVE]], [
                 'OR',
                 ['!=', 'wait_termnate', 1],
                 ['wait_termnate' => null]
@@ -197,13 +197,15 @@ class FreezeUnFreezeCertificate extends CertificateActions
 
     private function dropRequests()
     {
-        $refuseCondition = [Contracts::tableName() . '.status' => [Contracts::STATUS_CREATED]];
+        $refuseCondition = [
+            Contracts::tableName() . '.status' => [Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED]
+        ];
         $contracts = $this->certificate->getContractsModels()->andWhere($refuseCondition)->all();
 
         return array_reduce(
                 $contracts,
                 function ($acc, $contract) {
-                /**@var $contract Contracts */
+                    /**@var $contract Contracts */
                     return $acc && $contract->setRefused(
                             'Отклонено в связи с заморозкой сертификата.',
                             UserIdentity::ROLE_PAYER_ID,
