@@ -250,8 +250,13 @@ class ContractsController extends Controller
      */
     public function actionView($id)
     {
+        $model = $this->findModel($id);
+        $completenessQuery = \app\models\Completeness::find()
+            ->where(['contract_id' => $model->id])
+            ->orderBy(['year' => SORT_ASC, 'month' => SORT_ASC]);
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+            'completenessQuery' => $completenessQuery
         ]);
     }
 

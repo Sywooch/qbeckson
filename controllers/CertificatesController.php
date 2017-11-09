@@ -5,6 +5,8 @@ namespace app\controllers;
 use app\models\Certificates;
 use app\models\certificates\CertificateNerfNominal;
 use app\models\certificates\FreezeUnFreezeCertificate;
+use app\models\Completeness;
+use app\models\Contracts;
 use app\models\Payers;
 use app\models\User;
 use app\traits\AjaxValidationTrait;
@@ -49,10 +51,21 @@ class CertificatesController extends Controller
     {
         $nerfer = new CertificateNerfNominal($id);
         $freezer = new FreezeUnFreezeCertificate($id);
+        $completenessQuery = Completeness::find()
+            ->where([
+                'contract_id' => Contracts::find()
+                    ->select(['id'])
+                    ->where([
+                        'or', ['status' => Contracts::STATUS_CLOSED], ['status' => Contracts::STATUS_ACTIVE]
+                    ])->andWhere([
+                        'certificate_id' => $id
+                    ])
+            ]);
         return $this->render('view', [
             'model' => $this->findModel($id),
             'freezer' => $freezer,
             'nerfer' => $nerfer,
+            'completenessQuery' => $completenessQuery
         ]);
     }
 
