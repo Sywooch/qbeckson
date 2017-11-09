@@ -7,7 +7,6 @@
 $canViewGroups = false;
 $message = '';
 $groups = $model->groups;
-$value = $model;
 /** @var $certificate \app\models\Certificates */
 $certificate = Yii::$app->user->identity->certificate;
 $organization = $model->program->organization;
@@ -17,9 +16,8 @@ if (!empty($groups)) {
     if ($organization->actual == 0) {
         $message = '<h4>Вы не можете записаться на программу. Действие организации приостановленно.</h4>';
     } else {
-        // TODO Проверка лимитов зачисления по матрице
-        if (0) {
-            ;
+        if (!$model->program->canCreateMunicipalTaskContract($certificate)) {
+            $message = '<h4>Вы не можете записаться в группу из-за превышения лимитов на зачисление.</h4>';
         } else {
             $message = '<p>Вы можете записаться на программу. Выберете группу:</p>';
             $canViewGroups = true;
@@ -99,33 +97,15 @@ if (!empty($groups)) {
                         'buttons' =>
                             [
                                 'permit' => function ($url, $model) {
-                                    /** @var $identity \app\models\UserIdentity */
-                                    $identity = Yii::$app->user->identity;
-                                    if ($model->freePlaces && $identity->certificate->actual) {
-
-                                        return \yii\helpers\Html::a('Выбрать',
-                                            \yii\helpers\Url::to(['/contracts/request', 'groupId' => $model->id]),
-                                            [
-                                                'class' => 'btn btn-success',
-                                                'title' => 'Выбрать'
-                                            ]);
-                                    }
-
-                                    return \app\components\widgets\ButtonWithInfo::widget([
-                                        'label' => 'Выбрать',
-                                        'message' => !$model->freePlaces ? 'Нет свободных мест' : 'Ваш сертификат заморожен',
-                                        'options' => ['disabled' => 'disabled',
-                                            'class' => 'btn btn-default',
-                                            'style' => ['color' => '#333'],]
+                                    return \yii\helpers\Html::a('Выбрать', ['/municipal-task-contract/create', 'groupId' => $model->id], [
+                                        'class' => 'btn btn-success',
+                                        'title' => 'Выбрать'
                                     ]);
                                 },
-
                             ]
                     ],
-
                 ],
             ]); ?>
-
         <?php endif; ?>
     </div>
 </div>

@@ -59,7 +59,7 @@ $organization = [
         /** @var \app\models\Programs $model */
         return Html::a(
             $model->organization->name,
-            Url::to(['organization/view', 'id' => $model->organization_id]),
+            Url::to(['organization/view-subordered', 'id' => $model->organization_id]),
             ['target' => '_blank', 'data-pjax' => '0']
         );
     },

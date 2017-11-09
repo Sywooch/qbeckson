@@ -205,26 +205,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]);
     }
-    if (isset($roles['payer'])) {
-        echo DetailView::widget([
-            'model' => $model,
-            'attributes' => [
-                'max_child',
-                [
-                    'label' => 'Число обучающихся',
-                    'value' => $amount,
-                ],
-                [
-                    'value' => $contracts,
-                    'label' => Html::a('Число договоров', Url::to(['/personal/payer-contracts', 'org' => $model->name]), ['class' => 'blue']),
-                ],
-                [
-                    'label' => Html::a('Сертифицированных программ', Url::to(['/personal/payer-programs', 'org' => $model->name]), ['class' => 'blue']),
-                    'value' => $model->getCertprogram(),
-                ],
-            ],
-        ]);
-    }
 
     if (isset($roles['operators'])) {
         echo DetailView::widget([
@@ -246,24 +226,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]);
     } ?>
-
-    <?php
-    if (isset($roles['payer'])) {
-
-        $payers = new Payers();
-        $payer = $payers->getPayer();
-
-        echo DetailView::widget([
-            'model' => $model,
-            'attributes' => [
-                [
-                    'label' => Html::a('Выставлено счетов и авансов', Url::to(['/personal/payer-invoices', 'org' => $model->name]), ['class' => 'blue']),
-                    'value' => $model->invoiceCount($model->id, $payer->id),
-                ],
-            ],
-        ]);
-    }
-    ?>
 
     <?= DetailView::widget([
         'model' => $model,

@@ -19,6 +19,7 @@ use app\models\GroupsSearch;
 use app\models\LoginForm;
 use app\models\Invoices;
 use app\models\Mun;
+use app\models\MunicipalTaskContract;
 use app\models\MunicipalTaskMatrix;
 use app\models\MunicipalTaskPayerMatrixAssignment;
 use app\models\Operators;
@@ -37,6 +38,7 @@ use app\models\search\CertificatesSearch;
 use app\models\search\ContractsSearch;
 use app\models\search\CooperateSearch;
 use app\models\search\InvoicesSearch;
+use app\models\search\MunicipalTaskContractSearch;
 use app\models\search\OrganizationSearch;
 use app\models\search\ProgramsSearch;
 use app\models\UserIdentity;
@@ -949,6 +951,35 @@ class PersonalController extends Controller
             'endsContractsProvider' => $endsContractsProvider,
 
             'ContractsallProvider' => $ContractsallProvider,
+        ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function actionOrganizationMunicipalTaskContracts()
+    {
+        /** @var UserIdentity $user */
+        $user = Yii::$app->user->identity;
+
+        $searchActiveContracts = new MunicipalTaskContractSearch([
+            'status' => MunicipalTaskContract::STATUS_ACTIVE,
+            'organization_id' => $user->organization->id,
+        ]);
+        $activeContractsProvider = $searchActiveContracts->search(Yii::$app->request->queryParams);
+
+        $searchPendingContracts = new MunicipalTaskContractSearch([
+            'status' => MunicipalTaskContract::STATUS_NEW,
+            'organization_id' => $user->organization->id,
+        ]);
+        $pendingContractsProvider = $searchPendingContracts->search(Yii::$app->request->queryParams);
+
+
+        return $this->render('organization-municipal-task-contracts', [
+            'searchActiveContracts' => $searchActiveContracts,
+            'activeContractsProvider' => $activeContractsProvider,
+            'searchPendingContracts' => $searchPendingContracts,
+            'pendingContractsProvider' => $pendingContractsProvider,
         ]);
     }
 

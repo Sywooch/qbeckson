@@ -86,7 +86,15 @@ $this->title = 'Подведомственные организации';
         ],
         ['class' => 'yii\grid\ActionColumn',
             'controller' => 'organization',
-            'template' => '{view}',
+            'template' => '{view-subordered}',
+            'buttons' => [
+                'view-subordered' => function ($url, $model) {
+                    return Html::a(
+                        '<span class="glyphicon glyphicon-eye-open"></span>',
+                        ['organization/view-subordered', 'id' => $model->id]
+                    );
+                },
+            ],
         ],
     ],
 ]); ?>

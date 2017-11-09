@@ -703,6 +703,19 @@ class Programs extends ActiveRecord
     }
 
     /**
+     * проверка на возможность участия в муниципальном задании
+     * @return boolean
+     */
+    public function canCreateMunicipalTaskContract($certificate)
+    {
+        if (MunicipalTaskContract::findByProgram($this->id, $certificate)) {
+            return false;
+        }
+        // TODO Проверка лимитов зачисления по матрице
+        return true;
+    }
+
+    /**
      * Контракты в работе
      * @return \yii\db\ActiveQuery
      */

@@ -251,7 +251,16 @@ class Menu
                     'url'   => ['personal/organization-municipal-task']
                 ],
             ]],
-            ['label' => 'Договоры', 'url' => ['/personal/organization-contracts']],
+            ['label' => 'Договоры', 'items' => [
+                [
+                    'label' => 'Реестр договоров',
+                    'url'   => ['personal/organization-contracts']
+                ],
+                [
+                    'label' => 'Муниципальные задания',
+                    'url'   => ['personal/organization-municipal-task-contracts']
+                ],
+            ]],
             ['label' => 'Счета', 'url' => ['/personal/organization-invoices']],
             ['label' => 'Плательщики', 'items' => [
                 ['label' => 'Плательщики', 'url' => ['/personal/organization-payers']],

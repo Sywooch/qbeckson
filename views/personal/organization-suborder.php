@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <h3>Подвердите подведомственность региону <b><?= $suborder->organization->municipality->name ?></b></h3>
                 <a href="<?= Url::to(['organization-set-suborder-status']) ?>" class="btn btn-success">Подтвердить</a> <a href="<?= Url::to(['organization-set-suborder-status', 'refuse' => 1]) ?>" class="btn btn-danger">Отклонить</a>
             <?php elseif (!empty($suborder) && $suborder->status == OrganizationPayerAssignment::STATUS_ACTIVE): ?>
-                <h3>У вас установлена подведомственность с организацией <b><?= $suborder->organization->municipality->name ?>.</h3>
+                <h3>Вы указаны в качестве подведомственной организации городского округа (муниципального района): <b><?= $suborder->organization->municipality->name ?> (<?= $suborder->organization->name ?>).</h3>
             <?php else: ?>
                 <h4>Ни один плательщик еще не указал вас как свою подведомственную организацию.</h4>
             <?php endif; ?>

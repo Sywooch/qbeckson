@@ -184,7 +184,9 @@ $config = [
                     'actions' => [
                         'organization-suborder',
                         'organization-set-suborder-status',
-                        'organization-municipal-task'],
+                        'organization-municipal-task',
+                        'organization-municipal-task-contracts',
+                    ],
                     'allow' => true,
                     'roles' => ['organizations']
                 ],
@@ -269,6 +271,19 @@ $config = [
                         'actions' => ['update-task', 'refuse-task'],
                         'allow'   => true,
                         'roles'   => ['payer']
+                    ],
+                ],
+            'municipal-task-contract' =>
+                [
+                    [
+                        'actions' => ['create'],
+                        'allow'   => true,
+                        'roles'   => ['certificate']
+                    ],
+                    [
+                        'actions' => ['approve'],
+                        'allow'   => true,
+                        'roles'   => ['organizations']
                     ],
                 ],
             'user' =>
