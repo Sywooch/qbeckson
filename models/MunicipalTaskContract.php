@@ -130,4 +130,16 @@ class MunicipalTaskContract extends \yii\db\ActiveRecord
 
         return $this->save(false, ['status']);
     }
+
+    public static function getCountContracts($certificate, $matrixId)
+    {
+        $query = static::find()
+            ->joinWith('program')
+            ->where([
+                'certificate_id' => $certificate->id,
+                'programs.municipal_task_matrix_id' => $matrixId,
+            ]);
+
+        return $query->count();
+    }
 }

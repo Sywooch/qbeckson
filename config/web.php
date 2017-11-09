@@ -281,7 +281,7 @@ $config = [
                         'roles'   => ['certificate']
                     ],
                     [
-                        'actions' => ['approve'],
+                        'actions' => ['approve', 'view'],
                         'allow'   => true,
                         'roles'   => ['organizations']
                     ],

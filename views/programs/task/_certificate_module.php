@@ -1,8 +1,8 @@
 <?php
+use app\models\MunicipalTaskPayerMatrixAssignment;
+
 /** @var $model \app\models\ProgrammeModule */
-
 /** @var $this yii\web\View */
-
 
 $canViewGroups = false;
 $message = '';

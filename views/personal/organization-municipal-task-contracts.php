@@ -73,6 +73,14 @@ $actions = [
     'class' => ActionColumn::class,
     'controller' => 'contracts',
     'template' => '{view}',
+        'buttons' => [
+            'view' => function ($url, $model) {
+                return Html::a(
+                    '<span class="glyphicon glyphicon-eye-open"></span>',
+                    Url::to(['municipal-task-contract/view', 'id' => $model->id])
+                );
+            },
+        ],
     'searchFilter' => false,
 ];
 
