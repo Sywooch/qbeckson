@@ -1065,7 +1065,9 @@ EOD;
 
 			<p>БИК: ' . $organization->bank_bik . '</p>
 
-			<p>к/с (л/с): ' . $organization->korr_invoice . '</p>
+			<p>Лицевой счёт (л/с): ' . $organization->korr_invoice . '</p>
+
+            ' . $organization->correspondent_invoice ?? '<p>Корреспондентский счёт (к/с): ' . $organization->korr_invoice . '</p>' . '
 
 			<p>р/с: ' . $organization->rass_invoice . '</p>
 			
