@@ -20,6 +20,7 @@ use app\models\LoginForm;
 use app\models\Invoices;
 use app\models\Mun;
 use app\models\MunicipalTaskMatrix;
+use app\models\MunicipalTaskPayerMatrixAssignment;
 use app\models\Operators;
 use app\models\Organization;
 use app\models\OrganizationContractSettings;
@@ -1289,6 +1290,25 @@ class PersonalController extends Controller
      */
     public function actionCertificatePrograms(): string
     {
+        /** @var $certificate Certificates */
+        $certificate = Yii::$app->user->identity->certificate;
+
+        $matrix = MunicipalTaskPayerMatrixAssignment::findByPayerId($certificate->payer_id, $certificate->certGroup->is_special > 0 ? MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_AC : MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_PF);
+        $tabs = [];
+        foreach ($matrix as $item) {
+            $searchTasks = new ProgramsSearch([
+                'verification' => Programs::VERIFICATION_DONE,
+                'taskPayerId' => $certificate->payer_id,
+                'hours' => '0,2000',
+                'rating' => '0,100',
+                'modelName' => '',
+                'isMunicipalTask' => true,
+                'municipal_task_matrix_id' => $item->matrix->id,
+            ]);
+            $tasksProvider = $searchTasks->search(Yii::$app->request->queryParams);
+            array_push($tabs, ['item' => $item, 'searchModel' => $searchTasks, 'provider' => $tasksProvider]);
+        }
+
         $searchModel = new ProgramsSearch([
             'verification' => Programs::VERIFICATION_DONE,
             'hours' => '0,2000',
@@ -1297,6 +1317,7 @@ class PersonalController extends Controller
             'modelName' => '',
         ]);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
         if ($searchModel->organization_id) {
             Yii::$app->session->setFlash('success', 'Поиск по организации ' . $searchModel->getOrganization()->one()->name);
         }
@@ -1305,6 +1326,7 @@ class PersonalController extends Controller
         return $this->render('certificate/list', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
+            'tabs' => $tabs,
         ]);
     }
 

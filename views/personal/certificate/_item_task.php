@@ -36,7 +36,7 @@ $fStrings['costFirstModuleNotmativ'] = Yii::t('app', 'Нормативная: {f
 /** @var $user \app\models\UserIdentity */
 $user = Yii::$app->user->identity;
 /* вычисление доступности записи хотя бы на один модуль программы */
-$isAvailable = $model->isAvailable($user);
+$isAvailable = true;
 ?>
 <div class="card" <?= ($isAvailable ? '' : 'style="background-color: bisque;" 
       data-placement="top" data-toggle="tooltip"
@@ -76,15 +76,7 @@ $isAvailable = $model->isAvailable($user);
                             ['target' => '_blank']); ?></div>
                     <div><?= ($model->mainAddress ? $model->mainAddress->address : $model->organization->address_legal) ?></div>
                 </div>
-                <div class="card-info-paragraph card-info-paragraph_mh38">
-                    <div>Стоимость одного модуля</div>
-                    <div class="adaptive-ib" data-placement="top" data-toggle="tooltip"
-                         title="Стоимость модуля и нормативная стоимость модуля (НС) для программ с несколькими модулями указаны в таблице для первого модуля.">
-                        <?= $fStrings['costFirstModule'] ?>
-                    </div>
-                    <div class="adaptive-ib" data-placement="top" data-toggle="tooltip"
-                         title="Стоимость модуля и нормативная стоимость модуля (НС) для программ с несколькими модулями указаны в таблице для первого модуля."><?= $fStrings['costFirstModuleNotmativ'] ?></div>
-                </div><?= \yii\helpers\Html::a('Просмотр', ['programs/view', 'id' => $model->id], ['class' => 'btn btn-theme btn-block']) ?>
+                <?= \yii\helpers\Html::a('Просмотр', ['programs/view-task', 'id' => $model->id], ['class' => 'btn btn-theme btn-block']) ?>
             </div>
         </div>
     </div>

@@ -3,6 +3,7 @@
 namespace app\models\search;
 
 use app\models\OrganizationPayerAssignment;
+use app\models\Payers;
 use app\models\Programs;
 use app\models\UserIdentity;
 use Yii;
@@ -138,8 +139,8 @@ class ProgramsSearch extends Programs
 
         if ($this->taskPayerId) {
             /** @var UserIdentity $user */
-            $user = Yii::$app->user->getIdentity();
-            $organizationIds = ArrayHelper::getColumn($user->payer->getOrganizations(null, OrganizationPayerAssignment::STATUS_ACTIVE)->all(), 'id');
+            $payer = Payers::findOne($this->taskPayerId);
+            $organizationIds = ArrayHelper::getColumn($payer->getOrganizations(null, OrganizationPayerAssignment::STATUS_ACTIVE)->all(), 'id');
             if ($this->organization_id && $organizationIds && $this->organization_id !== 'Array') {
                 $this->organization_id = ArrayHelper::isIn($this->organization_id, $organizationIds) ?
                     $this->organization_id : 0;
@@ -267,6 +268,8 @@ class ProgramsSearch extends Programs
         }
 
         $query->groupBy(['programs.id']);
+
+        //print_r($query->prepare(Yii::$app->db->queryBuilder)->createCommand()->rawSql);exit;
 
         return $dataProvider;
     }

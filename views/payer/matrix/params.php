@@ -23,8 +23,10 @@ $this->params['breadcrumbs'][] = $this->title;
         foreach ($models as $index => $item) {
             $param_choose = 'can_choose_' . MunicipalTaskPayerMatrixAssignment::getPrefixes()[$i];
             $param_set_numbers = 'can_set_numbers_' . MunicipalTaskPayerMatrixAssignment::getPrefixes()[$i];
+            echo '<br />';
             if ($item->matrix->$param_choose > 0) {
                 echo $form->field($item, "[$index]can_be_chosen")->checkbox()->label($item->matrix->name);
+                echo $form->field($item, "[$index]number");
             } elseif ($item->matrix->$param_set_numbers > 0) {
                 echo $form->field($item, "[$index]number")->label($item->matrix->name);
                 echo $form->field($item, "[$index]number_type")->dropDownList(MunicipalTaskPayerMatrixAssignment::getNumberTypes())->label(false);

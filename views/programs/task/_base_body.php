@@ -12,7 +12,6 @@ if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_CERTIFICATE)) {
     $moduleTemplate = '_operator_module';
 }
 
-
 echo \yii\bootstrap\Tabs::widget([
     'items'       => array_map(function ($module) use ($moduleTemplate, $cooperate)
     {

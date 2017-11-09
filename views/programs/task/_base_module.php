@@ -38,14 +38,6 @@
                     'attribute' => 'kvfirst',
                 ],
                 [
-                    'attribute' => 'price',
-                    'format'    => 'currency',
-                ],
-                [
-                    'attribute' => 'normative_price',
-                    'format'    => 'currency',
-                ],
-                [
                     'label' => 'Адреса реализации модуля',
                     'value' => ($model->addresses ? '' : 'не указаны'),
                 ],

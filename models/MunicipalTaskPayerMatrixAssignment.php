@@ -69,7 +69,7 @@ class MunicipalTaskPayerMatrixAssignment extends \yii\db\ActiveRecord
             'payer_id' => 'Payer ID',
             'matrix_id' => 'Matrix ID',
             'can_be_chosen' => 'Доступно для выбора',
-            'number' => 'Количество',
+            'number' => 'Количество услуг',
             'number_type' => 'Услуги или часы',
         ];
     }
@@ -124,11 +124,18 @@ class MunicipalTaskPayerMatrixAssignment extends \yii\db\ActiveRecord
         ];
     }
 
-    public static function findByPayerId($payerId)
+    public static function findByPayerId($payerId, $certificateType = null)
     {
-        $models = static::find()
-            ->where(['payer_id' => $payerId])
-            ->all();
+        $query = static::find()
+            ->where(['payer_id' => $payerId]);
+
+        if (!empty($certificateType)) {
+            $query->joinWith('matrix')
+                ->andFilterWhere(['certificate_type' => $certificateType])
+            ->andWhere('`can_be_chosen` > 0 OR (`municipal_task_matrix`.can_set_numbers_' . static::getPrefixes()[$certificateType] . ' > 0 AND (`number` IS NOT NULL OR `number` > 0))');
+        }
+
+        $models = $query->all();
 
         return ArrayHelper::index($models, 'id');
     }
