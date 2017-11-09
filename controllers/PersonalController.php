@@ -1143,7 +1143,7 @@ class PersonalController extends Controller
         $searchContracts1 = new ContractsoSearch();
         $searchContracts1->certificate_id = $certificate['id'];
         $Contracts1Provider = $searchContracts1->search(Yii::$app->request->queryParams);
-        $contracts_count = $Contracts1Provider->getTotalCount();
+        $contracts_count = $Contracts1Provider->getTotalCount() + MunicipalTaskContract::getCountContracts($certificate, null, MunicipalTaskContract::STATUS_ACTIVE);
 
         $Contracts3Search = new Contracts3Search();
         $Contracts3Search->certificate_id = $certificate['id'];
@@ -1153,7 +1153,7 @@ class PersonalController extends Controller
         $ContractsnSearch = new ContractsnSearch();
         $ContractsnSearch->certificate_id = $certificate['id'];
         $ContractsnProvider = $ContractsnSearch->search(Yii::$app->request->queryParams);
-        $contracts_wait_request = $ContractsnProvider->getTotalCount();
+        $contracts_wait_request = $ContractsnProvider->getTotalCount() + MunicipalTaskContract::getCountContracts($certificate, null, MunicipalTaskContract::STATUS_NEW);
 
         $Contracts2Search = new Contracts2Search();
         $Contracts2Search->certificate_id = $certificate['id'];

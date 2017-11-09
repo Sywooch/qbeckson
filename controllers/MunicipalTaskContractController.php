@@ -46,11 +46,18 @@ class MunicipalTaskContractController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($model->approve()) {
-            Yii::$app->session->setFlash('success', 'Вы успешно одобрили заявку.');
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $model->pdf = $model->generatePdf();
+            if ($model->approve()) {
+                Yii::$app->session->setFlash('success', 'Вы успешно одобрили заявку.');
+            }
+
+            return $this->redirect(['view', 'id' => $model->id]);
         }
 
-        return $this->redirect(['/personal/organization-municipal-task-contracts']);
+        return $this->render('approve', [
+            'model' => $model,
+        ]);
     }
 
     /**

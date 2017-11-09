@@ -50,6 +50,7 @@ class MunicipalTaskContract extends \yii\db\ActiveRecord
     {
         return [
             [['certificate_id', 'payer_id', 'organization_id', 'program_id', 'group_id', 'status', 'created_at'], 'integer'],
+            [['number', 'pdf'], 'string'],
             [['certificate_id'], 'exist', 'skipOnError' => true, 'targetClass' => Certificates::className(), 'targetAttribute' => ['certificate_id' => 'id']],
             [['group_id'], 'exist', 'skipOnError' => true, 'targetClass' => Groups::className(), 'targetAttribute' => ['group_id' => 'id']],
             [['payer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payers::className(), 'targetAttribute' => ['payer_id' => 'id']],
@@ -70,6 +71,7 @@ class MunicipalTaskContract extends \yii\db\ActiveRecord
             'group_id' => 'Group ID',
             'status' => 'Status',
             'created_at' => 'Created At',
+            'number' => 'Введите номер договора',
         ];
     }
 
@@ -128,18 +130,31 @@ class MunicipalTaskContract extends \yii\db\ActiveRecord
     {
         $this->status = self::STATUS_ACTIVE;
 
-        return $this->save(false, ['status']);
+        return $this->save(false, ['status', 'number', 'pdf']);
     }
 
-    public static function getCountContracts($certificate, $matrixId)
+    public static function getCountContracts($certificate, $matrixId = null, $status = null)
     {
         $query = static::find()
             ->joinWith('program')
-            ->where([
+            ->andFilterWhere([
                 'certificate_id' => $certificate->id,
                 'programs.municipal_task_matrix_id' => $matrixId,
+                '`municipal_task_contract`.status' => $status,
             ]);
 
         return $query->count();
+    }
+
+    public function generatePdf()
+    {
+        $html = 'Тестовый договор на обучение по муниципальным заданиям.';
+
+        $mpdf = new \mPDF();
+        $mpdf->WriteHtml($html);
+        $filename = 'task-' . $this->number . '_' . date('d_m_Y') . '_' . $this->organization_id . '.pdf';
+        $mpdf->Output(Yii::getAlias('@pfdoroot/uploads/contracts/') . $filename, 'F');
+
+        return $filename;
     }
 }

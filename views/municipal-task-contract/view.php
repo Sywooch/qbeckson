@@ -97,3 +97,6 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]);
     ?>
+
+    <h3>Чтобы распечатать заявление &ndash; <a href="<?= Url::to('@pfdo/uploads/contracts/' . $model->pdf) ?>">жмите сюда</a></h3>
+
