@@ -11,45 +11,78 @@ use yii\console\Controller;
 
 class HotFixController extends Controller
 {
-    public function actionNewIdsContracts()
+    public function actionNewContracts()
     {
-        $trans = Yii::$app->db->beginTransaction();
-        $errs = false;
-        $newErrs = $this->moveContracts($errs); // назначаем новые id и //увозим с собой ноябрьские предоплаты на новые id
-        $errs = $errs || $newErrs;
-        $newErrs = $this->importContracts($errs, $this->getContractsJSON());  //загружаем сохраненные в json договора с их id
-        $errs = $errs || $newErrs;
-        if ($errs) {
-            echo 'hasErrs';
-            $trans->rollBack();
-
-            return;
-        }
-        $trans->commit();
+        // назначаем новые id и увозим с собой ноябрьские предоплаты на новые id
+        return $this->moveContracts();
     }
 
-    private function moveContracts($errs)
+    public function actionRevertContracts()
+    {
+        //загружаем сохраненные в json договора с их id
+        return $this->importContracts($this->getContractsJSON());
+    }
+
+    private function moveContracts()
     {
         $contracts = Contracts::find()->where(['id' => $this->getCcntractIsds()])->all();
         foreach ($contracts as $contract) {
             /**@var $contract Contracts */
             $contract->setIsNewRecord(true);
             $oldId = $contract->id;
+            echo 'Контракт с ID ' . $oldId . ' перевели на ID ';
             $contract->id = null;
             $result = $contract->save();
-            $newErrs = $this->traceErrs($contract);
-            $errs = $errs || $newErrs;
-            if (!$result) {
-                continue;
+            if (!$contract->save()) {
+                print_r($contract->errors);
+
+                return Controller::EXIT_CODE_ERROR;
             }
             $newId = $contract->id;
-            $newErrs = $this->traceErrs($contract);
-            $errs = $errs || $newErrs;
-            $newErrs = $this->moveCompletneses($errs, $oldId, $newId); //увозим с собой ноябрьские предоплаты на новые id
-            $errs = $errs || $newErrs;
+            echo $newId . PHP_EOL;
+            // увозим с собой ноябрьские предоплаты на новые id
+            $this->moveCompletneses($oldId, $newId);
         }
 
-        return $errs;
+        return Controller::EXIT_CODE_NORMAL;
+    }
+
+    private function moveCompletneses($oldID, $newId)
+    {
+        $contractCompletnesses = Completeness::find()
+            ->andWhere([
+                'preinvoice' => 1,
+                'month' => 11,
+                'year' => 2017,
+                'contract_id' => $oldID
+            ])
+            ->all();
+        if (count($contractCompletnesses) > 0) {
+            foreach ($contractCompletnesses as $contractCompletness) {
+                /**@var $contractCompletnesses Completeness */
+                $contractCompletness->contract_id = $newId;
+                if ($contractCompletness->save()) {
+                    echo 'Поменяли комплитнес ID ' . $contractCompletness->id . ' на новый айди контракта ' . $newId . PHP_EOL;
+                }
+            }
+        }
+
+        return Controller::EXIT_CODE_NORMAL;
+    }
+
+    private function importContracts(string $json)
+    {
+        foreach (json_decode($json) as $item) {
+            $contract = Contracts::findOne($item->id);
+            $contract->attributes = (array)$item;
+            if ($contract->update() === false) {
+                print_r($contract->errors);
+
+                return Controller::EXIT_CODE_ERROR;
+            }
+        }
+
+        return Controller::EXIT_CODE_NORMAL;
     }
 
     private function getCcntractIsds()
@@ -72,52 +105,6 @@ class HotFixController extends Controller
             75844, 75845, 75848, 75851, 75852, 75853, 75857, 75858, 75859, 75861, 75863,
             75872, 75884, 75897, 75901, 75902, 75908, 76115, 79313, 80931, 80934
         ];
-    }
-
-    private function traceErrs(Model $model)
-    {
-        if ($model->hasErrors()) {
-            echo $model->id;
-            echo $model::className();
-            echo PHP_EOL;
-            print_r($model->getErrors());
-            echo PHP_EOL;
-
-            return true;
-        }
-
-        return false;
-    }
-
-    private function moveCompletneses($errs, $oldID, $newId)
-    {
-
-
-        $contractCompletnesses = Completeness::find()
-            ->andWhere(['preinvoice' => 1, 'month' => 11, 'year' => 2017, 'contract_id' => $oldID])
-            ->all();
-        if (count($contractCompletnesses) > 0) {
-            foreach ($contractCompletnesses as $contractCompletness) {
-                /**@var $contractCompletnesses Completeness */
-                $contractCompletness->contract_id = $newId;
-                $contractCompletness->save();
-                $errs = $errs || $this->traceErrs($contractCompletness);
-            }
-        }
-
-        return $errs;
-    }
-
-    private function importContracts($errs, string $json)
-    {
-        foreach (json_decode($json) as $item) {
-            $contract = new Contracts($item);
-            $contract->setIsNewRecord(false);
-            $contract->update();
-            $errs = $errs || $this->traceErrs($contract);
-        }
-
-        return $errs;
     }
 
     private function getContractsJSON()
