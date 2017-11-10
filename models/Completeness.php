@@ -59,6 +59,7 @@ class Completeness extends \yii\db\ActiveRecord
             'year' => 'Год',
             'completeness' => 'Полнота услуг оказанных организацией',
             'preinvoice' => 'Предоплата',
+            'sum' => 'Сумма',
         ];
     }
 

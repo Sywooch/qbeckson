@@ -163,11 +163,12 @@ class ContractsController extends Controller
             $certificateId = Yii::$app->user->getIdentity()->certificate->id;
         }
 
-        $contract = Contracts::findOne(['group_id' => $groupId, 'certificate_id' => $certificateId]);
+        $contract = Contracts::findOne([
+            'group_id' => $groupId,
+            'certificate_id' => $certificateId,
+            'status' => null,
+            ]);
 
-        if (null !== $contract && null !== $contract->status && !in_array($contract->status, [Contracts::STATUS_REFUSED, Contracts::STATUS_CLOSED])) {
-            throw new \DomainException('Контракт уже заключён!');
-        }
         $group = Groups::findOne(['id' => $groupId]);
         if ($group && !$group->freePlaces) {
             Yii::$app->session->setFlash('modal-danger', 'К сожалению заявка на обучение по программе не будет отправлена, пока Вы ее составляли кто-то опередил Вас и подал заявку раньше, тем самым заняв последнее место в группе. Пожалуйста, посмотрите еще варианты зачисления на обучение (например, места могут оказаться в других группах)');
@@ -250,8 +251,13 @@ class ContractsController extends Controller
      */
     public function actionView($id)
     {
+        $model = $this->findModel($id);
+        $completenessQuery = \app\models\Completeness::find()
+            ->where(['contract_id' => $model->id])
+            ->orderBy(['year' => SORT_ASC, 'month' => SORT_ASC]);
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+            'completenessQuery' => $completenessQuery
         ]);
     }
 
