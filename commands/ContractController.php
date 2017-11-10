@@ -116,6 +116,11 @@ class ContractController extends Controller
           WHERE TIMESTAMPDIFF(DAY, :phpDate, contracts.stop_edu_contract) < 0
         ', [':phpDate' => date('Y-m-h H:i:s')])->execute();
 
+        Yii::$app->db->createCommand('
+          delete from contracts
+          WHERE contracts.status is NULL and TIMESTAMPDIFF(DAY, contracts.created_at, :phpDate) > 2
+        ', [':phpDate' => date('Y-m-h H:i:s')])->execute();
+
         echo 'Done.';
 
         return Controller::EXIT_CODE_NORMAL;
