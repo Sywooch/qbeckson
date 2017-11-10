@@ -440,7 +440,7 @@ class Organization extends \yii\db\ActiveRecord
     public function getActiveContracts()
     {
         return $this->getContracts()->where([Contracts::tableName() . '.status' => [
-            Contracts::STATUS_CREATED,
+            Contracts::STATUS_REQUESTED,
             Contracts::STATUS_ACTIVE,
             Contracts::STATUS_ACCEPTED
         ]]);

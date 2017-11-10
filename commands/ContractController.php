@@ -248,7 +248,7 @@ class ContractController extends Controller
 
         $contracts = Contracts::find()
             ->where('MONTH(start_edu_contract) = ' . $previousMonth)
-            ->andWhere('status = ' . Contracts::STATUS_CREATED .' or status = ' . Contracts::STATUS_ACCEPTED)
+            ->andWhere('status = ' . Contracts::STATUS_REQUESTED .' or status = ' . Contracts::STATUS_ACCEPTED)
             ->all();
 
         /** @var Contracts $contract */

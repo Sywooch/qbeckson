@@ -65,7 +65,7 @@ return [
         'url' => '9901022222-S9Lc.pdf',
         'balance' => '10000.00',
         'period' => 1,
-        'date_initiate_termination' => null,
+        'termination_initiated_at' => null,
         'cooperate_id' => 158,
     ],
 ];
