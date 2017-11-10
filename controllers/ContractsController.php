@@ -165,11 +165,9 @@ class ContractsController extends Controller
         $contract = Contracts::findOne([
             'group_id' => $groupId,
             'certificate_id' => $certificateId,
+            'status' => null,
             ]);
 
-        if (null !== $contract && null !== $contract->status && !in_array($contract->status, [Contracts::STATUS_REFUSED, Contracts::STATUS_CLOSED])) {
-            throw new \DomainException('Контракт уже заключён!');
-        }
         $group = Groups::findOne(['id' => $groupId]);
         if ($group && !$group->freePlaces) {
             Yii::$app->session->setFlash('modal-danger', 'К сожалению заявка на обучение по программе не будет отправлена, пока Вы ее составляли кто-то опередил Вас и подал заявку раньше, тем самым заняв последнее место в группе. Пожалуйста, посмотрите еще варианты зачисления на обучение (например, места могут оказаться в других группах)');
