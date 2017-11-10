@@ -269,7 +269,7 @@ class Certificates extends \yii\db\ActiveRecord
             $this->rezerv_p -= $contract->rezerv;
         }
         $result = $this->save();
-        if(!$result){
+        if (!$result) {
             Yii::trace($this->getErrors());
         }
         return $result;
