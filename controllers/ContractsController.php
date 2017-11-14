@@ -993,6 +993,7 @@ EOD;
 
         $mpdf->WriteHtml('<div align="justify"  style="font-size: ' . $model->fontsize . '">' . $text4 . '</div>');
 
+        $correspondentInvoice = (!empty($organization->correspondent_invoice)) ? '<p>Корреспондентский счёт (к/с): ' . $organization->correspondent_invoice . '</p>' : '';
 
         $mpdf->WriteHtml('
 <div style="font-size: ' . $model->fontsize . '" >
@@ -1068,7 +1069,7 @@ EOD;
 
 			<p>Лицевой счёт (л/с): ' . $organization->korr_invoice . '</p>
 
-            ' . $organization->correspondent_invoice ?? '<p>Корреспондентский счёт (к/с): ' . $organization->korr_invoice . '</p>' . '
+            ' . $correspondentInvoice . '
 
 			<p>р/с: ' . $organization->rass_invoice . '</p>
 			
