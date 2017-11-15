@@ -125,6 +125,9 @@ class ContractController extends Controller
                 GROUP BY B.certificate_id) B ON W.id = B.certificate_id
                 SET W.rezerv = CAST(B.summa as DECIMAL(10, 2))");
         */
+        /*SELECT crt.id, crt.balance, crt.rezerv, crt.nominal, CAST((crt.balance + crt.rezerv + SUM(c.paid)) as DECIMAL(10, 2)) as summmm, SUM(c.paid) AS spaid FROM `certificates` as crt JOIN `contracts` as c ON crt.id = c.certificate_id WHERE c.status !=2 AND c.period = 1 GROUP BY crt.id HAVING CAST((crt.balance + crt.rezerv + spaid) as DECIMAL(10, 2)) not between CAST(nominal - 5 as DECIMAL(10, 2)) and CAST(nominal + 5 as DECIMAL(10, 2))*/
+
+        /*"SELECT crt.id, crt.balance, c.rezerv, crt.nominal, CAST((crt.balance + SUM(c.rezerv) + SUM(c.paid)) as DECIMAL(10, 2)) as summmm, SUM(c.rezerv) AS srezerv, SUM(c.paid) AS spaid FROM `certificates` as crt JOIN `contracts` as c ON crt.id = c.certificate_id WHERE c.status !=2 AND c.period = 1 GROUP BY crt.id HAVING CAST((crt.balance + srezerv + spaid) as DECIMAL(10, 2)) not between CAST(nominal - 5 as DECIMAL(10, 2)) and CAST(nominal + 5 as DECIMAL(10, 2))"*/
 
         return Controller::EXIT_CODE_NORMAL;
     }
