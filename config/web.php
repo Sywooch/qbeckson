@@ -213,6 +213,11 @@ $config = [
                     'allow' => true,
                 ],
             ],
+            'api'  => [
+                [
+                    'allow' => true,
+                ],
+            ],
             'site' =>
                 [
                     [
