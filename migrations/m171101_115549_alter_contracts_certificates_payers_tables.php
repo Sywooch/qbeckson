@@ -6,7 +6,7 @@ class m171101_115549_alter_contracts_certificates_payers_tables extends Migratio
 {
     public function safeUp()
     {
-        $this->addColumn('payers', 'days_to_first_contract_request', $this->integer(11)->unsigned()->notNull()->defaultValue(5)->comment('кол-во дней для создания первой заявки после создания сертификата или перевода в тип ПФ'));
+        $this->addColumn('payers', 'days_to_first_contract_request', $this->integer(11)->unsigned()->notNull()->defaultValue(10)->comment('кол-во дней для создания первой заявки после создания сертификата или перевода в тип ПФ'));
         $this->addColumn('payers', 'days_to_contract_request_after_refused', $this->integer(11)->unsigned()->notNull()->defaultValue(10)->comment('кол-во дней для создания новой заявки после отклонения предыдущей'));
 
         $this->addColumn('certificates', 'created_at', $this->dateTime()->defaultValue(null)->comment('дата и время создания сертификата'));

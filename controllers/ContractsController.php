@@ -181,9 +181,11 @@ class ContractsController extends Controller
             return $this->redirect('/personal/certificate-programs');
         }
 
-
-        $model = new ContractRequestForm($groupId, $certificateId);
+        $contractRequestFormValid = false;
+        $model = new ContractRequestForm($groupId, $certificateId, $contract);
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $contractRequestFormValid = true;
+
             $contract = $model->save();
             if (!$contract) {
                 Yii::$app->session->setFlash('danger', 'Что-то не так.');
@@ -214,6 +216,7 @@ class ContractsController extends Controller
             'model' => $model,
             'contract' => $contract ?: null,
             'confirmForm' => $confirmForm ?: null,
+            'contractRequestFormValid' => $contractRequestFormValid,
         ]);
     }
 

@@ -23,13 +23,12 @@ $this->params['breadcrumbs'][] = $this->title;
     $organizations = new Organization();
         $organization = $organizations->getOrganization();
     
-    
+
     $lmonth = date('m');
             $start = date('Y').'-'.$lmonth.'-01';
             $cal_days_in_month = cal_days_in_month(CAL_GREGORIAN, $lmonth, date('Y'));
             $stop = date('Y').'-'.$lmonth.'-'.$cal_days_in_month;
-            
-            //return var_dump($payer);
+
             $contracts = (new \yii\db\Query())
                 ->select(['id'])
                 ->from('contracts')
@@ -40,9 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ->andWhere(['status' => 1])
                 ->andWhere(['>', 'all_funds', 0])
                 ->column();
-    
-   // return var_dump($contracts);
-        
+
             $sum = 0;
             foreach($contracts as $contract_id){           
                 $contract = Contracts::findOne($contract_id);                     
