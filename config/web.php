@@ -182,9 +182,9 @@ $config = [
                 ],
                 [
                     'actions' => [
-                        'organization-suborder',
-                        'organization-set-suborder-status',
-                        'organization-municipal-task'],
+                    'organization-suborder',
+                    'organization-set-suborder-status',
+                    'organization-municipal-task'],
                     'allow' => true,
                     'roles' => ['organizations']
                 ],
@@ -209,6 +209,11 @@ $config = [
                 ],
             ],
             'file-storage'  => [
+                [
+                    'allow' => true,
+                ],
+            ],
+            'api'  => [
                 [
                     'allow' => true,
                 ],
