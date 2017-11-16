@@ -146,6 +146,21 @@ class MunicipalTaskContract extends \yii\db\ActiveRecord
         return $query->count();
     }
 
+    public static function getCountHours($certificate, $matrixId = null, $status = null): int
+    {
+        $query = static::find()
+            ->select('SUM(`years`.hours) as summa')
+            ->joinWith('program')
+            ->joinWith('program.years')
+            ->andFilterWhere([
+                'certificate_id' => $certificate->id,
+                'programs.municipal_task_matrix_id' => $matrixId,
+                '`municipal_task_contract`.status' => $status,
+            ]);
+
+        return (int)$query->scalar();
+    }
+
     public function generatePdf()
     {
         $html = 'Тестовый договор на обучение по муниципальным заданиям.';

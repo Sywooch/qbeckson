@@ -712,14 +712,22 @@ class Programs extends ActiveRecord
             return false;
         }
 
-        $matrix = MunicipalTaskPayerMatrixAssignment::findByPayerId($certificate->payer_id, $certificate->certGroup->is_special > 0 ? MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_AC : MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_PF);
+        $certificate_type = $certificate->certGroup->is_special > 0 ? MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_AC : MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_PF;
+        $matrix = MunicipalTaskPayerMatrixAssignment::findByPayerId($certificate->payer_id, $certificate_type);
 
         $arrayCanBeChosen = ArrayHelper::map($matrix, 'matrix_id', 'can_be_chosen');
         $arrayLimits = ArrayHelper::map($matrix, 'matrix_id', 'number');
+        $arrayService = ArrayHelper::map($matrix, 'matrix_id', 'matrix.can_set_numbers_' . MunicipalTaskPayerMatrixAssignment::getPrefixes()[$certificate_type]);
+        $arrayNumberTypes = ArrayHelper::map($matrix, 'matrix_id', 'number_type');
 
         $tasksCount = MunicipalTaskContract::getCountContracts($certificate, $this->municipal_task_matrix_id);
+        $hoursCount = MunicipalTaskContract::getCountHours($certificate, $this->municipal_task_matrix_id);
 
-        if ($arrayCanBeChosen[$this->municipal_task_matrix_id] < 1 || $arrayLimits[$this->municipal_task_matrix_id] - $tasksCount < 1) {
+        if ($arrayService[$this->municipal_task_matrix_id] > 0 && $arrayNumberTypes[$this->municipal_task_matrix_id] == MunicipalTaskPayerMatrixAssignment::NUMBER_TYPE_SERVICE && $arrayLimits[$this->municipal_task_matrix_id] - $tasksCount < 1) {
+            return false;
+        } elseif ($arrayService[$this->municipal_task_matrix_id] > 0 && $arrayNumberTypes[$this->municipal_task_matrix_id] == MunicipalTaskPayerMatrixAssignment::NUMBER_TYPE_HOURS && $arrayLimits[$this->municipal_task_matrix_id] - $hoursCount < 1) {
+            return false;
+        } elseif ($arrayService[$this->municipal_task_matrix_id] < 1 && $arrayCanBeChosen[$this->municipal_task_matrix_id] < 1 || $arrayLimits[$this->municipal_task_matrix_id] - $tasksCount < 1) {
             return false;
         }
 
