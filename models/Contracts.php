@@ -103,6 +103,7 @@ use yii\web\ForbiddenHttpException;
  * @property ProgrammeModule $module
  * @property Groups          $group
  * @property string          $terminatorUserRole
+ * @property Completeness[] $completeness
  */
 class Contracts extends ActiveRecord
 {
@@ -491,6 +492,14 @@ class Contracts extends ActiveRecord
 
             return $rows;
         }
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCompleteness()
+    {
+        return $this->hasMany(Completeness::className(), ['contract_id' => 'id']);
     }
 
     public function getContractsYear($id) {
