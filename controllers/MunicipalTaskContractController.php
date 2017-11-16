@@ -82,7 +82,7 @@ class MunicipalTaskContractController extends Controller
             ]);
 
             if ($model->save()) {
-                Yii::$app->session->setFlash('success', 'Вы успешно подали заявку на участие в муниципальном задании.');
+                Yii::$app->session->setFlash('success', 'Вы успешно подали заявку на участие в программе по муниципальному заданию.');
             }
         }
 

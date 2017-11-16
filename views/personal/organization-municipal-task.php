@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $zab = [
     'type' => SearchFilter::TYPE_SELECT2,
-    'data' => $searchPrograms::illnesses(),
+    'data' => $searchWaitPrograms::illnesses(),
     'attribute' => 'zab',
     'label' => 'Категория детей',
     'value' => function ($model) {
@@ -81,7 +81,7 @@ $form = [
         return $model::forms()[$model->form];
     },
     'type' => SearchFilter::TYPE_DROPDOWN,
-    'data' => $searchPrograms::forms(),
+    'data' => $searchWaitPrograms::forms(),
 ];
 $ageGroupMin = [
     'attribute' => 'age_group_min',
@@ -140,11 +140,18 @@ $preparedOpenColumns = GridviewHelper::prepareColumns('programs', $openColumns, 
 
 ?>
 <ul class="nav nav-tabs">
-    <li class="active">
-        <a data-toggle="tab" href="#panel1">Действующие
-            <span class="badge"><?= $programsProvider->getTotalCount() ?></span>
-        </a>
-    </li>
+    <?php
+    $i = 0;
+    foreach ($tabs as $index => $tab) {
+        ?>
+        <li <?= !$i++ ? 'class="active"' : '' ?>>
+            <a data-toggle="tab" href="#panel<?= $index + 1 ?>"><?= $tab['item']->name ?>
+                <span class="badge"><?= $tab['provider']->getTotalCount() ?></span>
+            </a>
+        </li>
+        <?php
+    }
+    ?>
     <li>
         <a data-toggle="tab" href="#panel2">Ожидающие
             <span class="badge"><?= $waitProgramsProvider->getTotalCount() ?></span>
@@ -160,20 +167,26 @@ $preparedOpenColumns = GridviewHelper::prepareColumns('programs', $openColumns, 
 <?php
 if (Yii::$app->user->can('organizations') && Yii::$app->user->identity->organization->actual > 0) {
     echo "<p>";
-    echo Html::a('Добавить задание', ['programs/create', 'isTask' => 1], ['class' => 'btn btn-success']);
+    echo Html::a('Добавить программу', ['programs/create', 'isTask' => 1], ['class' => 'btn btn-success']);
     echo "</p>";
 }
 ?>
 <div class="tab-content">
-    <div id="panel1" class="tab-pane fade in active">
-        <?= GridView::widget([
-            'dataProvider' => $programsProvider,
-            'filterModel' => null,
-            'pjax' => true,
-            'summary' => false,
-            'columns' => $preparedOpenColumns,
-        ]); ?>
-    </div>
+    <?php
+    $i = 0;
+    foreach ($tabs as $index => $tab) {
+        ?>
+        <div id="panel<?= $index + 1 ?>" class="tab-pane fade in <?= !$i++ ? 'active' : '' ?>">
+            <?php echo GridView::widget([
+                'dataProvider' => $tab['provider'],
+                'filterModel' => null,
+                'pjax' => true,
+                'columns' => $preparedOpenColumns,
+            ]); ?>
+        </div>
+        <?php
+    }
+    ?>
     <div id="panel2" class="tab-pane fade in">
         <?= GridView::widget([
             'dataProvider' => $waitProgramsProvider,

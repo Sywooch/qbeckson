@@ -233,13 +233,13 @@ $this->registerJs($js);
     if (!$model->isNewRecord && !isset($roles['operators'])) {
         echo $form->field($model, 'edit')->checkbox(['value' => 1, 'ng-model' => 'edit']);
         echo '<div class="form-group" ng-show="edit">';
-        echo Html::a('Отменить', '/personal/organization-programs', ['class' => 'btn btn-danger']);
+        echo Html::a('Отменить', $model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs'], ['class' => 'btn btn-danger']);
         echo '&nbsp';
         echo Html::submitButton($model->isNewRecord ? 'Отправить программу на сертификацию' : 'Обновить программу', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
         echo '</div>';
     } else {
         echo '<div class="form-group">';
-        echo Html::a('Отменить', '/personal/organization-programs', ['class' => 'btn btn-danger']);
+        echo Html::a('Отменить', $model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs'], ['class' => 'btn btn-danger']);
         echo '&nbsp';
         echo Html::submitButton($model->isNewRecord ? ($model->isMunicipalTask ? 'Создать муниципальное задание' : 'Отправить программу на сертификацию') : 'Обновить программу', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
         echo '</div>';

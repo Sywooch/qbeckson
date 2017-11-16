@@ -651,7 +651,7 @@ class PersonalController extends Controller
                 'limit' => '0,10000',
                 'rating' => '0,100',
                 'modelName' => 'SearchTasks',
-                'verification' => 2,
+                'verification' => Programs::VERIFICATION_DONE,
                 'isMunicipalTask' => true,
                 'municipal_task_matrix_id' => $item->id,
             ]);
@@ -842,23 +842,29 @@ class PersonalController extends Controller
      */
     public function actionOrganizationMunicipalTask()
     {
-        $searchPrograms = new ProgramsSearch([
-            'organization_id' => Yii::$app->user->identity->organization->id,
-            'hours' => '0,2000',
-            'limit' => '0,10000',
-            'rating' => '0,100',
-            'modelName' => 'SearchOpenPrograms',
-            'isMunicipalTask' => true,
-            'verification' => Programs::VERIFICATION_DONE,
-        ]);
-        $programsProvider = $searchPrograms->search(Yii::$app->request->queryParams);
+        $matrix = MunicipalTaskMatrix::find()->all();
+        $tabs = [];
+        foreach ($matrix as $item) {
+            $searchTasks = new ProgramsSearch([
+                'organization_id' => Yii::$app->user->identity->organization->id,
+                'hours' => '0,2000',
+                'limit' => '0,10000',
+                'rating' => '0,100',
+                'modelName' => 'SearchTasks',
+                'verification' => Programs::VERIFICATION_DONE,
+                'isMunicipalTask' => true,
+                'municipal_task_matrix_id' => $item->id,
+            ]);
+            $tasksProvider = $searchTasks->search(Yii::$app->request->queryParams);
+            array_push($tabs, ['item' => $item, 'searchModel' => $searchTasks, 'provider' => $tasksProvider]);
+        }
 
         $searchWaitPrograms = new ProgramsSearch([
             'organization_id' => Yii::$app->user->identity->organization->id,
             'hours' => '0,2000',
             'limit' => '0,10000',
             'rating' => '0,100',
-            'modelName' => 'SearchOpenPrograms',
+            'modelName' => 'SearchTasks',
             'isMunicipalTask' => true,
             'verification' => Programs::VERIFICATION_UNDEFINED,
         ]);
@@ -869,15 +875,14 @@ class PersonalController extends Controller
             'hours' => '0,2000',
             'limit' => '0,10000',
             'rating' => '0,100',
-            'modelName' => 'SearchOpenPrograms',
+            'modelName' => 'SearchTasks',
             'isMunicipalTask' => true,
             'verification' => Programs::VERIFICATION_DENIED,
         ]);
         $deniedProgramsProvider = $searchDeniedPrograms->search(Yii::$app->request->queryParams);
 
         return $this->render('organization-municipal-task', [
-            'searchPrograms' => $searchPrograms,
-            'programsProvider' => $programsProvider,
+            'tabs' => $tabs,
             'searchWaitPrograms' => $searchWaitPrograms,
             'waitProgramsProvider' => $waitProgramsProvider,
             'searchDeniedPrograms' => $searchDeniedPrograms,

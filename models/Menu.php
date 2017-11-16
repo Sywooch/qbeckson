@@ -247,7 +247,7 @@ class Menu
                     'url'   => ['personal/organization-programs']
                 ],
                 [
-                    'label' => 'Муниципальное задание',
+                    'label' => 'Программы по муниципальному заданию',
                     'url'   => ['personal/organization-municipal-task']
                 ],
             ]],
@@ -257,7 +257,7 @@ class Menu
                     'url'   => ['personal/organization-contracts']
                 ],
                 [
-                    'label' => 'Муниципальные задания',
+                    'label' => 'Договоры - муниципальное задание',
                     'url'   => ['personal/organization-municipal-task-contracts']
                 ],
             ]],
