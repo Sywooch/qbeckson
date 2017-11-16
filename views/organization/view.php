@@ -132,31 +132,39 @@ $this->params['breadcrumbs'][] = $this->title;
     
     <?php
     if (isset($roles['operators'])) {
-        
-    echo DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'inn',
-            'KPP',
-            'OGRN',
-            'okopo',
-            'address_legal',
-            'last_year_contract',
-            'cratedate:date',
-        ],
-    ]);
-            
-        
-    echo DetailView::widget([
-        'model' => $model,
-        'attributes' => [
+
+        echo DetailView::widget([
+            'model'      => $model,
+            'attributes' => [
+                'inn',
+                'KPP',
+                'OGRN',
+                'okopo',
+                'address_legal',
+                'last_year_contract',
+                'cratedate:date',
+            ],
+        ]);
+
+        $requisiteAttributes = [
             'bank_name',
             'bank_bik',
             'bank_sity',
             'korr_invoice',
+            'correspondent_invoice',
             'rass_invoice',
-        ],
-    ]);
+        ];
+
+        // не отображать корреспондентский счет если он не указан
+        if (!$model->correspondent_invoice) {
+            $index = array_search('correspondent_invoice', $requisiteAttributes);
+            unset($requisiteAttributes[$index]);
+        }
+
+        echo DetailView::widget([
+            'model'      => $model,
+            'attributes' => $requisiteAttributes,
+        ]);
     }
     ?>
 

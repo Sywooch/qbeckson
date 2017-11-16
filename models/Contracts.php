@@ -102,8 +102,8 @@ use yii\web\ForbiddenHttpException;
  * @property Programs        $program
  * @property ProgrammeModule $module
  * @property Groups          $group
+ * @property Completeness[]  $completeness
  * @property string          $terminatorUserRole
- * @property Completeness[] $completeness
  */
 class Contracts extends ActiveRecord
 {

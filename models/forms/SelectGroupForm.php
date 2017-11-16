@@ -5,7 +5,9 @@ namespace app\models\forms;
 use app\models\Certificates;
 use app\models\Contracts;
 use app\models\Groups;
+use app\models\OperatorSettings;
 use app\models\Organization;
+use app\models\Payers;
 use app\models\ProgrammeModule;
 use app\models\Programs;
 use Yii;
@@ -72,7 +74,10 @@ class SelectGroupForm extends Model
         $programContractsCount = Contracts::find()
             ->andWhere([
                 'program_id' => $program->id,
-                'status' => [0, 1, 3]
+            ])
+            ->andWhere(['or',
+                ['status' => [0, 3],],
+                ['and', ['status' => 1], 'wait_termnate != 1']
             ])
             ->count();
 
@@ -111,7 +116,10 @@ class SelectGroupForm extends Model
             ->andWhere([
                 'payer_id'                => $this->getCertificate()->payer_id,
                 '`programs`.direction_id' => $program->direction_id,
-                'status'                  => [0, 1, 3]
+            ])
+            ->andWhere(['or',
+                ['status' => [0, 3],],
+                ['and', ['status' => 1], 'wait_termnate != 1']
             ])
             ->count();
 
@@ -136,7 +144,10 @@ class SelectGroupForm extends Model
             ->andWhere([
                 'certificate_id' => $this->getCertificate()->id,
                 'years.id' => $module->id,
-                'status' => [0, 1, 3],
+            ])
+            ->andWhere(['or',
+                ['status' => [0, 3]],
+                ['and', ['status' => 1], 'wait_termnate != 1']
             ])
             ->exists();
 
@@ -151,20 +162,49 @@ class SelectGroupForm extends Model
      */
     public function validateGroup($attribute)
     {
+        /** @var Payers $payer */
+        $payer = $this->getCertificate()->payer;
+
+        /** @var OperatorSettings $operatorSettings */
+        $operatorSettings = Yii::$app->operator->identity->settings;
+
         if (null === ($group = $this->getGroup())) {
             $this->addError($attribute, 'Группа не найдена.');
             return;
         }
 
-        if ((int)$this->getCertificate()->balance === 0 || (int)$this->getCertificate()->balance_f === 0) {
+        if (!$payer->certificateCanCreateContract() && $payer->certificate_can_use_future_balance != 1) {
+            $this->addError($attribute, 'К сожалению заключение новых договоров с сертификатами данной уполномоченной организации временно недоступно, поскольку ею установлено ограничение на использование сертификата.');
+            return;
+        }
+
+        if (((int)$this->getCertificate()->balance < 0.00000001 && (int)$this->getCertificate()->balance_f < 0.0000001) || ((int)$this->getCertificate()->balance < 0.00000001 && $payer->certificate_can_use_future_balance != 1) || ((int)$this->getCertificate()->balance_f < 0.000001 && !$payer->certificateCanCreateContract())) {
             $this->addError($attribute, 'Недостаточно средств на счету сертификата.');
+            return;
+        }
+
+        if ($payer->certificate_can_use_future_balance != 1 && strtotime($group->datestart) >= strtotime($operatorSettings->future_program_date_from)) {
+            $this->addError($attribute, 'К сожалению зачисление новых детей на период с ' . \Yii::$app->formatter->asDate($operatorSettings->future_program_date_from) . ' пока не доступно.');
+            return;
+        }
+
+        if (!$payer->certificateCanCreateContract() && strtotime($group->datestop) < strtotime($operatorSettings->future_program_date_from)) {
+            $this->addError($attribute, 'К сожалению зачисление в выбранную группу с учетом сроков реализации прекращено по решению уполномоченной организации.');
+            return;
+        }
+
+        if (strtotime($group->datestop) < strtotime(date('Y-m-d'))) {
+            $this->addError($attribute, 'На сегодняшний день обучение в группе завершено.');
             return;
         }
 
         $groupContractsCount = Contracts::find()
             ->andWhere([
                 'group_id' => $group->id,
-                'status' => [0, 1, 3]
+            ])
+            ->andWhere(['or',
+                ['status' => [0, 3],],
+                ['and', ['status' => 1], 'wait_termnate != 1']
             ])
             ->count();
 

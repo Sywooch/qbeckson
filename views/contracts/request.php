@@ -13,6 +13,7 @@ use yii\widgets\Pjax;
 /* @var $confirmForm \app\models\forms\ContractConfirmForm */
 /* @var $form ActiveForm */
 /* @var $contract \app\models\Contracts */
+/* @var $contractRequestFormValid boolean */
 
 $this->title = 'Подать заявку на получение образовательных услуг';
 $this->params['breadcrumbs'][] = $this->title;
@@ -47,7 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php $form::end(); ?>
     </div>
     <div id="confirm-box">
-        <?php if (null !== $contract) : ?>
+        <?php if ($contractRequestFormValid) : ?>
             <?php $confirm = ActiveForm::begin([
                 'options' => [
                     'data-pjax' => true

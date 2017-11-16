@@ -29,6 +29,8 @@ use Yii;
  * @property integer                $directionality_5_count
  * @property integer                $directionality_6_count
  * @property integer                $certificate_can_use_future_balance
+ * @property bool                   $certificate_can_create_contract        разрешено ли сертификату создавать контракт
+ * @property string                 $certificate_cant_create_contract_at    сертификату запрещается создавать контракт с указанной даты и времени
  * @property int                    $operator_id
  * @property string                 $code
  * @property string                 $name_dat
@@ -116,7 +118,7 @@ class Payers extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'name_dat', 'INN', 'OGRN', 'KPP', 'OKPO', 'address_legal', 'address_actual', 'email', 'phone', 'position', 'fio', 'code'], 'required'],
-            [['user_id', 'INN', 'OGRN', 'KPP', 'OKPO', 'directionality_1rob_count', 'directionality_1_count', 'directionality_2_count', 'directionality_3_count', 'directionality_4_count', 'directionality_5_count', 'directionality_6_count', 'mun', 'certificate_can_use_future_balance'], 'integer'],
+            [['user_id', 'INN', 'OGRN', 'KPP', 'OKPO', 'directionality_1rob_count', 'directionality_1_count', 'directionality_2_count', 'directionality_3_count', 'directionality_4_count', 'directionality_5_count', 'directionality_6_count', 'mun', 'certificate_can_use_future_balance', 'certificate_can_create_contract'], 'integer'],
             ['operator_id', 'integer'],
             [['code'], 'string', 'length' => [2, 2]],
             [['directionality'], 'safe'],
@@ -126,6 +128,7 @@ class Payers extends \yii\db\ActiveRecord
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
             ['days_to_first_contract_request', 'integer', 'min' => 5],
             ['days_to_contract_request_after_refused', 'integer', 'min' => 10],
+            ['certificate_cant_create_contract_at', 'datetime', 'php:Y-m-d H:i:s'],
         ];
     }
 
@@ -162,6 +165,8 @@ class Payers extends \yii\db\ActiveRecord
             'cooperates'                             => 'Число заключенных соглашений',
             'certificates'                           => 'Число выданных сертификатов',
             'certificate_can_use_future_balance'     => 'Установите возможность заключения договоров за счет средств сертификатов, предусмотренных на период от ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_from) . ' до ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_to),
+            'certificate_can_create_contract'        => 'Доступно заключение договоров на текущий период:  от ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_from) . ' по ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_to),
+            'certificate_cant_create_contract_at'    => 'Дата и время с которой начинает действовать запрет на заключение договоров',
             'days_to_first_contract_request'         => 'Количество дней, предусмотренное для создания первой заявки после создания сертификата или его перевода в тип "сертификат ПФ"',
             'days_to_contract_request_after_refused' => 'Количество дней, предусмотренное для создания новой заявки после неудачной попытки заключения предыдущего договора',
         ];
@@ -510,5 +515,28 @@ class Payers extends \yii\db\ActiveRecord
                     Contracts::STATUS_ACCEPTED
                 ]
             ]);
+    }
+
+    /**
+     * разрешено ли менять плательщику разрешение на создание контрактов сертификатами
+     *
+     * @return boolean
+     */
+    public function canChangePermission()
+    {
+        $allowed = is_null($this->certificate_cant_create_contract_at) || date('Y-m-d H:i:s') <= $this->certificate_cant_create_contract_at;
+        $allowed &= date('Y-m-d', strtotime('+2 Month')) >= \Yii::$app->operator->identity->settings->current_program_date_to;
+
+        return $allowed;
+    }
+
+    /**
+     * разрешено ли создавать контракт сертификату
+     *
+     * @return boolean
+     */
+    public function certificateCanCreateContract()
+    {
+        return $this->certificate_can_create_contract || date('Y-m-d H:i:s') <= $this->certificate_cant_create_contract_at;
     }
 }

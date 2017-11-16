@@ -181,9 +181,11 @@ class ContractsController extends Controller
             return $this->redirect('/personal/certificate-programs');
         }
 
-
+        $contractRequestFormValid = false;
         $model = new ContractRequestForm($groupId, $certificateId, $contract);
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $contractRequestFormValid = true;
+
             $contract = $model->save();
             if (!$contract) {
                 Yii::$app->session->setFlash('danger', 'Что-то не так.');
@@ -192,7 +194,7 @@ class ContractsController extends Controller
             }
         }
         $confirmForm = null;
-        if (null !== $contract) {
+        if (null !== $contract && $contract->status == null) {
             $confirmForm = new ContractConfirmForm($contract, $certificateId);
             if ($confirmForm->load(Yii::$app->request->post()) && $confirmForm->validate()) {
                 if ($confirmForm->save()) {
@@ -214,6 +216,7 @@ class ContractsController extends Controller
             'model' => $model,
             'contract' => $contract ?: null,
             'confirmForm' => $confirmForm ?: null,
+            'contractRequestFormValid' => $contractRequestFormValid,
         ]);
     }
 
@@ -1066,7 +1069,9 @@ EOD;
 
 			<p>БИК: ' . $organization->bank_bik . '</p>
 
-			<p>к/с (л/с): ' . $organization->korr_invoice . '</p>
+			<p>Лицевой счёт (л/с): ' . $organization->korr_invoice . '</p>
+
+            ' . $organization->correspondent_invoice ?? '<p>Корреспондентский счёт (к/с): ' . $organization->korr_invoice . '</p>' . '
 
 			<p>р/с: ' . $organization->rass_invoice . '</p>
 			
