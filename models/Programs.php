@@ -703,6 +703,30 @@ class Programs extends ActiveRecord
     }
 
     /**
+     * проверка на возможность участия в муниципальном задании
+     * @return boolean
+     */
+    public function canCreateMunicipalTaskContract($certificate)
+    {
+        if (MunicipalTaskContract::findByProgram($this->id, $certificate)) {
+            return false;
+        }
+
+        $matrix = MunicipalTaskPayerMatrixAssignment::findByPayerId($certificate->payer_id, $certificate->certGroup->is_special > 0 ? MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_AC : MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_PF);
+
+        $arrayCanBeChosen = ArrayHelper::map($matrix, 'matrix_id', 'can_be_chosen');
+        $arrayLimits = ArrayHelper::map($matrix, 'matrix_id', 'number');
+
+        $tasksCount = MunicipalTaskContract::getCountContracts($certificate, $this->municipal_task_matrix_id);
+
+        if ($arrayCanBeChosen[$this->municipal_task_matrix_id] < 1 || $arrayLimits[$this->municipal_task_matrix_id] - $tasksCount < 1) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Контракты в работе
      * @return \yii\db\ActiveQuery
      */
