@@ -128,7 +128,7 @@ class Payers extends \yii\db\ActiveRecord
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
             ['days_to_first_contract_request', 'integer', 'min' => 5],
             ['days_to_contract_request_after_refused', 'integer', 'min' => 10],
-            ['certificate_cant_create_contract_at', 'datetime', 'php:Y-m-d H:i:s'],
+            ['certificate_cant_create_contract_at', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
         ];
     }
 
