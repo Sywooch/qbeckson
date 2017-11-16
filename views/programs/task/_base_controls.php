@@ -9,12 +9,7 @@ use yii\helpers\Url;
 
 ?>
 <div class="btn-row">
-    <?php if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_OPERATOR)) {
-        echo Html::a('К списку программ', '/personal/operator-programs', ['class' => 'btn btn-theme']);
-        echo Html::a('Пересчитать нормативную стоимость', Url::to(['/programs/newnormprice', 'id' => $model->id]), ['class' => 'btn btn-theme']);
-        echo Html::a('Пересчитать лимит', Url::to(['/programs/newlimit', 'id' => $model->id]), ['class' => 'btn btn-theme']);
-        echo Html::a('Пересчитать рейтинг', Url::to(['/programs/raiting', 'id' => $model->id]), ['class' => 'btn btn-theme']);
-    }
+    <?php
 
     if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_CERTIFICATE)) {
         echo Html::a('К списку заданий', '/personal/certificate-programs', ['class' => 'btn btn-theme']);
@@ -24,8 +19,8 @@ use yii\helpers\Url;
         echo Html::a('К списку заданий', '/personal/payer-municipal-task', ['class' => 'btn btn-theme']);
         if ($model->verification == \app\models\Programs::VERIFICATION_UNDEFINED) {
             echo Html::a('Одобрить', ['/programs/update-task', 'id' => $model->id], ['class' => 'btn btn-success']);
-            echo Html::a('Отказать', ['/programs/refuse-task', 'id' => $model->id], ['class' => 'btn btn-danger']);
-        } else {
+            echo Html::a('Отказать', ['/programs/decertificate', 'id' => $model->id], ['class' => 'btn btn-danger']);
+        } elseif ($model->verification == \app\models\Programs::VERIFICATION_DONE) {
             echo Html::a('Изменить раздел', ['/programs/update-task', 'id' => $model->id], ['class' => 'btn btn-theme']);
         }
     }

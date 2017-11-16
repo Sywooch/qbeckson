@@ -268,7 +268,7 @@ $config = [
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['update-task', 'refuse-task'],
+                        'actions' => ['update-task', 'refuse-task', 'decertificate'],
                         'allow'   => true,
                         'roles'   => ['payer']
                     ],

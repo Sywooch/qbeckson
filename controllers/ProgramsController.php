@@ -222,8 +222,6 @@ class ProgramsController extends Controller
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
             if ($model->verification === $model::VERIFICATION_DENIED) {
-//                Yii::$app->session->setFlash('danger', sprintf('Причина отказа: %s',
-//                    $model->getInforms()->andWhere(['status' => $model::VERIFICATION_DENIED])->one()->text));
                 Yii::$app->session->setFlash('danger',
                     $this->renderPartial('informers/list_of_reazon',
                         [
@@ -268,6 +266,22 @@ class ProgramsController extends Controller
 
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION) && $user->organization->id !== $model->organization_id) {
             throw new ForbiddenHttpException('Нет доступа');
+        }
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
+            || Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
+            if ($model->verification === $model::VERIFICATION_DENIED) {
+                Yii::$app->session->setFlash('danger',
+                    $this->renderPartial('informers/list_of_reazon',
+                        [
+                            'dataProvider' => new ActiveDataProvider([
+                                    'query' => $model->getInforms()
+                                        ->andWhere(['status' => $model::VERIFICATION_DENIED]),
+                                    'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
+                                ]
+                            )
+                        ]
+                    ));
+            }
         }
 
         ProgramsAsset::register($this->view);
@@ -981,7 +995,7 @@ class ProgramsController extends Controller
                 $informs->read = 0;
                 $informs->save();
 
-                return $this->redirect('/personal/operator-programs');
+                return $this->redirect($model->getIsMunicipalTask() ? '/personal/payer-municipal-task' : '/personal/operator-programs');
             }
         }
 
