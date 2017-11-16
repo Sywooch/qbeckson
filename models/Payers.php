@@ -162,8 +162,8 @@ class Payers extends \yii\db\ActiveRecord
             'cooperates'                             => 'Число заключенных соглашений',
             'certificates'                           => 'Число выданных сертификатов',
             'certificate_can_use_future_balance'     => 'Установите возможность заключения договоров за счет средств сертификатов, предусмотренных на период от ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_from) . ' до ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_to),
-            'days_to_first_contract_request'         => 'кол-во дней для создания первой заявки после создания сертификата или перевода в тип ПФ',
-            'days_to_contract_request_after_refused' => 'кол-во дней для создания новой заявки после отклонения предыдущей',
+            'days_to_first_contract_request'         => 'Количество дней, предусмотренное для создания первой заявки после создания сертификата или его перевода в тип "сертификат ПФ"',
+            'days_to_contract_request_after_refused' => 'Количество дней, предусмотренное для создания новой заявки после неудачной попытки заключения предыдущего договора',
         ];
     }
 

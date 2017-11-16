@@ -123,6 +123,9 @@ $this->registerJs("jQuery('#payers-certificate_can_use_future_balance').click(fu
     <?php $form = ActiveForm::begin(); ?>
     <?= $form->field($payer, 'days_to_first_contract_request')->textInput() ?>
     <?= $form->field($payer, 'days_to_contract_request_after_refused')->textInput() ?>
+
+    <p>*В случае если в течение указанных сроков для сертификата ПФ не будут созданы новые заявки на обучение, то сертификат подлежит переводу в тип "сертификат учета".</p>
+
     <?= $form->field(Yii::$app->user->identity->payer, 'certificate_can_use_future_balance')->checkbox() ?>
 
     <?= Html::submitButton('сохранить', ['class' => 'btn btn-primary']) ?>
