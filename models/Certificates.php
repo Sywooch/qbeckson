@@ -607,6 +607,7 @@ class Certificates extends \yii\db\ActiveRecord
                 ->leftJoin('payers', 'certificates.payer_id = payers.id')
                 ->leftJoin('contracts', 'certificates.id = contracts.certificate_id and contracts.period = ' . Contracts::CURRENT_REALIZATION_PERIOD . ' and contracts.status is not null and (contracts.status in (' . $allStatusesExceptRefused . ') or contracts.refused_at is null or TIMESTAMPDIFF(DAY, contracts.refused_at, "' . date('Y-m-d H:i:s') . '") < payers.days_to_contract_request_after_refused)')
                 ->where(['cert_group.payer_id' => $payer->id])
+                ->andWhere(['certificates.actual' => 1])
                 ->andWhere('cert_group.id = certificates.possible_cert_group')
                 ->andWhere('TIMESTAMPDIFF(DAY, certificates.created_at, "' . date('Y-m-d H:i:s') . '") > payers.days_to_first_contract_request and (certificates.type_changed_at is null || TIMESTAMPDIFF(DAY, certificates.type_changed_at, "' . date('Y-m-d H:i:s') . '") > payers.days_to_first_contract_request)')
                 ->andWhere('contracts.id is null')

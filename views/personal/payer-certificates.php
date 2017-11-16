@@ -92,44 +92,48 @@ $columns = [
     'role' => UserIdentity::ROLE_PAYER
 ]); ?>
 
-<?php Modal::begin([
-    'header' => 'Подтверждение перевода неиспользуемых сертификатов в сертификаты учета',
-    'id' => 'certificate-change-type-confirmation-modal',
-    'toggleButton' => [
-        'label' => 'Перевести неиспользуемые сертификаты в сертификаты учета',
-        'class' => 'btn btn-danger'
-    ],
-]) ?>
+<div class="row">
+    <div class="col-xs-6">
+        <p>
+            <?php if (PermissionHelper::checkMonitorUrl('/certificates/create')) : ?>
+                <?= Html::a('Добавить сертификат', ['/certificates/create'], ['class' => 'btn btn-success']) ?>
+            <?php elseif (PermissionHelper::checkMonitorUrl('/certificates/allnominal')) : ?>
+                <br>
+                <br>
+            <?php endif; ?>
+        </p>
+    </div>
 
-<p>В соответствии с регламентом проведения оценки использования сертификатов дополнительного образования неиспользуемые в течении <?= Yii::$app->user->identity->payer->days_to_first_contract_request ?> дней сертификаты подлежат переводу в сертификаты учета</p>
+    <div class="col-xs-6 text-right">
+        <?php Modal::begin([
+            'header'       => 'Подтверждение перевода неиспользуемых сертификатов в сертификаты учета',
+            'id'           => 'certificate-change-type-confirmation-modal',
+            'toggleButton' => [
+                'label' => 'Перевести неиспользуемые сертификаты в сертификаты учета',
+                'class' => 'btn btn-danger'
+            ],
+        ]) ?>
 
-<?php $form = ActiveForm::begin([
-    'enableAjaxValidation' => true,
-    'options'              => [
-        'data-pjax' => true
-    ]
-]) ?>
+        <p>В соответствии с регламентом проведения оценки использования сертификатов дополнительного образования неиспользуемые в течении <?= Yii::$app->user->identity->payer->days_to_first_contract_request ?>
+            дней сертификаты подлежат переводу в сертификаты учета</p>
 
-<?= $form->field($certificateToAccountingConfirmForm, 'changeTypeConfirmed')->checkbox() ?>
+        <?php $form = ActiveForm::begin([
+            'enableAjaxValidation' => true,
+            'options'              => [
+                'data-pjax' => true
+            ]
+        ]) ?>
 
-<div class="form-group">
-    <?= Html::submitButton('выполнить') ?>
+        <?= $form->field($certificateToAccountingConfirmForm, 'changeTypeConfirmed')->checkbox() ?>
+
+        <div class="form-group">
+            <?= Html::submitButton('выполнить') ?>
+        </div>
+        <?php $form->end() ?>
+
+        <?php Modal::end() ?>
+    </div>
 </div>
-<?php $form->end() ?>
-
-<?php Modal::end() ?>
-
-<br>
-<br>
-
-<p>
-    <?php if (PermissionHelper::checkMonitorUrl('/certificates/create')) : ?>
-    <?= Html::a('Добавить сертификат', ['/certificates/create'], ['class' => 'btn btn-success']) ?>
-    <?php elseif (PermissionHelper::checkMonitorUrl('/certificates/allnominal')) : ?>
-        <br>
-        <br>
-    <?php endif; ?>
-</p>
 
 <?= GridView::widget([
     'dataProvider' => $certificatesProvider,
