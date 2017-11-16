@@ -4,9 +4,11 @@ namespace app\controllers;
 
 use app\models\CertGroup;
 use app\models\CertificateGroupQueue;
+use app\models\forms\ContractCreatePermissionConfirmForm;
 use app\models\Payers;
 use app\models\search\CertGroupSearch;
 use app\services\PayerService;
+use kartik\widgets\ActiveForm;
 use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -34,6 +36,21 @@ class CertGroupController extends Controller
     {
         $searchModel = new CertGroupSearch(['payerId' => Yii::$app->user->identity->payer->id]);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        $payer = Payers::findOne(Yii::$app->user->identity->payer->id);
+        if ($payer && $payer->load(Yii::$app->request->post())) {
+            $payer->save();
+        }
+
+        $contractCreatePermissionConfirmForm = new ContractCreatePermissionConfirmForm(['scenario' => $payer->certificate_can_create_contract == 1 ? 'deny_to_create_contract' : 'allow_to_create_contract', 'certificate_can_create_contract' => $payer->certificate_can_create_contract]);
+
+        if (Yii::$app->request->isAjax && $contractCreatePermissionConfirmForm->load(Yii::$app->request->post())) {
+            if (Yii::$app->request->get('changePermission', 0)) {
+                $contractCreatePermissionConfirmForm->changeContractCreatePermission($payer);
+            }
+
+            return $this->asJson(ActiveForm::validate($contractCreatePermissionConfirmForm) ?: $payer->certificate_can_create_contract);
+        }
 
         if (Yii::$app->request->isAjax && Yii::$app->request->post('hasEditable')) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -85,17 +102,12 @@ class CertGroupController extends Controller
 
             return $out;
         }
-        $payer = Payers::findOne(Yii::$app->user->identity->payer->id);
-        /** @var Payers $payer */
-
-        if ($payer && $payer->load(Yii::$app->request->post())) {
-            $payer->save();
-        }
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'payer' => $payer,
+            'contractCreatePermissionConfirmForm' => $contractCreatePermissionConfirmForm,
         ]);
     }
 
