@@ -7,6 +7,7 @@ use app\models\Certificates;
 use app\models\Contracts;
 use app\models\Groups;
 use app\models\OperatorSettings;
+use app\models\Payers;
 use Yii;
 use yii\base\Model;
 
@@ -83,16 +84,38 @@ class ContractRequestForm extends Model
         }*/
 
         $group = $this->getGroup();
-        if (strtotime($this->$attribute) < strtotime($group->datestart) ||
-            strtotime($this->$attribute) > strtotime($group->datestop)) {
+        if (null === ($settings = $this->getSettings())) {
+            $this->addError($attribute, 'Должны быть указаны периоды реализации программ в настройках.');
+            return;
+        }
+
+        /** @var Payers $payer */
+        $payer = $this->getCertificate()->payer;
+
+        if (!$payer->certificateCanCreateContract() && $payer->certificate_can_use_future_balance = 1 &&
+                (strtotime($this->$attribute) < strtotime($settings->future_program_date_from))) {
             $this->addError(
                 $attribute,
-                'Дата должна быть в пределах: '. $group->datestart .' ' . $group->datestop . '.'
+                'Дата начала обучения по договору не может быть ранее '. \Yii::$app->formatter->asDate($settings->future_program_date_from) . ', поскольку уполномоченная организация закрыла возможность зачисления в текущем периоде.'
             );
             return;
         }
-        if (null === ($settings = $this->getSettings())) {
-            $this->addError($attribute, 'Должны быть указаны периоды реализации программ в настройках.');
+
+        if ($payer->certificateCanCreateContract() && $payer->certificate_can_use_future_balance != 1 &&
+                (strtotime($this->$attribute) > strtotime($settings->current_program_date_to))) {
+            $this->addError(
+                $attribute,
+                'Дата начала обучения по договору не может быть позднее '. \Yii::$app->formatter->asDate($settings->current_program_date_to) . ', пока уполномоченная организация не установила возможность зачисления в будущем периоде.'
+            );
+            return;
+        }
+
+        if ($payer->certificateCanCreateContract() && $payer->certificate_can_use_future_balance = 1 &&
+                (strtotime($this->$attribute) < strtotime($group->datestart) || strtotime($this->$attribute) > strtotime($group->datestop))) {
+            $this->addError(
+                $attribute,
+                'Дата начала обучения должна быть в пределах срока реализации программы в группе: '. \Yii::$app->formatter->asDate($group->datestart) .' - ' . \Yii::$app->formatter->asDate($group->datestop) . '.'
+            );
             return;
         }
 
@@ -117,7 +140,7 @@ class ContractRequestForm extends Model
         }
 
         if (null === $this->getRealizationPeriod()) {
-            $this->addError($attribute, 'В данный период времени реализация программ не выполняется.');
+            $this->addError($attribute, 'В данный период времени реализация программы не осуществляется.');
             return;
         }
 
