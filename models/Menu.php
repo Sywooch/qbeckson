@@ -246,13 +246,25 @@ class Menu
                     'label' => 'Реестр программ',
                     'url'   => ['personal/organization-programs']
                 ],
-
+                [
+                    'label' => 'Программы по муниципальному заданию',
+                    'url'   => ['personal/organization-municipal-task']
+                ],
             ]],
-            ['label' => 'Договоры', 'url' => ['/personal/organization-contracts']],
+            ['label' => 'Договоры', 'items' => [
+                [
+                    'label' => 'Реестр договоров',
+                    'url'   => ['personal/organization-contracts']
+                ],
+                [
+                    'label' => 'Договоры - муниципальное задание',
+                    'url'   => ['personal/organization-municipal-task-contracts']
+                ],
+            ]],
             ['label' => 'Счета', 'url' => ['/personal/organization-invoices']],
             ['label' => 'Плательщики', 'items' => [
                 ['label' => 'Плательщики', 'url' => ['/personal/organization-payers']],
-                //['label' => 'Подведомственность', 'url' => ['/personal/organization-suborder']],
+                ['label' => 'Подведомственность', 'url' => ['/personal/organization-suborder']],
             ]],
             ['label' => 'Группы', 'url' => ['/personal/organization-groups']],
         ];

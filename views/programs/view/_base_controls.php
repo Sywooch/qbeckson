@@ -22,6 +22,9 @@ use yii\helpers\Url;
 
     if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_PAYER)) {
         echo Html::a('К списку программ', '/personal/payer-programs', ['class' => 'btn btn-theme']);
+        if ($model->isMunicipalTask) {
+            echo Html::a('Изменить параметры', ['/programs/update-task', 'id' => $model->id], ['class' => 'btn btn-theme']);
+        }
     }
 
     if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)) {
