@@ -182,9 +182,11 @@ $config = [
                 ],
                 [
                     'actions' => [
-                    'organization-suborder',
-                    'organization-set-suborder-status',
-                    'organization-municipal-task'],
+                        'organization-suborder',
+                        'organization-set-suborder-status',
+                        'organization-municipal-task',
+                        'organization-municipal-task-contracts',
+                    ],
                     'allow' => true,
                     'roles' => ['organizations']
                 ],
@@ -231,6 +233,13 @@ $config = [
                         'roles' => ['admins'],
                     ],
                 ],
+            'matrix' =>
+                [
+                    [
+                        'allow' => true,
+                        'roles' => ['payer'],
+                    ],
+                ],
             'admin/cleanup' =>
                 [
                     [
@@ -260,8 +269,26 @@ $config = [
             'programs' =>
                 [
                     [
-                        'actions' => ['index', 'view'],
+                        'actions' => ['index', 'view', 'view-task'],
                         'allow' => true,
+                    ],
+                    [
+                        'actions' => ['update-task', 'refuse-task', 'decertificate'],
+                        'allow'   => true,
+                        'roles'   => ['payer']
+                    ],
+                ],
+            'municipal-task-contract' =>
+                [
+                    [
+                        'actions' => ['create'],
+                        'allow'   => true,
+                        'roles'   => ['certificate']
+                    ],
+                    [
+                        'actions' => ['approve', 'view'],
+                        'allow'   => true,
+                        'roles'   => ['organizations']
                     ],
                 ],
             'user' =>
