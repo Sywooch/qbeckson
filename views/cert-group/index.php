@@ -27,31 +27,45 @@ jQuery('#payers-certificate_can_use_future_balance').click(function(){
 $('.certificate-can-create-contract').on('click', function() {
     if ($(this).prop('checked') == false) {
         $('#modal-deny-to-create-contract').modal();
-            $(this).prop('checked', 'checked');
     } else {
         $('#modal-allow-to-create-contract').modal();
-            $(this).removeAttr('checked');
     }
 });
 
-$('.change-permission-to-contract-create').on('click', function() {
-    if (!$('.certificate-can-create-contract').prop('checked')) {
-        $('.certificate-can-create-contract').prop('checked', 'checked');
-        $('#modal-allow-to-create-contract').modal('hide');
-    } else {
-        $('.certificate-can-create-contract').removeAttr('checked');
-        $('#modal-deny-to-create-contract').modal('hide');
-    }
-    
+$('.modal-dialog').on('click', function(e) {
+  e.stopPropagation();
+});
+
+$('.modal').on('click', function() {
+  $.ajax({
+        type: 'POST',
+        url: '/cert-group/index?getPermission=1', 
+        data: $('#payer-settings-form').serialize(),
+        success: function (data) {
+            if (data == 1) {
+                $('.certificate-can-create-contract').prop('checked', 'checked');
+            } else {
+                $('.certificate-can-create-contract').removeAttr('checked');
+            }
+        }
+    });
+});
+
+$('.change-permission-to-contract-create').on('click', function() {    
     $.ajax({
         type: 'POST',
         url: '/cert-group/index?changePermission=1', 
         data: $('#payer-settings-form').serialize(),
         success: function (data) {
-            if (data) {
-                $('.certificate-can-create-contract').prop('checked', 'checked');
-            } else {
-                $('.certificate-can-create-contract').removeAttr('checked');
+            console.log(data);
+            if (data.changed == true) {
+                if (data.canCreate == 1) {
+                    $('.certificate-can-create-contract').prop('checked', 'checked');
+                    $('#modal-allow-to-create-contract').modal('hide');
+                } else {
+                    $('.certificate-can-create-contract').removeAttr('checked');
+                    $('#modal-deny-to-create-contract').modal('hide');
+                }
             }
         }
     });
