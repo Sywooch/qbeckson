@@ -12,6 +12,6 @@ echo \yii\widgets\ListView::widget([
     'itemView' => function ($model, $key, $index, $widget)
     {
         /**@var $model \app\models\Informs */
-        return $model->date . ': ' . $model->text;
+        return $model->date . ': ' . nl2br($model->text);
     }
 ]);
