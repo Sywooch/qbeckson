@@ -21,11 +21,13 @@ $this->params['breadcrumbs'][] = $this->title;
         'maxFileSize' => 1 * 1024 * 1024,
         'acceptFileTypes' => new JsExpression('/(\.|\/)(doc|docx)$/i'),
     ]); ?>
+    <?= $model->getGeneralDocumentUrl() ? Html::a('Типовой договор без суммы', $model->getGeneralDocumentUrl(), ['target' => 'blank']) : ''; ?>
     <?= $form->field($model, 'extendDocument')->widget(Upload::class, [
         'url' => ['file-storage/upload'],
         'maxFileSize' => 1 * 1024 * 1024,
         'acceptFileTypes' => new JsExpression('/(\.|\/)(doc|docx)$/i'),
     ]); ?>
+    <?= $model->getExtendDocumentUrl() ? Html::a('Типовой договор с суммой', $model->getExtendDocumentUrl(), ['target' => 'blank']) : ''; ?>
     <?= $form->field($model, 'document_name')->dropDownList(Cooperate::documentNames()) ?>
     <hr />
     <div class="row">

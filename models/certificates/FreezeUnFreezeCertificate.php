@@ -197,7 +197,7 @@ class FreezeUnFreezeCertificate extends CertificateActions
 
     private function dropRequests()
     {
-        $refuseCondition = [Contracts::tableName() . '.status' => [Contracts::STATUS_CREATED]];
+        $refuseCondition = [Contracts::tableName() . '.status' => [Contracts::STATUS_REQUESTED]];
         $contracts = $this->certificate->getContractsModels()->andWhere($refuseCondition)->all();
 
         return array_reduce(

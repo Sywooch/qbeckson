@@ -8,6 +8,7 @@ use kartik\datecontrol\DateControl;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
+/* @var $organization Organization */
 
 $this->title = 'Сведения об организации';
 $this->params['breadcrumbs'][] = $this->title;
@@ -40,6 +41,10 @@ $this->registerJs($js, $this::POS_READY);
                 <p><label class="control-label">БИК Банка</label> - <?= $organization['bank_bik'] ?></p>
                 <p><label class="control-label"><?= $organization->attributeLabels()['korr_invoice'] ?></label>
                     - <?= $organization['korr_invoice'] ?></p>
+                <?php if ($organization->correspondent_invoice): ?>
+                    <p><label class="control-label"><?= $organization->attributeLabels()['correspondent_invoice'] ?></label>
+                        - <?= $organization['correspondent_invoice'] ?></p>
+                <?php endif; ?>
                 <p><label class="control-label">Город банка</label> - <?= $organization['bank_sity'] ?></p>
                 <p><label class="control-label">Контактное лицо</label> - <?= $organization['fio_contact'] ?></p>
                 <?php if ($organization->type === Organization::TYPE_IP_WITHOUT_WORKERS):?>

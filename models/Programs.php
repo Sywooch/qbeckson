@@ -707,7 +707,7 @@ class Programs extends ActiveRecord
      */
     public function getLivingContracts()
     {
-        return $this->getContracts()->andFilterWhere(['status' => [Contracts::STATUS_CREATED,
+        return $this->getContracts()->andFilterWhere(['status' => [Contracts::STATUS_REQUESTED,
             Contracts::STATUS_ACTIVE,
             Contracts::STATUS_ACCEPTED]]);
     }

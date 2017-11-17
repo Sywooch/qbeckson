@@ -13,7 +13,7 @@ use yii\widgets\DetailView;
 
 if ($model->status == Contracts::STATUS_ACTIVE || $model->status == Contracts::STATUS_CLOSED || $model->status == Contracts::STATUS_REFUSED) {
     $this->title = 'Просмотр договора № ' . $model->number . ' от ' . Yii::$app->formatter->asDate($model->date);
-} elseif ($model->status == Contracts::STATUS_CREATED) {
+} elseif ($model->status == Contracts::STATUS_REQUESTED) {
     $this->title = 'Просмотр заявки';
 } elseif ($model->status == Contracts::STATUS_ACCEPTED) {
     $this->title = 'Просмотр оферты';
@@ -40,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
     $cert = $model->certificate;
 
 
-    if ($model->status == Contracts::STATUS_CREATED
+    if ($model->status == Contracts::STATUS_REQUESTED
         && (!Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)
             && !Yii::$app->user->can(UserIdentity::ROLE_PAYER)
         )) {
@@ -375,7 +375,7 @@ $this->params['breadcrumbs'][] = $this->title;
     }
 
     if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)
-        && ($model->status === Contracts::STATUS_CREATED || $model->status === Contracts::STATUS_ACCEPTED)
+        && ($model->status === Contracts::STATUS_REQUESTED || $model->status === Contracts::STATUS_ACCEPTED)
         && $certificate->actual
     ) {
 

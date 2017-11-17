@@ -3,7 +3,9 @@
 namespace app\controllers;
 
 use app\assets\programsAsset\ProgramsAsset;
+use app\behaviors\NotificationBehavior;
 use app\models\Certificates;
+use app\models\certificates\CertificateToAccountingConfirmForm;
 use app\models\Contracts;
 use app\models\Contracts2Search;
 use app\models\Contracts3Search;
@@ -63,6 +65,9 @@ class PersonalController extends Controller
                 'actions' => [
                     'update-municipality' => ['post'],
                 ],
+            ],
+            'notification' => [
+                'class' => NotificationBehavior::className(),
             ],
         ];
     }
@@ -295,7 +300,7 @@ class PersonalController extends Controller
         $confirmedContractsProvider = $searchConfirmedContracts->search(Yii::$app->request->queryParams);
 
         $searchPendingContracts = new ContractsSearch([
-            'status' => Contracts::STATUS_CREATED,
+            'status' => Contracts::STATUS_REQUESTED,
             'modelName' => 'SearchPendingContracts'
         ]);
         $pendingContractsProvider = $searchPendingContracts->search(Yii::$app->request->queryParams);
@@ -425,10 +430,20 @@ class PersonalController extends Controller
         $certificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
         $allCertificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams, 999999);
 
+        $certificateToAccountingConfirmForm = new CertificateToAccountingConfirmForm;
+        if (Yii::$app->request->isAjax && $certificateToAccountingConfirmForm->load(Yii::$app->request->post())) {
+            return $this->asJson(ActiveForm::validate($certificateToAccountingConfirmForm));
+        }
+
+        if ($certificateToAccountingConfirmForm->load(Yii::$app->request->post()) && $certificateToAccountingConfirmForm->validate()) {
+            return $this->redirect('/certificates/change-to-accounting-type');
+        }
+
         return $this->render('payer-certificates', [
             'certificatesProvider' => $certificatesProvider,
             'searchCertificates' => $searchCertificates,
             'allCertificatesProvider' => $allCertificatesProvider,
+            'certificateToAccountingConfirmForm' => $certificateToAccountingConfirmForm
         ]);
     }
 
@@ -458,7 +473,7 @@ class PersonalController extends Controller
 
         $searchPendingContracts = new ContractsSearch([
             'payer_id' => $payer->id,
-            'status' => Contracts::STATUS_CREATED,
+            'status' => Contracts::STATUS_REQUESTED,
             'modelName' => 'SearchPendingContracts'
         ]);
         $pendingContractsProvider = $searchPendingContracts->search(Yii::$app->request->queryParams);
@@ -848,7 +863,7 @@ class PersonalController extends Controller
         $confirmedContractsProvider = $searchConfirmedContracts->search(Yii::$app->request->queryParams);
 
         $searchPendingContracts = new ContractsSearch([
-            'status' => Contracts::STATUS_CREATED,
+            'status' => Contracts::STATUS_REQUESTED,
             'modelName' => 'SearchPendingContracts',
             'organization_id' => $user->organization->id,
         ]);
