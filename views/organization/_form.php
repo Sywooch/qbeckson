@@ -133,6 +133,16 @@ $readonlyField = !Yii::$app->user->can('operators') && !Yii::$app->user->isGuest
 
         <?= $form->field($model, 'korr_invoice')->textInput() ?>
 
+        <div class="invoices">
+            <div class="checkbox-container">
+                <?= Html::checkbox('correspondent_invoice_show', $model->correspondent_invoice ?: false, ['name' => 'asd', 'label' => 'Указать корреспондентский счёт (к/с)', 'onClick' => 'showNextContainer(this); $(".correspondent_invoice input").val("")']) ?>
+            </div>
+
+            <div class="correspondent_invoice" <?= $model->correspondent_invoice ?: 'style="display: none"' ?>>
+                <?= $form->field($model, 'correspondent_invoice')->textInput() ?>
+            </div>
+        </div>
+
         <?= $form->field($model, 'rass_invoice')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'receiver')->textInput(['maxlength' => true]) ?>

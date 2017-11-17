@@ -181,9 +181,11 @@ class ContractsController extends Controller
             return $this->redirect('/personal/certificate-programs');
         }
 
-
+        $contractRequestFormValid = false;
         $model = new ContractRequestForm($groupId, $certificateId, $contract);
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $contractRequestFormValid = true;
+
             $contract = $model->save();
             if (!$contract) {
                 Yii::$app->session->setFlash('danger', 'Что-то не так.');
@@ -192,7 +194,7 @@ class ContractsController extends Controller
             }
         }
         $confirmForm = null;
-        if (null !== $contract) {
+        if (null !== $contract && $contract->status == null) {
             $confirmForm = new ContractConfirmForm($contract, $certificateId);
             if ($confirmForm->load(Yii::$app->request->post()) && $confirmForm->validate()) {
                 if ($confirmForm->save()) {
@@ -214,6 +216,7 @@ class ContractsController extends Controller
             'model' => $model,
             'contract' => $contract ?: null,
             'confirmForm' => $confirmForm ?: null,
+            'contractRequestFormValid' => $contractRequestFormValid,
         ]);
     }
 
@@ -407,6 +410,7 @@ class ContractsController extends Controller
             $model->status = 1;
             if ($model->stop_edu_contract <= date('Y-m-d', $lastDayOfMonth)) {
                 $model->wait_termnate = 1;
+                $model->termination_initiated_at = date('Y-m-d H:i:s');
             }
 
             if ($model->save()) {
@@ -533,7 +537,7 @@ class ContractsController extends Controller
         $model = $this->findModel($id);
 
         if (!Yii::$app->user->can($model->terminatorUserRole)) {
-            throw new ForbiddenHttpException('Действите запрещено.');
+            throw new ForbiddenHttpException('Действие запрещено.');
         }
 
         $content = $this->renderPartial(Yii::$app->user->can('certificate') ? 'application-close-certificate-pdf' : 'application-close-organization-pdf', [
@@ -591,7 +595,7 @@ class ContractsController extends Controller
         if ($model->status === Contracts::STATUS_REFUSED) {
             throw new NotAcceptableHttpException('Уже отменена');
         }
-        if (!in_array($model->status, [Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED])) {
+        if (!in_array($model->status, [Contracts::STATUS_REQUESTED, Contracts::STATUS_ACCEPTED])) {
             throw new NotAcceptableHttpException('Контракт не может быть расторгнут, поскольку уже переведен в "действующие договоры"');
         }
 
@@ -992,6 +996,7 @@ EOD;
 
         $mpdf->WriteHtml('<div align="justify"  style="font-size: ' . $model->fontsize . '">' . $text4 . '</div>');
 
+        $correspondentInvoice = (!empty($organization->correspondent_invoice)) ? '<p>Корреспондентский счёт (к/с): ' . $organization->correspondent_invoice . '</p>' : '';
 
         $mpdf->WriteHtml('
 <div style="font-size: ' . $model->fontsize . '" >
@@ -1065,7 +1070,9 @@ EOD;
 
 			<p>БИК: ' . $organization->bank_bik . '</p>
 
-			<p>к/с (л/с): ' . $organization->korr_invoice . '</p>
+			<p>Лицевой счёт (л/с): ' . $organization->korr_invoice . '</p>
+
+            ' . $correspondentInvoice . '
 
 			<p>р/с: ' . $organization->rass_invoice . '</p>
 			
@@ -1102,6 +1109,7 @@ EOD;
         $model = $this->findModel($id);
 
         $model->status = Contracts::STATUS_ACCEPTED;
+        $model->accepted_at = date('Y-m-d H:i:s');
         if ($model->save()) {
             return $this->redirect(['mpdf', 'id' => $id, 'ok' => true]);
         }
@@ -1399,6 +1407,7 @@ EOD;
                 foreach ($contracts3 as $contract) {
                     $cont = $this->findModel($contract);
                     $cont->wait_termnate = 1;
+                    $cont->termination_initiated_at = date('Y-m-d H:i:s');
                     $cont->save();
                 }
                 //return var_dump($contracts3);

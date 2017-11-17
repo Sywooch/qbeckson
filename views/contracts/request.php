@@ -13,6 +13,7 @@ use yii\widgets\Pjax;
 /* @var $confirmForm \app\models\forms\ContractConfirmForm */
 /* @var $form ActiveForm */
 /* @var $contract \app\models\Contracts */
+/* @var $contractRequestFormValid boolean */
 
 $this->title = 'Подать заявку на получение образовательных услуг';
 $this->params['breadcrumbs'][] = $this->title;
@@ -27,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ]); ?>
         <div class="row">
             <div class="col-md-offset-3 col-md-6">
-                <p class="lead"><?= ($contract->group->datestart > date('Y-m-d')) ? 'Выберите дату начала обучения по договору:' : 'Обратите внимание! Обучение в группе уже началось. Система предлагает вам записаться с первого числа следующего месяца, но вы можете поменять дату начала обучения ниже:' ?></p>
+                <p class="lead"><?= ($contract ? $contract->group->datestart : null > date('Y-m-d')) ? 'Выберите дату начала обучения по договору:' : 'Обратите внимание! Обучение в группе уже началось. Система предлагает вам записаться с первого числа следующего месяца, но вы можете поменять дату начала обучения ниже:' ?></p>
             </div>
         </div>
         <div class="row">
@@ -47,7 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php $form::end(); ?>
     </div>
     <div id="confirm-box">
-        <?php if (null !== $contract) : ?>
+        <?php if ($contractRequestFormValid) : ?>
             <?php $confirm = ActiveForm::begin([
                 'options' => [
                     'data-pjax' => true
@@ -63,7 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             </p>
                             <br>
                             <p>Организация: <?= $contract->organization->name ?></p>
-                            <p>Место проведения: <?= $contract->module->mainAddress->address ?></p>
+                            <p>Место проведения: <?= $contract->module->mainAddress ? $contract->module->mainAddress->address : '' ?></p>
                             <p>Дата начала: <?= Yii::$app->formatter->asDate($contract->group->datestart) ?></p>
                             <p>Дата окончания: <?= Yii::$app->formatter->asDate($contract->group->datestop) ?></p>
                             <br>

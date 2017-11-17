@@ -153,7 +153,7 @@ class InvoiceBuilder extends InvoicesActions
             ->getContracts()
             ->andWhere([
                 Contracts::tableName() . '.status' => [
-                    Contracts::STATUS_CREATED,
+                    Contracts::STATUS_REQUESTED,
                     Contracts::STATUS_ACCEPTED
                 ]
             ])

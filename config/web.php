@@ -105,7 +105,7 @@ $config = [
             'baseUrl' => '@web/uploads',
             'filesystem' => [
                 'class' => LocalFlysystemBuilder::class,
-                'path' => '@webroot/uploads'
+                'path' => '@pfdoroot/uploads'
             ],
         ],
     ],
@@ -209,6 +209,11 @@ $config = [
                 ],
             ],
             'file-storage'  => [
+                [
+                    'allow' => true,
+                ],
+            ],
+            'api'  => [
                 [
                     'allow' => true,
                 ],
@@ -418,6 +423,13 @@ $config = [
                     'allow' => true,
                     'roles' => ['?']
                 ],
+            ],
+            'file' => [
+                [
+                    'allow' => true,
+                    'roles' => ['operators'],
+                    'actions' => ['contract'],
+                ]
             ]
         ],
     ],

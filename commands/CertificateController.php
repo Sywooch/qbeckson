@@ -31,7 +31,7 @@ class CertificateController extends Controller
                 ->select('certificate_id, SUM(paid + rezerv) as sum')
                 ->where([
                     'status' => [
-                        Contracts::STATUS_CREATED,
+                        Contracts::STATUS_REQUESTED,
                         Contracts::STATUS_ACTIVE,
                         Contracts::STATUS_ACCEPTED
                     ],
