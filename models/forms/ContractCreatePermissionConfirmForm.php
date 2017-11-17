@@ -55,7 +55,7 @@ class ContractCreatePermissionConfirmForm extends Model
     {
         return [
             'password' => 'Пароль',
-            'certificate_can_create_contract' => 'Доступно заключение договоров на текущий период:  от ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_from) . ' по ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_to),
+            'certificate_can_create_contract' => 'Доступно заключение договоров на текущий период:  от ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_from) . ' по ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_to),
             'changePermissionConfirm' => 'Да, мы уверены',
         ];
     }
