@@ -47,8 +47,13 @@ class CertificatesController extends Controller
      */
     public function actionView($id)
     {
+        if (!Yii::$app->user->can('viewCertificate', ['id' => $id])) {
+            throw new ForbiddenHttpException('Нет прав на просмотр сертификата.');
+        }
+
         $nerfer = new CertificateNerfNominal($id);
         $freezer = new FreezeUnFreezeCertificate($id);
+
         return $this->render('view', [
             'model' => $this->findModel($id),
             'freezer' => $freezer,
