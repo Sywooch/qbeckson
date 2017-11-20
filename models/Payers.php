@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\ArrayHelper;
 use Yii;
 
 /**
@@ -431,6 +432,13 @@ class Payers extends \yii\db\ActiveRecord
     public function getUser()
     {
         return $this->hasOne(User::className(), ['id' => 'user_id']);
+    }
+
+    public function findCooperateOrganizations()
+    {
+        $cooperates = $this->cooperates;
+
+        return ArrayHelper::getColumn($cooperates, 'organization_id');
     }
 
     /**
