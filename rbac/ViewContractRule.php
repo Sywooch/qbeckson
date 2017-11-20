@@ -16,6 +16,6 @@ class ViewContractRule extends Rule
      */
     public function execute($user, $item, $params)
     {
-        return true;
+        return false;
     }
 }

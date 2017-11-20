@@ -253,6 +253,10 @@ class ContractsController extends Controller
      */
     public function actionView($id)
     {
+        if (!Yii::$app->user->can('viewContract')) {
+            throw new ForbiddenHttpException('Нет прав на просмотр договора.');
+        }
+
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
