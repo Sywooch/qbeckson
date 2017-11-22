@@ -2,6 +2,7 @@
 
 use app\components\KeyStorage;
 use app\components\LocalFlysystemBuilder;
+use app\components\trntv\TrntvStorage;
 use developeruz\db_rbac\behaviors\AccessBehavior;
 use kartik\datecontrol\Module;
 use trntv\filekit\Storage;
@@ -103,6 +104,14 @@ $config = [
         'fileStorage' => [
             'class' => Storage::class,
             'baseUrl' => '@web/uploads',
+            'filesystem' => [
+                'class' => LocalFlysystemBuilder::class,
+                'path' => '@webroot/uploads'
+            ],
+        ],
+        'contractFileStorage' => [
+            'class' => TrntvStorage::class,
+            'baseUrl' => '@web/file/contract?path=/uploads',
             'filesystem' => [
                 'class' => LocalFlysystemBuilder::class,
                 'path' => '@pfdoroot/uploads'
@@ -454,7 +463,7 @@ $config = [
             'file' => [
                 [
                     'allow' => true,
-                    'roles' => ['operators'],
+                    'roles' => ['operators', 'organizations', 'payer'],
                     'actions' => ['contract'],
                 ]
             ]
