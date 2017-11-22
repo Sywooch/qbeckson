@@ -5,8 +5,8 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\forms\ProgramSectionForm */
 
-$this->title = 'Редактирование муниципального задания';
-$this->params['breadcrumbs'][] = ['label' => 'Муниципальные задания', 'url' => ['/personal/organization-municipal-task']];
+$this->title = 'Редактирование';
+$this->params['breadcrumbs'][] = ['label' => 'Программы по муниципальному заданию', 'url' => ['/personal/organization-municipal-task']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="programs-create col-md-10 col-md-offset-1">
