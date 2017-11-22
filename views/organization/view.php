@@ -406,7 +406,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 if (null !== $cooperation->getDocumentUrl()) {
                     echo '<hr><div class="panel panel-default">
                         <div class="panel-body">' .
-                        Html::a('Текст договора/соглашения', $cooperation->getDocumentUrl())
+                        Html::a('Текст договора/соглашения', $cooperation->getDocumentUrl(), ['target' => 'blank'])
                         . ' </div>
                     </div>';
                 }
