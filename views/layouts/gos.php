@@ -33,7 +33,7 @@ $user = Yii::$app->user->getIdentity();
     <div class="container-fluid">
         <div class="top-line row">
             <div class="col-md-7 col-md-offset-1 text-center">
-                <a href="<?= Url::home() ?>"> ПРОВЕРКА ДЕПЛОЯ
+                <a href="<?= Url::home() ?>">
                     Портал персонифицированного финансирования дополнительного образования детей
                 </a>
             </div>
