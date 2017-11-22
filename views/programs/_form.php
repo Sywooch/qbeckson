@@ -241,7 +241,7 @@ $this->registerJs($js);
         echo '<div class="form-group">';
         echo Html::a('Отменить', $model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs'], ['class' => 'btn btn-danger']);
         echo '&nbsp';
-        echo Html::submitButton($model->isNewRecord ? ($model->isMunicipalTask ? 'Создать муниципальное задание' : 'Отправить программу на сертификацию') : 'Обновить программу', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
+        echo Html::submitButton($model->isNewRecord ? ($model->isMunicipalTask ? 'Создать программу' : 'Отправить программу на сертификацию') : 'Обновить программу', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
         echo '</div>';
     }
     ?>
