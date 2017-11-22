@@ -454,7 +454,7 @@ $config = [
             'file' => [
                 [
                     'allow' => true,
-                    'roles' => ['operators'],
+                    'roles' => ['operators', 'organizations', 'payer'],
                     'actions' => ['contract'],
                 ]
             ]
