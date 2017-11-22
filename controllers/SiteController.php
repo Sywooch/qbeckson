@@ -120,6 +120,7 @@ class SiteController extends Controller
 
     public function actionIndex()
     {
+        echo '<h1>TEST</h1>';
         if (!Yii::$app->user->isGuest) {
             return $this->redirect(PermissionHelper::redirectUrlByRole());
         }
