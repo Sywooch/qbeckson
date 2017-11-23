@@ -173,7 +173,7 @@ $this->registerJs($js);
 
     <?= $form->field(Yii::$app->user->identity->payer, 'certificate_can_use_future_balance')->checkbox() ?>
 
-    <div data-toogle="tooltip" title="<?= !$payer->canChangePermission() ? 'установить запрет на зачисление на обучение в текущем периоде не возможно до ' . Yii::$app->formatter->asDate(date('Y-m-d', strtotime(\Yii::$app->operator->identity->settings->current_program_date_to . '-2 Month'))) : '' ?>">
+    <div data-toogle="tooltip" title="<?= !$payer->canChangePermission() ? 'установить запрет на зачисление на обучение в текущем периоде невозможно до ' . Yii::$app->formatter->asDate(date('Y-m-d', strtotime(\Yii::$app->operator->identity->settings->current_program_date_to . '-2 Month'))) : '' ?>">
         <?= $form->field($contractCreatePermissionConfirmForm, 'certificate_can_create_contract')->checkbox(['class' => 'certificate-can-create-contract', 'disabled' => !$payer->canChangePermission()]) ?>
     </div>
 
