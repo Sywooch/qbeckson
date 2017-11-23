@@ -6,6 +6,7 @@ use app\assets\programsAsset\ProgramsAsset;
 use app\models\AllProgramsSearch;
 use app\models\Cooperate;
 use app\models\forms\ProgramAddressesForm;
+use app\models\forms\ProgramSectionForm;
 use app\models\Informs;
 use app\models\Model;
 use app\models\Organization;
@@ -20,6 +21,7 @@ use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -156,6 +158,45 @@ class ProgramsController extends Controller
         ]);
     }
 
+    public function actionUpdateTask($id)
+    {
+        $program = $this->findModel($id);
+        if (!$program->isMunicipalTask) {
+            throw new BadRequestHttpException();
+        }
+        $model = new ProgramSectionForm($program);
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', 'Муниципальное задание успешно обновлено.');
+
+            $this->redirect(['view-task', 'id' => $id]);
+        }
+
+        return $this->render('update-task', [
+            'model' => $model,
+        ]);
+    }
+
+    public function actionRefuseTask($id)
+    {
+        $program = $this->findModel($id);
+        if (!$program->isMunicipalTask) {
+            throw new BadRequestHttpException();
+        }
+        $model = new ProgramSectionForm($program);
+        $model->scenario = ProgramSectionForm::SCENARIO_REFUSE;
+
+        if ($model->load(Yii::$app->request->post()) && $model->refuse()) {
+            Yii::$app->session->setFlash('success', 'Задание успешно отклонено.');
+
+            $this->redirect(['/personal/payer-municipal-task']);
+        }
+
+        return $this->render('refuse-task', [
+            'model' => $model,
+        ]);
+    }
+
     /**
      * Displays a single Programs model.
      *
@@ -181,8 +222,6 @@ class ProgramsController extends Controller
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
             if ($model->verification === $model::VERIFICATION_DENIED) {
-//                Yii::$app->session->setFlash('danger', sprintf('Причина отказа: %s',
-//                    $model->getInforms()->andWhere(['status' => $model::VERIFICATION_DENIED])->one()->text));
                 Yii::$app->session->setFlash('danger',
                     $this->renderPartial('informers/list_of_reazon',
                         [
@@ -212,6 +251,50 @@ class ProgramsController extends Controller
     }
 
     /**
+     * Displays a single Programs model.
+     *
+     * @param integer $id
+     *
+     * @return mixed
+     * @throws ForbiddenHttpException
+     */
+    public function actionViewTask($id)
+    {
+        /** @var $user UserIdentity */
+        $user = Yii::$app->user->identity;
+        $model = $this->findModel($id);
+
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION) && $user->organization->id !== $model->organization_id) {
+            throw new ForbiddenHttpException('Нет доступа');
+        }
+        // При первом просмотре от плательщика меняем статус, чтобы запретить редактирование организации
+        if (Yii::$app->user->can(UserIdentity::ROLE_PAYER) && $model->verification === $model::VERIFICATION_UNDEFINED) {
+            $model->verification = $model::VERIFICATION_WAIT;
+            $model->save(false, ['verification']);
+        }
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
+            || Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
+            if ($model->verification === $model::VERIFICATION_DENIED) {
+                Yii::$app->session->setFlash('danger',
+                    $this->renderPartial('informers/list_of_reazon',
+                        [
+                            'dataProvider' => new ActiveDataProvider([
+                                    'query' => $model->getInforms()
+                                        ->andWhere(['status' => $model::VERIFICATION_DENIED]),
+                                    'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
+                                ]
+                            )
+                        ]
+                    ));
+            }
+        }
+
+        ProgramsAsset::register($this->view);
+
+        return $this->render('task/view', ['model' => $model, 'cooperate' => null]);
+    }
+
+    /**
      * Creates a new Programs model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
@@ -222,11 +305,15 @@ class ProgramsController extends Controller
             'is_municipal_task' => empty($isTask) ? null : 1,
         ]);
 
+        if ($model->getIsMunicipalTask() && !Yii::$app->user->identity->organization->suborderPayer) {
+            throw new ForbiddenHttpException();
+        }
+
         $file = new ProgramsFile();
-        $modelsYears = [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])];
+        $modelsYears = [new ProgrammeModule(['scenario' => $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : ProgrammeModule::SCENARIO_CREATE])];
 
         if ($model->load(Yii::$app->request->post())) {
-            $modelsYears = Model::createMultiple(ProgrammeModule::classname());
+            $modelsYears = Model::createMultiple(ProgrammeModule::classname(), [], $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : null);
             Model::loadMultiple($modelsYears, Yii::$app->request->post());
 
             // ajax validation
@@ -917,7 +1004,7 @@ class ProgramsController extends Controller
                 $informs->read = 0;
                 $informs->save();
 
-                return $this->redirect('/personal/operator-programs');
+                return $this->redirect($model->getIsMunicipalTask() ? '/personal/payer-municipal-task' : '/personal/operator-programs');
             }
         }
 
@@ -986,6 +1073,12 @@ class ProgramsController extends Controller
             throw new NotFoundHttpException();
         }
         $modelYears = $model->years;
+        if ($model->isMunicipalTask) {
+            foreach ($modelYears as $index => $item) {
+                $modelYears[$index]->scenario = ProgrammeModule::SCENARIO_MUNICIPAL_TASK;
+            }
+        }
+
         $file = new ProgramsFile();
         /** @var $organisation Organization */
         $model->zab = explode(',', $model->zab);
@@ -1015,7 +1108,7 @@ class ProgramsController extends Controller
             }
 
             $oldIDs = ArrayHelper::map($modelYears, 'id', 'id');
-            $modelYears = Model::createMultiple(ProgrammeModule::classname(), $modelYears);
+            $modelYears = Model::createMultiple(ProgrammeModule::classname(), $modelYears, $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : null);
             Model::loadMultiple($modelYears, Yii::$app->request->post());
             $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelYears, 'id', 'id')));
 
@@ -1061,7 +1154,7 @@ class ProgramsController extends Controller
                         $informs->read = 0;
                         $informs->save();
 
-                        return $this->redirect(['/personal/organization-programs']);
+                        return $this->redirect($model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']);
                     }
                 } catch (Exception $e) {
                     $transaction->rollBack();

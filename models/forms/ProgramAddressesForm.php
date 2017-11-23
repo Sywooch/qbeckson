@@ -7,7 +7,7 @@ use app\models\Programs;
 use yii\base\Model;
 
 /**
- * Class ConfirmRequestForm
+ * Class ProgramAddressesForm
  * @package app\models\forms
  */
 class ProgramAddressesForm extends Model

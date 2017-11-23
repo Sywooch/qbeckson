@@ -518,4 +518,18 @@ class CertificatesController extends Controller
             print_r($model->getErrors());
         }
     }
+
+    /**
+     * перевести неиспользуемые сертификаты в сертификаты учета
+     */
+    public function actionChangeToAccountingType()
+    {
+        $changedCount = Certificates::changeToAccountingType();
+
+        if ($changedCount) {
+            Yii::$app->session->addFlash('warning', 'В сертификаты учета ' . Yii::$app->i18n->format('{n, plural, =0{ни один сертификат не переведен} =1{переведен один сертификат} one{переведен # сертификат} few{переведены # сертификата} many{переведено # сертификатов} other{переведен # сертификат}}!', ['n' => $changedCount], 'ru_RU'));
+        }
+
+        return $this->redirect('/personal/payer-certificates');
+    }
 }

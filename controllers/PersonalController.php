@@ -3,7 +3,9 @@
 namespace app\controllers;
 
 use app\assets\programsAsset\ProgramsAsset;
+use app\behaviors\NotificationBehavior;
 use app\models\Certificates;
+use app\models\certificates\CertificateToAccountingConfirmForm;
 use app\models\Contracts;
 use app\models\Contracts2Search;
 use app\models\Contracts3Search;
@@ -19,6 +21,9 @@ use app\models\GroupsSearch;
 use app\models\LoginForm;
 use app\models\Invoices;
 use app\models\Mun;
+use app\models\MunicipalTaskContract;
+use app\models\MunicipalTaskMatrix;
+use app\models\MunicipalTaskPayerMatrixAssignment;
 use app\models\Operators;
 use app\models\Organization;
 use app\models\OrganizationContractSettings;
@@ -27,6 +32,7 @@ use app\models\Payers;
 use app\models\PayersSearch;
 use app\models\PersonalAssignment;
 use app\models\PreviusSearch;
+use app\models\ProgrammeModule;
 use app\models\ProgrammeModuleSearch;
 use app\models\Programs;
 use app\models\ProgramsclearSearch;
@@ -34,6 +40,7 @@ use app\models\search\CertificatesSearch;
 use app\models\search\ContractsSearch;
 use app\models\search\CooperateSearch;
 use app\models\search\InvoicesSearch;
+use app\models\search\MunicipalTaskContractSearch;
 use app\models\search\OrganizationSearch;
 use app\models\search\ProgramsSearch;
 use app\models\UserIdentity;
@@ -63,6 +70,9 @@ class PersonalController extends Controller
                 'actions' => [
                     'update-municipality' => ['post'],
                 ],
+            ],
+            'notification' => [
+                'class' => NotificationBehavior::className(),
             ],
         ];
     }
@@ -295,7 +305,7 @@ class PersonalController extends Controller
         $confirmedContractsProvider = $searchConfirmedContracts->search(Yii::$app->request->queryParams);
 
         $searchPendingContracts = new ContractsSearch([
-            'status' => Contracts::STATUS_CREATED,
+            'status' => Contracts::STATUS_REQUESTED,
             'modelName' => 'SearchPendingContracts'
         ]);
         $pendingContractsProvider = $searchPendingContracts->search(Yii::$app->request->queryParams);
@@ -425,10 +435,20 @@ class PersonalController extends Controller
         $certificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
         $allCertificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams, 999999);
 
+        $certificateToAccountingConfirmForm = new CertificateToAccountingConfirmForm;
+        if (Yii::$app->request->isAjax && $certificateToAccountingConfirmForm->load(Yii::$app->request->post())) {
+            return $this->asJson(ActiveForm::validate($certificateToAccountingConfirmForm));
+        }
+
+        if ($certificateToAccountingConfirmForm->load(Yii::$app->request->post()) && $certificateToAccountingConfirmForm->validate()) {
+            return $this->redirect('/certificates/change-to-accounting-type');
+        }
+
         return $this->render('payer-certificates', [
             'certificatesProvider' => $certificatesProvider,
             'searchCertificates' => $searchCertificates,
             'allCertificatesProvider' => $allCertificatesProvider,
+            'certificateToAccountingConfirmForm' => $certificateToAccountingConfirmForm
         ]);
     }
 
@@ -458,7 +478,7 @@ class PersonalController extends Controller
 
         $searchPendingContracts = new ContractsSearch([
             'payer_id' => $payer->id,
-            'status' => Contracts::STATUS_CREATED,
+            'status' => Contracts::STATUS_REQUESTED,
             'modelName' => 'SearchPendingContracts'
         ]);
         $pendingContractsProvider = $searchPendingContracts->search(Yii::$app->request->queryParams);
@@ -615,20 +635,48 @@ class PersonalController extends Controller
         /** @var UserIdentity $user */
         $user = Yii::$app->user->getIdentity();
 
-        $searchPrograms = new ProgramsSearch([
-            'payerId' => $user->payer->id,
+        $searchWaitTasks = new ProgramsSearch([
+            'taskPayerId' => $user->payer->id,
             'hours' => '0,2000',
             'limit' => '0,10000',
             'rating' => '0,100',
-            'modelName' => 'SearchPrograms',
+            'modelName' => 'SearchTasks',
+            'verification' => Programs::VERIFICATION_UNDEFINED,
             'isMunicipalTask' => true,
         ]);
-        $programsProvider = $searchPrograms->search(Yii::$app->request->queryParams);
+        $waitTasksProvider = $searchWaitTasks->search(Yii::$app->request->queryParams);
+
+        $searchRefusedTasks = new ProgramsSearch([
+            'taskPayerId' => $user->payer->id,
+            'hours' => '0,2000',
+            'limit' => '0,10000',
+            'rating' => '0,100',
+            'modelName' => 'SearchTasks',
+            'verification' => Programs::VERIFICATION_DENIED,
+            'isMunicipalTask' => true,
+        ]);
+        $refusedTasksProvider = $searchRefusedTasks->search(Yii::$app->request->queryParams);
+
+        $matrix = MunicipalTaskMatrix::find()->all();
+        $tabs = [];
+        foreach ($matrix as $item) {
+            $searchTasks = new ProgramsSearch([
+                'taskPayerId' => $user->payer->id,
+                'hours' => '0,2000',
+                'limit' => '0,10000',
+                'rating' => '0,100',
+                'modelName' => 'SearchTasks',
+                'verification' => Programs::VERIFICATION_DONE,
+                'isMunicipalTask' => true,
+                'municipal_task_matrix_id' => $item->id,
+            ]);
+            $tasksProvider = $searchTasks->search(Yii::$app->request->queryParams);
+            array_push($tabs, ['item' => $item, 'searchModel' => $searchTasks, 'provider' => $tasksProvider]);
+        }
 
         if (Yii::$app->request->isAjax && Yii::$app->request->post('hasEditable')) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $model = Programs::findOne(Yii::$app->request->post('editableKey'));
-            //$model->scenario = Organization::SCENARIO_PAYER;
             $post = Yii::$app->request->post();
 
             $out = ['output' => '', 'message' => ''];
@@ -645,8 +693,11 @@ class PersonalController extends Controller
         }
 
         return $this->render('payer-municipal-task', [
-            'searchPrograms' => $searchPrograms,
-            'programsProvider' => $programsProvider,
+            'searchWaitTasks' => $searchWaitTasks,
+            'waitTasksProvider' => $waitTasksProvider,
+            'searchRefusedTasks' => $searchRefusedTasks,
+            'refusedTasksProvider' => $refusedTasksProvider,
+            'tabs' => $tabs,
         ]);
     }
 
@@ -806,19 +857,51 @@ class PersonalController extends Controller
      */
     public function actionOrganizationMunicipalTask()
     {
-        $searchPrograms = new ProgramsSearch([
+        $matrix = MunicipalTaskMatrix::find()->all();
+        $tabs = [];
+        foreach ($matrix as $item) {
+            $searchTasks = new ProgramsSearch([
+                'organization_id' => Yii::$app->user->identity->organization->id,
+                'hours' => '0,2000',
+                'limit' => '0,10000',
+                'rating' => '0,100',
+                'modelName' => 'SearchTasks',
+                'verification' => Programs::VERIFICATION_DONE,
+                'isMunicipalTask' => true,
+                'municipal_task_matrix_id' => $item->id,
+            ]);
+            $tasksProvider = $searchTasks->search(Yii::$app->request->queryParams);
+            array_push($tabs, ['item' => $item, 'searchModel' => $searchTasks, 'provider' => $tasksProvider]);
+        }
+
+        $searchWaitPrograms = new ProgramsSearch([
             'organization_id' => Yii::$app->user->identity->organization->id,
             'hours' => '0,2000',
             'limit' => '0,10000',
             'rating' => '0,100',
-            'modelName' => 'SearchOpenPrograms',
+            'modelName' => 'SearchTasks',
             'isMunicipalTask' => true,
+            'verification' => [Programs::VERIFICATION_UNDEFINED, Programs::VERIFICATION_WAIT],
         ]);
-        $programsProvider = $searchPrograms->search(Yii::$app->request->queryParams);
+        $waitProgramsProvider = $searchWaitPrograms->search(Yii::$app->request->queryParams);
+
+        $searchDeniedPrograms = new ProgramsSearch([
+            'organization_id' => Yii::$app->user->identity->organization->id,
+            'hours' => '0,2000',
+            'limit' => '0,10000',
+            'rating' => '0,100',
+            'modelName' => 'SearchTasks',
+            'isMunicipalTask' => true,
+            'verification' => Programs::VERIFICATION_DENIED,
+        ]);
+        $deniedProgramsProvider = $searchDeniedPrograms->search(Yii::$app->request->queryParams);
 
         return $this->render('organization-municipal-task', [
-            'searchPrograms' => $searchPrograms,
-            'programsProvider' => $programsProvider,
+            'tabs' => $tabs,
+            'searchWaitPrograms' => $searchWaitPrograms,
+            'waitProgramsProvider' => $waitProgramsProvider,
+            'searchDeniedPrograms' => $searchDeniedPrograms,
+            'deniedProgramsProvider' => $deniedProgramsProvider,
         ]);
     }
 
@@ -848,7 +931,7 @@ class PersonalController extends Controller
         $confirmedContractsProvider = $searchConfirmedContracts->search(Yii::$app->request->queryParams);
 
         $searchPendingContracts = new ContractsSearch([
-            'status' => Contracts::STATUS_CREATED,
+            'status' => Contracts::STATUS_REQUESTED,
             'modelName' => 'SearchPendingContracts',
             'organization_id' => $user->organization->id,
         ]);
@@ -888,6 +971,35 @@ class PersonalController extends Controller
             'endsContractsProvider' => $endsContractsProvider,
 
             'ContractsallProvider' => $ContractsallProvider,
+        ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function actionOrganizationMunicipalTaskContracts()
+    {
+        /** @var UserIdentity $user */
+        $user = Yii::$app->user->identity;
+
+        $searchActiveContracts = new MunicipalTaskContractSearch([
+            'status' => MunicipalTaskContract::STATUS_ACTIVE,
+            'organization_id' => $user->organization->id,
+        ]);
+        $activeContractsProvider = $searchActiveContracts->search(Yii::$app->request->queryParams);
+
+        $searchPendingContracts = new MunicipalTaskContractSearch([
+            'status' => MunicipalTaskContract::STATUS_NEW,
+            'organization_id' => $user->organization->id,
+        ]);
+        $pendingContractsProvider = $searchPendingContracts->search(Yii::$app->request->queryParams);
+
+
+        return $this->render('organization-municipal-task-contracts', [
+            'searchActiveContracts' => $searchActiveContracts,
+            'activeContractsProvider' => $activeContractsProvider,
+            'searchPendingContracts' => $searchPendingContracts,
+            'pendingContractsProvider' => $pendingContractsProvider,
         ]);
     }
 
@@ -1051,7 +1163,7 @@ class PersonalController extends Controller
         $searchContracts1 = new ContractsoSearch();
         $searchContracts1->certificate_id = $certificate['id'];
         $Contracts1Provider = $searchContracts1->search(Yii::$app->request->queryParams);
-        $contracts_count = $Contracts1Provider->getTotalCount();
+        $contracts_count = $Contracts1Provider->getTotalCount() + MunicipalTaskContract::getCountContracts($certificate, null, MunicipalTaskContract::STATUS_ACTIVE);
 
         $Contracts3Search = new Contracts3Search();
         $Contracts3Search->certificate_id = $certificate['id'];
@@ -1061,7 +1173,7 @@ class PersonalController extends Controller
         $ContractsnSearch = new ContractsnSearch();
         $ContractsnSearch->certificate_id = $certificate['id'];
         $ContractsnProvider = $ContractsnSearch->search(Yii::$app->request->queryParams);
-        $contracts_wait_request = $ContractsnProvider->getTotalCount();
+        $contracts_wait_request = $ContractsnProvider->getTotalCount() + MunicipalTaskContract::getCountContracts($certificate, null, MunicipalTaskContract::STATUS_NEW);
 
         $Contracts2Search = new Contracts2Search();
         $Contracts2Search->certificate_id = $certificate['id'];
@@ -1229,6 +1341,25 @@ class PersonalController extends Controller
      */
     public function actionCertificatePrograms(): string
     {
+        /** @var $certificate Certificates */
+        $certificate = Yii::$app->user->identity->certificate;
+
+        $matrix = MunicipalTaskPayerMatrixAssignment::findByPayerId($certificate->payer_id, $certificate->certGroup->is_special > 0 ? MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_AC : MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_PF);
+        $tabs = [];
+        foreach ($matrix as $item) {
+            $searchTasks = new ProgramsSearch([
+                'verification' => Programs::VERIFICATION_DONE,
+                'taskPayerId' => $certificate->payer_id,
+                'hours' => '0,2000',
+                'rating' => '0,100',
+                'modelName' => '',
+                'isMunicipalTask' => true,
+                'municipal_task_matrix_id' => $item->matrix->id,
+            ]);
+            $tasksProvider = $searchTasks->search(Yii::$app->request->queryParams);
+            array_push($tabs, ['item' => $item, 'searchModel' => $searchTasks, 'provider' => $tasksProvider]);
+        }
+
         $searchModel = new ProgramsSearch([
             'verification' => Programs::VERIFICATION_DONE,
             'hours' => '0,2000',
@@ -1237,6 +1368,7 @@ class PersonalController extends Controller
             'modelName' => '',
         ]);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
         if ($searchModel->organization_id) {
             Yii::$app->session->setFlash('success', 'Поиск по организации ' . $searchModel->getOrganization()->one()->name);
         }
@@ -1245,6 +1377,7 @@ class PersonalController extends Controller
         return $this->render('certificate/list', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
+            'tabs' => $tabs,
         ]);
     }
 

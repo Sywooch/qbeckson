@@ -1,5 +1,7 @@
 <?php
 
+use app\models\certificates\CertificateToAccountingConfirmForm;
+use yii\bootstrap\Modal;
 use yii\grid\ActionColumn;
 use app\models\CertGroup;
 use app\models\UserIdentity;
@@ -9,6 +11,7 @@ use kartik\grid\GridView;
 use app\widgets\SearchFilter;
 use app\helpers\GridviewHelper;
 use app\helpers\PermissionHelper;
+use yii\widgets\ActiveForm;
 
 $this->title = 'Сертификаты';
 $this->params['breadcrumbs'][] = $this->title;
@@ -16,6 +19,8 @@ $this->params['breadcrumbs'][] = $this->title;
 /* @var $this yii\web\View */
 /* @var $searchCertificates \app\models\search\CertificatesSearch */
 /* @var $certificatesProvider \yii\data\ActiveDataProvider */
+/* @var $allCertificatesProvider \yii\data\ActiveDataProvider */
+/* @var $certificateToAccountingConfirmForm CertificateToAccountingConfirmForm */
 
 $columns = [
     [
@@ -87,14 +92,48 @@ $columns = [
     'role' => UserIdentity::ROLE_PAYER
 ]); ?>
 
-<p>
-    <?php if (PermissionHelper::checkMonitorUrl('/certificates/create')) : ?>
-    <?= Html::a('Добавить сертификат', ['/certificates/create'], ['class' => 'btn btn-success']) ?>
-    <?php elseif (PermissionHelper::checkMonitorUrl('/certificates/allnominal')) : ?>
-        <br>
-        <br>
-    <?php endif; ?>
-</p>
+<div class="row">
+    <div class="col-xs-6">
+        <p>
+            <?php if (PermissionHelper::checkMonitorUrl('/certificates/create')) : ?>
+                <?= Html::a('Добавить сертификат', ['/certificates/create'], ['class' => 'btn btn-success']) ?>
+            <?php elseif (PermissionHelper::checkMonitorUrl('/certificates/allnominal')) : ?>
+                <br>
+                <br>
+            <?php endif; ?>
+        </p>
+    </div>
+
+    <div class="col-xs-6 text-right">
+        <?php Modal::begin([
+            'header'       => 'Подтверждение перевода неиспользуемых сертификатов в сертификаты учета',
+            'id'           => 'certificate-change-type-confirmation-modal',
+            'toggleButton' => [
+                'label' => 'Перевести неиспользуемые сертификаты в сертификаты учета',
+                'class' => 'btn btn-danger'
+            ],
+        ]) ?>
+
+        <p>В соответствии с регламентом проведения оценки использования сертификатов дополнительного образования неиспользуемые в течении <?= Yii::$app->user->identity->payer->days_to_first_contract_request ?>
+            дней сертификаты подлежат переводу в сертификаты учета</p>
+
+        <?php $form = ActiveForm::begin([
+            'enableAjaxValidation' => true,
+            'options'              => [
+                'data-pjax' => true
+            ]
+        ]) ?>
+
+        <?= $form->field($certificateToAccountingConfirmForm, 'changeTypeConfirmed')->checkbox() ?>
+
+        <div class="form-group">
+            <?= Html::submitButton('выполнить') ?>
+        </div>
+        <?php $form->end() ?>
+
+        <?php Modal::end() ?>
+    </div>
+</div>
 
 <?= GridView::widget([
     'dataProvider' => $certificatesProvider,

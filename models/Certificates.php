@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
 use yii\db\Exception;
 
 /**
@@ -37,6 +38,10 @@ use yii\db\Exception;
  * @property string      $friezed_ballance
  * @property integer     $possible_cert_group
  * @property integer     $cert_group
+ * @property int         $updated_cert_group
+ * @property string      $nominal_p
+ * @property string      $created_at
+ * @property string      $type_changed_at
  *
  * @property bool $canChangeGroup
  *
@@ -82,6 +87,29 @@ class Certificates extends \yii\db\ActiveRecord
     public static function tableName()
     {
         return 'certificates';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => TimestampBehavior::className(),
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => null,
+                'value' => date('Y-m-d H:i:s', time()),
+            ]
+        ];
+    }
+
+    public static function getCountCertGroup($certGroupId)
+    {
+        $query = static::find()
+            ->where(['cert_group' => $certGroupId]);
+
+        return $query->count();
     }
 
     public static function getCountCertificates($payerId = null)
@@ -131,6 +159,7 @@ class Certificates extends \yii\db\ActiveRecord
             [['balance', 'balance_f', 'rezerv', 'rezerv_f', 'friezed_ballance'], 'number'],
             [['number'], 'unique'],
             [['friezed_at'], 'date', 'format' => 'Y-m-d'],
+            [['created_at', 'type_changed_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
             [['fio_child', 'fio_parent', 'birthday', 'address'], 'string', 'max' => 255],
             [['name', 'soname', 'phname'], 'string', 'max' => 50],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
@@ -186,6 +215,8 @@ class Certificates extends \yii\db\ActiveRecord
             'payer' => 'Плательщик',
             'selectCertGroup' => 'Тип сертификата',
             'possible_cert_group' => 'Группа сертификата',
+            'created_at' => 'дата и время создания',
+            'type_changed_at' => 'дата и время изменения типа сертификата',
         ];
     }
 
@@ -217,7 +248,19 @@ class Certificates extends \yii\db\ActiveRecord
 
     public function setNominals()
     {
-        if (!empty($this->selectCertGroup) && $this->selectCertGroup == self::TYPE_PF) {
+        if (empty($this->selectCertGroup)) {
+            return false;
+        }
+
+        $certGroup = $this->payer->getCertGroups(1)->one();
+
+        // обновить дату и время изменения типа сертификата
+        if ($this->selectCertGroup == self::TYPE_PF && $certGroup && $this->cert_group == $certGroup->id ||
+            $this->selectCertGroup == self::TYPE_ACCOUNTING && $certGroup && $this->cert_group != $certGroup->id) {
+            $this->type_changed_at = date('Y-m-d H:i:s');
+        }
+
+        if ($this->selectCertGroup == self::TYPE_PF) {
             $this->cert_group = $this->possible_cert_group;
             $this->nominal = $this->possibleCertGroup->nominal;
             $this->nominal_f = $this->possibleCertGroup->nominal_f;
@@ -225,7 +268,7 @@ class Certificates extends \yii\db\ActiveRecord
             $this->balance_f = $this->nominal_f;
 
             return true;
-        } elseif (!empty($this->selectCertGroup) && $certGroup = $this->payers->getCertGroups(1)->one()) {
+        } elseif ($certGroup && $this->selectCertGroup == self::TYPE_ACCOUNTING) {
             $this->cert_group = $certGroup->id;
             $this->nominal = 0;
             $this->nominal_f = 0;
@@ -300,7 +343,7 @@ class Certificates extends \yii\db\ActiveRecord
     {
         if (Contracts::getCountContracts([
             'status' => [
-                Contracts::STATUS_CREATED,
+                Contracts::STATUS_REQUESTED,
                 Contracts::STATUS_ACTIVE,
                 Contracts::STATUS_REFUSED,
                 Contracts::STATUS_ACCEPTED,
@@ -484,7 +527,7 @@ class Certificates extends \yii\db\ActiveRecord
     {
         return $this->getContractsModels()->where([
             Contracts::tableName() . '.status' => [
-                Contracts::STATUS_CREATED,
+                Contracts::STATUS_REQUESTED,
                 Contracts::STATUS_ACTIVE,
                 Contracts::STATUS_ACCEPTED
             ],
@@ -540,4 +583,54 @@ class Certificates extends \yii\db\ActiveRecord
             ->andWhere(['>=', Contracts::tableName() . '.stop_edu_contract', $now]);
     }
 
+    /**
+     * перевести неиспользуемые сертификаты в сертификаты учета
+     * ---
+     * по прошествии "payers.days_to_first_contract_request" дней с даты создания сертификата или даты перевода его в сертификат пф,
+     * в сертификаты учета переводятся все сертификаты:
+     * 1. не имеющие договоров "текущего" периода, где status равен любому кроме null
+     * 2. имеющие только отклоненные договора (если поле даты отклонения refused_at != null) по прошествии "payers.days_to_contract_request_after_refused" дней до создания новой заявки.
+     *
+     * @return integer
+     */
+    public static function changeToAccountingType()
+    {
+        $changedCount = 0;
+
+        if ($payer = Yii::$app->user->identity->payer) {
+            $allStatusesExceptRefused = join(',', [Contracts::STATUS_REQUESTED, Contracts::STATUS_ACTIVE, Contracts::STATUS_ACCEPTED, Contracts::STATUS_CLOSED]);
+
+            $certificates = Certificates::find()
+                ->distinct()
+                ->with('certGroup')
+                ->leftJoin('cert_group', 'cert_group.id = certificates.cert_group')
+                ->leftJoin('payers', 'certificates.payer_id = payers.id')
+                ->leftJoin('contracts', 'certificates.id = contracts.certificate_id and contracts.period = ' . Contracts::CURRENT_REALIZATION_PERIOD . ' and contracts.status is not null and (contracts.status in (' . $allStatusesExceptRefused . ') or contracts.refused_at is null or TIMESTAMPDIFF(DAY, contracts.refused_at, "' . date('Y-m-d H:i:s') . '") < payers.days_to_contract_request_after_refused)')
+                ->where(['cert_group.payer_id' => $payer->id])
+                ->andWhere(['certificates.actual' => 1])
+                ->andWhere('cert_group.id = certificates.possible_cert_group')
+                ->andWhere('TIMESTAMPDIFF(DAY, certificates.created_at, "' . date('Y-m-d H:i:s') . '") > payers.days_to_first_contract_request and (certificates.type_changed_at is null || TIMESTAMPDIFF(DAY, certificates.type_changed_at, "' . date('Y-m-d H:i:s') . '") > payers.days_to_first_contract_request)')
+                ->andWhere('contracts.id is null')
+                ->all();
+
+            if (!$certificates) {
+                return 0;
+            }
+
+            /** @var Certificates[] $certificates */
+            foreach ($certificates as $certificate) {
+                $certificate->selectCertGroup = self::TYPE_ACCOUNTING;
+                $certificate->setNominals();
+
+                if ($certificate->save()) {
+                    $changedCount++;
+
+                    $notification = new Notification(['user_id' => $certificate->user->id, 'message' => 'Ваш сертификат переведен в вид "сертификат учета" в связи с тем, что не был активирован в течении установленного уполномоченным органом периода времени']);
+                    $notification->save();
+                }
+            }
+
+            return $changedCount;
+        }
+    }
 }

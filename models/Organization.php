@@ -21,6 +21,7 @@ use Yii;
  * @property integer             $bank_bik
  * @property string              $bank_sity
  * @property integer             $korr_invoice
+ * @property int                 $correspondent_invoice
  * @property integer             $mun
  * @property string              $rass_invoice
  * @property string              $fio
@@ -165,6 +166,7 @@ class Organization extends \yii\db\ActiveRecord
             [['license_date', 'date_proxy', 'cratedate', 'accepted_date'], 'safe'],
             [['raiting'], 'number'],
             [['about', 'site', 'phone', 'refuse_reason', 'anonymous_update_token', 'receiver', 'korr_invoice'], 'string'],
+            ['correspondent_invoice', 'integer', 'integerPattern' => '/^[0-9]{20}$/', 'message' => 'Значение должно состоять из 20 цифр'],
             [['email'], 'email'],
             [['name', 'license_number', 'license_issued', 'license_issued_dat', 'bank_name', 'bank_sity', 'fio_contact', 'fio', 'position', 'position_min', 'address_legal', 'address_actual', 'geocode', 'full_name'], 'string', 'max' => 255],
             [['rass_invoice', 'ground', 'number_proxy'], 'string', 'max' => 45],
@@ -228,6 +230,10 @@ class Organization extends \yii\db\ActiveRecord
         }
         if (!empty($this->statementDocument) && is_array($this->statementDocument)) {
             $this->statementDocument[0]['document_type'] = OrganizationDocument::TYPE_STATEMENT;
+        }
+
+        if ($this->correspondent_invoice == '') {
+            $this->correspondent_invoice = null;
         }
 
         return parent::beforeValidate();
@@ -315,7 +321,8 @@ class Organization extends \yii\db\ActiveRecord
             'bank_name' => 'Наименование банка',
             'bank_bik' => 'БИК Банка',
             'bank_sity' => 'Город банка',
-            'korr_invoice' => 'К/с (л/с)',
+            'korr_invoice' => 'Лицевой счёт (л/с)',
+            'correspondent_invoice' => 'Корреспондентский счёт (к/с)',
             'rass_invoice' => 'Расчетный счет',
             'fio_contact' => 'Контактное лицо',
             'fio' => 'ФИО представителя поставщика',
@@ -433,7 +440,7 @@ class Organization extends \yii\db\ActiveRecord
     public function getActiveContracts()
     {
         return $this->getContracts()->where([Contracts::tableName() . '.status' => [
-            Contracts::STATUS_CREATED,
+            Contracts::STATUS_REQUESTED,
             Contracts::STATUS_ACTIVE,
             Contracts::STATUS_ACCEPTED
         ]]);
@@ -662,7 +669,7 @@ class Organization extends \yii\db\ActiveRecord
         $query = static::find()
             ->leftJoin('organization_operator_assignment', 'organization.id = organization_operator_assignment.organization_id')
             ->where(['organization_operator_assignment.operator_id' => null]);
-        
+
         return $query->all();
     }
 

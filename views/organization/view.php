@@ -132,31 +132,39 @@ $this->params['breadcrumbs'][] = $this->title;
     
     <?php
     if (isset($roles['operators'])) {
-        
-    echo DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'inn',
-            'KPP',
-            'OGRN',
-            'okopo',
-            'address_legal',
-            'last_year_contract',
-            'cratedate:date',
-        ],
-    ]);
-            
-        
-    echo DetailView::widget([
-        'model' => $model,
-        'attributes' => [
+
+        echo DetailView::widget([
+            'model'      => $model,
+            'attributes' => [
+                'inn',
+                'KPP',
+                'OGRN',
+                'okopo',
+                'address_legal',
+                'last_year_contract',
+                'cratedate:date',
+            ],
+        ]);
+
+        $requisiteAttributes = [
             'bank_name',
             'bank_bik',
             'bank_sity',
             'korr_invoice',
+            'correspondent_invoice',
             'rass_invoice',
-        ],
-    ]);
+        ];
+
+        // не отображать корреспондентский счет если он не указан
+        if (!$model->correspondent_invoice) {
+            $index = array_search('correspondent_invoice', $requisiteAttributes);
+            unset($requisiteAttributes[$index]);
+        }
+
+        echo DetailView::widget([
+            'model'      => $model,
+            'attributes' => $requisiteAttributes,
+        ]);
     }
     ?>
 
@@ -398,7 +406,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 if (null !== $cooperation->getDocumentUrl()) {
                     echo '<hr><div class="panel panel-default">
                         <div class="panel-body">' .
-                        Html::a('Текст договора/соглашения', $cooperation->getDocumentUrl())
+                        Html::a('Текст договора/соглашения', $cooperation->getDocumentUrl(), ['target' => 'blank'])
                         . ' </div>
                     </div>';
                 }

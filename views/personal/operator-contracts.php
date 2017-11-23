@@ -189,10 +189,18 @@ $confirmedColumns = [
         'template' => '{dobr}',
         'buttons' => [
             'dobr' => function ($url, $model) {
+                /** @var Contracts $model */
+                if ($model->passedTooLongTimeAfterAccepted()) {
+                    $style = 'glyphicon-alert';
+                    $option = ['class' => 'btn btn-warning','title' => 'Оферта слишком долго находится в ожидании!', 'data-toggle' => 'tooltip'];
+                } else {
+                    $style = 'glyphicon-check';
+                    $option = ['title' => 'Ok'];
+                }
                 return Html::a(
-                    '<span class="glyphicon glyphicon-check"></span>',
+                    '<span class="glyphicon ' . $style . '"></span>',
                     Url::to(['contracts/verificate', 'id' => $model->id]),
-                    ['title' => 'Ok']
+                    $option
                 );
             },
         ],
@@ -214,11 +222,34 @@ $pendingColumns = [
         'controller' => 'contracts',
         'template' => '{view}',
         'buttons' => [
-            'permit' => function ($url, $model) {
+            'view'   => function ($url, $model) {
+                /** @var Contracts $model */
+                if ($model->passedTooLongTimeAfterRequested()) {
+                    $style = 'glyphicon-alert';
+                    $option = ['class' => 'btn btn-warning','title' => 'Оферта слишком долго находится в ожидании!', 'data-toggle' => 'tooltip'];
+                } else {
+                    $style = 'glyphicon-eye-open';
+                    $option = ['title' => 'Просмотр'];
+                }
                 return Html::a(
-                    '<span class="glyphicon glyphicon-ok"></span>',
+                    '<span class="glyphicon ' . $style . '"></span>',
+                    Url::to(['contracts/view', 'id' => $model->id]),
+                    $option
+                );
+            },
+            'permit' => function ($url, $model) {
+                /** @var Contracts $model */
+                if ($model->passedTooLongTimeAfterRequested()) {
+                    $style = 'glyphicon-alert';
+                    $option = ['class' => 'btn btn-warning','title' => 'Оферта слишком долго находится в ожидании!', 'data-toggle' => 'tooltip'];
+                } else {
+                    $style = 'glyphicon-ok';
+                    $option = ['title' => 'Подтвердить создание договора'];
+                }
+                return Html::a(
+                    '<span class="glyphicon ' . $style . '"></span>',
                     Url::to(['contracts/ok', 'id' => $model->id]),
-                    ['title' => 'Подтвердить создание договора']
+                    $option
                 );
             },
         ],
@@ -316,7 +347,7 @@ $preparedRefusedColumns = GridviewHelper::prepareColumns('contracts', $refusedCo
             'rowOptions' => function ($model, $index, $widget, $grid) {
                 if ($model->wait_termnate === 1) {
                     return ['class' => 'danger'];
-                } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
+                } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_REQUESTED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
                     return ['class' => 'warning'];
                 }
             },
@@ -349,7 +380,7 @@ $preparedRefusedColumns = GridviewHelper::prepareColumns('contracts', $refusedCo
             'rowOptions' => function ($model, $index, $widget, $grid) {
                 if ($model->wait_termnate === 1) {
                     return ['class' => 'danger'];
-                } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
+                } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_REQUESTED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
                     return ['class' => 'warning'];
                 }
             },
@@ -379,7 +410,7 @@ $preparedRefusedColumns = GridviewHelper::prepareColumns('contracts', $refusedCo
             {
                 if ($model->wait_termnate === 1) {
                     return ['class' => 'danger'];
-                } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_CREATED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
+                } elseif ($model->wait_termnate < 1 && in_array($model->status, [Contracts::STATUS_ACTIVE, Contracts::STATUS_REQUESTED, Contracts::STATUS_ACCEPTED]) && $model->all_parents_funds > 0) {
                     return ['class' => 'warning'];
                 }
             },
