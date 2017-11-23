@@ -2,6 +2,7 @@
 
 use app\components\KeyStorage;
 use app\components\LocalFlysystemBuilder;
+use app\components\trntv\TrntvStorage;
 use developeruz\db_rbac\behaviors\AccessBehavior;
 use kartik\datecontrol\Module;
 use trntv\filekit\Storage;
@@ -108,6 +109,14 @@ $config = [
                 'path' => '@webroot/uploads'
             ],
         ],
+        'contractFileStorage' => [
+            'class' => TrntvStorage::class,
+            'baseUrl' => '@web/file/contract?path=/uploads',
+            'filesystem' => [
+                'class' => LocalFlysystemBuilder::class,
+                'path' => '@pfdoroot/uploads'
+            ],
+        ],
     ],
     'modules' => [
         'permit' => [
@@ -182,9 +191,11 @@ $config = [
                 ],
                 [
                     'actions' => [
-                    'organization-suborder',
-                    'organization-set-suborder-status',
-                    'organization-municipal-task'],
+                        'organization-suborder',
+                        'organization-set-suborder-status',
+                        'organization-municipal-task',
+                        'organization-municipal-task-contracts',
+                    ],
                     'allow' => true,
                     'roles' => ['organizations']
                 ],
@@ -231,6 +242,13 @@ $config = [
                         'roles' => ['admins'],
                     ],
                 ],
+            'matrix' =>
+                [
+                    [
+                        'allow' => true,
+                        'roles' => ['payer'],
+                    ],
+                ],
             'admin/cleanup' =>
                 [
                     [
@@ -260,8 +278,26 @@ $config = [
             'programs' =>
                 [
                     [
-                        'actions' => ['index', 'view'],
+                        'actions' => ['index', 'view', 'view-task'],
                         'allow' => true,
+                    ],
+                    [
+                        'actions' => ['update-task', 'refuse-task', 'decertificate'],
+                        'allow'   => true,
+                        'roles'   => ['payer']
+                    ],
+                ],
+            'municipal-task-contract' =>
+                [
+                    [
+                        'actions' => ['create'],
+                        'allow'   => true,
+                        'roles'   => ['certificate']
+                    ],
+                    [
+                        'actions' => ['approve', 'view'],
+                        'allow'   => true,
+                        'roles'   => ['organizations']
                     ],
                 ],
             'user' =>
@@ -423,6 +459,13 @@ $config = [
                     'allow' => true,
                     'roles' => ['?']
                 ],
+            ],
+            'file' => [
+                [
+                    'allow' => true,
+                    'roles' => ['operators', 'organizations', 'payer'],
+                    'actions' => ['contract'],
+                ]
             ]
         ],
     ],

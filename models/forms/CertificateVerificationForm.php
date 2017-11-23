@@ -75,6 +75,13 @@ class CertificateVerificationForm extends Model
             $this->addError($attribute, 'Сертификат заморожен.');
             return;
         }
+
+        $payer = $certificate->payer;
+
+        if (!$payer->certificateCanCreateContract() && $payer->certificate_can_use_future_balance != 1) {
+            $this->addError($attribute, 'На данный момент уполномоченной организацией выбранного сертификата установлен запрет на создание новых заявок как в текущем, так и в будущем периоде.');
+            return;
+        }
     }
 
     /**

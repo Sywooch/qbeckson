@@ -44,6 +44,8 @@ class ProgrammeModule extends ActiveRecord
 {
     const SCENARIO_CREATE = 'create';
 
+    const SCENARIO_MUNICIPAL_TASK = 'municipal-task';
+
     /**
      * @inheritdoc
      */
@@ -56,6 +58,7 @@ class ProgrammeModule extends ActiveRecord
     {
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_CREATE] = $scenarios['default'];
+        $scenarios[self::SCENARIO_MUNICIPAL_TASK] = $scenarios[self::SCENARIO_CREATE];
 
         return $scenarios;
     }
@@ -66,8 +69,11 @@ class ProgrammeModule extends ActiveRecord
     public function rules()
     {
         return [
-            [['month', 'hours', 'hoursindivid', 'hoursdop', 'kvfirst', 'kvdop'], 'required'],
+            [['month', 'hours', 'hoursindivid', 'hoursdop', 'kvfirst', 'kvdop'], 'required', 'on' => 'default'],
+            [['month', 'hours', 'hoursindivid', 'hoursdop', 'kvfirst', 'kvdop'], 'required', 'on' => self::SCENARIO_CREATE],
+            [['month', 'hours', 'kvfirst'], 'required', 'on' => self::SCENARIO_MUNICIPAL_TASK],
             [['name', 'minchild', 'maxchild', 'results'], 'required', 'on' => self::SCENARIO_CREATE],
+            [['name', 'minchild', 'maxchild', 'results'], 'required', 'on' => self::SCENARIO_MUNICIPAL_TASK],
             [['hours', 'program_id', 'year', 'hoursdop', 'hoursindivid', 'minchild', 'maxchild', 'open', 'quality_control', 'p21z', 'p22z'], 'integer'],
             [['price', 'normative_price'], 'number'],
             [['month'], 'integer', 'max' => 12],

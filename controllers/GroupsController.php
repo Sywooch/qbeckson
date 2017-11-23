@@ -266,7 +266,7 @@ class GroupsController extends Controller
                         if ($flag) {
                             $transaction->commit();
 
-                            return $this->redirect(['programs/view', 'id' => $model->program_id]);
+                            return $this->redirect(['programs/view' . ($model->program->isMunicipalTask ? '-task' : ''), 'id' => $model->program_id]);
                         }
                     } catch (\Exception $e) {
                         $transaction->rollBack();
@@ -353,7 +353,7 @@ class GroupsController extends Controller
                         if ($flag) {
                             $transaction->commit();
 
-                            return $this->redirect(['programs/view', 'id' => $model->program_id]);
+                            return $this->redirect(['programs/view' . ($model->program->isMunicipalTask ? '-task' : ''), 'id' => $model->program_id]);
                         }
                     } catch (Exception $e) {
                         $transaction->rollBack();

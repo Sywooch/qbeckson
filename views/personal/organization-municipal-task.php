@@ -1,5 +1,6 @@
 <?php
 
+use app\models\statics\DirectoryProgramDirection;
 use app\helpers\GridviewHelper;
 use app\models\UserIdentity;
 use yii\grid\ActionColumn;
@@ -15,7 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $zab = [
     'type' => SearchFilter::TYPE_SELECT2,
-    'data' => $searchPrograms::illnesses(),
+    'data' => $searchWaitPrograms::illnesses(),
     'attribute' => 'zab',
     'label' => 'Категория детей',
     'value' => function ($model) {
@@ -68,10 +69,11 @@ $hours = [
     ]
 ];
 $directivity = [
-    'attribute' => 'directivity',
+    'attribute' => 'direction_id',
+    'value' => 'direction.name',
     'label' => 'Направленность',
     'type' => SearchFilter::TYPE_DROPDOWN,
-    'data' => $searchPrograms::directivities(),
+    'data' => ArrayHelper::map(DirectoryProgramDirection::find()->all(), 'id', 'name'),
 ];
 $form = [
     'attribute' => 'form',
@@ -79,7 +81,7 @@ $form = [
         return $model::forms()[$model->form];
     },
     'type' => SearchFilter::TYPE_DROPDOWN,
-    'data' => $searchPrograms::forms(),
+    'data' => $searchWaitPrograms::forms(),
 ];
 $ageGroupMin = [
     'attribute' => 'age_group_min',
@@ -111,6 +113,11 @@ $actions = [
     'class' => ActionColumn::class,
     'controller' => 'programs',
     'template' => '{view}',
+    'buttons' => [
+        'view' => function ($url, $model, $key) {
+            return '<a href="' . Url::to(['/programs/view-task', 'id' => $model->id]) . '" title="Просмотр" aria-label="Просмотр" data-pjax="0"><span class="glyphicon glyphicon-eye-open"></span></a>';
+        },
+    ],
     'searchFilter' => false,
 ];
 
@@ -133,37 +140,73 @@ $preparedOpenColumns = GridviewHelper::prepareColumns('programs', $openColumns, 
 
 ?>
 <ul class="nav nav-tabs">
-    <li class="active">
-        <a data-toggle="tab" href="#panel1">Реестр заданий
-            <span class="badge"><?= $programsProvider->getTotalCount() ?></span>
+    <?php
+    $i = 0;
+    foreach ($tabs as $index => $tab) {
+        ?>
+        <li <?= !$i++ ? 'class="active"' : '' ?>>
+            <a data-toggle="tab" href="#panel<?= $index + 1 ?>"><?= $tab['item']->name ?>
+                <span class="badge"><?= $tab['provider']->getTotalCount() ?></span>
+            </a>
+        </li>
+        <?php
+    }
+    ?>
+    <li>
+        <a data-toggle="tab" href="#panel-e-0">Ожидающие
+            <span class="badge"><?= $waitProgramsProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel-e-1">Невошедшие в реестр
+            <span class="badge"><?= $deniedProgramsProvider->getTotalCount() ?></span>
         </a>
     </li>
 </ul>
 <br>
+<?php
+if (!Yii::$app->user->identity->organization->suborderPayer) {
+    echo \app\components\widgets\ButtonWithInfo::widget([
+        'label' => 'Добавить программу',
+        'message' => 'Невозможно. Не установлена подведомственность ни с одной организацией.',
+        'options' => ['disabled' => 'disabled',
+            'class' => 'btn btn-theme',]
+    ]);
+    echo '<br /><br />';
+} elseif (Yii::$app->user->can('organizations') && Yii::$app->user->identity->organization->actual > 0) {
+    echo "<p>";
+    echo Html::a('Добавить программу', ['programs/create', 'isTask' => 1], ['class' => 'btn btn-success']);
+    echo "</p>";
+}
+?>
 <div class="tab-content">
     <?php
-    if (Yii::$app->user->can('organizations') && Yii::$app->user->identity->organization->actual > 0) {
-        echo "<p>";
-        echo Html::a('Добавить задание', ['programs/create', 'isTask' => 1], ['class' => 'btn btn-success']);
-        echo "</p>";
+    $i = 0;
+    foreach ($tabs as $index => $tab) {
+        ?>
+        <div id="panel<?= $index + 1 ?>" class="tab-pane fade in <?= !$i++ ? 'active' : '' ?>">
+            <?php echo GridView::widget([
+                'dataProvider' => $tab['provider'],
+                'filterModel' => null,
+                'pjax' => true,
+                'columns' => $preparedOpenColumns,
+            ]); ?>
+        </div>
+        <?php
     }
     ?>
-    <div id="panel1" class="tab-pane fade in active">
-        <?= SearchFilter::widget([
-            'model' => $searchPrograms,
-            'action' => ['personal/organization-programs'],
-            'data' => GridviewHelper::prepareColumns(
-                'programs',
-                $openColumns,
-                'open',
-                'searchFilter',
-                null
-            ),
-            'role' => UserIdentity::ROLE_ORGANIZATION,
-            'type' => 'open'
-        ]); ?>
+    <div id="panel-e-0" class="tab-pane fade in">
         <?= GridView::widget([
-            'dataProvider' => $programsProvider,
+            'dataProvider' => $waitProgramsProvider,
+            'filterModel' => null,
+            'pjax' => true,
+            'summary' => false,
+            'columns' => $preparedOpenColumns,
+        ]); ?>
+    </div>
+    <div id="panel-e-1" class="tab-pane fade in">
+        <?= GridView::widget([
+            'dataProvider' => $deniedProgramsProvider,
             'filterModel' => null,
             'pjax' => true,
             'summary' => false,

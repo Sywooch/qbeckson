@@ -176,8 +176,11 @@ class YearsController extends Controller
 
         if ($rows > 0) {
             $model->open = 1;
+            if ($model->program->isMunicipalTask) {
+                $model->scenario = ProgrammeModule::SCENARIO_MUNICIPAL_TASK;
+            }
             if ($model->save()) {
-                return $this->redirect(['programs/view', 'id' => $model->program_id]);
+                return $this->redirect(['programs/view' . (!$model->program->isMunicipalTask ?: '-task'), 'id' => $model->program_id]);
             }
         } else {
             /* $modelsGroups = [new Groups];
@@ -259,8 +262,11 @@ class YearsController extends Controller
             throw  new ForbiddenHttpException();
         }
         $model->open = 0;
+        if ($model->program->isMunicipalTask) {
+            $model->scenario = ProgrammeModule::SCENARIO_MUNICIPAL_TASK;
+        }
         if ($model->save()) {
-            return $this->redirect(['programs/view', 'id' => $model->program_id]);
+            return $this->redirect(['programs/view' . (!$model->program->isMunicipalTask ?: '-task'), 'id' => $model->program_id]);
         }
     }
 

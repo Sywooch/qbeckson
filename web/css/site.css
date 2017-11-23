@@ -181,8 +181,9 @@ a.desc:after {
 }
 
 .image {
-    min-height: 400px;
-    background-image: url('/img/img1.png');
+    min-height: 100px;
+    width : 150px;
+    background-image: url('/img/upload.png');
     background-size: cover;
     background-repeat: no-repeat;
 }

@@ -144,7 +144,7 @@ class Programs extends ActiveRecord
     {
         return [
             [['direction_id', 'name', 'task', 'annotation', 'ovz', 'norm_providing', 'age_group_min', 'age_group_max', 'ground'], 'required'],
-            [['organization_id', 'ovz', 'mun', 'year', 'ground', 'age_group_min', 'age_group_max', 'verification', 'form', 'p3z', 'study', 'last_contracts', 'limit', 'last_s_contracts', 'quality_control', 'last_s_contracts_rod', 'direction_id', 'is_municipal_task', 'certificate_accounting_limit'], 'integer'],
+            [['organization_id', 'ovz', 'mun', 'year', 'ground', 'age_group_min', 'age_group_max', 'verification', 'form', 'p3z', 'study', 'last_contracts', 'limit', 'last_s_contracts', 'quality_control', 'last_s_contracts_rod', 'direction_id', 'is_municipal_task', 'certificate_accounting_limit', 'municipal_task_matrix_id'], 'integer'],
             [['rating', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch'], 'number'],
             [['task', 'annotation', 'vid', 'norm_providing', 'search', 'photo_path', 'photo_base_url'], 'string'],
             [['name', 'zab'], 'string', 'max' => 255],
@@ -354,6 +354,7 @@ class Programs extends ActiveRecord
             'zabAsString' => 'Категория детей',
             'illnessesList' => 'Категория детей',
             'currentActiveContracts' => 'Обучающиеся в данный момент',
+            'municipal_task_matrix_id' => 'Раздел муниципального задания',
         ];
     }
 
@@ -668,12 +669,12 @@ class Programs extends ActiveRecord
         return $result['summa'];
     }
 
-    public function getIsMunicipalTask()
+    public function getIsMunicipalTask(): bool
     {
         return $this->is_municipal_task > 0 ? true : false;
     }
 
-    public function getIsActive()
+    public function getIsActive(): bool
     {
         return $this->verification !== self::VERIFICATION_IN_ARCHIVE;
     }
@@ -702,12 +703,44 @@ class Programs extends ActiveRecord
     }
 
     /**
+     * проверка на возможность участия в муниципальном задании
+     * @return boolean
+     */
+    public function canCreateMunicipalTaskContract($certificate)
+    {
+        if (MunicipalTaskContract::findByProgram($this->id, $certificate)) {
+            return false;
+        }
+
+        $certificate_type = $certificate->certGroup->is_special > 0 ? MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_AC : MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_PF;
+        $matrix = MunicipalTaskPayerMatrixAssignment::findByPayerId($certificate->payer_id, $certificate_type);
+
+        $arrayCanBeChosen = ArrayHelper::map($matrix, 'matrix_id', 'can_be_chosen');
+        $arrayLimits = ArrayHelper::map($matrix, 'matrix_id', 'number');
+        $arrayService = ArrayHelper::map($matrix, 'matrix_id', 'matrix.can_set_numbers_' . MunicipalTaskPayerMatrixAssignment::getPrefixes()[$certificate_type]);
+        $arrayNumberTypes = ArrayHelper::map($matrix, 'matrix_id', 'number_type');
+
+        $tasksCount = MunicipalTaskContract::getCountContracts($certificate, $this->municipal_task_matrix_id);
+        $hoursCount = MunicipalTaskContract::getCountHours($certificate, $this->municipal_task_matrix_id);
+
+        if ($arrayService[$this->municipal_task_matrix_id] > 0 && $arrayNumberTypes[$this->municipal_task_matrix_id] == MunicipalTaskPayerMatrixAssignment::NUMBER_TYPE_SERVICE && $arrayLimits[$this->municipal_task_matrix_id] - $tasksCount < 1) {
+            return false;
+        } elseif ($arrayService[$this->municipal_task_matrix_id] > 0 && $arrayNumberTypes[$this->municipal_task_matrix_id] == MunicipalTaskPayerMatrixAssignment::NUMBER_TYPE_HOURS && $arrayLimits[$this->municipal_task_matrix_id] - $hoursCount < 1) {
+            return false;
+        } elseif ($arrayService[$this->municipal_task_matrix_id] < 1 && $arrayCanBeChosen[$this->municipal_task_matrix_id] < 1 || $arrayLimits[$this->municipal_task_matrix_id] - $tasksCount < 1) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Контракты в работе
      * @return \yii\db\ActiveQuery
      */
     public function getLivingContracts()
     {
-        return $this->getContracts()->andFilterWhere(['status' => [Contracts::STATUS_CREATED,
+        return $this->getContracts()->andFilterWhere(['status' => [Contracts::STATUS_REQUESTED,
             Contracts::STATUS_ACTIVE,
             Contracts::STATUS_ACCEPTED]]);
     }
@@ -734,6 +767,14 @@ class Programs extends ActiveRecord
         return $this->hasMany(Contracts::className(), ['program_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMunicipalTaskContracts($status = null)
+    {
+        return $this->hasMany(MunicipalTaskContract::className(), ['program_id' => 'id'])
+            ->andFilterWhere(['status' => $status]);
+    }
 
     /** @return bool */
     public function existsFreePlace()

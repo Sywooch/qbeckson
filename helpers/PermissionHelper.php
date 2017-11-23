@@ -65,17 +65,17 @@ class PermissionHelper
             ['label' => 'Организации', 'items' => [
                 ['label' => 'Реестр ПФДО', 'url' => ['/personal/payer-
 organizations']],
-                //['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
+                ['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
             ]],
             ['label' => 'Программы', 'items' => [
                 [
                     'label' => 'Реестр программ',
                     'url' => ['personal/payer-programs']
                 ],
-                /*[
-                    'label' => 'Муниципальное задание',
+                [
+                    'label' => 'Программы по муниципальному заданию',
                     'url' => ['personal/payer-municipal-task']
-                ],*/
+                ],
             ]],
         ];
 

@@ -98,7 +98,8 @@ class ContractConfirmForm extends Model
 
             $contract->number = $organization->contracts_count . ' - ПФ';
             $contract->date = date('Y-m-d');
-            $contract->status = 0;
+            $contract->status = Contracts::STATUS_REQUESTED;
+            $contract->requested_at = date('Y-m-d H:i:s');
             $contract->rezerv = $contract->funds_cert;
             $contract->save(false, [
                 'number',
