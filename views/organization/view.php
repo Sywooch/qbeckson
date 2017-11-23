@@ -403,13 +403,33 @@ $this->params['breadcrumbs'][] = $this->title;
                         ['cooperation' => $cooperation]
                     );
                 }
-                if (null !== $cooperation->getDocumentUrl()) {
+
+                $documentLabel = $cooperation->total_payment_limit ? 'Текст договора/соглашения c суммой' : 'Текст договора/соглашения без суммы';
+                $alternativeDocumentLabel = !$cooperation->total_payment_limit ? 'Текст договора/соглашения c суммой' : 'Текст договора/соглашения без суммы';
+
+                $activeDocumentLink = null !== $cooperation->getActiveDocumentUrl() ? Html::a($documentLabel, [$cooperation->getActiveDocumentUrl()], ['target' => 'blank']) : '';
+                $alternativeDocumentLink = null !== $cooperation->getAlternativeDocumentUrl() ? Html::a($alternativeDocumentLabel, [$cooperation->getAlternativeDocumentUrl()], ['target' => 'blank']) : '';
+
+                if ($activeDocumentLink) {
                     echo '<hr><div class="panel panel-default">
-                        <div class="panel-body">' .
-                        Html::a('Текст договора/соглашения', $cooperation->getDocumentUrl(), ['target' => 'blank'])
-                        . ' </div>
-                    </div>';
+                        <div class="panel-body">
+                        <p>Действующее соглашение:</p>
+                        <br>' .
+                        $activeDocumentLink .
+                        ' </div>
+                </div>';
                 }
+
+                if ($alternativeDocumentLink) {
+                    echo '<hr><div class="panel panel-default">
+                        <div class="panel-body">
+                        <p>Альтернативное соглашение:</p>
+                        <br>' .
+                        $alternativeDocumentLink .
+                        ' </div>
+                </div>';
+                }
+
                 if ($cooperation->status === Cooperate::STATUS_NEW) {
                     echo ' ';
                     echo $this->render(
