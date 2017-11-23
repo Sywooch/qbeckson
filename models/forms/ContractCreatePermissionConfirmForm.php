@@ -116,6 +116,33 @@ class ContractCreatePermissionConfirmForm extends Model
             return false;
         }
 
+        $certificateUserIds = ArrayHelper::map($payer->getCertificates()->distinct()->select('user_id')->asArray()->all(), 'user_id', 'user_id');
+        $organizationUserIds = ArrayHelper::map($payer->getOrganizations()->select('user_id')->asArray()->all(), 'user_id', 'user_id');
+
+        $messageForCertificates = 'C ' . \Yii::$app->formatter->asDate(date('Y-m-d', strtotime($payer->certificate_cant_create_contract_at))) . ' установлено ограничение на заключение новых договоров, с указанного числа Вы не сможете подать новые заявки на обучение на период с ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_from) . ' по ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_to) . '.';
+        $messageForOrganizations = 'Уполномоченной организацией ' . $payer->name . ' установлено ограничение на заключение новых договоров с детьми с ' . \Yii::$app->formatter->asDate(date('Y-m-d', strtotime($payer->certificate_cant_create_contract_at))) . '. Формирование новых заявок по сертификатам данной уполномоченной организации на обучение будет недоступно с указанной даты.';
+
+        $notificationForCertificates = Notification::getExistOrCreate($messageForCertificates, 0, Notification::TYPE_DENY_CONTRACT_CREATE);
+        $notificationForOrganizations = Notification::getExistOrCreate($messageForOrganizations, 0, Notification::TYPE_DENY_CONTRACT_CREATE);
+
+        // уведомления сертификатов
+        if ($notificationForCertificates) {
+            if ($payer->certificate_can_create_contract == 0) {
+                NotificationUser::assignToUsers($certificateUserIds, $notificationForCertificates->id);
+            } else {
+                $notificationForCertificates->delete();
+            }
+        }
+
+        // уведомление организаций
+        if ($notificationForOrganizations) {
+            if ($payer->certificate_can_create_contract == 0) {
+                NotificationUser::assignToUsers($organizationUserIds, $notificationForOrganizations->id);
+            } else {
+                $notificationForOrganizations->delete();
+            }
+        }
+
         return true;
     }
 }
