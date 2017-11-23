@@ -7,6 +7,7 @@ use League\Flysystem\FilesystemInterface;
 use trntv\filekit\events\UploadEvent;
 use League\Flysystem\File as FlysystemFile;
 use yii\base\DynamicModel;
+use yii\di\Instance;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\UploadedFile;
@@ -38,7 +39,7 @@ class TrntvUploadAction extends UploadAction
                 $validationModel = DynamicModel::validateData(['file' => $uploadedFile], $this->validationRules);
 
                 if (!$validationModel->hasErrors()) {
-                    $fileNamePostfix = $this->fileparam == '_fileinput_w1' ? 'dogsumma' : 'dogovor';
+                    $fileNamePostfix = $this->fileparam == '_fileinput_w1' ? 'dogovor' : 'dogsumma';
 
                     if (\Yii::$app->user->can('operators')) {
                         $tempPath = preg_replace('/^(.*?)([^\\/]*$)/', '\1' . \Yii::$app->user->identity->username . $fileNamePostfix . '.' . $uploadedFile->getExtension(), $uploadedFile->tempName);
@@ -93,5 +94,17 @@ class TrntvUploadAction extends UploadAction
             'filesystem' => $fs,
             'file' => $file
         ]));
+    }
+
+    /**
+     * @return TrntvStorage
+     * @throws \yii\base\InvalidConfigException
+     */
+    protected function getFileStorage()
+    {
+        $fileStorage = 'contractFileStorage';
+        $fileStorage = Instance::ensure($fileStorage, TrntvStorage::className());
+
+        return $fileStorage;
     }
 }

@@ -267,6 +267,11 @@ class ProgramsController extends Controller
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION) && $user->organization->id !== $model->organization_id) {
             throw new ForbiddenHttpException('Нет доступа');
         }
+        // При первом просмотре от плательщика меняем статус, чтобы запретить редактирование организации
+        if (Yii::$app->user->can(UserIdentity::ROLE_PAYER) && $model->verification === $model::VERIFICATION_UNDEFINED) {
+            $model->verification = $model::VERIFICATION_WAIT;
+            $model->save(false, ['verification']);
+        }
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             || Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
             if ($model->verification === $model::VERIFICATION_DENIED) {
@@ -286,7 +291,7 @@ class ProgramsController extends Controller
 
         ProgramsAsset::register($this->view);
 
-        return $this->render('task/view', ['model' => $model, 'cooperate' => $cooperate]);
+        return $this->render('task/view', ['model' => $model, 'cooperate' => null]);
     }
 
     /**
@@ -299,6 +304,10 @@ class ProgramsController extends Controller
         $model = new Programs([
             'is_municipal_task' => empty($isTask) ? null : 1,
         ]);
+
+        if ($model->getIsMunicipalTask() && !Yii::$app->user->identity->organization->suborderPayer) {
+            throw new ForbiddenHttpException();
+        }
 
         $file = new ProgramsFile();
         $modelsYears = [new ProgrammeModule(['scenario' => $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : ProgrammeModule::SCENARIO_CREATE])];

@@ -153,19 +153,27 @@ $preparedOpenColumns = GridviewHelper::prepareColumns('programs', $openColumns, 
     }
     ?>
     <li>
-        <a data-toggle="tab" href="#panel2">Ожидающие
+        <a data-toggle="tab" href="#panel-e-0">Ожидающие
             <span class="badge"><?= $waitProgramsProvider->getTotalCount() ?></span>
         </a>
     </li>
     <li>
-        <a data-toggle="tab" href="#panel3">Отклонённые
+        <a data-toggle="tab" href="#panel-e-1">Невошедшие в реестр
             <span class="badge"><?= $deniedProgramsProvider->getTotalCount() ?></span>
         </a>
     </li>
 </ul>
 <br>
 <?php
-if (Yii::$app->user->can('organizations') && Yii::$app->user->identity->organization->actual > 0) {
+if (!Yii::$app->user->identity->organization->suborderPayer) {
+    echo \app\components\widgets\ButtonWithInfo::widget([
+        'label' => 'Добавить программу',
+        'message' => 'Невозможно. Не установлена подведомственность ни с одной организацией.',
+        'options' => ['disabled' => 'disabled',
+            'class' => 'btn btn-theme',]
+    ]);
+    echo '<br /><br />';
+} elseif (Yii::$app->user->can('organizations') && Yii::$app->user->identity->organization->actual > 0) {
     echo "<p>";
     echo Html::a('Добавить программу', ['programs/create', 'isTask' => 1], ['class' => 'btn btn-success']);
     echo "</p>";
@@ -187,7 +195,7 @@ if (Yii::$app->user->can('organizations') && Yii::$app->user->identity->organiza
         <?php
     }
     ?>
-    <div id="panel2" class="tab-pane fade in">
+    <div id="panel-e-0" class="tab-pane fade in">
         <?= GridView::widget([
             'dataProvider' => $waitProgramsProvider,
             'filterModel' => null,
@@ -196,7 +204,7 @@ if (Yii::$app->user->can('organizations') && Yii::$app->user->identity->organiza
             'columns' => $preparedOpenColumns,
         ]); ?>
     </div>
-    <div id="panel3" class="tab-pane fade in">
+    <div id="panel-e-1" class="tab-pane fade in">
         <?= GridView::widget([
             'dataProvider' => $deniedProgramsProvider,
             'filterModel' => null,
