@@ -768,6 +768,14 @@ class Programs extends ActiveRecord
         return $this->hasMany(Contracts::className(), ['program_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMunicipalTaskContracts($status = null)
+    {
+        return $this->hasMany(MunicipalTaskContract::className(), ['program_id' => 'id'])
+            ->andFilterWhere(['status' => $status]);
+    }
 
     /** @return bool */
     public function existsFreePlace()

@@ -22,7 +22,7 @@ $this->title = $model->name;
 if (Yii::$app->user->can('operators')) {
     $this->params['breadcrumbs'][] = ['label' => 'Программы', 'url' => ['/personal/operator-programs']];
 } elseif (Yii::$app->user->can('organizations')) {
-    $this->params['breadcrumbs'][] = ['label' => $model->isMunicipalTask ? 'Муниципальные задания' : 'Программы', 'url' => $model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']];
+    $this->params['breadcrumbs'][] = ['label' => $model->isMunicipalTask ? 'Программы по муниципальному заданию' : 'Программы', 'url' => $model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']];
 }
 
 $this->params['breadcrumbs'][] = $this->title;
