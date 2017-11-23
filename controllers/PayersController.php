@@ -24,8 +24,6 @@ use yii\widgets\ActiveForm;
  */
 class PayersController extends Controller
 {
-    use AjaxValidationTrait;
-
     /**
      * @inheritdoc
      */
@@ -74,31 +72,11 @@ class PayersController extends Controller
     {
         $payer = $this->findModel($id);
 
-        /** @var OperatorSettings $operatorSettings */
-        $operatorSettings = Yii::$app->operator->identity->settings;
-
-        $confirmRequestForm = new ConfirmRequestForm;
-        $this->performAjaxValidation($confirmRequestForm);
-
-        $activeCooperate = $payer->getCooperation(Cooperate::STATUS_ACTIVE);
-
-        if (\Yii::$app->user->can('organizations') && $confirmRequestForm->load(Yii::$app->request->post())) {
-            $confirmRequestForm->setModel($activeCooperate);
-
-            if ($confirmRequestForm->changeCooperateType()) {
-                Yii::$app->session->setFlash('success', 'Вы успешно изменили соглашение.');
-            } else {
-                Yii::$app->session->setFlash('error', 'Возникла ошибка при изменении соглашения.');
-            }
-
-            return $this->refresh();
-        }
+        $activeCooperateExists = $payer->getCooperation(Cooperate::STATUS_ACTIVE) ? true: false;
 
         return $this->render('view', [
             'model' => $payer,
-            'confirmRequestForm' => $confirmRequestForm,
-            'operatorSettings' => $operatorSettings,
-            'activeCooperateExists' => $activeCooperate ? true: false,
+            'activeCooperateExists' => $activeCooperateExists ? true: false,
         ]);
     }
 
