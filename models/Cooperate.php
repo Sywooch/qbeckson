@@ -34,8 +34,8 @@ use yii\db\ActiveRecord;
  *
  * @property Organization $organization
  * @property Payers $payers
- * @property null|string $documentUrl
- * @property null|string $additionalDocumentUrl
+ * @property null|string $activeDocumentUrl
+ * @property null|string $alternativeDocumentUrl
  * @property Payers $payer
  * @property Contracts[] $contracts
  */
