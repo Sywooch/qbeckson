@@ -101,11 +101,13 @@ class ContractConfirmForm extends Model
             $contract->status = Contracts::STATUS_REQUESTED;
             $contract->requested_at = date('Y-m-d H:i:s');
             $contract->rezerv = $contract->funds_cert;
+            $contract->setCooperate();
             $contract->save(false, [
                 'number',
                 'date',
                 'status',
                 'rezerv',
+                'cooperate_id',
             ]);
 
             if ($contract->period == Contracts::CURRENT_REALIZATION_PERIOD) {
