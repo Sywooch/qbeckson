@@ -17,7 +17,7 @@ Modal::begin([
     'toggleButton' => [
         'tag' => 'a',
         'class' => 'btn btn-default',
-        'label' => $model->total_payment_limit . ' рублей',
+        'label' => round($model->total_payment_limit, 2) . ' рублей',
     ],
 ]);
 ?>

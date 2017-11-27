@@ -73,7 +73,7 @@ organizations']],
                     'url' => ['personal/payer-programs']
                 ],
                 [
-                    'label' => 'Муниципальное задание',
+                    'label' => 'Программы по муниципальному заданию',
                     'url' => ['personal/payer-municipal-task']
                 ],
             ]],
