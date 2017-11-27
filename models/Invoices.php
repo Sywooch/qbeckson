@@ -174,9 +174,9 @@ class Invoices extends ActiveRecord
             ':cooperate_id' => $cooperateId,
         ]);
         if ($invoices = $command->queryAll()) {
-            $command = Yii::$app->db->createCommand("SELECT SUM(i.sum) as sum FROM invoices as i WHERE i.`prepayment` = 1 AND i.`status` = " . static::STATUS_PAID . " AND i.`cooperate_id`= :cooperate_id AND i.`month` NOT IN (:months) GROUP BY i.`cooperate_id`", [
+            $command = Yii::$app->db->createCommand("SELECT SUM(i.sum) as sum FROM invoices as i WHERE i.`prepayment` = 1 AND i.`status` = " . static::STATUS_PAID . " AND i.`cooperate_id`= :cooperate_id AND i.`month` NOT IN (" . join(',', ArrayHelper::getColumn($invoices, 'month')) . ") GROUP BY i.`cooperate_id`", [
                 ':cooperate_id' => $cooperateId,
-                ':months' => join(',', ArrayHelper::getColumn($invoices, 'month')),
+                // TODO: Добавить условие на год
             ]);
             $additionalSum = $command->queryScalar();
         }

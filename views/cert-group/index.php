@@ -27,31 +27,45 @@ jQuery('#payers-certificate_can_use_future_balance').click(function(){
 $('.certificate-can-create-contract').on('click', function() {
     if ($(this).prop('checked') == false) {
         $('#modal-deny-to-create-contract').modal();
-            $(this).prop('checked', 'checked');
     } else {
         $('#modal-allow-to-create-contract').modal();
-            $(this).removeAttr('checked');
     }
 });
 
-$('.change-permission-to-contract-create').on('click', function() {
-    if (!$('.certificate-can-create-contract').prop('checked')) {
-        $('.certificate-can-create-contract').prop('checked', 'checked');
-        $('#modal-allow-to-create-contract').modal('hide');
-    } else {
-        $('.certificate-can-create-contract').removeAttr('checked');
-        $('#modal-deny-to-create-contract').modal('hide');
-    }
-    
+$('.modal-dialog').on('click', function(e) {
+  e.stopPropagation();
+});
+
+$('.modal').on('click', function() {
+  $.ajax({
+        type: 'POST',
+        url: '/cert-group/index?getPermission=1', 
+        data: $('#payer-settings-form').serialize(),
+        success: function (data) {
+            if (data == 1) {
+                $('.certificate-can-create-contract').prop('checked', 'checked');
+            } else {
+                $('.certificate-can-create-contract').removeAttr('checked');
+            }
+        }
+    });
+});
+
+$('.change-permission-to-contract-create').on('click', function() {    
     $.ajax({
         type: 'POST',
         url: '/cert-group/index?changePermission=1', 
         data: $('#payer-settings-form').serialize(),
         success: function (data) {
-            if (data) {
-                $('.certificate-can-create-contract').prop('checked', 'checked');
-            } else {
-                $('.certificate-can-create-contract').removeAttr('checked');
+            console.log(data);
+            if (data.changed == true) {
+                if (data.canCreate == 1) {
+                    $('.certificate-can-create-contract').prop('checked', 'checked');
+                    $('#modal-allow-to-create-contract').modal('hide');
+                } else {
+                    $('.certificate-can-create-contract').removeAttr('checked');
+                    $('#modal-deny-to-create-contract').modal('hide');
+                }
             }
         }
     });
@@ -168,16 +182,14 @@ $this->registerJs($js);
     <?php $form = ActiveForm::begin(['id' => 'payer-settings-form', 'enableAjaxValidation' => true]); ?>
     <?= $form->field($payer, 'days_to_first_contract_request')->textInput() ?>
     <?= $form->field($payer, 'days_to_contract_request_after_refused')->textInput() ?>
-
     <p>*В случае если в течение указанных сроков для сертификата ПФ не будут созданы новые заявки на обучение, то сертификат подлежит переводу в тип "сертификат учета".</p>
+    <?= Html::submitButton('сохранить', ['class' => 'btn btn-primary']) ?>
 
     <?= $form->field(Yii::$app->user->identity->payer, 'certificate_can_use_future_balance')->checkbox() ?>
 
-    <div data-toogle="tooltip" title="<?= !$payer->canChangePermission() ? 'установить запрет на зачисление на обучение в текущем периоде не возможно до ' . Yii::$app->formatter->asDate(date('Y-m-d', strtotime(\Yii::$app->operator->identity->settings->current_program_date_to . '-2 Month'))) : '' ?>">
+    <div data-toogle="tooltip" title="<?= !$payer->canChangePermission() ? 'установить запрет на зачисление на обучение в текущем периоде невозможно до ' . Yii::$app->formatter->asDate(date('Y-m-d', strtotime(\Yii::$app->operator->identity->settings->current_program_date_to . '-2 Month'))) : '' ?>">
         <?= $form->field($contractCreatePermissionConfirmForm, 'certificate_can_create_contract')->checkbox(['class' => 'certificate-can-create-contract', 'disabled' => !$payer->canChangePermission()]) ?>
     </div>
-
-    <?= Html::submitButton('сохранить', ['class' => 'btn btn-primary']) ?>
 
     <!-- окно для отмены создания договоров -->
     <?php Modal::begin([
@@ -193,7 +205,7 @@ $this->registerJs($js);
 
         <?= $form->field($contractCreatePermissionConfirmForm, 'password')->passwordInput(); ?>
 
-        <?= Html::Button('сохранить', ['class' => 'change-permission-to-contract-create btn btn-primary']) ?>
+        <?= Html::Button('подтвердить', ['class' => 'change-permission-to-contract-create btn btn-primary']) ?>
     </div>
 
     <?php Modal::end() ?>
@@ -204,7 +216,7 @@ $this->registerJs($js);
         'header' => 'После сохранения будет снят запрет на заключение новых договоров',
     ]) ?>
 
-    <?= Html::Button('сохранить', ['class' => 'change-permission-to-contract-create btn btn-primary']) ?>
+    <?= Html::Button('подтвердить', ['class' => 'change-permission-to-contract-create btn btn-primary']) ?>
 
     <?php Modal::end() ?>
 

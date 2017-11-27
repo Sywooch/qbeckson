@@ -176,6 +176,13 @@ $config = [
                     'roles' => ['operators']
                 ],
             ],
+            'notification' => [
+                [
+                    'allow' => true,
+                    'actions' => ['delete'],
+                    'roles' => ['@'],
+                ]
+            ],
             'personal' => [
                 [
                     'allow' => true,

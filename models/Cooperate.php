@@ -193,7 +193,7 @@ class Cooperate extends ActiveRecord
     public function getDocumentUrl()
     {
         return (null !== $this->document_path) ?
-            $this->document_base_url . '/' . $this->document_path : null;
+            '/file/contract?path=' . $this->document_base_url . '/' . $this->document_path : null;
     }
 
     /**
@@ -202,7 +202,7 @@ class Cooperate extends ActiveRecord
     public function getAdditionalDocumentUrl()
     {
         return (null !== $this->additional_document_path) ?
-            $this->additional_document_base_url . '/' . $this->additional_document_path : null;
+            '/file/contract?path=' . $this->additional_document_base_url . '/' . $this->additional_document_path : null;
     }
 
     /**

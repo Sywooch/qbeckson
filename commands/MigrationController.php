@@ -186,13 +186,13 @@ class MigrationController extends Controller
             }
         }
 
-        $invoices = Invoices::find()->all();
+        /*$invoices = Invoices::find()->all();
         foreach ($invoices as $invoice) {
             if (empty($invoice->cooperate_id)) {
                 $invoice->setCooperate();
                 $invoice->save(false, ['cooperate_id']);
                 echo $invoice->id . PHP_EOL;
             }
-        }
+        }*/
     }
 }
