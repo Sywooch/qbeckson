@@ -48,7 +48,7 @@ $('.change-permission-to-contract-create').on('click', function() {
         url: '/cert-group/index?changePermission=1', 
         data: $('#payer-settings-form').serialize(),
         success: function (data) {
-            if (data) {
+            if (data == 1) {
                 $('.certificate-can-create-contract').prop('checked', 'checked');
             } else {
                 $('.certificate-can-create-contract').removeAttr('checked');
