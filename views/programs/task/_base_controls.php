@@ -17,11 +17,14 @@ use yii\helpers\Url;
 
     if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_PAYER)) {
         echo Html::a('К списку заданий', '/personal/payer-municipal-task', ['class' => 'btn btn-theme']);
-        if ($model->verification == \app\models\Programs::VERIFICATION_UNDEFINED) {
+        if ($model->verification == \app\models\Programs::VERIFICATION_UNDEFINED || $model->verification == \app\models\Programs::VERIFICATION_WAIT) {
             echo Html::a('Одобрить', ['/programs/update-task', 'id' => $model->id], ['class' => 'btn btn-success']);
             echo Html::a('Отказать', ['/programs/decertificate', 'id' => $model->id], ['class' => 'btn btn-danger']);
         } elseif ($model->verification == \app\models\Programs::VERIFICATION_DONE) {
-            echo Html::a('Изменить раздел', ['/programs/update-task', 'id' => $model->id], ['class' => 'btn btn-theme']);
+            echo Html::a('Перенести в другой реестр', ['/programs/update-task', 'id' => $model->id], ['class' => 'btn btn-warning']);
+            if (!$model->getMunicipalTaskContracts(\app\models\MunicipalTaskContract::STATUS_ACTIVE)->count()) {
+                echo Html::a('Убрать из реестра', ['/programs/decertificate', 'id' => $model->id], ['class' => 'btn btn-danger']);
+            }
         }
     }
 
@@ -35,13 +38,13 @@ use yii\helpers\Url;
         if ($model->verification === \app\models\Programs::VERIFICATION_WAIT) {
             echo \app\components\widgets\ButtonWithInfo::widget([
                 'label' => 'Редактировать',
-                'message' => 'Невозможно. Оператор запустил процедуру сертификации',
+                'message' => 'Невозможно. Организация запустила процедуру сертификации',
                 'options' => ['disabled' => 'disabled',
                     'class' => 'btn btn-theme',]
             ]);
             echo \app\components\widgets\ButtonWithInfo::widget([
                 'label' => 'Удалить',
-                'message' => 'Невозможно. Оператор запустил процедуру сертификации',
+                'message' => 'Невозможно. Организация запустила процедуру сертификации',
                 'options' => ['disabled' => 'disabled',
                     'class' => 'btn btn-danger',]
             ]);
@@ -68,8 +71,6 @@ use yii\helpers\Url;
                                                      'toggleButton' => ['class' => 'btn btn-danger', 'label' => 'Удалить']]);
 
         }
-
-
     }
 
     echo Html::a('Открыть текст программы', $model->programFile, ['class' => 'btn btn-theme']);

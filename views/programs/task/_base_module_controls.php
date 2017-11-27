@@ -44,7 +44,7 @@ use yii\helpers\Url;
 
         echo \app\components\widgets\ButtonWithInfo::widget([
             'label' => 'Действия',
-            'message' => 'Недоступно по причине отказа',
+            'message' => 'Действия пока недоступны.',
             'options' => ['disabled' => 'disabled',
                 'class' => 'btn btn-theme',]
         ]);
