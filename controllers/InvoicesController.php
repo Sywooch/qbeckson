@@ -254,7 +254,7 @@ class InvoicesController extends Controller
     {
         $model = $this->findModel($id);
         $model->status = Invoices::STATUS_IN_THE_WORK;
-        $model->save() || Yii::$app->session->setFlash('danger', 'Ошибка! сохранить новое состояние счета неудалось!');
+        $model->save() || Yii::$app->session->setFlash('danger', 'Ошибка! сохранить новое состояние счета не удалось!');
 
         return $this->redirect(['view', 'id' => $model->id]);
 

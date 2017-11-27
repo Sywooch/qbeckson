@@ -195,6 +195,14 @@ class InvoiceBuilder extends InvoicesActions
         return (int)$date->format('m');
     }
 
+    public function getDatePrevYearNumber(): int
+    {
+        $date = new DateTime();
+        $date->modify('first day of previous month');
+
+        return (int)$date->format('Y');
+    }
+
     /**
      * Все манипуляции внутри этой функции происходят в трансзакции, можно прервать трансзакцию из нутри.
      * для успешного завершения вернуть true
@@ -263,6 +271,7 @@ class InvoiceBuilder extends InvoicesActions
         $this->invoice->date = $this->date;
         $this->invoice->number = $this->number;
         $this->invoice->month = $this->datePrevMonthNumber;
+        $this->invoice->year = $this->datePrevYearNumber;
         $this->invoice->prepayment = 0;
         $this->invoice->status = Invoices::STATUS_NOT_VIEWED;
         $this->invoice->organization_id = $this->organization->id;
