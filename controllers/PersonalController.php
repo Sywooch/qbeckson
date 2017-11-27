@@ -642,7 +642,7 @@ class PersonalController extends Controller
             'limit' => '0,10000',
             'rating' => '0,100',
             'modelName' => 'SearchTasks',
-            'verification' => Programs::VERIFICATION_UNDEFINED,
+            'verification' => [Programs::VERIFICATION_UNDEFINED, Programs::VERIFICATION_WAIT],
             'isMunicipalTask' => true,
         ]);
         $waitTasksProvider = $searchWaitTasks->search(Yii::$app->request->queryParams);

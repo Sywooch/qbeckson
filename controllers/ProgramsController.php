@@ -311,7 +311,7 @@ class ProgramsController extends Controller
         }
 
         $file = new ProgramsFile();
-        $modelsYears = [new ProgrammeModule(['scenario' => $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : ProgrammeModule::SCENARIO_CREATE])];
+        $modelsYears = [new ProgrammeModule(['kvfirst' => 'Педагог, обладающий соответствующей квалификацией', 'scenario' => $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : ProgrammeModule::SCENARIO_CREATE])];
 
         if ($model->load(Yii::$app->request->post())) {
             $modelsYears = Model::createMultiple(ProgrammeModule::classname(), [], $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : null);

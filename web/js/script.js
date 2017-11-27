@@ -66,6 +66,21 @@ $(document).ready(function () {
             $(this).find('span').removeClass('glyphicon-eye-close').addClass('glyphicon-eye-open');
         }
     });
+
+    var titles = $(".input-title").find("input");
+    var titleBody = $(".input-title-body");
+
+    titles.focusin(function () {
+        titleBody.html($(this).parent(".input-title").data('input-title'));
+        titleBody.css('display','block');
+        titleBody.css('width', $(this).width());
+        titleBody.css('top', $(this).offset().top + $(this).height() + 20);
+        titleBody.css('left', $(this).offset().left);
+    });
+
+    titles.focusout(function () {
+        titleBody.css('display','none');
+    });
 });
 
 function selectGroup(obj) {
