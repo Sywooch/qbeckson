@@ -18,6 +18,9 @@ $config = [
     'layout' => 'gos',
     'defaultRoute' => 'site/index',
     'components' => [
+        'assetManager' => [
+            'appendTimestamp' => true,
+        ],
         'keyStorage' => [
             'class' => KeyStorage::class
         ],
