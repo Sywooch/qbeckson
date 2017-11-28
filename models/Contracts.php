@@ -287,6 +287,18 @@ class Contracts extends ActiveRecord
         return $query->all();
     }
 
+    public static function findByCertificate($certificateId, $onlyCount = true)
+    {
+        $query = static::find()
+            ->where([
+                'certificate_id' => $certificateId,
+                'period' => static::CURRENT_REALIZATION_PERIOD,
+                // TODO Нужно добавить ограничения по статусу (??)
+            ]);
+
+        return $onlyCount === true ? $query->count() : $query->all();
+    }
+
     public function getPeriodSuffix()
     {
         $suffix = '';

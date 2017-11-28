@@ -17,13 +17,13 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php $form = ActiveForm::begin(); ?>
     <?= $form->errorSummary($model) ?>
     <?= $form->field($model, 'generalDocument')->widget(Upload::class, [
-        'url' => ['file-storage/upload'],
+        'url' => ['file-storage/contract-upload'],
         'maxFileSize' => 1 * 1024 * 1024,
         'acceptFileTypes' => new JsExpression('/(\.|\/)(doc|docx)$/i'),
     ]); ?>
     <?= $model->getGeneralDocumentUrl() ? Html::a('Типовой договор без суммы', $model->getGeneralDocumentUrl(), ['target' => 'blank']) : ''; ?>
     <?= $form->field($model, 'extendDocument')->widget(Upload::class, [
-        'url' => ['file-storage/upload'],
+        'url' => ['file-storage/contract-upload'],
         'maxFileSize' => 1 * 1024 * 1024,
         'acceptFileTypes' => new JsExpression('/(\.|\/)(doc|docx)$/i'),
     ]); ?>

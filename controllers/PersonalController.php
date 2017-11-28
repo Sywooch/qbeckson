@@ -25,6 +25,7 @@ use app\models\MunicipalTaskContract;
 use app\models\MunicipalTaskMatrix;
 use app\models\MunicipalTaskPayerMatrixAssignment;
 use app\models\Operators;
+use app\models\OperatorSettings;
 use app\models\Organization;
 use app\models\OrganizationContractSettings;
 use app\models\OrganizationPayerAssignment;
@@ -641,7 +642,7 @@ class PersonalController extends Controller
             'limit' => '0,10000',
             'rating' => '0,100',
             'modelName' => 'SearchTasks',
-            'verification' => Programs::VERIFICATION_UNDEFINED,
+            'verification' => [Programs::VERIFICATION_UNDEFINED, Programs::VERIFICATION_WAIT],
             'isMunicipalTask' => true,
         ]);
         $waitTasksProvider = $searchWaitTasks->search(Yii::$app->request->queryParams);
@@ -1373,6 +1374,16 @@ class PersonalController extends Controller
             Yii::$app->session->setFlash('success', 'Поиск по организации ' . $searchModel->getOrganization()->one()->name);
         }
         ProgramsAsset::register($this->view);
+
+        if (!$certificate->payer->certificateCanCreateContract()) {
+            /** @var OperatorSettings $operatorSettings */
+            $operatorSettings = Yii::$app->operator->identity->settings;
+
+            $nextPeriodBeginDate = \Yii::$app->formatter->asDate(strtotime($operatorSettings->future_program_date_from));
+            $additionMessage = $certificate->payer->certificate_can_use_future_balance ? ' Вы можете подать заявки на обучение на период с ' . $nextPeriodBeginDate . '.' : 'Дождитесь появления возможности подачи заявки на обучение на период с ' . $nextPeriodBeginDate . '.';
+
+            \Yii::$app->session->setFlash('warning', 'Заявки на обучение на период до ' . \Yii::$app->formatter->asDate(strtotime($operatorSettings->current_program_date_to)) . ' не принимаются.' . $additionMessage);
+        }
 
         return $this->render('certificate/list', [
             'dataProvider' => $dataProvider,

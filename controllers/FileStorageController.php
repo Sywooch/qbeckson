@@ -36,8 +36,12 @@ class FileStorageController extends Controller
     public function actions()
     {
         return [
-            'upload' => [
+            'contract-upload' => [
                 'class' => TrntvUploadAction::class,
+                'deleteRoute' => 'delete'
+            ],
+            'upload' => [
+                'class' => UploadAction::class,
                 'deleteRoute' => 'delete'
             ],
             'delete' => [

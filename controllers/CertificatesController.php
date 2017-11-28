@@ -5,8 +5,6 @@ namespace app\controllers;
 use app\models\Certificates;
 use app\models\certificates\CertificateNerfNominal;
 use app\models\certificates\FreezeUnFreezeCertificate;
-use app\models\Completeness;
-use app\models\Contracts;
 use app\models\Payers;
 use app\models\User;
 use app\traits\AjaxValidationTrait;
@@ -49,23 +47,17 @@ class CertificatesController extends Controller
      */
     public function actionView($id)
     {
+        if (!Yii::$app->user->can('viewCertificate', ['id' => $id])) {
+            throw new ForbiddenHttpException('Нет прав на просмотр сертификата.');
+        }
+
         $nerfer = new CertificateNerfNominal($id);
         $freezer = new FreezeUnFreezeCertificate($id);
-        $completenessQuery = Completeness::find()
-            ->where([
-                'contract_id' => Contracts::find()
-                    ->select(['id'])
-                    ->where([
-                        'or', ['status' => Contracts::STATUS_CLOSED], ['status' => Contracts::STATUS_ACTIVE]
-                    ])->andWhere([
-                        'certificate_id' => $id
-                    ])
-            ]);
+
         return $this->render('view', [
             'model' => $this->findModel($id),
             'freezer' => $freezer,
             'nerfer' => $nerfer,
-            'completenessQuery' => $completenessQuery
         ]);
     }
 
@@ -402,9 +394,7 @@ class CertificatesController extends Controller
             if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
                 $model = $this->findModel($id);
                 if ($model->hasContracts) {
-                    throw new ForbiddenHttpException(
-                        'Невозможно удалить сертификат, так как он уже заключил договоры.'
-                    );
+                    throw new ForbiddenHttpException('Невозможно удалить сертификат, так как он уже заключил договоры.');
                 }
                 User::findOne($model['user_id'])->delete();
 
