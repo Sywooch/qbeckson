@@ -15,7 +15,7 @@ return [
 
     'param42' => 'об оплате обучения', // о возмещении затрат
 
-    'decemberNumber' => 10,
+    'decemberNumber' => 12,
     
     /*
     'mun' => [
