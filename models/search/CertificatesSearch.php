@@ -2,6 +2,7 @@
 
 namespace app\models\search;
 
+use app\models\CertGroup;
 use Yii;
 use app\models\Contracts;
 use yii\base\Model;
@@ -29,6 +30,7 @@ class CertificatesSearch extends Certificates
                 'id', 'user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2',
                 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'contractCount', 'payerMunicipality'
             ], 'integer', 'message' => 'Неверное значение.'],
+            [['selectCertGroup'], 'in', 'range' => [self::TYPE_ACCOUNTING, self::TYPE_PF]],
             [['fio_child', 'number', 'name', 'soname', 'phname'], 'string'],
             [['fio_parent', 'payer', 'nominal', 'rezerv', 'balance', 'cert_group'], 'safe'],
         ];
@@ -155,6 +157,15 @@ class CertificatesSearch extends Certificates
         if (!empty($this->balance) && $this->balance !== '0,150000') {
             $balance = explode(',', $this->balance);
             $query->andWhere(['and', ['>=', 'balance', (int)$balance[0]], ['<=', 'balance', (int)$balance[1]]]);
+        }
+
+        if ($this->selectCertGroup) {
+            $query->joinWith('certGroup');
+            if ($this->selectCertGroup === self::TYPE_ACCOUNTING) {
+                $query->andWhere(['>', CertGroup::tableName() . '.[[is_special]]', 0]);
+            } elseif ($this->selectCertGroup === self::TYPE_PF) {
+                $query->andWhere([CertGroup::tableName() . '.[[is_special]]' => null]);
+            }
         }
 
         return $dataProvider;
