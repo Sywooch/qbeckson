@@ -10,6 +10,7 @@ use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Contracts */
+/* @var $completenessQuery \yii\db\ActiveQuery */
 
 if ($model->status == Contracts::STATUS_ACTIVE || $model->status == Contracts::STATUS_CLOSED || $model->status == Contracts::STATUS_REFUSED) {
     $this->title = 'Просмотр договора № ' . $model->number . ' от ' . Yii::$app->formatter->asDate($model->date);
@@ -309,10 +310,19 @@ $this->params['breadcrumbs'][] = $this->title;
         ]);
 
     }
+
+    if (($model->status === Contracts::STATUS_ACTIVE
+            || $model->status === Contracts::STATUS_CLOSED)
+        && (Yii::$app->user->can(UserIdentity::ROLE_PAYER)
+            || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR))
+    ) {
+        echo \app\components\widgets\ContractPayDetails\ContractPayDetails::widget(
+            [
+                'query' => $completenessQuery
+            ]
+        );
+    }
     ?>
-
-
-
     <?php
     if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_CERTIFICATE)) {
         /** @var $certificate Certificates */

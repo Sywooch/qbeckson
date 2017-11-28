@@ -50,7 +50,7 @@ if ($model->status === \app\models\Contracts::STATUS_REFUSED) {
     ]) ?>
 
     <?= DetailView::widget([
-        'model' => $model,
+        'model' => $model->contract,
         'attributes' => [
             'start_edu_contract:date',
             'stop_edu_contract:date',
@@ -67,7 +67,7 @@ if ($model->status === \app\models\Contracts::STATUS_REFUSED) {
             ],
             [
                 'label' => 'Модуль',
-                'value' => $model->year->fullname,
+                'value' => $model->contract->year->fullname,
             ],
         ],
     ]) ?>
@@ -80,7 +80,7 @@ if ($model->status === \app\models\Contracts::STATUS_REFUSED) {
                 [
                     'label' => 'Посмотреть текст договора',
                     'format'=>'raw',
-                    'value'=> Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $model->fullUrl),
+                    'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $model->contract->fullUrl),
                 ],
             ],
         ]);

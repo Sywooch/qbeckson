@@ -69,6 +69,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ],
         ]);
+        echo \app\components\widgets\ContractPayDetails\ContractPayDetails::widget(
+            [
+                'query' => $completenessQuery
+            ]
+        );
     } ?>
 
     <p>
