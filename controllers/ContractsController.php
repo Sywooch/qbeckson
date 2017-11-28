@@ -256,9 +256,14 @@ class ContractsController extends Controller
         if (!Yii::$app->user->can('viewContract', ['id' => $id])) {
             throw new ForbiddenHttpException('Нет прав на просмотр договора.');
         }
-
+        $model = $this->findModel($id);
+        $completenessQuery = \app\models\Completeness::find()
+            ->where(['contract_id' => $model->id])
+            ->orderBy(['year' => SORT_ASC, 'month' => SORT_ASC]);
+        
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+            'completenessQuery' => $completenessQuery
         ]);
     }
 
