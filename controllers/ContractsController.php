@@ -665,9 +665,7 @@ class ContractsController extends Controller
     {
         $payers = new Contracts();
 
-
         if ($payers->load(Yii::$app->request->post())) {
-
             $searchContracts = new ContractsDecInvoiceSearch();
             $searchContracts->payer_id = $payers->payer_id;
             $ContractsProvider = $searchContracts->search(Yii::$app->request->queryParams);

@@ -101,8 +101,6 @@ class InvoicesController extends Controller
 
     public function actionDec($payer)
     {
-        //$action=Yii::$app->request->post('action');
-        // $selection=(array)Yii::$app->request->post('selection');
         $model = new Invoices();
 
         $model->date = date("Y-m-d");
