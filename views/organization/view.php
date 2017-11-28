@@ -1,14 +1,21 @@
 <?php
 
 use app\models\Cooperate;
+use app\models\forms\ConfirmRequestForm;
 use app\models\Payers;
 use app\models\UserIdentity;
+use trntv\filekit\widget\Upload;
+use yii\bootstrap\Modal;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\web\JsExpression;
+use yii\widgets\ActiveForm;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Organization */
+/* @var $confirmRequestForm ConfirmRequestForm */
+/* @var $activeCooperateExists boolean */
 
 $this->title = $model->name;
 
@@ -34,6 +41,23 @@ if (isset($roles['payer'])) {
     }
 }
 $this->params['breadcrumbs'][] = $this->title;
+
+$js = <<<JS
+    $('#type').change(function() {
+        var val = $(this).val();
+        $('.item').hide().children('.text').hide();
+        $('.' + val).show().children('.' + val + 'Text').show();
+    })
+    $('#iscustomvalue').change(function() {
+        if(this.checked) {
+            $('.extend').show();
+            return;
+        }
+        $('.extend').hide();
+    })
+JS;
+$this->registerJs($js, $this::POS_READY);
+
 ?>
 <div class="organization-view col-md-8 col-md-offset-2">
 
@@ -403,13 +427,95 @@ $this->params['breadcrumbs'][] = $this->title;
                         ['cooperation' => $cooperation]
                     );
                 }
-                if (null !== $cooperation->getDocumentUrl()) {
+
+                $documentLabel = $cooperation->total_payment_limit ? 'Текст договора/соглашения c суммой' : 'Текст договора/соглашения без суммы';
+                $alternativeDocumentLabel = !$cooperation->total_payment_limit ? 'Текст договора/соглашения c суммой' : 'Текст договора/соглашения без суммы';
+
+                $activeDocumentLink = null !== $cooperation->getActiveDocumentUrl() ? Html::a($documentLabel, [$cooperation->getActiveDocumentUrl()], ['target' => 'blank']) : '';
+                $alternativeDocumentLink = null !== $cooperation->getAlternativeDocumentUrl() ? Html::a($alternativeDocumentLabel, [$cooperation->getAlternativeDocumentUrl()], ['target' => 'blank']) : '';
+
+                if ($activeDocumentLink) {
                     echo '<hr><div class="panel panel-default">
-                        <div class="panel-body">' .
-                        Html::a('Текст договора/соглашения', $cooperation->getDocumentUrl(), ['target' => 'blank'])
-                        . ' </div>
-                    </div>';
+                        <div class="panel-body">
+                        <p>Действующее соглашение:</p>
+                        <br>' .
+                        $activeDocumentLink .
+                        ' </div>
+                </div>';
                 }
+
+                if ($activeCooperateExists && $alternativeDocumentLink) {
+                    echo '<hr><div class="panel panel-default">
+                        <div class="panel-body">
+                        <p>Альтернативное соглашение:</p>
+                        <br>' .
+                        $alternativeDocumentLink .
+                        ' </div>
+                </div>';
+
+                    Modal::begin([
+                        'id' => 'change-cooperate-type-modal',
+                        'header' => 'Изменить тип соглашения',
+                        'toggleButton' => [
+                            'label' => 'изменить тип соглашения',
+                            'class' => 'btn btn-primary',
+                        ],
+                    ]);
+
+                    $form = ActiveForm::begin([
+                        'id' => 'cooperate-type-change-form',
+                        'enableAjaxValidation' => true,
+                        'enableClientValidation' => false,
+                    ]); ?>
+
+                    <p>
+                        Вы уверены, что хотите поменять соглашение? Не забудьте при необходимости изменить реквизиты,
+                        но имейте ввиду, что если у Ваших детей уже есть договоры с данной организацией,
+                        то в них фигурируют прошлые реквизиты
+                    </p>
+
+                    <?= $form->field($confirmRequestForm, 'type')->dropDownList(Cooperate::documentTypes()) ?>
+                    <div class="item <?= Cooperate::DOCUMENT_TYPE_GENERAL ?>">
+                        <p class="text <?= Cooperate::DOCUMENT_TYPE_GENERAL ?>Text">
+                            <small>* Рекомендуется заключать в случае если для расходования средств не требуется постановки расходного обязательства в казначействе (подходит для СОНКО)</small>
+                            <br>
+                            <?= Html::a('Просмотр договора', $operatorSettings->getGeneralDocumentUrl()); ?>
+                        </p>
+                    </div>
+                    <div class="item <?= Cooperate::DOCUMENT_TYPE_CUSTOM ?>" style="display: none">
+                        <p class="text <?= Cooperate::DOCUMENT_TYPE_CUSTOM ?>Text" style="display: none;">
+                            <small>* Вы можете сделать свой вариант договора (например, проставить заранее реквизиты в предлагаемый оператором), но не уходите от принципов ПФ. Если Вы выберите данный вариант,
+                                укажите, пожалуйста, сделан ли Ваш договор с указанием максимальной суммы (в этом случае укажите сумму), или без нее, чтобы система отслеживала необходимость заключения
+                                допсоглашений
+                                и информировала Вас об этом при необходимости.
+                            </small>
+                        </p>
+                        <?= $form->field($confirmRequestForm, 'isCustomValue')->checkbox(); ?>
+                        <?= $form->field($confirmRequestForm, 'document')->widget(Upload::class, [
+                            'url' => ['file-storage/upload'],
+                            'maxFileSize' => 10 * 1024 * 1024,
+                            'acceptFileTypes' => new JsExpression('/(\.|\/)(doc|docx)$/i'),
+                        ]); ?>
+                    </div>
+                    <div class="item <?= Cooperate::DOCUMENT_TYPE_EXTEND ?>" style="display: none">
+                        <p class="text <?= Cooperate::DOCUMENT_TYPE_EXTEND ?>Text" style="display: none;">
+                            <small>* Рекомендуется заключать в случае если для постановки расходного обязательства на исполнение необходимо зафиксировать сумму договора (подходит для АУ). Использование данного
+                                договора предполагает необходимость регулярного заключения дополнительных соглашений (информационная система будет давать подсказки)
+                            </small>
+                            <br>
+                            <?= Html::a('Просмотр договора', $operatorSettings->getExtendDocumentUrl()); ?>
+                        </p>
+                        <?= $form->field($confirmRequestForm, 'value')->textInput() ?>
+                    </div>
+                    <div class="form-group clearfix">
+                        <?= Html::submitButton('Изменить тип соглашения', ['class' => 'btn btn-success pull-right']) ?>
+                    </div>
+
+                    <? $form->end();
+
+                    Modal::end();
+                }
+
                 if ($cooperation->status === Cooperate::STATUS_NEW) {
                     echo ' ';
                     echo $this->render(

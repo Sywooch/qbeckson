@@ -185,7 +185,8 @@ class Programs extends ActiveRecord
                 'attribute' => 'photo_path',
                 'width' => 400,
                 'height' => 400,
-                'basePath' => Yii::getAlias('@webroot/uploads')],
+                'basePath' => \Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix(),
+            ],
         ];
     }
 

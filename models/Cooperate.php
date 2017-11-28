@@ -34,8 +34,8 @@ use yii\db\ActiveRecord;
  *
  * @property Organization $organization
  * @property Payers $payers
- * @property null|string $documentUrl
- * @property null|string $additionalDocumentUrl
+ * @property null|string $activeDocumentUrl
+ * @property null|string $alternativeDocumentUrl
  * @property Payers $payer
  * @property Contracts[] $contracts
  */
@@ -188,21 +188,42 @@ class Cooperate extends ActiveRecord
     }
 
     /**
+     * получить ссылку на действующий документ соглашения
+     *
+     * @param string $fileStorage
+     *
      * @return null|string
      */
-    public function getDocumentUrl()
+    public function getActiveDocumentUrl($fileStorage = 'fileStorage')
     {
-        return (null !== $this->document_path) ?
-            '/file/contract?path=' . $this->document_base_url . '/' . $this->document_path : null;
+        if (!file_exists(Yii::$app->$fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $this->document_path)) {
+            return null;
+        }
+
+        return $this->document_base_url . '/' . $this->document_path;
     }
 
     /**
+     * получить ссылку на альтернативный документ соглашения
+     *
+     * @param string $fileStorage
+     *
      * @return null|string
      */
-    public function getAdditionalDocumentUrl()
+    public function getAlternativeDocumentUrl($fileStorage = 'fileStorage')
     {
-        return (null !== $this->additional_document_path) ?
-            '/file/contract?path=' . $this->additional_document_base_url . '/' . $this->additional_document_path : null;
+        /** @var OperatorSettings $operatorSettings */
+        $operatorSettings = Yii::$app->operator->identity->settings;
+
+        if (!is_null($this->total_payment_limit) && file_exists(Yii::$app->$fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $operatorSettings->general_document_path)) {
+            return $operatorSettings->general_document_base_url . '/' . $operatorSettings->general_document_path;
+        }
+
+        if (is_null($this->total_payment_limit) && file_exists(Yii::$app->$fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $operatorSettings->extend_document_path)) {
+            return $operatorSettings->extend_document_base_url . '/' . $operatorSettings->extend_document_path;
+        }
+
+        return null;
     }
 
     /**
