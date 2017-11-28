@@ -1,6 +1,7 @@
 <?php
 /** @var $model \app\models\ProgrammeModule */
 
+use app\models\Programs;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -9,8 +10,8 @@ use yii\helpers\Url;
 
     <?php
     if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)
-        && ($model->program->verification !== \app\models\Programs::VERIFICATION_DENIED
-            || $model->program->verification !== \app\models\Programs::VERIFICATION_WAIT)) {
+        && ($model->program->verification !== Programs::VERIFICATION_DENIED
+            || $model->program->verification !== Programs::VERIFICATION_WAIT)) {
         $message = '';
         $url = '#';
         $classButton = 'btn-theme';
@@ -73,15 +74,17 @@ use yii\helpers\Url;
         }
 
         /** Зачисление отккыть/закрыть */
-        if ($active) {
-            echo Html::a($message, $url, ['class' => 'btn ' . $classButton]);
-        } else {
-            echo \app\components\widgets\ButtonWithInfo::widget([
-                'label' => 'Зачисление',
-                'message' => $message,
-                'options' => ['disabled' => 'disabled',
-                    'class' => 'btn btn-theme',]
-            ]);
+        if ($model->program->verification == Programs::VERIFICATION_DONE) {
+            if ($active) {
+                echo Html::a($message, $url, ['class' => 'btn ' . $classButton]);
+            } else {
+                echo \app\components\widgets\ButtonWithInfo::widget([
+                    'label' => 'Зачисление',
+                    'message' => $message,
+                    'options' => ['disabled' => 'disabled',
+                        'class' => 'btn btn-theme',]
+                ]);
+            }
         }
 
         /** установка цены */
@@ -127,8 +130,8 @@ use yii\helpers\Url;
         ?>
 
     <?php } elseif (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)
-        && ($model->program->verification === \app\models\Programs::VERIFICATION_DENIED
-            || $model->program->verification === \app\models\Programs::VERIFICATION_WAIT)) {
+        && ($model->program->verification === Programs::VERIFICATION_DENIED
+            || $model->program->verification === Programs::VERIFICATION_WAIT)) {
 
         echo \app\components\widgets\ButtonWithInfo::widget([
             'label' => 'Действия',
