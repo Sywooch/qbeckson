@@ -432,8 +432,13 @@ class PersonalController extends Controller
             'rezerv' => '0,150000',
             'balance' => '0,150000',
         ]);
-        $certificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
         $allCertificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams, 999999);
+        // Только сертификаты ПФ
+        $searchCertificates->selectCertGroup = $searchCertificates::TYPE_PF;
+        $certificatesProviderPF = $searchCertificates->search(Yii::$app->request->queryParams);
+        // Только сертификаты учета
+        $searchCertificates->selectCertGroup = $searchCertificates::TYPE_ACCOUNTING;
+        $certificatesProviderAccounting = $searchCertificates->search(Yii::$app->request->queryParams);
 
         $certificateToAccountingConfirmForm = new CertificateToAccountingConfirmForm;
         if (Yii::$app->request->isAjax && $certificateToAccountingConfirmForm->load(Yii::$app->request->post())) {
@@ -445,7 +450,8 @@ class PersonalController extends Controller
         }
 
         return $this->render('payer-certificates', [
-            'certificatesProvider' => $certificatesProvider,
+            'certificatesProviderPF' => $certificatesProviderPF,
+            'certificatesProviderAccounting' => $certificatesProviderAccounting,
             'searchCertificates' => $searchCertificates,
             'allCertificatesProvider' => $allCertificatesProvider,
             'certificateToAccountingConfirmForm' => $certificateToAccountingConfirmForm
