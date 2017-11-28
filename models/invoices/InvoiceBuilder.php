@@ -40,6 +40,7 @@ class InvoiceBuilder extends InvoicesActions
     public $date;
     public $number;
     public $payer_id;
+    public $isDecember = false;
     /**
      * @var Organization
      */
@@ -71,7 +72,8 @@ class InvoiceBuilder extends InvoicesActions
             'invoice' => new Invoices(),
             'date' => $date,
             'organization' => $organization,
-            'payer_id' => $payer_id
+            'payer_id' => $payer_id,
+            'isDecember' => $params['isDecember'] === true ? true : false,
         ]);
     }
 
@@ -171,8 +173,19 @@ class InvoiceBuilder extends InvoicesActions
         return count($this->outOfRangeContracts) > 0;
     }
 
+    public function getLmonth()
+    {
+        return Yii::$app->params['decemberNumber'];
+    }
+
     public function getDatePrevMonthEnd(): string
     {
+        if ($this->isDecember) {
+            $cal_days_in_month = cal_days_in_month(CAL_GREGORIAN, $this->lmonth, date('Y'));
+
+            return date('Y') . '-' . $this->lmonth . '-' . $cal_days_in_month;
+        }
+
         $date = new DateTime();
         $date->modify('last day of previous month');
 
@@ -181,6 +194,10 @@ class InvoiceBuilder extends InvoicesActions
 
     public function getDatePrevMonthBeginning(): string
     {
+        if ($this->isDecember) {
+            return date('Y') . '-' . $this->lmonth . '-' . '01';
+        }
+
         $date = new DateTime();
         $date->modify('first day of previous month');
 
@@ -189,6 +206,10 @@ class InvoiceBuilder extends InvoicesActions
 
     public function getDatePrevMonthNumber(): int
     {
+        if ($this->isDecember) {
+            return $this->lmonth;
+        }
+
         $date = new DateTime();
         $date->modify('first day of previous month');
 
