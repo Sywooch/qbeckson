@@ -101,90 +101,22 @@ class InvoicesController extends Controller
 
     public function actionDec($payer)
     {
-        $model = new Invoices();
+        $builder = InvoiceBuilder::createInstance([
+            'payer_id' => $payer,
+            'isDecember' => true,
+        ]);
 
-        $model->date = date("Y-m-d");
-
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
-
-        if ($model->load(Yii::$app->request->post())) {
-
-            $organizations = new Organization();
-            $organization = $organizations->getOrganization();
-
-            $lmonth = date('m');
-            $start = date('Y') . '-' . $lmonth . '-01';
-            $cal_days_in_month = cal_days_in_month(CAL_GREGORIAN, $lmonth, date('Y'));
-            $stop = date('Y') . '-' . $lmonth . '-' . $cal_days_in_month;
-
-            //return var_dump($payer);
-            $contracts = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('contracts')
-                ->where(['<=', 'start_edu_contract', $stop])
-                ->andWhere(['>=', 'stop_edu_contract', $start])
-                ->andWhere(['organization_id' => $organization->id])
-                ->andWhere(['payer_id' => $payer])
-                ->andWhere(['status' => 1])
-                ->andWhere(['>', 'all_funds', 0])
-                ->column();
-
-            $sum = 0;
-            foreach ($contracts as $contract_id) {
-                $contract = Contracts::findOne($contract_id);
-
-                $completeness = (new \yii\db\Query())
-                    ->select(['sum'])
-                    ->from('completeness')
-                    ->where(['contract_id' => $contract->id])
-                    ->andWhere(['preinvoice' => 0])
-                    ->andWhere(['month' => $lmonth])
-                    ->one();
-
-                /* $nopreinvoice = (new \yii\db\Query())
-                            ->select(['id'])
-                            ->from('invoices')
-                            ->where(['month' => date('m')])
-                            ->andWhere(['prepayment' => 1])
-                            ->one();
-                    
-                    
-                $precompleteness = (new \yii\db\Query())
-                        ->select(['sum'])
-                        ->from('completeness')
-                        ->where(['contract_id' => $contract->id])
-                        ->andWhere(['preinvoice' => 1])
-                        ->andWhere(['month' => date('m')])
-                        ->one();
-                
-                if (!isset($nopreinvoice['id']) or empty($nopreinvoice['id'])) {
-                    $sum += $completeness['sum'] + $precompleteness['sum'];
-                }
-                else { */
-                $sum += $completeness['sum'];
-                //  }
-
-                //$model->completeness = $completeness['completeness'];  
-                $model->payers_id = $contract->payer_id;
-            }
-            $model->contracts = implode(",", $contracts);
-
-            $model->sum = $sum;
-            $model->month = $lmonth;
-            $model->prepayment = 0;
-            $model->status = 0;
-
-
-            $model->organization_id = $organization->id;
-            if ($model->save()) {
-                return $this->redirect(['/invoices/view', 'id' => $model->id]);
-            }
-        } else {
-            return $this->render('number', [
-                'model' => $model,
-            ]);
+        if ($builder->load(Yii::$app->request->post()) && $builder->save()) {
+            return $this->redirect(['/invoices/view', 'id' => $builder->invoice->id]);
         }
+
+        if (mb_strlen($builder->contractsData['contracts']) < 1) {
+            Yii::$app->session->setFlash('danger', 'Не обнаружено не одного договора');
+        }
+
+        return $this->render('number', [
+            'model' => $builder,
+        ]);
     }
 
 

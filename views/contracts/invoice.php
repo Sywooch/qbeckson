@@ -73,31 +73,28 @@ $this->params['breadcrumbs'][] = $this->title;
     $contracts_all = (new \yii\db\Query())
         ->select(['id'])
         ->from('contracts')
-        ->where(['<=', 'start_edu_contract', $start])
-        ->andWhere(['>=', 'stop_edu_contract', $start])/** todo тут нет случайно ошибки? */
+        ->where(['<=', 'start_edu_contract', $stop])
+        ->andWhere(['>=', 'stop_edu_contract', $start])
         ->andWhere(['organization_id' => $organization->id])
-        ->andWhere(['payer_id' => $payers])
-        ->andWhere(['status' => 1])
+        ->andWhere(['payer_id' => $payers->payer_id])
+        ->andWhere(['status' => Contracts::STATUS_ACTIVE])
         ->andWhere(['>', 'all_funds', 0])
         ->column();
 
     $contracts_terminated = (new \yii\db\Query())
         ->select(['id'])
         ->from('contracts')
-        ->where(['<=', 'start_edu_contract', $start])
+        ->where(['<=', 'start_edu_contract', $stop])
         ->andWhere(['>=', 'stop_edu_contract', $start])
         ->andWhere(['organization_id' => $organization->id])
-        ->andWhere(['payer_id' => $payers])
-        ->andWhere(['status' => 4])
+        ->andWhere(['payer_id' => $payers->payer_id])
+        ->andWhere(['status' => Contracts::STATUS_CLOSED])
         ->andWhere(['<=', 'date_termnate', $stop])
         ->andWhere(['>=', 'date_termnate', $start])
         ->andWhere(['>', 'all_funds', 0])
         ->column();
 
-    //array_push($contracts, $contracts_terminated);
-    // $contracts += $contracts_terminated;
     $contracts = array_merge($contracts_all, $contracts_terminated);
-
 
     $sum = 0;
     foreach ($contracts as $contract_id) {
@@ -111,37 +108,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ->andWhere(['month' => $lmonth])
             ->one();
 
-        /*
-        $nopreinvoice = (new \yii\db\Query())
-                    ->select(['id'])
-                    ->from('invoices')
-                    ->where(['month' => date('m')])
-                    ->andWhere(['prepayment' => 1])
-            ->andWhere(['status' => [0,1,2]])
-                    ->one();
-
-        $precompleteness = (new \yii\db\Query())
-                ->select(['sum'])
-                ->from('completeness')
-                ->where(['contract_id' => $contract->id])
-                ->andWhere(['preinvoice' => 1])
-                ->andWhere(['month' => date('m')])
-                ->one();
-
-        if (!isset($nopreinvoice['id']) or empty($nopreinvoice['id'])) {
-            $sum += $completeness['sum'] + $precompleteness['sum'];
-        }
-        else { */
         $sum += $completeness['sum'];
-        // }
-
     }
 
     echo '<h1>Всего необходимо для оплаты договоров - ' . round($sum, 2) . ' руб.</h1>';
     ?>
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= Html::beginForm(['invoices/new', 'payer' => $payers['payer_id']], 'post'); ?>
 
@@ -151,13 +124,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'summary' => false,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-            /*['class' => 'yii\grid\CheckboxColumn',
-             'checkboxOptions' => function ($model, $key, $index, $column) {
-                 return ['value' => $model->id];
-             }   
-            ], */
-
-            //'id',
             'number',
             'date',
             'certificate.number',
@@ -188,72 +154,15 @@ $this->params['breadcrumbs'][] = $this->title;
                         ->andWhere(['preinvoice' => 0])
                         ->one();
 
-                    /*
-                     $nopreinvoice = (new \yii\db\Query())
-                        ->select(['id'])
-                        ->from('invoices')
-                        ->where(['month' => date('m')])
-                        ->andWhere(['prepayment' => 1])
-                         ->andWhere(['status' => [0,1,2]])
-                        ->one();
-
-                   $precompleteness = (new \yii\db\Query())
-                            ->select(['sum'])
-                            ->from('completeness')
-                            ->where(['contract_id' => $model->id])
-                            ->andWhere(['preinvoice' => 1])
-                            ->andWhere(['month' => date('m')])
-                            ->one();
-
-                    if (!isset($nopreinvoice['id']) or empty($nopreinvoice['id'])) {
-                        return round($completeness['sum'] + $precompleteness['sum'], 2);
-                    }
-                    else { */
-
                     return round($completeness['sum'], 2);
-                    // }
                 }
             ],
-            //'payer_id',
-            //'status',
-            //'status_termination',
-            //'status_comment:ntext',
-            //'status_year',
-            // 'link_doc',
-            // 'link_ofer',
-            // 'start_edu_programm',
-            // 'start_edu_contract',
-            // 'stop_edu_contract',
-
-            // ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
 
-    <!-- <p id='total'>Плательщиков: 0</p> -->
     <?= Html::a('Назад', ['/contracts/invoice'], ['class' => 'btn btn-primary']) ?>
     &nbsp;
     <?= Html::submitButton('Продолжить', ['class' => 'btn btn-primary',]); ?>
 
-
-    <?php /* 
-    $script = <<< JS
-                $(document).ready(function(){
-                    $("#invoices input[type=checkbox]").click(function(){
-                                
-                        var keys = $('#invoices').yiiGridView('getSelectedRows');
-                        
-                        //alert(keys);
-                        
-                        $.post('/invoices/countpayer',
-                               {
-                                   keylist : keys,
-                               }, 
-                                function(data) { var data = $.parseJSON(data); $('#total').text('Плательщиков: ' + data.total);   }
-                        ); 
-                    });
-                });
-JS;
-$this->registerJs($script);
-  */ ?>
     <?= Html::endForm(); ?>
 </div>
