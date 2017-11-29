@@ -103,10 +103,10 @@ $config = [
         ],
         'fileStorage' => [
             'class' => Storage::class,
-            'baseUrl' => '@web/uploads',
+            'baseUrl' => '@web/file/contract?path=/uploads',
             'filesystem' => [
                 'class' => LocalFlysystemBuilder::class,
-                'path' => '@webroot/uploads'
+                'path' => '@pfdoroot/uploads'
             ],
         ],
         'contractFileStorage' => [

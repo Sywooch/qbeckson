@@ -35,7 +35,7 @@ class ResizeImageAfterSaveBehavior extends Behavior
             ($model->isNewRecord
                 || array_key_exists($this->attribute, $event->changedAttributes))) {
             $manager = new ImageManager(array('driver' => 'gd'));
-            $path = $this->basePath . DIRECTORY_SEPARATOR . $model->{$this->attribute};
+            $path = $this->basePath . $model->{$this->attribute};
             \Yii::trace($path);
             $img = $manager->make($path);
             $img->fit($this->width, $this->height);

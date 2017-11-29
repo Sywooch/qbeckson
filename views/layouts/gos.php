@@ -166,6 +166,7 @@ $user = Yii::$app->user->getIdentity();
         </div>
     </div>
 </div>
+<div class="input-title-body"></div>
 <?= MainFooter::widget(); ?>
 <?php $this->endBody() ?>
 </body>
