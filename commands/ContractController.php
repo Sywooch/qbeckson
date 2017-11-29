@@ -8,7 +8,6 @@ use app\models\Payers;
 use app\models\UserIdentity;
 use yii;
 use yii\console\Controller;
-use yii\console\ExitCode;
 
 /*
 php yii contract/close
@@ -361,6 +360,6 @@ class ContractController extends Controller
         Yii::trace('Тестовое количество контрактов ' . count($contracts));
         Yii::trace('Тестирование завершено.');
 
-        return ExitCode::OK;
+        return Controller::EXIT_CODE_NORMAL;
     }
 }
