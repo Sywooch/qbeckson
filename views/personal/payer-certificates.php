@@ -137,6 +137,7 @@ $columns = [
     </div>
 </div>
 <?php
+$preparedColumns = GridviewHelper::prepareColumns('certificates', $columns);
 $items = [
     [
         'label' => 'Сертификаты ПФ',
@@ -145,7 +146,7 @@ $items = [
             'filterModel' => null,
             'pjax' => true,
             'summary' => false,
-            'columns' => GridviewHelper::prepareColumns('certificates', $columns),
+            'columns' => $preparedColumns,
         ]),
         'active' => true
     ],
@@ -156,7 +157,7 @@ $items = [
             'filterModel' => null,
             'pjax' => true,
             'summary' => false,
-            'columns' => GridviewHelper::prepareColumns('certificates', $columns),
+            'columns' => $preparedColumns,
         ])
     ],
 
