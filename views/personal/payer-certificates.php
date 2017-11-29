@@ -104,13 +104,13 @@ $columns = [
         </p>
     </div>
 
-    <div class="col-xs-6 text-right">
+    <div class="col-xs-6">
         <?php Modal::begin([
-            'header'       => 'Подтверждение перевода неиспользуемых сертификатов в сертификаты учета',
-            'id'           => 'certificate-change-type-confirmation-modal',
+            'header' => 'Подтверждение перевода неиспользуемых сертификатов в сертификаты учета',
+            'id' => 'certificate-change-type-confirmation-modal',
             'toggleButton' => [
                 'label' => 'Перевести неиспользуемые сертификаты в сертификаты учета',
-                'class' => 'btn btn-danger'
+                'class' => 'btn btn-danger pull-right'
             ],
         ]) ?>
 
@@ -119,7 +119,7 @@ $columns = [
 
         <?php $form = ActiveForm::begin([
             'enableAjaxValidation' => true,
-            'options'              => [
+            'options' => [
                 'data-pjax' => true
             ]
         ]) ?>
@@ -127,7 +127,7 @@ $columns = [
         <?= $form->field($certificateToAccountingConfirmForm, 'changeTypeConfirmed')->checkbox() ?>
 
         <div class="form-group">
-            <?= Html::submitButton('выполнить') ?>
+            <?= Html::submitButton('выполнить', ['class' => 'btn btn-danger']) ?>
         </div>
         <?php $form->end() ?>
 

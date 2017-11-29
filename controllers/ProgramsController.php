@@ -239,7 +239,8 @@ class ProgramsController extends Controller
         if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
             $cooperate = Cooperate::find()->where([
                 Cooperate::tableName() . '.payer_id' => $user->getCertificate()->select('payer_id'),
-                Cooperate::tableName() . '.organization_id' => $model->organization_id])->all();
+                Cooperate::tableName() . '.organization_id' => $model->organization_id,
+                'status' => Cooperate::STATUS_ACTIVE])->all();
             if (!count($cooperate)) {
                 Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в организацию, реализующую выбранную программу. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
             }

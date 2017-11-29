@@ -94,7 +94,7 @@ class CertificateVerificationForm extends Model
                 ->andWhere([
                     'organization_id' => Yii::$app->user->identity->organization->id,
                     'payer_id' => $this->getCertificate()->payer_id,
-                    'status' => 1
+                    'status' => Cooperate::STATUS_ACTIVE,
                 ])
                 ->one();
         }
