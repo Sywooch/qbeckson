@@ -5,6 +5,7 @@ namespace app\components\periodicField;
 
 
 use yii\base\Behavior;
+use yii\base\Exception;
 use yii\db\ActiveRecord;
 use yii\db\AfterSaveEvent;
 
@@ -39,8 +40,13 @@ class PeriodicFieldBehavior extends Behavior
                 continue;
             }
             $historyRecord = new PeriodicFieldAR();
-            //$historyRecord->
-
+            $historyRecord->table_name = $table;
+            $historyRecord->field_name = $field;
+            $historyRecord->record_id = $sender->getPrimaryKey();
+            $historyRecord->value = $sender->{$field};
+            if (!$historyRecord->save()) {
+                throw new Exception('Не удалось сохранить историю поля' . $historyRecord->field_name);
+            }
         }
     }
 }

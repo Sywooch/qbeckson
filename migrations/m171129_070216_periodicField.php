@@ -11,6 +11,7 @@ class m171129_070216_periodicField extends Migration
             [
                 'id' => $this->primaryKey(),
                 'table_name' => $this->string(255)->notNull(),
+                'record_id' => $this->integer()->notNull(),
                 'field_name' => $this->string(255)->notNull(),
                 'created_at' => $this->integer()->notNull(),
                 'created_by' => $this->integer()->notNull(),
@@ -20,7 +21,7 @@ class m171129_070216_periodicField extends Migration
         $this->createIndex(
             'idx_periodic_field_table_field',
             '{{%periodic_field}}',
-            ['table_name', 'field_name']
+            ['table_name', 'record_id', 'field_name']
         );
         $this->createIndex(
             'idx_periodic_field_created_at',
@@ -31,9 +32,7 @@ class m171129_070216_periodicField extends Migration
 
     public function safeDown()
     {
-        echo "m171129_070216_periodicField cannot be reverted.\n";
-
-        return false;
+        $this->dropTable('{{%periodic_field}}');
     }
 
     /*
