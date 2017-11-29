@@ -8,6 +8,7 @@ use app\models\Payers;
 use app\models\UserIdentity;
 use yii;
 use yii\console\Controller;
+use yii\console\ExitCode;
 
 /*
 php yii contract/close
@@ -111,7 +112,7 @@ class ContractController extends Controller
     public function actionCloseOnExpired()
     {
         Yii::$app->db->createCommand('
-          update contracts as c CROSS JOIN programs as p ON c.program_id = p.id CROSS JOIN organization as o ON c.organization_id = o.id 
+          update contracts as c CROSS JOIN programs as p ON c.program_id = p.id CROSS JOIN organization as o ON c.organization_id = o.id
           set c.status = 4, c.wait_termnate = 0, c.date_termnate = c.stop_edu_contract, p.last_s_contracts_rod = IF(c.terminator_user = 1, p.last_s_contracts_rod + 1, p.last_s_contracts_rod), p.last_contracts = p.last_contracts - 1, p.last_s_contracts = p.last_s_contracts + 1, o.amount_child = o.amount_child - 1
           WHERE TIMESTAMPDIFF(DAY, :phpDate, contracts.stop_edu_contract) < 0
         ', [':phpDate' => date('Y-m-h H:i:s')])->execute();
@@ -349,5 +350,17 @@ class ContractController extends Controller
         }
 
         return Controller::EXIT_CODE_NORMAL;
+    }
+
+    public function actionCronTest()
+    {
+        $contracts = Contracts::find()
+            ->limit(10)
+            ->all();
+
+        Yii::trace('Тестовое количество контрактов ' . count($contracts));
+        Yii::trace('Тестирование завершено.');
+
+        return ExitCode::OK;
     }
 }
