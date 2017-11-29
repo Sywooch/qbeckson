@@ -418,6 +418,29 @@ class Programs extends ActiveRecord
         return $query->one();
     }
 
+    /**
+     * @param int $id
+     * @return array|null|ActiveRecord
+     */
+    public static function getProgramData($id)
+    {
+        $tableName = self::tableName();
+        $yearsTableName = ProgrammeModule::tableName();
+        return self::find()->select([
+            $tableName . '.*',
+            'duration_month' => 'SUM(' . $yearsTableName . '.[[month]])',
+            'duration_hours' => 'SUM(' . $yearsTableName . '.[[hours]])',
+        ])
+            ->join('LEFT OUTER JOIN', $yearsTableName, $yearsTableName . '.[[program_id]] =  ' . $tableName . '.[[id]]')
+            ->where([
+                $tableName . '.[[verification]]' => self::VERIFICATION_DONE,
+                $tableName . '.[[id]]' => $id
+            ])
+            ->groupBy($tableName . '.[[id]]')
+            ->asArray()
+            ->one();
+    }
+
     public function getOrganizationProgram()
     {
 
