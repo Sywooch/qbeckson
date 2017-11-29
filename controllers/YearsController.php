@@ -178,9 +178,12 @@ class YearsController extends Controller
             $model->open = 1;
             if ($model->program->isMunicipalTask) {
                 $model->scenario = ProgrammeModule::SCENARIO_MUNICIPAL_TASK;
+                $path = 'programs/view-task';
+            } else {
+                $path = 'programs/view';
             }
             if ($model->save()) {
-                return $this->redirect(['programs/view' . (!$model->program->isMunicipalTask ?: '-task'), 'id' => $model->program_id]);
+                return $this->redirect([$path, 'id' => $model->program_id]);
             }
         } else {
             /* $modelsGroups = [new Groups];
@@ -258,15 +261,17 @@ class YearsController extends Controller
         $model = $this->findModel($id);
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             && $model->program->verification === Programs::VERIFICATION_DENIED) {
-
             throw  new ForbiddenHttpException();
         }
         $model->open = 0;
         if ($model->program->isMunicipalTask) {
             $model->scenario = ProgrammeModule::SCENARIO_MUNICIPAL_TASK;
+            $path = 'programs/view-task';
+        } else {
+            $path = 'programs/view';
         }
         if ($model->save()) {
-            return $this->redirect(['programs/view' . (!$model->program->isMunicipalTask ?: '-task'), 'id' => $model->program_id]);
+            return $this->redirect([$path, 'id' => $model->program_id]);
         }
     }
 
