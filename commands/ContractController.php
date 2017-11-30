@@ -138,7 +138,6 @@ class ContractController extends Controller
         $contracts = Contracts::find()
             ->where(['status' => Contracts::STATUS_ACTIVE])
             ->andWhere(['<', 'start_edu_contract', $datestart])
-            ->limit(1000)
             ->all();
 
         foreach ($contracts as $contract) {
