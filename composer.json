@@ -59,7 +59,8 @@
     "bower-asset/angular": "1.5.7",
     "opis/closure": "^3.0.6",
     "squizlabs/php_codesniffer": "^3.1",
-    "html2text/html2text": "^4.1"
+    "html2text/html2text": "^4.1",
+    "box/spout": "^2.7"
   },
   "require-dev": {
     "yiisoft/yii2-debug": "*",
