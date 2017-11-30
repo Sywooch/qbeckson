@@ -3,6 +3,7 @@ namespace app\commands;
 
 use app\models\Completeness;
 use app\models\Contracts;
+use app\models\Certificates;
 use app\models\Operators;
 use app\models\Payers;
 use app\models\UserIdentity;
@@ -132,55 +133,31 @@ class ContractController extends Controller
         // == Вынимаем действующие контракты, дата начала обучения которых меньше первого числа текущего месяца
         // Для контракта уменьшаем rezerv, увеличиваем paid
         // Для связанного сертификата уменьшаем rezerv
-        $command = Yii::$app->db->createCommand("UPDATE contracts as c CROSS JOIN certificates as crt ON c.certificate_id = crt.id SET crt.rezerv = ROUND(crt.rezerv - c.payer_other_month_payment, 2), c.rezerv = ROUND(c.rezerv - c.payer_other_month_payment, 2), c.paid = ROUND(c.paid + c.payer_other_month_payment, 2) WHERE c.status = 1 AND c.start_edu_contract < :contract_start", [
-            ':contract_start' => date('Y-m-d', strtotime('first day of this month')),
-        ]);
-        $command->execute();
-
-        // new
-        /*$command = Yii::$app->db->createCommand("UPDATE `certificates` W
-            INNER JOIN (
-                SELECT B.certificate_id, SUM(B.rezerv) AS summa
-                FROM `certificates` A
-                INNER JOIN `contracts` B ON A.id = B.certificate_id
-                WHERE B.period = 1 AND B.status != 2
-                GROUP BY B.certificate_id) B ON W.id = B.certificate_id
-                SET W.rezerv = CAST(B.summa as DECIMAL(10, 2))");
-        */
-        /*SELECT crt.id, crt.balance, crt.rezerv, crt.nominal, CAST((crt.balance + crt.rezerv + SUM(c.paid)) as DECIMAL(10, 2)) as summmm, SUM(c.paid) AS spaid FROM `certificates` as crt JOIN `contracts` as c ON crt.id = c.certificate_id WHERE c.status !=2 AND c.period = 1 GROUP BY crt.id HAVING CAST((crt.balance + crt.rezerv + spaid) as DECIMAL(10, 2)) not between CAST(nominal - 5 as DECIMAL(10, 2)) and CAST(nominal + 5 as DECIMAL(10, 2))*/
-
-        /*"SELECT crt.id, crt.balance, c.rezerv, crt.nominal, CAST((crt.balance + SUM(c.rezerv) + SUM(c.paid)) as DECIMAL(10, 2)) as summmm, SUM(c.rezerv) AS srezerv, SUM(c.paid) AS spaid FROM `certificates` as crt JOIN `contracts` as c ON crt.id = c.certificate_id WHERE c.status !=2 AND c.period = 1 GROUP BY crt.id HAVING CAST((crt.balance + srezerv + spaid) as DECIMAL(10, 2)) not between CAST(nominal - 5 as DECIMAL(10, 2)) and CAST(nominal + 5 as DECIMAL(10, 2))"*/
-
-        return Controller::EXIT_CODE_NORMAL;
-    }
-
-    public function actionCompletenessRefound()
-    {
-        return Controller::EXIT_CODE_NORMAL;
-
-        // TODO: временный костыль, переделать логику
-        ini_set('memory_limit', '-1');
+        $datestart = date('Y-m-d', strtotime('first day of this month'));
 
         $contracts = Contracts::find()
-            ->where(['status' => [Contracts::STATUS_ACTIVE, Contracts::STATUS_CLOSED]])
+            ->where(['status' => Contracts::STATUS_ACTIVE])
+            ->andWhere(['<', 'start_edu_contract', $datestart])
             ->all();
 
-        $dateTwoMonthsAgo = strtotime('first day of 2 months ago');
         foreach ($contracts as $contract) {
-            $completeness = Completeness::find()
-                ->where([
-                    'month' => date('m', $dateTwoMonthsAgo),
-                    'year' => date('Y', $dateTwoMonthsAgo),
-                    'preinvoice' => 0,
-                    'contract_id' => $contract->id,
-                ])
+            $certificate = Certificates::find()
+                ->where(['>', 'rezerv', 0])
+                ->andWhere(['id' => $contract->certificate_id])
                 ->one();
 
-            if (!empty($completeness) && $completeness['completeness'] < 100) {
-                $certificate = $contract->certificate;
-                $monthlyPrice = $this->monthlyPrice($contract, $dateTwoMonthsAgo);
-                $certificate->updateCounters(['balance' => (($monthlyPrice * $contract->payer_dol) / 100) * (100 - $completeness['completeness'])]);
-                // TODO: Уменьшить и paid по договору, резерв не возвращая
+            if (!$certificate) {
+                continue;
+            }
+
+            echo $contract->id . PHP_EOL;
+
+            $contract->rezerv = round($contract->rezerv - $contract->payer_other_month_payment, 2);
+            $contract->paid = round($contract->paid + $contract->payer_other_month_payment, 2);
+            $certificate->rezerv = round($certificate->rezerv - $contract->payer_other_month_payment, 2);
+
+            if (!$contract->save() || !$certificate->save()) {
+                die('Error while saving.');
             }
         }
 
