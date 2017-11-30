@@ -154,7 +154,8 @@ class ContractController extends Controller
             echo $contract->id . PHP_EOL;
 
             $contract->rezerv = round($contract->rezerv - $contract->payer_other_month_payment, 2);
-            $contract->paid = round($contract->paid + $contract->payer_other_month_payment, 2);        $certificate->rezerv = round($certificate->rezerv - $contract->payer_other_month_payment, 2);
+            $contract->paid = round($contract->paid + $contract->payer_other_month_payment, 2);
+            $certificate->rezerv = round($certificate->rezerv - $contract->payer_other_month_payment, 2);
 
             if (!$contract->save() || !$certificate->save()) {
                 die('Error while saving.');
