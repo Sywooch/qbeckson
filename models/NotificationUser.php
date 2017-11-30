@@ -15,27 +15,6 @@ use yii\helpers\ArrayHelper;
 class NotificationUser extends ActiveRecord
 {
     /**
-     * @inheritdoc
-     */
-    public static function tableName()
-    {
-        return 'notification_user';
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function rules()
-    {
-        return [
-            [['notification_id', 'user_id'], 'required'],
-            ['notification_id', 'exist', 'targetClass' => Notification::className(), 'targetAttribute' => 'id'],
-            ['user_id', 'exist', 'targetClass' => User::className(), 'targetAttribute' => 'id'],
-            [['user_id', 'notification_id'], 'unique', 'targetAttribute' => ['user_id', 'notification_id']],
-        ];
-    }
-
-    /**
      * назначить уведомление пользователям
      *
      * @param $userIdList - список id пользователей
@@ -53,6 +32,14 @@ class NotificationUser extends ActiveRecord
         }
 
         \Yii::$app->db->createCommand()->batchInsert(self::tableName(), ['user_id', 'notification_id'], $rows)->execute();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function tableName()
+    {
+        return 'notification_user';
     }
 
     /**
@@ -75,5 +62,18 @@ class NotificationUser extends ActiveRecord
         }
 
         return true;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+        return [
+            [['notification_id', 'user_id'], 'required'],
+            ['notification_id', 'exist', 'targetClass' => Notification::className(), 'targetAttribute' => 'id'],
+            ['user_id', 'exist', 'targetClass' => User::className(), 'targetAttribute' => 'id'],
+            [['user_id', 'notification_id'], 'unique', 'targetAttribute' => ['user_id', 'notification_id']],
+        ];
     }
 }
