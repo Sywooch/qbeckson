@@ -72,14 +72,14 @@ $(document).ready(function () {
 
     titles.focusin(function () {
         titleBody.html($(this).parent(".input-title").data('input-title'));
-        titleBody.css('display','block');
+        titleBody.css('display', 'block');
         titleBody.css('width', $(this).width());
         titleBody.css('top', $(this).offset().top + $(this).height() + 20);
         titleBody.css('left', $(this).offset().left);
     });
 
     titles.focusout(function () {
-        titleBody.css('display','none');
+        titleBody.css('display', 'none');
     });
 });
 

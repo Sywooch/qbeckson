@@ -1,16 +1,16 @@
 <?php
 
-use app\models\certificates\CertificateToAccountingConfirmForm;
-use yii\bootstrap\Modal;
-use yii\grid\ActionColumn;
-use app\models\CertGroup;
-use app\models\UserIdentity;
-use yii\helpers\ArrayHelper;
-use yii\helpers\Html;
-use kartik\grid\GridView;
-use app\widgets\SearchFilter;
 use app\helpers\GridviewHelper;
 use app\helpers\PermissionHelper;
+use app\models\CertGroup;
+use app\models\certificates\CertificateToAccountingConfirmForm;
+use app\models\UserIdentity;
+use app\widgets\SearchFilter;
+use kartik\grid\GridView;
+use yii\bootstrap\Modal;
+use yii\grid\ActionColumn;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 $this->title = 'Сертификаты';

@@ -85,6 +85,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]);
     }
+    echo $this->render('_history', ['model' => $model]);
     ?>
 
     <?php
