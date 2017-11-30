@@ -2,15 +2,17 @@
 
 namespace app\models;
 
+use app\components\periodicField\PeriodicField;
+use app\components\periodicField\PeriodicFieldBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "years".
  *
- * @property integer                          $id
+ * @property integer $id
  * @property string $name
- * @property integer                          $program_id
+ * @property integer $program_id
  * @property integer $year  порядковый номер модуля
  * @property integer $month Число месяцев реализации
  * @property integer $hours
@@ -18,8 +20,8 @@ use yii\db\ActiveRecord;
  * @property string $kvdop    Квалификация дополнительно пед работника
  * @property integer $hoursindivid
  * @property integer $hoursdop
- * @property integer                          $maxchild
- * @property integer                          $minchild
+ * @property integer $maxchild
+ * @property integer $minchild
  * @property float $price
  * @property float $normative_price
  * @property integer $rating
@@ -30,18 +32,21 @@ use yii\db\ActiveRecord;
  * @property integer $p21z
  * @property integer $p22z
  * @property string $results
- * @property string                           $fullname
+ * @property string $fullname
  *
- * @property Programs                         $program
- * @property Contracts[]                      $activeContracts
- * @property OrganizationAddress[]            $addresses
- * @property ProgramModuleAddress[]           $oldAddresses
- * @property OrganizationAddress              $mainAddress
+ * @property Programs $program
+ * @property Contracts[] $activeContracts
+ * @property OrganizationAddress[] $addresses
+ * @property ProgramModuleAddress[] $oldAddresses
+ * @property OrganizationAddress $mainAddress
  * @property ProgramModuleAddressAssignment[] $moduleAddressAssignments
- * @property Groups[]                         $groups
+ * @property Groups[] $groups
  */
 class ProgrammeModule extends ActiveRecord
 {
+
+    use PeriodicField;
+
     const SCENARIO_CREATE = 'create';
 
     const SCENARIO_MUNICIPAL_TASK = 'municipal-task';
@@ -81,6 +86,13 @@ class ProgrammeModule extends ActiveRecord
             ['results', 'string'],
             [['minchild', 'maxchild'], 'integer', 'min' => 1],
             [['program_id'], 'exist', 'skipOnError' => true, 'targetClass' => Programs::className(), 'targetAttribute' => ['program_id' => 'id']],
+        ];
+    }
+
+    public function behaviors()
+    {
+        return [
+            PeriodicFieldBehavior::className()
         ];
     }
 
@@ -213,6 +225,7 @@ class ProgrammeModule extends ActiveRecord
 
     /**
      * @param bool $prefix
+     *
      * @return string
      */
     public function getFullname($prefix = true)

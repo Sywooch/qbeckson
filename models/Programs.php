@@ -3,6 +3,8 @@
 namespace app\models;
 
 use app\components\behaviors\ResizeImageAfterSaveBehavior;
+use app\components\periodicField\PeriodicField;
+use app\components\periodicField\PeriodicFieldBehavior;
 use app\models\statics\DirectoryProgramActivity;
 use app\models\statics\DirectoryProgramDirection;
 use trntv\filekit\behaviors\UploadBehavior;
@@ -84,6 +86,9 @@ use yii\helpers\ArrayHelper;
  */
 class Programs extends ActiveRecord
 {
+
+    use PeriodicField;
+
     const VERIFICATION_UNDEFINED = 0;
     const VERIFICATION_WAIT = 1;
     const VERIFICATION_DONE = 2;
@@ -185,7 +190,9 @@ class Programs extends ActiveRecord
                 'attribute' => 'photo_path',
                 'width' => 400,
                 'height' => 400,
-                'basePath' => Yii::getAlias('@webroot/uploads')],
+                'basePath' => Yii::getAlias('@webroot/uploads')
+            ],
+            PeriodicFieldBehavior::className()
         ];
     }
 

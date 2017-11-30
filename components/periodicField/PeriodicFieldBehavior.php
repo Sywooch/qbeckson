@@ -8,7 +8,13 @@ use yii\base\Behavior;
 use yii\base\Exception;
 use yii\db\ActiveRecord;
 use yii\db\AfterSaveEvent;
+use yii\db\Transaction;
 
+/**
+ * Class PeriodicFieldBehavior
+ * @package app\components\periodicField
+ * @property Transaction $transaction
+ */
 class PeriodicFieldBehavior extends Behavior
 {
     public $blackListFields = [
@@ -17,14 +23,23 @@ class PeriodicFieldBehavior extends Behavior
 
     public $whiteListFields = null;
 
+    private $transaction;
+
     public function events()
     {
         return [
+            ActiveRecord::EVENT_BEFORE_INSERT => 'beginTransaction',
+            ActiveRecord::EVENT_BEFORE_UPDATE => 'beginTransaction',
             ActiveRecord::EVENT_AFTER_INSERT => 'afterSave',
             ActiveRecord::EVENT_AFTER_UPDATE => 'afterSave'
         ];
     }
 
+
+    public function beginTransaction($event)
+    {
+        $this->transaction = \Yii::$app->db->beginTransaction();
+    }
 
     public function afterSave(AfterSaveEvent $event)
     {
@@ -45,8 +60,10 @@ class PeriodicFieldBehavior extends Behavior
             $historyRecord->record_id = $sender->getPrimaryKey();
             $historyRecord->value = $sender->{$field};
             if (!$historyRecord->save()) {
+                $this->transaction->rollback();
                 throw new Exception('Не удалось сохранить историю поля' . $historyRecord->field_name);
             }
         }
+        $this->transaction->commit();
     }
 }
