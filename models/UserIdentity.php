@@ -24,6 +24,7 @@ use yii\web\IdentityInterface;
  * @property mixed               $userName
  * @property Payers              $payer
  * @property \yii\db\ActiveQuery $operator
+ * @property Notification[]      $notifications
  */
 class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacInterface
 {
@@ -234,6 +235,14 @@ class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacIn
         }
 
         throw new BadRequestHttpException('Ошибка обращения к монитору.');
+    }
+
+    /**
+     * получить все уведомления назначенные пользователю
+     */
+    public function getNotifications()
+    {
+        return $this->hasMany(Notification::className(), ['id' => 'notification_id'])->viaTable(NotificationUser::tableName(), ['user_id' => 'id']);
     }
 
     /**

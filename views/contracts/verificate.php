@@ -80,7 +80,7 @@ if ($model->status === \app\models\Contracts::STATUS_REFUSED) {
                 [
                     'label' => 'Посмотреть текст договора',
                     'format'=>'raw',
-                    'value'=> Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $model->fullUrl),
+                    'value' => Html::a('<span class="glyphicon glyphicon-download-alt"></span>', $model->contract->fullUrl),
                 ],
             ],
         ]);

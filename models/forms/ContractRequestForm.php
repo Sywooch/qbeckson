@@ -92,25 +92,33 @@ class ContractRequestForm extends Model
         /** @var Payers $payer */
         $payer = $this->getCertificate()->payer;
 
-        if (!$payer->certificateCanCreateContract() && $payer->certificate_can_use_future_balance = 1 &&
-                (strtotime($this->$attribute) < strtotime($settings->future_program_date_from))) {
+        if (!$payer->certificateCanCreateContract() && 1 == $payer->certificate_can_use_future_balance &&
+            (strtotime($this->$attribute) < strtotime($settings->future_program_date_from) || strtotime($this->$attribute) > strtotime($group->datestop))) {
+            if (strtotime($settings->future_program_date_from) > strtotime($group->datestop)) {
+                $this->addError(
+                    $attribute,
+                    'В настоящее время запись недоступна.'
+                );
+                return;
+            }
+
             $this->addError(
                 $attribute,
-                'Дата начала обучения по договору не может быть ранее '. \Yii::$app->formatter->asDate($settings->future_program_date_from) . ', поскольку уполномоченная организация закрыла возможность зачисления в текущем периоде.'
+                'Дата начала обучения по договору должна быть в пределах: '. \Yii::$app->formatter->asDate($settings->future_program_date_from) . ' - ' . \Yii::$app->formatter->asDate($group->datestop) . ', поскольку уполномоченная организация закрыла возможность зачисления в текущем периоде.'
             );
             return;
         }
 
-        if ($payer->certificateCanCreateContract() && $payer->certificate_can_use_future_balance != 1 &&
+        if ($payer->certificateCanCreateContract() && 1 != $payer->certificate_can_use_future_balance &&
                 (strtotime($this->$attribute) > strtotime($settings->current_program_date_to))) {
             $this->addError(
                 $attribute,
-                'Дата начала обучения по договору не может быть позднее '. \Yii::$app->formatter->asDate($settings->current_program_date_to) . ', пока уполномоченная организация не установила возможность зачисления в будущем периоде.'
+                'Дата начала обучения по договору должна быть в пределах: ' . \Yii::$app->formatter->asDate($settings->current_program_date_from) . ' - ' . \Yii::$app->formatter->asDate($settings->current_program_date_to) . ', пока уполномоченная организация не установила возможность зачисления в будущем периоде.'
             );
             return;
         }
 
-        if ($payer->certificateCanCreateContract() && $payer->certificate_can_use_future_balance = 1 &&
+        if ($payer->certificateCanCreateContract() && 1 == $payer->certificate_can_use_future_balance &&
                 (strtotime($this->$attribute) < strtotime($group->datestart) || strtotime($this->$attribute) > strtotime($group->datestop))) {
             $this->addError(
                 $attribute,
@@ -347,7 +355,7 @@ class ContractRequestForm extends Model
     /**
      * @return string
      */
-    public function getRealizationPeriod(): string
+    public function getRealizationPeriod()
     {
         return $this->realizationPeriod;
     }
