@@ -83,7 +83,7 @@ class Help extends \yii\db\ActiveRecord
             'order_id'   => 'номер для сортировки',
             'name'       => 'Название',
             'body'       => 'Текст',
-            'applied_to' => 'Кто должен поставить "галочки" о прочтении',
+            'applied_to' => 'Адресаты инструкций',
             'for_guest'  => 'Не авторизованный',
             'checked'    => 'C разделом «<a target="_blank" href="' . \yii\helpers\Url::to(['site/manual', 'id' => $this->id]) . '">' . $this->name . '</a>» ознакомлен, ' . $checkedLabel,
         ];
