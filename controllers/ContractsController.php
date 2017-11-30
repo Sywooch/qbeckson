@@ -257,9 +257,7 @@ class ContractsController extends Controller
             throw new ForbiddenHttpException('Нет прав на просмотр договора.');
         }
         $model = $this->findModel($id);
-        $completenessQuery = \app\models\Completeness::find()
-            ->where(['contract_id' => $model->id])
-            ->orderBy(['year' => SORT_ASC, 'month' => SORT_ASC]);
+        $completenessQuery = $model->getTransactions();
         
         return $this->render('view', [
             'model' => $model,

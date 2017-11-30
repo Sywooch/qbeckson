@@ -20,6 +20,10 @@ namespace app\models;
  * @property float $sum
  * @property integer $preinvoice   0 - окончательный расчет,  1 - авансовый
  *
+ * @property \DateTime $date
+ * @property string $preinvoiceLabel
+ *
+ *
  *
  * @property Groups $group
  */
@@ -47,6 +51,20 @@ class Completeness extends \yii\db\ActiveRecord
         ];
     }
 
+    public function getDate()
+    {
+        return (new \DateTime())->setDate($this->year, $this->month, 1);
+    }
+
+    public function getPreinvoiceLabel()
+    {
+        if ($this->preinvoice) {
+            return 'Аванс';
+        } else {
+            return 'Счет';
+        }
+    }
+
     /**
      * @inheritdoc
      */
@@ -60,6 +78,7 @@ class Completeness extends \yii\db\ActiveRecord
             'completeness' => 'Полнота услуг оказанных организацией',
             'preinvoice' => 'Предоплата',
             'sum' => 'Сумма',
+            'preinvoiceLabel' => 'Тип счета',
         ];
     }
 
