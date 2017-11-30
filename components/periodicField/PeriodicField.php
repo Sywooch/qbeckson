@@ -16,11 +16,11 @@ trait PeriodicField
      *
      * @throws Exception
      */
-    private function getHistoryQuery(string $field)
+    public function getHistoryQuery(string $field = null)
     {
         /** @var $self ActiveRecord */
         $self = $this;
-        if (!in_array($field, $self->fields())) {
+        if ($field && !in_array($field, $self->fields())) {
             throw new Exception('Не известное поле ' . $field);
         }
         $table = $self::tableName();
@@ -31,9 +31,9 @@ trait PeriodicField
                 [
                     'table_name' => $table,
                     'record_id' => $record_id,
-                    'field_name' => $field
+
                 ]
-            );
+            )->andFilterWhere(['field_name' => $field]);
     }
 
     public function getHistory(string $field)

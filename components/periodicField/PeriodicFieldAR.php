@@ -2,8 +2,11 @@
 
 namespace app\components\periodicField;
 
+use app\models\ProgrammeModule;
+use app\models\Programs;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 
 /**
  * Class PeriodicFieldAR
@@ -16,15 +19,37 @@ use yii\behaviors\TimestampBehavior;
  * @property int $created_by
  * @property string $value
  *
+ * @property string $fieldLabel
+ *
+ * @property ActiveRecord $model
+ *
  */
 class PeriodicFieldAR extends \yii\db\ActiveRecord
 {
+    private $model;
+
+    private $tablesToModels = [
+        'programs' => Programs::class,
+        'years' => ProgrammeModule::class
+    ];
+
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
         return '{{%periodic_field}}';
+    }
+
+    public function init()
+    {
+        parent::init();
+        $this->on(
+            'afterFind',
+            function () {
+                $this->model = $this->tablesToModels[$this->table_name]::instantiate(null);
+            }
+        );
     }
 
     public function behaviors()
@@ -65,10 +90,22 @@ class PeriodicFieldAR extends \yii\db\ActiveRecord
             'id' => 'ID',
             'table_name' => 'Таблица',
             'field_name' => 'Поле',
+            'fieldLabel' => 'Поле',
             'record_id' => 'Id записи',
             'created_at' => 'Дата',
             'created_by' => 'Пользователь',
             'value' => 'Значение',
+            'resolvedValue' => 'Значение',
         ];
+    }
+
+    public function getFieldLabel()
+    {
+        return $this->model->attributeLabels()[$this->field_name];
+    }
+
+    public function getResolvedValue()
+    {
+        return $this->model->fieldResolver($this);
     }
 }

@@ -87,7 +87,7 @@ $config = [
             'class' => 'yii\rbac\DbManager',
         ],
         'formatter' => [
-            'class' => 'yii\i18n\Formatter',
+            'class' => '\app\components\AppFormatter',
             'dateFormat' => 'php:d.m.Y',
             'datetimeFormat' => 'php:d.m.Y H:i:s',
             'timeFormat' => 'php:H:i:s',

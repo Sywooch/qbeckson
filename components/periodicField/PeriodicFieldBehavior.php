@@ -47,19 +47,25 @@ class PeriodicFieldBehavior extends Behavior
         $sender = $event->sender;
         $table = $sender::tableName();
         $fields = $event->changedAttributes;
-        foreach ($fields as $field) {
+        $now = time();
+        foreach ($fields as $field => $oldValue) {
             if (in_array($field, $this->blackListFields)) {
                 continue;
             }
             if ($this->whiteListFields && !in_array($field, $this->whiteListFields)) {
                 continue;
             }
+            if ($oldValue == $sender->{$field}) {
+                continue;
+            }
             $historyRecord = new PeriodicFieldAR();
             $historyRecord->table_name = $table;
             $historyRecord->field_name = $field;
             $historyRecord->record_id = $sender->getPrimaryKey();
-            $historyRecord->value = $sender->{$field};
+            $historyRecord->value = (string)$sender->{$field};
+            $historyRecord->created_at = $now;
             if (!$historyRecord->save()) {
+                \Yii::trace($historyRecord->getErrors());
                 $this->transaction->rollback();
                 throw new Exception('Не удалось сохранить историю поля' . $historyRecord->field_name);
             }
