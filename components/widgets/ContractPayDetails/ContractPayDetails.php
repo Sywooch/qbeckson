@@ -5,6 +5,7 @@ namespace app\components\widgets\ContractPayDetails;
 use yii\base\Widget;
 use yii\bootstrap\Collapse;
 use yii\data\ActiveDataProvider;
+use yii\helpers\Html;
 
 class ContractPayDetails extends Widget
 {
@@ -15,17 +16,50 @@ class ContractPayDetails extends Widget
     public function run()
     {
         $dataProvider = new ActiveDataProvider(['query' => $this->query, 'pagination' => ['pageSize' => 10]]);
-        $table = $this->render('_table', ['dataProvider' => $dataProvider]);
+        $table = $this->render('_table', [
+            'dataProvider' => $dataProvider,
+        ]);
 
         return $this->collapsed($table);
     }
 
     private function collapsed($content)
     {
-        return Collapse::widget(['items' => [
-            ['label' => $this->title,
-                'content' => $content,]]
-        ]);
+        $icoCaret =
+            Html::tag(
+                'span',
+                null,
+                ['class' => ['glyphicon', 'glyphicon-chevron-down', 'pull-right']]
+            );
+        $icoList =
+            Html::tag(
+                'span',
+                null,
+                ['class' => ['glyphicon', 'glyphicon-list']]
+            );
+        $title = Html::tag(
+            'div',
+            $icoList . ' ' . $this->title . $icoCaret,
+            ['style' => ['display' => 'block']]
+        );
+
+        return Collapse::widget(
+            ['items' => [
+                [
+                    'label' => $title,
+                    'content' => $content,
+                ]
+            ],
+                'encodeLabels' => false,
+            ]
+        );
+    }
+
+    public function getDecHashGenerator()
+    {
+        return function (string $val): string {
+            return hexdec(substr(md5($val), -15, 15));
+        };
     }
 
 }
