@@ -1,16 +1,12 @@
 <?php
+
 use app\models\Cooperate;
-use app\models\forms\ConfirmRequestForm;
 use app\models\forms\CooperateChangeTypeForm;
-use trntv\filekit\widget\Upload;
-use yii\bootstrap\Modal;
-use yii\db\Query;
-use yii\helpers\Url;
-use yii\helpers\Html;
-use yii\web\JsExpression;
-use yii\widgets\ActiveForm;
-use yii\widgets\DetailView;
 use app\models\Organization;
+use yii\db\Query;
+use yii\helpers\Html;
+use yii\helpers\Url;
+use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Payers */

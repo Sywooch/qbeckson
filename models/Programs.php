@@ -192,6 +192,7 @@ class Programs extends ActiveRecord
                 'height' => 400,
                 'basePath' => \Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix(),
             ],
+            PeriodicFieldBehavior::className()
         ];
     }
 
