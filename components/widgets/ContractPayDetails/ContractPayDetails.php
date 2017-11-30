@@ -16,7 +16,9 @@ class ContractPayDetails extends Widget
     public function run()
     {
         $dataProvider = new ActiveDataProvider(['query' => $this->query, 'pagination' => ['pageSize' => 10]]);
-        $table = $this->render('_table', ['dataProvider' => $dataProvider]);
+        $table = $this->render('_table', [
+            'dataProvider' => $dataProvider,
+        ]);
 
         return $this->collapsed($table);
     }
@@ -51,6 +53,13 @@ class ContractPayDetails extends Widget
                 'encodeLabels' => false,
             ]
         );
+    }
+
+    public function getDecHashGenerator()
+    {
+        return function (string $val): string {
+            return hexdec(substr(md5($val), -15, 15));
+        };
     }
 
 }
