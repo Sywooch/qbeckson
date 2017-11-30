@@ -2,6 +2,9 @@
 
 namespace app\rbac;
 
+use app\models\Programs;
+use app\models\UserIdentity;
+use Yii;
 use yii\rbac\Rule;
 
 class ViewProgrammeRule extends Rule
@@ -16,6 +19,29 @@ class ViewProgrammeRule extends Rule
      */
     public function execute($user, $item, $params)
     {
-        return true;
+        if (!isset($params['id']) || !$programme = Programs::findOne($params['id'])) {
+            return false;
+        }
+
+        $userIdentity = Yii::$app->user->identity;
+
+        if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE) && $programme->mun == $userIdentity->certificate->payer->mun) {
+            return true;
+        }
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION) && $programme->organization_id == $userIdentity->organization->id) {
+            return true;
+        }
+        if (Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
+            $organizations = Yii::$app->user->identity->payer->findCooperateOrganizations();
+
+            if (in_array($programme->organization_id, $organizations)) {
+                return true;
+            }
+        }
+        if (Yii::$app->user->can(UserIdentity::ROLE_OPERATOR) && $programme->municipality->operator_id == $userIdentity->operator->id) {
+            return true;
+        }
+
+        return false;
     }
 }

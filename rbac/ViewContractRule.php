@@ -2,6 +2,10 @@
 
 namespace app\rbac;
 
+use Yii;
+use app\models\Contracts;
+use app\models\User;
+use app\models\UserIdentity;
 use yii\rbac\Rule;
 
 class ViewContractRule extends Rule
@@ -16,6 +20,25 @@ class ViewContractRule extends Rule
      */
     public function execute($user, $item, $params)
     {
-        return true;
+        if (!isset($params['id']) || !$contract = Contracts::findOne($params['id'])) {
+            return false;
+        }
+
+        $userIdentity = Yii::$app->user->identity;
+
+        if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE) && $contract->certificate_id == $userIdentity->certificate->id) {
+            return true;
+        }
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION) && $contract->organization_id == $userIdentity->organization->id) {
+            return true;
+        }
+        if (Yii::$app->user->can(UserIdentity::ROLE_PAYER) && $contract->payer_id == $userIdentity->payer->id) {
+            return true;
+        }
+        if (Yii::$app->user->can(UserIdentity::ROLE_OPERATOR) && $contract->payer->operator_id == $userIdentity->operator->id) {
+            return true;
+        }
+
+        return false;
     }
 }

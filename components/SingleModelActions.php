@@ -18,7 +18,6 @@ use yii\helpers\ArrayHelper;
 abstract class SingleModelActions extends Model
 {
     private $targetModel;
-
     /**
      * CertificateActions constructor.
      *
