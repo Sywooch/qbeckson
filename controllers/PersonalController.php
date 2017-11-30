@@ -278,14 +278,14 @@ class PersonalController extends Controller
         $allCertificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams, 999999);
         // Только сертификаты ПФ
         $searchCertificates->selectCertGroup = $searchCertificates::TYPE_PF;
-        $certificatesProviderPF = $searchCertificates->search(Yii::$app->request->queryParams);
+        $certificatesProviderPf = $searchCertificates->search(Yii::$app->request->queryParams);
         // Только сертификаты учета
         $searchCertificates->selectCertGroup = $searchCertificates::TYPE_ACCOUNTING;
         $certificatesProviderAccounting = $searchCertificates->search(Yii::$app->request->queryParams);
 
         return $this->render('operator-certificates', [
             'searchCertificates' => $searchCertificates,
-            'certificatesProviderPF' => $certificatesProviderPF,
+            'certificatesProviderPf' => $certificatesProviderPf,
             'certificatesProviderAccounting' => $certificatesProviderAccounting,
             'allCertificatesProvider' => $allCertificatesProvider,
         ]);
@@ -442,7 +442,7 @@ class PersonalController extends Controller
         $allCertificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams, 999999);
         // Только сертификаты ПФ
         $searchCertificates->selectCertGroup = $searchCertificates::TYPE_PF;
-        $certificatesProviderPF = $searchCertificates->search(Yii::$app->request->queryParams);
+        $certificatesProviderPf = $searchCertificates->search(Yii::$app->request->queryParams);
         // Только сертификаты учета
         $searchCertificates->selectCertGroup = $searchCertificates::TYPE_ACCOUNTING;
         $certificatesProviderAccounting = $searchCertificates->search(Yii::$app->request->queryParams);
@@ -457,7 +457,7 @@ class PersonalController extends Controller
         }
 
         return $this->render('payer-certificates', [
-            'certificatesProviderPF' => $certificatesProviderPF,
+            'certificatesProviderPf' => $certificatesProviderPf,
             'certificatesProviderAccounting' => $certificatesProviderAccounting,
             'searchCertificates' => $searchCertificates,
             'allCertificatesProvider' => $allCertificatesProvider,

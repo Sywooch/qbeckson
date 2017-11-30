@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
 /* @var $this yii\web\View */
 /* @var $searchCertificates \app\models\search\CertificatesSearch */
 /* @var $certificatesProviderAccounting \yii\data\ActiveDataProvider */
-/* @var $certificatesProviderPF \yii\data\ActiveDataProvider */
+/* @var $certificatesProviderPf \yii\data\ActiveDataProvider */
 /* @var $allCertificatesProvider \yii\data\ActiveDataProvider */
 /* @var $certificateToAccountingConfirmForm CertificateToAccountingConfirmForm */
 
@@ -142,7 +142,7 @@ $items = [
     [
         'label' => 'Сертификаты ПФ',
         'content' => GridView::widget([
-            'dataProvider' => $certificatesProviderPF,
+            'dataProvider' => $certificatesProviderPf,
             'filterModel' => null,
             'pjax' => true,
             'summary' => false,
