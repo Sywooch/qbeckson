@@ -50,7 +50,7 @@ if ($model->status === \app\models\Contracts::STATUS_REFUSED) {
     ]) ?>
 
     <?= DetailView::widget([
-        'model' => $model->contract,
+        'model' => $model,
         'attributes' => [
             'start_edu_contract:date',
             'stop_edu_contract:date',
@@ -67,7 +67,7 @@ if ($model->status === \app\models\Contracts::STATUS_REFUSED) {
             ],
             [
                 'label' => 'Модуль',
-                'value' => $model->contract->year->fullname,
+                'value' => $model->year->fullname,
             ],
         ],
     ]) ?>
