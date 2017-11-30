@@ -928,6 +928,7 @@ class PersonalController extends Controller
 
         $searchActiveContracts = new ContractsSearch([
             'status' => Contracts::STATUS_ACTIVE,
+            'started' => ContractsSearch::STARTED_YES,
             'paid' => '0,150000',
             'rezerv' => '0,150000',
             'all_parents_funds' => '0,10000',
@@ -935,6 +936,17 @@ class PersonalController extends Controller
             'organization_id' => $user->organization->id,
         ]);
         $activeContractsProvider = $searchActiveContracts->search(Yii::$app->request->queryParams);
+
+        $searchFutureContracts = new ContractsSearch([
+            'status' => Contracts::STATUS_ACTIVE,
+            'started' => ContractsSearch::STARTED_NO,
+            'paid' => '0,150000',
+            'rezerv' => '0,150000',
+            'all_parents_funds' => '0,10000',
+            'modelName' => 'SearchActiveContracts',
+            'organization_id' => $user->organization->id,
+        ]);
+        $futureContractsProvider = $searchFutureContracts->search(Yii::$app->request->queryParams);
 
         $searchConfirmedContracts = new ContractsSearch([
             'status' => Contracts::STATUS_ACCEPTED,
@@ -982,6 +994,8 @@ class PersonalController extends Controller
             'dissolvedContractsProvider' => $dissolvedContractsProvider,
             'searchEndsContracts' => $searchEndsContracts,
             'endsContractsProvider' => $endsContractsProvider,
+            'searchFutureContracts' => $searchFutureContracts,
+            'futureContractsProvider' => $futureContractsProvider,
 
             'ContractsallProvider' => $ContractsallProvider,
         ]);
