@@ -5,6 +5,7 @@ namespace app\models;
 use app\components\services\InformerBuilder;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -687,6 +688,34 @@ class Contracts extends ActiveRecord
         return $monthlyPrice;
     }
 
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getTransactions()
+    {
+        $now = new \DateTime();
+        $year = $now->format('Y');
+        $month = $now->format('m');
+        $condition = [
+            'or',
+            ['preinvoice' => 0],
+            [
+                'and',
+                ['preinvoice' => 1],
+                [
+                    'and',
+                    ['year' => $year],
+                    ['month' => $month]
+                ]
+            ],
+        ];
+
+        return $this
+            ->getCompleteness()
+            ->andWhere($condition);
+    }
+    
     /**
      * @return array
      */

@@ -4,14 +4,18 @@ namespace app\controllers;
 
 use app\models\Certificates;
 use app\models\Contracts;
+use app\models\Cooperate;
+use app\models\forms\ConfirmRequestForm;
 use app\models\Informs;
 use app\models\Mun;
+use app\models\OperatorSettings;
 use app\models\Organization;
 use app\models\OrganizationPayerAssignment;
 use app\models\Programs;
 use app\models\search\OrganizationSearch;
 use app\models\User;
 use app\models\UserIdentity;
+use app\traits\AjaxValidationTrait;
 use Yii;
 use yii\base\DynamicModel;
 use yii\filters\VerbFilter;
@@ -26,6 +30,8 @@ use yii\widgets\ActiveForm;
  */
 class OrganizationController extends Controller
 {
+    use AjaxValidationTrait;
+
     /**
      * @inheritdoc
      */
@@ -84,8 +90,31 @@ class OrganizationController extends Controller
             }
         }
 
+        /** @var OperatorSettings $operatorSettings */
+        $operatorSettings = Yii::$app->operator->identity->settings;
+
+        $confirmRequestForm = new ConfirmRequestForm;
+        $this->performAjaxValidation($confirmRequestForm);
+
+        $activeCooperate = $model->getCooperation(Cooperate::STATUS_ACTIVE);
+
+        if (\Yii::$app->user->can('payer') && $confirmRequestForm->load(Yii::$app->request->post())) {
+            $confirmRequestForm->setModel($activeCooperate);
+
+            if ($confirmRequestForm->changeCooperateType()) {
+                Yii::$app->session->setFlash('success', 'Вы успешно изменили соглашение.');
+            } else {
+                Yii::$app->session->setFlash('error', 'Возникла ошибка при изменении соглашения.');
+            }
+
+            return $this->refresh();
+        }
+
         return $this->render('view', [
             'model' => $model,
+            'confirmRequestForm' => $confirmRequestForm,
+            'operatorSettings' => $operatorSettings,
+            'activeCooperateExists' => $activeCooperate ? true: false,
         ]);
     }
 

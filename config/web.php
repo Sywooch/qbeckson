@@ -18,6 +18,9 @@ $config = [
     'layout' => 'gos',
     'defaultRoute' => 'site/index',
     'components' => [
+        'assetManager' => [
+            'appendTimestamp' => true,
+        ],
         'keyStorage' => [
             'class' => KeyStorage::class
         ],
@@ -103,10 +106,10 @@ $config = [
         ],
         'fileStorage' => [
             'class' => Storage::class,
-            'baseUrl' => '@web/uploads',
+            'baseUrl' => '@web/file/contract?path=/uploads',
             'filesystem' => [
                 'class' => LocalFlysystemBuilder::class,
-                'path' => '@webroot/uploads'
+                'path' => '@pfdoroot/uploads'
             ],
         ],
         'contractFileStorage' => [
@@ -172,6 +175,13 @@ $config = [
                     'actions' => ['index', 'create', 'view'],
                     'roles' => ['operators']
                 ],
+            ],
+            'notification' => [
+                [
+                    'allow' => true,
+                    'actions' => ['delete'],
+                    'roles' => ['@'],
+                ]
             ],
             'personal' => [
                 [

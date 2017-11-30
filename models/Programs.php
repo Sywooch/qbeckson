@@ -185,7 +185,8 @@ class Programs extends ActiveRecord
                 'attribute' => 'photo_path',
                 'width' => 400,
                 'height' => 400,
-                'basePath' => Yii::getAlias('@webroot/uploads')],
+                'basePath' => \Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix(),
+            ],
         ];
     }
 
@@ -354,6 +355,7 @@ class Programs extends ActiveRecord
             'zabAsString' => 'Категория детей',
             'illnessesList' => 'Категория детей',
             'currentActiveContracts' => 'Обучающиеся в данный момент',
+            'currentActiveContractsCount' => 'Обучающихся',
             'municipal_task_matrix_id' => 'Раздел муниципального задания',
         ];
     }
@@ -756,6 +758,15 @@ class Programs extends ActiveRecord
         return $this->getContracts()
             ->andWhere(['<=', Contracts::tableName() . '.start_edu_contract', $now])
             ->andWhere(['>=', Contracts::tableName() . '.stop_edu_contract', $now]);
+    }
+
+    /**
+     * Количество Контактов действующих в данный момент.
+     * @return int
+     */
+    public function getCurrentActiveContractsCount()
+    {
+        return $this->getCurrentActiveContracts()->count();
     }
 
 

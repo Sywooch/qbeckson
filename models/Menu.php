@@ -146,9 +146,9 @@ class Menu
             [
                 'label' => 'Система',
                 'items' => [
-                    ['label' => 'Информация', 'url' => ['/personal/operator-statistic']],
-                    ['label' => 'Параметры системы', 'url' => ['/operator/operator-settings']],
-                    //['label' => 'Информационная рассылка', 'url' => ['/mailing']],
+                    ['label' => 'Информация', 'url' => ['personal/operator-statistic']],
+                    ['label' => 'Параметры системы', 'url' => ['operator/operator-settings']],
+                    ['label' => 'Информационная рассылка', 'url' => ['/mailing']],
 
                 ]
             ],
