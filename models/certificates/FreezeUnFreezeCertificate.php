@@ -197,14 +197,21 @@ class FreezeUnFreezeCertificate extends CertificateActions
 
     private function dropRequests()
     {
-        $refuseCondition = [Contracts::tableName() . '.status' => [Contracts::STATUS_REQUESTED]];
+        $refuseCondition = [
+            Contracts::tableName() . '.status' => [
+                Contracts::STATUS_REQUESTED,
+                Contracts::STATUS_ACCEPTED
+            ]
+        ];
         $contracts = $this->certificate->getContractsModels()->andWhere($refuseCondition)->all();
 
-        return array_reduce(
+        return
+            array_reduce(
                 $contracts,
                 function ($acc, $contract) {
-                /**@var $contract Contracts */
-                    return $acc && $contract->setRefused(
+                    /**@var $contract Contracts */
+                    return $acc
+                        && $contract->setRefused(
                             'Отклонено в связи с заморозкой сертификата.',
                             UserIdentity::ROLE_PAYER_ID,
                             Yii::$app->user->identity->payer->id
