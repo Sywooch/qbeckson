@@ -169,6 +169,18 @@ $config = [
     'as AccessBehavior' => [
         'class' => AccessBehavior::class,
         'rules' => [
+            'module' => [
+                [
+                    'allow' => true,
+                    'actions' => ['index', 'view', 'verificate'],
+                    'roles' => ['operators'],
+                ],
+                [
+                    'allow' => true,
+                    'actions' => ['update', 'view'],
+                    'roles' => ['organizations'],
+                ]
+            ],
             'mailing' => [
                 [
                     'allow' => true,

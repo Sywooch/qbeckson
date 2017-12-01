@@ -3,7 +3,9 @@
 namespace app\models;
 
 use app\components\periodicField\PeriodicField;
+use app\components\periodicField\PeriodicFieldAR;
 use app\components\periodicField\PeriodicFieldBehavior;
+use app\components\periodicField\RecordWithHistory;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -42,7 +44,7 @@ use yii\db\ActiveRecord;
  * @property ProgramModuleAddressAssignment[] $moduleAddressAssignments
  * @property Groups[] $groups
  */
-class ProgrammeModule extends ActiveRecord
+class ProgrammeModule extends ActiveRecord implements RecordWithHistory
 {
 
     use PeriodicField;
@@ -50,6 +52,11 @@ class ProgrammeModule extends ActiveRecord
     const SCENARIO_CREATE = 'create';
 
     const SCENARIO_MUNICIPAL_TASK = 'municipal-task';
+
+    public function fieldResolver(PeriodicFieldAR $history)
+    {
+        return $history->value;
+    }
 
     /**
      * @inheritdoc
