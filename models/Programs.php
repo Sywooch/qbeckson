@@ -711,6 +711,11 @@ class Programs extends ActiveRecord implements RecordWithHistory
         return $this->is_municipal_task > 0 ? true : false;
     }
 
+    public function getCanTaskBeTranferred(): bool
+    {
+        return !$this->getMunicipalTaskContracts()->count() && $this->verification == self::VERIFICATION_DENIED;
+    }
+
     public function getIsActive(): bool
     {
         return $this->verification !== self::VERIFICATION_IN_ARCHIVE;

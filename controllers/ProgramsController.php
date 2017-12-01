@@ -7,6 +7,7 @@ use app\models\AllProgramsSearch;
 use app\models\Cooperate;
 use app\models\forms\ProgramAddressesForm;
 use app\models\forms\ProgramSectionForm;
+use app\models\forms\TaskTransferForm;
 use app\models\Informs;
 use app\models\Model;
 use app\models\Organization;
@@ -192,6 +193,25 @@ class ProgramsController extends Controller
         }
 
         return $this->render('refuse-task', [
+            'model' => $model,
+        ]);
+    }
+
+    public function actionTransferTask($id)
+    {
+        $program = $this->findModel($id);
+        if (!$program->canTaskBeTranferred) {
+            throw new BadRequestHttpException();
+        }
+        $model = new TaskTransferForm($program);
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', 'Задание успешно перенесено на ПФ.');
+
+            $this->redirect(['/personal/payer-municipal-task']);
+        }
+
+        return $this->render('transfer-task', [
             'model' => $model,
         ]);
     }
