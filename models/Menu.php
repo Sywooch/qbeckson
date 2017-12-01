@@ -92,15 +92,15 @@ class Menu
                 'items' => [
                     [
                         'label' => 'Направленности программ',
-                        'url'   => ['admin/directory-program-direction/index']
+                        'url'   => ['/admin/directory-program-direction/index']
                     ],
                     [
                         'label' => 'Настройки фильтров',
-                        'url'   => ['admin/search-filters/index']
+                        'url'   => ['/admin/search-filters/index']
                     ],
                     [
                         'label' => 'Руководство пользователей',
-                        'url'   => ['admin/help/index']
+                        'url'   => ['/admin/help/index']
                     ],
                 ],
 
@@ -163,14 +163,14 @@ class Menu
                 'items' => [
                     [
                         'label' => 'Уполномоченные Организации',
-                        'url'   => ['personal/operator-payers']
+                        'url'   => ['/personal/operator-payers']
                     ],
                     ['label' => 'Соглашения',
-                     'url'   => ['personal/operator-cooperates'],
+                     'url'   => ['/personal/operator-cooperates'],
                     ],
                     [
                         'label' => 'Счета',
-                        'url'   => ['personal/operator-invoices'],
+                        'url'   => ['/personal/operator-invoices'],
                     ]
 
                 ]
@@ -197,7 +197,7 @@ class Menu
             return [
                 ['label' => 'Организации', 'items' => [
                     ['label' => 'Реестр ПФДО', 'url' => ['/personal/payer-organizations']],
-                    ['label' => 'О работе в ИС ПФДО', 'url' => ['site/manuals']],
+                    ['label' => 'О работе в ИС ПФДО', 'url' => ['/site/manuals']],
                     //['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
                 ]],
             ];
@@ -234,31 +234,31 @@ class Menu
                 ],
                 [
                     'label' => 'Адреса реализации образовательных программ',
-                    'url'   => ['organization/address/index']
+                    'url'   => ['/organization/address/index']
                 ],
                 [
                     'label' => 'О работе в ИС ПФДО',
-                    'url' => ['site/manuals']
+                    'url' => ['/site/manuals']
                 ],
             ]],
             ['label' => 'Программы', 'items' => [
                 [
                     'label' => 'Реестр программ',
-                    'url'   => ['personal/organization-programs']
+                    'url'   => ['/personal/organization-programs']
                 ],
                 [
                     'label' => 'Программы по муниципальному заданию',
-                    'url'   => ['personal/organization-municipal-task']
+                    'url'   => ['/personal/organization-municipal-task']
                 ],
             ]],
             ['label' => 'Договоры', 'items' => [
                 [
                     'label' => 'Реестр договоров',
-                    'url'   => ['personal/organization-contracts']
+                    'url'   => ['/personal/organization-contracts']
                 ],
                 [
                     'label' => 'Договоры - муниципальное задание',
-                    'url'   => ['personal/organization-municipal-task-contracts']
+                    'url'   => ['/personal/organization-municipal-task-contracts']
                 ],
             ]],
             ['label' => 'Счета', 'url' => ['/personal/organization-invoices']],
