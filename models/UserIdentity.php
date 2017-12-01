@@ -24,7 +24,7 @@ use yii\web\IdentityInterface;
  * @property mixed               $userName
  * @property Payers              $payer
  * @property \yii\db\ActiveQuery $operator
- * @property Notification[]      $notifications
+ * @property Notification[] $notifications
  */
 class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacInterface
 {
