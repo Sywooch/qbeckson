@@ -35,6 +35,7 @@ use yii\db\ActiveRecord;
  * @property integer $p22z
  * @property string $results
  * @property string $fullname
+ * @property integer $verification
  *
  * @property Programs $program
  * @property Contracts[] $activeContracts
@@ -46,8 +47,13 @@ use yii\db\ActiveRecord;
  */
 class ProgrammeModule extends ActiveRecord implements RecordWithHistory
 {
-
     use PeriodicField;
+
+    const VERIFICATION_UNDEFINED = 0;
+    const VERIFICATION_WAIT = 1;
+    const VERIFICATION_DONE = 2;
+    const VERIFICATION_DENIED = 3;
+    const VERIFICATION_IN_ARCHIVE = 10;
 
     const SCENARIO_CREATE = 'create';
 
@@ -63,7 +69,7 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
      */
     public static function tableName()
     {
-        return 'years';
+        return '{{%years}}';
     }
 
     public function scenarios()
@@ -88,6 +94,7 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
             [['name', 'minchild', 'maxchild', 'results'], 'required', 'on' => self::SCENARIO_MUNICIPAL_TASK],
             [['hours', 'program_id', 'year', 'hoursdop', 'hoursindivid', 'minchild', 'maxchild', 'open', 'quality_control', 'p21z', 'p22z'], 'integer'],
             [['price', 'normative_price'], 'number'],
+            [['verification'], 'integer'],
             [['month'], 'integer', 'max' => 12],
             [['kvfirst', 'kvdop', 'name'], 'string', 'max' => 255],
             ['results', 'string'],
