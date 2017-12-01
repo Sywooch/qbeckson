@@ -88,7 +88,6 @@ use yii\helpers\ArrayHelper;
  */
 class Programs extends ActiveRecord implements RecordWithHistory
 {
-
     use PeriodicField;
 
     const VERIFICATION_UNDEFINED = 0;
@@ -104,6 +103,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
     public $edit;
     public $search;
     public $programPhoto;
+    public $inTransferProcess = false;
 
     public function fieldResolver(PeriodicFieldAR $history)
     {
@@ -120,7 +120,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
                 case self::VERIFICATION_IN_ARCHIVE:
                     return 'Программа в архиве';
                 default:
-                    return 'не известное значение: ' . $history->value;
+                    return 'неизвестное значение: ' . $history->value;
 
             }
         } elseif ($history->field_name === 'direction_id') {
@@ -128,7 +128,6 @@ class Programs extends ActiveRecord implements RecordWithHistory
             if ($direction) {
                 return $direction->old_name;
             }
-
         } else {
             return $history->value;
         }
@@ -719,6 +718,12 @@ class Programs extends ActiveRecord implements RecordWithHistory
     public function getIsActive(): bool
     {
         return $this->verification !== self::VERIFICATION_IN_ARCHIVE;
+    }
+
+    public function setTransferParams()
+    {
+        $this->inTransferProcess = true;
+        $this->is_municipal_task = 0;
     }
 
     /**

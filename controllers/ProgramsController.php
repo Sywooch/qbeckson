@@ -197,25 +197,6 @@ class ProgramsController extends Controller
         ]);
     }
 
-    public function actionTransferTask($id)
-    {
-        $program = $this->findModel($id);
-        if (!$program->canTaskBeTranferred) {
-            throw new BadRequestHttpException();
-        }
-        $model = new TaskTransferForm($program);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            Yii::$app->session->setFlash('success', 'Задание успешно перенесено на ПФ.');
-
-            $this->redirect(['/personal/payer-municipal-task']);
-        }
-
-        return $this->render('transfer-task', [
-            'model' => $model,
-        ]);
-    }
-
     /**
      * Displays a single Programs model.
      *
@@ -338,13 +319,11 @@ class ProgramsController extends Controller
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-
                 return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelsYears),
                     ActiveForm::validate($model)
                 ));
             }
-
 
             $organizations = new Organization();
             $organization = $organizations->getOrganization();
@@ -358,7 +337,6 @@ class ProgramsController extends Controller
             }
 
             if (Yii::$app->request->isPost) {
-
                 $file->docFile = UploadedFile::getInstance($file, 'docFile');
 
                 if (empty($file->docFile)) {
@@ -1076,6 +1054,24 @@ class ProgramsController extends Controller
                 'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
             ]);
         }
+    }
+
+    public function actionTransferTask($id)
+    {
+        $model = $this->findModel($id);
+        if (!$model->isMunicipalTask || !$model->canTaskBeTranferred) {
+            throw new BadRequestHttpException();
+        }
+        $model->setTransferParams();
+        $modelYears = $model->years;
+        $file = new ProgramsFile();
+
+        return $this->render('update', [
+            'strictAction' => ['/programs/update', 'id' => $model->id],
+            'model' => $model,
+            'file' => $file,
+            'modelYears' => (empty($modelYears)) ? [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])] : $modelYears
+        ]);
     }
 
     /**
