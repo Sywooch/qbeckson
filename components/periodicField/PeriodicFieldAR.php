@@ -47,7 +47,7 @@ class PeriodicFieldAR extends \yii\db\ActiveRecord
             'fieldLabel',
             'created_at:datetime',
             'created_by:userName',
-            'resolvedValue'
+            'resolvedValue:raw'
         ];
     }
 
