@@ -138,6 +138,8 @@ class ContractController extends Controller
         $contracts = Contracts::find()
             ->where(['status' => Contracts::STATUS_ACTIVE])
             ->andWhere(['<', 'start_edu_contract', $datestart])
+            ->andWhere(['>', 'id', 56424])
+            ->orderBy('id')
             ->all();
 
         foreach ($contracts as $contract) {
@@ -156,10 +158,14 @@ class ContractController extends Controller
             $contract->paid = round($contract->paid + $contract->payer_other_month_payment, 2);
             $certificate->rezerv = round($certificate->rezerv - $contract->payer_other_month_payment, 2);
 
-            if (!$contract->save() || !$certificate->save()) {
+            if (!$contract->save(false, ['rezerv', 'paid']) || !$certificate->save(false, ['rezerv'])) {
+                print_r($contract->errors);
+                print_r($certificate->errors);
+
                 die('Error while saving.');
             }
         }
+        echo 'Done.';
 
         return Controller::EXIT_CODE_NORMAL;
     }
