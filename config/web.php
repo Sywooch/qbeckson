@@ -219,14 +219,14 @@ $config = [
                         'assigned-user-login'
                     ],
                     'allow' => true,
-                    'roles' => ['payers']
+                    'roles' => ['payer']
                 ],
             ],
             'invoices'      => [
                 [
                     'allow'   => true,
                     'actions' => ['roll-back'],
-                    'roles'   => ['payers']
+                    'roles'   => ['payer']
                 ],
             ],
             'file-storage'  => [
@@ -275,7 +275,7 @@ $config = [
                     [
                         'actions' => ['set-as-subordinated', 'cancel-subording', 'view-subordered'],
                         'allow' => true,
-                        'roles' => ['payers'],
+                        'roles' => ['payer'],
                     ],
                 ],
             'operators' =>
@@ -295,6 +295,11 @@ $config = [
                         'actions' => ['update-task', 'refuse-task', 'decertificate'],
                         'allow'   => true,
                         'roles'   => ['payer']
+                    ],
+                    [
+                        'actions' => ['transfer-task'],
+                        'allow'   => true,
+                        'roles'   => ['organizations']
                     ],
                 ],
             'municipal-task-contract' =>
@@ -423,7 +428,7 @@ $config = [
             'monitor' => [
                 [
                     'allow' => true,
-                    'roles' => ['payers'],
+                    'roles' => ['payer'],
                 ]
             ],
             'operator/operator-settings' => [
@@ -487,7 +492,6 @@ if (YII_ENV_DEV) {
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',
-        'allowedIPs' => ['*'],
     ];
 
     $config['bootstrap'][] = 'gii';
