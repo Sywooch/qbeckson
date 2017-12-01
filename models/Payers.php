@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\ArrayHelper;
 use Yii;
 
 /**
@@ -195,12 +196,15 @@ class Payers extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param null $status - статус соглашения
+     *
      * @return Cooperate
      */
-    public function getCooperation()
+    public function getCooperation($status = null)
     {
         return $this->hasOne(Cooperate::class, ['payer_id' => 'id'])
             ->andWhere(['cooperate.organization_id' => Yii::$app->user->getIdentity()->organization->id])
+            ->andFilterWhere(['cooperate.status' => $status])
             ->one();
     }
 
@@ -431,6 +435,13 @@ class Payers extends \yii\db\ActiveRecord
     public function getUser()
     {
         return $this->hasOne(User::className(), ['id' => 'user_id']);
+    }
+
+    public function findCooperateOrganizations()
+    {
+        $cooperates = $this->cooperates;
+
+        return ArrayHelper::getColumn($cooperates, 'organization_id');
     }
 
     /**

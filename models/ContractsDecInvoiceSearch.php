@@ -41,10 +41,8 @@ class ContractsDecInvoiceSearch extends Contracts
      * @return ActiveDataProvider
      */
     public function search($params)
-    {   
-        $lmonth = 12;
-        $start = date('Y').'-'.$lmonth.'-'.date('d');
-        $query = Contracts::find()->where(['<=', 'start_edu_contract', $start])->andWhere(['>=', 'stop_edu_contract', $start]);
+    {
+        $query = Contracts::find();
 
         // add conditions that should always apply here
 
@@ -57,6 +55,7 @@ class ContractsDecInvoiceSearch extends Contracts
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             $query->where('0=1');
+
             return $dataProvider;
         }
 
@@ -65,60 +64,38 @@ class ContractsDecInvoiceSearch extends Contracts
 
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
-        
-      $lmonth = date('m');
-            $start = date('Y').'-'.$lmonth.'-01';
-            $cal_days_in_month = cal_days_in_month(CAL_GREGORIAN, $lmonth, date('Y'));
-            $stop = date('Y').'-'.$lmonth.'-'.$cal_days_in_month;
-        
-            $contracts = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('contracts')
-                ->where(['<=', 'start_edu_contract', $stop])
-                ->andWhere(['>=', 'stop_edu_contract', $start])
-                ->andWhere(['organization_id' => $organization->id])
-                ->andWhere(['payer_id' => $payer])
-                ->andWhere(['`contracts`.status' => 1])
-                ->andWhere(['>', 'all_funds', 0])
-                ->column();
+
+        $lmonth = Yii::$app->params['decemberNumber'];
+        $start = date('Y') . '-' . $lmonth . '-01';
+        $cal_days_in_month = cal_days_in_month(CAL_GREGORIAN, $lmonth, date('Y'));
+        $stop = date('Y') . '-' . $lmonth . '-' . $cal_days_in_month;
+
+        $contracts = (new \yii\db\Query())
+            ->select(['id'])
+            ->from('contracts')
+            ->where(['<=', 'start_edu_contract', $stop])
+            ->andWhere(['>=', 'stop_edu_contract', $start])
+            ->andWhere(['organization_id' => $organization->id])
+            ->andWhere(['payer_id' => $this->payer_id])
+            ->andWhere(['`contracts`.status' => 1])
+            ->andWhere(['>', 'all_funds', 0])
+            ->column();
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
+            'id' => $contracts,
             'number' => $this->number,
             'date' => $this->date,
             'certificate_id' => $this->certificate_id,
             'organization_id' => $organization['id'],
             'payer_id' => $this->payer_id,
-            '`contracts`.status' => 1,
+            '`contracts`.status' => Contracts::STATUS_ACTIVE,
             'status_termination' => $this->status_termination,
             'status_year' => $this->status_year,
             'start_edu_programm' => $this->start_edu_programm,
             'start_edu_contract' => $this->start_edu_contract,
             'stop_edu_contract' => $this->stop_edu_contract,
         ]);
-
-      /*  $cont = (new \yii\db\Query())
-                ->select(['contracts'])
-                ->from('invoices')
-                ->where(['month' => date('m')])
-                ->andWhere(['prepayment' => 0])
-                ->column();
-        
-       $contracts = array();
-        foreach ($cont as $value) {
-            $tmp = explode(",", $value);
-            foreach ($tmp as $contract) {
-                array_push($contracts, $contract);
-            }
-        }
-        $contracts = array_unique($contracts);
-        if (empty($contracts)) {$contracts = 0; } */
-        
-        $query->andFilterWhere(['like', 'status_comment', $this->status_comment])
-            ->andFilterWhere(['like', 'link_doc', $this->link_doc])
-            ->andFilterWhere(['like', 'link_ofer', $this->link_ofer]);
-            //->andFilterWhere(['!=', 'id', $contracts]);
 
         return $dataProvider;
     }

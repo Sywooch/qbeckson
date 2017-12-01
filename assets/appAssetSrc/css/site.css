@@ -647,3 +647,13 @@ li.breadcrumbs-help-icon:before {
 .margin-bottom-0 {
     margin-bottom: 0;
 }
+
+.input-title-body {
+    display: none;
+    position: absolute;
+    background: #000c;
+    border-radius: 5px;
+    padding: 4px;
+    color: #e6e6e6;
+    font-size: 14pt;
+}

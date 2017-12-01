@@ -253,8 +253,15 @@ class ContractsController extends Controller
      */
     public function actionView($id)
     {
+        if (!Yii::$app->user->can('viewContract', ['id' => $id])) {
+            throw new ForbiddenHttpException('Нет прав на просмотр договора.');
+        }
+        $model = $this->findModel($id);
+        $completenessQuery = $model->getTransactions();
+        
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+            'completenessQuery' => $completenessQuery
         ]);
     }
 
@@ -661,9 +668,7 @@ class ContractsController extends Controller
     {
         $payers = new Contracts();
 
-
         if ($payers->load(Yii::$app->request->post())) {
-
             $searchContracts = new ContractsDecInvoiceSearch();
             $searchContracts->payer_id = $payers->payer_id;
             $ContractsProvider = $searchContracts->search(Yii::$app->request->queryParams);
