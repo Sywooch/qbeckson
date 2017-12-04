@@ -8,7 +8,7 @@ use yii\widgets\ActiveForm;
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="programme-module-form">
+<div class="programme-module-form" ng-app>
 
     <?php $form = ActiveForm::begin(); ?>
 
@@ -37,10 +37,15 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'results')->textarea(['rows' => 6]) ?>
 
     <div class="form-group">
-        <?= Html::submitButton(
-            $model->isNewRecord ? 'Create' : 'Update',
-            ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']
-        ) ?>
+        <?php
+        echo $form->field($model, 'edit')->checkbox(['value' => 1, 'ng-model' => 'edit']);
+        echo '<div class="form-group" ng-show="edit">';
+
+        echo '&nbsp';
+        echo Html::submitButton('Отправить модуль на сертификацию', ['class' => 'btn btn-success']);
+        echo '</div>';
+        echo Html::a('Отменить', ['/programms/view', 'id' => $model->id], ['class' => 'btn btn-danger']);
+        ?>
     </div>
 
     <?php ActiveForm::end(); ?>
