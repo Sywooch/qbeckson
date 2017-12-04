@@ -41,6 +41,16 @@ class PeriodicFieldAR extends \yii\db\ActiveRecord
         return '{{%periodic_field}}';
     }
 
+    public static function getColumns()
+    {
+        return [
+            'fieldLabel',
+            'created_at:datetime',
+            'created_by:userName',
+            'resolvedValue:raw'
+        ];
+    }
+
     public function init()
     {
         parent::init();

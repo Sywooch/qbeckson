@@ -14,6 +14,7 @@ use voskobovich\linker\LinkerBehavior;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "programs".
@@ -129,6 +130,8 @@ class Programs extends ActiveRecord implements RecordWithHistory
                 return $direction->old_name;
             }
 
+        } elseif ($history->field_name === 'link') {
+            return Html::a($history->value, $this->getProgramFile($history->value));
         } else {
             return $history->value;
         }
@@ -858,9 +861,14 @@ class Programs extends ActiveRecord implements RecordWithHistory
         return null;
     }
 
-    public function getProgramFile()
+    public function getProgramFile($link = null)
     {
-        $filename = $this->link;
+        if ($link) {
+            $filename = $link;
+        } else {
+            $filename = $this->link;
+        }
+
         if (strstr($filename, 'programs/')) {
             $filename = str_replace('programs/', '', $filename);
         }
