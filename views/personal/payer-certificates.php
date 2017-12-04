@@ -1,16 +1,16 @@
 <?php
 
-use app\models\certificates\CertificateToAccountingConfirmForm;
-use yii\bootstrap\Modal;
-use yii\grid\ActionColumn;
-use app\models\CertGroup;
-use app\models\UserIdentity;
-use yii\helpers\ArrayHelper;
-use yii\helpers\Html;
-use kartik\grid\GridView;
-use app\widgets\SearchFilter;
 use app\helpers\GridviewHelper;
 use app\helpers\PermissionHelper;
+use app\models\CertGroup;
+use app\models\certificates\CertificateToAccountingConfirmForm;
+use app\models\UserIdentity;
+use app\widgets\SearchFilter;
+use kartik\grid\GridView;
+use yii\bootstrap\Modal;
+use yii\grid\ActionColumn;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 $this->title = 'Сертификаты';
@@ -21,6 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
 /* @var $certificatesProvider \yii\data\ActiveDataProvider */
 /* @var $allCertificatesProvider \yii\data\ActiveDataProvider */
 /* @var $certificateToAccountingConfirmForm CertificateToAccountingConfirmForm */
+/* @var $certificateImportTemplateExists boolean */
 
 $columns = [
     [
@@ -94,14 +95,16 @@ $columns = [
 
 <div class="row">
     <div class="col-xs-6">
-        <p>
-            <?php if (PermissionHelper::checkMonitorUrl('/certificates/create')) : ?>
-                <?= Html::a('Добавить сертификат', ['/certificates/create'], ['class' => 'btn btn-success']) ?>
-            <?php elseif (PermissionHelper::checkMonitorUrl('/certificates/allnominal')) : ?>
-                <br>
-                <br>
-            <?php endif; ?>
-        </p>
+        <?php if (PermissionHelper::checkMonitorUrl('/certificates/create')) : ?>
+            <?= Html::a('Добавить один сертификат', ['/certificates/create'], ['class' => 'btn btn-success']) ?>
+        <?php elseif (PermissionHelper::checkMonitorUrl('/certificates/allnominal')) : ?>
+            <br>
+            <br>
+        <?php endif; ?>
+
+        <?php if ($certificateImportTemplateExists): ?>
+            <?= Html::a('Импорт списка сертификатов', ['certificates/certificate-import'], ['class' => 'btn btn-success inline']) ?>
+        <?php endif; ?>
     </div>
 
     <div class="col-xs-6">
@@ -134,6 +137,8 @@ $columns = [
         <?php Modal::end() ?>
     </div>
 </div>
+
+<br>
 
 <?= GridView::widget([
     'dataProvider' => $certificatesProvider,
