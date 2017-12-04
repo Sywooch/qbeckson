@@ -76,6 +76,11 @@ class ModuleController extends Controller
         }
     }
 
+    public function certificateCalcNormative($id)
+    {
+
+    }
+
     /**
      * Updates an existing ProgrammeModule model.
      * If update is successful, the browser will be redirected to the 'view' page.
