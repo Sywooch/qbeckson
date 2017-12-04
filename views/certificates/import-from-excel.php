@@ -6,7 +6,6 @@
  * @var $this View
  * @var $certificateImportTemplate CertificateImportTemplate|null
  * @var $certificateImportRegistry CertificateImportRegistry - модель для обновления буфера списка сертификатов для импорта
- * @var $certificateRegistryFileExists boolean - существует ли буфер списка сертификатов для текущего плательщика
  */
 
 use app\models\certificates\CertificateImportRegistry;
@@ -120,8 +119,7 @@ $this->registerJs($js);
                 <h1>Нет шаблона для импорта списка сертификатов</h1>
             <?php endif; ?>
 
-            <?php $registryNotDownloadedOption = $certificateImportRegistry->is_registry_downloaded ? [] : ['disabled' => true, 'title' => 'Ранее загруженный реестр не был ни разу скачан. Пожалуйста скачайте его перед загрузкой нового.'] ?>
-
+            <?php $registryNotDownloadedOption = (!$certificateImportRegistry->is_registry_downloaded && $certificateImportRegistry->registryFileExist()) ? ['disabled' => true, 'title' => 'Ранее загруженный реестр не был ни разу скачан. Пожалуйста скачайте его перед загрузкой нового.'] : [] ?>
 
             <!-- загрузка файла xlsx со списком сертификатов -->
             <div class="">
@@ -176,9 +174,8 @@ $this->registerJs($js);
     <div class="panel panel-default">
         <div class="panel-body">
 
-
             <!-- ссылка на импортированный список сертификатов и пользователей -->
-            <?php if ($certificateRegistryFileExists): ?>
+            <?php if ($certificateImportRegistry->registryFileExist()): ?>
                 <p>Последний реестр сертификатов дополнительного образования загруженный Вами <b><?= \Yii::$app->formatter->asDate($certificateImportRegistry->registry_created_at) ?>
                         в <?= \Yii::$app->formatter->asTime($certificateImportRegistry->registry_created_at) ?></b> по мск доступен для скачивания (дети уже внесены в систему, им присвоены номера сертификатов и
                     пароли
