@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\models\certificates\CertificateImportRegistry;
+use app\models\certificates\CertificateImportTemplate;
 use app\models\Certificates;
 use app\models\certificates\CertificateNerfNominal;
 use app\models\certificates\FreezeUnFreezeCertificate;
@@ -168,6 +170,93 @@ class CertificatesController extends Controller
             'region' => $region,
             'payer' => $payer,
         ]);
+    }
+
+    /**
+     * импорт списка сертификатов
+     */
+    public function actionCertificateImport()
+    {
+        $certificateImportTemplate = CertificateImportTemplate::find()->one();
+
+        $certificateImportRegistry = CertificateImportRegistry::findOne(['payer_id' => Yii::$app->user->identity->payer->id]);
+
+        if (is_null($certificateImportRegistry)) {
+            $certificateImportRegistry = new CertificateImportRegistry(['payer_id' => Yii::$app->user->identity->payer->id]);
+        }
+
+        if (\Yii::$app->request->isAjax && $certificateImportRegistry->load(\Yii::$app->request->post())) {
+            return $this->asJson(ActiveForm::validate($certificateImportRegistry));
+        }
+
+        $certificateRegistryFileExists = $certificateImportRegistry->registryFileExist();
+
+        return $this->render('import-from-excel', [
+            'certificateImportTemplate' => $certificateImportTemplate,
+            'certificateImportRegistry' => $certificateImportRegistry,
+            'certificateRegistryFileExists' => $certificateRegistryFileExists,
+        ]);
+    }
+
+    /**
+     * загрузить список сертификатов
+     */
+    public function actionUploadCertificateList()
+    {
+        $certificateImportRegistry = CertificateImportRegistry::findOne(['payer_id' => Yii::$app->user->identity->payer->id]);
+        if (is_null($certificateImportRegistry)) {
+            $certificateImportRegistry = new CertificateImportRegistry(['payer_id' => Yii::$app->user->identity->payer->id]);
+        }
+
+        if (Yii::$app->request->isAjax && $certificateImportRegistry->load(\Yii::$app->request->post()) && $certificateImportRegistry->validate()) {
+            if (!$certificateImportRegistry->checkFileFormat()) {
+                return $this->asJson($certificateImportRegistry->getFirstError('certificateListForImport'));
+            }
+
+            if ($certificateImportRegistry->importCertificateList()) {
+                $certificateImportRegistry->save();
+
+                return $this->asJson(1);
+            } else {
+                return $this->asJson(0);
+            }
+        }
+
+        return $this->asJson(0);
+    }
+
+    /**
+     * скачать реестр импортированных сертификатов и пользователей для текущего плательщика
+     */
+    public function actionDownloadCertificateListRegistry()
+    {
+        $certificateImportRegistry = CertificateImportRegistry::findOne(['payer_id' => Yii::$app->user->identity->payer->id]);
+
+        if (is_null($certificateImportRegistry)) {
+            return null;
+        }
+
+        $certificateImportRegistry->is_registry_downloaded = 1;
+        $certificateImportRegistry->save();
+
+        return Yii::$app->response->sendFile($certificateImportRegistry->getRegistryUrl());
+    }
+
+    /**
+     * удалить реестр импортированных сертификатов и пользователей для текущего плательщика
+     */
+    public function actionDeleteCertificateListRegistry()
+    {
+        $certificateImportRegistry = CertificateImportRegistry::findOne(['payer_id' => Yii::$app->user->identity->payer->id]);
+        if ($certificateImportRegistry->deleteRegistry()) {
+            $certificateImportRegistry->save();
+
+            \Yii::$app->session->addFlash('info', 'Файл реестр успешно удален');
+        } else {
+            \Yii::$app->session->addFlash('warning', 'Ошибка при удалении файла реестра');
+        }
+
+        return $this->redirect('/certificates/certificate-import');
     }
 
     /**
