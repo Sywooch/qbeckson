@@ -94,6 +94,14 @@ class ContractRequestForm extends Model
 
         if (!$payer->certificateCanCreateContract() && 1 == $payer->certificate_can_use_future_balance &&
             (strtotime($this->$attribute) < strtotime($settings->future_program_date_from) || strtotime($this->$attribute) > strtotime($group->datestop))) {
+            if (strtotime($settings->future_program_date_from) > strtotime($group->datestop)) {
+                $this->addError(
+                    $attribute,
+                    'В настоящее время запись недоступна.'
+                );
+                return;
+            }
+
             $this->addError(
                 $attribute,
                 'Дата начала обучения по договору должна быть в пределах: '. \Yii::$app->formatter->asDate($settings->future_program_date_from) . ' - ' . \Yii::$app->formatter->asDate($group->datestop) . ', поскольку уполномоченная организация закрыла возможность зачисления в текущем периоде.'

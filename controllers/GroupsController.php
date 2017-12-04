@@ -440,9 +440,8 @@ class GroupsController extends Controller
 
     public function actionInvoice()
     {
-
-        $organization = Yii::$app->user->identity->organization;
         /**@var $organization Organization */
+        $organization = Yii::$app->user->identity->organization;
 
         $searchGroups = new GroupsInvoiceSearch(['invoice' => true]);
         $searchGroups->organization_id = $organization->id;
@@ -456,12 +455,10 @@ class GroupsController extends Controller
 
     }
 
-    // Это для декабря (12 месяц)
-
     public function actionPreinvoice()
     {
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
+        /**@var $organization Organization */
+        $organization = Yii::$app->user->identity->organization;
 
         $searchGroups = new GroupsPreinvoiceSearch();
         $searchGroups->organization_id = $organization['id'];
@@ -475,12 +472,13 @@ class GroupsController extends Controller
 
     }
 
+    // Это для декабря (12 месяц)
     public function actionDec()
     {
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
+        /**@var $organization Organization */
+        $organization = Yii::$app->user->identity->organization;
 
-        // TODO: в случае если месяц == 12 выводить договоры которые дата начала обучения по которым меньше чем 31 декабря пред. года
+        // TODO: в случае если месяц == 12 выводить договоры дата начала обучения по которым меньше чем 31 декабря пред. года
         $searchGroups = new GroupsInvoiceSearch();
         $searchGroups->organization_id = $organization['id'];
 

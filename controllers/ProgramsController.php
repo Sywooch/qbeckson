@@ -215,10 +215,10 @@ class ProgramsController extends Controller
             throw new NotFoundHttpException();
         }
 
-        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION) && $user->organization->id !== $model->organization_id) {
-
-            throw new ForbiddenHttpException('Нет доступа');
+        if (!Yii::$app->user->can('viewProgramme', ['id' => $id])) {
+            throw new ForbiddenHttpException('Нет прав на просмотр программы.');
         }
+
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
             if ($model->verification === $model::VERIFICATION_DENIED) {
