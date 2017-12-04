@@ -59,6 +59,8 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
 
     const SCENARIO_MUNICIPAL_TASK = 'municipal-task';
 
+    public $edit;
+
     public function fieldResolver(PeriodicFieldAR $history)
     {
         return $history->value;
@@ -137,6 +139,7 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
             'p22z' => 'Квалификация педагогического работника, дополнительно привлекаемого для совместной реализации образовательной программы в группе',
             'results' => 'Ожидаемые результаты освоения модуля',
             'fullname' => 'Наименование модуля',
+            'edit' => 'Отправить на повторную сертификацию',
         ];
     }
 
@@ -217,7 +220,7 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
     public function getActiveContracts()
     {
         return $this->hasMany(Contracts::class, ['year_id' => 'id'])
-            ->andWhere(['contracts.status' => 1]);
+            ->andWhere(['contracts.status' => Contracts::STATUS_ACTIVE]);
     }
 
 
@@ -282,11 +285,37 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
         return array_unique($rows);
     }
 
+    public function canEdit()
+    {
+        $contractsExists = $this
+            ->getContracts()
+            ->andFilterWhere([
+                'status' => [
+                    Contracts::STATUS_REQUESTED,
+                    Contracts::STATUS_ACTIVE,
+                    Contracts::STATUS_ACCEPTED
+                ]
+            ])->exists();
+        $isOpen = $this->open;
+
+        return !($contractsExists || $isOpen);
+    }
+
     /**
      * @return integer|null
      */
     public function getChildrenAverage()
     {
         return $this->program->municipality->operator->settings->children_average;
+    }
+
+    public function setVerificationWaitAndSave()
+    {
+        if ($this->verification === self::VERIFICATION_WAIT) {
+            return true;
+        }
+        $this->verification = self::VERIFICATION_WAIT;
+
+        return $this->save(false);
     }
 }

@@ -91,6 +91,8 @@ class ModuleController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
+            $model->setVerificationWaitAndSave();
+            
             return $this->render('update', [
                 'model' => $model,
             ]);

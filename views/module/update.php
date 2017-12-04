@@ -5,8 +5,11 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\ProgrammeModule */
 
-$this->title = 'Update Programme Module: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Модуль программы ' . $model->program->name, 'url' => ['index']];
+$this->title = 'Изменение модуля: ' . $model->name;
+$this->params['breadcrumbs'][] = [
+    'label' => 'Программа ' . $model->program->name,
+    'url' => ['/programs/view', 'id' => $model->program_id]
+];
 $this->params['breadcrumbs'][] = [
     'label' => $model->name . ' (' . $model->year . ')', 'url' => ['view', 'id' => $model->id]
 ];
