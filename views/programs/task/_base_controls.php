@@ -49,8 +49,7 @@ use yii\helpers\Url;
                     'class' => 'btn btn-danger',]
             ]);
 
-        } elseif ($model->getLivingContracts()->exists() || $model->getModules()->andWhere(['open' => 1])->exists()) {
-
+        } elseif ($model->getMunicipalTaskContracts()->count() || $model->getModules()->andWhere(['open' => 1])->exists()) {
             echo \app\components\widgets\ButtonWithInfo::widget([
                 'label' => 'Редактировать',
                 'message' => 'Невозможно, существуют контракты и/или открыто зачисление в одном или нескольких модулях, либо оператор запустил процедуру сертификации',
@@ -65,11 +64,13 @@ use yii\helpers\Url;
             ]);
         } else {
             echo Html::a('Редактировать', Url::to(['/programs/update', 'id' => $model->id]), ['class' => 'btn btn-theme']);
-            echo PostButtonWithModalConfirm::widget(['title'        => 'Удалить программу',
-                                                     'url'          => Url::to(['/programs/delete', 'id' => $model->id]),
-                                                     'confirm'      => 'Вы уверены, что хотите удалить программу?',
-                                                     'toggleButton' => ['class' => 'btn btn-danger', 'label' => 'Удалить']]);
-
+            echo PostButtonWithModalConfirm::widget(['title' => 'Удалить программу',
+                'url' => Url::to(['/programs/delete', 'id' => $model->id]),
+                'confirm' => 'Вы уверены, что хотите удалить программу?',
+                'toggleButton' => ['class' => 'btn btn-danger', 'label' => 'Удалить']]);
+            if ($model->canTaskBeTranferred) {
+                echo Html::a('Перевести на ПФ', Url::to(['/programs/transfer-task', 'id' => $model->id]), ['class' => 'btn btn-theme']);
+            }
         }
     }
 
