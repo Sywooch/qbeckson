@@ -259,10 +259,11 @@ class CertificateImportRegistry extends ActiveRecord
         $userIdListForLog = [];
         foreach ($userIdList as $userId) {
             $userIdListForLog[] = ['user_id' => $userId];
+            $userIdListForLog[] = ['created_at' => date('Y-m-d H:i:s')];
         }
 
         if ($insertCount > 0) {
-            Yii::$app->db->createCommand()->batchInsert(UserCreatedOnCertificateImportLog::tableName(), ['user_id'], $userIdListForLog)->execute();
+            Yii::$app->db->createCommand()->batchInsert(UserCreatedOnCertificateImportLog::tableName(), ['user_id', 'created_at'], $userIdListForLog)->execute();
         }
 
         $possibleCertGroupId = $payer->getCertGroups()->one()->id;
@@ -363,7 +364,7 @@ class CertificateImportRegistry extends ActiveRecord
     private function deleteCertificateListForImport()
     {
         $filePath = Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $this->certificate_list_for_import_path;
-        if (file_exists($filePath) && unlink($filePath)) {
+        if ($this->certificate_list_for_import_path && file_exists($filePath) && unlink($filePath)) {
             $this->certificateImportListFile = null;
             $this->save();
 
@@ -379,7 +380,7 @@ class CertificateImportRegistry extends ActiveRecord
     public function deleteRegistry()
     {
         $filePath = Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $this->registry_path;
-        if (file_exists($filePath) && unlink($filePath)) {
+        if ($this->registry_path && file_exists($filePath) && unlink($filePath)) {
             $this->certificateListRegistryFile = null;
 
             $this->save();
