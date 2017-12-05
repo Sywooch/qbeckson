@@ -112,7 +112,7 @@ class ContractController extends Controller
     public function actionCloseOnExpired()
     {
         Yii::$app->db->createCommand('
-          update contracts as c CROSS JOIN programs as p ON c.program_id = p.id CROSS JOIN organization as o ON c.organization_id = o.id 
+          update contracts as c CROSS JOIN programs as p ON c.program_id = p.id CROSS JOIN organization as o ON c.organization_id = o.id
           set c.status = 4, c.wait_termnate = 0, c.date_termnate = c.stop_edu_contract, p.last_s_contracts_rod = IF(c.terminator_user = 1, p.last_s_contracts_rod + 1, p.last_s_contracts_rod), p.last_contracts = p.last_contracts - 1, p.last_s_contracts = p.last_s_contracts + 1, o.amount_child = o.amount_child - 1
           WHERE TIMESTAMPDIFF(DAY, :phpDate, c.stop_edu_contract) < 0
         ', [':phpDate' => date('Y-m-h H:i:s')])->execute();
@@ -156,10 +156,14 @@ class ContractController extends Controller
             $contract->paid = round($contract->paid + $contract->payer_other_month_payment, 2);
             $certificate->rezerv = round($certificate->rezerv - $contract->payer_other_month_payment, 2);
 
-            if (!$contract->save() || !$certificate->save()) {
+            if (!$contract->save(false, ['rezerv', 'paid']) || !$certificate->save(false, ['rezerv'])) {
+                print_r($contract->errors);
+                print_r($certificate->errors);
+
                 die('Error while saving.');
             }
         }
+        echo 'Done.';
 
         return Controller::EXIT_CODE_NORMAL;
     }
@@ -324,6 +328,18 @@ class ContractController extends Controller
                 echo "certificate_id: {$contract->certificate->id} ===> {$contract->certificate->balance} != {$balance}" . PHP_EOL;
             }
         }
+
+        return Controller::EXIT_CODE_NORMAL;
+    }
+
+    public function actionCronTest()
+    {
+        $contracts = Contracts::find()
+            ->limit(10)
+            ->all();
+
+        Yii::trace('Тестовое количество контрактов ' . count($contracts));
+        Yii::trace('Тестирование завершено.');
 
         return Controller::EXIT_CODE_NORMAL;
     }
