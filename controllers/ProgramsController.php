@@ -1067,7 +1067,7 @@ class ProgramsController extends Controller
     public function actionTransferTask($id)
     {
         $model = $this->findModel($id);
-        if (!$model->isMunicipalTask || !$model->canTaskBeTranferred) {
+        if (!$model->isMunicipalTask || !$model->canTaskBeTransferred) {
             throw new BadRequestHttpException();
         }
         $model->setTransferParams();
@@ -1080,6 +1080,25 @@ class ProgramsController extends Controller
             'file' => $file,
             'modelYears' => (empty($modelYears)) ? [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])] : $modelYears
         ]);
+    }
+
+    public function actionTransferProgramme($id)
+    {
+        $model = $this->findModel($id);
+        if ($model->isMunicipalTask || !$model->canProgrammeBeTransferred) {
+            throw new BadRequestHttpException();
+        }
+        $model->setTransferParams(false);
+
+        if ($model->save()) {
+            flash('Программа успешно перенесена на муниципальное задание.', 'success');
+
+            return $this->redirect(['/programs/view-task', 'id' => $model->id]);
+        } else {
+            flash('Произошла ошибка в процессе переноса.');
+
+            return $this->redirect(['/programs/view', 'id' => $model->id]);
+        }
     }
 
     /**
