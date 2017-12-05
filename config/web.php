@@ -476,7 +476,14 @@ $config = [
                     'roles' => ['operators', 'organizations', 'payer'],
                     'actions' => ['contract'],
                 ]
-            ]
+            ],
+            'groups' => [
+                [
+                    'allow' => true,
+                    'roles' => ['operators'],
+                    'actions' => ['contracts']
+                ]
+            ],
         ],
     ],
     'params' => $params,
