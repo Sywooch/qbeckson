@@ -29,8 +29,8 @@ class PeriodicFieldAR extends \yii\db\ActiveRecord
     private $model;
 
     private $tablesToModels = [
-        'programs' => Programs::class,
-        'years' => ProgrammeModule::class
+        '{{%programs}}' => Programs::class,
+        '{{%years}}' => ProgrammeModule::class
     ];
 
     /**
