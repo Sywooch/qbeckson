@@ -258,8 +258,7 @@ class CertificateImportRegistry extends ActiveRecord
 
         $userIdListForLog = [];
         foreach ($userIdList as $userId) {
-            $userIdListForLog[] = ['user_id' => $userId];
-            $userIdListForLog[] = ['created_at' => date('Y-m-d H:i:s')];
+            $userIdListForLog[] = ['user_id' => $userId, 'created_at' => date('Y-m-d H:i:s')];
         }
 
         if ($insertCount > 0) {
@@ -331,7 +330,7 @@ class CertificateImportRegistry extends ActiveRecord
      */
     private function getCertificateImportFilePath()
     {
-        if (!key_exists('path', $this->certificateImportListFile) && !file_exists(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $this->certificateImportListFile['path'])) {
+        if (!isset($this->certificateImportListFile['path']) && !file_exists(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $this->certificateImportListFile['path'])) {
             return null;
         }
 
@@ -343,7 +342,7 @@ class CertificateImportRegistry extends ActiveRecord
      */
     public function getRegistryUrl()
     {
-        if (!key_exists('path', $this->certificateImportListFile) && !file_exists(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $this->certificateListRegistryFile['path'])) {
+        if (!isset($this->certificateImportListFile['path']) && !file_exists(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $this->certificateListRegistryFile['path'])) {
             return null;
         }
 
