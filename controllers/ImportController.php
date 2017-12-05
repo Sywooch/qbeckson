@@ -2,12 +2,30 @@
 
 namespace app\controllers;
 
+use app\models\certificates\CertificateImportTemplate;
 use Yii;
 use app\models\Import;
 use yii\web\UploadedFile;
 
 class ImportController extends \yii\web\Controller
 {
+    public function actionUploadCertificateImportTemplate()
+    {
+        $certificateImportTemplate = CertificateImportTemplate::find()->one();
+
+        if (is_null($certificateImportTemplate)) {
+            $certificateImportTemplate = new CertificateImportTemplate;
+        }
+
+        if ($certificateImportTemplate->load(\Yii::$app->request->post())) {
+            $certificateImportTemplate->save();
+        }
+
+        return $this->render('upload-certificate-import-template', [
+            'certificateImportTemplate' => $certificateImportTemplate,
+        ]);
+    }
+
     public function actionChildren()
     {
         $model = new Import();

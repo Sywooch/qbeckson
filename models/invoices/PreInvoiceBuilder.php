@@ -156,6 +156,13 @@ class PreInvoiceBuilder extends InvoicesActions
         return (int)$date->format('m');
     }
 
+    public function getDateCurrentYearNumber(): int
+    {
+        $date = new DateTime();
+
+        return (int)$date->format('Y');
+    }
+
     /**
      * Все манипуляции внутри этой функции происходят в трансзакции, можно прервать трансзакцию из нутри.
      * для успешного завершения вернуть true
@@ -205,6 +212,7 @@ class PreInvoiceBuilder extends InvoicesActions
         $this->invoice->date = $this->date;
         $this->invoice->number = $this->number;
         $this->invoice->month = $this->dateCurrentMonthNumber;
+        $this->invoice->year = $this->dateCurrentYearNumber;
         $this->invoice->prepayment = 1;
         $this->invoice->status = Invoices::STATUS_NOT_VIEWED;
         $this->invoice->organization_id = $this->organization->id;

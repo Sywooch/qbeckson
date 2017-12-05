@@ -25,7 +25,7 @@ class ViewProgrammeRule extends Rule
 
         $userIdentity = Yii::$app->user->identity;
 
-        if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE) && $programme->mun == $userIdentity->certificate->payer->mun) {
+        if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE) && $programme->municipality->operator_id == $userIdentity->certificate->payer->operator_id) {
             return true;
         }
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION) && $programme->organization_id == $userIdentity->organization->id) {
