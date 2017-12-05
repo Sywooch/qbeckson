@@ -17,7 +17,7 @@ echo \yii\grid\GridView::widget(
                 'label' => 'Дата',
                 'format' => ['date', 'php:M Y']
             ],
-            'preinvoiceLabel',
+            //'preinvoiceLabel',
             [
                 'attribute' => 'sum',
                 'format' => 'currency',

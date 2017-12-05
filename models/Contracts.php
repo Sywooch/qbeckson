@@ -846,11 +846,11 @@ class Contracts extends ActiveRecord
 
             return $rollback();
         }
-        if (isset($roles['certificate'])) {
+        if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
             $this->terminator_user = 1;
         }
 
-        if (isset($roles['organizations'])) {
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
             $this->terminator_user = 2;
         }
 

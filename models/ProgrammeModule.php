@@ -3,7 +3,9 @@
 namespace app\models;
 
 use app\components\periodicField\PeriodicField;
+use app\components\periodicField\PeriodicFieldAR;
 use app\components\periodicField\PeriodicFieldBehavior;
+use app\components\periodicField\RecordWithHistory;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -33,6 +35,7 @@ use yii\db\ActiveRecord;
  * @property integer $p22z
  * @property string $results
  * @property string $fullname
+ * @property integer $verification
  *
  * @property Programs $program
  * @property Contracts[] $activeContracts
@@ -42,21 +45,33 @@ use yii\db\ActiveRecord;
  * @property ProgramModuleAddressAssignment[] $moduleAddressAssignments
  * @property Groups[] $groups
  */
-class ProgrammeModule extends ActiveRecord
+class ProgrammeModule extends ActiveRecord implements RecordWithHistory
 {
-
     use PeriodicField;
+
+    const VERIFICATION_UNDEFINED = 0;
+    const VERIFICATION_WAIT = 1;
+    const VERIFICATION_DONE = 2;
+    const VERIFICATION_DENIED = 3;
+    const VERIFICATION_IN_ARCHIVE = 10;
 
     const SCENARIO_CREATE = 'create';
 
     const SCENARIO_MUNICIPAL_TASK = 'municipal-task';
+
+    public $edit;
+
+    public function fieldResolver(PeriodicFieldAR $history)
+    {
+        return $history->value;
+    }
 
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
-        return 'years';
+        return '{{%years}}';
     }
 
     public function scenarios()
@@ -81,6 +96,7 @@ class ProgrammeModule extends ActiveRecord
             [['name', 'minchild', 'maxchild', 'results'], 'required', 'on' => self::SCENARIO_MUNICIPAL_TASK],
             [['hours', 'program_id', 'year', 'hoursdop', 'hoursindivid', 'minchild', 'maxchild', 'open', 'quality_control', 'p21z', 'p22z'], 'integer'],
             [['price', 'normative_price'], 'number'],
+            [['verification'], 'integer'],
             [['month'], 'integer', 'max' => 12],
             [['kvfirst', 'kvdop', 'name'], 'string', 'max' => 255],
             ['results', 'string'],
@@ -123,6 +139,7 @@ class ProgrammeModule extends ActiveRecord
             'p22z' => 'Квалификация педагогического работника, дополнительно привлекаемого для совместной реализации образовательной программы в группе',
             'results' => 'Ожидаемые результаты освоения модуля',
             'fullname' => 'Наименование модуля',
+            'edit' => 'Отправить на повторную сертификацию',
         ];
     }
 
@@ -203,7 +220,7 @@ class ProgrammeModule extends ActiveRecord
     public function getActiveContracts()
     {
         return $this->hasMany(Contracts::class, ['year_id' => 'id'])
-            ->andWhere(['contracts.status' => 1]);
+            ->andWhere(['contracts.status' => Contracts::STATUS_ACTIVE]);
     }
 
 
@@ -268,11 +285,37 @@ class ProgrammeModule extends ActiveRecord
         return array_unique($rows);
     }
 
+    public function canEdit()
+    {
+        $contractsExists = $this
+            ->getContracts()
+            ->andFilterWhere([
+                'status' => [
+                    Contracts::STATUS_REQUESTED,
+                    Contracts::STATUS_ACTIVE,
+                    Contracts::STATUS_ACCEPTED
+                ]
+            ])->exists();
+        $isOpen = $this->open;
+
+        return !($contractsExists || $isOpen);
+    }
+
     /**
      * @return integer|null
      */
     public function getChildrenAverage()
     {
         return $this->program->municipality->operator->settings->children_average;
+    }
+
+    public function setVerificationWaitAndSave()
+    {
+        if ($this->verification === self::VERIFICATION_WAIT) {
+            return true;
+        }
+        $this->verification = self::VERIFICATION_WAIT;
+
+        return $this->save(false);
     }
 }
