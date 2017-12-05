@@ -715,9 +715,14 @@ class Programs extends ActiveRecord implements RecordWithHistory
         return $this->is_municipal_task > 0 ? true : false;
     }
 
-    public function getCanTaskBeTranferred(): bool
+    public function getCanTaskBeTransferred(): bool
     {
         return !$this->getMunicipalTaskContracts()->count() && $this->verification == self::VERIFICATION_DENIED;
+    }
+
+    public function getCanProgrammeBeTransferred(): bool
+    {
+        return !$this->getLivingContracts()->count() && !$this->getModules()->andWhere(['open' => 1])->count();
     }
 
     public function getIsActive(): bool
@@ -725,10 +730,16 @@ class Programs extends ActiveRecord implements RecordWithHistory
         return $this->verification !== self::VERIFICATION_IN_ARCHIVE;
     }
 
-    public function setTransferParams()
+    public function setTransferParams($task = true)
     {
-        $this->inTransferProcess = true;
-        $this->is_municipal_task = 0;
+        if ($task) {
+            $this->inTransferProcess = true;
+            $this->is_municipal_task = 0;
+        } else {
+            $this->verification = self::VERIFICATION_UNDEFINED;
+            $this->price = 0;
+            $this->is_municipal_task = 1;
+        }
     }
 
     /**
@@ -792,9 +803,13 @@ class Programs extends ActiveRecord implements RecordWithHistory
      */
     public function getLivingContracts()
     {
-        return $this->getContracts()->andFilterWhere(['status' => [Contracts::STATUS_REQUESTED,
-            Contracts::STATUS_ACTIVE,
-            Contracts::STATUS_ACCEPTED]]);
+        return $this->getContracts()->andFilterWhere(['status' =>
+            [
+                Contracts::STATUS_REQUESTED,
+                Contracts::STATUS_ACTIVE,
+                Contracts::STATUS_ACCEPTED
+            ]
+        ]);
     }
 
     /**

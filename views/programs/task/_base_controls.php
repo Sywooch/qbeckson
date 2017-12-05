@@ -68,7 +68,7 @@ use yii\helpers\Url;
                 'url' => Url::to(['/programs/delete', 'id' => $model->id]),
                 'confirm' => 'Вы уверены, что хотите удалить программу?',
                 'toggleButton' => ['class' => 'btn btn-danger', 'label' => 'Удалить']]);
-            if ($model->canTaskBeTranferred) {
+            if ($model->canTaskBeTransferred) {
                 echo Html::a('Перевести на ПФ', Url::to(['/programs/transfer-task', 'id' => $model->id]), ['class' => 'btn btn-theme']);
             }
         }
