@@ -189,12 +189,9 @@ class CertificatesController extends Controller
             return $this->asJson(ActiveForm::validate($certificateImportRegistry));
         }
 
-        $certificateRegistryFileExists = $certificateImportRegistry->registryFileExist();
-
         return $this->render('import-from-excel', [
             'certificateImportTemplate' => $certificateImportTemplate,
             'certificateImportRegistry' => $certificateImportRegistry,
-            'certificateRegistryFileExists' => $certificateRegistryFileExists,
         ]);
     }
 
