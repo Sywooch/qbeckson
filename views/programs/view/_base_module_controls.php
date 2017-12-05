@@ -12,7 +12,11 @@ use yii\helpers\Url;
     <?php
     if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)
         && ($model->program->verification !== Programs::VERIFICATION_DENIED
-            || $model->program->verification !== Programs::VERIFICATION_WAIT)) {
+            || $model->program->verification !== Programs::VERIFICATION_WAIT
+        )
+        && ($model->verification !== \app\models\ProgrammeModule::VERIFICATION_DENIED
+            || $model->verification !== \app\models\ProgrammeModule::VERIFICATION_WAIT)
+    ) {
         $message = '';
         $url = '#';
         $classButton = 'btn-theme';

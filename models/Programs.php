@@ -56,6 +56,7 @@ use yii\helpers\Html;
  * @property integer $age_group_min
  * @property integer $age_group_max
  * @property integer $is_municipal_task
+ * @property integer $p3z
  * @property string $zabAsString
  *
  * @property string $iconClass
@@ -158,7 +159,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
      */
     public static function tableName()
     {
-        return 'programs';
+        return '{{%programs}}';
     }
 
     /**
