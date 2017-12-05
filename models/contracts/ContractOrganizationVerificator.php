@@ -178,24 +178,6 @@ class ContractOrganizationVerificator extends ContractsActions
             || $transactionTerminator();
     }
 
-    private function buildInforms(): bool
-    {
-        return InformerBuilder::build(
-                $this->contract,
-                ' Заключен договор',
-                UserIdentity::ROLE_PAYER_ID,
-                $this->contract->payer_id
-            )
-                ->save()
-            && InformerBuilder::build(
-                $this->contract,
-                ' Заключен договор',
-                UserIdentity::ROLE_CERTIFICATE_ID,
-                $this->contract->certificate_id
-            )
-                ->save();
-    }
-
     private function organizationChildAmountInc(Organization $organization): bool
     {
         $organization->amount_child++;
@@ -238,7 +220,6 @@ class ContractOrganizationVerificator extends ContractsActions
 
         return $result;
     }
-
 
     /**
      * Договор находится в режиме продления?
@@ -334,5 +315,23 @@ class ContractOrganizationVerificator extends ContractsActions
         $preinvoice->sum = round(($price * $preinvoice->completeness) / 100, 2);
 
         return $preinvoice->save();
+    }
+
+    private function buildInforms(): bool
+    {
+        return InformerBuilder::build(
+                $this->contract,
+                ' Заключен договор',
+                UserIdentity::ROLE_PAYER_ID,
+                $this->contract->payer_id
+            )
+                ->save()
+            && InformerBuilder::build(
+                $this->contract,
+                ' Заключен договор',
+                UserIdentity::ROLE_CERTIFICATE_ID,
+                $this->contract->certificate_id
+            )
+                ->save();
     }
 }

@@ -114,7 +114,7 @@ class OrganizationController extends Controller
             'model' => $model,
             'confirmRequestForm' => $confirmRequestForm,
             'operatorSettings' => $operatorSettings,
-            'activeCooperateExists' => $activeCooperate ? true: false,
+            'activeCooperateExists' => $activeCooperate ? true : false,
         ]);
     }
 

@@ -16,7 +16,6 @@ use app\models\ProgramsallSearch;
 use app\models\ProgramsFile;
 use app\models\ProgramsPreviusSearch;
 use app\models\UserIdentity;
-use app\models\Years;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
@@ -504,18 +503,21 @@ class ProgramsController extends Controller
                 /**@var $val Informs */
                 return $val->status === Programs::VERIFICATION_DENIED;
             })) > 0) {
-            Yii::$app->session->setFlash('danger',
-                $this->renderPartial('informers/list_of_reazon',
+            Yii::$app->session->setFlash(
+                'danger',
+                $this->renderPartial(
+                    'informers/list_of_reazon',
                     [
-                        'dataProvider' => new ActiveDataProvider([
+                        'dataProvider' => new ActiveDataProvider(
+                            [
                                 'query' => $model->getInforms()
                                     ->andWhere(['status' => $model::VERIFICATION_DENIED]),
                                 'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
                             ]
                         )
                     ]
-                ));
-
+                )
+            );
         }
 
         $model->verification = Programs::VERIFICATION_WAIT;

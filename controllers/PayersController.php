@@ -4,13 +4,10 @@ namespace app\controllers;
 
 use app\models\CertGroup;
 use app\models\Cooperate;
-use app\models\forms\ConfirmRequestForm;
 use app\models\forms\CooperateChangeTypeForm;
-use app\models\OperatorSettings;
 use app\models\Payers;
 use app\models\PayersSearch;
 use app\models\User;
-use app\traits\AjaxValidationTrait;
 use Yii;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
@@ -72,11 +69,11 @@ class PayersController extends Controller
     {
         $payer = $this->findModel($id);
 
-        $activeCooperateExists = $payer->getCooperation(Cooperate::STATUS_ACTIVE) ? true: false;
+        $activeCooperateExists = $payer->getCooperation(Cooperate::STATUS_ACTIVE) ? true : false;
 
         return $this->render('view', [
             'model' => $payer,
-            'activeCooperateExists' => $activeCooperateExists ? true: false,
+            'activeCooperateExists' => $activeCooperateExists ? true : false,
         ]);
     }
 

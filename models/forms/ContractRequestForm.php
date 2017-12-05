@@ -99,13 +99,15 @@ class ContractRequestForm extends Model
                     $attribute,
                     'В настоящее время запись недоступна.'
                 );
+
                 return;
             }
 
             $this->addError(
                 $attribute,
-                'Дата начала обучения по договору должна быть в пределах: '. \Yii::$app->formatter->asDate($settings->future_program_date_from) . ' - ' . \Yii::$app->formatter->asDate($group->datestop) . ', поскольку уполномоченная организация закрыла возможность зачисления в текущем периоде.'
+                'Дата начала обучения по договору должна быть в пределах: ' . \Yii::$app->formatter->asDate($settings->future_program_date_from) . ' - ' . \Yii::$app->formatter->asDate($group->datestop) . ', поскольку уполномоченная организация закрыла возможность зачисления в текущем периоде.'
             );
+
             return;
         }
 

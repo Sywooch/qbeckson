@@ -1,4 +1,5 @@
 <?php
+
 namespace app\commands;
 
 use Yii;
@@ -10,9 +11,9 @@ use yii\console\Controller;
  */
 class RbacController extends Controller
 {
-	public function actionCreateViewPermissions()
-	{
-		$auth = Yii::$app->authManager;
+    public function actionCreateViewPermissions()
+    {
+        $auth = Yii::$app->authManager;
         $roles = $auth->getRoles();
 
         $rule = new \app\rbac\ViewContractRule();
@@ -42,5 +43,5 @@ class RbacController extends Controller
             $auth->addChild($role, $viewProgramme);
             $auth->addChild($role, $viewCertificate);
         }
-	}
+    }
 }
