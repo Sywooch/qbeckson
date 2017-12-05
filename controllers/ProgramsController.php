@@ -8,6 +8,7 @@ use app\models\AllProgramsSearch;
 use app\models\Cooperate;
 use app\models\forms\ProgramAddressesForm;
 use app\models\forms\ProgramSectionForm;
+use app\models\forms\TaskTransferForm;
 use app\models\Informs;
 use app\models\Model;
 use app\models\Organization;
@@ -319,13 +320,11 @@ class ProgramsController extends Controller
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-
                 return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelsYears),
                     ActiveForm::validate($model)
                 ));
             }
-
 
             $organizations = new Organization();
             $organization = $organizations->getOrganization();
@@ -339,7 +338,6 @@ class ProgramsController extends Controller
             }
 
             if (Yii::$app->request->isPost) {
-
                 $file->docFile = UploadedFile::getInstance($file, 'docFile');
 
                 if (empty($file->docFile)) {
@@ -1064,6 +1062,24 @@ class ProgramsController extends Controller
                 'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
             ]);
         }
+    }
+
+    public function actionTransferTask($id)
+    {
+        $model = $this->findModel($id);
+        if (!$model->isMunicipalTask || !$model->canTaskBeTranferred) {
+            throw new BadRequestHttpException();
+        }
+        $model->setTransferParams();
+        $modelYears = $model->years;
+        $file = new ProgramsFile();
+
+        return $this->render('update', [
+            'strictAction' => ['/programs/update', 'id' => $model->id],
+            'model' => $model,
+            'file' => $file,
+            'modelYears' => (empty($modelYears)) ? [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])] : $modelYears
+        ]);
     }
 
     /**
