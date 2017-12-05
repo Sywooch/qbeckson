@@ -330,7 +330,7 @@ class CertificateImportRegistry extends ActiveRecord
      */
     private function getCertificateImportFilePath()
     {
-        if (!key_exists('path', $this->certificateImportListFile) && !file_exists(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $this->certificateImportListFile['path'])) {
+        if (!isset($this->certificateImportListFile['path']) && !file_exists(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $this->certificateImportListFile['path'])) {
             return null;
         }
 
@@ -342,7 +342,7 @@ class CertificateImportRegistry extends ActiveRecord
      */
     public function getRegistryUrl()
     {
-        if (!key_exists('path', $this->certificateImportListFile) && !file_exists(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $this->certificateListRegistryFile['path'])) {
+        if (!isset($this->certificateImportListFile['path']) && !file_exists(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $this->certificateListRegistryFile['path'])) {
             return null;
         }
 
