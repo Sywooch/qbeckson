@@ -44,7 +44,7 @@ class PeriodicFieldAR extends \yii\db\ActiveRecord
     public static function getColumns()
     {
         return [
-            'fieldLabel',
+            'fieldLabel:shortTextWithPopup',
             'created_at:datetime',
             'created_by:userName',
             'resolvedValue:raw'
