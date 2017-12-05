@@ -263,12 +263,12 @@ class InvoiceBuilder extends InvoicesActions
                 ->andWhere(['<=', 'start_edu_contract', $this->datePrevMonthEnd])
                 ->andWhere(['>=', 'stop_edu_contract', $this->datePrevMonthBeginning])
                 /* если договор закрыт, учитываем так же дату закрытия, а если активен то НЕ учитываем */
-                ->andWhere(['OR', [
+                /*->andWhere(['OR', [
                     'AND', ['<=', 'date_termnate', $this->datePrevMonthEnd], ['`contracts`.status' => Contracts::STATUS_CLOSED]
                 ], [
                     '`contracts`.status' => Contracts::STATUS_ACTIVE
                 ]
-                ])
+                ])*/
                 ->andWhere(['OR', [
                     'AND', ['>=', 'date_termnate', $this->datePrevMonthBeginning], ['`contracts`.status' => Contracts::STATUS_CLOSED]
                 ], [

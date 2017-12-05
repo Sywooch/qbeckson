@@ -75,6 +75,7 @@ class Menu
                 'url'   => ['/import/index'],
                 'items' => [
                     ['label' => 'Дети (сертификаты)', 'url' => ['/import/children']],
+                    ['label' => 'Шаблон импорта списка сертификатов', 'url' => ['/import/upload-certificate-import-template']],
                     ['label' => 'Корректировка паролей', 'url' => ['/import/children-password']],
                 ],
             ],
