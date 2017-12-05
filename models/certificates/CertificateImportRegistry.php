@@ -258,8 +258,7 @@ class CertificateImportRegistry extends ActiveRecord
 
         $userIdListForLog = [];
         foreach ($userIdList as $userId) {
-            $userIdListForLog[] = ['user_id' => $userId];
-            $userIdListForLog[] = ['created_at' => date('Y-m-d H:i:s')];
+            $userIdListForLog[] = ['user_id' => $userId, 'created_at' => date('Y-m-d H:i:s')];
         }
 
         if ($insertCount > 0) {
