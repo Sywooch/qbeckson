@@ -154,7 +154,7 @@ $preparedColumns = GridviewHelper::prepareColumns('invoices', $columns);
                 }
             }
         
-            if (date('m') == 12) { 
+            if (date('m') == Yii::$app->params['decemberNumber']) {
             $dec = array();
             foreach ($rows as $payer_id) {
                 $payer3 = (new Query())
@@ -162,7 +162,7 @@ $preparedColumns = GridviewHelper::prepareColumns('invoices', $columns);
                     ->from('invoices')
                     ->where(['organization_id' => $organization['id']])
                     ->andWhere(['payers_id' => $payer_id])
-                    ->andWhere(['month' => 12])
+                    ->andWhere(['month' => Yii::$app->params['decemberNumber']])
                     ->andWhere(['prepayment' => 0])
                     ->andWhere(['status' => [0,1,2]])
                     ->column();

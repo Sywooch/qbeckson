@@ -100,7 +100,7 @@ $organization = $organizations->getOrganization();
                             $comp = $completeness['completeness'];
                         }
 
-                        return Html::a($comp . ' %', Url::to(['/completeness/preinvoice', 'id' => $completeness['id']]), ['class' => 'btn btn-primary']);
+                        return Html::a(($completeness['completeness'] ?? 0) . ' %', Url::to(['/completeness/preinvoice', 'id' => $completeness['id']]), ['class' => 'btn btn-primary']);
                     }
                 ],
 

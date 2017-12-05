@@ -312,7 +312,7 @@ class Certificates extends \yii\db\ActiveRecord
             $this->rezerv_p -= $contract->rezerv;
         }
         $result = $this->save();
-        if(!$result){
+        if (!$result) {
             Yii::trace($this->getErrors());
         }
         return $result;
@@ -617,6 +617,8 @@ class Certificates extends \yii\db\ActiveRecord
                 return 0;
             }
 
+            $userIdList = [];
+
             /** @var Certificates[] $certificates */
             foreach ($certificates as $certificate) {
                 $certificate->selectCertGroup = self::TYPE_ACCOUNTING;
@@ -625,10 +627,13 @@ class Certificates extends \yii\db\ActiveRecord
                 if ($certificate->save()) {
                     $changedCount++;
 
-                    $notification = new Notification(['user_id' => $certificate->user->id, 'message' => 'Ваш сертификат переведен в вид "сертификат учета" в связи с тем, что не был активирован в течении установленного уполномоченным органом периода времени']);
-                    $notification->save();
+                    $userIdList[] = $certificate->user_id;
                 }
             }
+
+            $message = 'Ваш сертификат переведен в вид "сертификат учета" в связи с тем, что не был активирован в течении установленного уполномоченным органом периода времени';
+            $notification = Notification::getExistOrCreate($message, 0, Notification::TYPE_CERTIFICATE_TO_ACCOUNTING);
+            NotificationUser::assignToUsers($userIdList, $notification->id);
 
             return $changedCount;
         }
