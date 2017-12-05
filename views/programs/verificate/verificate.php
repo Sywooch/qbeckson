@@ -16,6 +16,16 @@ if ($roles['operators']) {
 }
 $this->params['breadcrumbs'][] = 'Сертификация - 1 шаг';
 $this->params['breadcrumbs'][] = $this->title;
+
+if ($model->verification === \app\models\Programs::VERIFICATION_DONE) {
+    echo \yii\bootstrap\Alert::widget([
+        'options' => [
+            'class' => 'alert-info',
+        ],
+        'body' => 'Программа сертифицирована, но не сертифицирован один из ее модулей.',
+    ]);
+}
+
 ?>
 <div class="programs-view col-md-8 col-md-offset-2">
 
@@ -28,7 +38,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'organization.name',
                 'label' => 'Организация заявитель',
                 'format' => 'raw',
-                'value' => Html::a($model->organization->name, Url::to(['/organization/view', 'id' => $model->organization->id]), ['class' => 'blue']),
+                'value' => Html::a(
+                    $model->organization->name,
+                    Url::to(['/organization/view', 'id' => $model->organization->id]),
+                    ['class' => 'blue']
+                ),
             ],
             'name',
             'directivity',
@@ -64,27 +78,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'illnessesList',
             'norm_providing',
         ],
-    ]) ?>
-
-    <?php
-    foreach ($model->modules as $value) {
-        echo "<h3>$value->year модуль</h3>";
-        echo DetailView::widget([
-            'model' => $value,
-            'attributes' => [
-                'name',
-                'month',
-                'hours',
-                'kvfirst',
-                'hoursindivid',
-                'hoursdop',
-                'kvdop',
-                'minchild',
-                'maxchild',
-                'results:ntext',
-            ],
-        ]);
-    }
+    ]);
+    echo $this->render('_modules_view', ['model' => $model]);
     echo $this->render('_history', ['model' => $model]);
     ?>
 
