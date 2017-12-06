@@ -950,5 +950,11 @@ class Programs extends ActiveRecord implements RecordWithHistory
                 ->getActiveContractsByProgram($this->id)->exists(); //Нет заключенных договоров на программу
     }
 
+    public function needCertificate(): bool
+    {
+        return ($this->verification === self::VERIFICATION_UNDEFINED
+            || $this->verification === self::VERIFICATION_WAIT);
+    }
+
 
 }

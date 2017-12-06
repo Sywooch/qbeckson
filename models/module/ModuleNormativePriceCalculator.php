@@ -4,18 +4,8 @@ namespace app\models\module;
 
 use Yii;
 
-class ModuleVerificator extends ModuleActions
+class ModuleNormativePriceCalculator extends ModuleActions
 {
-    public function setStateWait()
-    {
-        if (!$this->isPossibleToSaveTheCurrentUser()) {
-            $this->module->verification = $this->module::VERIFICATION_WAIT;
-
-            return $this->module->save(false);
-        }
-
-        return $this->throwForbidden();
-    }
 
     public function calcNormativPrice()
     {
@@ -104,32 +94,32 @@ class ModuleVerificator extends ModuleActions
         $p15 = Yii::$app->coefficient->data->pk;
         $p13 = Yii::$app->coefficient->data->weekyear;
 
-        if ($this->module->programYears->p21z == 1) {
+        if ($this->module->p21z == 1) {
             $p1y = 'p21v';
         }
-        if ($this->module->programYears->p21z == 2) {
+        if ($this->module->p21z == 2) {
             $p1y = 'p21s';
         }
-        if ($this->module->programYears->p21z == 3) {
+        if ($this->module->p21z == 3) {
             $p1y = 'p21o';
         }
         $p21 = Yii::$app->coefficient->data->$p1y;
 
-        if ($this->module->programYears->p22z == 1) {
+        if ($this->module->p22z == 1) {
             $p2y = 'p22v';
         }
-        if ($this->module->programYears->p22z == 2) {
+        if ($this->module->p22z == 2) {
             $p2y = 'p22s';
         }
-        if ($this->module->programYears->p22z == 3) {
+        if ($this->module->p22z == 3) {
             $p2y = 'p22o';
         }
         $p22 = Yii::$app->coefficient->data->$p2y;
 
-        $childrenAverage = $this->module->programYears->getChildrenAverage()
-            ? $this->module->programYears->getChildrenAverage()
-            : ($this->module->programYears->maxchild
-                + $this->module->programYears->minchild) / 2;
+        $childrenAverage = $this->module->getChildrenAverage()
+            ? $this->module->getChildrenAverage()
+            : ($this->module->maxchild
+                + $this->module->minchild) / 2;
         $nprice =
             (
                 $p6
@@ -139,20 +129,20 @@ class ModuleVerificator extends ModuleActions
                             (
                                 ($p21
                                     * (
-                                        $this->module->programYears->hours
-                                        - $this->module->programYears->hoursindivid
+                                        $this->module->hours
+                                        - $this->module->hoursindivid
                                     )
                                 )
                                 + (
                                     $p22
-                                    * $this->module->programYears->hoursdop
+                                    * $this->module->hoursdop
                                 )
                             )
                             / ($childrenAverage)
                         )
                         + (
                             $p21
-                            * $this->module->programYears->hoursindivid
+                            * $this->module->hoursindivid
                         )
                     )
                     / (
@@ -173,11 +163,11 @@ class ModuleVerificator extends ModuleActions
                 (
                     (
                         (
-                            $this->module->programYears->hours
-                            - $this->module->programYears->hoursindivid
+                            $this->module->hours
+                            - $this->module->hoursindivid
                         )
                         + (
-                            $this->module->programYears->hoursindivid
+                            $this->module->hoursindivid
                             * $childrenAverage
                         )
                     )
@@ -197,12 +187,12 @@ class ModuleVerificator extends ModuleActions
                     (
                         (
                             (
-                                $this->module->programYears->hours
-                                - $this->module->programYears->hoursindivid
+                                $this->module->hours
+                                - $this->module->hoursindivid
                             )
-                            + $this->module->programYears->hoursdop
+                            + $this->module->hoursdop
                             + (
-                                $this->module->programYears->hoursindivid
+                                $this->module->hoursindivid
                                 * $childrenAverage
                             )
                         )
@@ -220,20 +210,9 @@ class ModuleVerificator extends ModuleActions
                 * $p5
             );
 
-        return round($nprice);
-    }
+        $this->module->normative_price = round($nprice);
 
-    public function calcAndSaveNormativePrice(): bool
-    {
-        $this->module->normative_price = $this->calcNormativPrice();
-
-        return $this->module->save();
-    }
-
-
-    public function canVerify()
-    {
-
+        return true;
     }
 
     /**
@@ -247,7 +226,10 @@ class ModuleVerificator extends ModuleActions
      */
     public function saveActions(\Closure $transactionTerminator, bool $validate): bool
     {
-        // TODO: Implement saveActions() method.
+        return (
+            $this->calcNormativPrice()
+            )
+            || $transactionTerminator();
     }
 
 

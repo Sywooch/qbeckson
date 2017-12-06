@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\assets\programsAsset\ProgramsAsset;
 use app\components\EditableOperations;
+use app\helpers\FlashHelper;
 use app\models\AllProgramsSearch;
 use app\models\Cooperate;
 use app\models\forms\ProgramAddressesForm;
@@ -13,6 +14,8 @@ use app\models\Model;
 use app\models\Organization;
 use app\models\ProgrammeModule;
 use app\models\Programs;
+use app\models\programs\ProgramsNormativePriceCalculator;
+use app\models\programs\ProgramsVerificator;
 use app\models\ProgramsallSearch;
 use app\models\ProgramsFile;
 use app\models\ProgramsPreviusSearch;
@@ -45,6 +48,7 @@ class ProgramsController extends Controller
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
+                    'save' => ['POST'],
                 ],
             ],
         ];
@@ -560,45 +564,13 @@ class ProgramsController extends Controller
 
     public function actionSave($id)
     {
-        $model = $this->findModel($id);
+        $verificator = new ProgramsVerificator($id);
 
-        if ($model->directivity == 'Техническая (робототехника)') {
-            $model->limit = Yii::$app->coefficient->data->blimrob * $model->year;
-        }
-        if ($model->directivity == 'Техническая (иная)') {
-            $model->limit = Yii::$app->coefficient->data->blimtex * $model->year;
-        }
-        if ($model->directivity == 'Естественнонаучная') {
-            $model->limit = Yii::$app->coefficient->data->blimest * $model->year;
-        }
-        if ($model->directivity == 'Физкультурно-спортивная') {
-            $model->limit = Yii::$app->coefficient->data->blimfiz * $model->year;
-        }
-        if ($model->directivity == 'Художественная') {
-            $model->limit = Yii::$app->coefficient->data->blimxud * $model->year;
-        }
-        if ($model->directivity == 'Туристско-краеведческая') {
-            $model->limit = Yii::$app->coefficient->data->blimtur * $model->year;
-        }
-        if ($model->directivity == 'Социально-педагогическая') {
-            $model->limit = Yii::$app->coefficient->data->blimsoc * $model->year;
+        if (!$verificator->save()) {
+            FlashHelper::flashFirst($verificator);
         }
 
-        $model->verification = Programs::VERIFICATION_DONE;
-
-        //return var_dump($model->limit);
-        if ($model->save()) {
-            $informs = new Informs();
-            $informs->program_id = $model->id;
-            $informs->prof_id = $model->organization_id;
-            $informs->text = 'Сертифицированна программа';
-            $informs->from = 3;
-            $informs->date = date("Y-m-d");
-            $informs->read = 0;
-            if ($informs->save()) {
-                return $this->redirect('/personal/operator-programs');
-            }
-        }
+        return $this->redirect('/personal/operator-programs');
     }
 
     public function actionCertificate($id)
@@ -606,178 +578,15 @@ class ProgramsController extends Controller
         $model = $this->findModel($id);
         $modelsYears = $model->years;
 
-        if ($model->load(Yii::$app->request->post())) {
-
-            $oldIDs = ArrayHelper::map($modelsYears, 'id', 'id');
-            $modelsYears = Model::createMultiple(ProgrammeModule::classname(), $modelsYears);
-            Model::loadMultiple($modelsYears, Yii::$app->request->post());
-            $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelsYears, 'id', 'id')));
-
-            // ajax validation
-            if (Yii::$app->request->isAjax) {
-
-                return $this->asJson(ArrayHelper::merge(
-                    ActiveForm::validateMultiple($modelsYears),
-                    ActiveForm::validate($model)
-                ));
-            }
-
-            $valid = $model->validate();
-            $valid = Model::validateMultiple($modelsYears) && $valid;
-
-            if ($valid) {
-                $transaction = \Yii::$app->db->beginTransaction();
-
-                try {
-                    if ($flag = $model->save(false)) {
-                        if (!empty($deletedIDs)) {
-                            ProgrammeModule::deleteAll(['id' => $deletedIDs]);
-                        }
-                        /**
-                         * @var $modelYears ProgrammeModule
-                         */
-                        foreach ($modelsYears as $modelYears) {
-
-
-                            if ($model->p3z == 1) {
-                                $p3r = 'p3v';
-                            }
-                            if ($model->p3z == 2) {
-                                $p3r = 'p3s';
-                            }
-                            if ($model->p3z == 3) {
-                                $p3r = 'p3n';
-                            }
-
-                            $p3 = Yii::$app->coefficient->data->$p3r;
-
-                            $mun = (new \yii\db\Query())
-                                ->select(['pc', 'zp', 'cozp', 'stav', 'costav', 'dop', 'codop', 'uvel', 'couvel', 'otch', 'cootch', 'otpusk', 'cootpusk', 'polezn', 'copolezn', 'nopc', 'conopc', 'rob', 'corob', 'tex', 'cotex', 'est', 'coest', 'fiz', 'cofiz', 'xud', 'coxud', 'tur', 'cotur', 'soc', 'cosoc'])
-                                ->from('mun')
-                                ->where(['id' => $model->mun])
-                                ->one();
-
-                            if ($model->ground == 1) {
-                                $p5 = $mun['pc'];
-                                $p6 = $mun['zp'];
-                                $p12 = $mun['stav'];
-                                $p7 = $mun['dop'];
-                                $p8 = $mun['uvel'];
-                                $p9 = $mun['otch'];
-                                $p10 = $mun['otpusk'];
-                                $p11 = $mun['polezn'];
-                                $p4 = $mun['nopc'];
-                                if ($model->directivity == 'Техническая (робототехника)') {
-                                    $p1 = $mun['rob'];
-                                }
-                                if ($model->directivity == 'Техническая (иная)') {
-                                    $p1 = $mun['tex'];
-                                }
-                                if ($model->directivity == 'Естественнонаучная') {
-                                    $p1 = $mun['est'];
-                                }
-                                if ($model->directivity == 'Физкультурно-спортивная') {
-                                    $p1 = $mun['fiz'];
-                                }
-                                if ($model->directivity == 'Художественная') {
-                                    $p1 = $mun['xud'];
-                                }
-                                if ($model->directivity == 'Туристско-краеведческая') {
-                                    $p1 = $mun['tur'];
-                                }
-                                if ($model->directivity == 'Социально-педагогическая') {
-                                    $p1 = $mun['soc'];
-                                }
-                            }
-
-                            if ($model->ground == 2) {
-                                $p5 = $mun['pc'];
-                                $p6 = $mun['cozp'];
-                                $p12 = $mun['costav'];
-                                $p7 = $mun['codop'];
-                                $p8 = $mun['couvel'];
-                                $p9 = $mun['cootch'];
-                                $p10 = $mun['cootpusk'];
-                                $p11 = $mun['copolezn'];
-                                $p4 = $mun['conopc'];
-                                if ($model->directivity == 'Техническая (робототехника)') {
-                                    $p1 = $mun['corob'];
-                                }
-                                if ($model->directivity == 'Техническая (иная)') {
-                                    $p1 = $mun['cotex'];
-                                }
-                                if ($model->directivity == 'Естественнонаучная') {
-                                    $p1 = $mun['coest'];
-                                }
-                                if ($model->directivity == 'Физкультурно-спортивная') {
-                                    $p1 = $mun['cofiz'];
-                                }
-                                if ($model->directivity == 'Художественная') {
-                                    $p1 = $mun['coxud'];
-                                }
-                                if ($model->directivity == 'Туристско-краеведческая') {
-                                    $p1 = $mun['cotur'];
-                                }
-                                if ($model->directivity == 'Социально-педагогическая') {
-                                    $p1 = $mun['cosoc'];
-                                }
-                            }
-
-                            $p14 = Yii::$app->coefficient->data->weekmonth;
-                            $p16 = Yii::$app->coefficient->data->norm;
-                            $p15 = Yii::$app->coefficient->data->pk;
-                            $p13 = Yii::$app->coefficient->data->weekyear;
-
-                            if ($modelYears->p21z == 1) {
-                                $p1y = 'p21v';
-                            }
-                            if ($modelYears->p21z == 2) {
-                                $p1y = 'p21s';
-                            }
-                            if ($modelYears->p21z == 3) {
-                                $p1y = 'p21o';
-                            }
-                            $p21 = Yii::$app->coefficient->data->$p1y;
-
-                            if ($modelYears->p22z == 1) {
-                                $p2y = 'p22v';
-                            }
-                            if ($modelYears->p22z == 2) {
-                                $p2y = 'p22s';
-                            }
-                            if ($modelYears->p22z == 3) {
-                                $p2y = 'p22o';
-                            }
-                            $p22 = Yii::$app->coefficient->data->$p2y;
-
-                            $childrenAverage = $modelYears->getChildrenAverage() ? $modelYears->getChildrenAverage() : ($modelYears->maxchild + $modelYears->minchild) / 2;
-                            $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / ($childrenAverage)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * ($childrenAverage)) / ($p11 * ($childrenAverage))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * ($childrenAverage)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * ($childrenAverage))) * $p5;
-
-                            $modelYears->normative_price = round($nprice);
-
-
-                            if (!($flag = $modelYears->save(false))) {
-                                $transaction->rollBack();
-                                break;
-                            }
-                        }
-                    }
-                    if ($flag) {
-                        $transaction->commit();
-
-                        return $this->redirect(['certificate', 'id' => $id]);
-                    }
-                } catch (Exception $e) {
-                    $transaction->rollBack();
-                }
-            }
-
-        } else {
-            return $this->render('cert', [
-                'model' => $model,
-                'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
-            ]);
+        if (Yii::$app->request->isPost) {
+            $calculator = new ProgramsNormativePriceCalculator($model);
+            ($calculator->save()) || FlashHelper::flashFirst($calculator);
         }
+
+        return $this->render('cert', [
+            'model' => $model,
+            'modelsYears' => $modelsYears
+        ]);
     }
 
     public function actionNewnormprice($id)
@@ -991,8 +800,6 @@ class ProgramsController extends Controller
     public function actionCertificateold($id)
     {
         $model = $this->findModel($id);
-
-
         $params = (new \yii\db\Query())
             ->select(['id', 'hours', 'hoursindivid', 'hoursdop', 'minchild', 'maxchild', 'p21z', 'p22z'])
             ->from('years')
