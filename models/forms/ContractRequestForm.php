@@ -42,7 +42,7 @@ class ContractRequestForm extends Model
             if (time() < strtotime($this->getGroup()->datestart)) {
                 $this->dateFrom = Yii::$app->formatter->asDate($this->getGroup()->datestart);
             } else {
-                $this->dateFrom = date('d.m.Y', strtotime('first day of next month'));
+                $this->dateFrom = date('d.m.Y', strtotime('next day'));
             }
         }
         parent::__construct($config);
@@ -68,7 +68,18 @@ class ContractRequestForm extends Model
             [['dateFrom'], 'required'],
             [['dateFrom'], 'date', 'format' => 'php:d.m.Y'],
             [['dateFrom'], 'validateDate'],
+            [['dateFrom'], 'compareDates'],
         ];
+    }
+
+    /**
+     * Проверяет, чтобы дата начала обучения была раньше, чем дата окончания
+     * В правилах валидации прописать после валидации validateDate, т.к. в ней задается свойство dateTo.
+     */
+    public function compareDates() {
+        if(strtotime($this->dateFrom) >= strtotime($this->dateTo)){
+            $this->addError('dateFrom', 'Дата окончания обучения по договору должна быть больше даты начала обучения');
+        }
     }
 
     /**
@@ -158,6 +169,7 @@ class ContractRequestForm extends Model
             $this->addError($attribute, 'Даты должны отличаться');
             return;
         }
+
     }
 
     /**
