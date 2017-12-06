@@ -198,12 +198,11 @@ class ProgramsController extends Controller
     }
 
     /**
-     * Displays a single Programs model.
+     * @param $id int
      *
-     * @param integer $id
-     *
-     * @return mixed
+     * @return string
      * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
      */
     public function actionView($id)
     {
@@ -222,17 +221,21 @@ class ProgramsController extends Controller
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
             if ($model->verification === $model::VERIFICATION_DENIED) {
-                Yii::$app->session->setFlash('danger',
-                    $this->renderPartial('informers/list_of_reazon',
+                Yii::$app->session->setFlash(
+                    'danger',
+                    $this->renderPartial(
+                        'informers/list_of_reazon',
                         [
-                            'dataProvider' => new ActiveDataProvider([
+                            'dataProvider' => new ActiveDataProvider(
+                                [
                                     'query' => $model->getInforms()
                                         ->andWhere(['status' => $model::VERIFICATION_DENIED]),
                                     'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
                                 ]
                             )
                         ]
-                    ));
+                    )
+                );
             }
         }
         $cooperate = null;
@@ -242,7 +245,12 @@ class ProgramsController extends Controller
                 Cooperate::tableName() . '.organization_id' => $model->organization_id,
                 'status' => Cooperate::STATUS_ACTIVE])->all();
             if (!count($cooperate)) {
-                Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в организацию, реализующую выбранную программу. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
+                Yii::$app->session->setFlash(
+                    'warning',
+                    'К сожалению, на данный момент Вы не можете'
+                    . ' записаться на обучение в организацию, реализующую выбранную программу.'
+                    . ' Уполномоченная организация пока не заключила с ней необходимое соглашение.'
+                );
             }
         }
 
@@ -251,13 +259,13 @@ class ProgramsController extends Controller
         return $this->render('view/view', ['model' => $model, 'cooperate' => $cooperate]);
     }
 
+
     /**
-     * Displays a single Programs model.
+     * @param $id
      *
-     * @param integer $id
-     *
-     * @return mixed
+     * @return string
      * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
      */
     public function actionViewTask($id)
     {
@@ -265,7 +273,9 @@ class ProgramsController extends Controller
         $user = Yii::$app->user->identity;
         $model = $this->findModel($id);
 
-        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION) && $user->organization->id !== $model->organization_id) {
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
+            && $user->organization->id !== $model->organization_id
+        ) {
             throw new ForbiddenHttpException('Нет доступа');
         }
         // При первом просмотре от плательщика меняем статус, чтобы запретить редактирование организации
@@ -276,17 +286,21 @@ class ProgramsController extends Controller
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             || Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
             if ($model->verification === $model::VERIFICATION_DENIED) {
-                Yii::$app->session->setFlash('danger',
-                    $this->renderPartial('informers/list_of_reazon',
+                Yii::$app->session->setFlash(
+                    'danger',
+                    $this->renderPartial(
+                        'informers/list_of_reazon',
                         [
-                            'dataProvider' => new ActiveDataProvider([
+                            'dataProvider' => new ActiveDataProvider(
+                                [
                                     'query' => $model->getInforms()
                                         ->andWhere(['status' => $model::VERIFICATION_DENIED]),
                                     'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
                                 ]
                             )
                         ]
-                    ));
+                    )
+                );
             }
         }
 
@@ -311,25 +325,39 @@ class ProgramsController extends Controller
         }
 
         $file = new ProgramsFile();
-        $modelsYears = [new ProgrammeModule(['kvfirst' => 'Педагог, обладающий соответствующей квалификацией', 'scenario' => $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : ProgrammeModule::SCENARIO_CREATE])];
+        $modelsYears = [
+            new ProgrammeModule(
+                [
+                    'kvfirst' => 'Педагог, обладающий соответствующей квалификацией',
+                    'scenario' => $model->isMunicipalTask
+                        ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK
+                        : ProgrammeModule::SCENARIO_CREATE
+                ]
+            )
+        ];
 
         if ($model->load(Yii::$app->request->post())) {
-            $modelsYears = Model::createMultiple(ProgrammeModule::classname(), [], $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : null);
+            $modelsYears = Model::createMultiple(
+                ProgrammeModule::classname(),
+                [],
+                $model->isMunicipalTask
+                    ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK
+                    : null
+            );
             Model::loadMultiple($modelsYears, Yii::$app->request->post());
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-
                 return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelsYears),
                     ActiveForm::validate($model)
                 ));
             }
 
-
-            $organizations = new Organization();
-            $organization = $organizations->getOrganization();
-            $model->organization_id = $organization['id'];
+            /**@var $userIdentity UserIdentity */
+            $userIdentity = Yii::$app->user->identity;
+            $organization = $userIdentity->organization;
+            $model->organization_id = $organization->id;
             $model->verification = Programs::VERIFICATION_UNDEFINED;
             $model->open = 0;
             if ($model->ovz == 2) {
@@ -339,7 +367,6 @@ class ProgramsController extends Controller
             }
 
             if (Yii::$app->request->isPost) {
-
                 $file->docFile = UploadedFile::getInstance($file, 'docFile');
 
                 if (empty($file->docFile)) {
@@ -358,7 +385,6 @@ class ProgramsController extends Controller
                 $model->year = count($modelsYears);
 
                 if ($file->upload($filename)) {
-
                     $valid = $model->validate();
                     $valid = Model::validateMultiple($modelsYears) && $valid;
 
@@ -1034,16 +1060,7 @@ class ProgramsController extends Controller
         $model = $this->findModel($id);
         $modelsYears = $model->years;
 
-        $oldIDs = ArrayHelper::map($modelsYears, 'id', 'id');
-        $modelYears = Model::createMultiple(ProgrammeModule::classname(), $modelsYears);
         Model::loadMultiple($modelsYears, Yii::$app->request->post());
-        $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelsYears, 'id', 'id')));
-
-        if (Yii::$app->request->isAjax) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-
-            return ActiveForm::validateMultiple($modelsGroups);
-        }
 
         if (Yii::$app->request->isPost) {
             if ($model->verification == Programs::VERIFICATION_WAIT) {
@@ -1053,7 +1070,6 @@ class ProgramsController extends Controller
             }
 
             foreach ($modelsYears as $modelYears) {
-
                 $modelYears->save();
             }
 
@@ -1061,7 +1077,8 @@ class ProgramsController extends Controller
 
         } else {
             return $this->render('open', [
-                'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
+                'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears,
+                'model' => $model
             ]);
         }
     }
@@ -1116,13 +1133,22 @@ class ProgramsController extends Controller
             }
 
             $oldIDs = ArrayHelper::map($modelYears, 'id', 'id');
-            $modelYears = Model::createMultiple(ProgrammeModule::classname(), $modelYears, $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : null);
+            /**@var $modelYears ProgrammeModule[] */
+            $modelYears = Model::createMultiple(
+                ProgrammeModule::classname(),
+                $modelYears,
+                $model->isMunicipalTask
+                    ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK
+                    : null
+            );
             Model::loadMultiple($modelYears, Yii::$app->request->post());
-            $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelYears, 'id', 'id')));
+            $deletedIDs = array_diff(
+                $oldIDs,
+                array_filter(ArrayHelper::map($modelYears, 'id', 'id'))
+            );
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-
                 return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelYears),
                     ActiveForm::validate($model)
@@ -1162,9 +1188,13 @@ class ProgramsController extends Controller
                         $informs->read = 0;
                         $informs->save();
 
-                        return $this->redirect($model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']);
+                        return $this->redirect(
+                            $model->isMunicipalTask
+                                ? ['/personal/organization-municipal-task']
+                                : ['/personal/organization-programs']
+                        );
                     }
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     $transaction->rollBack();
                 }
             }
@@ -1173,7 +1203,10 @@ class ProgramsController extends Controller
             return $this->render('update', [
                 'model' => $model,
                 'file' => $file,
-                'modelYears' => (empty($modelYears)) ? [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])] : $modelYears
+                'modelYears' =>
+                    (empty($modelYears))
+                        ? [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])]
+                        : $modelYears
             ]);
         }
     }
@@ -1186,7 +1219,6 @@ class ProgramsController extends Controller
         $model->zab = explode(',', $model->zab);
 
         if ($model->load(Yii::$app->request->post())) {
-
             $oldIDs = ArrayHelper::map($modelYears, 'id', 'id');
             $modelYears = Model::createMultiple(ProgrammeModule::classname(), $modelYears);
             Model::loadMultiple($modelYears, Yii::$app->request->post());
@@ -1194,7 +1226,6 @@ class ProgramsController extends Controller
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-
                 return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelYears),
                     ActiveForm::validate($model)

@@ -183,13 +183,33 @@ class Programs extends ActiveRecord implements RecordWithHistory
     public function rules()
     {
         return [
-            [['direction_id', 'name', 'task', 'annotation', 'ovz', 'norm_providing', 'age_group_min', 'age_group_max', 'ground'], 'required'],
-            [['organization_id', 'ovz', 'mun', 'year', 'ground', 'age_group_min', 'age_group_max', 'verification', 'form', 'p3z', 'study', 'last_contracts', 'limit', 'last_s_contracts', 'quality_control', 'last_s_contracts_rod', 'direction_id', 'is_municipal_task', 'certificate_accounting_limit', 'municipal_task_matrix_id'], 'integer'],
+            [
+                [
+                    'direction_id', 'name', 'task', 'annotation',
+                    'ovz', 'norm_providing', 'age_group_min', 'age_group_max', 'ground'
+                ],
+                'required'
+            ],
+            [
+                [
+                    'organization_id', 'ovz', 'mun', 'year',
+                    'ground', 'age_group_min', 'age_group_max',
+                    'verification', 'form', 'p3z', 'study', 'last_contracts',
+                    'limit', 'last_s_contracts', 'quality_control',
+                    'last_s_contracts_rod', 'direction_id', 'is_municipal_task',
+                    'certificate_accounting_limit', 'municipal_task_matrix_id'
+                ],
+                'integer'
+            ],
             [['rating', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch'], 'number'],
             [['task', 'annotation', 'vid', 'norm_providing', 'search', 'photo_path', 'photo_base_url'], 'string'],
             [['name', 'zab'], 'string', 'max' => 255],
             [['link'], 'string', 'max' => 45],
-            [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
+            [
+                ['organization_id'], 'exist', 'skipOnError' => true,
+                'targetClass' => Organization::className(),
+                'targetAttribute' => ['organization_id' => 'id']
+            ],
             ['age_group_min', 'compare', 'compareAttribute' => 'age_group_max', 'type' => 'number', 'operator' => '<='],
             ['age_group_max', 'compare', 'compareAttribute' => 'age_group_min', 'type' => 'number', 'operator' => '>='],
             [
@@ -306,7 +326,9 @@ class Programs extends ActiveRecord implements RecordWithHistory
     public function getActiveContracts()
     {
         return $this->hasMany(Contracts::class, ['year_id' => 'id'])
-            ->andWhere(['contracts.status' => 1])->via('modules')->groupBy(Contracts::getTableSchema()->columnNames);
+            ->andWhere(['contracts.status' => 1])
+            ->via('modules')
+            ->groupBy(Contracts::getTableSchema()->columnNames);
     }
 
 
@@ -361,12 +383,18 @@ class Programs extends ActiveRecord implements RecordWithHistory
             'municipality.name' => 'Муниципальное образование',
             'annotation' => 'Аннотация программы',
             'task' => 'Цели и задачи программы',
-            'age_group_min' => 'Возрастная категория детей, определяемая минимальным возрастом лиц, которые могут быть зачислены на обучение по образовательной программе',
-            'age_group_max' => 'Возрастная категория детей, определяемая максимальным возрастом лиц, которые могут быть зачислены на обучение по образовательной программе',
-            'ovz' => 'Категория состояния здоровья детей, которые могут быть зачислены на обучение по образовательной программе (ОВЗ/без ОВЗ)',
+            'age_group_min' => 'Возрастная категория детей,'
+                . ' определяемая минимальным возрастом лиц, '
+                . 'которые могут быть зачислены на обучение по образовательной программе',
+            'age_group_max' => 'Возрастная категория детей,'
+                . ' определяемая максимальным возрастом лиц, которые могут'
+                . ' быть зачислены на обучение по образовательной программе',
+            'ovz' => 'Категория состояния здоровья детей, которые могут'
+                . ' быть зачислены на обучение по образовательной программе (ОВЗ/без ОВЗ)',
             'zab' => 'Заболевание',
             'year' => 'Число модулей',
-            'norm_providing' => 'Нормы оснащения детей средствами обучения при проведении обучения по образовательной программе и интенсивность их использования',
+            'norm_providing' => 'Нормы оснащения детей средствами обучения при'
+                . ' проведении обучения по образовательной программе и интенсивность их использования',
             'ground' => 'Тип местности',
             'groundName' => 'Тип местности',
             'rating' => 'Рейтинг программы ',
@@ -484,7 +512,6 @@ class Programs extends ActiveRecord implements RecordWithHistory
     {
 
         if (!Yii::$app->user->isGuest) {
-
             $organizations = new Organization();
             $organization = $organizations->getOrganization();
 
@@ -503,7 +530,6 @@ class Programs extends ActiveRecord implements RecordWithHistory
     {
 
         if (!Yii::$app->user->isGuest) {
-
             $organizations = new Organization();
             $organization = $organizations->getOrganization();
 
@@ -522,7 +548,6 @@ class Programs extends ActiveRecord implements RecordWithHistory
     {
 
         if (!Yii::$app->user->isGuest) {
-
             $cooperates = new Cooperate();
             $cooperate = $cooperates->getCooperateOrg();
             if (empty($cooperate)) {
@@ -553,12 +578,9 @@ class Programs extends ActiveRecord implements RecordWithHistory
 
     public function getGroundName(): string
     {
-
         if (array_key_exists($this->ground, Yii::$app->params['ground'])) {
-
             return Yii::$app->params['ground'][$this->ground];
         } else {
-
             return 'undefined';
         }
 
@@ -610,7 +632,6 @@ class Programs extends ActiveRecord implements RecordWithHistory
     public function getZabAsString(): string
     {
         if ($this->ovz != 2) {
-
             return 'без ОВЗ';
         }
         $zabArray = explode(',', $this->zab);
@@ -620,7 +641,6 @@ class Programs extends ActiveRecord implements RecordWithHistory
         }, ARRAY_FILTER_USE_KEY);
 
         if (!count($zabNamesArray)) {
-
             return 'без ОВЗ';
         }
 
@@ -753,22 +773,40 @@ class Programs extends ActiveRecord implements RecordWithHistory
             return false;
         }
 
-        $certificate_type = $certificate->certGroup->is_special > 0 ? MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_AC : MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_PF;
+        $certificate_type = $certificate->certGroup->is_special > 0
+            ? MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_AC
+            : MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_PF;
         $matrix = MunicipalTaskPayerMatrixAssignment::findByPayerId($certificate->payer_id, $certificate_type);
 
         $arrayCanBeChosen = ArrayHelper::map($matrix, 'matrix_id', 'can_be_chosen');
         $arrayLimits = ArrayHelper::map($matrix, 'matrix_id', 'number');
-        $arrayService = ArrayHelper::map($matrix, 'matrix_id', 'matrix.can_set_numbers_' . MunicipalTaskPayerMatrixAssignment::getPrefixes()[$certificate_type]);
+        $certificatePrefix = MunicipalTaskPayerMatrixAssignment::getPrefixes()[$certificate_type];
+        $arrayService = ArrayHelper::map(
+            $matrix,
+            'matrix_id',
+            'matrix.can_set_numbers_' . $certificatePrefix
+        );
         $arrayNumberTypes = ArrayHelper::map($matrix, 'matrix_id', 'number_type');
 
         $tasksCount = MunicipalTaskContract::getCountContracts($certificate, $this->municipal_task_matrix_id);
         $hoursCount = MunicipalTaskContract::getCountHours($certificate, $this->municipal_task_matrix_id);
 
-        if ($arrayService[$this->municipal_task_matrix_id] > 0 && $arrayNumberTypes[$this->municipal_task_matrix_id] == MunicipalTaskPayerMatrixAssignment::NUMBER_TYPE_SERVICE && $arrayLimits[$this->municipal_task_matrix_id] - $tasksCount < 1) {
+        if ($arrayService[$this->municipal_task_matrix_id] > 0
+            && $arrayNumberTypes[$this->municipal_task_matrix_id]
+            == MunicipalTaskPayerMatrixAssignment::NUMBER_TYPE_SERVICE
+            && $arrayLimits[$this->municipal_task_matrix_id] - $tasksCount < 1
+        ) {
             return false;
-        } elseif ($arrayService[$this->municipal_task_matrix_id] > 0 && $arrayNumberTypes[$this->municipal_task_matrix_id] == MunicipalTaskPayerMatrixAssignment::NUMBER_TYPE_HOURS && $arrayLimits[$this->municipal_task_matrix_id] - $hoursCount < 1) {
+        } elseif ($arrayService[$this->municipal_task_matrix_id] > 0
+            && $arrayNumberTypes[$this->municipal_task_matrix_id]
+            == MunicipalTaskPayerMatrixAssignment::NUMBER_TYPE_HOURS
+            && $arrayLimits[$this->municipal_task_matrix_id] - $hoursCount < 1
+        ) {
             return false;
-        } elseif ($arrayService[$this->municipal_task_matrix_id] < 1 && $arrayCanBeChosen[$this->municipal_task_matrix_id] < 1 || $arrayLimits[$this->municipal_task_matrix_id] - $tasksCount < 1) {
+        } elseif ($arrayService[$this->municipal_task_matrix_id] < 1
+            && $arrayCanBeChosen[$this->municipal_task_matrix_id] < 1
+            || $arrayLimits[$this->municipal_task_matrix_id] - $tasksCount < 1
+        ) {
             return false;
         }
 
@@ -889,15 +927,27 @@ class Programs extends ActiveRecord implements RecordWithHistory
         return $this->getGroups()->exists()  //есть группы
             && Cooperate::find()->where([
                 Cooperate::tableName() . '.payer_id' => $certificateUser->getCertificate()->select('payer_id'),
-                Cooperate::tableName() . '.organization_id' => $this->organization_id])->exists()   //есть соглашение с уполномоченой организацией
-            && $this->getModules()->andWhere([\app\models\ProgrammeModule::tableName() . '.open' => 1])->exists() //есть модули с открытым зачислением
-            && (!(($certificateUser->certificate->balance < 1 && $certificateUser->certificate->payer->certificate_can_use_future_balance < 1) || ($certificateUser->certificate->balance < 1 && $certificateUser->certificate->payer->certificate_can_use_future_balance > 0 && $certificateUser->certificate->balance_f < 1))) // есть средства на счету сертификата
+                Cooperate::tableName() . '.organization_id' => $this->organization_id])
+                ->exists()   //есть соглашение с уполномоченой организацией
+            && $this->getModules()->andWhere([\app\models\ProgrammeModule::tableName() . '.open' => 1])
+                ->exists() //есть модули с открытым зачислением
+            && (
+            !(($certificateUser->certificate->balance < 1
+                    && $certificateUser->certificate->payer->certificate_can_use_future_balance < 1)
+                || ($certificateUser->certificate->balance < 1
+                    && $certificateUser->certificate->payer->certificate_can_use_future_balance > 0
+                    && $certificateUser->certificate->balance_f < 1))
+            ) // есть средства на счету сертификата
             && $this->organization->actual // Организация программы действует
+            /*Не достигнут максимальный предел числа одновременно оплачиваемых*/
+            /*вашей уполномоченной организацией услуг по данной направленности*/
             && ($certificateUser->certificate->payer->getActiveContractsByProgram($this->id)->count()
-                <= $certificateUser->certificate->payer->getDirectionalityCountByName($this->directivity))// Не достигнут максимальный предел числа одновременно оплачиваемых вашей уполномоченной организацией услуг по данной направленности
+                <= $certificateUser->certificate->payer
+                    ->getDirectionalityCountByName($this->directivity))
             && $this->organization->existsFreePlace() //Есть место в организации
             && $this->existsFreePlace() //В программе есть место
-            && !$certificateUser->certificate->getActiveContractsByProgram($this->id)->exists(); //Нет заключенных договоров на программу
+            && !$certificateUser->certificate
+                ->getActiveContractsByProgram($this->id)->exists(); //Нет заключенных договоров на программу
     }
 
 
