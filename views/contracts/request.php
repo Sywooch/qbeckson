@@ -14,6 +14,8 @@ use yii\widgets\Pjax;
 /* @var $form ActiveForm */
 /* @var $contract \app\models\Contracts */
 /* @var $contractRequestFormValid boolean */
+/** @var $groupId integer */
+/** @var $certificateId integer */
 
 $this->title = 'Подать заявку на получение образовательных услуг';
 $this->params['breadcrumbs'][] = $this->title;
@@ -23,6 +25,11 @@ $this->params['breadcrumbs'][] = $this->title;
     <div id="request-box">
         <?php $form = ActiveForm::begin([
             'enableAjaxValidation' => true,
+            'validationUrl' => \yii\helpers\Url::to([
+                'validate-request',
+                'groupId' => $groupId,
+                'certificateId' => $certificateId,
+            ]),
             'options' => [
                 'data-pjax' => true
             ]
