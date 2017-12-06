@@ -285,7 +285,7 @@ class ContractController extends Controller
             'year' => date('Y', $date),
         ]);
 
-        if (!$completeness->save(false)) {
+        if (!$completeness->save()) {
             print_r($completeness->errors);
 
             return false;
