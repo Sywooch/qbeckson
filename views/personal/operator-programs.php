@@ -144,16 +144,9 @@ $actions = [
 ];
 
 $count = [
-    'attribute'    => 'currentActiveContracts',
-    'label'        => 'Обучающихся',
-    'value'        => function ($model)
-    {
-        /** @var $model \app\models\Programs */
-        return count($model->currentActiveContracts);
-    },
+    'attribute' => 'currentActiveContractsCount',
     'searchFilter' => false,
-    // TODO: Временно убрал из экспорта, надо вернуть
-    'export' => false,
+    'export' => true,
 ];
 
 $openColumns = [

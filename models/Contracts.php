@@ -5,6 +5,7 @@ namespace app\models;
 use app\components\services\InformerBuilder;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -285,6 +286,18 @@ class Contracts extends ActiveRecord
         $query->andFilterWhere(['organization_id' => $organizationId]);
 
         return $query->all();
+    }
+
+    public static function findByCertificate($certificateId, $onlyCount = true)
+    {
+        $query = static::find()
+            ->where([
+                'certificate_id' => $certificateId,
+                'period' => static::CURRENT_REALIZATION_PERIOD,
+                // TODO Нужно добавить ограничения по статусу (??)
+            ]);
+
+        return $onlyCount === true ? $query->count() : $query->all();
     }
 
     public function getPeriodSuffix()
@@ -675,6 +688,34 @@ class Contracts extends ActiveRecord
         return $monthlyPrice;
     }
 
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getTransactions()
+    {
+        $now = new \DateTime();
+        $year = $now->format('Y');
+        $month = $now->format('m');
+        $condition = [
+            'or',
+            ['preinvoice' => 0],
+            [
+                'and',
+                ['preinvoice' => 1],
+                [
+                    'and',
+                    ['year' => $year],
+                    ['month' => $month]
+                ]
+            ],
+        ];
+
+        return $this
+            ->getCompleteness()
+            ->andWhere($condition);
+    }
+    
     /**
      * @return array
      */
@@ -805,11 +846,11 @@ class Contracts extends ActiveRecord
 
             return $rollback();
         }
-        if (isset($roles['certificate'])) {
+        if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
             $this->terminator_user = 1;
         }
 
-        if (isset($roles['organizations'])) {
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
             $this->terminator_user = 2;
         }
 

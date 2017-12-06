@@ -50,7 +50,7 @@
     "kartik-v/yii2-widget-select2": "*",
     "mpdf/mpdf": "6.1.3",
     "phpoffice/phpexcel": "1.8.x-dev",
-    "kartik-v/yii2-export": "*",
+    "kartik-v/yii2-export": "1.2.7",
     "kartik-v/yii2-tabs-x": "*",
     "moonlandsoft/yii2-phpexcel": "*",
     "kartik-v/yii2-widget-timepicker": "*",
@@ -59,7 +59,10 @@
     "bower-asset/angular": "1.5.7",
     "opis/closure": "^3.0.6",
     "squizlabs/php_codesniffer": "^3.1",
-    "html2text/html2text": "^4.1"
+    "html2text/html2text": "^4.1",
+    "kartik-v/yii2-widget-rangeinput": "^1.0",
+    "box/spout": "^2.7",
+    "kartik-v/yii2-popover-x": "*"
   },
   "require-dev": {
     "yiisoft/yii2-debug": "*",
@@ -72,6 +75,12 @@
   },
   "config": {
     "process-timeout": 1800
+  },
+  "autoload": {
+    "files": [
+      "functions/debug.php",
+      "functions/flash.php"
+    ]
   },
   "scripts": {
     "post-create-project-cmd": [

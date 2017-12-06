@@ -7,7 +7,7 @@ use yii\helpers\Url;
 
 
 $this->title = 'Подведомственные организации';
-   $this->params['breadcrumbs'][] = $this->title;
+$this->params['breadcrumbs'][] = $this->title;
 /* @var $this yii\web\View */
 ?>
 
@@ -20,58 +20,37 @@ $this->title = 'Подведомственные организации';
     'filterModel' => $searchModel,
     'summary' => false,
     'columns' => [
-        'name',
         [
-            'attribute' => 'type',
-            'value' => function ($model) {
-                /** @var Organization $model */
-                return $model::types()[$model->type];
-            },
+            'attribute' => 'name',
+            'label' => 'Наименование',
         ],
         [
-            'label' => 'Число программ',
+            'label' => 'Число программ по МЗ',
             'value' => function ($data) {
                 $programs = (new \yii\db\Query())
                     ->select(['id'])
                     ->from('programs')
                     ->where(['organization_id' => $data->id])
-                    ->andWhere(['verification' => 2])
+                    ->andWhere([
+                        'verification' => 2,
+                        'is_municipal_task' => 1,
+                    ])
                     ->count();
 
                 return $programs;
             }
         ],
-        'max_child',
         [
-            'label' => 'Число обучающихся',
+            'label' => 'Кол-во услуг',
             'value' => function ($data) {
                 $payer = Yii::$app->user->identity->payer;
 
                 $organization = Organization::findOne($data->id);
 
-                return $cert = $organization ? $organization->getChildrenCount($payer) : null;
-            }
-        ],
-        [
-            'label' => 'Число договоров',
-            'value' => function ($data) {
-                $payer = Yii::$app->user->identity->payer;
-
-                $organization = Organization::findOne($data->id);
-
-                return $organization ? $organization->getContractsCount($payer) : null;
+                return $cert = $organization ? $organization->getChildrenCountMunicipalTask($payer) : null;
             }
         ],
         'raiting',
-        ['attribute' => 'actual',
-            'value' => function ($data) {
-                if ($data->actual == 0) {
-                    return '-';
-                } else {
-                    return '+';
-                }
-            }
-        ],
         [
             'class' => 'kartik\grid\EditableColumn',
             'attribute' => 'certificate_accounting_limit',

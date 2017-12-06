@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\assets\programsAsset\ProgramsAsset;
 use app\behaviors\NotificationBehavior;
 use app\models\Certificates;
+use app\models\certificates\CertificateImportTemplate;
 use app\models\certificates\CertificateToAccountingConfirmForm;
 use app\models\Contracts;
 use app\models\Contracts2Search;
@@ -18,8 +19,8 @@ use app\models\Cooperate;
 use app\models\FavoritesSearch;
 use app\models\forms\OrganizationSettingsForm;
 use app\models\GroupsSearch;
-use app\models\LoginForm;
 use app\models\Invoices;
+use app\models\LoginForm;
 use app\models\Mun;
 use app\models\MunicipalTaskContract;
 use app\models\MunicipalTaskMatrix;
@@ -33,7 +34,6 @@ use app\models\Payers;
 use app\models\PayersSearch;
 use app\models\PersonalAssignment;
 use app\models\PreviusSearch;
-use app\models\ProgrammeModule;
 use app\models\ProgrammeModuleSearch;
 use app\models\Programs;
 use app\models\ProgramsclearSearch;
@@ -445,11 +445,14 @@ class PersonalController extends Controller
             return $this->redirect('/certificates/change-to-accounting-type');
         }
 
+        $certificateImportTemplateExists = CertificateImportTemplate::exists();
+
         return $this->render('payer-certificates', [
             'certificatesProvider' => $certificatesProvider,
             'searchCertificates' => $searchCertificates,
             'allCertificatesProvider' => $allCertificatesProvider,
-            'certificateToAccountingConfirmForm' => $certificateToAccountingConfirmForm
+            'certificateToAccountingConfirmForm' => $certificateToAccountingConfirmForm,
+            'certificateImportTemplateExists' => $certificateImportTemplateExists,
         ]);
     }
 

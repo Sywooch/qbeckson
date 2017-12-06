@@ -40,7 +40,7 @@ class ContractsInvoiceSearch extends Contracts
      * @return ActiveDataProvider
      */
     public function search($params)
-    {   
+    {
         $query = Contracts::find();
 
         // add conditions that should always apply here
@@ -58,6 +58,7 @@ class ContractsInvoiceSearch extends Contracts
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             $query->where('0=1');
+
             return $dataProvider;
         }
 
@@ -67,37 +68,36 @@ class ContractsInvoiceSearch extends Contracts
         $organizations = new Organization();
         $organization = $organizations->getOrganization();
 
-        $lmonth = date('m')-1;
+        $lmonth = date('m') - 1;
         $start = date('Y') . '-' . $lmonth . '-01'; /*начало предыдущего месяца  */
-            
-            $cal_days_in_month = cal_days_in_month(CAL_GREGORIAN, $lmonth, date('Y'));
+
+        $cal_days_in_month = cal_days_in_month(CAL_GREGORIAN, $lmonth, date('Y'));
         \Yii::trace($cal_days_in_month);
         $stop = date('Y') . '-' . $lmonth . '-' . $cal_days_in_month; /* конец предыдущего месяца*/
-        
-         $contracts_all = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('contracts')
-                ->where(['<=', 'start_edu_contract', $stop]) // TODO: поменять везде это
-                ->andWhere(['>=', 'stop_edu_contract', $start])
-                ->andWhere(['`contracts`.status' => 1])
-                ->andWhere(['>', 'all_funds', 0])
-                ->column();
 
-            $contracts_terminated = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('contracts')
-                ->where(['<=', 'start_edu_contract', $stop])
-                ->andWhere(['>=', 'stop_edu_contract', $start])
-                ->andWhere(['`contracts`.status' => 4])
-                ->andWhere(['<=' ,'date_termnate', $stop])
-                ->andWhere(['>=' ,'date_termnate', $start])
-                ->andWhere(['>', 'all_funds', 0])
-                ->column();
-            
-            //array_push($contracts, $contracts_terminated);
-       // $contracts += $contracts_terminated;
-            $contracts = array_merge($contracts_all, $contracts_terminated);
-    
+        $contracts_all = (new \yii\db\Query())
+            ->select(['id'])
+            ->from('contracts')
+            ->where(['<=', 'start_edu_contract', $stop])// TODO: поменять везде это
+            ->andWhere(['>=', 'stop_edu_contract', $start])
+            ->andWhere(['`contracts`.status' => 1])
+            ->andWhere(['>', 'all_funds', 0])
+            ->column();
+
+        $contracts_terminated = (new \yii\db\Query())
+            ->select(['id'])
+            ->from('contracts')
+            ->where(['<=', 'start_edu_contract', $stop])
+            ->andWhere(['>=', 'stop_edu_contract', $start])
+            ->andWhere(['`contracts`.status' => 4])
+            ->andWhere(['<=', 'date_termnate', $stop])
+            ->andWhere(['>=', 'date_termnate', $start])
+            ->andWhere(['>', 'all_funds', 0])
+            ->column();
+
+        //array_push($contracts, $contracts_terminated);
+        // $contracts += $contracts_terminated;
+        $contracts = array_merge($contracts_all, $contracts_terminated);
 
 
         // grid filtering conditions
@@ -116,27 +116,28 @@ class ContractsInvoiceSearch extends Contracts
             'stop_edu_contract' => $this->stop_edu_contract,
         ]);
 
-      /*  $cont = (new \yii\db\Query())
-                ->select(['contracts'])
-                ->from('invoices')
-                ->where(['month' => date('m')])
-                ->andWhere(['prepayment' => 0])
-                ->column();
-        
-       $contracts = array();
-        foreach ($cont as $value) {
-            $tmp = explode(",", $value);
-            foreach ($tmp as $contract) {
-                array_push($contracts, $contract);
-            }
-        }
-        $contracts = array_unique($contracts);
-        if (empty($contracts)) {$contracts = 0; } */
-        
+        /*  $cont = (new \yii\db\Query())
+                  ->select(['contracts'])
+                  ->from('invoices')
+                  ->where(['month' => date('m')])
+                  ->andWhere(['prepayment' => 0])
+                  ->column();
+
+         $contracts = array();
+          foreach ($cont as $value) {
+              $tmp = explode(",", $value);
+              foreach ($tmp as $contract) {
+                  array_push($contracts, $contract);
+              }
+          }
+          $contracts = array_unique($contracts);
+          if (empty($contracts)) {$contracts = 0; } */
+
         $query->andFilterWhere(['like', 'status_comment', $this->status_comment])
             ->andFilterWhere(['like', 'link_doc', $this->link_doc])
             ->andFilterWhere(['like', 'link_ofer', $this->link_ofer]);
-            //->andFilterWhere(['!=', 'id', $contracts]);
+
+        //->andFilterWhere(['!=', 'id', $contracts]);
 
         return $dataProvider;
     }
