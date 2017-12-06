@@ -85,6 +85,7 @@ class CertGroup extends ActiveRecord
             'nominal_f' => 'Номинал будущего периода',
             'countCertificates' => 'Количество используемых сертификатов',
             'countActualCertificates' => 'Количество используемых сертификатов',
+            'sumCertificatesNominals' => 'Сумма номиналов',
             'amount' => 'Лимит',
         ];
     }
@@ -107,6 +108,15 @@ class CertGroup extends ActiveRecord
     public function getCountActualCertificates(): int
     {
         return $this->getActualCertificates()->count();
+    }
+
+    /**
+     * @return int
+     */
+    public function getSumCertificatesNominals(): int
+    {
+        $sum = $this->getActualCertificates()->sum('nominal');
+        return !empty($sum) ? $sum : 0;
     }
 
     /**

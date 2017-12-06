@@ -157,6 +157,7 @@ $this->registerJs($js);
                 },
             ],
             'countActualCertificates',
+            'sumCertificatesNominals',
             [
                 'class' => 'kartik\grid\EditableColumn',
                 'attribute' => 'amount',
