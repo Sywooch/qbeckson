@@ -206,12 +206,12 @@ class ContractController extends Controller
             // Создаем за предыдущий месяц
             // Если месяц январь - создаваться не будет
             if (!$completenessExists && $contract->start_edu_contract < date('Y-m-d', $currentMonth)) {
-                echo PHP_EOL . $i++ . '. Создал для ' . $contract->id . ' счет за ' . date('d.m.Y', $previousMonth) . PHP_EOL;
                 if (!$this->createCompleteness($contract, $previousMonth, $this->monthlyPrice($contract, $previousMonth))) {
                     echo('Ошибка создание счета.');
-                    
+
                     continue;
                 }
+                echo PHP_EOL . $i++ . '. Создал для ' . $contract->id . ' счет за ' . date('d.m.Y', $previousMonth) . PHP_EOL;
             }
             // Если текущий месяц == декабрь, то тоже создаем
             if (date('m') == 12) {
