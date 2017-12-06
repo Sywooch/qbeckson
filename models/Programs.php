@@ -796,7 +796,8 @@ class Programs extends ActiveRecord implements RecordWithHistory
 
         return $this->getContracts()
             ->andWhere(['<=', Contracts::tableName() . '.start_edu_contract', $now])
-            ->andWhere(['>=', Contracts::tableName() . '.stop_edu_contract', $now]);
+            ->andWhere(['>=', Contracts::tableName() . '.stop_edu_contract', $now])
+            ->andWhere([Contracts::tableName() . '[[status]]' => Contracts::STATUS_ACTIVE]);
     }
 
     /**
