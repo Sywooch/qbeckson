@@ -183,14 +183,20 @@ class ContractsController extends Controller
 
         $contractRequestFormValid = false;
         $model = new ContractRequestForm($groupId, $certificateId, $contract);
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            $contractRequestFormValid = true;
+        if ($model->load(Yii::$app->request->post())) {
+            if (Yii::$app->request->isAjax) {
+                Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                return ActiveForm::validate($model);
+            }
+            if ($model->validate()) {
+                $contractRequestFormValid = true;
 
-            $contract = $model->save();
-            if (!$contract) {
-                Yii::$app->session->setFlash('danger', 'Что-то не так.');
+                $contract = $model->save();
+                if (!$contract) {
+                    Yii::$app->session->setFlash('danger', 'Что-то не так.');
 
-                return $this->refresh();
+                    return $this->refresh();
+                }
             }
         }
         $confirmForm = null;

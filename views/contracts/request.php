@@ -22,13 +22,14 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="contract-request">
     <div id="request-box">
         <?php $form = ActiveForm::begin([
+            'enableAjaxValidation' => true,
             'options' => [
                 'data-pjax' => true
             ]
         ]); ?>
         <div class="row">
             <div class="col-md-offset-3 col-md-6">
-                <p class="lead"><?= ($contract ? $contract->group->datestart : null > date('Y-m-d')) ? 'Выберите дату начала обучения по договору:' : 'Обратите внимание! Обучение в группе уже началось. Система предлагает вам записаться с первого числа следующего месяца, но вы можете поменять дату начала обучения ниже:' ?></p>
+                <p class="lead"><?= ($contract ? $contract->group->datestart : null > date('Y-m-d')) ? 'Выберите дату начала обучения по договору:' : 'Обратите внимание! Обучение в группе уже началось. Система предлагает вам записаться с завтрашнего дня, но вы можете поменять дату начала обучения ниже:' ?></p>
             </div>
         </div>
         <div class="row">
