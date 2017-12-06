@@ -168,7 +168,7 @@ class ContractController extends Controller
         return Controller::EXIT_CODE_NORMAL;
     }
 
-    public function actionCompletenessCreate($createForDecember = true)
+    public function actionCompletenessCreate()
     {
         // TODO: временный костыль, переделать логику
         ini_set('memory_limit', '-1');
@@ -212,8 +212,18 @@ class ContractController extends Controller
                 }
             }
             // Если текущий месяц == декабрь, то тоже создаем
-            if (date('m') == 12 && $createForDecember === true) {
-                $this->createCompleteness($contract, time(), $this->monthlyPrice($contract, time()));
+            if (date('m') == 12) {
+                $completenessDecemberExists = Completeness::find()
+                    ->where([
+                        'contract_id' => $contract->id,
+                        'preinvoice' => 0,
+                        'month' => date('m', time()),
+                        'year' => date('Y', time()),
+                    ])
+                    ->count();
+                if (!$completenessDecemberExists) {
+                    $this->createCompleteness($contract, time(), $this->monthlyPrice($contract, time()));
+                }
             }
             // Создаем преинвойс
             if (!$preinvoiceExists && $contract->status == Contracts::STATUS_ACTIVE && $contract->start_edu_contract <= date('Y-m-d', $lastDayOfThisMonth)) {
@@ -275,7 +285,7 @@ class ContractController extends Controller
             'year' => date('Y', $date),
         ]);
 
-        if (!$completeness->save()) {
+        if (!$completeness->save(false)) {
             print_r($completeness->errors);
 
             return false;
