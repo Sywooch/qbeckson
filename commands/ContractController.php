@@ -275,7 +275,13 @@ class ContractController extends Controller
             'year' => date('Y', $date),
         ]);
 
-        return $completeness->save();
+        if (!$completeness->save()) {
+            print_r($completeness->errors);
+
+            return false;
+        }
+
+        return true;
     }
 
     private function createPreinvoice($contract, $price)
