@@ -61,7 +61,8 @@
     "squizlabs/php_codesniffer": "^3.1",
     "html2text/html2text": "^4.1",
     "kartik-v/yii2-widget-rangeinput": "^1.0",
-    "box/spout": "^2.7"
+    "box/spout": "^2.7",
+    "kartik-v/yii2-popover-x": "*"
   },
   "require-dev": {
     "yiisoft/yii2-debug": "*",
