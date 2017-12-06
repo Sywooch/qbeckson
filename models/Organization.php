@@ -275,6 +275,14 @@ class Organization extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getMunicipalContracts()
+    {
+        return $this->hasMany(MunicipalTaskContract::class, ['organization_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getCharter()
     {
         return $this->hasMany(OrganizationDocument::class, ['organization_id' => 'id'])
@@ -380,6 +388,17 @@ class Organization extends \yii\db\ActiveRecord
             ->leftJoin(Certificates::tableName(), 'certificates.id = contracts.certificate_id')
             ->andWhere(['contracts.status' => 1])
             ->andFilterWhere(['contracts.payer_id' => $payerId])
+            ->count();
+    }
+
+    public function getChildrenCountMunicipalTask($payerId = null)
+    {
+        return $this->getMunicipalContracts()
+            ->select('certificates.id')
+            ->distinct()
+            ->leftJoin(Certificates::tableName(), 'certificates.id = municipal_task_contract.certificate_id')
+            ->andWhere(['municipal_task_contract.status' => MunicipalTaskContract::STATUS_ACTIVE])
+            ->andFilterWhere(['municipal_task_contract.payer_id' => $payerId])
             ->count();
     }
 

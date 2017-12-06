@@ -417,8 +417,11 @@ class Payers extends \yii\db\ActiveRecord
      */
     public function getOrganizations($organizationId = null, $status = null)
     {
-        $relation = $this->hasMany(Organization::className(), ['id' => 'organization_id'])->viaTable('organization_payer_assignment', ['payer_id' => 'id'], function ($query) use ($organizationId, $status)
-        {
+        $relation = $this->hasMany(Organization::className(), ['id' => 'organization_id'])->viaTable('organization_payer_assignment', ['payer_id' => 'id'], function ($query) use
+        (
+            $organizationId,
+            $status
+        ) {
             /* @var $query \yii\db\ActiveQuery */
             $query->andFilterWhere([
                 'organization_id' => $organizationId,
