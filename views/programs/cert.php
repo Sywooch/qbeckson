@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = 'Редактировать';
         ],
     ]); ?>
 
-
+    <?php \yii\widgets\Pjax::begin() ?>
     <div class="container-items"><!-- widgetContainer -->
         <?php foreach ($modelsYears as $i => $modelYears): ?>
             <div class="item panel panel-default"><!-- widgetBody -->
@@ -55,9 +55,10 @@ $this->params['breadcrumbs'][] = 'Редактировать';
                                 'additionalData' => ['id' => $modelYears->id],
                                 'inputType' => Editable::INPUT_DROPDOWN_LIST,
                                 'data' => $data,
+                                'options' => ['id' => $modelYears->formName() . '-' . $i . '-p21z',],
                                 'displayValueConfig' => $data,
                                 'format' => Editable::FORMAT_BUTTON,
-                                'attribute' => 'p21z',
+                                'attribute' => "p21z",
                                 'formOptions' => [
                                     'action' => Url::to(['programs/normpricesave']),
                                 ],
@@ -68,10 +69,11 @@ $this->params['breadcrumbs'][] = 'Редактировать';
                                 'model' => $modelYears,
                                 'additionalData' => ['id' => $modelYears->id],
                                 'inputType' => Editable::INPUT_DROPDOWN_LIST,
+                                'options' => ['id' => $modelYears->formName() . '-' . $i . '-p22z',],
                                 'data' => $data,
                                 'displayValueConfig' => $data,
                                 'format' => Editable::FORMAT_BUTTON,
-                                'attribute' => 'p22z',
+                                'attribute' => "p22z",
                                 'formOptions' => [
                                     'action' => Url::to(['programs/normpricesave']),
                                 ],
@@ -82,7 +84,8 @@ $this->params['breadcrumbs'][] = 'Редактировать';
                             echo Editable::widget([
                                 'model' => $modelYears,
                                 'additionalData' => ['id' => $modelYears->id],
-                                'attribute' => 'normative_price',
+                                'options' => ['id' => $modelYears->formName() . '-' . $i . '-normative_price',],
+                                'attribute' => "normative_price",
                                 'format' => Editable::FORMAT_BUTTON,
                                 'formOptions' => [
                                     'action' => Url::to(['programs/normpricesave']),
@@ -99,12 +102,23 @@ $this->params['breadcrumbs'][] = 'Редактировать';
     <?php
     echo Html::a('Назад', Url::to(['/programs/verificate', 'id' => $model->id]), ['class' => 'btn btn-primary']);
     echo '&nbsp;';
-    echo Html::submitButton(
+    echo Html::a(
         'Пересчитать нормативную стоимость',
-        ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']
+        Url::to(['/programs/certificate', 'id' => $model->id]),
+        [
+            'class' => 'btn btn-primary',
+            'data' => [
+                'method' => 'post',
+            ],
+        ]
     );
+    \yii\widgets\Pjax::end();
     echo '&nbsp';
-    echo Html::a('Cертифицировать', Url::to(['save', 'id' => $model->id]), ['class' => 'btn btn-primary']);
+    echo Html::a(
+        'Cертифицировать',
+        Url::to(['save', 'id' => $model->id]),
+        ['class' => 'btn btn-primary', 'data' => ['method' => 'post']]
+    );
     ?>
 
 </div>

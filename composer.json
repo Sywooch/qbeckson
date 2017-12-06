@@ -76,12 +76,6 @@
   "config": {
     "process-timeout": 1800
   },
-  "autoload": {
-    "files": [
-      "functions/debug.php",
-      "functions/flash.php"
-    ]
-  },
   "scripts": {
     "post-create-project-cmd": [
       "yii\\composer\\Installer::postCreateProject"
