@@ -473,7 +473,7 @@ class ContractsController extends Controller
                     $completeness->save();
                 }
 
-                if ($model->start_edu_contract < date('Y-m-d', $nextMonth)) {
+                if ($model->start_edu_contract < date('Y-m-d', $nextMonth) && $model->stop_edu_contract >= date('Y-m-d', $currentMonth)) {
                     $preinvoice = new Completeness();
                     $preinvoice->group_id = $model->group_id;
                     $preinvoice->contract_id = $model->id;
