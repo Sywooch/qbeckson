@@ -29,7 +29,7 @@ use yii\helpers\Url;
 
         /** установка цены */
         if ($model->havePrice()) {
-            if ($model->canEditPrice()) {
+            if (!$model->canEditPrice()) {
                 echo \app\components\widgets\ButtonWithInfo::widget([
                     'label' => 'Изменить цену',
                     'message' => 'Невозможно мзмнеть цену когда открыто зачисление',
@@ -111,7 +111,7 @@ use yii\helpers\Url;
                     'class' => 'btn btn-theme',]
             ]);
         }
-    } else {
+    } elseif ($model->havePermissions()) {
         echo \app\components\widgets\ButtonWithInfo::widget([
             'label' => 'Действия',
             'message' => $model->getNoAccessMessage(),
