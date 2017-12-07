@@ -14,6 +14,8 @@ use yii\widgets\Pjax;
 /* @var $form ActiveForm */
 /* @var $contract \app\models\Contracts */
 /* @var $contractRequestFormValid boolean */
+/** @var $groupId integer */
+/** @var $certificateId integer */
 
 $this->title = 'Подать заявку на получение образовательных услуг';
 $this->params['breadcrumbs'][] = $this->title;
@@ -22,13 +24,19 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="contract-request">
     <div id="request-box">
         <?php $form = ActiveForm::begin([
+            'enableAjaxValidation' => true,
+            'validationUrl' => \yii\helpers\Url::to([
+                'validate-request',
+                'groupId' => $groupId,
+                'certificateId' => $certificateId,
+            ]),
             'options' => [
                 'data-pjax' => true
             ]
         ]); ?>
         <div class="row">
             <div class="col-md-offset-3 col-md-6">
-                <p class="lead"><?= ($contract ? $contract->group->datestart : null > date('Y-m-d')) ? 'Выберите дату начала обучения по договору:' : 'Обратите внимание! Обучение в группе уже началось. Система предлагает вам записаться с первого числа следующего месяца, но вы можете поменять дату начала обучения ниже:' ?></p>
+                <p class="lead"><?= ($contract ? $contract->group->datestart : null > date('Y-m-d')) ? 'Выберите дату начала обучения по договору:' : 'Обратите внимание! Обучение в группе уже началось. Система предлагает вам записаться с завтрашнего дня, но вы можете поменять дату начала обучения ниже:' ?></p>
             </div>
         </div>
         <div class="row">
