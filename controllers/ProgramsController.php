@@ -577,7 +577,7 @@ class ProgramsController extends Controller
     public function actionCertificate($id)
     {
         $model = $this->findModel($id);
-        $modelsYears = $model->years;
+        $modelsYears = $model->modules;
 
         if (Yii::$app->request->isPost) {
             $calculator = new ProgramsNormativePriceCalculator($model);
@@ -770,7 +770,6 @@ class ProgramsController extends Controller
 
 
     /**
-     * @param $id int идентификатор программы
      *
      * @return Response
      * @throws ForbiddenHttpException
