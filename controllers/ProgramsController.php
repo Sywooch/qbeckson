@@ -11,6 +11,7 @@ use app\models\forms\ProgramAddressesForm;
 use app\models\forms\ProgramSectionForm;
 use app\models\Informs;
 use app\models\Model;
+use app\models\module\ModuleViewDecoratorOrganisation;
 use app\models\Organization;
 use app\models\ProgrammeModule;
 use app\models\Programs;
@@ -213,7 +214,7 @@ class ProgramsController extends Controller
         /** @var $user UserIdentity */
         $user = Yii::$app->user->identity;
         $model = $this->findModel($id);
-
+        $modules = ModuleViewDecoratorOrganisation::decorateMultiple($model->modules);
         if (!$model->isActive) {
             throw new NotFoundHttpException();
         }
@@ -224,7 +225,7 @@ class ProgramsController extends Controller
 
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
-            if ($model->verification === $model::VERIFICATION_DENIED) {
+            if ($model->verification === Programs::VERIFICATION_DENIED) {
                 Yii::$app->session->setFlash(
                     'danger',
                     $this->renderPartial(
@@ -233,7 +234,7 @@ class ProgramsController extends Controller
                             'dataProvider' => new ActiveDataProvider(
                                 [
                                     'query' => $model->getInforms()
-                                        ->andWhere(['status' => $model::VERIFICATION_DENIED]),
+                                        ->andWhere(['status' => Programs::VERIFICATION_DENIED]),
                                     'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
                                 ]
                             )
@@ -260,7 +261,7 @@ class ProgramsController extends Controller
 
         ProgramsAsset::register($this->view);
 
-        return $this->render('view/view', ['model' => $model, 'cooperate' => $cooperate]);
+        return $this->render('view/view', ['model' => $model, 'modules' => $modules, 'cooperate' => $cooperate]);
     }
 
 

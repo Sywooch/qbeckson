@@ -12,6 +12,8 @@ use yii\base\Model;
 /**
  * Class ModuleUpdateForm
  * @package app\models\forms
+ *
+ * @property ProgrammeModule $model
  */
 class ModuleUpdateForm extends Model
 {
@@ -173,7 +175,6 @@ class ModuleUpdateForm extends Model
                 $certGroup->nominal_f / $this->calculateFuturePercent() * 100
             );
         }
-
         return $recommendedPrice;
     }
 
@@ -194,7 +195,9 @@ class ModuleUpdateForm extends Model
             throw new \DomainException('Model not found');
         }
         $this->price = $this->model->price ?: null;
-        if ($group = $this->model->groups[0]) {
+        $groups = $this->model->groups;
+        $group = array_shift($groups);
+        if ($group) {
             $this->dateFrom = date('d.m.Y', strtotime($group->datestart));
             $this->dateTo = date('d.m.Y', strtotime($group->datestop));
         }
