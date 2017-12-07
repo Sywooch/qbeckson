@@ -42,10 +42,7 @@ class EditableOperations
 
     public function exec()
     {
-        \Yii::trace('exec');
         if (!$this->getModel()) {
-            \Yii::trace('no model' . $this->formName);
-
             return false;
         }
         foreach ($this->attributes as $attribute) {
@@ -55,9 +52,11 @@ class EditableOperations
                 break;
             }
         }
+        if (!$this->changed) {
+            return false;
+        }
 
         $result = $this->getModel()->save();
-        \Yii::trace($this->getModel()->getErrors());
         if ($result) {
             return $this->result($this->getModel()->{$this->changed});
         } else {
@@ -78,8 +77,6 @@ class EditableOperations
         $model = new $class();
         $this->formName = $model->formName();
 
-        \Yii::trace($this->params);
-        \Yii::trace($this->formName);
         if (array_key_exists($this->formName, $this->params)
             && array_key_exists('id', $this->params)) {
             $this->model = $model::findOne(['id' => $this->params['id']]);
@@ -92,6 +89,7 @@ class EditableOperations
 
     private function setAttribute($attribute): bool
     {
+
         if (array_key_exists($attribute, $this->params[$this->formName])) {
             $this->getModel()->{$attribute} = $this->params[$this->formName][$attribute];
             $this->changed = $attribute;

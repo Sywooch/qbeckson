@@ -76,7 +76,7 @@ class ModuleController extends Controller
         }
     }
 
-    public function actionCertificateCalcNormative($id)
+    public function actionCertificateCalcNormative()
     {
 
     }
