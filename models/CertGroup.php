@@ -97,7 +97,8 @@ class CertGroup extends ActiveRecord
         if ($this->is_special) {
             return true;
         }
-        if ($this->amount - $this->countActualCertificates > 0) {
+        if ($this->amount - $this->countActualCertificates > 0 &&
+            ($this->nominals_limit < 1 || ($this->nominals_limit - $this->nominal - $this->getSumCertificatesNominals()) > 0)) {
             return true;
         }
 
@@ -118,6 +119,7 @@ class CertGroup extends ActiveRecord
     public function getSumCertificatesNominals(): int
     {
         $sum = $this->getActualCertificates()->sum('nominal');
+
         return !empty($sum) ? $sum : 0;
     }
 
