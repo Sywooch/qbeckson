@@ -206,18 +206,30 @@ class ContractController extends Controller
             // Создаем за предыдущий месяц
             // Если месяц январь - создаваться не будет
             if (!$completenessExists && $contract->start_edu_contract < date('Y-m-d', $currentMonth)) {
-                echo PHP_EOL . $i++ . '. Создал счет за ' . date('d.m.Y', $previousMonth) . PHP_EOL;
                 if (!$this->createCompleteness($contract, $previousMonth, $this->monthlyPrice($contract, $previousMonth))) {
-                    die('Ошибка создание счета.');
+                    echo('Ошибка создание счета.');
+
+                    continue;
                 }
+                echo PHP_EOL . $i++ . '. Создал для ' . $contract->id . ' счет за ' . date('d.m.Y', $previousMonth) . PHP_EOL;
             }
             // Если текущий месяц == декабрь, то тоже создаем
             if (date('m') == 12) {
-                $this->createCompleteness($contract, time(), $this->monthlyPrice($contract, time()));
+                $completenessDecemberExists = Completeness::find()
+                    ->where([
+                        'contract_id' => $contract->id,
+                        'preinvoice' => 0,
+                        'month' => date('m', time()),
+                        'year' => date('Y', time()),
+                    ])
+                    ->count();
+                if (!$completenessDecemberExists) {
+                    $this->createCompleteness($contract, time(), $this->monthlyPrice($contract, time()));
+                }
             }
             // Создаем преинвойс
             if (!$preinvoiceExists && $contract->status == Contracts::STATUS_ACTIVE && $contract->start_edu_contract <= date('Y-m-d', $lastDayOfThisMonth)) {
-                echo PHP_EOL . $i++ . '. Создал аванс за ' . date('d.m.Y') . PHP_EOL;
+                echo PHP_EOL . $i++ . '. Создал для ' . $contract->id . ' аванс за ' . date('d.m.Y') . PHP_EOL;
                 if (!$this->createPreinvoice($contract, $this->monthlyPrice($contract, time()))) {
                     die('Ошибка создание аванса.');
                 }
@@ -275,7 +287,13 @@ class ContractController extends Controller
             'year' => date('Y', $date),
         ]);
 
-        return $completeness->save();
+        if (!$completeness->save()) {
+            print_r($completeness->errors);
+
+            return false;
+        }
+
+        return true;
     }
 
     private function createPreinvoice($contract, $price)
