@@ -14,6 +14,7 @@ use yii\db\ActiveRecord;
  * @property integer        $nominal
  * @property float          $nominal_f
  * @property integer        $amount
+ * @property integer        $nominals_limit
  * @property integer        $is_special
  *
  * @property integer $countActualCertificates
@@ -39,7 +40,7 @@ class CertGroup extends ActiveRecord
     {
         return [
             [['payer_id', 'group', 'nominal', 'nominal_f', 'amount'], 'required'],
-            [['payer_id', 'is_special'], 'integer'],
+            [['payer_id', 'is_special', 'nominals_limit'], 'integer'],
             [['nominal', 'nominal_f'], 'number', 'max' => 100000],
             [['group'], 'string', 'max' => 255],
             [
@@ -86,6 +87,7 @@ class CertGroup extends ActiveRecord
             'countCertificates' => 'Количество используемых сертификатов',
             'countActualCertificates' => 'Количество используемых сертификатов',
             'sumCertificatesNominals' => 'Сумма номиналов',
+            'nominals_limit' => 'Ограничение суммы номиналов',
             'amount' => 'Лимит',
         ];
     }
