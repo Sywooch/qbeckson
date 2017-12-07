@@ -195,4 +195,12 @@ class MigrationController extends Controller
             }
         }*/
     }
+
+    public function actionPopulateCertGroupLimits()
+    {
+        $command = Yii::$app->db->createCommand("UPDATE `cert_group` SET nominals_limit = CEIL(amount * nominal) WHERE 1");
+        print_r($command->rawSql);
+        echo PHP_EOL;
+        $command->execute();
+    }
 }
