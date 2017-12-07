@@ -2,7 +2,9 @@
 
 namespace app\models\programs;
 
+use app\helpers\ModelHelper;
 use app\models\Informs;
+use app\models\module\ModuleVerificator;
 use app\models\Programs;
 use app\models\UserIdentity;
 use Yii;
@@ -22,7 +24,10 @@ class ProgramsVerificator extends ProgramsActions
     public function saveActions(\Closure $transactionTerminator, bool $validate): bool
     {
         return (
-                $this->setLimits() && $this->setStateDone() && $this->createInformer()
+                $this->setLimits()
+                && $this->setStateDone()
+                && $this->createInformer()
+                && $this->verificateModules()
             )
             || $transactionTerminator();
     }
@@ -68,6 +73,20 @@ class ProgramsVerificator extends ProgramsActions
         $informs->read = 0;
 
         return $informs->save();
+    }
+
+    private function verificateModules()
+    {
+        foreach ($this->program->modules as $module) {
+            $verificator = new ModuleVerificator($module);
+            if (!$verificator->setWithOutInformer()->save()) {
+                $this->addError('program', ModelHelper::getFirstError($verificator));
+
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }

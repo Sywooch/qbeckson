@@ -955,6 +955,4 @@ class Programs extends ActiveRecord implements RecordWithHistory
         return ($this->verification === self::VERIFICATION_UNDEFINED
             || $this->verification === self::VERIFICATION_WAIT);
     }
-
-
 }

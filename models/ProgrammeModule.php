@@ -323,8 +323,8 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
 
     public function needCertificate(): bool
     {
-        return ($this->verification === ProgrammeModule::VERIFICATION_UNDEFINED
-                || $this->verification === ProgrammeModule::VERIFICATION_WAIT)
+        return ($this->verification === self::VERIFICATION_UNDEFINED
+                || $this->verification === self::VERIFICATION_WAIT)
             && ($this->program->verification !== Programs::VERIFICATION_UNDEFINED
                 && $this->program->verification !== Programs::VERIFICATION_WAIT);
     }
