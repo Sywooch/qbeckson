@@ -63,7 +63,26 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
 
     public function fieldResolver(PeriodicFieldAR $history)
     {
-        return $history->value;
+        if ($history->field_name === 'verification') {
+            switch ($history->value) {
+                case self::VERIFICATION_UNDEFINED:
+                    return 'не определенная';
+                case self::VERIFICATION_WAIT:
+                    return 'Ожидает';
+                case self::VERIFICATION_DONE:
+                    return 'Верифицированно успешно';
+                case self::VERIFICATION_DENIED:
+                    return 'Отказ';
+                case self::VERIFICATION_IN_ARCHIVE:
+                    return 'Программа в архиве';
+                default:
+                    return 'не известное значение: ' . $history->value;
+            }
+        } elseif ($history->field_name === 'open') {
+            return $history->value ? 'открыто' : 'закрыто';
+        } else {
+            return $history->value;
+        }
     }
 
     /**
@@ -140,6 +159,7 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
             'results' => 'Ожидаемые результаты освоения модуля',
             'fullname' => 'Наименование модуля',
             'edit' => 'Отправить на повторную сертификацию',
+            'verification' => 'Сертификация',
         ];
     }
 
@@ -299,6 +319,14 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
         $isOpen = $this->open;
 
         return !($contractsExists || $isOpen);
+    }
+
+    public function needCertificate(): bool
+    {
+        return ($this->verification === self::VERIFICATION_UNDEFINED
+                || $this->verification === self::VERIFICATION_WAIT)
+            && ($this->program->verification !== Programs::VERIFICATION_UNDEFINED
+                && $this->program->verification !== Programs::VERIFICATION_WAIT);
     }
 
     /**

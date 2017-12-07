@@ -117,8 +117,8 @@ class YearsController extends Controller
         $model = new ModuleUpdateForm($id);
 
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
-            && $model->model->program->verification === Programs::VERIFICATION_DENIED) {
-
+            && $model->model->program->verification === Programs::VERIFICATION_DENIED
+        ) {
             throw  new ForbiddenHttpException();
         }
 

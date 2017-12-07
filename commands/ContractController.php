@@ -112,7 +112,7 @@ class ContractController extends Controller
     public function actionCloseOnExpired()
     {
         Yii::$app->db->createCommand('
-          update contracts as c CROSS JOIN programs as p ON c.program_id = p.id CROSS JOIN organization as o ON c.organization_id = o.id 
+          update contracts as c CROSS JOIN programs as p ON c.program_id = p.id CROSS JOIN organization as o ON c.organization_id = o.id
           set c.status = 4, c.wait_termnate = 0, c.date_termnate = c.stop_edu_contract, p.last_s_contracts_rod = IF(c.terminator_user = 1, p.last_s_contracts_rod + 1, p.last_s_contracts_rod), p.last_contracts = p.last_contracts - 1, p.last_s_contracts = p.last_s_contracts + 1, o.amount_child = o.amount_child - 1
           WHERE TIMESTAMPDIFF(DAY, :phpDate, c.stop_edu_contract) < 0
         ', [':phpDate' => date('Y-m-h H:i:s')])->execute();
@@ -156,10 +156,14 @@ class ContractController extends Controller
             $contract->paid = round($contract->paid + $contract->payer_other_month_payment, 2);
             $certificate->rezerv = round($certificate->rezerv - $contract->payer_other_month_payment, 2);
 
-            if (!$contract->save() || !$certificate->save()) {
+            if (!$contract->save(false, ['rezerv', 'paid']) || !$certificate->save(false, ['rezerv'])) {
+                print_r($contract->errors);
+                print_r($certificate->errors);
+
                 die('Error while saving.');
             }
         }
+        echo 'Done.';
 
         return Controller::EXIT_CODE_NORMAL;
     }
@@ -202,18 +206,30 @@ class ContractController extends Controller
             // Создаем за предыдущий месяц
             // Если месяц январь - создаваться не будет
             if (!$completenessExists && $contract->start_edu_contract < date('Y-m-d', $currentMonth)) {
-                echo PHP_EOL . $i++ . '. Создал счет за ' . date('d.m.Y', $previousMonth) . PHP_EOL;
                 if (!$this->createCompleteness($contract, $previousMonth, $this->monthlyPrice($contract, $previousMonth))) {
-                    die('Ошибка создание счета.');
+                    echo('Ошибка создание счета.');
+
+                    continue;
                 }
+                echo PHP_EOL . $i++ . '. Создал для ' . $contract->id . ' счет за ' . date('d.m.Y', $previousMonth) . PHP_EOL;
             }
             // Если текущий месяц == декабрь, то тоже создаем
             if (date('m') == 12) {
-                $this->createCompleteness($contract, time(), $this->monthlyPrice($contract, time()));
+                $completenessDecemberExists = Completeness::find()
+                    ->where([
+                        'contract_id' => $contract->id,
+                        'preinvoice' => 0,
+                        'month' => date('m', time()),
+                        'year' => date('Y', time()),
+                    ])
+                    ->count();
+                if (!$completenessDecemberExists) {
+                    $this->createCompleteness($contract, time(), $this->monthlyPrice($contract, time()));
+                }
             }
             // Создаем преинвойс
             if (!$preinvoiceExists && $contract->status == Contracts::STATUS_ACTIVE && $contract->start_edu_contract <= date('Y-m-d', $lastDayOfThisMonth)) {
-                echo PHP_EOL . $i++ . '. Создал аванс за ' . date('d.m.Y') . PHP_EOL;
+                echo PHP_EOL . $i++ . '. Создал для ' . $contract->id . ' аванс за ' . date('d.m.Y') . PHP_EOL;
                 if (!$this->createPreinvoice($contract, $this->monthlyPrice($contract, time()))) {
                     die('Ошибка создание аванса.');
                 }
@@ -271,7 +287,13 @@ class ContractController extends Controller
             'year' => date('Y', $date),
         ]);
 
-        return $completeness->save();
+        if (!$completeness->save()) {
+            print_r($completeness->errors);
+
+            return false;
+        }
+
+        return true;
     }
 
     private function createPreinvoice($contract, $price)
@@ -324,6 +346,18 @@ class ContractController extends Controller
                 echo "certificate_id: {$contract->certificate->id} ===> {$contract->certificate->balance} != {$balance}" . PHP_EOL;
             }
         }
+
+        return Controller::EXIT_CODE_NORMAL;
+    }
+
+    public function actionCronTest()
+    {
+        $contracts = Contracts::find()
+            ->limit(10)
+            ->all();
+
+        Yii::trace('Тестовое количество контрактов ' . count($contracts));
+        Yii::trace('Тестирование завершено.');
 
         return Controller::EXIT_CODE_NORMAL;
     }

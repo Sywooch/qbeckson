@@ -479,6 +479,7 @@ class ModelDecorator extends Model
         $this->entity->offsetUnset($offset);
     }
 
+
     public function __get($name)
     {
         $getter = 'get' . $name;

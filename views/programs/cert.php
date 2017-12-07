@@ -1,7 +1,6 @@
 <?php
 
-use kartik\form\ActiveForm;
-use wbraganca\dynamicform\DynamicFormWidget;
+use kartik\editable\Editable;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -20,27 +19,24 @@ $this->params['breadcrumbs'][] = 'Редактировать';
 ?>
 
 <div class="programs-form" ng-app>
-    <?php $form = ActiveForm::begin(['id' => 'dynamic-form']); ?>
 
-    <?= $form->field($model, 'p3z')
-        ->dropDownList([1 => 'Высокое обеспечение', 2 => 'Среднее обеспечение', 3 => 'Низкое обеспечение']) ?>
-
-    <?php DynamicFormWidget::begin([
-        'widgetContainer' => 'dynamicform_wrapper', // required: only alphanumeric characters plus "_" [A-Za-z0-9_]
-        'widgetBody' => '.container-items', // required: css class selector
-        'widgetItem' => '.item', // required: css class
-        'limit' => 6, // the maximum times, an element can be cloned (default 999)
-        'min' => 1, // 0 or 1 (default 1)
-        'insertButton' => '.add-item', // css class
-        'deleteButton' => '.remove-item', // css class
-        'model' => $modelsYears[0],
-        'formId' => 'dynamic-form',
-        'formFields' => [
-            'p21z',
-            'p22z',
+    <?php
+    $data = [1 => 'Высокое обеспечение', 2 => 'Среднее обеспечение', 3 => 'Низкое обеспечение'];
+    echo Html::label($model->getAttributeLabel('p3z') . ': ');
+    echo Editable::widget([
+        'model' => $model,
+        'additionalData' => ['id' => $model->id],
+        'inputType' => Editable::INPUT_DROPDOWN_LIST,
+        'format' => Editable::FORMAT_BUTTON,
+        'data' => $data,
+        'displayValueConfig' => $data,
+        'attribute' => 'p3z',
+        'formOptions' => [
+            'action' => Url::to(['programs/normpricesave']),
         ],
     ]); ?>
 
+    <?php \yii\widgets\Pjax::begin() ?>
     <div class="container-items"><!-- widgetContainer -->
         <?php foreach ($modelsYears as $i => $modelYears): ?>
             <div class="item panel panel-default"><!-- widgetBody -->
@@ -49,63 +45,80 @@ $this->params['breadcrumbs'][] = 'Редактировать';
                     <div class="clearfix"></div>
                 </div>
                 <div class="panel-body">
-                    <?php
-                    // necessary for update action.
-                    if (!$modelYears->isNewRecord) {
-                        echo Html::activeHiddenInput($modelYears, "[{$i}]id");
-                    }
-                    ?>
                     <div class="row">
                         <div class="col-sm-12">
-
-                            <?= $form->field($modelYears, "[{$i}]p21z")
-                                ->dropDownList([1 => 'Выше среднего', 2 => 'Средняя', 3 => 'Ниже среднего']) ?>
-
-                            <?= $form->field($modelYears, "[{$i}]p22z")
-                                ->dropDownList([1 => 'Выше среднего', 2 => 'Средняя', 3 => 'Ниже среднего']) ?>
-
-                            <?= $form->field(
-                                $modelYears,
-                                "[{$i}]normative_price",
-                                [
-                                    'addon' => [
-                                        'append' => [
-                                            'content' => Html::a(
-                                                'Изменить',
-                                                Url::to(
-                                                    [
-                                                        '/programs/normpricesave',
-                                                        'id' => $modelYears->id
-                                                    ]
-                                                ),
-                                                ['class' => 'btn btn-success']
-                                            ),
-                                            'asButton' => true
-                                        ]
-                                    ]
-                                ]
-                            )
-                                ->textInput(['readOnly' => true]) ?>
-
+                            <?php
+                            $data = [1 => 'Выше среднего', 2 => 'Средняя', 3 => 'Ниже среднего'];
+                            echo Html::label($modelYears->getAttributeLabel('p21z') . ': ');
+                            echo Editable::widget([
+                                'model' => $modelYears,
+                                'additionalData' => ['id' => $modelYears->id],
+                                'inputType' => Editable::INPUT_DROPDOWN_LIST,
+                                'data' => $data,
+                                'options' => ['id' => $modelYears->formName() . '-' . $i . '-p21z',],
+                                'displayValueConfig' => $data,
+                                'format' => Editable::FORMAT_BUTTON,
+                                'attribute' => "p21z",
+                                'formOptions' => [
+                                    'action' => Url::to(['programs/normpricesave']),
+                                ],
+                            ]);
+                            ?><?php
+                            echo Html::label($modelYears->getAttributeLabel('p22z') . ': ');
+                            echo Editable::widget([
+                                'model' => $modelYears,
+                                'additionalData' => ['id' => $modelYears->id],
+                                'inputType' => Editable::INPUT_DROPDOWN_LIST,
+                                'options' => ['id' => $modelYears->formName() . '-' . $i . '-p22z',],
+                                'data' => $data,
+                                'displayValueConfig' => $data,
+                                'format' => Editable::FORMAT_BUTTON,
+                                'attribute' => "p22z",
+                                'formOptions' => [
+                                    'action' => Url::to(['programs/normpricesave']),
+                                ],
+                            ]);
+                            ?>
+                            <?php
+                            echo Html::label($modelYears->getAttributeLabel('normative_price') . ': ');
+                            echo Editable::widget([
+                                'model' => $modelYears,
+                                'additionalData' => ['id' => $modelYears->id],
+                                'options' => ['id' => $modelYears->formName() . '-' . $i . '-normative_price',],
+                                'attribute' => "normative_price",
+                                'format' => Editable::FORMAT_BUTTON,
+                                'formOptions' => [
+                                    'action' => Url::to(['programs/normpricesave']),
+                                ],
+                            ]);
+                            ?>
                         </div>
                     </div><!-- .row -->
                 </div>
             </div>
         <?php endforeach; ?>
     </div>
-    <?php DynamicFormWidget::end(); ?>
 
     <?php
     echo Html::a('Назад', Url::to(['/programs/verificate', 'id' => $model->id]), ['class' => 'btn btn-primary']);
     echo '&nbsp;';
-    echo Html::submitButton(
+    echo Html::a(
         'Пересчитать нормативную стоимость',
-        ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']
+        Url::to(['/programs/certificate', 'id' => $model->id]),
+        [
+            'class' => 'btn btn-primary',
+            'data' => [
+                'method' => 'post',
+            ],
+        ]
     );
+    \yii\widgets\Pjax::end();
     echo '&nbsp';
-    echo Html::a('Cертифицировать', Url::to(['save', 'id' => $model->id]), ['class' => 'btn btn-primary']);
+    echo Html::a(
+        'Cертифицировать',
+        Url::to(['save', 'id' => $model->id]),
+        ['class' => 'btn btn-primary', 'data' => ['method' => 'post']]
+    );
     ?>
-
-    <?php ActiveForm::end(); ?>
 
 </div>

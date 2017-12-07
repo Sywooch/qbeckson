@@ -45,7 +45,7 @@ abstract class ModuleActions extends SingleModelActions
 
     /**
      *
-     * @param ProgrammeModule||integer $certificate
+     * @param ProgrammeModule||integer $module
      *
      * @throws InvalidParamException
      *

@@ -29,8 +29,8 @@ class PeriodicFieldAR extends \yii\db\ActiveRecord
     private $model;
 
     private $tablesToModels = [
-        'programs' => Programs::class,
-        'years' => ProgrammeModule::class
+        '{{%programs}}' => Programs::class,
+        '{{%years}}' => ProgrammeModule::class
     ];
 
     /**
@@ -44,7 +44,7 @@ class PeriodicFieldAR extends \yii\db\ActiveRecord
     public static function getColumns()
     {
         return [
-            'fieldLabel',
+            'fieldLabel:shortTextWithPopup',
             'created_at:datetime',
             'created_by:userName',
             'resolvedValue:raw'

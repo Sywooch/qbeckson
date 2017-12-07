@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\assets\programsAsset\ProgramsAsset;
 use app\behaviors\NotificationBehavior;
 use app\models\Certificates;
+use app\models\certificates\CertificateImportTemplate;
 use app\models\certificates\CertificateToAccountingConfirmForm;
 use app\models\Contracts;
 use app\models\Contracts2Search;
@@ -444,11 +445,14 @@ class PersonalController extends Controller
             return $this->redirect('/certificates/change-to-accounting-type');
         }
 
+        $certificateImportTemplateExists = CertificateImportTemplate::exists();
+
         return $this->render('payer-certificates', [
             'certificatesProvider' => $certificatesProvider,
             'searchCertificates' => $searchCertificates,
             'allCertificatesProvider' => $allCertificatesProvider,
-            'certificateToAccountingConfirmForm' => $certificateToAccountingConfirmForm
+            'certificateToAccountingConfirmForm' => $certificateToAccountingConfirmForm,
+            'certificateImportTemplateExists' => $certificateImportTemplateExists,
         ]);
     }
 
