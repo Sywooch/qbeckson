@@ -68,7 +68,6 @@ $this->registerJs($js);
     <?php
     if ($model->inTransferProcess) {
         echo $form->field($model, 'inTransferProcess')->hiddenInput()->label(false);
-        echo $form->field($model, 'is_municipal_task')->hiddenInput()->label(false);
     }
     ?>
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>

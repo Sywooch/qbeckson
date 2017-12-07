@@ -992,6 +992,10 @@ class ProgramsController extends Controller
                 array_filter(ArrayHelper::map($modelYears, 'id', 'id'))
             );
 
+            if ($model->inTransferProcess) {
+                $model->setTransferParams();
+            }
+
             // ajax validation
             if (Yii::$app->request->isAjax) {
                 return $this->asJson(ArrayHelper::merge(
@@ -1032,6 +1036,10 @@ class ProgramsController extends Controller
                         $informs->date = date("Y-m-d");
                         $informs->read = 0;
                         $informs->save();
+
+                        if ($model->inTransferProcess) {
+                            Yii::$app->session->setFlash('success', 'Вы успешно перевели программу на персонифицированное финансирование в реестр "Ожидающие сертификации"');
+                        }
 
                         return $this->redirect(
                             $model->isMunicipalTask

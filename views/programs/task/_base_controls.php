@@ -69,7 +69,7 @@ use yii\helpers\Url;
                 'confirm' => 'Вы уверены, что хотите удалить программу?',
                 'toggleButton' => ['class' => 'btn btn-danger', 'label' => 'Удалить']]);
             if ($model->canTaskBeTransferred) {
-                echo Html::a('Перевести на ПФ', Url::to(['/programs/transfer-task', 'id' => $model->id]), ['class' => 'btn btn-theme']);
+                echo Html::a('Перевести на ПФ', Url::to(['/programs/transfer-task', 'id' => $model->id]), ['class' => 'btn btn-warning']);
             }
         }
     }
