@@ -31,6 +31,7 @@ use yii\db\ActiveRecord;
  * @property string additional_date
  * @property string additional_document_base_url
  * @property string additional_document_path
+ * @property bool $period [tinyint(1)] период действия соглашения, 0 - архивный, 1 - текущий, 2 - будущий
  *
  * @property Organization $organization
  * @property Payers $payers
@@ -58,6 +59,10 @@ class Cooperate extends ActiveRecord
 
     const DOCUMENT_NAME_FIRST = 'cooperateFirstDocumentName';
     const DOCUMENT_NAME_SECOND = 'cooperateSecondDocumentName';
+
+    const PERIOD_ARCHIVE = 0;
+    const PERIOD_CURRENT = 1;
+    const PERIOD_FUTURE = 2;
 
     public $document;
     public $additionalDocument;

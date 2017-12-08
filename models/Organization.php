@@ -440,14 +440,16 @@ class Organization extends \yii\db\ActiveRecord
 
     /**
      * @param $status
+     * @param $period
      *
      * @return Cooperate
      */
-    public function getCooperation($status = null)
+    public function getCooperation($status = null, $period = null)
     {
         return $this->hasOne(Cooperate::class, ['organization_id' => 'id'])
             ->andWhere(['cooperate.payer_id' => Yii::$app->user->getIdentity()->payer->id])
             ->andFilterWhere(['cooperate.status' => $status])
+            ->andFilterWhere(['cooperate.period' => $period])
             ->one();
     }
 

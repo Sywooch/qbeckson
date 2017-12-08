@@ -301,7 +301,8 @@ return [
                 'reject-request',
                 'application-close-pdf',
                 'application-pdf',
-                'termrequest'
+                'termrequest',
+                'validate-request',
             ]
         ],
         [
