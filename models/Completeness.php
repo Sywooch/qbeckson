@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use yii\db\Expression;
+
 /**
  * This is the model class for table "completeness".
  *
@@ -88,6 +90,23 @@ class Completeness extends \yii\db\ActiveRecord
     public function getGroup()
     {
         return $this->hasOne(Groups::className(), ['id' => 'group_id']);
+    }
+
+    public function getIsPaid(): bool
+    {
+        $date = new \DateTime($this->date);
+        $beginMoth = $date->modify('first day of this month')->format('Y-m-d');
+        $endMoth = $date->modify('first day of this month')->format('Y-m-d');
+        $contractCollectionExpression = <<<SQL
+
+SQL;
+        $condition = [
+            'and',
+            ['between', 'date', $beginMoth, $endMoth],
+            ['in', $this->contract_id, new Expression($contractCollectionExpression)]
+        ];
+
+        return Invoices::find()->where($condition)->exists();
     }
 
     /**
