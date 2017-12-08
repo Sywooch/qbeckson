@@ -14,7 +14,6 @@ class RbacController extends Controller
     public function actionCreateViewPermissions()
     {
         $auth = Yii::$app->authManager;
-        $roles = $auth->getRoles();
 
         $rule = new \app\rbac\ViewContractRule();
         $auth->add($rule);
@@ -42,6 +41,23 @@ class RbacController extends Controller
             $auth->addChild($role, $viewContract);
             $auth->addChild($role, $viewProgramme);
             $auth->addChild($role, $viewCertificate);
+        }
+    }
+
+    public function actionCreateGroupViewPermissions()
+    {
+        $auth = Yii::$app->authManager;
+
+        $rule = new \app\rbac\ViewGroupRule();
+        $auth->add($rule);
+        $viewGroup = $auth->createPermission('viewGroup');
+        $viewGroup->description = 'Права на просмотр группы';
+        $viewGroup->ruleName = $rule->name;
+        $auth->add($viewGroup);
+
+        $roles = $auth->getRoles();
+        foreach ($roles as $role) {
+            $auth->addChild($role, $viewGroup);
         }
     }
 }
