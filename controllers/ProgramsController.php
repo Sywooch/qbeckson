@@ -918,7 +918,7 @@ class ProgramsController extends Controller
         $model->setTransferParams(false);
 
         if ($model->save()) {
-            Yii::$app->session->setFlash('success', 'Программа успешно перенесена на муниципальное задание.');
+            Yii::$app->session->setFlash('success', 'Вы успешно перевели программу на муниципальное задание в реестр "Ожидающие рассмотрения"');
 
             return $this->redirect(['/programs/view-task', 'id' => $model->id]);
         } else {
