@@ -90,7 +90,6 @@ use yii\helpers\Html;
  */
 class Programs extends ActiveRecord implements RecordWithHistory
 {
-
     use PeriodicField;
 
     const VERIFICATION_UNDEFINED = 0;
@@ -106,6 +105,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
     public $edit;
     public $search;
     public $programPhoto;
+    public $inTransferProcess = false;
 
     public function fieldResolver(PeriodicFieldAR $history)
     {
@@ -122,7 +122,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
                 case self::VERIFICATION_IN_ARCHIVE:
                     return 'Программа в архиве';
                 default:
-                    return 'не известное значение: ' . $history->value;
+                    return 'неизвестное значение: ' . $history->value;
 
             }
         } elseif ($history->field_name === 'direction_id') {
@@ -218,6 +218,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
                 'targetAttribute' => ['direction_id' => 'id']
             ],
             [['programPhoto'], 'safe'],
+            ['inTransferProcess', 'boolean'],
             [['activity_ids'], 'each', 'rule' => ['integer']],
         ];
     }
@@ -735,9 +736,32 @@ class Programs extends ActiveRecord implements RecordWithHistory
         return $this->is_municipal_task > 0 ? true : false;
     }
 
+    public function getCanTaskBeTransferred(): bool
+    {
+        return !$this->getMunicipalTaskContracts()->count() && $this->verification == self::VERIFICATION_DENIED;
+    }
+
+    public function getCanProgrammeBeTransferred(): bool
+    {
+        return !$this->getLivingContracts()->count() && !$this->getModules()->andWhere(['open' => 1])->count();
+    }
+
     public function getIsActive(): bool
     {
         return $this->verification !== self::VERIFICATION_IN_ARCHIVE;
+    }
+
+    public function setTransferParams($task = true)
+    {
+        if ($task) {
+            $this->inTransferProcess = true;
+            $this->is_municipal_task = 0;
+            $this->verification = self::VERIFICATION_WAIT;
+        } else {
+            $this->verification = self::VERIFICATION_UNDEFINED;
+            $this->price = 0;
+            $this->is_municipal_task = 1;
+        }
     }
 
     /**
@@ -819,9 +843,13 @@ class Programs extends ActiveRecord implements RecordWithHistory
      */
     public function getLivingContracts()
     {
-        return $this->getContracts()->andFilterWhere(['status' => [Contracts::STATUS_REQUESTED,
-            Contracts::STATUS_ACTIVE,
-            Contracts::STATUS_ACCEPTED]]);
+        return $this->getContracts()->andFilterWhere(['status' =>
+            [
+                Contracts::STATUS_REQUESTED,
+                Contracts::STATUS_ACTIVE,
+                Contracts::STATUS_ACCEPTED
+            ]
+        ]);
     }
 
     /**

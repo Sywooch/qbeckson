@@ -142,6 +142,11 @@ return [
                 'allow' => true,
                 'roles' => ['payer']
             ],
+            [
+                'actions' => ['transfer-task' , 'transfer-programme'],
+                'allow' => true,
+                'roles' => ['organizations']
+            ],
         ],
     'municipal-task-contract' =>
         [
