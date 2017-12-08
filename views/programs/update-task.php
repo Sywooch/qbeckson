@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\forms\ProgramSectionForm */
 
-$this->title = 'Редактирование';
+$this->title = 'Выберите реестр программ, в который нужно перенести программу';
 $this->params['breadcrumbs'][] = ['label' => 'Программы по муниципальному заданию', 'url' => ['/personal/organization-municipal-task']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -23,3 +23,5 @@ $this->params['breadcrumbs'][] = $this->title;
         ?>
         <?php ActiveForm::end(); ?>
     </div>
+
+</div>

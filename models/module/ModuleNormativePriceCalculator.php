@@ -211,7 +211,6 @@ class ModuleNormativePriceCalculator extends ModuleActions
             );
 
         $this->module->normative_price = round($nprice);
-
         return true;
     }
 

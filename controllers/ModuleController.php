@@ -2,6 +2,10 @@
 
 namespace app\controllers;
 
+use app\components\EditableOperations;
+use app\helpers\FlashHelper;
+use app\models\module\ModuleNormativePriceCalculator;
+use app\models\module\ModuleVerificator;
 use app\models\ProgrammeModule;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -23,7 +27,8 @@ class ModuleController extends Controller
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
-                    'delete' => ['POST'],
+                    'save' => ['POST'],
+                    'normpricesave' => ['POST'],
                 ],
             ],
         ];
@@ -76,9 +81,42 @@ class ModuleController extends Controller
         }
     }
 
-    public function actionCertificateCalcNormative()
+    public function actionCertificateCalcNormative($id)
     {
+        $model = $this->findModel($id);
+        $model->setVerificationWaitAndSave();
+        if (Yii::$app->request->isPost) {
+            $calculator = new ModuleNormativePriceCalculator($model);
+            ($calculator->save()) || FlashHelper::flashFirst($calculator);
+        }
 
+        return $this->render('verificate/calcNormative', [
+            'model' => $model,
+        ]);
+
+    }
+
+    public function actionNormpricesave()
+    {
+        $programModuleSaveResult = EditableOperations::getInstance(
+            Yii::$app->request->post(),
+            ProgrammeModule::className()
+        )->setAttributes('p21z', 'p22z', 'normative_price')
+            ->exec();
+        ($response = $programModuleSaveResult)
+        || ($response = ['output' => '', 'message' => 'Неизвестная ошибка']);
+
+        return $this->asJson($response);
+    }
+
+    public function actionSave($id)
+    {
+        $verificator = new ModuleVerificator($id);
+        if (!$verificator->save()) {
+            FlashHelper::flashFirst($verificator);
+        }
+
+        return $this->redirect('/personal/operator-programs');
     }
 
     /**
@@ -88,34 +126,21 @@ class ModuleController extends Controller
      * @param integer $id
      *
      * @return mixed
+     *
+     * @throws NotFoundHttpException
      */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post())
+            && $model->setNeedVerification()->save()
+        ) {
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
-            $model->setVerificationWaitAndSave();
-            
             return $this->render('update', [
                 'model' => $model,
             ]);
         }
-    }
-
-    /**
-     * Deletes an existing ProgrammeModule model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     *
-     * @param integer $id
-     *
-     * @return mixed
-     */
-    public function actionDelete($id)
-    {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
     }
 }
