@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\behaviors\UploadBehavior;
 use Yii;
 use yii\db\ActiveRecord;
 
@@ -25,12 +26,51 @@ use yii\db\ActiveRecord;
  * @property Payers         $payer
  * @property integer        $countdet
  * @property integer        $operator_id
+ * @property integer        $mun_id
+ * @property integer        $user_id
+ * @property integer        $type
+ * @property integer        $file
+ * @property integer        $base_url
  *
  * @property Operators      $operator
  * @property Organization[] $organization
  */
 class Mun extends ActiveRecord
 {
+
+    /**
+     * Муниципалитет
+     */
+    const TYPE_MAIN = 1;
+
+    /**
+     * Заявка на изменение муниципалитета
+     */
+    const TYPE_APPLICATION = 2;
+
+    /**
+     * Отклоненная заявка на изменение
+     */
+    const TYPE_REJECTED = 3;
+
+    public $confirmationFile;
+
+    /**
+     * @inheritdoc
+     * @return array
+     */
+    public function behaviors()
+    {
+        return [
+            'uploadConfirmationFile' => [
+                'class' => UploadBehavior::class,
+                'attribute' => 'confirmationFile',
+                'pathAttribute' => 'file',
+                'baseUrlAttribute' => 'base_url',
+            ],
+        ];
+    }
+
     /**
      * @inheritdoc
      */
@@ -49,7 +89,8 @@ class Mun extends ActiveRecord
             ['operator_id', 'integer'],
             [['nopc', 'conopc', 'pc', 'copc', 'zp', 'cozp', 'dop', 'codop', 'uvel', 'couvel', 'otch', 'cootch', 'otpusk', 'cootpusk', 'polezn', 'copolezn', 'stav', 'costav'], 'number'],
             [['rob', 'corob', 'tex', 'cotex', 'est', 'coest', 'fiz', 'cofiz', 'xud', 'coxud', 'tur', 'cotur', 'soc', 'cosoc', 'deystv', 'countdet', 'lastdeystv'], 'integer'],
-            [['name'], 'string', 'max' => 255],
+            [['name', 'file', 'base_url'], 'string', 'max' => 255],
+            [['confirmationFile'], 'safe'],
         ];
     }
 
@@ -95,7 +136,8 @@ class Mun extends ActiveRecord
             'cosoc' => 'Социально-педагогическая',
             'deystv' => 'Число действующих в очередном учебном году сертификатов дополнительного образования',
             'lastdeystv' => 'Число действовавших в предыдущем учебном году сертификатов дополнительного образования',
-            'countdet' => 'Общее число детей в возрасте от 5-ти до 18-ти лет, проживающее на территории муниципального района (городского округа)'
+            'countdet' => 'Общее число детей в возрасте от 5-ти до 18-ти лет, проживающее на территории муниципального района (городского округа)',
+            'confirmationFile' => 'Файл-подтверждение',
         ];
     }
 
