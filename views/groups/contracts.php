@@ -11,8 +11,11 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\Groups */
 
+$isOperator = Yii::$app->user->can(\app\models\UserIdentity::ROLE_OPERATOR);
 $this->title = 'Просмотр группы: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Группы', 'url' => ['/personal/organization-groups']];
+if (!$isOperator) {
+    $this->params['breadcrumbs'][] = ['label' => 'Группы', 'url' => ['/personal/organization-groups']];
+}
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="contracts-view col-md-10 col-md-offset-1">
@@ -111,7 +114,7 @@ $this->params['breadcrumbs'][] = $this->title;
         echo "<h3>В этой группе нет обучающихся</h3>";
         $del = 1;
     }
-    if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_OPERATOR)) {
+    if ($isOperator) {
         echo Html::a('Назад', ['/programs/view', 'id' => $model->program_id], ['class' => 'btn btn-primary']);
     } else {
         echo Html::a('Назад', '/personal/organization-groups', ['class' => 'btn btn-primary']);
