@@ -2,8 +2,6 @@
 
 namespace app\models;
 
-use yii\db\Expression;
-
 /**
  * This is the model class for table "completeness".
  *
@@ -24,6 +22,7 @@ use yii\db\Expression;
  *
  * @property \DateTime $date
  * @property string $preinvoiceLabel
+ * @property Invoices[] $invoice
  *
  *
  *
@@ -92,21 +91,39 @@ class Completeness extends \yii\db\ActiveRecord
         return $this->hasOne(Groups::className(), ['id' => 'group_id']);
     }
 
-    public function getIsPaid(): bool
+//    public function getIsPaid(): bool
+//    {
+//        $date = new \DateTime($this->date);
+//
+//        $condition = [
+//            'and',
+//            [
+//                'and',
+//                [
+//                    Invoices::tableName().'year' => $this->year,
+//                    Invoices::tableName().'month'=>$this->month
+//                ],
+//                [
+//
+//                ]
+//            ],
+//            [
+//
+//            ],
+//        ];
+//
+//        return $this->getContract()->joinWith()
+//            ->exists();
+//    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     *
+     */
+    public function getInvoice()
     {
-        $date = new \DateTime($this->date);
-        $beginMoth = $date->modify('first day of this month')->format('Y-m-d');
-        $endMoth = $date->modify('first day of this month')->format('Y-m-d');
-        $contractCollectionExpression = <<<SQL
-
-SQL;
-        $condition = [
-            'and',
-            ['between', 'date', $beginMoth, $endMoth],
-            ['in', $this->contract_id, new Expression($contractCollectionExpression)]
-        ];
-
-        return Invoices::find()->where($condition)->exists();
+        return $this->hasOne(Invoices::className(), [])
+            ->via('contract');
     }
 
     /**

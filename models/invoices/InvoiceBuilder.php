@@ -6,13 +6,17 @@ namespace app\models\invoices;
 use app\helpers\DeclinationOfMonths;
 use app\models\Completeness;
 use app\models\Contracts;
+use app\models\InvoiceHaveContract;
 use app\models\Invoices;
 use app\models\Organization;
 use app\models\Payers;
 use app\models\UserIdentity;
 use DateTime;
 use Yii;
+use yii\base\Event;
 use yii\base\InvalidParamException;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\validators\InlineValidator;
@@ -164,6 +168,31 @@ class InvoiceBuilder extends InvoicesActions
             ->all();
     }
 
+    public function setAfterSaveInvoiceHaveContractsCreateAction(\Closure $transactionTerminator)
+    {
+        $contractIds = $this->getContractsIds();
+
+        $action = function (Event $event) use ($transactionTerminator, $contractIds) {
+            /**@var $invoice Invoices */
+            $invoice = $event->sender;
+            foreach ($contractIds as $contractId) {
+                $linker = new InvoiceHaveContract(
+                    ['invoice_id' => $invoice->id, 'contract_id' => $contractId]
+                );
+                if (!$linker->save()) {
+                    $this->addError('invoice', 'Не удалось привязать договора');
+
+                    return $transactionTerminator();
+                }
+            }
+
+            return true;
+        };
+
+        $this->invoice->on(ActiveRecord::EVENT_AFTER_INSERT, $action);
+        $this->invoice->on(ActiveRecord::EVENT_AFTER_UPDATE, $action);
+    }
+
     public function getHaveOutOfRangeContracts(): bool
     {
         if (is_null($this->_outOfRangeContracts)) {
@@ -235,6 +264,7 @@ class InvoiceBuilder extends InvoicesActions
      */
     public function saveActions(\Closure $transactionTerminator, bool $validate): bool
     {
+        $this->setAfterSaveInvoiceHaveContractsCreateAction($transactionTerminator);
         $this->invoice->setAttributes($this->getContractsData()); /*заполняем данные договоров*/
         $this->fillFieldsOfInvoice();             /* заполняем скалярные данные*/
         $this->invoice->setCooperate();
@@ -249,42 +279,76 @@ class InvoiceBuilder extends InvoicesActions
 
     }
 
+    private function applyContractsCondition(ActiveQuery $contractQuery): ActiveQuery
+    {
+        $contractQuery
+            ->andWhere(['preinvoice' => 0])
+            ->andWhere(['month' => $this->datePrevMonthNumber])
+            ->andWhere(['<=', 'start_edu_contract', $this->datePrevMonthEnd])
+            ->andWhere(['>=', 'stop_edu_contract', $this->datePrevMonthBeginning])
+            /* если договор закрыт, учитываем так же дату закрытия, а если активен то НЕ учитываем */
+//            ->andWhere(
+//                [
+//                    'OR',
+//                    [
+//                        'AND',
+//                        ['<=', 'date_termnate', $this->datePrevMonthEnd],
+//                        ['`contracts`.status' => Contracts::STATUS_CLOSED]
+//                    ],
+//                    [
+//                        '`contracts`.status' => Contracts::STATUS_ACTIVE
+//                    ]
+//                ]
+//            )
+            ->andWhere(
+                [
+                    'OR',
+                    [
+                        'AND',
+                        ['>=', 'date_termnate', $this->datePrevMonthBeginning],
+                        ['`contracts`.status' => Contracts::STATUS_CLOSED]
+                    ],
+                    [
+                        '`contracts`.status' => Contracts::STATUS_ACTIVE
+                    ]
+                ]
+            )
+            ->andWhere([Contracts::tableName() . '.organization_id' => $this->organization->id])
+            ->andWhere([Contracts::tableName() . '.payer_id' => $this->payer_id])
+            ->andWhere(['>', 'all_funds', 0]);
+
+        return $contractQuery;
+    }
+
     public function getContractsData()
     {
         if (!$this->_contractsData) {
-            $this->_contractsData = Contracts::find()
+            $contractsQuery = Contracts::find()
                 ->select([
                     'contracts' => new Expression('GROUP_CONCAT(' . Contracts::tableName() . '.{{id}})'),
                     'sum' => new Expression('ROUND(SUM(' . Completeness::tableName() . '.{{sum}}), 2)')
                 ])
-                ->innerJoin(Completeness::tableName(), ['contract_id' => new Expression(Contracts::tableName() . '.{{id}}')])
-                ->andWhere(['preinvoice' => 0])
-                ->andWhere(['month' => $this->datePrevMonthNumber])
-                ->andWhere(['<=', 'start_edu_contract', $this->datePrevMonthEnd])
-                ->andWhere(['>=', 'stop_edu_contract', $this->datePrevMonthBeginning])
-                /* если договор закрыт, учитываем так же дату закрытия, а если активен то НЕ учитываем */
-                /*->andWhere(['OR', [
-                    'AND', ['<=', 'date_termnate', $this->datePrevMonthEnd], ['`contracts`.status' => Contracts::STATUS_CLOSED]
-                ], [
-                    '`contracts`.status' => Contracts::STATUS_ACTIVE
-                ]
-                ])*/
-                ->andWhere(['OR', [
-                    'AND', ['>=', 'date_termnate', $this->datePrevMonthBeginning], ['`contracts`.status' => Contracts::STATUS_CLOSED]
-                ], [
-                    '`contracts`.status' => Contracts::STATUS_ACTIVE
-                ]
-                ])
-                /******************************************************/
-                ->andWhere([Contracts::tableName() . '.organization_id' => $this->organization->id])
-                ->andWhere([Contracts::tableName() . '.payer_id' => $this->payer_id])
-                ->andWhere(['>', 'all_funds', 0])
+                ->innerJoin(
+                    Completeness::tableName(),
+                    ['contract_id' => new Expression(Contracts::tableName() . '.{{id}}')]
+                );
+            $this->_contractsData = $this->applyContractsCondition($contractsQuery)
                 ->asArray()
                 ->one();
         }
 
         return $this->_contractsData;
+    }
 
+    public function getContractsIds(): array
+    {
+        $contractsQuery = Contracts::find()
+            ->innerJoin(
+                Completeness::tableName(),
+                ['contract_id' => new Expression(Contracts::tableName() . '.{{id}}')]
+            );
+
+        return $this->applyContractsCondition($contractsQuery)->column();
     }
 
     private function fillFieldsOfInvoice()
