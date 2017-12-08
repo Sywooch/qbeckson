@@ -18,7 +18,26 @@ class MunSearch extends Mun
     public function rules()
     {
         return [
-            [['id', 'nopc', 'pc', 'zp', 'dop', 'uvel', 'otch', 'otpusk', 'polezn', 'stav', 'deystv', 'lastdeystv', 'countdet', 'operator_id'], 'integer'],
+            [
+                [
+                    'id',
+                    'nopc',
+                    'pc',
+                    'zp',
+                    'dop',
+                    'uvel',
+                    'otch',
+                    'otpusk',
+                    'polezn',
+                    'stav',
+                    'deystv',
+                    'lastdeystv',
+                    'countdet',
+                    'operator_id',
+                    'type'
+                ],
+                'integer'
+            ],
             [['name'], 'safe'],
         ];
     }
@@ -73,6 +92,7 @@ class MunSearch extends Mun
             'deystv' => $this->deystv,
             'lastdeystv' => $this->lastdeystv,
             'countdet' => $this->countdet,
+            'type' => $this->type,
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name]);

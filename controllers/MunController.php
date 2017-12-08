@@ -37,11 +37,16 @@ class MunController extends Controller
     public function actionIndex()
     {
         $searchModel = new MunSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $queryParams = Yii::$app->request->queryParams;
+        $queryParams['MunSearch']['type'] = $searchModel::TYPE_MAIN;
+        $dataProvider = $searchModel->search($queryParams);
+        $queryParams['MunSearch']['type'] = $searchModel::TYPE_APPLICATION;
+        $dataProviderApplication = $searchModel->search($queryParams);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'dataProviderApplication' => $dataProviderApplication,
         ]);
     }
 
@@ -85,6 +90,25 @@ class MunController extends Controller
     {
         $model = $this->findModel($id);
 
+        // Если payer то подается заявка на изменение
+        if (Yii::$app->user->can('payer')) {
+            // Если пользователь уже подавал заявку, то выводим ее, иначе, создаем новую
+            $application = Mun::find()->where([
+                'user_id' => Yii::$app->user->id,
+                'mun_id' => $model->id,
+            ])->limit(1)->one();
+
+            if(!$application) {
+                $application = new Mun();
+                $application->setAttributes($model->attributes);
+                $application->user_id = \Yii::$app->user->id;
+                $application->mun_id = $model->id;
+            }
+
+            $application->type = $application::TYPE_APPLICATION;
+            $model = $application;
+        }
+
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
@@ -107,7 +131,7 @@ class MunController extends Controller
         if($user->load(Yii::$app->request->post())) {
 
             if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
-                
+
                 $this->findModel($id)->delete();
 
                 return $this->redirect(['index']);
@@ -121,6 +145,46 @@ class MunController extends Controller
             'user' => $user,
             'title' => 'Удалить муниципалитет',
         ]);
+    }
+
+    /**
+     * @param $id
+     * @return \yii\web\Response
+     */
+    public function actionConfirm($id) {
+        $newModel = $this->findModel($id);
+        $mainModel = $this->findModel($newModel->mun_id);
+        $mainModel->setAttributes($newModel->attributes);
+        $mainModel->confirmationFile = $newModel->confirmationFile;
+        if ($mainModel->save()) {
+            if ($newModel->delete()) {
+                Yii::$app->session->setFlash('success', 'Данные изменены.');
+                return $this->redirect(['view', 'id' => $mainModel->id]);
+            } else {
+                Yii::$app->session->setFlash('error', 'Данные изменены, но не удалось удалить заявку.');
+                return $this->redirect(['view', 'id' => $newModel->id]);
+            }
+        } else {
+            Yii::$app->session->setFlash('error', 'Не удалось изменить данные.');
+            return $this->redirect(['view', 'id' => $newModel->id]);
+        }
+    }
+
+    /**
+     * @param $id
+     * @return \yii\web\Response
+     */
+    public function actionReject($id) {
+        $model = $this->findModel($id);
+        $model->type = $model::TYPE_REJECTED;
+        if ($model->save()) {
+            //todo: Добавить оповещение пользователю, что его заявку отклонили
+            Yii::$app->session->setFlash('success', 'Заявка отклонена.');
+            return $this->redirect(['index']);
+        } else {
+            Yii::$app->session->setFlash('error', 'Не еудалось отклонить заявку.');
+            return $this->redirect(['view', 'id' => $id]);
+        }
     }
 
     /**

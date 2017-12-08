@@ -322,5 +322,12 @@ return [
             'roles' => ['operators', 'organizations', 'payer'],
             'actions' => ['contract'],
         ]
-    ]
+    ],
+    'mun' => [
+        [
+            'allow' => true,
+            'roles' => ['payer'],
+            'actions' => ['view', 'update', 'upload'],
+        ]
+    ],
 ];

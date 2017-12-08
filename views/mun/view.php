@@ -10,10 +10,17 @@ use yii\widgets\DetailView;
 $this->title = $model->name;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Муниципалитеты'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
+$isOperator = Yii::$app->user->can('operators');
 ?>
 <div class="mun-view col-md-offset-1 col-md-10">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h1>
+        <?php if($model->type === $model::TYPE_APPLICATION) { ?>
+            <small>Заявка на изменение муниципалитета</small>
+            <br>
+        <?php } ?>
+        <?= Html::encode($this->title) ?>
+    </h1>
         
     <div class="table-responsive">
         <table class="table  table-condensed">
@@ -130,12 +137,49 @@ $this->params['breadcrumbs'][] = $this->title;
                 </tr>
             </tbody>
         </table>
+
+            <?php
+                // todo: Сделать ссылку на скачивание файла
+            if ($model->file) {
+                echo Html::a('Файл-подтвержение', [$model->base_url, 'path' => $model->file]);
+            } ?>
+
     </div>
-    <?= Html::a('Назад', Url::to(['/mun/index']), ['class' => 'btn btn-primary']); ?>
-     &nbsp;
-    <?= Html::a('Редактировать', Url::to(['/mun/update', 'id' => $model->id]), ['class' => 'btn btn-primary']); ?>
-     &nbsp;
-    <?= Html::a('Удалить', Url::to(['/mun/delete', 'id' => $model->id]), ['class' => 'btn btn-danger', 'data' => [
-            'confirm' => 'Вы уверены что хотите удалить этот муниципалитет?', 'method' => 'post']]); ?>       
-            
+
+    <?php if ($isOperator) { ?>
+        <?= Html::a('Назад', Url::to(['/mun/index']), ['class' => 'btn btn-primary']); ?>
+    <?php } ?>
+
+    <?php if ($model->type === $model::TYPE_APPLICATION) { ?>
+        <?php if ($isOperator) { ?>
+            <?= Html::a('Подтвердить', Url::to(['/mun/confirm', 'id' => $model->id]),
+                ['class' => 'btn btn-success']); ?>
+            <?= Html::a('Отклонить', Url::to(['/mun/reject', 'id' => $model->id]),
+                ['class' => 'btn btn-danger']); ?>
+        <?php } elseif ($model->user_id == Yii::$app->user->id) { ?>
+            <?= Html::a('Редактировать', Url::to(['/mun/update', 'id' => $model->mun_id]),
+                ['class' => 'btn btn-primary']); ?>
+            <?= Html::a('Удалить', Url::to(['/mun/delete', 'id' => $model->id]), [
+                'class' => 'btn btn-danger',
+                'data' => [
+                    'confirm' => 'Вы уверены что хотите удалить эту заявку?',
+                    'method' => 'post'
+                ]
+            ]); ?>
+        <?php } ?>
+    <?php } else { ?>
+        <?= Html::a('Редактировать', Url::to(['/mun/update', 'id' => $model->id]),
+            ['class' => 'btn btn-primary']); ?>
+        <?php if ($isOperator) { ?>
+            <?= Html::a('Удалить', Url::to(['/mun/delete', 'id' => $model->id]), [
+                'class' => 'btn btn-danger',
+                'data' => [
+                    'confirm' => 'Вы уверены что хотите удалить этот муниципалитет?',
+                    'method' => 'post'
+                ]
+            ]); ?>
+
+        <?php } ?>
+    <?php } ?>
+
 </div>
