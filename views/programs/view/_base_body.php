@@ -2,6 +2,7 @@
 
 /** @var $model \app\models\Programs */
 /** @var $this yii\web\View */
+/** @var $modules \app\models\module\ModuleViewDecoratorOrganisation[] */
 
 $moduleTemplate = '_base_module';
 if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_CERTIFICATE)) {
@@ -23,7 +24,7 @@ echo \yii\bootstrap\Tabs::widget([
         $result['content'] = $this->render($moduleTemplate, ['model' => $module, 'cooperate' => $cooperate]);
 
         return $result;
-    }, $model->modules),
+    }, $modules),
     'itemOptions' => ['class' => 'program-info-view'],
     'navType'     => 'new-nav-tabs'
 ]);

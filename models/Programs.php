@@ -218,6 +218,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
                 'targetAttribute' => ['direction_id' => 'id']
             ],
             [['programPhoto'], 'safe'],
+            ['inTransferProcess', 'boolean'],
             [['activity_ids'], 'each', 'rule' => ['integer']],
         ];
     }
@@ -755,6 +756,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
         if ($task) {
             $this->inTransferProcess = true;
             $this->is_municipal_task = 0;
+            $this->verification = self::VERIFICATION_WAIT;
         } else {
             $this->verification = self::VERIFICATION_UNDEFINED;
             $this->price = 0;
@@ -981,6 +983,4 @@ class Programs extends ActiveRecord implements RecordWithHistory
         return ($this->verification === self::VERIFICATION_UNDEFINED
             || $this->verification === self::VERIFICATION_WAIT);
     }
-
-
 }

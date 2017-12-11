@@ -323,8 +323,8 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
 
     public function needCertificate(): bool
     {
-        return ($this->verification === ProgrammeModule::VERIFICATION_UNDEFINED
-                || $this->verification === ProgrammeModule::VERIFICATION_WAIT)
+        return ($this->verification === self::VERIFICATION_UNDEFINED
+                || $this->verification === self::VERIFICATION_WAIT)
             && ($this->program->verification !== Programs::VERIFICATION_UNDEFINED
                 && $this->program->verification !== Programs::VERIFICATION_WAIT);
     }
@@ -337,7 +337,7 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
         return $this->program->municipality->operator->settings->children_average;
     }
 
-    public function setVerificationWaitAndSave()
+    public function setVerificationWaitAndSave(): bool
     {
         if ($this->verification === self::VERIFICATION_WAIT) {
             return true;
@@ -345,5 +345,17 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
         $this->verification = self::VERIFICATION_WAIT;
 
         return $this->save(false);
+    }
+
+    public function setNeedVerification(): self
+    {
+        if ($this->verification === self::VERIFICATION_WAIT
+            || $this->verification === self::VERIFICATION_UNDEFINED
+        ) {
+            return $this;
+        }
+        $this->verification = self::VERIFICATION_UNDEFINED;
+
+        return $this;
     }
 }
