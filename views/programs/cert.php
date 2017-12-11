@@ -59,7 +59,7 @@ $this->params['breadcrumbs'][] = 'Редактировать';
                                 'attribute' => "p21z",
                                 'formOptions' => [
                                     'action' => Url::to(['programs/normpricesave']),
-                                ],
+                                ]
                             ]);
                             ?><?php
                             echo Html::label($modelYears->getAttributeLabel('p22z') . ': ');
