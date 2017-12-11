@@ -37,7 +37,9 @@ class m171208_062603_invoice_have_contracts extends Migration
 
     private function buildLinks()
     {
-        $invoices = \app\models\Invoices::find()->all();
+        $invoices = \app\models\Invoices::find()
+            ->where(['not in', 'id', \app\models\InvoiceHaveContract::find()->select('invoice_id')])
+            ->all();
         array_map(
             function (\app\models\Invoices $invoice) {
                 $this->buildLink($invoice);
@@ -64,6 +66,15 @@ class m171208_062603_invoice_have_contracts extends Migration
     private function buildLink(\app\models\Invoices $invoice)
     {
         $contractIds = explode(',', $invoice->contracts);
+        $preparedIdsTrim = array_map('trim', $contractIds);
+        $preparedIdsFiltred = array_filter($preparedIdsTrim, function ($id) {
+            return $id != '';
+        });
+        $preparedIdsInts = array_map('intVal', $preparedIdsFiltred);
+        $preparedIdsFiltredZero = array_filter($preparedIdsInts, function ($id) {
+            return $id != 0;
+        });
+        $uniqIds = array_unique($preparedIdsFiltredZero);
         $invoiceId = $invoice->id;
         array_map(
             function (int $contractId) use ($invoiceId) {
@@ -73,9 +84,9 @@ class m171208_062603_invoice_have_contracts extends Migration
                 $invoiceHaveContract->save()
                 || (Yii::getLogger()
                         ->log(\app\helpers\ModelHelper::getFirstError($invoiceHaveContract), LOG_ERR)
-                    && print_r(\app\helpers\ModelHelper::getFirstError($invoiceHaveContract)));;
+                    && print_r(\app\helpers\ModelHelper::getFirstError($invoiceHaveContract)));
             },
-            $contractIds
+            $uniqIds
         );
     }
 

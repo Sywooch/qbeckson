@@ -276,7 +276,6 @@ class InvoiceBuilder extends InvoicesActions
         $this->invoice->pdf = $this->invoice->generateInvoice();  /* Генерируем файл отчета */
 
         return true;
-
     }
 
     private function applyContractsCondition(ActiveQuery $contractQuery): ActiveQuery

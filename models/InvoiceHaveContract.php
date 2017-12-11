@@ -15,6 +15,7 @@ use yii\db\ActiveRecord;
  */
 class InvoiceHaveContract extends ActiveRecord
 {
+
     /**
      * @inheritdoc
      */
@@ -60,6 +61,11 @@ class InvoiceHaveContract extends ActiveRecord
     {
         return $this->hasOne(Contracts::className(), ['id' => 'contract_id'])
             ->inverseOf('invoiceHaveContracts');
+    }
+
+    public function getInvoiceMonth()
+    {
+        return $this->invoice->month;
     }
 
     /**
