@@ -28,6 +28,10 @@ use yii\helpers\Url;
     }
 
     if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)) {
+        $contractsExist = $model->getLivingContracts()->exists();
+        $openModulesExist = $model->getModules()->andWhere(['open' => 1])->exists();
+        $transferButtonTitle = 'Перевести на мунзадание';
+
         echo Html::a('К списку программ', '/personal/organization-programs', ['class' => 'btn btn-theme']);
         if ($model->verification === \app\models\Programs::VERIFICATION_DONE) {
             echo Html::a($model->getPhoto() ? 'Изменить фото' : 'Добавить фото', ['add-photo', 'id' => $model->id], ['class' => 'btn btn-theme']);
@@ -47,9 +51,7 @@ use yii\helpers\Url;
                 'options' => ['disabled' => 'disabled',
                     'class' => 'btn btn-danger',]
             ]);
-
-        } elseif ($model->getLivingContracts()->exists() || $model->getModules()->andWhere(['open' => 1])->exists()) {
-
+        } elseif ($contractsExist || $openModulesExist) {
             echo \app\components\widgets\ButtonWithInfo::widget([
                 'label' => 'Редактировать',
                 'message' => 'Невозможно, существуют контракты и/или открыто зачисление в одном или нескольких модулях, либо оператор запустил процедуру сертификации',
@@ -62,16 +64,28 @@ use yii\helpers\Url;
                 'options' => ['disabled' => 'disabled',
                     'class' => 'btn btn-danger',]
             ]);
+            echo \app\components\widgets\ButtonWithInfo::widget([
+                'label' => $transferButtonTitle,
+                'message' => $contractsExist ? 'Перевести программу невозможно. Есть действующие договоры или заявки на программу.' : 'Перевести программу невозможно. Открыто зачисление.',
+                'options' => ['disabled' => 'disabled',
+                    'class' => 'btn btn-warning',]
+            ]);
         } else {
             echo Html::a('Редактировать', Url::to(['/programs/update', 'id' => $model->id]), ['class' => 'btn btn-theme']);
-            echo PostButtonWithModalConfirm::widget(['title'        => 'Удалить программу',
-                                                     'url'          => Url::to(['/programs/delete', 'id' => $model->id]),
-                                                     'confirm'      => 'Вы уверены, что хотите удалить программу?',
-                                                     'toggleButton' => ['class' => 'btn btn-danger', 'label' => 'Удалить']]);
-
+            echo PostButtonWithModalConfirm::widget(['title' => 'Удалить программу',
+                'url' => Url::to(['/programs/delete', 'id' => $model->id]),
+                'confirm' => 'Вы уверены, что хотите удалить программу?',
+                'toggleButton' => ['class' => 'btn btn-danger', 'label' => 'Удалить']]);
+            if ($model->canProgrammeBeTransferred) {
+                echo PostButtonWithModalConfirm::widget([
+                    'title' => $transferButtonTitle,
+                    'askPassword' => false,
+                    'url' => Url::to(['/programs/transfer-programme', 'id' => $model->id]),
+                    'confirm' => 'Вы собираетесь перевести программу на муниципальное задание в реестр "Ожидающие рассмотрения"',
+                    'toggleButton' => ['class' => 'btn btn-warning', 'label' => $transferButtonTitle]
+                ]);
+            }
         }
-
-
     }
 
     echo Html::a('Открыть текст программы', $model->programFile, ['class' => 'btn btn-theme']);

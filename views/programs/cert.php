@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id
 $this->params['breadcrumbs'][] = 'Редактировать';
 ?>
 
-<div class="programs-form" ng-app>
+<div class="programs-form">
 
     <?php
     $data = [1 => 'Высокое обеспечение', 2 => 'Среднее обеспечение', 3 => 'Низкое обеспечение'];
@@ -35,10 +35,8 @@ $this->params['breadcrumbs'][] = 'Редактировать';
             'action' => Url::to(['programs/normpricesave']),
         ],
     ]); ?>
-
-    <?php \yii\widgets\Pjax::begin() ?>
     <div class="container-items"><!-- widgetContainer -->
-        <?php foreach ($modelsYears as $i => $modelYears): ?>
+        <?php foreach ($modelsYears as $i => $modelYears) : ?>
             <div class="item panel panel-default"><!-- widgetBody -->
                 <div class="panel-heading">
                     <h3 class="panel-title pull-left"><?= $i + 1 ?> модуль</h3>
@@ -112,8 +110,6 @@ $this->params['breadcrumbs'][] = 'Редактировать';
             ],
         ]
     );
-    \yii\widgets\Pjax::end();
-    echo '&nbsp';
     echo Html::a(
         'Cертифицировать',
         Url::to(['save', 'id' => $model->id]),

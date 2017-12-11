@@ -203,7 +203,7 @@ class ModuleViewDecoratorOrganisation extends ModelDecorator
             : Url::to(['years/start', 'id' => $this->id]);
     }
 
-    public function getClassButtonEnlistment(): bool
+    public function getClassButtonEnlistment()
     {
         return $this->open ? 'btn-danger' : 'btn-theme';
     }

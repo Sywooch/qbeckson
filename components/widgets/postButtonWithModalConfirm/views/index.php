@@ -24,6 +24,8 @@ use yii\helpers\Html;
 ]);
 echo $confirm;
 Alert::end(); ?>
+
+<?php if ($askPassword): ?>
 <?php $form = ActiveForm::begin(['action' => $url]); ?>
 
 <?= $form->field($model, 'confirm')->passwordInput() ?>
@@ -31,5 +33,9 @@ Alert::end(); ?>
 <?= Html::submitButton('Подтвердить', ['class' => 'btn btn-danger']) ?>
 
 <?php ActiveForm::end(); ?>
+<?php else: ?>
+    <?= Html::a('Продолжить', $url, ['class' => 'btn btn-success']) ?>
+    <?= Html::a('Отмена', 'javascript:void(0);', ['class' => 'btn btn-theme', 'data-dismiss' => 'modal']) ?>
+<?php endif; ?>
 
 <?php Modal::end(); ?>

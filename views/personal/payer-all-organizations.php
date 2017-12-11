@@ -24,6 +24,9 @@ $this->title = 'Выберите организацию';
                 return $model::types()[$model->type];
             },
         ],
+        'address_actual',
+        'fio_contact',
+        'phone',
         ['class' => 'yii\grid\ActionColumn',
             'controller' => 'organization',
             'template' => '{view}',

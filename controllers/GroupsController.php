@@ -66,6 +66,10 @@ class GroupsController extends Controller
      */
     public function actionView($id)
     {
+        if (!Yii::$app->user->can('viewGroup', ['id' => $id])) {
+            throw new ForbiddenHttpException('Нет прав на просмотр группы.');
+        }
+
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
@@ -92,6 +96,10 @@ class GroupsController extends Controller
     public function actionContracts($id)
     {
         $model = $this->findModel($id);
+
+        if (!Yii::$app->user->can('viewGroup', ['id' => $id])) {
+            throw new ForbiddenHttpException('Нет прав на просмотр группы.');
+        }
 
         $Contracts1Search = new ContractsStatus1onlySearch();
         $Contracts1Search->group_id = $id;
