@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "263917ea62c8f428427c0847e6ac1d74",
+    "content-hash": "c5a20a5913d45af3aa6793718febed70",
     "packages": [
         {
             "name": "2amigos/yii2-ckeditor-widget",
@@ -208,7 +208,8 @@
                 "selection",
                 "upload",
                 "widget"
-            ]
+            ],
+            "time": "2017-12-01T10:27:17+00:00"
         },
         {
             "name": "bower-asset/blueimp-load-image",
@@ -373,7 +374,8 @@
                 "javascript",
                 "jquery",
                 "library"
-            ]
+            ],
+            "time": "2016-05-20T17:24:43+00:00"
         },
         {
             "name": "bower-asset/jquery-ui",
@@ -401,7 +403,8 @@
             },
             "license": [
                 "MIT"
-            ]
+            ],
+            "time": "2016-09-16T05:47:55+00:00"
         },
         {
             "name": "bower-asset/jquery.inputmask",
@@ -460,7 +463,8 @@
                 "jquery",
                 "mask",
                 "plugins"
-            ]
+            ],
+            "time": "2017-11-21T11:46:23+00:00"
         },
         {
             "name": "bower-asset/punycode",
@@ -522,7 +526,8 @@
             },
             "license": [
                 "MIT"
-            ]
+            ],
+            "time": "2017-10-12T10:11:14+00:00"
         },
         {
             "name": "box/spout",
@@ -3511,12 +3516,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPOffice/PHPWord.git",
-                "reference": "05e2f1bf638655793c032961d8166af993ee9c5b"
+                "reference": "194e5c47e4b7600a5a0c1d9d8cfe323ed140abef"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPOffice/PHPWord/zipball/05e2f1bf638655793c032961d8166af993ee9c5b",
-                "reference": "05e2f1bf638655793c032961d8166af993ee9c5b",
+                "url": "https://api.github.com/repos/PHPOffice/PHPWord/zipball/194e5c47e4b7600a5a0c1d9d8cfe323ed140abef",
+                "reference": "194e5c47e4b7600a5a0c1d9d8cfe323ed140abef",
                 "shasum": ""
             },
             "require": {
@@ -3607,7 +3612,7 @@
                 "word",
                 "writer"
             ],
-            "time": "2017-12-05T07:02:23+00:00"
+            "time": "2017-12-05T20:39:35+00:00"
         },
         {
             "name": "psr/http-message",
@@ -5505,16 +5510,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "5.2.4",
+            "version": "5.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "033ec97498cf530cc1be4199264cad568b19be26"
+                "reference": "661f34d0bd3f1a7225ef491a70a020ad23a057a1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/033ec97498cf530cc1be4199264cad568b19be26",
-                "reference": "033ec97498cf530cc1be4199264cad568b19be26",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/661f34d0bd3f1a7225ef491a70a020ad23a057a1",
+                "reference": "661f34d0bd3f1a7225ef491a70a020ad23a057a1",
                 "shasum": ""
             },
             "require": {
@@ -5530,7 +5535,6 @@
                 "theseer/tokenizer": "^1.1"
             },
             "require-dev": {
-                "ext-xdebug": "^2.5",
                 "phpunit/phpunit": "^6.0"
             },
             "suggest": {
@@ -5539,7 +5543,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "5.2.x-dev"
+                    "dev-master": "5.3.x-dev"
                 }
             },
             "autoload": {
@@ -5554,7 +5558,7 @@
             "authors": [
                 {
                     "name": "Sebastian Bergmann",
-                    "email": "sb@sebastian-bergmann.de",
+                    "email": "sebastian@phpunit.de",
                     "role": "lead"
                 }
             ],
@@ -5565,7 +5569,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2017-11-27T09:00:30+00:00"
+            "time": "2017-12-06T09:29:45+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
