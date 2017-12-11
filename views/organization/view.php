@@ -34,7 +34,7 @@ if (isset($roles['organizations'])) {
     $this->params['breadcrumbs'][] = 'Организации';
 }
 if (isset($roles['payer'])) {
-    $cooperation = $model->getCooperation(Cooperate::STATUS_ACTIVE, Cooperate::PERIOD_CURRENT);
+    $cooperation = $model->getCooperation(null, Cooperate::PERIOD_CURRENT);
     if ($cooperation && !empty($cooperation->total_payment_limit)) {
         $commitments = \app\models\Contracts::getCommitments($cooperation->id);
         $summary = \app\models\Invoices::getSummary($cooperation->id);

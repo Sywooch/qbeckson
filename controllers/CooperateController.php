@@ -109,7 +109,7 @@ class CooperateController extends Controller
         }
 
         if (Cooperate::PERIOD_FUTURE == $period && !$operatorSettings->payerCanCreateFuturePeriodCooperate()) {
-            flash('error', 'Вы не можете подать заявку на будущий период.');
+            \Yii::$app->session->setFlash('error', 'Вы не можете подать заявку на будущий период.');
 
             return $this->redirect(['payers/view', 'id' => $payerId]);
         }
