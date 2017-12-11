@@ -4,7 +4,7 @@ namespace app\controllers;
 
 use app\models\CertGroup;
 use app\models\Cooperate;
-use app\models\forms\CooperateChangeTypeForm;
+use app\models\OperatorSettings;
 use app\models\Payers;
 use app\models\PayersSearch;
 use app\models\User;
@@ -71,9 +71,13 @@ class PayersController extends Controller
 
         $activeCooperateExists = $payer->getCooperation(Cooperate::STATUS_ACTIVE) ? true : false;
 
+        /** @var OperatorSettings $operatorSettings */
+        $operatorSettings = Yii::$app->operator->identity->settings;
+
         return $this->render('view', [
             'model' => $payer,
             'activeCooperateExists' => $activeCooperateExists ? true : false,
+            'operatorSettings' => $operatorSettings,
         ]);
     }
 

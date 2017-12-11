@@ -34,7 +34,7 @@ if (isset($roles['organizations'])) {
     $this->params['breadcrumbs'][] = 'Организации';
 }
 if (isset($roles['payer'])) {
-    $cooperation = $model->getCooperation();
+    $cooperation = $model->getCooperation(null, Cooperate::PERIOD_CURRENT);
     if ($cooperation && !empty($cooperation->total_payment_limit)) {
         $commitments = \app\models\Contracts::getCommitments($cooperation->id);
         $summary = \app\models\Invoices::getSummary($cooperation->id);
@@ -54,12 +54,12 @@ if (isset($roles['payer'])) {
 $this->params['breadcrumbs'][] = $this->title;
 
 $js = <<<JS
-$('#type').change(function() {
+$('select[id="type"]').change(function() {
     var val = $(this).val();
     $('.item').hide().children('.text').hide();
     $('.' + val).show().children('.' + val + 'Text').show();
 })
-$('#iscustomvalue').change(function() {
+$('select[id="iscustomvalue"').change(function() {
     if(this.checked) {
         $('.extend').show();
         return;
@@ -611,7 +611,7 @@ $this->registerJs($js, $this::POS_READY);
                                             <?= Html::a('Просмотр договора', $operatorSettings->getGeneralDocumentUrl()); ?>
                                         </p>
                                     </div>
-                                    <div class="item <?= Cooperate::DOCUMENT_TYPE_CUSTOM ?>" style="display: "<?= Cooperate::DOCUMENT_TYPE_CUSTOM == $cooperation->document_type ? 'block' : 'none' ?>>
+                                    <div class="item <?= Cooperate::DOCUMENT_TYPE_CUSTOM ?>" style="display: <?= Cooperate::DOCUMENT_TYPE_CUSTOM == $cooperation->document_type ? 'block' : 'none' ?>">
                                         <p class="text <?= Cooperate::DOCUMENT_TYPE_CUSTOM ?>Text" style="display: none;">
                                             <small>* Вы можете сделать свой вариант договора (например, проставить заранее реквизиты в
                                                 предлагаемый оператором), но не уходите от принципов ПФ. Если Вы выберите данный
@@ -653,31 +653,24 @@ $this->registerJs($js, $this::POS_READY);
                                 </td>
                             </tr>
 
-                            <?php if ($cooperation->status === Cooperate::STATUS_NEW) {
-                                echo ' ';
-                                echo $this->render(
-                                    '../cooperate/reject-request',
-                                    ['model' => $cooperation]
-                                );
-                                echo $this->render(
-                                    '../cooperate/confirm-request',
-                                    ['cooperation' => $cooperation]
-                                );
-                            }
-                            if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
+                            <?php if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
                                 null === $cooperation->number &&
                                 null === $cooperation->date
-                            ) {
-                                echo $this->render(
-                                    '../cooperate/requisites',
-                                    [
-                                        'model' => $cooperation,
-                                        'toggleButtonClass' => null,
-                                        'label' => 'Сведения о реквизитах соглашения/договора не внесены',
-                                    ]
-                                );
-                                echo '<br /><br />';
-                            } else if (($cooperation->status === Cooperate::STATUS_CONFIRMED &&
+                            ) { ?>
+                                <tr>
+                                    <th>Реквизиты соглашения</th>
+                                    <td>
+                                        <?= $this->render(
+                                            '../cooperate/requisites',
+                                            [
+                                                'model' => $cooperation,
+                                                'toggleButtonClass' => null,
+                                                'label' => 'Сведения о реквизитах соглашения/договора не внесены',
+                                            ]
+                                        ); ?>
+                                    </td>
+                                </tr>
+                            <?php } else if (($cooperation->status === Cooperate::STATUS_CONFIRMED &&
                                     null !== $cooperation->number &&
                                     null !== $cooperation->date) ||
                                 $cooperation->status === Cooperate::STATUS_ACTIVE
@@ -695,33 +688,29 @@ $this->registerJs($js, $this::POS_READY);
                                     ); ?>
                                 </td>
                             </tr>
-                                <?php if ($cooperation->status == Cooperate::STATUS_ACTIVE && $cooperation->document_type == Cooperate::DOCUMENT_TYPE_EXTEND && Yii::$app->user->can('payers')) { ?>
+                            <?php if ($cooperation->status == Cooperate::STATUS_ACTIVE && $cooperation->document_type == Cooperate::DOCUMENT_TYPE_EXTEND && Yii::$app->user->can('payers')) { ?>
+                                <tr>
+                                    <th>Установлена максимальная сумма по договору, рублей</th>
+                                    <td><?= round($cooperation->total_payment_limit, 2) ?>
+                                        <?= $this->render(
+                                            '../cooperate/payment-limit',
+                                            [
+                                                'toggleButtonClass' => '',
+                                                'label' => '(изменить)',
+                                                'model' => $cooperation,
+                                            ]
+                                        ); ?>
+                                    </td>
+                                </tr>
+                            <?php }
+                            } ?>
+
                             <tr>
-                                <th>Установлена максимальная сумма по договору, рублей</th>
-                                <td><?= round($cooperation->total_payment_limit, 2) ?>
-                                    <?= $this->render(
-                                        '../cooperate/payment-limit',
-                                        [
-                                            'toggleButtonClass' => '',
-                                            'label' => '(изменить)',
-                                            'model' => $cooperation,
-                                        ]
-                                    ); ?>
+                                <th>Период действия соглашения</th>
+                                <td>
+                                    <?= $cooperation->getPeriodValidity() ?>
                                 </td>
                             </tr>
-                                <?php }
-                            }
-                            if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
-                                null !== $cooperation->number &&
-                                null !== $cooperation->date
-                            ) {
-                                echo ' ';
-                                echo Html::a(
-                                    'Одобрить',
-                                    ['cooperate/confirm-contract', 'id' => $cooperation->id],
-                                    ['class' => 'btn btn-primary']
-                                );
-                            } ?>
 
                             <?php if (!empty($commitments)): ?>
                                 <tr>
@@ -744,6 +733,33 @@ $this->registerJs($js, $this::POS_READY);
                     </div>
 
                 <?php } ?>
+                <br>
+                <br>
+
+                <?php if ($cooperation->status === Cooperate::STATUS_NEW) { ?>
+                    <?= $this->render(
+                        '../cooperate/reject-request',
+                        ['model' => $cooperation]
+                    ); ?>
+                    <?= $this->render(
+                        '../cooperate/confirm-request',
+                        ['cooperation' => $cooperation]
+                    ); ?>
+                <?php } ?>
+
+                <?php if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
+                    null !== $cooperation->number &&
+                    null !== $cooperation->date
+                ) {
+                    echo ' ';
+                    echo Html::a(
+                        'Одобрить',
+                        ['cooperate/confirm-contract', 'id' => $cooperation->id],
+                        ['class' => 'btn btn-primary']
+                    );
+                } ?>
+
+                <br>
                 <br>
 
                 <div class="checkbox-container">
@@ -842,8 +858,14 @@ $this->registerJs($js, $this::POS_READY);
 
                 <?php $futurePeriodForm->end(); ?>
                 <?php Modal::end(); ?>
+            <?php } elseif ($futurePeriodCooperate) { ?>
+                <br>
+                <br>
+                <p>Договор с данным поставщиком услуг начнет действовать только <?= $futurePeriodCooperate->getPeriodValidity() ?></p>
+                <br>
+            <?php } ?>
 
-                <?php if ($futurePeriodCooperate): ?>
+            <?php if ($futurePeriodCooperate): ?>
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <?= Cooperate::documentNames()[$operatorSettings->document_name] ?>, использование которого предусматривается в будущем периоде:
@@ -950,8 +972,7 @@ $this->registerJs($js, $this::POS_READY);
                     </table>
 
                 </div>
-                <?php endif; ?>
-            <?php }
-        } ?>
+            <?php endif; ?>
+        <?php } ?>
     </div>
 </div>
