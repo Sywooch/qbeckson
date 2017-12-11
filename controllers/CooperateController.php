@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\forms\ConfirmRequestForm;
 use app\models\forms\RejectContractForm;
+use app\models\OperatorSettings;
 use app\models\UserIdentity;
 use app\traits\AjaxValidationTrait;
 use Yii;
@@ -94,17 +95,29 @@ class CooperateController extends Controller
      * Отправка заявки на заключение договора с плательщиком организации.
      *
      * @param $payerId
-     * @return string|\yii\web\Response
+     * @param $period
+     * @return string|Response
      * @throws NotFoundHttpException
      */
-    public function actionRequest($payerId)
+    public function actionRequest($payerId, $period)
     {
+        /** @var OperatorSettings $operatorSettings */
+        $operatorSettings = Yii::$app->operator->identity->settings;
+
         if (null !== $this->findCurrentModel(null, $payerId, Yii::$app->user->getIdentity()->organization->id)) {
             throw new NotFoundHttpException('Model already exist!');
         }
+
+        if (Cooperate::PERIOD_FUTURE == $period && !$operatorSettings->payerCanCreateFuturePeriodCooperate()) {
+            flash('error', 'Вы не можете подать заявку на будущий период.');
+
+            return $this->redirect(['payers/view', 'id' => $payerId]);
+        }
+
         $model = new Cooperate([
             'payer_id' => $payerId,
-            'organization_id' => Yii::$app->user->getIdentity()->organization->id
+            'organization_id' => Yii::$app->user->getIdentity()->organization->id,
+            'period' => $period,
         ]);
 
         $model->create();

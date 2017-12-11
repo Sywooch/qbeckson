@@ -201,7 +201,7 @@ class Cooperate extends ActiveRecord
      */
     public function getActiveDocumentUrl($fileStorage = 'fileStorage')
     {
-        if (!file_exists(Yii::$app->$fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $this->document_path)) {
+        if (is_null($this->document_base_url) || is_null($this->document_path) || !file_exists(Yii::$app->$fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $this->document_path)) {
             return null;
         }
 
@@ -305,6 +305,17 @@ class Cooperate extends ActiveRecord
     }
 
     /**
+     * @return array
+     */
+    public static function documentNamesInGenitive()
+    {
+        return [
+            self::DOCUMENT_NAME_FIRST => 'договора о возмещении затрат',
+            self::DOCUMENT_NAME_SECOND => 'договора об оплате дополнительного образования',
+        ];
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getContracts()
@@ -312,7 +323,33 @@ class Cooperate extends ActiveRecord
         return $this->hasMany(Contracts::class, ['payer_id' => 'payer_id', 'organization_id' => 'organization_id']);
     }
 
+    /**
+     * получить период действия соглашения
+     */
+    public function getPeriodValidity()
+    {
+        return self::periodValidityList($this->period);
+    }
 
+    /**
+     * получить список периодов действия соглашения, если указан период возвращает указанный период
+     *
+     * @param int $period
+     *
+     * @return array|string
+     */
+    public static function periodValidityList($period = null)
+    {
+        /** @var OperatorSettings $operatorSettings */
+        $operatorSettings = Yii::$app->operator->identity->settings;
+
+        $periodLabels = [
+            self::PERIOD_CURRENT => 'с ' . \Yii::$app->formatter->asDate($operatorSettings->current_program_date_from) . ' по ' . \Yii::$app->formatter->asDate($operatorSettings->current_program_date_to),
+            self::PERIOD_FUTURE => 'с ' . \Yii::$app->formatter->asDate($operatorSettings->future_program_date_from),
+        ];
+
+        return !is_null($period) ? $periodLabels[$period] : $periodLabels;
+    }
 
 
 

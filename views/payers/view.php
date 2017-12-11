@@ -1,7 +1,7 @@
 <?php
 
 use app\models\Cooperate;
-use app\models\forms\CooperateChangeTypeForm;
+use app\models\OperatorSettings;
 use app\models\Organization;
 use yii\db\Query;
 use yii\helpers\Html;
@@ -11,6 +11,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\Payers */
 /* @var $activeCooperateExists boolean */
+/* @var $operatorSettings OperatorSettings */
 
 $this->title = $model->name;
 
@@ -288,12 +289,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     echo '<div style="margin-top: 20px;">Совокупная сумма оплаченных ранее счетов &ndash; ' . round($summary, 2) . ' рублей</div>';
                 }
             } else {
-                echo ' ';
-                echo Html::a(
-                    'Направить заявку на заключение соглашения с уполномоченной организацией',
-                    Url::to(['cooperate/request', 'payerId' => $model->id]),
-                    ['class' => 'btn btn-primary']
-                );
+                echo $this->render('_cooperate-request', ['model' => $model, 'operatorSettings' => $operatorSettings]);
             }
         }
         ?>
