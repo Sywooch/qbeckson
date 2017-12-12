@@ -157,7 +157,11 @@ class MunController extends Controller
         $mainModel->setAttributes($newModel->attributes);
         $mainModel->confirmationFile = $newModel->confirmationFile;
         if ($mainModel->save()) {
+            //обнуляем значения, чтобы не удалился файл при удалении модели
+            $newModel->file = null;
+            $newModel->base_url = null;
             if ($newModel->delete()) {
+                //TODO: после принятия параметров должен производиться перерасчёт нормативной стоимости программ
                 Yii::$app->session->setFlash('success', 'Данные изменены.');
                 return $this->redirect(['view', 'id' => $mainModel->id]);
             } else {
@@ -182,7 +186,7 @@ class MunController extends Controller
             Yii::$app->session->setFlash('success', 'Заявка отклонена.');
             return $this->redirect(['index']);
         } else {
-            Yii::$app->session->setFlash('error', 'Не еудалось отклонить заявку.');
+            Yii::$app->session->setFlash('error', 'Не удалось отклонить заявку.');
             return $this->redirect(['view', 'id' => $id]);
         }
     }
