@@ -134,7 +134,9 @@ $isPayer = Yii::$app->user->can('payer');
     ?>
 
     <div class="form-group">
-       <?= Html::a('Отмена', Url::to(['/mun/index']), ['class' => 'btn btn-danger']); ?>
+       <?= Html::a('Отмена',
+           Url::to($isPayer ? ['/mun/view', 'id' => $model->id] : ['/mun/index']),
+           ['class' => 'btn btn-danger']); ?>
      &nbsp;
         <?= Html::submitButton($isPayer ? 'Отправить заявку на изменение' : 'Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
     </div>
