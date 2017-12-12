@@ -146,6 +146,8 @@ $this->registerJs($js);
         'fieldConfig1' => ['addon' => [
             'prepend' => ['content' => 'От '],
         ]],
+        'widgetOptions1' => ['pluginOptions' => ['step' => .25, 'decimals' => 2]],
+        'widgetOptions2' => ['pluginOptions' => ['step' => .25, 'decimals' => 2]],
     ]);
     ?>
 
