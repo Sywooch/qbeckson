@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\behaviors\UploadBehavior;
+use app\helpers\ArrayHelper;
 use Yii;
 use yii\db\ActiveRecord;
 
@@ -33,6 +34,7 @@ use yii\db\ActiveRecord;
  * @property integer        $base_url
  *
  * @property Operators      $operator
+ * @property Mun      $mun
  * @property Organization[] $organization
  */
 class Mun extends ActiveRecord
@@ -167,6 +169,23 @@ class Mun extends ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMun()
+    {
+        return $this->hasOne(self::className(), ['id' => 'mun_id']);
+    }
+
+    /**
+     * @param string $attribute
+     * @return null|string
+     */
+    public function getMunValue(string $attribute)
+    {
+        return ArrayHelper::getValue($this, ['mun', $attribute]);
+    }
+
+    /**
      * @param string $columns
      * @return static[]
      */
@@ -177,5 +196,32 @@ class Mun extends ActiveRecord
             ->where(['operator_id' => Yii::$app->operator->identity->id]);
 
         return $query->all();
+    }
+
+    /**
+     * Сравнивает значения атрибута заявки на изменение муниципалитета и самого муниципалитета
+     * @param $attribute
+     * @return bool
+     */
+    public function compareWithMunValue($attribute)
+    {
+        $mun = $this->mun;
+        if (!$mun) {
+            return false;
+        } else {
+            return ArrayHelper::getValue($mun, $attribute) == ArrayHelper::getValue($this, $attribute);
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getFileUrl()
+    {
+        if ($this->base_url && $this->file) {
+            return $this->base_url . '/' . $this->file;
+        }
+
+        return null;
     }
 }
