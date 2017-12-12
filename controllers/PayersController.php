@@ -282,10 +282,14 @@ class PayersController extends Controller
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $post = Yii::$app->request->post();
+            /** @var Payers $model */
             $model = Yii::$app->user->identity->payer;
-            if ($model->load($post) && $model->save(false, ['certificate_can_use_future_balance'])) {
-                return true;
+
+            if ($model->load($post) && \Yii::$app->request->post('change') == 1) {
+                $model->changeCertificateCanUseFutureBalance();
             }
+
+            return $this->asJson(['certificate_can_use_future_balance' => $model->certificate_can_use_future_balance]);
         }
 
         return null;
