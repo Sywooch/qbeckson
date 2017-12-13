@@ -16,23 +16,26 @@ class ProgramsFile extends Model
     public function rules()
     {
         return [
-            [['docFile'], 'file', 'skipOnEmpty' => true, 'extensions' => 'doc, docx, pdf', 'maxSize' => 1024 * 1024 * 20],
+            [
+                ['docFile'], 'file', 'skipOnEmpty' => true,
+                'extensions' => 'doc, docx, pdf', 'maxSize' => 1024 * 1024 * 20
+            ],
         ];
     }
-    
-        public function attributeLabels()
+
+    public function attributeLabels()
     {
         return [
             'docFile' => 'Образовательная программа',
             'newprogram' => 'Изменить программу',
-            ];
+        ];
     }
 
     public function upload($filename)
     {
         if ($this->validate()) {
             $this->docFile->saveAs(\Yii::getAlias('@pfdoroot/uploads/programs/') . $filename);
-            
+
             return true;
         } else {
             return false;

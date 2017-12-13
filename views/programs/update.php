@@ -17,19 +17,19 @@ echo $model->getAlert();
 ?>
 <div class="programs-update col-md-10 col-md-offset-1">
     <?php if (!$model->inTransferProcess): ?>
-    <div class="modal fade modal-auto-popup">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">Внимание!</h4>
-                </div>
-                <div class="modal-body">
-                    После редактирования программы, она отправляется на повторную сертификацию.
+        <div class="modal fade modal-auto-popup">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Внимание!</h4>
+                    </div>
+                    <div class="modal-body">
+                        После редактирования программы, она отправляется на повторную сертификацию.
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     <?php endif; ?>
 
     <h1><?= Html::encode($this->title) ?></h1>

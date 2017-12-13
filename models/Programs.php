@@ -87,6 +87,8 @@ use yii\helpers\Html;
  * @property OrganizationAddress $mainAddress
  * @property ProgramAddressAssignment[] $addressAssignments
  * @property ProgramAddressAssignment[] $mainAddressAssignments
+ * @property bool $canProgrammeBeTransferred
+ *
  */
 class Programs extends ActiveRecord implements RecordWithHistory
 {
@@ -758,7 +760,9 @@ class Programs extends ActiveRecord implements RecordWithHistory
 
     public function getCanProgrammeBeTransferred(): bool
     {
-        return !$this->getLivingContracts()->count() && !$this->getModules()->andWhere(['open' => 1])->count();
+        return !$this->getLivingContracts()->count()
+            && !$this->getModules()->andWhere(['open' => 1])->count()
+            && !$this->isADraft();
     }
 
     public function getIsActive(): bool

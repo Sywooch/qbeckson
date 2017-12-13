@@ -143,7 +143,7 @@ return [
                 'roles' => ['payer']
             ],
             [
-                'actions' => ['transfer-task' , 'transfer-programme'],
+                'actions' => ['transfer-task', 'transfer-programme'],
                 'allow' => true,
                 'roles' => ['organizations']
             ],
