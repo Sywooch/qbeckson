@@ -157,6 +157,19 @@ $this->registerJs($js);
                 },
             ],
             'countActualCertificates',
+            'sumCertificatesNominals',
+            [
+                'class' => 'kartik\grid\EditableColumn',
+                'attribute' => 'nominals_limit',
+                'pageSummary' => false,
+                'editableOptions' => [
+                    'asPopover' => false,
+                    'submitButton' => [
+                        'icon' => '<i class="glyphicon glyphicon-ok"></i>',
+                        'class' => 'btn btn-sm btn-success',
+                    ],
+                ],
+            ],
             [
                 'class' => 'kartik\grid\EditableColumn',
                 'attribute' => 'amount',
