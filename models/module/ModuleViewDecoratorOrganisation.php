@@ -60,22 +60,6 @@ class ModuleViewDecoratorOrganisation extends ModelDecorator
 {
     private $localOrganisation;
 
-
-    /**
-     * @param ProgrammeModule[] $models
-     *
-     * @return self[]
-     */
-    public static function decorateMultiple(array $models): array
-    {
-        return array_map(
-            function (ProgrammeModule $module) {
-                return static::decorate($module);
-            },
-            $models
-        );
-    }
-
     public function canEditPrice(): bool
     {
         return $this->havePrice() && !$this->open;

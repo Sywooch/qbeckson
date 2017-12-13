@@ -97,6 +97,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
     const VERIFICATION_WAIT = 1;
     const VERIFICATION_DONE = 2;
     const VERIFICATION_DENIED = 3;
+    const VERIFICATION_DRAFT = 5;
     const VERIFICATION_IN_ARCHIVE = 10;
 
     const ICON_DEFAULT = 'icon-socped';
@@ -106,6 +107,13 @@ class Programs extends ActiveRecord implements RecordWithHistory
     public $edit;
     public $search;
     public $programPhoto;
+
+    public $asDraft = false;
+
+    public function isADraft(): bool
+    {
+        return $this->verification === self::VERIFICATION_DRAFT;
+    }
 
     public function fieldResolver(PeriodicFieldAR $history)
     {
@@ -119,6 +127,8 @@ class Programs extends ActiveRecord implements RecordWithHistory
                     return 'Верифицированно успешно';
                 case self::VERIFICATION_DENIED:
                     return 'Отказ';
+                case self::VERIFICATION_DRAFT:
+                    return 'Черновик';
                 case self::VERIFICATION_IN_ARCHIVE:
                     return 'Программа в архиве';
                 default:
@@ -196,10 +206,11 @@ class Programs extends ActiveRecord implements RecordWithHistory
                     'ground', 'verification', 'form', 'p3z', 'study', 'last_contracts',
                     'limit', 'last_s_contracts', 'quality_control',
                     'last_s_contracts_rod', 'direction_id', 'is_municipal_task',
-                    'certificate_accounting_limit', 'municipal_task_matrix_id'
+                    'certificate_accounting_limit', 'municipal_task_matrix_id',
                 ],
                 'integer'
             ],
+            ['asDraft', 'safe'],
             [
                 ['age_group_min', 'age_group_max',],
                 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*\.?[2,5,7,0]+([eE][-+]?[0-9]+)?\s*$/'
@@ -429,6 +440,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
             'currentActiveContracts' => 'Обучающиеся в данный момент',
             'currentActiveContractsCount' => 'Обучающихся',
             'municipal_task_matrix_id' => 'Раздел муниципального задания',
+            'asDraft' => 'Сохранить как черновик',
         ];
     }
 
