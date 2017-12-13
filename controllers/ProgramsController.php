@@ -18,6 +18,7 @@ use app\models\ProgrammeModule;
 use app\models\Programs;
 use app\models\programs\ProgramsNormativePriceCalculator;
 use app\models\programs\ProgramsVerificator;
+use app\models\programs\ProgramViewDecorator;
 use app\models\ProgramsallSearch;
 use app\models\ProgramsFile;
 use app\models\ProgramsPreviusSearch;
@@ -214,7 +215,8 @@ class ProgramsController extends Controller
     {
         /** @var $user UserIdentity */
         $user = Yii::$app->user->identity;
-        $model = $this->findModel($id);
+        $modelOriginal = $this->findModel($id);
+        $model = ProgramViewDecorator::decorate($modelOriginal);
         $modules = ModuleViewDecoratorOrganisation::decorateMultiple($model->modules);
         if (!$model->isActive) {
             throw new NotFoundHttpException();
@@ -364,7 +366,11 @@ class ProgramsController extends Controller
             $userIdentity = Yii::$app->user->identity;
             $organization = $userIdentity->organization;
             $model->organization_id = $organization->id;
-            $model->verification = Programs::VERIFICATION_UNDEFINED;
+            if ($model->asDraft) {
+                $model->verification = Programs::VERIFICATION_DRAFT;
+            } else {
+                $model->verification = Programs::VERIFICATION_UNDEFINED;
+            }
             $model->open = 0;
             if ($model->ovz == 2) {
                 if (!empty($model->zab)) {
@@ -375,7 +381,7 @@ class ProgramsController extends Controller
             if (Yii::$app->request->isPost) {
                 $file->docFile = UploadedFile::getInstance($file, 'docFile');
 
-                if (empty($file->docFile)) {
+                if (empty($file->docFile) && !$model->isADraft()) {
                     Yii::$app->session->setFlash('error', 'Пожалуйста, добавьте файл образовательной программы.');
 
                     return $this->render('create', [
@@ -383,11 +389,13 @@ class ProgramsController extends Controller
                         'file' => $file,
                         'modelsYears' => $modelsYears,
                     ]);
+                } elseif (empty($file->docFile)) {
+                    $model->link = null;
+                } else {
+                    $datetime = time();
+                    $filename = 'program-' . $organization['id'] . '-' . $datetime . '.' . $file->docFile->extension;
+                    $model->link = $filename;
                 }
-
-                $datetime = time();
-                $filename = 'program-' . $organization['id'] . '-' . $datetime . '.' . $file->docFile->extension;
-                $model->link = $filename;
                 $model->year = count($modelsYears);
 
                 if ($file->upload($filename)) {
@@ -500,19 +508,26 @@ class ProgramsController extends Controller
                                 }
                             }
                             if ($flag) {
-                                $transaction->commit();
+                                if (!$model->isADraft()) {
+                                    $informs = new Informs();
+                                    $informs->program_id = $model->id;
+                                    $informs->text = 'Поступила программа на сертификацию';
+                                    $informs->from = UserIdentity::ROLE_ORGANIZATION_ID;
+                                    $informs->date = date("Y-m-d");
+                                    $informs->read = 0;
+                                    $flag = $flag && $informs->save();
+                                }
+                                $flag && ($transaction->commit() || true)
+                                || $transaction->rollBack();
 
-                                $informs = new Informs();
-                                $informs->program_id = $model->id;
-                                $informs->text = 'Поступила программа на сертификацию';
-                                $informs->from = 1;
-                                $informs->date = date("Y-m-d");
-                                $informs->read = 0;
-                                $informs->save();
-
-                                return $this->redirect($model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']);
+                                return $this->redirect(
+                                    $model->isMunicipalTask
+                                        ? ['/personal/organization-municipal-task']
+                                        : ['/personal/organization-programs']
+                                );
                             }
                         } catch (\Exception $e) {
+                            Yii::trace($e->getMessage());
                             $transaction->rollBack();
                         }
                     }
@@ -938,7 +953,8 @@ class ProgramsController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $modelOriginal = $this->findModel($id);
+        $model = ProgramViewDecorator::decorate($modelOriginal);
         if (!$model->isActive) {
             throw new NotFoundHttpException();
         }
@@ -971,7 +987,11 @@ class ProgramsController extends Controller
                 $model->link = $filename;
                 $file->upload($filename);
             }
-            $model->verification = Programs::VERIFICATION_UNDEFINED;
+            if ($model->asDraft) {
+                $model->verification = Programs::VERIFICATION_DRAFT;
+            } else {
+                $model->verification = Programs::VERIFICATION_UNDEFINED;
+            }
             $model->open = 0;
             if ($model->zab) {
                 $model->zab = implode(',', $model->zab);
@@ -1027,15 +1047,17 @@ class ProgramsController extends Controller
                         }
                     }
                     if ($flag) {
-                        $transaction->commit();
-
-                        $informs = new Informs();
-                        $informs->program_id = $model->id;
-                        $informs->text = 'Отредактирована программа для сертификации';
-                        $informs->from = 1;
-                        $informs->date = date("Y-m-d");
-                        $informs->read = 0;
-                        $informs->save();
+                        if (!$model->isADraft()) {
+                            $informs = new Informs();
+                            $informs->program_id = $model->id;
+                            $informs->text = 'Отредактирована программа для сертификации';
+                            $informs->from = 1;
+                            $informs->date = date("Y-m-d");
+                            $informs->read = 0;
+                            $flag = $flag && $informs->save();
+                        }
+                        ($flag && ($transaction->commit() || true))
+                        || $transaction->rollBack();
 
                         if ($model->inTransferProcess) {
                             Yii::$app->session->setFlash('success', 'Вы успешно перевели программу на персонифицированное финансирование в реестр "Ожидающие сертификации"');

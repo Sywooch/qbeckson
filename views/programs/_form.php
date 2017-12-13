@@ -56,7 +56,6 @@ function() {
 JS;
 
 
-
 $this->registerJs($js);
 ?>
 <div class="programs-form" ng-app>
@@ -72,41 +71,41 @@ $this->registerJs($js);
     ?>
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
     <?php
-        echo $form->field($model, 'direction_id')->widget(Select2::class, [
-            'data' => ArrayHelper::map(DirectoryProgramDirection::findAllRecords(), 'id', 'name'),
-            'options' => [
-                'placeholder' => 'Выберите направленность программы ...',
-                'id' => 'direction-id'
-            ],
-        ]);
-        echo $form->field($model, 'activity_ids')->widget(DepDrop::class, [
-            'data'=> $model->direction_id ?
-                ArrayHelper::map(
-                    DirectoryProgramActivity::findAllActiveActivitiesByDirection($model->direction_id),
-                    'id',
-                    'name'
-                ) : [],
-            'type' => DepDrop::TYPE_SELECT2,
-            'options' => [
-                'multiple' => true,
-            ],
-            'select2Options' => [
-                'showToggleAll' => false,
-                'pluginOptions' => [
-                    'tags' => true,
-                    'maximumSelectionLength' => 3,
-                ],
-                'pluginEvents' => [
-                    'change' => new \yii\web\JsExpression($changeJS),
-                ],
-            ],
+    echo $form->field($model, 'direction_id')->widget(Select2::class, [
+        'data' => ArrayHelper::map(DirectoryProgramDirection::findAllRecords(), 'id', 'name'),
+        'options' => [
+            'placeholder' => 'Выберите направленность программы ...',
+            'id' => 'direction-id'
+        ],
+    ]);
+    echo $form->field($model, 'activity_ids')->widget(DepDrop::class, [
+        'data' => $model->direction_id ?
+            ArrayHelper::map(
+                DirectoryProgramActivity::findAllActiveActivitiesByDirection($model->direction_id),
+                'id',
+                'name'
+            ) : [],
+        'type' => DepDrop::TYPE_SELECT2,
+        'options' => [
+            'multiple' => true,
+        ],
+        'select2Options' => [
+            'showToggleAll' => false,
             'pluginOptions' => [
-                'placeholder' => 'Выберите вид (виды) деятельности или добавьте свой',
-                'depends' => ['direction-id'],
-                'url' => Url::to(['activity/load-activities']),
-                'loadingText' => 'Загрузка видов деятельности..',
+                'tags' => true,
+                'maximumSelectionLength' => 3,
             ],
-        ]);
+            'pluginEvents' => [
+                'change' => new \yii\web\JsExpression($changeJS),
+            ],
+        ],
+        'pluginOptions' => [
+            'placeholder' => 'Выберите вид (виды) деятельности или добавьте свой',
+            'depends' => ['direction-id'],
+            'url' => Url::to(['activity/load-activities']),
+            'loadingText' => 'Загрузка видов деятельности..',
+        ],
+    ]);
     ?>
     <?= $form->field($model, 'form')->dropDownList(Yii::$app->params['form']) ?>
     <?= $form->field($model, 'mun')->dropDownList(ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name')) ?>
@@ -242,6 +241,17 @@ $this->registerJs($js);
     }
 
     $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
+
+
+    echo Html::submitButton(
+        'Сохранить как черновик',
+        [
+            'class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary',
+            'name' => $model->formName() . '[asDraft]',
+            'value' => 1
+        ]
+    );
+
 
     if (!$model->isNewRecord && !isset($roles['operators']) && !$model->inTransferProcess) {
         echo $form->field($model, 'edit')->checkbox(['value' => 1, 'ng-model' => 'edit']);

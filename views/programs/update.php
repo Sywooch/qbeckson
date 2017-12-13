@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Programs */
+/* @var $model \app\models\programs\ProgramViewDecorator */
 /* @var $modelYears \app\models\ProgrammeModule[] */
 
 $this->title = 'Редактировать программу: ' . $model->name;
@@ -13,6 +13,7 @@ if ($model->inTransferProcess) {
 $this->params['breadcrumbs'][] = ['label' => $model->isMunicipalTask ? 'Программы по муниципальному заданию' : 'Программы', 'url' => $model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view' . ($model->isMunicipalTask ? '-task' : ''), 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Редактировать';
+echo $model->getAlert();
 ?>
 <div class="programs-update col-md-10 col-md-offset-1">
     <?php if (!$model->inTransferProcess): ?>
