@@ -9,7 +9,10 @@ use yii\helpers\Url;
 $isOperator = Yii::$app->user->can('operators');
 $isApplication = $model->type === $model::TYPE_APPLICATION;
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Муниципалитеты'), 'url' => $isOperator ? ['index'] : null];
+$this->params['breadcrumbs'][] = [
+    'label' => Yii::t('app', 'Муниципалитеты'),
+    'url' => $isOperator ? ['index'] : null
+];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="mun-view col-md-offset-1 col-md-10">
@@ -299,9 +302,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 ['class' => 'btn btn-success']); ?>
             <?= Html::a('Отказать', Url::to(['/mun/reject', 'id' => $model->id]),
                 ['class' => 'btn btn-danger']); ?>
-        <?php } elseif ($model->user_id == Yii::$app->user->id) { ?>
-            <?= Html::a('Редактировать', Url::to(['/mun/update', 'id' => $model->mun_id]),
-                ['class' => 'btn btn-primary']); ?>
             <?= Html::a('Удалить', Url::to(['/mun/delete', 'id' => $model->id]), [
                 'class' => 'btn btn-danger',
                 'data' => [
@@ -309,6 +309,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     'method' => 'post'
                 ]
             ]); ?>
+        <?php } elseif ($model->user_id == Yii::$app->user->id) { ?>
+            <?= Html::a('Редактировать', Url::to(['/mun/update', 'id' => $model->mun_id]),
+                ['class' => 'btn btn-primary']); ?>
         <?php } ?>
     <?php } else { ?>
         <?= Html::a('Редактировать', Url::to(['/mun/update', 'id' => $model->id]),
