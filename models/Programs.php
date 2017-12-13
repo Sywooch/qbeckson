@@ -102,6 +102,17 @@ class Programs extends ActiveRecord implements RecordWithHistory
     const ICON_DEFAULT = 'icon-socped';
     const ICON_KEY_IN_PARAMS = 'directivityIconsClass';
 
+    const DIRECTION_TECHNICAL_ROBOTICS = 'Техническая (робототехника)';
+    const DIRECTION_TECHNICAL_OTHER = 'Техническая (иная)';
+    const DIRECTION_NATURAL_SCIENCE = 'Естественнонаучная';
+    const DIRECTION_PHYSICAL_CULTURE_SPORT = 'Физкультурно-спортивная';
+    const DIRECTION_ARTISTIC = 'Художественная';
+    const DIRECTION_TOURIST_LOCAL_LORE = 'Туристско-краеведческая';
+    const DIRECTION_SOCIAL_EDUCATION = 'Социально-педагогическая';
+
+    const GROUND_CITY = 1;
+    const GROUND_COUNTRY = 2;
+
     public $file;
     public $edit;
     public $search;
@@ -900,5 +911,35 @@ class Programs extends ActiveRecord implements RecordWithHistory
             && !$certificateUser->certificate->getActiveContractsByProgram($this->id)->exists(); //Нет заключенных договоров на программу
     }
 
+    /**
+     * @return bool|null|string
+     */
+    public function getProgramDirection()
+    {
+        $municipality = $this->municipality;
+        if ($municipality) {
+            $prefix = ($this->ground === self::GROUND_COUNTRY) ? $municipality::PREFIX_COUNTRY : $municipality::PREFIX_CITY;
+            switch ($this->directivity) {
+                case self::DIRECTION_TECHNICAL_ROBOTICS :
+                    return $municipality[$prefix . 'rob'];
+                case self::DIRECTION_TECHNICAL_OTHER :
+                    return $municipality[$prefix . 'tex'];
+                case self::DIRECTION_NATURAL_SCIENCE :
+                    return $municipality[$prefix . 'est'];
+                case self::DIRECTION_PHYSICAL_CULTURE_SPORT :
+                    return $municipality[$prefix . 'fiz'];
+                case self::DIRECTION_ARTISTIC :
+                    return $municipality[$prefix . 'xud'];
+                case self::DIRECTION_TOURIST_LOCAL_LORE :
+                    return $municipality[$prefix . 'tur'];
+                case self::DIRECTION_SOCIAL_EDUCATION :
+                    return $municipality[$prefix . 'soc'];
+                default:
+                    return null;
+            }
+        } else {
+            return false;
+        }
+    }
 
 }
