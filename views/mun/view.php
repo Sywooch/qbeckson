@@ -302,13 +302,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 ['class' => 'btn btn-success']); ?>
             <?= Html::a('Отказать', Url::to(['/mun/reject', 'id' => $model->id]),
                 ['class' => 'btn btn-danger']); ?>
-            <?= Html::a('Удалить', Url::to(['/mun/delete', 'id' => $model->id]), [
-                'class' => 'btn btn-danger',
-                'data' => [
-                    'confirm' => 'Вы уверены что хотите удалить эту заявку?',
-                    'method' => 'post'
-                ]
-            ]); ?>
         <?php } elseif ($model->user_id == Yii::$app->user->id) { ?>
             <?= Html::a('Редактировать', Url::to(['/mun/update', 'id' => $model->mun_id]),
                 ['class' => 'btn btn-primary']); ?>
