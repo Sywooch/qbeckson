@@ -7,9 +7,9 @@ namespace app\models;
  *
  * Платеж по договору в конкретном месяце
  *
- * В каждом договоре прописывается платеж за первый и прочие месяцы, на каждый месяц идет два  платежа (авансовый комплитнесс "в
- * сентябре 80% денег за сентябрь" и счетовой комплитнесс "в октябре 100% за сентябрь").
- * Комплитнессы создаются когда договор переводится в действующие (в статус 1) и при  наступлении нового месяца (крон)
+ * В каждом договоре прописывается платеж за первый и прочие месяцы, на каждый месяц идет два  платежа (авансовый
+ * комплитнесс "в сентябре 80% денег за сентябрь" и счетовой комплитнесс "в октябре 100% за сентябрь"). Комплитнессы
+ * создаются когда договор переводится в действующие (в статус 1) и при  наступлении нового месяца (крон)
  *
  * @property integer $id
  * @property integer $group_id
@@ -22,6 +22,10 @@ namespace app\models;
  *
  * @property \DateTime $date
  * @property string $preinvoiceLabel
+ * @property Contracts $contract
+ * @property Invoices[] $invoices
+ * @property Invoices $invoice
+ * @property string $paidType
  *
  *
  *
@@ -47,7 +51,10 @@ class Completeness extends \yii\db\ActiveRecord
             [['group_id', 'contract_id', 'month', 'year', 'preinvoice'], 'integer'],
             [['completeness'], 'integer', 'max' => 100],
             [['sum'], 'number'],
-            [['group_id'], 'exist', 'skipOnError' => true, 'targetClass' => Groups::className(), 'targetAttribute' => ['group_id' => 'id']],
+            [
+                ['group_id'], 'exist', 'skipOnError' => true,
+                'targetClass' => Groups::className(), 'targetAttribute' => ['group_id' => 'id']
+            ],
         ];
     }
 
@@ -78,7 +85,7 @@ class Completeness extends \yii\db\ActiveRecord
             'completeness' => 'Полнота услуг оказанных организацией',
             'preinvoice' => 'Предоплата',
             'sum' => 'Сумма',
-            'preinvoiceLabel' => 'Тип счета',
+            'paidType' => 'Оплата',
         ];
     }
 
@@ -88,6 +95,91 @@ class Completeness extends \yii\db\ActiveRecord
     public function getGroup()
     {
         return $this->hasOne(Groups::className(), ['id' => 'group_id']);
+    }
+
+//    public function getIsPaid(): bool
+//    {
+//        $date = new \DateTime($this->date);
+//
+//        $condition = [
+//            'and',
+//            [
+//                'and',
+//                [
+//                    Invoices::tableName().'year' => $this->year,
+//                    Invoices::tableName().'month'=>$this->month
+//                ],
+//                [
+//
+//                ]
+//            ],
+//            [
+//
+//            ],
+//        ];
+//
+//        return $this->getContract()->joinWith()
+//            ->exists();
+//    }
+
+
+    public function getInvoice()
+    {
+        $single = array_filter(
+            $this->invoices,
+            function (invoices $invoice) {
+                return $invoice->month === $this->month
+                    && $invoice->year === $this->year
+                    && $invoice->prepayment === $this->preinvoice;
+            }
+        );
+        if (count($single) > 0) {
+            return reset($single);
+        } else {
+            return null;
+        }
+    }
+
+    public function getPaidType()
+    {
+        if (!$this->invoice) {
+            return 'не оплачено';
+        }
+        if ($this->preinvoice) {
+            return 'Аванс';
+        } else {
+            return 'Оплачено';
+        }
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     *
+     */
+    public function getInvoices()
+    {
+//        return Invoices::find()
+//            ->where([
+//                'id' => InvoiceHaveContract::find()
+//                    ->select(['invoice_id'])
+//                    ->where(['contract_id' => $this->contract_id]),
+//                'month' => $this->month,
+//                'year' => $this->year
+//            ]);
+
+
+        return $this->hasMany(
+            Invoices::className(),
+            [
+                'id' => 'invoice_id',
+            ]
+        )
+            ->viaTable(
+                'invoice_have_contract',
+                [
+                    'contract_id' => 'contract_id',
+                ]
+            );
     }
 
     /**

@@ -12,13 +12,15 @@ use yii\grid\ActionColumn;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use yii\bootstrap\Tabs;
 
 $this->title = 'Сертификаты';
 $this->params['breadcrumbs'][] = $this->title;
 
 /* @var $this yii\web\View */
 /* @var $searchCertificates \app\models\search\CertificatesSearch */
-/* @var $certificatesProvider \yii\data\ActiveDataProvider */
+/* @var $certificatesProviderAccounting \yii\data\ActiveDataProvider */
+/* @var $certificatesProviderPf \yii\data\ActiveDataProvider */
 /* @var $allCertificatesProvider \yii\data\ActiveDataProvider */
 /* @var $certificateToAccountingConfirmForm CertificateToAccountingConfirmForm */
 /* @var $certificateImportTemplateExists boolean */
@@ -137,16 +139,37 @@ $columns = [
         <?php Modal::end() ?>
     </div>
 </div>
+<?php
+$preparedColumns = GridviewHelper::prepareColumns('certificates', $columns);
+$items = [
+    [
+        'label' => 'Сертификаты ПФ',
+        'content' => GridView::widget([
+            'dataProvider' => $certificatesProviderPf,
+            'filterModel' => null,
+            'pjax' => true,
+            'summary' => false,
+            'columns' => $preparedColumns,
+        ]),
+        'active' => true
+    ],
+    [
+        'label' => 'Сертификаты учета',
+        'content' => GridView::widget([
+            'dataProvider' => $certificatesProviderAccounting,
+            'filterModel' => null,
+            'pjax' => true,
+            'summary' => false,
+            'columns' => $preparedColumns,
+        ])
+    ],
 
-<br>
+];
 
-<?= GridView::widget([
-    'dataProvider' => $certificatesProvider,
-    'filterModel' => null,
-    'pjax' => true,
-    'summary' => false,
-    'columns' => GridviewHelper::prepareColumns('certificates', $columns),
-]); ?>
+echo Tabs::widget([
+    'items' => $items
+]);
+?>
 
 <?= \app\widgets\Export::widget([
     'dataProvider' => $allCertificatesProvider,

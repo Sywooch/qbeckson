@@ -7,18 +7,16 @@ use yii\helpers\Html;
 /* @var $modelYears \app\models\ProgrammeModule[] */
 
 $this->title = 'Редактировать программу: ' . $model->name;
-$this->params['breadcrumbs'][] = [
-    'label' => $model->isMunicipalTask ? 'Программы по муниципальному заданию' : 'Программы',
-    'url' => $model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']
-];
-$this->params['breadcrumbs'][] = [
-    'label' => $model->name,
-    'url' => ['view' . ($model->isMunicipalTask ? '-task' : ''), 'id' => $model->id]
-];
+if ($model->inTransferProcess) {
+    $this->title = 'Перевод программы на ПФ: ' . $model->name;
+}
+$this->params['breadcrumbs'][] = ['label' => $model->isMunicipalTask ? 'Программы по муниципальному заданию' : 'Программы', 'url' => $model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']];
+$this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view' . ($model->isMunicipalTask ? '-task' : ''), 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Редактировать';
 echo $model->getAlert();
 ?>
 <div class="programs-update col-md-10 col-md-offset-1">
+    <?php if (!$model->inTransferProcess): ?>
     <div class="modal fade modal-auto-popup">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -32,8 +30,11 @@ echo $model->getAlert();
             </div>
         </div>
     </div>
+    <?php endif; ?>
+
     <h1><?= Html::encode($this->title) ?></h1>
     <?= $this->render('_form', [
+        'strictAction' => !empty($strictAction) ? $strictAction : null,
         'model' => $model,
         'file' => $file,
         'modelsYears' => $modelYears

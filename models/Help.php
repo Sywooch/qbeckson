@@ -13,6 +13,7 @@ use yii\db\Expression;
  * @property string $name
  * @property string $body
  * @property string $applied_to
+ * @property integer $for_guest
  *
  * @property HelpUserAssignment[] $helpUserAssignments
  * @property User[] $users
@@ -21,6 +22,8 @@ use yii\db\Expression;
 class Help extends \yii\db\ActiveRecord
 {
     const SCENARIO_CHECK = 'check';
+    const FOR_GUEST_YES = 1;
+    const FOR_GUEST_NO = 0;
 
     public $checked = 0;
 
@@ -61,7 +64,8 @@ class Help extends \yii\db\ActiveRecord
             [['body', 'name'], 'required'],
             [['body', 'applied_to'], 'string'],
             [['name'], 'string', 'max' => 255],
-            ['order_id', 'integer'],
+            [['order_id', 'for_guest'], 'integer'],
+            ['for_guest', 'in', 'range' => [self::FOR_GUEST_YES, self::FOR_GUEST_NO]],
             ['checked', 'safe'],
             ['checked', 'required', 'on' => self::SCENARIO_CHECK, 'requiredValue' => 1, 'message' => false],
         ];
@@ -79,7 +83,8 @@ class Help extends \yii\db\ActiveRecord
             'order_id'   => 'номер для сортировки',
             'name'       => 'Название',
             'body'       => 'Текст',
-            'applied_to' => 'Кто должен поставить "галочки" о прочтении',
+            'applied_to' => 'Адресаты инструкций',
+            'for_guest'  => 'Не авторизованный',
             'checked'    => 'C разделом «<a target="_blank" href="' . \yii\helpers\Url::to(['site/manual', 'id' => $this->id]) . '">' . $this->name . '</a>» ознакомлен, ' . $checkedLabel,
         ];
     }

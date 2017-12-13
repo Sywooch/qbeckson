@@ -53,13 +53,13 @@ $this->params['breadcrumbs'][] = $this->title;
         ->one();
     ?>
     <?= DetailView::widget([
-        'model'      => $model,
+        'model' => $model,
         'attributes' => [
             'name',
             [
                 'attribute' => 'program.name',
-                'format'    => 'raw',
-                'value'     => Html::a($model->program->name,
+                'format' => 'raw',
+                'value' => Html::a($model->program->name,
                     Url::to(['/programs/view', 'id' => $model->program->id]),
                     ['class' => 'blue', 'target' => '_blank']),
             ],
@@ -85,22 +85,21 @@ $this->params['breadcrumbs'][] = $this->title;
     if ($ContractsProvider->getTotalCount() > 0) {
         echo GridView::widget([
             'dataProvider' => $ContractsProvider,
-            'summary'      => false,
-            'columns'      => [
+            'summary' => false,
+            'columns' => [
                 'certificate.number',
                 'certificate.fio_child',
                 'date:date',
                 'number',
                 'start_edu_contract:date',
-                ['class'    => 'yii\grid\ActionColumn',
-                 'template' => '{newgroup}',
-                 'buttons'  =>
-                     [
-                         'newgroup' => function ($url, $model)
-                         {
-                             return Html::a('Сменить группу', Url::to(['/contracts/newgroup', 'id' => $model->id]), ['class' => 'btn btn-primary']);
-                         },
-                     ]
+                ['class' => 'yii\grid\ActionColumn',
+                    'template' => '{newgroup}',
+                    'buttons' =>
+                        [
+                            'newgroup' => function ($url, $model) {
+                                return Html::a('Сменить группу', Url::to(['/contracts/newgroup', 'id' => $model->id]), ['class' => 'btn btn-primary']);
+                            },
+                        ]
                 ],
             ],
         ]);
@@ -117,18 +116,18 @@ $this->params['breadcrumbs'][] = $this->title;
 
     echo Html::a('Редактировать',
         ($model->isActive ? ['/groups/update', 'id' => $model->id] : '#'),
-        ['class' => 'btn btn-primary '.($model->isActive ? '' : 'disabled')]);
+        ['class' => 'btn btn-primary ' . ($model->isActive ? '' : 'disabled')]);
     echo '<div class="pull-right">';
     if ($del && $model->isActive) {
-        echo PostButtonWithModalConfirm::widget(['title'        => 'Удалить группу',
-                                                 'url'          => Url::to(['/groups/delete', 'id' => $model->id]),
-                                                 'confirm'      => 'Вы действительно хотите удалить эту группу?',
-                                                 'toggleButton' => ['class' => 'btn btn-danger', 'label' => 'Удалить']]);
+        echo PostButtonWithModalConfirm::widget(['title' => 'Удалить группу',
+            'url' => Url::to(['/groups/delete', 'id' => $model->id]),
+            'confirm' => 'Вы действительно хотите удалить эту группу?',
+            'toggleButton' => ['class' => 'btn btn-danger', 'label' => 'Удалить']]);
 
-    }else{
+    } else {
         echo \yii\bootstrap\Button::widget(['label' => 'Удалить группу нельзя',
-                                            'options' => ['class' => 'btn btn-danger',
-                                                          'disabled'=>'disabled'],]);
+            'options' => ['class' => 'btn btn-danger',
+                'disabled' => 'disabled'],]);
     }
     echo '</div>';
     ?>

@@ -59,7 +59,16 @@ JS;
 $this->registerJs($js);
 ?>
 <div class="programs-form" ng-app>
-    <?php $form = ActiveForm::begin(['id' => 'dynamic-form', 'options' => ['enctype' => 'multipart/form-data']]); ?>
+    <?php $form = ActiveForm::begin([
+        'id' => 'dynamic-form',
+        'action' => !empty($strictAction) ? $strictAction : null,
+        'options' => ['enctype' => 'multipart/form-data']
+    ]); ?>
+    <?php
+    if ($model->inTransferProcess) {
+        echo $form->field($model, 'inTransferProcess')->hiddenInput()->label(false);
+    }
+    ?>
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
     <?php
     echo $form->field($model, 'direction_id')->widget(Select2::class, [
@@ -207,7 +216,7 @@ $this->registerJs($js);
                                         echo $form->field($modelYears, "[{$i}]hoursindivid")->textInput(['maxlength' => true]);
                                         echo $form->field($modelYears, "[{$i}]hoursdop")->textInput(['maxlength' => true]);
                                         echo $form->field($modelYears, "[{$i}]kvdop")->textInput(['maxlength' => true]);
-                                    } ?>
+} ?>
 
                                     <?= $form->field($modelYears, "[{$i}]minchild")->textInput() ?>
 
@@ -244,7 +253,7 @@ $this->registerJs($js);
     );
 
 
-    if (!$model->isNewRecord && !isset($roles['operators'])) {
+    if (!$model->isNewRecord && !isset($roles['operators']) && !$model->inTransferProcess) {
         echo $form->field($model, 'edit')->checkbox(['value' => 1, 'ng-model' => 'edit']);
         echo '<div class="form-group" ng-show="edit">';
         echo Html::a('Отменить', $model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs'], ['class' => 'btn btn-danger']);
@@ -255,7 +264,7 @@ $this->registerJs($js);
         echo '<div class="form-group">';
         echo Html::a('Отменить', $model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs'], ['class' => 'btn btn-danger']);
         echo '&nbsp';
-        echo Html::submitButton($model->isNewRecord ? ($model->isMunicipalTask ? 'Создать программу' : 'Отправить программу на сертификацию') : 'Обновить программу', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
+        echo Html::submitButton($model->isNewRecord ? ($model->isMunicipalTask ? 'Создать программу' : 'Отправить программу на сертификацию') : ($model->inTransferProcess ? 'Перевести программу на ПФ' : 'Обновить программу'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
         echo '</div>';
     }
     ?>

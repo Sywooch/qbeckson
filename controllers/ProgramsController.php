@@ -9,6 +9,7 @@ use app\models\AllProgramsSearch;
 use app\models\Cooperate;
 use app\models\forms\ProgramAddressesForm;
 use app\models\forms\ProgramSectionForm;
+use app\models\forms\TaskTransferForm;
 use app\models\Informs;
 use app\models\Model;
 use app\models\module\ModuleViewDecoratorOrganisation;
@@ -905,6 +906,43 @@ class ProgramsController extends Controller
         }
     }
 
+    public function actionTransferTask($id)
+    {
+        $model = $this->findModel($id);
+        if (!$model->isMunicipalTask || !$model->canTaskBeTransferred) {
+            throw new BadRequestHttpException();
+        }
+        $model->setTransferParams();
+        $modelYears = $model->years;
+        $file = new ProgramsFile();
+
+        return $this->render('update', [
+            'strictAction' => ['/programs/update', 'id' => $model->id],
+            'model' => $model,
+            'file' => $file,
+            'modelYears' => (empty($modelYears)) ? [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])] : $modelYears
+        ]);
+    }
+
+    public function actionTransferProgramme($id)
+    {
+        $model = $this->findModel($id);
+        if ($model->isMunicipalTask || !$model->canProgrammeBeTransferred) {
+            throw new BadRequestHttpException();
+        }
+        $model->setTransferParams(false);
+
+        if ($model->save()) {
+            Yii::$app->session->setFlash('success', 'Вы успешно перевели программу на муниципальное задание в реестр "Ожидающие рассмотрения"');
+
+            return $this->redirect(['/programs/view-task', 'id' => $model->id]);
+        } else {
+            Yii::$app->session->setFlash('danger', 'Произошла ошибка в процессе переноса.');
+
+            return $this->redirect(['/programs/view', 'id' => $model->id]);
+        }
+    }
+
     /**
      * Updates an existing Programs model.
      * If update is successful, the browser will be redirected to the 'view' page.
@@ -974,6 +1012,10 @@ class ProgramsController extends Controller
                 array_filter(ArrayHelper::map($modelYears, 'id', 'id'))
             );
 
+            if ($model->inTransferProcess) {
+                $model->setTransferParams();
+            }
+
             // ajax validation
             if (Yii::$app->request->isAjax) {
                 return $this->asJson(ArrayHelper::merge(
@@ -1016,6 +1058,10 @@ class ProgramsController extends Controller
                         }
                         ($flag && ($transaction->commit() || true))
                         || $transaction->rollBack();
+
+                        if ($model->inTransferProcess) {
+                            Yii::$app->session->setFlash('success', 'Вы успешно перевели программу на персонифицированное финансирование в реестр "Ожидающие сертификации"');
+                        }
 
                         return $this->redirect(
                             $model->isMunicipalTask
