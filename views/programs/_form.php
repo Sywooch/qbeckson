@@ -16,6 +16,7 @@ use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Programs */
+/* @var $file \app\models\ProgramsFile */
 /* @var $form yii\widgets\ActiveForm */
 
 $js = <<<JS
@@ -38,21 +39,21 @@ JS;
 $url = Url::to(['activity/add-activity']);
 $changeJS = <<<JS
 function() {
-                        var isNew = $(this).find('[data-select2-tag="true"]');
-                        var name = isNew.val();
-                        var directionId = $('#direction-id').val();
-                        if (isNew.length && name !== "...") {
-                            $.ajax({
-                            	type: "POST",
-                            	url: "$url",
-                            	data: {name: name, directionId: directionId},
-                            	success: function (id) {
-                            	    isNew.replaceWith('<option selected value=' + id +'>' + name + '</option>');
-                            	},
-                            	error: function (xhr, ajaxOptions, thrownError) { }
-                            });
-                        }
-                    }
+    var isNew = $(this).find('[data-select2-tag="true"]');
+    var name = isNew.val();
+    var directionId = $('#direction-id').val();
+    if (isNew.length && name !== "...") {
+        $.ajax({
+        	type: "POST",
+        	url: "$url",
+        	data: {name: name, directionId: directionId},
+        	success: function (id) {
+        	    isNew.replaceWith('<option selected value=' + id +'>' + name + '</option>');
+        	},
+        	error: function (xhr, ajaxOptions, thrownError) { }
+        });
+    }
+}
 JS;
 
 
@@ -121,7 +122,10 @@ $this->registerJs($js);
             'showUpload' => false
         ]]);
     } else {
-        echo '<a href="' . $model->programFile . '"><span class="glyphicon glyphicon-download-alt"></span> Скачать программу</a>';
+        echo '<a href="' . $model->programFile . '">'
+            . '<span class="glyphicon glyphicon-download-alt"></span>'
+            . ' Скачать программу'
+            . '</a>';
         echo $form->field($file, 'newprogram')->checkbox(['value' => 1, 'ng-model' => 'newprogram']);
         echo '<div ng-show="newprogram">';
         echo $form->field($file, 'docFile')->widget(FileInput::class, ['pluginOptions' => [
@@ -137,7 +141,9 @@ $this->registerJs($js);
     <?= FieldRange::widget([
         'form' => $form,
         'model' => $model,
-        'label' => 'Возрастная категория детей, определяемая минимальным и максимальным возрастом лиц, которые могут быть зачислены на обучение по образовательной программе',
+        'label' => 'Возрастная категория детей,'
+            . ' определяемая минимальным и максимальным возрастом лиц,'
+            . ' которые могут быть зачислены на обучение по образовательной программе',
         'attribute1' => 'age_group_min',
         'attribute2' => 'age_group_max',
         'type' => FieldRange::INPUT_SPIN,
@@ -154,7 +160,10 @@ $this->registerJs($js);
 
     <?php // $form->field($model, 'age_group_max')->textInput() ?>
 
-    <?= $form->field($model, 'ovz')->dropDownList([1 => 'Без ОВЗ', 2 => 'С ОВЗ'], ['onChange' => 'selectOvz(this.value);']) ?>
+    <?= $form->field($model, 'ovz')->dropDownList(
+        [1 => 'Без ОВЗ', 2 => 'С ОВЗ'],
+        ['onChange' => 'selectOvz(this.value);']
+    ) ?>
 
     <div id="zab" style="display: <?= $model->ovz == 2 ? 'block' : 'none' ?>">
         <?= $form->field($model, 'zab')->checkboxList(\app\models\Programs::illnesses()) ?>
@@ -166,7 +175,8 @@ $this->registerJs($js);
         </div>
         <div class="panel-body">
             <?php DynamicFormWidget::begin([
-                'widgetContainer' => 'dynamicform_wrapper', // required: only alphanumeric characters plus "_" [A-Za-z0-9_]
+                /**required: only alphanumeric characters plus "_" [A-Za-z0-9_]*/
+                'widgetContainer' => 'dynamicform_wrapper',
                 'widgetBody' => '.container-items', // required: css class selector
                 'widgetItem' => '.item', // required: css class
                 'min' => 1, // 0 or 1 (default 1)
@@ -209,14 +219,41 @@ $this->registerJs($js);
 
                                     <?= $form->field($modelYears, "[{$i}]hours")->textInput(['maxlength' => true]) ?>
 
-                                    <?= $form->field($modelYears, "[{$i}]kvfirst", ['options' => ['class' => 'input-title', 'data' => ['input-title' => 'Укажите необходимую квалификацию педагогического работника. Не рекомендуем указывать конкретные данные, так как при, например, увольнении педагога, будет сложно найти соответствующего программе преподавателя с тем же стажем работы или фамилией. <br>Пример: Педагог, обладающий соответствующей квалификацией']]])
-                                        ->textInput(['maxlength' => true, 'placeholder' => 'Педагог, обладающий соответствующей квалификацией']) ?>
+                                    <?= $form->field(
+                                        $modelYears,
+                                        "[{$i}]kvfirst",
+                                        ['options' => [
+                                            'class' => 'input-title',
+                                            'data' => [
+                                                'input-title' => 'Укажите необходимую квалификацию педаго'
+                                                    . 'гического работника. Не рекомендуем указывать'
+                                                    . ' конкретные данные, так как при, например, увольнении'
+                                                    . ' педагога, будет сложно найти соответствующего'
+                                                    . ' программе преподавателя с тем же стажем работы'
+                                                    . ' или фамилией. <br>Пример: Педагог, обладающий '
+                                                    . 'соответствующей квалификацией'
+                                            ]
+                                        ]]
+                                    )
+                                        ->textInput([
+                                            'maxlength' => true,
+                                            'placeholder' => 'Педагог, обладающий соответствующей квалификацией'
+                                        ]) ?>
 
                                     <?php if ($modelYears->scenario != ProgrammeModule::SCENARIO_MUNICIPAL_TASK) {
-                                        echo $form->field($modelYears, "[{$i}]hoursindivid")->textInput(['maxlength' => true]);
-                                        echo $form->field($modelYears, "[{$i}]hoursdop")->textInput(['maxlength' => true]);
-                                        echo $form->field($modelYears, "[{$i}]kvdop")->textInput(['maxlength' => true]);
-} ?>
+                                        echo $form->field(
+                                            $modelYears,
+                                            "[{$i}]hoursindivid"
+                                        )->textInput(['maxlength' => true]);
+                                        echo $form->field(
+                                            $modelYears,
+                                            "[{$i}]hoursdop"
+                                        )->textInput(['maxlength' => true]);
+                                        echo $form->field(
+                                            $modelYears,
+                                            "[{$i}]kvdop"
+                                        )->textInput(['maxlength' => true]);
+                                    } ?>
 
                                     <?= $form->field($modelYears, "[{$i}]minchild")->textInput() ?>
 
@@ -242,7 +279,6 @@ $this->registerJs($js);
 
     $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
 
-
     echo Html::submitButton(
         'Сохранить как черновик',
         [
@@ -252,23 +288,42 @@ $this->registerJs($js);
         ]
     );
 
-
     if (!$model->isNewRecord && !isset($roles['operators']) && !$model->inTransferProcess) {
         echo $form->field($model, 'edit')->checkbox(['value' => 1, 'ng-model' => 'edit']);
         echo '<div class="form-group" ng-show="edit">';
-        echo Html::a('Отменить', $model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs'], ['class' => 'btn btn-danger']);
+        echo Html::a(
+            'Отменить',
+            $model->isMunicipalTask
+                ? ['/personal/organization-municipal-task']
+                : ['/personal/organization-programs'],
+            ['class' => 'btn btn-danger']
+        );
         echo '&nbsp';
-        echo Html::submitButton($model->isNewRecord ? 'Отправить программу на сертификацию' : 'Обновить программу', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
+        echo Html::submitButton(
+            $model->isNewRecord
+                ? 'Отправить программу на сертификацию'
+                : 'Обновить программу',
+            ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']
+        );
         echo '</div>';
     } else {
         echo '<div class="form-group">';
-        echo Html::a('Отменить', $model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs'], ['class' => 'btn btn-danger']);
+        echo Html::a(
+            'Отменить',
+            $model->isMunicipalTask
+                ? ['/personal/organization-municipal-task']
+                : ['/personal/organization-programs'],
+            ['class' => 'btn btn-danger']
+        );
         echo '&nbsp';
-        echo Html::submitButton($model->isNewRecord ? ($model->isMunicipalTask ? 'Создать программу' : 'Отправить программу на сертификацию') : ($model->inTransferProcess ? 'Перевести программу на ПФ' : 'Обновить программу'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
+        echo Html::submitButton(
+            $model->isNewRecord
+                ? ($model->isMunicipalTask ? 'Создать программу' : 'Отправить программу на сертификацию')
+                : ($model->inTransferProcess ? 'Перевести программу на ПФ' : 'Обновить программу'),
+            ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']
+        );
         echo '</div>';
     }
     ?>
-
     <?php ActiveForm::end(); ?>
-
 </div>

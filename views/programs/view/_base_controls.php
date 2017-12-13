@@ -90,12 +90,18 @@ use yii\helpers\Url;
             ]);
             echo \app\components\widgets\ButtonWithInfo::widget([
                 'label' => $transferButtonTitle,
-                'message' => $contractsExist ? 'Перевести программу невозможно. Есть действующие договоры или заявки на программу.' : 'Перевести программу невозможно. Открыто зачисление.',
+                'message' => $contractsExist ? 'Перевести программу невозможно.'
+                    . ' Есть действующие договоры или заявки на программу.'
+                    : 'Перевести программу невозможно. Открыто зачисление.',
                 'options' => ['disabled' => 'disabled',
                     'class' => 'btn btn-warning',]
             ]);
         } else {
-            echo Html::a('Редактировать', Url::to(['/programs/update', 'id' => $model->id]), ['class' => 'btn btn-theme']);
+            echo Html::a(
+                'Редактировать',
+                Url::to(['/programs/update', 'id' => $model->id]),
+                ['class' => 'btn btn-theme']
+            );
             echo PostButtonWithModalConfirm::widget(['title' => 'Удалить программу',
                 'url' => Url::to(['/programs/delete', 'id' => $model->id]),
                 'confirm' => 'Вы уверены, что хотите удалить программу?',
@@ -105,7 +111,8 @@ use yii\helpers\Url;
                     'title' => $transferButtonTitle,
                     'askPassword' => false,
                     'url' => Url::to(['/programs/transfer-programme', 'id' => $model->id]),
-                    'confirm' => 'Вы собираетесь перевести программу на муниципальное задание в реестр "Ожидающие рассмотрения"',
+                    'confirm' => 'Вы собираетесь перевести программу'
+                        . ' на муниципальное задание в реестр "Ожидающие рассмотрения"',
                     'toggleButton' => ['class' => 'btn btn-warning', 'label' => $transferButtonTitle]
                 ]);
             }
