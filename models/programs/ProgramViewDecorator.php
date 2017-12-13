@@ -96,6 +96,7 @@ use yii\bootstrap\Alert;
  * @property OrganizationAddress $mainAddress
  * @property ProgramAddressAssignment[] $addressAssignments
  * @property ProgramAddressAssignment[] $mainAddressAssignments
+ * @property bool $canProgrammeBeTransferred
  * @method  isADraft()
  *  ***
  */
