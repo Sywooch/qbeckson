@@ -346,4 +346,43 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
 
         return $this->save(false);
     }
+
+    /**
+     * @param Coefficient $coefficientData
+     * @return bool|float
+     */
+    public function getNormativePrice(Coefficient $coefficientData)
+    {
+        $program = $this->program;
+        if (!$program) {
+            return false;
+        }
+        $municipality = $program->municipality;
+        if (!$municipality) {
+            return false;
+        }
+        if ($program->ground === $program::GROUND_COUNTRY) {
+            $prefix = $municipality::PREFIX_COUNTRY;
+        } else {
+            $prefix = $municipality::PREFIX_CITY;
+        }
+
+        $programDirection = $program->getProgramDirection();
+        $provision = $coefficientData->getProvision($program->p3z);
+        $mainTeacher = $coefficientData->getMainTeacherCoefficient($this->p21z);
+        $additionalTeacher= $coefficientData->getAdditionalTeacherCoefficient($this->p22z);
+
+        $childAverage = $this->getChildrenAverage() ? $this->getChildrenAverage() : ($this->maxchild + $this->minchild) / 2;
+        $normativePrice = $municipality[$prefix . 'zp'] * (((($mainTeacher * ($this->hours - $this->hoursindivid) + $additionalTeacher* $this->hoursdop) /
+                        ($childAverage)) + $mainTeacher * $this->hoursindivid) /
+                ($municipality[$prefix . 'stav'] * $coefficientData->norm * $coefficientData->weekmonth)) * $municipality[$prefix . 'dop'] *
+            (1 + $municipality[$prefix . 'uvel']) * $municipality[$prefix . 'otch'] * $municipality[$prefix . 'otpusk'] +
+            ((($this->hours - $this->hoursindivid) + $this->hoursindivid * ($childAverage)) /
+                ($municipality[$prefix . 'polezn'] * ($childAverage))) * ($programDirection * $provision + $municipality[$prefix . 'nopc']) +
+            (((($this->hours - $this->hoursindivid) + $this->hoursdop + $this->hoursindivid * ($childAverage)) *
+                    $municipality[$prefix . 'otpusk'] * $municipality[$prefix . 'dop']) / ($coefficientData->pk * $coefficientData->weekyear *
+                    $municipality[$prefix . 'stav'] * $coefficientData->norm * ($childAverage))) * $municipality[$prefix . 'pc'];
+
+        return round($normativePrice);
+    }
 }
