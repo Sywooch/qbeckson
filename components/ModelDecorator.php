@@ -2,9 +2,9 @@
 
 namespace app\components;
 
-use app\models\Model;
 use yii\base\Event;
 use yii\base\InvalidCallException;
+use yii\base\Model;
 
 
 /**
@@ -12,6 +12,7 @@ use yii\base\InvalidCallException;
  * Class ModelDecorator
  * @package app\components
  * @property Model $entity
+ * @method save($validation = true) @see yii\db\ActiveRecord
  */
 class ModelDecorator extends Model
 {
@@ -20,6 +21,21 @@ class ModelDecorator extends Model
     public static function decorate($entity)
     {
         return new static(['entity' => $entity]);
+    }
+
+    /**
+     * @param Model[] $models
+     *
+     * @return static[]
+     */
+    public static function decorateMultiple(array $models): array
+    {
+        return array_map(
+            function (Model $module) {
+                return static::decorate($module);
+            },
+            $models
+        );
     }
 
     /**

@@ -859,6 +859,16 @@ class PersonalController extends Controller
         ]);
         $closedProgramsProvider = $searchClosedPrograms->search(Yii::$app->request->queryParams);
 
+        $searchDraftPrograms = new ProgramsSearch([
+            'organization_id' => Yii::$app->user->identity->organization->id,
+            'verification' => [Programs::VERIFICATION_DRAFT],
+            'hours' => '0,2000',
+            'limit' => '0,10000',
+            'rating' => '0,100',
+            'modelName' => 'SearchDraftPrograms',
+        ]);
+        $draftProgramsProvider = $searchDraftPrograms->search(Yii::$app->request->queryParams);
+
         return $this->render('organization-programs', [
             'searchOpenPrograms' => $searchOpenPrograms,
             'openProgramsProvider' => $openProgramsProvider,
@@ -866,6 +876,8 @@ class PersonalController extends Controller
             'waitProgramsProvider' => $waitProgramsProvider,
             'searchClosedPrograms' => $searchClosedPrograms,
             'closedProgramsProvider' => $closedProgramsProvider,
+            'searchDraftPrograms' => $searchDraftPrograms,
+            'draftProgramsProvider' => $draftProgramsProvider,
         ]);
     }
 
