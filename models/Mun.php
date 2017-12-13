@@ -55,6 +55,9 @@ class Mun extends ActiveRecord
      */
     const TYPE_REJECTED = 3;
 
+    /** Сценарий для подачи заявки на изменение муниципалитета */
+    const SCENARIO_APPLICATION = 'application';
+
     public $confirmationFile;
 
     /**
@@ -92,7 +95,8 @@ class Mun extends ActiveRecord
             [['nopc', 'conopc', 'pc', 'copc', 'zp', 'cozp', 'dop', 'codop', 'uvel', 'couvel', 'otch', 'cootch', 'otpusk', 'cootpusk', 'polezn', 'copolezn', 'stav', 'costav'], 'number'],
             [['rob', 'corob', 'tex', 'cotex', 'est', 'coest', 'fiz', 'cofiz', 'xud', 'coxud', 'tur', 'cotur', 'soc', 'cosoc', 'deystv', 'countdet', 'lastdeystv'], 'integer'],
             [['name', 'file', 'base_url'], 'string', 'max' => 255],
-            [['confirmationFile'], 'safe'],
+            [['confirmationFile'], 'safe', 'except' => self::SCENARIO_APPLICATION],
+            [['confirmationFile'], 'required', 'on' => self::SCENARIO_APPLICATION],
         ];
     }
 
