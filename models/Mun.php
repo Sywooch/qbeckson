@@ -32,6 +32,12 @@ use yii\db\ActiveRecord;
  * @property integer        $type
  * @property integer        $file
  * @property integer        $base_url
+ * @property integer        $rob
+ * @property integer        $tex
+ * @property integer        $fiz
+ * @property integer        $xud
+ * @property integer        $tur
+ * @property integer        $soc
  *
  * @property Operators      $operator
  * @property Mun      $mun
@@ -57,6 +63,9 @@ class Mun extends ActiveRecord
 
     /** Сценарий для подачи заявки на изменение муниципалитета */
     const SCENARIO_APPLICATION = 'application';
+
+    const PREFIX_CITY = '';
+    const PREFIX_COUNTRY = 'co';
 
     public $confirmationFile;
 
