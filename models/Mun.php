@@ -38,6 +38,7 @@ use yii\db\ActiveRecord;
  * @property integer        $xud
  * @property integer        $tur
  * @property integer        $soc
+ * @property string         $filename
  *
  * @property Operators      $operator
  * @property Mun      $mun
@@ -81,6 +82,7 @@ class Mun extends ActiveRecord
                 'attribute' => 'confirmationFile',
                 'pathAttribute' => 'file',
                 'baseUrlAttribute' => 'base_url',
+                'nameAttribute' => 'filename',
             ],
         ];
     }
@@ -105,6 +107,7 @@ class Mun extends ActiveRecord
             [['rob', 'corob', 'tex', 'cotex', 'est', 'coest', 'fiz', 'cofiz', 'xud', 'coxud', 'tur', 'cotur', 'soc', 'cosoc', 'deystv', 'countdet', 'lastdeystv'], 'integer'],
             [['name', 'file', 'base_url'], 'string', 'max' => 255],
             [['confirmationFile'], 'safe', 'except' => self::SCENARIO_APPLICATION],
+            [['filename'], 'safe'],
             [['confirmationFile'], 'required', 'on' => self::SCENARIO_APPLICATION],
         ];
     }
