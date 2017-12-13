@@ -88,7 +88,6 @@ use yii\web\ForbiddenHttpException;
  * @property Disputes[]      $disputes
  * @property string          $statusName
  * @property mixed           $organizationname
- * @property mixed           $invoices
  * @property string          $yearyear
  * @property mixed           $payers
  * @property mixed           $certificatenumber
@@ -105,6 +104,8 @@ use yii\web\ForbiddenHttpException;
  * @property Groups          $group
  * @property Completeness[]  $completeness
  * @property string          $terminatorUserRole
+ * @property InvoiceHaveContract[] $invoiceHaveContracts
+ * @property Invoices[] $invoices
  */
 class Contracts extends ActiveRecord
 {
@@ -473,9 +474,22 @@ class Contracts extends ActiveRecord
         return $this->hasMany(Informs::className(), ['contract_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getInvoiceHaveContracts()
+    {
+        return $this->hasMany(InvoiceHaveContract::className(), ['contract_id' => 'id'])
+            ->inverseOf('contract');
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getInvoices()
     {
-        return $this->hasMany(Invoices::className(), ['contract_id' => 'id']);
+        return $this->hasMany(Invoices::className(), ['id' => 'invoice_id'])
+            ->viaTable('invoice_have_contract', ['contract_id' => 'id']);
     }
 
     public function getContracts() {

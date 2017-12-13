@@ -193,13 +193,16 @@ class Programs extends ActiveRecord implements RecordWithHistory
             [
                 [
                     'organization_id', 'ovz', 'mun', 'year',
-                    'ground', 'age_group_min', 'age_group_max',
-                    'verification', 'form', 'p3z', 'study', 'last_contracts',
+                    'ground', 'verification', 'form', 'p3z', 'study', 'last_contracts',
                     'limit', 'last_s_contracts', 'quality_control',
                     'last_s_contracts_rod', 'direction_id', 'is_municipal_task',
                     'certificate_accounting_limit', 'municipal_task_matrix_id'
                 ],
                 'integer'
+            ],
+            [
+                ['age_group_min', 'age_group_max',],
+                'number', 'numberPattern' => '/^\s*[-+]?[0-9]*\.?[2,5,7,0]+([eE][-+]?[0-9]+)?\s*$/'
             ],
             [['rating', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch'], 'number'],
             [['task', 'annotation', 'vid', 'norm_providing', 'search', 'photo_path', 'photo_base_url'], 'string'],

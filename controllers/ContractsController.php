@@ -277,7 +277,7 @@ class ContractsController extends Controller
             throw new ForbiddenHttpException('Нет прав на просмотр договора.');
         }
         $model = $this->findModel($id);
-        $completenessQuery = $model->getTransactions();
+        $completenessQuery = $model->getTransactions()->with('invoices');
         
         return $this->render('view', [
             'model' => $model,

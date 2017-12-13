@@ -14,19 +14,23 @@ use yii\helpers\ArrayHelper;
  *
  * @property integer      $id
  * @property integer      $month
+ * @property integer $year
  * @property integer      $organization_id
  * @property integer      $payers_id
- * @property integer      $contract_id
+ * @property string $contracts
  * @property integer      $sum
  * @property integer      $number
  * @property string       $date
  * @property string       $link
  * @property integer      $prepayment
+ * @property integer $completeness
  * @property integer      $status
  * @property String       $statusAsString
- * @property String $contracts
+ * @property integer $cooperate_id
+ * @property string $pdf
  *
- *
+ * @property InvoiceHaveContract[] $invoiceHaveContracts
+ * @property Contracts[] $contractModels
  * @property Contracts    $contract
  * @property Organization $organization
  * @property Payers       $payers
@@ -59,7 +63,7 @@ class Invoices extends ActiveRecord
      */
     public static function tableName()
     {
-        return 'invoices';
+        return '{{%invoices}}';
     }
 
     /**
@@ -134,6 +138,24 @@ class Invoices extends ActiveRecord
     public function getPayers()
     {
         return $this->hasOne(Payers::className(), ['id' => 'payers_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getInvoiceHaveContracts()
+    {
+        return $this->hasMany(InvoiceHaveContract::className(), ['invoice_id' => 'id'])
+            ->inverseOf('invoice');
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getContractModels()
+    {
+        return $this->hasMany(Contracts::className(), ['id' => 'contract_id'])
+            ->viaTable('invoice_have_contract', ['invoice_id' => 'id']);
     }
 
     public function setCooperate()
