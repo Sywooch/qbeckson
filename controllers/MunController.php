@@ -194,7 +194,7 @@ class MunController extends Controller
         $model->type = $model::TYPE_REJECTED;
         if ($model->save()) {
             // Добавляем оповещение пользователю, что его заявку отклонили
-            $message = 'Ваша заявка на изменение данных муниципалитета отклонена.';
+            $message = 'В применении новых параметров отказано.';
             $notification = Notification::getExistOrCreate($message, 1, Notification::TYPE_MUN_APPLICATION_REJECT);
             if ($notification) {
                 NotificationUser::assignToUsers([$model->user_id], $notification->id);
