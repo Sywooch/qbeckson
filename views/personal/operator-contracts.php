@@ -372,7 +372,7 @@ $preparedRefusedColumns = GridviewHelper::prepareColumns('contracts', $refusedCo
             'table' => 'contracts',
         ]); ?>
     </div>
-    <div id="panel2" class="tab-pane fade in active">
+    <div id="panel2" class="tab-pane fade">
         <?php if ($searchFutureContracts->organization_id) : ?>
             <p class="lead">Показаны результаты для организации: <?= $searchFutureContracts->organizationName; ?></p>
         <?php endif; ?>
