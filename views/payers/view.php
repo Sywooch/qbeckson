@@ -1,13 +1,16 @@
 <?php
+
 use app\models\Cooperate;
-use yii\db\Query;
-use yii\helpers\Url;
-use yii\helpers\Html;
-use yii\widgets\DetailView;
+use app\models\forms\CooperateChangeTypeForm;
 use app\models\Organization;
+use yii\db\Query;
+use yii\helpers\Html;
+use yii\helpers\Url;
+use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Payers */
+/* @var $activeCooperateExists boolean */
 
 $this->title = $model->name;
 
@@ -221,12 +224,31 @@ $this->params['breadcrumbs'][] = $this->title;
                         ['cooperation' => $cooperation]
                     );
                 }
-                if (null !== $cooperation->getDocumentUrl()) {
+
+                $documentLabel = $cooperation->total_payment_limit ? 'Текст договора/соглашения c суммой' : 'Текст договора/соглашения без суммы';
+                $alternativeDocumentLabel = !$cooperation->total_payment_limit ? 'Текст договора/соглашения c суммой' : 'Текст договора/соглашения без суммы';
+
+                $activeDocumentLink = null !== $cooperation->getActiveDocumentUrl() ? Html::a($documentLabel, [$cooperation->getActiveDocumentUrl()], ['target' => 'blank']) : '';
+                $alternativeDocumentLink = null !== $cooperation->getAlternativeDocumentUrl() ? Html::a($alternativeDocumentLabel, [$cooperation->getAlternativeDocumentUrl()], ['target' => 'blank']) : '';
+
+                if ($activeDocumentLink) {
                     echo '<hr><div class="panel panel-default">
-                        <div class="panel-body">' .
-                        Html::a('Текст договора/соглашения', [$cooperation->getDocumentUrl()], ['target' => 'blank'])
-                        . ' </div>
-                    </div>';
+                        <div class="panel-body">
+                        <p>Действующее соглашение:</p>
+                        <br>' .
+                        $activeDocumentLink .
+                        ' </div>
+                </div>';
+                }
+
+                if ($activeCooperateExists && $alternativeDocumentLink) {
+                    echo '<hr><div class="panel panel-default">
+                        <div class="panel-body">
+                        <p>Альтернативное соглашение:</p>
+                        <br>' .
+                        $alternativeDocumentLink .
+                        ' </div>
+                </div>';
                 }
 
                 if (Yii::$app->user->can('organizations') && $cooperation->status === Cooperate::STATUS_APPEALED) {

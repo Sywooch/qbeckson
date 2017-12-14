@@ -65,8 +65,8 @@ class GroupsInvoiceSearch extends Groups
         $previousMonth = strtotime('first day of previous month');
         $currentMonth = strtotime('first day of this month');
 
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
+        /**@var $organization Organization */
+        $organization = Yii::$app->user->identity->organization;
 
         $contractsQuery = (new \yii\db\Query())
             ->select(['group_id'])

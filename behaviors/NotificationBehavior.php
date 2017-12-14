@@ -3,7 +3,9 @@
 namespace app\behaviors;
 
 use app\models\Notification;
+use app\models\NotificationUser;
 use yii\base\Behavior;
+use yii\helpers\Url;
 use yii\web\Controller;
 
 /**
@@ -28,12 +30,17 @@ class NotificationBehavior extends Behavior
             return;
         }
 
-        $notifications = Notification::findAll(['user_id' => \Yii::$app->user->identity->id]);
+        /** @var Notification[] $notifications */
+        $notifications = \Yii::$app->user->identity->notifications;
 
         if ($notifications) {
             foreach ($notifications as $notification) {
-                \Yii::$app->session->addFlash('warning', $notification->message, false);
-                $notification->delete();
+                $deleteLink = !$notification->delete_after_show ? '<a href="javascript:void(0)" onclick="$.ajax(\'' . Url::to(['/notification/delete', 'notificationId' => $notification->id]) . '\'); $(this).parent().remove()"> Удалить уведомление</a>' : '';
+                \Yii::$app->session->addFlash('warning', $notification->message . $deleteLink, false);
+
+                if ($notification->delete_after_show) {
+                    NotificationUser::deleteForCurrentUser($notification->id);
+                }
             }
         }
     }

@@ -185,11 +185,9 @@ class ContractsController extends Controller
         $model = new ContractRequestForm($groupId, $certificateId, $contract);
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $contractRequestFormValid = true;
-
             $contract = $model->save();
             if (!$contract) {
                 Yii::$app->session->setFlash('danger', 'Что-то не так.');
-
                 return $this->refresh();
             }
         }
@@ -217,7 +215,29 @@ class ContractsController extends Controller
             'contract' => $contract ?: null,
             'confirmForm' => $confirmForm ?: null,
             'contractRequestFormValid' => $contractRequestFormValid,
+            'groupId' => $groupId,
+            'certificateId' => $certificateId,
         ]);
+    }
+
+    /**
+     * @param $groupId
+     * @param null $certificateId
+     * @return array|null
+     */
+    public function actionValidateRequest($groupId, $certificateId = null)
+    {
+        $contract = Contracts::findOne([
+            'group_id' => $groupId,
+            'certificate_id' => $certificateId,
+            'status' => null,
+        ]);
+        $model = new ContractRequestForm($groupId, $certificateId, $contract);
+        if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        return null;
     }
 
     /**
@@ -253,8 +273,15 @@ class ContractsController extends Controller
      */
     public function actionView($id)
     {
+        if (!Yii::$app->user->can('viewContract', ['id' => $id])) {
+            throw new ForbiddenHttpException('Нет прав на просмотр договора.');
+        }
+        $model = $this->findModel($id);
+        $completenessQuery = $model->getTransactions();
+        
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+            'completenessQuery' => $completenessQuery
         ]);
     }
 
@@ -413,89 +440,102 @@ class ContractsController extends Controller
                 $model->termination_initiated_at = date('Y-m-d H:i:s');
             }
 
+            $firstDayOfPreviousMonth = strtotime('first day of previous month');
+
             if ($model->save()) {
-                $completeness = new Completeness();
-                $completeness->group_id = $model->group_id;
-                $completeness->contract_id = $model->id;
+                if (date('m') != 1 && $model->stop_edu_contract >= date('Y-m-d', $firstDayOfPreviousMonth) && $model->start_edu_contract < date('Y-m-d', $currentMonth)) {
+                    $completeness = new Completeness();
+                    $completeness->group_id = $model->group_id;
+                    $completeness->contract_id = $model->id;
 
-                $start_edu_contract = explode("-", $model->start_edu_contract);
+                    $start_edu_contract = explode("-", $model->start_edu_contract);
 
-                if (date('m') == 12) {
-                    $completeness->month = date('m');
-                    $completeness->year = $start_edu_contract[0];
-                } else {
                     $completeness->month = date('m') - 1;
                     $completeness->year = $start_edu_contract[0];
-                }
-                $completeness->preinvoice = 0;
-                $completeness->completeness = 100;
 
-                $month = $start_edu_contract[1];
+                    $completeness->preinvoice = 0;
+                    $completeness->completeness = 100;
 
-                if (date('m') == 12) {
-                    if ($month == 12) {
-                        $price = $model->payer_first_month_payment;
-                    } else {
-                        $price = $model->payer_other_month_payment;
-                    }
-                } else {
+                    $month = $start_edu_contract[1];
+
                     if ($month == date('m') - 1) {
                         $price = $model->payer_first_month_payment;
                     } else {
                         $price = $model->payer_other_month_payment;
                     }
-                }
 
-                $completeness->sum = round(($price * $completeness->completeness) / 100, 2);
-
-                if (date('m') != 1 && $model->start_edu_contract < date('Y-m-d', $currentMonth)) {
+                    $completeness->sum = round(($price * $completeness->completeness) / 100, 2);
                     $completeness->save();
                 }
 
-                $preinvoice = new Completeness();
-                $preinvoice->group_id = $model->group_id;
-                $preinvoice->contract_id = $model->id;
-                $preinvoice->month = date('m');
-                $preinvoice->year = $start_edu_contract[0];
-                $preinvoice->preinvoice = 1;
-                $preinvoice->completeness = 80;
+                if (date('m') == 12 && $model->stop_edu_contract >= date('Y-m-d', $currentMonth) && $model->start_edu_contract <= date('Y-m-d', $lastDayOfMonth) ) {
+                    $completeness = new Completeness();
+                    $completeness->group_id = $model->group_id;
+                    $completeness->contract_id = $model->id;
 
-                $start_edu_contract = explode("-", $model->start_edu_contract);
-                $month = $start_edu_contract[1];
+                    $start_edu_contract = explode("-", $model->start_edu_contract);
 
-                if ($month == date('m')) {
-                    $price = $model->payer_first_month_payment;
-                } else {
-                    $price = $model->payer_other_month_payment;
+                    $completeness->month = date('m');
+                    $completeness->year = date('Y');
+
+                    $completeness->preinvoice = 0;
+                    $completeness->completeness = 100;
+
+                    $month = $start_edu_contract[1];
+
+                    if ($month == date('m')) {
+                        $price = $model->payer_first_month_payment;
+                    } else {
+                        $price = $model->payer_other_month_payment;
+                    }
+
+                    $completeness->sum = round(($price * $completeness->completeness) / 100, 2);
+                    $completeness->save();
                 }
 
-                $preinvoice->sum = round(($price * $preinvoice->completeness) / 100, 2);
+                if ($model->start_edu_contract < date('Y-m-d', $nextMonth) && $model->stop_edu_contract >= date('Y-m-d', $currentMonth)) {
+                    $preinvoice = new Completeness();
+                    $preinvoice->group_id = $model->group_id;
+                    $preinvoice->contract_id = $model->id;
+                    $preinvoice->month = date('m');
+                    $preinvoice->year = $start_edu_contract[0];
+                    $preinvoice->preinvoice = 1;
+                    $preinvoice->completeness = 80;
 
-                if ($model->start_edu_contract < date('Y-m-d', $nextMonth)) {
+                    $start_edu_contract = explode("-", $model->start_edu_contract);
+                    $month = $start_edu_contract[1];
+
+                    if ($month == date('m')) {
+                        $price = $model->payer_first_month_payment;
+                    } else {
+                        $price = $model->payer_other_month_payment;
+                    }
+
+                    $preinvoice->sum = round(($price * $preinvoice->completeness) / 100, 2);
                     $preinvoice->save();
+                }
 
-                    $informs = new Informs();
-                    $informs->program_id = $model->program_id;
-                    $informs->contract_id = $model->id;
-                    $informs->prof_id = $cert->payer_id;
-                    $informs->text = 'Заключен договор';
-                    $informs->from = 2;
-                    $informs->date = date("Y-m-d");
-                    $informs->read = 0;
+                $informs = new Informs();
+                $informs->program_id = $model->program_id;
+                $informs->contract_id = $model->id;
+                $informs->prof_id = $cert->payer_id;
+                $informs->text = 'Заключен договор';
+                $informs->from = 2;
+                $informs->date = date("Y-m-d");
+                $informs->read = 0;
 
-                    if ($informs->save()) {
-                        $inform = new Informs();
-                        $inform->program_id = $model->program_id;
-                        $inform->contract_id = $model->id;
-                        $inform->prof_id = $model->certificate_id;
-                        $inform->text = 'Заключен договор';
-                        $inform->from = 4;
-                        $inform->date = date("Y-m-d");
-                        $inform->read = 0;
+                if ($informs->save()) {
+                    $inform = new Informs();
+                    $inform->program_id = $model->program_id;
+                    $inform->contract_id = $model->id;
+                    $inform->prof_id = $model->certificate_id;
+                    $inform->text = 'Заключен договор';
+                    $inform->from = 4;
+                    $inform->date = date("Y-m-d");
+                    $inform->read = 0;
 
-                        if ($inform->save()) {
-                            return $this->redirect('/personal/organization-contracts');
-                        }
+                    if ($inform->save()) {
+                        return $this->redirect('/personal/organization-contracts');
                     }
                 }
             }
@@ -661,9 +701,7 @@ class ContractsController extends Controller
     {
         $payers = new Contracts();
 
-
         if ($payers->load(Yii::$app->request->post())) {
-
             $searchContracts = new ContractsDecInvoiceSearch();
             $searchContracts->payer_id = $payers->payer_id;
             $ContractsProvider = $searchContracts->search(Yii::$app->request->queryParams);

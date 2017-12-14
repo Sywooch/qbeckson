@@ -275,6 +275,14 @@ class Organization extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getMunicipalContracts()
+    {
+        return $this->hasMany(MunicipalTaskContract::class, ['organization_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getCharter()
     {
         return $this->hasMany(OrganizationDocument::class, ['organization_id' => 'id'])
@@ -383,6 +391,17 @@ class Organization extends \yii\db\ActiveRecord
             ->count();
     }
 
+    public function getChildrenCountMunicipalTask($payerId = null)
+    {
+        return $this->getMunicipalContracts()
+            ->select('certificates.id')
+            ->distinct()
+            ->leftJoin(Certificates::tableName(), 'certificates.id = municipal_task_contract.certificate_id')
+            ->andWhere(['municipal_task_contract.status' => MunicipalTaskContract::STATUS_ACTIVE])
+            ->andFilterWhere(['municipal_task_contract.payer_id' => $payerId])
+            ->count();
+    }
+
     /**
      * получить кол-во договоров
      *
@@ -420,12 +439,15 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param $status
+     *
      * @return Cooperate
      */
-    public function getCooperation()
+    public function getCooperation($status = null)
     {
         return $this->hasOne(Cooperate::class, ['organization_id' => 'id'])
             ->andWhere(['cooperate.payer_id' => Yii::$app->user->getIdentity()->payer->id])
+            ->andFilterWhere(['cooperate.status' => $status])
             ->one();
     }
 

@@ -75,10 +75,13 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
     <hr>
 
-    <!-- максимальное значение цены модуля от нормативной стоимости -->
     <div class="row">
+        <!-- максимальное значение цены модуля от нормативной стоимости -->
         <div class="col-md-6">
             <?= $form->field($model, 'module_max_price', ['addon' => ['append' => ['content'=>'%']]])->textInput(); ?>
+        </div>
+        <div class="col-md-6">
+            <?= $form->field($model, 'day_offset')->textInput(); ?>
         </div>
     </div>
 

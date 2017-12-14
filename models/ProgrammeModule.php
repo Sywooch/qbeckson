@@ -2,15 +2,19 @@
 
 namespace app\models;
 
+use app\components\periodicField\PeriodicField;
+use app\components\periodicField\PeriodicFieldAR;
+use app\components\periodicField\PeriodicFieldBehavior;
+use app\components\periodicField\RecordWithHistory;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "years".
  *
- * @property integer                          $id
+ * @property integer $id
  * @property string $name
- * @property integer                          $program_id
+ * @property integer $program_id
  * @property integer $year  порядковый номер модуля
  * @property integer $month Число месяцев реализации
  * @property integer $hours
@@ -18,8 +22,8 @@ use yii\db\ActiveRecord;
  * @property string $kvdop    Квалификация дополнительно пед работника
  * @property integer $hoursindivid
  * @property integer $hoursdop
- * @property integer                          $maxchild
- * @property integer                          $minchild
+ * @property integer $maxchild
+ * @property integer $minchild
  * @property float $price
  * @property float $normative_price
  * @property integer $rating
@@ -30,28 +34,63 @@ use yii\db\ActiveRecord;
  * @property integer $p21z
  * @property integer $p22z
  * @property string $results
- * @property string                           $fullname
+ * @property string $fullname
+ * @property integer $verification
  *
- * @property Programs                         $program
- * @property Contracts[]                      $activeContracts
- * @property OrganizationAddress[]            $addresses
- * @property ProgramModuleAddress[]           $oldAddresses
- * @property OrganizationAddress              $mainAddress
+ * @property Programs $program
+ * @property Contracts[] $activeContracts
+ * @property OrganizationAddress[] $addresses
+ * @property ProgramModuleAddress[] $oldAddresses
+ * @property OrganizationAddress $mainAddress
  * @property ProgramModuleAddressAssignment[] $moduleAddressAssignments
- * @property Groups[]                         $groups
+ * @property Groups[] $groups
  */
-class ProgrammeModule extends ActiveRecord
+class ProgrammeModule extends ActiveRecord implements RecordWithHistory
 {
+    use PeriodicField;
+
+    const VERIFICATION_UNDEFINED = 0;
+    const VERIFICATION_WAIT = 1;
+    const VERIFICATION_DONE = 2;
+    const VERIFICATION_DENIED = 3;
+    const VERIFICATION_IN_ARCHIVE = 10;
+
     const SCENARIO_CREATE = 'create';
 
     const SCENARIO_MUNICIPAL_TASK = 'municipal-task';
+
+    public $edit;
+
+    public function fieldResolver(PeriodicFieldAR $history)
+    {
+        if ($history->field_name === 'verification') {
+            switch ($history->value) {
+                case self::VERIFICATION_UNDEFINED:
+                    return 'не определенная';
+                case self::VERIFICATION_WAIT:
+                    return 'Ожидает';
+                case self::VERIFICATION_DONE:
+                    return 'Верифицированно успешно';
+                case self::VERIFICATION_DENIED:
+                    return 'Отказ';
+                case self::VERIFICATION_IN_ARCHIVE:
+                    return 'Программа в архиве';
+                default:
+                    return 'не известное значение: ' . $history->value;
+            }
+        } elseif ($history->field_name === 'open') {
+            return $history->value ? 'открыто' : 'закрыто';
+        } else {
+            return $history->value;
+        }
+    }
 
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
-        return 'years';
+        return '{{%years}}';
     }
 
     public function scenarios()
@@ -76,11 +115,19 @@ class ProgrammeModule extends ActiveRecord
             [['name', 'minchild', 'maxchild', 'results'], 'required', 'on' => self::SCENARIO_MUNICIPAL_TASK],
             [['hours', 'program_id', 'year', 'hoursdop', 'hoursindivid', 'minchild', 'maxchild', 'open', 'quality_control', 'p21z', 'p22z'], 'integer'],
             [['price', 'normative_price'], 'number'],
+            [['verification'], 'integer'],
             [['month'], 'integer', 'max' => 12],
             [['kvfirst', 'kvdop', 'name'], 'string', 'max' => 255],
             ['results', 'string'],
             [['minchild', 'maxchild'], 'integer', 'min' => 1],
             [['program_id'], 'exist', 'skipOnError' => true, 'targetClass' => Programs::className(), 'targetAttribute' => ['program_id' => 'id']],
+        ];
+    }
+
+    public function behaviors()
+    {
+        return [
+            PeriodicFieldBehavior::className()
         ];
     }
 
@@ -96,7 +143,7 @@ class ProgrammeModule extends ActiveRecord
             'year' => 'Модуль',
             'month' => 'Число месяцев реализации',
             'hours' => 'Продолжительность реализации образовательной программы в часах',
-            'kvfirst' => 'Квалификация педагогического работника непосредственно осуществляющего реализацию образовательной программы в группе детей',
+            'kvfirst' => 'Сведения о необходимой квалификации педагогического работника для реализации программы',
             'hoursindivid' => 'Число часов работы педагогического работника, предусмотренное на индивидуальное сопровождение детей',
             'hoursdop' => 'Число часов сопровождения группы дополнительным педагогическим работником одновременно с педагогическим работником, непосредственно осуществляющим реализацию образовательной программы',
             'kvdop' => 'Квалификация педагогического работника, дополнительно привлекаемого для совместной реализации образовательной программы в группе',
@@ -111,6 +158,8 @@ class ProgrammeModule extends ActiveRecord
             'p22z' => 'Квалификация педагогического работника, дополнительно привлекаемого для совместной реализации образовательной программы в группе',
             'results' => 'Ожидаемые результаты освоения модуля',
             'fullname' => 'Наименование модуля',
+            'edit' => 'Отправить на повторную сертификацию',
+            'verification' => 'Сертификация',
         ];
     }
 
@@ -191,7 +240,7 @@ class ProgrammeModule extends ActiveRecord
     public function getActiveContracts()
     {
         return $this->hasMany(Contracts::class, ['year_id' => 'id'])
-            ->andWhere(['contracts.status' => 1]);
+            ->andWhere(['contracts.status' => Contracts::STATUS_ACTIVE]);
     }
 
 
@@ -213,6 +262,7 @@ class ProgrammeModule extends ActiveRecord
 
     /**
      * @param bool $prefix
+     *
      * @return string
      */
     public function getFullname($prefix = true)
@@ -255,11 +305,84 @@ class ProgrammeModule extends ActiveRecord
         return array_unique($rows);
     }
 
+    public function canEdit()
+    {
+        $contractsExists = $this
+            ->getContracts()
+            ->andFilterWhere([
+                'status' => [
+                    Contracts::STATUS_REQUESTED,
+                    Contracts::STATUS_ACTIVE,
+                    Contracts::STATUS_ACCEPTED
+                ]
+            ])->exists();
+        $isOpen = $this->open;
+
+        return !($contractsExists || $isOpen);
+    }
+
+    public function needCertificate(): bool
+    {
+        return ($this->verification === ProgrammeModule::VERIFICATION_UNDEFINED
+                || $this->verification === ProgrammeModule::VERIFICATION_WAIT)
+            && ($this->program->verification !== Programs::VERIFICATION_UNDEFINED
+                && $this->program->verification !== Programs::VERIFICATION_WAIT);
+    }
+
     /**
      * @return integer|null
      */
     public function getChildrenAverage()
     {
         return $this->program->municipality->operator->settings->children_average;
+    }
+
+    public function setVerificationWaitAndSave()
+    {
+        if ($this->verification === self::VERIFICATION_WAIT) {
+            return true;
+        }
+        $this->verification = self::VERIFICATION_WAIT;
+
+        return $this->save(false);
+    }
+
+    /**
+     * @param Coefficient $coefficientData
+     * @return bool|float
+     */
+    public function getNormativePrice(Coefficient $coefficientData)
+    {
+        $program = $this->program;
+        if (!$program) {
+            return false;
+        }
+        $municipality = $program->municipality;
+        if (!$municipality) {
+            return false;
+        }
+        if ($program->ground === $program::GROUND_COUNTRY) {
+            $prefix = $municipality::PREFIX_COUNTRY;
+        } else {
+            $prefix = $municipality::PREFIX_CITY;
+        }
+
+        $programDirection = $program->getProgramDirection();
+        $provision = $coefficientData->getProvision($program->p3z);
+        $mainTeacher = $coefficientData->getMainTeacherCoefficient($this->p21z);
+        $additionalTeacher= $coefficientData->getAdditionalTeacherCoefficient($this->p22z);
+
+        $childAverage = $this->getChildrenAverage() ? $this->getChildrenAverage() : ($this->maxchild + $this->minchild) / 2;
+        $normativePrice = $municipality[$prefix . 'zp'] * (((($mainTeacher * ($this->hours - $this->hoursindivid) + $additionalTeacher* $this->hoursdop) /
+                        ($childAverage)) + $mainTeacher * $this->hoursindivid) /
+                ($municipality[$prefix . 'stav'] * $coefficientData->norm * $coefficientData->weekmonth)) * $municipality[$prefix . 'dop'] *
+            (1 + $municipality[$prefix . 'uvel']) * $municipality[$prefix . 'otch'] * $municipality[$prefix . 'otpusk'] +
+            ((($this->hours - $this->hoursindivid) + $this->hoursindivid * ($childAverage)) /
+                ($municipality[$prefix . 'polezn'] * ($childAverage))) * ($programDirection * $provision + $municipality[$prefix . 'nopc']) +
+            (((($this->hours - $this->hoursindivid) + $this->hoursdop + $this->hoursindivid * ($childAverage)) *
+                    $municipality[$prefix . 'otpusk'] * $municipality[$prefix . 'dop']) / ($coefficientData->pk * $coefficientData->weekyear *
+                    $municipality[$prefix . 'stav'] * $coefficientData->norm * ($childAverage))) * $municipality[$prefix . 'pc'];
+
+        return round($normativePrice);
     }
 }

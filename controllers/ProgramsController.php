@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\assets\programsAsset\ProgramsAsset;
+use app\components\EditableOperations;
 use app\models\AllProgramsSearch;
 use app\models\Cooperate;
 use app\models\forms\ProgramAddressesForm;
@@ -16,7 +17,6 @@ use app\models\ProgramsallSearch;
 use app\models\ProgramsFile;
 use app\models\ProgramsPreviusSearch;
 use app\models\UserIdentity;
-use app\models\Years;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
@@ -215,10 +215,10 @@ class ProgramsController extends Controller
             throw new NotFoundHttpException();
         }
 
-        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION) && $user->organization->id !== $model->organization_id) {
-
-            throw new ForbiddenHttpException('Нет доступа');
+        if (!Yii::$app->user->can('viewProgramme', ['id' => $id])) {
+            throw new ForbiddenHttpException('Нет прав на просмотр программы.');
         }
+
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
             if ($model->verification === $model::VERIFICATION_DENIED) {
@@ -239,7 +239,8 @@ class ProgramsController extends Controller
         if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
             $cooperate = Cooperate::find()->where([
                 Cooperate::tableName() . '.payer_id' => $user->getCertificate()->select('payer_id'),
-                Cooperate::tableName() . '.organization_id' => $model->organization_id])->all();
+                Cooperate::tableName() . '.organization_id' => $model->organization_id,
+                'status' => Cooperate::STATUS_ACTIVE])->all();
             if (!count($cooperate)) {
                 Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в организацию, реализующую выбранную программу. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
             }
@@ -310,7 +311,7 @@ class ProgramsController extends Controller
         }
 
         $file = new ProgramsFile();
-        $modelsYears = [new ProgrammeModule(['scenario' => $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : ProgrammeModule::SCENARIO_CREATE])];
+        $modelsYears = [new ProgrammeModule(['kvfirst' => 'Педагог, обладающий соответствующей квалификацией', 'scenario' => $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : ProgrammeModule::SCENARIO_CREATE])];
 
         if ($model->load(Yii::$app->request->post())) {
             $modelsYears = Model::createMultiple(ProgrammeModule::classname(), [], $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : null);
@@ -503,27 +504,32 @@ class ProgramsController extends Controller
                 /**@var $val Informs */
                 return $val->status === Programs::VERIFICATION_DENIED;
             })) > 0) {
-            Yii::$app->session->setFlash('danger',
-                $this->renderPartial('informers/list_of_reazon',
+            Yii::$app->session->setFlash(
+                'danger',
+                $this->renderPartial(
+                    'informers/list_of_reazon',
                     [
-                        'dataProvider' => new ActiveDataProvider([
+                        'dataProvider' => new ActiveDataProvider(
+                            [
                                 'query' => $model->getInforms()
                                     ->andWhere(['status' => $model::VERIFICATION_DENIED]),
                                 'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
                             ]
                         )
                     ]
-                ));
-
+                )
+            );
+        }
+        if ($model->verification !== Programs::VERIFICATION_WAIT
+            && $model->verification !== Programs::VERIFICATION_DONE
+        ) {
+            $model->verification = Programs::VERIFICATION_WAIT;
+            $model->save();
         }
 
-        $model->verification = Programs::VERIFICATION_WAIT;
-
-        if ($model->save()) {
-            return $this->render('verificate', [
-                'model' => $model,
-            ]);
-        }
+        return $this->render('verificate/verificate', [
+            'model' => $model,
+        ]);
     }
 
     public function actionSave($id)
@@ -926,32 +932,34 @@ class ProgramsController extends Controller
         }
     }
 
-    public function actionNormpricesave($id)
+
+    /**
+     * @param $id int идентификатор программы
+     *
+     * @return Response
+     * @throws ForbiddenHttpException
+     */
+    public function actionNormpricesave()
     {
+        if (!Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
+            $response = ['output' => '', 'message' => 'Действие запрещено'];
 
-        $model = ProgrammeModule::findOne($id);
-
-        if ($model->load(Yii::$app->request->post())) {
-            $model->save();
-
-            $programs = (new \yii\db\Query())
-                ->select(['verification'])
-                ->from('programs')
-                ->where(['id' => $model->program_id])
-                ->one();
-
-            if ($programs['verification'] == 1) {
-                return $this->redirect(['certificate', 'id' => $model->program_id]);
-            } else {
-                return $this->redirect(['newnormprice', 'id' => $model->program_id]);
-            }
+            return $this->asJson($response);
         }
 
-        return $this->render('newnormpricesave', [
-            'title' => null,
-            'model' => $model,
-        ]);
+        $programSaveResult = EditableOperations::getInstance(Yii::$app->request->post(), Programs::className())
+            ->setAttributes('p3z')
+            ->exec();
+        $programModuleSaveResult = EditableOperations::getInstance(
+            Yii::$app->request->post(),
+            ProgrammeModule::className()
+        )->setAttributes('p21z', 'p22z', 'normative_price')
+            ->exec();
+        ($response = $programSaveResult)
+        || ($response = $programModuleSaveResult)
+        || ($response = ['output' => '', 'message' => 'Неизвестная ошибка']);
 
+        return $this->asJson($response);
     }
 
     public function actionCertificateold($id)

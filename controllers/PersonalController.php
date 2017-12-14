@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\assets\programsAsset\ProgramsAsset;
 use app\behaviors\NotificationBehavior;
 use app\models\Certificates;
+use app\models\certificates\CertificateImportTemplate;
 use app\models\certificates\CertificateToAccountingConfirmForm;
 use app\models\Contracts;
 use app\models\Contracts2Search;
@@ -18,13 +19,14 @@ use app\models\Cooperate;
 use app\models\FavoritesSearch;
 use app\models\forms\OrganizationSettingsForm;
 use app\models\GroupsSearch;
-use app\models\LoginForm;
 use app\models\Invoices;
+use app\models\LoginForm;
 use app\models\Mun;
 use app\models\MunicipalTaskContract;
 use app\models\MunicipalTaskMatrix;
 use app\models\MunicipalTaskPayerMatrixAssignment;
 use app\models\Operators;
+use app\models\OperatorSettings;
 use app\models\Organization;
 use app\models\OrganizationContractSettings;
 use app\models\OrganizationPayerAssignment;
@@ -32,7 +34,6 @@ use app\models\Payers;
 use app\models\PayersSearch;
 use app\models\PersonalAssignment;
 use app\models\PreviusSearch;
-use app\models\ProgrammeModule;
 use app\models\ProgrammeModuleSearch;
 use app\models\Programs;
 use app\models\ProgramsclearSearch;
@@ -274,12 +275,19 @@ class PersonalController extends Controller
             'rezerv' => '0,150000',
             'balance' => '0,150000',
         ]);
-        $certificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
+
         $allCertificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams, 999999);
+        // Только сертификаты ПФ
+        $searchCertificates->selectCertGroup = $searchCertificates::TYPE_PF;
+        $certificatesProviderPf = $searchCertificates->search(Yii::$app->request->queryParams);
+        // Только сертификаты учета
+        $searchCertificates->selectCertGroup = $searchCertificates::TYPE_ACCOUNTING;
+        $certificatesProviderAccounting = $searchCertificates->search(Yii::$app->request->queryParams);
 
         return $this->render('operator-certificates', [
             'searchCertificates' => $searchCertificates,
-            'certificatesProvider' => $certificatesProvider,
+            'certificatesProviderPf' => $certificatesProviderPf,
+            'certificatesProviderAccounting' => $certificatesProviderAccounting,
             'allCertificatesProvider' => $allCertificatesProvider,
         ]);
     }
@@ -446,8 +454,13 @@ class PersonalController extends Controller
             'rezerv' => '0,150000',
             'balance' => '0,150000',
         ]);
-        $certificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
         $allCertificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams, 999999);
+        // Только сертификаты ПФ
+        $searchCertificates->selectCertGroup = $searchCertificates::TYPE_PF;
+        $certificatesProviderPf = $searchCertificates->search(Yii::$app->request->queryParams);
+        // Только сертификаты учета
+        $searchCertificates->selectCertGroup = $searchCertificates::TYPE_ACCOUNTING;
+        $certificatesProviderAccounting = $searchCertificates->search(Yii::$app->request->queryParams);
 
         $certificateToAccountingConfirmForm = new CertificateToAccountingConfirmForm;
         if (Yii::$app->request->isAjax && $certificateToAccountingConfirmForm->load(Yii::$app->request->post())) {
@@ -458,11 +471,15 @@ class PersonalController extends Controller
             return $this->redirect('/certificates/change-to-accounting-type');
         }
 
+        $certificateImportTemplateExists = CertificateImportTemplate::exists();
+
         return $this->render('payer-certificates', [
-            'certificatesProvider' => $certificatesProvider,
+            'certificatesProviderPf' => $certificatesProviderPf,
+            'certificatesProviderAccounting' => $certificatesProviderAccounting,
             'searchCertificates' => $searchCertificates,
             'allCertificatesProvider' => $allCertificatesProvider,
-            'certificateToAccountingConfirmForm' => $certificateToAccountingConfirmForm
+            'certificateToAccountingConfirmForm' => $certificateToAccountingConfirmForm,
+            'certificateImportTemplateExists' => $certificateImportTemplateExists,
         ]);
     }
 
@@ -1414,6 +1431,16 @@ class PersonalController extends Controller
             Yii::$app->session->setFlash('success', 'Поиск по организации ' . $searchModel->getOrganization()->one()->name);
         }
         ProgramsAsset::register($this->view);
+
+        if (!$certificate->payer->certificateCanCreateContract()) {
+            /** @var OperatorSettings $operatorSettings */
+            $operatorSettings = Yii::$app->operator->identity->settings;
+
+            $nextPeriodBeginDate = \Yii::$app->formatter->asDate(strtotime($operatorSettings->future_program_date_from));
+            $additionMessage = $certificate->payer->certificate_can_use_future_balance ? ' Вы можете подать заявки на обучение на период с ' . $nextPeriodBeginDate . '.' : 'Дождитесь появления возможности подачи заявки на обучение на период с ' . $nextPeriodBeginDate . '.';
+
+            \Yii::$app->session->setFlash('warning', 'Заявки на обучение на период до ' . \Yii::$app->formatter->asDate(strtotime($operatorSettings->current_program_date_to)) . ' не принимаются.' . $additionMessage);
+        }
 
         return $this->render('certificate/list', [
             'dataProvider' => $dataProvider,

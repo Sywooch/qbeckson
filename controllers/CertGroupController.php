@@ -46,10 +46,16 @@ class CertGroupController extends Controller
 
         if (Yii::$app->request->isAjax && $contractCreatePermissionConfirmForm->load(Yii::$app->request->post())) {
             if (Yii::$app->request->get('changePermission', 0)) {
-                $contractCreatePermissionConfirmForm->changeContractCreatePermission($payer);
+                $changed = $contractCreatePermissionConfirmForm->changeContractCreatePermission($payer);
+
+                return $this->asJson(['canCreate' => $payer->certificate_can_create_contract, 'changed' => $changed]);
             }
 
-            return $this->asJson(ActiveForm::validate($contractCreatePermissionConfirmForm) ?: $payer->certificate_can_create_contract);
+            if (Yii::$app->request->get('getPermission', 0)) {
+                return $this->asJson($payer->certificate_can_create_contract);
+            }
+
+            return $this->asJson(ActiveForm::validate($contractCreatePermissionConfirmForm));
         }
 
         if (Yii::$app->request->isAjax && Yii::$app->request->post('hasEditable')) {

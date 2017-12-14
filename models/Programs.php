@@ -3,6 +3,10 @@
 namespace app\models;
 
 use app\components\behaviors\ResizeImageAfterSaveBehavior;
+use app\components\periodicField\PeriodicField;
+use app\components\periodicField\PeriodicFieldAR;
+use app\components\periodicField\PeriodicFieldBehavior;
+use app\components\periodicField\RecordWithHistory;
 use app\models\statics\DirectoryProgramActivity;
 use app\models\statics\DirectoryProgramDirection;
 use trntv\filekit\behaviors\UploadBehavior;
@@ -10,6 +14,7 @@ use voskobovich\linker\LinkerBehavior;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "programs".
@@ -51,6 +56,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $age_group_min
  * @property integer $age_group_max
  * @property integer $is_municipal_task
+ * @property integer $p3z
  * @property string $zabAsString
  *
  * @property string $iconClass
@@ -82,8 +88,11 @@ use yii\helpers\ArrayHelper;
  * @property ProgramAddressAssignment[] $addressAssignments
  * @property ProgramAddressAssignment[] $mainAddressAssignments
  */
-class Programs extends ActiveRecord
+class Programs extends ActiveRecord implements RecordWithHistory
 {
+
+    use PeriodicField;
+
     const VERIFICATION_UNDEFINED = 0;
     const VERIFICATION_WAIT = 1;
     const VERIFICATION_DONE = 2;
@@ -93,10 +102,52 @@ class Programs extends ActiveRecord
     const ICON_DEFAULT = 'icon-socped';
     const ICON_KEY_IN_PARAMS = 'directivityIconsClass';
 
+    const DIRECTION_TECHNICAL_ROBOTICS = 'Техническая (робототехника)';
+    const DIRECTION_TECHNICAL_OTHER = 'Техническая (иная)';
+    const DIRECTION_NATURAL_SCIENCE = 'Естественнонаучная';
+    const DIRECTION_PHYSICAL_CULTURE_SPORT = 'Физкультурно-спортивная';
+    const DIRECTION_ARTISTIC = 'Художественная';
+    const DIRECTION_TOURIST_LOCAL_LORE = 'Туристско-краеведческая';
+    const DIRECTION_SOCIAL_EDUCATION = 'Социально-педагогическая';
+
+    const GROUND_CITY = 1;
+    const GROUND_COUNTRY = 2;
+
     public $file;
     public $edit;
     public $search;
     public $programPhoto;
+
+    public function fieldResolver(PeriodicFieldAR $history)
+    {
+        if ($history->field_name === 'verification') {
+            switch ($history->value) {
+                case self::VERIFICATION_UNDEFINED:
+                    return 'не определенная';
+                case self::VERIFICATION_WAIT:
+                    return 'Ожидает';
+                case self::VERIFICATION_DONE:
+                    return 'Верифицированно успешно';
+                case self::VERIFICATION_DENIED:
+                    return 'Отказ';
+                case self::VERIFICATION_IN_ARCHIVE:
+                    return 'Программа в архиве';
+                default:
+                    return 'не известное значение: ' . $history->value;
+
+            }
+        } elseif ($history->field_name === 'direction_id') {
+            $direction = DirectoryProgramDirection::findOne(['id' => $history->value]);
+            if ($direction) {
+                return $direction->old_name;
+            }
+
+        } elseif ($history->field_name === 'link') {
+            return Html::a($history->value, $this->getProgramFile($history->value));
+        } else {
+            return $history->value;
+        }
+    }
 
     public static function getCountPrograms($organization_id = null, $verification = null)
     {
@@ -119,7 +170,7 @@ class Programs extends ActiveRecord
      */
     public static function tableName()
     {
-        return 'programs';
+        return '{{%programs}}';
     }
 
     /**
@@ -185,7 +236,9 @@ class Programs extends ActiveRecord
                 'attribute' => 'photo_path',
                 'width' => 400,
                 'height' => 400,
-                'basePath' => Yii::getAlias('@webroot/uploads')],
+                'basePath' => \Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix(),
+            ],
+            PeriodicFieldBehavior::className()
         ];
     }
 
@@ -354,6 +407,7 @@ class Programs extends ActiveRecord
             'zabAsString' => 'Категория детей',
             'illnessesList' => 'Категория детей',
             'currentActiveContracts' => 'Обучающиеся в данный момент',
+            'currentActiveContractsCount' => 'Обучающихся',
             'municipal_task_matrix_id' => 'Раздел муниципального задания',
         ];
     }
@@ -416,6 +470,29 @@ class Programs extends ActiveRecord
         }
 
         return $query->one();
+    }
+
+    /**
+     * @param int $id
+     * @return array|null|ActiveRecord
+     */
+    public static function getProgramData($id)
+    {
+        $tableName = self::tableName();
+        $yearsTableName = ProgrammeModule::tableName();
+        return self::find()->select([
+            $tableName . '.*',
+            'duration_month' => 'SUM(' . $yearsTableName . '.[[month]])',
+            'duration_hours' => 'SUM(' . $yearsTableName . '.[[hours]])',
+        ])
+            ->join('LEFT OUTER JOIN', $yearsTableName, $yearsTableName . '.[[program_id]] =  ' . $tableName . '.[[id]]')
+            ->where([
+                $tableName . '.[[verification]]' => self::VERIFICATION_DONE,
+                $tableName . '.[[id]]' => $id
+            ])
+            ->groupBy($tableName . '.[[id]]')
+            ->asArray()
+            ->one();
     }
 
     public function getOrganizationProgram()
@@ -571,8 +648,7 @@ class Programs extends ActiveRecord
             return 'без ОВЗ';
         }
         $zabArray = explode(',', $this->zab);
-        $zabNamesArray = array_filter(self::illnesses(), function ($val) use ($zabArray)
-        {
+        $zabNamesArray = array_filter(self::illnesses(), function ($val) use ($zabArray) {
 
             return in_array($val, $zabArray);
         }, ARRAY_FILTER_USE_KEY);
@@ -612,8 +688,7 @@ class Programs extends ActiveRecord
         }
         $illnessesKeysArray = explode(',', $this->zab);
         $illnessesArray = array_map(
-            function ($key)
-            {
+            function ($key) {
                 return static::illnesses()[$key];
             },
             $illnessesKeysArray
@@ -755,7 +830,17 @@ class Programs extends ActiveRecord
 
         return $this->getContracts()
             ->andWhere(['<=', Contracts::tableName() . '.start_edu_contract', $now])
-            ->andWhere(['>=', Contracts::tableName() . '.stop_edu_contract', $now]);
+            ->andWhere(['>=', Contracts::tableName() . '.stop_edu_contract', $now])
+            ->andWhere([Contracts::tableName() . '.[[status]]' => Contracts::STATUS_ACTIVE]);
+    }
+
+    /**
+     * Количество Контактов действующих в данный момент.
+     * @return int
+     */
+    public function getCurrentActiveContractsCount()
+    {
+        return $this->getCurrentActiveContracts()->count();
     }
 
 
@@ -812,9 +897,14 @@ class Programs extends ActiveRecord
         return null;
     }
 
-    public function getProgramFile()
+    public function getProgramFile($link = null)
     {
-        $filename = $this->link;
+        if ($link) {
+            $filename = $link;
+        } else {
+            $filename = $this->link;
+        }
+
         if (strstr($filename, 'programs/')) {
             $filename = str_replace('programs/', '', $filename);
         }
@@ -845,5 +935,35 @@ class Programs extends ActiveRecord
             && !$certificateUser->certificate->getActiveContractsByProgram($this->id)->exists(); //Нет заключенных договоров на программу
     }
 
+    /**
+     * @return bool|null|string
+     */
+    public function getProgramDirection()
+    {
+        $municipality = $this->municipality;
+        if ($municipality) {
+            $prefix = ($this->ground === self::GROUND_COUNTRY) ? $municipality::PREFIX_COUNTRY : $municipality::PREFIX_CITY;
+            switch ($this->directivity) {
+                case self::DIRECTION_TECHNICAL_ROBOTICS :
+                    return $municipality[$prefix . 'rob'];
+                case self::DIRECTION_TECHNICAL_OTHER :
+                    return $municipality[$prefix . 'tex'];
+                case self::DIRECTION_NATURAL_SCIENCE :
+                    return $municipality[$prefix . 'est'];
+                case self::DIRECTION_PHYSICAL_CULTURE_SPORT :
+                    return $municipality[$prefix . 'fiz'];
+                case self::DIRECTION_ARTISTIC :
+                    return $municipality[$prefix . 'xud'];
+                case self::DIRECTION_TOURIST_LOCAL_LORE :
+                    return $municipality[$prefix . 'tur'];
+                case self::DIRECTION_SOCIAL_EDUCATION :
+                    return $municipality[$prefix . 'soc'];
+                default:
+                    return null;
+            }
+        } else {
+            return false;
+        }
+    }
 
 }

@@ -1,7 +1,7 @@
 <?php
 
-use app\models\ProgrammeModule;
 use app\models\Mun;
+use app\models\ProgrammeModule;
 use app\models\statics\DirectoryProgramActivity;
 use app\models\statics\DirectoryProgramDirection;
 use kartik\field\FieldRange;
@@ -20,17 +20,19 @@ use yii\helpers\Url;
 
 $js = <<<JS
 const wrapper = jQuery(".dynamicform_wrapper");
-const panelTitle = jQuery(".dynamicform_wrapper .panel-title"); 
+const panelTitle = jQuery(".dynamicform_wrapper .panel-title");
+const setText = function() {
+        $(this).val('Педагог, обладающий соответствующей квалификацией');      
+    };
 wrapper.on("afterInsert", function(e, item) {
-    panelTitle.each(function(index) {
+    wrapper.find('input[id$="kvfirst"]').each(setText);
+    wrapper.find('.panel-title').each(function(index) {
         jQuery(this).html((index + 1) + " модуль")
     });
 });
 
 wrapper.on("afterDelete", function(e) {
-   panelTitle.each(function(index) {
-        jQuery(this).html((index + 1) + " модуль")
-    });
+   panelTitle.each(setText);
 });
 JS;
 $url = Url::to(['activity/add-activity']);
@@ -150,8 +152,7 @@ $this->registerJs($js);
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h4>Добавление модулей реализации программы</h4>
-
+            <h4 class="panel-title">Добавление модулей реализации программы</h4>
         </div>
         <div class="panel-body">
             <?php DynamicFormWidget::begin([
@@ -198,7 +199,8 @@ $this->registerJs($js);
 
                                     <?= $form->field($modelYears, "[{$i}]hours")->textInput(['maxlength' => true]) ?>
 
-                                    <?= $form->field($modelYears, "[{$i}]kvfirst")->textInput(['maxlength' => true]) ?>
+                                    <?= $form->field($modelYears, "[{$i}]kvfirst", ['options' => ['class' => 'input-title', 'data' => ['input-title' => 'Укажите необходимую квалификацию педагогического работника. Не рекомендуем указывать конкретные данные, так как при, например, увольнении педагога, будет сложно найти соответствующего программе преподавателя с тем же стажем работы или фамилией. <br>Пример: Педагог, обладающий соответствующей квалификацией']]])
+                                        ->textInput(['maxlength' => true, 'placeholder' => 'Педагог, обладающий соответствующей квалификацией']) ?>
 
                                     <?php if ($modelYears->scenario != ProgrammeModule::SCENARIO_MUNICIPAL_TASK) {
                                         echo $form->field($modelYears, "[{$i}]hoursindivid")->textInput(['maxlength' => true]);

@@ -3,6 +3,8 @@
 namespace app\controllers;
 
 use app\models\CertGroup;
+use app\models\Cooperate;
+use app\models\forms\CooperateChangeTypeForm;
 use app\models\Payers;
 use app\models\PayersSearch;
 use app\models\User;
@@ -65,8 +67,13 @@ class PayersController extends Controller
      */
     public function actionView($id)
     {
+        $payer = $this->findModel($id);
+
+        $activeCooperateExists = $payer->getCooperation(Cooperate::STATUS_ACTIVE) ? true : false;
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $payer,
+            'activeCooperateExists' => $activeCooperateExists ? true : false,
         ]);
     }
 
