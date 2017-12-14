@@ -122,28 +122,28 @@ $year = date('Y');
                 ->andWhere(['status' => 1])
                 ->column();
 
-            if (date('m') == Yii::$app->params['decemberNumber']) {
-                $dec = array();
-                foreach ($rows as $payer_id) {
-                    $payer3 = (new Query())
-                        ->select(['id'])
-                        ->from('invoices')
-                        ->where(['organization_id' => $organization['id']])
-                        ->andWhere(['payers_id' => $payer_id])
-                        ->andWhere(['month' => Yii::$app->params['decemberNumber'], 'year' => $year])
-                        ->andWhere(['prepayment' => 0])
-                        ->andWhere(['status' => [0,1,2]])
-                        ->column();
+        if (date('m') == Yii::$app->params['decemberNumber']) {
+            $dec = array();
+            foreach ($rows as $payer_id) {
+                $payer3 = (new Query())
+                    ->select(['id'])
+                    ->from('invoices')
+                    ->where(['organization_id' => $organization['id']])
+                    ->andWhere(['payers_id' => $payer_id])
+                    ->andWhere(['month' => Yii::$app->params['decemberNumber'], 'year' => $year])
+                    ->andWhere(['prepayment' => 0])
+                    ->andWhere(['status' => [0, 1, 2]])
+                    ->column();
 
-                    if (!$payer3) {
-                        array_push($dec, $payer_id);
-                    }
+                if (!$payer3) {
+                    array_push($dec, $payer_id);
                 }
             }
+        }
             
             $preinvoice = array();
             foreach ($rows as $payer_id) {
-                if($month != Yii::$app->params['decemberNumber'] || (isset($dec) && in_array($payer_id, $dec))) {
+                if ($month != Yii::$app->params['decemberNumber'] || (isset($dec) && in_array($payer_id, $dec))) {
                     $payer = (new Query())
                         ->select(['id'])
                         ->from('invoices')
@@ -167,7 +167,7 @@ $year = date('Y');
                     ->from('invoices')
                     ->where(['organization_id' => $organization['id']])
                     ->andWhere(['payers_id' => $payer_id])
-                    ->andWhere(['month' => date('m')-1, 'year' => $year])
+                    ->andWhere(['month' => date('m') - 1, 'year' => $year])
                     ->andWhere(['prepayment' => 0])
                     ->andWhere(['status' => [0,1,2]])
                     ->column();

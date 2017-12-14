@@ -24,6 +24,9 @@ class Notification extends ActiveRecord
     /** уведомление о переводе сертификатов в "сертификат учета" */
     const TYPE_CERTIFICATE_TO_ACCOUNTING = 'certificate_to_accounting_type';
 
+    /** уведомление об отклонении заявки на изменение данных муниципалитета */
+    const TYPE_MUN_APPLICATION_REJECT = 'mun_application_reject';
+
     /** @inheritdoc */
     public static function tableName()
     {

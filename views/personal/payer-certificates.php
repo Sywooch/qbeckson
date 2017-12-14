@@ -8,11 +8,11 @@ use app\models\UserIdentity;
 use app\widgets\SearchFilter;
 use kartik\grid\GridView;
 use yii\bootstrap\Modal;
+use yii\bootstrap\Tabs;
 use yii\grid\ActionColumn;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use yii\bootstrap\Tabs;
 
 $this->title = 'Сертификаты';
 $this->params['breadcrumbs'][] = $this->title;

@@ -143,7 +143,7 @@ return [
                 'roles' => ['payer']
             ],
             [
-                'actions' => ['transfer-task' , 'transfer-programme'],
+                'actions' => ['transfer-task', 'transfer-programme'],
                 'allow' => true,
                 'roles' => ['organizations']
             ],
@@ -328,5 +328,19 @@ return [
             'roles' => ['operators', 'organizations', 'payer'],
             'actions' => ['contract'],
         ]
-    ]
+    ],
+    'groups' => [
+        [
+            'allow' => true,
+            'roles' => ['operators'],
+            'actions' => ['contracts']
+        ]
+    ],
+    'mun' => [
+        [
+            'allow' => true,
+            'roles' => ['payer'],
+            'actions' => ['view', 'update', 'upload'],
+        ]
+    ],
 ];
