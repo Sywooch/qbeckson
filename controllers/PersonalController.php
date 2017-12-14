@@ -275,12 +275,19 @@ class PersonalController extends Controller
             'rezerv' => '0,150000',
             'balance' => '0,150000',
         ]);
-        $certificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
+
         $allCertificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams, 999999);
+        // Только сертификаты ПФ
+        $searchCertificates->selectCertGroup = $searchCertificates::TYPE_PF;
+        $certificatesProviderPf = $searchCertificates->search(Yii::$app->request->queryParams);
+        // Только сертификаты учета
+        $searchCertificates->selectCertGroup = $searchCertificates::TYPE_ACCOUNTING;
+        $certificatesProviderAccounting = $searchCertificates->search(Yii::$app->request->queryParams);
 
         return $this->render('operator-certificates', [
             'searchCertificates' => $searchCertificates,
-            'certificatesProvider' => $certificatesProvider,
+            'certificatesProviderPf' => $certificatesProviderPf,
+            'certificatesProviderAccounting' => $certificatesProviderAccounting,
             'allCertificatesProvider' => $allCertificatesProvider,
         ]);
     }
@@ -433,8 +440,13 @@ class PersonalController extends Controller
             'rezerv' => '0,150000',
             'balance' => '0,150000',
         ]);
-        $certificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
         $allCertificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams, 999999);
+        // Только сертификаты ПФ
+        $searchCertificates->selectCertGroup = $searchCertificates::TYPE_PF;
+        $certificatesProviderPf = $searchCertificates->search(Yii::$app->request->queryParams);
+        // Только сертификаты учета
+        $searchCertificates->selectCertGroup = $searchCertificates::TYPE_ACCOUNTING;
+        $certificatesProviderAccounting = $searchCertificates->search(Yii::$app->request->queryParams);
 
         $certificateToAccountingConfirmForm = new CertificateToAccountingConfirmForm;
         if (Yii::$app->request->isAjax && $certificateToAccountingConfirmForm->load(Yii::$app->request->post())) {
@@ -448,7 +460,8 @@ class PersonalController extends Controller
         $certificateImportTemplateExists = CertificateImportTemplate::exists();
 
         return $this->render('payer-certificates', [
-            'certificatesProvider' => $certificatesProvider,
+            'certificatesProviderPf' => $certificatesProviderPf,
+            'certificatesProviderAccounting' => $certificatesProviderAccounting,
             'searchCertificates' => $searchCertificates,
             'allCertificatesProvider' => $allCertificatesProvider,
             'certificateToAccountingConfirmForm' => $certificateToAccountingConfirmForm,
@@ -919,6 +932,7 @@ class PersonalController extends Controller
 
         $searchActiveContracts = new ContractsSearch([
             'status' => Contracts::STATUS_ACTIVE,
+            'started' => ContractsSearch::STARTED_YES,
             'paid' => '0,150000',
             'rezerv' => '0,150000',
             'all_parents_funds' => '0,10000',
@@ -926,6 +940,17 @@ class PersonalController extends Controller
             'organization_id' => $user->organization->id,
         ]);
         $activeContractsProvider = $searchActiveContracts->search(Yii::$app->request->queryParams);
+
+        $searchFutureContracts = new ContractsSearch([
+            'status' => Contracts::STATUS_ACTIVE,
+            'started' => ContractsSearch::STARTED_NO,
+            'paid' => '0,150000',
+            'rezerv' => '0,150000',
+            'all_parents_funds' => '0,10000',
+            'modelName' => 'SearchActiveContracts',
+            'organization_id' => $user->organization->id,
+        ]);
+        $futureContractsProvider = $searchFutureContracts->search(Yii::$app->request->queryParams);
 
         $searchConfirmedContracts = new ContractsSearch([
             'status' => Contracts::STATUS_ACCEPTED,
@@ -973,6 +998,8 @@ class PersonalController extends Controller
             'dissolvedContractsProvider' => $dissolvedContractsProvider,
             'searchEndsContracts' => $searchEndsContracts,
             'endsContractsProvider' => $endsContractsProvider,
+            'searchFutureContracts' => $searchFutureContracts,
+            'futureContractsProvider' => $futureContractsProvider,
 
             'ContractsallProvider' => $ContractsallProvider,
         ]);

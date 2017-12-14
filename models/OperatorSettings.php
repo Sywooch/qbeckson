@@ -19,6 +19,7 @@ use yii\db\ActiveRecord;
  * @property integer $current_program_date_to
  * @property integer $future_program_date_from
  * @property integer $future_program_date_to
+ * @property integer $day_offset
  *
  * @property string $extendDocumentUrl
  * @property string $generalDocumentUrl
@@ -49,6 +50,7 @@ class OperatorSettings extends ActiveRecord
                 'future_program_date_from', 'future_program_date_to', 'extendDocument', 'generalDocument'
             ], 'required'],
             [['operator_id', 'children_average'], 'integer'],
+            [['day_offset'], 'integer', 'min' => 0, 'max' => 50],
             [[
                 'general_document_path', 'general_document_base_url', 'document_name', 'extend_document_path',
                 'extend_document_base_url'
@@ -120,6 +122,7 @@ class OperatorSettings extends ActiveRecord
             'current_program_date_to' => 'Дата до',
             'future_program_date_from' => 'Дата с',
             'future_program_date_to' => 'Дата до',
+            'day_offset' => 'Сколько дней c начала обучения разрешено добавлять договоры',
 
             'extendDocument' => 'Типовой договор с суммой',
             'generalDocument' => 'Типовой договор без суммы',

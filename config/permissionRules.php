@@ -324,6 +324,13 @@ return [
             'actions' => ['contract'],
         ]
     ],
+    'groups' => [
+        [
+            'allow' => true,
+            'roles' => ['operators'],
+            'actions' => ['contracts']
+        ]
+    ],
     'mun' => [
         [
             'allow' => true,
