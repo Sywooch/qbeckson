@@ -933,33 +933,31 @@ class ProgramsController extends Controller
     }
 
 
-    /**
-     * @param $id int идентификатор программы
-     *
-     * @return Response
-     * @throws ForbiddenHttpException
-     */
-    public function actionNormpricesave()
+    public function actionNormpricesave($id)
     {
-        if (!Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
-            $response = ['output' => '', 'message' => 'Действие запрещено'];
 
-            return $this->asJson($response);
+        $model = ProgrammeModule::findOne($id);
+
+        if ($model->load(Yii::$app->request->post())) {
+            $model->save();
+
+            $programs = (new \yii\db\Query())
+                ->select(['verification'])
+                ->from('programs')
+                ->where(['id' => $model->program_id])
+                ->one();
+
+            if ($programs['verification'] == 1) {
+                return $this->redirect(['certificate', 'id' => $model->program_id]);
+            } else {
+                return $this->redirect(['newnormprice', 'id' => $model->program_id]);
+            }
         }
 
-        $programSaveResult = EditableOperations::getInstance(Yii::$app->request->post(), Programs::className())
-            ->setAttributes('p3z')
-            ->exec();
-        $programModuleSaveResult = EditableOperations::getInstance(
-            Yii::$app->request->post(),
-            ProgrammeModule::className()
-        )->setAttributes('p21z', 'p22z', 'normative_price')
-            ->exec();
-        ($response = $programSaveResult)
-        || ($response = $programModuleSaveResult)
-        || ($response = ['output' => '', 'message' => 'Неизвестная ошибка']);
-
-        return $this->asJson($response);
+        return $this->render('newnormpricesave', [
+            'title' => null,
+            'model' => $model,
+        ]);
     }
 
     public function actionCertificateold($id)
