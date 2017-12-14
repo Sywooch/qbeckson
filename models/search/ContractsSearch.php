@@ -6,12 +6,16 @@ use app\models\Contracts;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use yii\db\Expression;
 
 /**
  * ContractsSearch represents the model behind the search form about `app\models\search\Contracts`.
  */
 class ContractsSearch extends Contracts
 {
+    const STARTED_NO = 0;
+    const STARTED_YES = 1;
+
     public $programMunicipality;
     public $childFullName;
     public $moduleName;
@@ -19,6 +23,7 @@ class ContractsSearch extends Contracts
     public $programName;
     public $organizationName;
     public $payerName;
+    public $started;
 
     public $modelName;
 
@@ -55,7 +60,7 @@ class ContractsSearch extends Contracts
             [[
                 'id', 'certificate_id', 'payer_id', 'program_id', 'year_id', 'organization_id', 'group_id', 'status',
                 'status_year', 'funds_gone', 'sposob', 'prodolj_d', 'prodolj_m', 'prodolj_m_user', 'ocen_fact',
-                'ocen_kadr', 'ocen_mat', 'ocen_obch', 'ocenka', 'wait_termnate', 'terminator_user'
+                'ocen_kadr', 'ocen_mat', 'ocen_obch', 'ocenka', 'wait_termnate', 'terminator_user', 'started'
             ], 'integer'],
             [[
                 'number', 'date', 'status_termination', 'status_comment', 'link_doc', 'link_ofer', 'start_edu_programm',
@@ -190,6 +195,11 @@ class ContractsSearch extends Contracts
         if (!empty($this->rezerv) && $this->rezerv !== '0,150000') {
             $rezerv = explode(',', $this->rezerv);
             $query->andWhere(['and', ['>=', 'contracts.rezerv', (int)$rezerv[0]], ['<=', 'nominal', (int)$rezerv[1]]]);
+        }
+
+        if ($this->started !== null) {
+            $operator = $this->started === self::STARTED_YES ? '<=' : '>';
+            $query->andWhere([$operator, 'start_edu_contract', new Expression('NOW()')]);
         }
 
         $query->groupBy(['contracts.id']);
