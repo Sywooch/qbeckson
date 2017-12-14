@@ -122,7 +122,7 @@ class OperatorSettings extends ActiveRecord
             'current_program_date_to' => 'Дата до',
             'future_program_date_from' => 'Дата с',
             'future_program_date_to' => 'Дата до',
-            'day_offset' => 'Сколько дней c начала обучения разрешено добавлять договоры',
+            'day_offset' => 'Число дней после начала нового периода действия программы ПФ в течение которых допускается формирование заявок на обучение (и договоров) задним числом',
 
             'extendDocument' => 'Типовой договор с суммой',
             'generalDocument' => 'Типовой договор без суммы',
