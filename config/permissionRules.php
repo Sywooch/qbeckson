@@ -331,4 +331,11 @@ return [
             'actions' => ['contracts']
         ]
     ],
+    'mun' => [
+        [
+            'allow' => true,
+            'roles' => ['payer'],
+            'actions' => ['view', 'update', 'upload'],
+        ]
+    ],
 ];
