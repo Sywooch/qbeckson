@@ -20,6 +20,9 @@ use yii\db\ActiveRecord;
  */
 class OrganizationAddress extends ActiveRecord
 {
+    const STATUS_ACTIVE = 1;
+    const STATUS_HIDDEN = 0;
+
     /**
      * @inheritdoc
      */
@@ -63,5 +66,49 @@ class OrganizationAddress extends ActiveRecord
             'lat' => 'Lat',
             'lng' => 'Lng',
         ];
+    }
+
+    /**
+     * @return array
+     */
+    public static function getAllMarks()
+    {
+        $programsTable = Programs::tableName();
+        $assignmentTable = ProgramAddressAssignment::tableName();
+        $addressTable = self::tableName();
+        $marks = self::find()
+            ->select([
+                'age_from' => $programsTable . '.[[age_group_min]]',
+                'age_to' => $programsTable . '.[[age_group_max]]',
+                'title' => $programsTable . '.[[name]]',
+                'description' => $programsTable . '.[[annotation]]',
+                $programsTable . '.[[direction_id]]',
+                $assignmentTable . '.[[program_id]]',
+                $addressTable . '.[[lat]]',
+                $addressTable . '.[[lng]]',
+                $addressTable . '.[[address]]',
+            ])
+            ->innerJoin(
+                $assignmentTable,
+                "$assignmentTable.[[organization_address_id]] = $addressTable.[[organization_id]]"
+            )
+            ->innerJoin(
+                $programsTable,
+                "$programsTable.[[id]] = $assignmentTable.[[program_id]]"
+            )
+            ->where([$addressTable . '.[[status]]' => self::STATUS_ACTIVE])
+            ->andWhere([
+                'AND',
+                ['<>', $addressTable . '.[[lng]]', ''],
+                ['<>', $addressTable . '.[[lat]]', ''],
+            ])
+            ->asArray()
+            ->all();
+
+        foreach ($marks as $key => $mark) {
+            $marks[$key]['geo_code'] = [$mark['lat'], $mark['lng']];
+        }
+
+        return $marks;
     }
 }

@@ -116,100 +116,102 @@ class ModuleNormativePriceCalculator extends ModuleActions
         }
         $p22 = Yii::$app->coefficient->data->$p2y;
 
-        $childrenAverage = $this->module->getChildrenAverage()
-            ? $this->module->getChildrenAverage()
-            : ($this->module->maxchild
-                + $this->module->minchild) / 2;
-        $nprice =
-            (
-                $p6
-                * (
-                    (
-                        (
-                            (
-                                ($p21
-                                    * (
-                                        $this->module->hours
-                                        - $this->module->hoursindivid
-                                    )
-                                )
-                                + (
-                                    $p22
-                                    * $this->module->hoursdop
-                                )
-                            )
-                            / ($childrenAverage)
-                        )
-                        + (
-                            $p21
-                            * $this->module->hoursindivid
-                        )
-                    )
-                    / (
-                        $p12
-                        * $p16
-                        * $p14
-                    )
-                )
-                * $p7
-                * (
-                    1
-                    + $p8
-                )
-                * $p9
-                * $p10
-            )
-            + (
-                (
-                    (
-                        (
-                            $this->module->hours
-                            - $this->module->hoursindivid
-                        )
-                        + (
-                            $this->module->hoursindivid
-                            * $childrenAverage
-                        )
-                    )
-                    / (
-                        $p11
-                        * $childrenAverage
-                    )
-                )
-                * (
-                    $p1
-                    * $p3
-                    + $p4
-                )
-            )
-            + (
-                (
-                    (
-                        (
-                            (
-                                $this->module->hours
-                                - $this->module->hoursindivid
-                            )
-                            + $this->module->hoursdop
-                            + (
-                                $this->module->hoursindivid
-                                * $childrenAverage
-                            )
-                        )
-                        * $p10
-                        * $p7
-                    )
-                    / (
-                        $p15
-                        * $p13
-                        * $p12
-                        * $p16
-                        * $childrenAverage
-                    )
-                )
-                * $p5
-            );
-
+//        $childrenAverage = $this->module->getChildrenAverage()
+//            ? $this->module->getChildrenAverage()
+//            : ($this->module->maxchild
+//                + $this->module->minchild) / 2;
+//        $nprice =
+//            (
+//                $p6
+//                * (
+//                    (
+//                        (
+//                            (
+//                                ($p21
+//                                    * (
+//                                        $this->module->hours
+//                                        - $this->module->hoursindivid
+//                                    )
+//                                )
+//                                + (
+//                                    $p22
+//                                    * $this->module->hoursdop
+//                                )
+//                            )
+//                            / ($childrenAverage)
+//                        )
+//                        + (
+//                            $p21
+//                            * $this->module->hoursindivid
+//                        )
+//                    )
+//                    / (
+//                        $p12
+//                        * $p16
+//                        * $p14
+//                    )
+//                )
+//                * $p7
+//                * (
+//                    1
+//                    + $p8
+//                )
+//                * $p9
+//                * $p10
+//            )
+//            + (
+//                (
+//                    (
+//                        (
+//                            $this->module->hours
+//                            - $this->module->hoursindivid
+//                        )
+//                        + (
+//                            $this->module->hoursindivid
+//                            * $childrenAverage
+//                        )
+//                    )
+//                    / (
+//                        $p11
+//                        * $childrenAverage
+//                    )
+//                )
+//                * (
+//                    $p1
+//                    * $p3
+//                    + $p4
+//                )
+//            )
+//            + (
+//                (
+//                    (
+//                        (
+//                            (
+//                                $this->module->hours
+//                                - $this->module->hoursindivid
+//                            )
+//                            + $this->module->hoursdop
+//                            + (
+//                                $this->module->hoursindivid
+//                                * $childrenAverage
+//                            )
+//                        )
+//                        * $p10
+//                        * $p7
+//                    )
+//                    / (
+//                        $p15
+//                        * $p13
+//                        * $p12
+//                        * $p16
+//                        * $childrenAverage
+//                    )
+//                )
+//                * $p5
+//            );
+        $modelYears = $this->module;
+        $childAverage = $this->module->getChildrenAverage() ? $this->module->getChildrenAverage() : ($this->module->maxchild + $this->module->minchild) / 2;
+        $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / ($childAverage)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * ($childAverage)) / ($p11 * ($childAverage))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * ($childAverage)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * ($childAverage))) * $p5;
         $this->module->normative_price = round($nprice);
         return true;
     }

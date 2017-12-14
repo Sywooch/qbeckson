@@ -328,5 +328,19 @@ return [
             'roles' => ['operators', 'organizations', 'payer'],
             'actions' => ['contract'],
         ]
-    ]
+    ],
+    'groups' => [
+        [
+            'allow' => true,
+            'roles' => ['operators'],
+            'actions' => ['contracts']
+        ]
+    ],
+    'mun' => [
+        [
+            'allow' => true,
+            'roles' => ['payer'],
+            'actions' => ['view', 'update', 'upload'],
+        ]
+    ],
 ];
