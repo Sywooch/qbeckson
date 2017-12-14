@@ -23,6 +23,7 @@ use yii\helpers\Html;
  * @property integer $organization_id
  * @property integer $verification
  * @property string $name
+ * @property string $short_name
  * @property string $vid
  * @property integer $mun
  * @property integer $ground
@@ -57,6 +58,7 @@ use yii\helpers\Html;
  * @property integer $age_group_max
  * @property integer $is_municipal_task
  * @property integer $p3z
+ * @property integer $municipal_task_matrix_id
  * @property string $zabAsString
  *
  * @property string $iconClass
@@ -197,7 +199,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
         return [
             [
                 [
-                    'direction_id', 'name', 'task', 'annotation',
+                    'direction_id', 'name', 'short_name', 'task', 'annotation',
                     'ovz', 'norm_providing', 'age_group_min', 'age_group_max', 'ground'
                 ],
                 'required'
@@ -220,6 +222,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
             [['rating', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch'], 'number'],
             [['task', 'annotation', 'vid', 'norm_providing', 'search', 'photo_path', 'photo_base_url'], 'string'],
             [['name', 'zab'], 'string', 'max' => 255],
+            [['short_name'], 'string', 'max' => 64],
             [['link'], 'string', 'max' => 45],
             [
                 ['organization_id'], 'exist', 'skipOnError' => true,
@@ -391,6 +394,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
             'countHours' => 'Учебных часов',
             'form' => 'Форма обучения',
             'name' => 'Наименование программы',
+            'short_name' => 'Краткое наименование программы',
             'directivity' => 'Направленность программы',
             'direction_id' => 'Направленность программы',
             'vid' => 'Вид деятельности образовательной программы',

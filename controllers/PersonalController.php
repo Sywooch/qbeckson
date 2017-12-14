@@ -36,6 +36,7 @@ use app\models\PersonalAssignment;
 use app\models\PreviusSearch;
 use app\models\ProgrammeModuleSearch;
 use app\models\Programs;
+use app\models\programs\ProgramViewDecorator;
 use app\models\ProgramsclearSearch;
 use app\models\search\CertificatesSearch;
 use app\models\search\ContractsSearch;
@@ -125,6 +126,7 @@ class PersonalController extends Controller
      * Update user municipality binding.
      *
      * @param $munId
+     *
      * @return \yii\web\Response
      * @throws NotFoundHttpException
      */
@@ -1373,7 +1375,12 @@ class PersonalController extends Controller
         /** @var $certificate Certificates */
         $certificate = Yii::$app->user->identity->certificate;
 
-        $matrix = MunicipalTaskPayerMatrixAssignment::findByPayerId($certificate->payer_id, $certificate->certGroup->is_special > 0 ? MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_AC : MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_PF);
+        $matrix = MunicipalTaskPayerMatrixAssignment::findByPayerId(
+            $certificate->payer_id,
+            $certificate->certGroup->is_special > 0
+                ? MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_AC
+                : MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_PF
+        );
         $tabs = [];
         foreach ($matrix as $item) {
             $searchTasks = new ProgramsSearch([
@@ -1395,11 +1402,18 @@ class PersonalController extends Controller
             'rating' => '0,100',
             'mun' => Yii::$app->user->identity->mun_id,
             'modelName' => '',
+            'decorator' => ProgramViewDecorator::className()
         ]);
+
+
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         if ($searchModel->organization_id) {
-            Yii::$app->session->setFlash('success', 'Поиск по организации ' . $searchModel->getOrganization()->one()->name);
+            Yii::$app->session->setFlash(
+                'success',
+                'Поиск по организации '
+                . $searchModel->getOrganization()->one()->name
+            );
         }
         ProgramsAsset::register($this->view);
 
@@ -1407,10 +1421,22 @@ class PersonalController extends Controller
             /** @var OperatorSettings $operatorSettings */
             $operatorSettings = Yii::$app->operator->identity->settings;
 
-            $nextPeriodBeginDate = \Yii::$app->formatter->asDate(strtotime($operatorSettings->future_program_date_from));
-            $additionMessage = $certificate->payer->certificate_can_use_future_balance ? ' Вы можете подать заявки на обучение на период с ' . $nextPeriodBeginDate . '.' : 'Дождитесь появления возможности подачи заявки на обучение на период с ' . $nextPeriodBeginDate . '.';
+            $nextPeriodBeginDate = \Yii::$app->formatter->asDate(
+                strtotime($operatorSettings->future_program_date_from)
+            );
+            $additionMessage = $certificate->payer->certificate_can_use_future_balance
+                ? ' Вы можете подать заявки на обучение на период с ' . $nextPeriodBeginDate . '.'
+                : 'Дождитесь появления возможности подачи заявки на обучение на период с '
+                . $nextPeriodBeginDate . '.';
 
-            \Yii::$app->session->setFlash('warning', 'Заявки на обучение на период до ' . \Yii::$app->formatter->asDate(strtotime($operatorSettings->current_program_date_to)) . ' не принимаются.' . $additionMessage);
+            \Yii::$app->session->setFlash(
+                'warning',
+                'Заявки на обучение на период до '
+                . \Yii::$app->formatter->asDate(
+                    strtotime($operatorSettings->current_program_date_to)
+                )
+                . ' не принимаются.' . $additionMessage
+            );
         }
 
         return $this->render('certificate/list', [

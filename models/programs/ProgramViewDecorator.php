@@ -99,9 +99,15 @@ use yii\bootstrap\Alert;
  * @property bool $canProgrammeBeTransferred
  * @method  isADraft()
  *  ***
+ * @property string shortNameWithHint
  */
 class ProgramViewDecorator extends ModelDecorator
 {
+    public static function illnesses()
+    {
+        return Programs::illnesses();
+    }
+
     public function getAlert(): string
     {
         if ($this->verification === Programs::VERIFICATION_DRAFT) {
@@ -126,5 +132,15 @@ class ProgramViewDecorator extends ModelDecorator
         }
 
         return $headTemplate;
+    }
+
+    public function getShortNameWithHint(): string
+    {
+        return 'sssss';
+    }
+
+    public function attributeLabels()
+    {
+        return parent::attributeLabels();
     }
 }

@@ -14,7 +14,7 @@ use yii\base\Model;
  * @property Model $entity
  * @method save($validation = true) @see yii\db\ActiveRecord
  */
-class ModelDecorator extends Model
+class ModelDecorator extends Model implements ModelDecoratorInterface
 {
     public $entity;
 
