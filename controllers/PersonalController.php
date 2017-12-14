@@ -477,11 +477,22 @@ class PersonalController extends Controller
         $searchActiveContracts = new ContractsSearch([
             'payer_id' => $payer->id,
             'status' => Contracts::STATUS_ACTIVE,
+            'started' => ContractsSearch::STARTED_YES,
             'paid' => '0,150000',
             'rezerv' => '0,150000',
             'modelName' => 'SearchActiveContracts'
         ]);
         $activeContractsProvider = $searchActiveContracts->search(Yii::$app->request->queryParams);
+
+        $searchFutureContracts = new ContractsSearch([
+            'payer_id' => $payer->id,
+            'status' => Contracts::STATUS_ACTIVE,
+            'started' => ContractsSearch::STARTED_NO,
+            'paid' => '0,150000',
+            'rezerv' => '0,150000',
+            'modelName' => 'SearchFutureContracts'
+        ]);
+        $futureContractsProvider = $searchFutureContracts->search(Yii::$app->request->queryParams);
 
         $searchConfirmedContracts = new ContractsSearch([
             'payer_id' => $payer->id,
@@ -511,6 +522,8 @@ class PersonalController extends Controller
         return $this->render('payer-contracts', [
             'searchActiveContracts' => $searchActiveContracts,
             'activeContractsProvider' => $activeContractsProvider,
+            'searchFutureContracts' => $searchFutureContracts,
+            'futureContractsProvider' => $futureContractsProvider,
             'searchConfirmedContracts' => $searchConfirmedContracts,
             'confirmedContractsProvider' => $confirmedContractsProvider,
             'searchPendingContracts' => $searchPendingContracts,
