@@ -554,10 +554,13 @@ $this->registerJs($js, $this::POS_READY);
             echo Html::a('Назад', '/personal/organization-info', ['class' => 'btn btn-primary']);
         }
 
-        if (isset($roles['payer'])) {
-            echo Html::a('Назад', ['personal/payer-organizations'], ['class' => 'btn btn-primary']);
+        if (isset($roles['payer'])) { ?>
 
-            if (!empty($cooperation)) {
+            <?php if (isset($cooperation) && Cooperate::STATUS_NEW == $cooperation->status): ?>
+                <p>Поставщиком услуг направлена заявка на заключение с Вами договора, действие которого предполагается <?= $cooperation->getPeriodValidityLabel() ?>.</p>
+            <?php endif; ?>
+
+            <?php if (!empty($cooperation)) {
                 if (count($cooperation->contracts) < 1 && $cooperation->status === Cooperate::STATUS_ACTIVE) {
                     echo $this->render(
                         '../cooperate/reject-contract',
@@ -576,7 +579,7 @@ $this->registerJs($js, $this::POS_READY);
                     <hr>
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <?= Cooperate::documentNames()[$operatorSettings->document_name] ?>, используемый для оплаты услуг на текущий момент:
+                            <?= Cooperate::documentNames()[$operatorSettings->document_name] ?>, используемый для оплаты услуг на текущий момент<?= Cooperate::STATUS_NEW == $cooperation->status ? ', использование которого предусматривается ' . $cooperation->getPeriodValidityLabel() : '' ?>:
                         </div>
 
                         <table class="table table-striped table-bordered detail-view">
@@ -708,7 +711,7 @@ $this->registerJs($js, $this::POS_READY);
                             <tr>
                                 <th>Период действия соглашения</th>
                                 <td>
-                                    <?= $cooperation->getPeriodValidity() ?>
+                                    <?= $cooperation->getPeriodValidityLabel() ?>
                                 </td>
                             </tr>
 
@@ -733,8 +736,6 @@ $this->registerJs($js, $this::POS_READY);
                     </div>
 
                 <?php } ?>
-                <br>
-                <br>
 
                 <?php if ($cooperation->status === Cooperate::STATUS_NEW) { ?>
                     <?= $this->render(
@@ -745,15 +746,22 @@ $this->registerJs($js, $this::POS_READY);
                         '../cooperate/confirm-request',
                         ['cooperation' => $cooperation]
                     ); ?>
-                <?php } ?>
+                <?php }
 
-                <?php if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
+                $periodLabel = '';
+                if (Cooperate::PERIOD_CURRENT == $cooperation->period) {
+                    $periodLabel = 'текущий договор';
+                } elseif (Cooperate::PERIOD_FUTURE == $cooperation->period) {
+                    $periodLabel = 'будущий договор';
+                }
+
+                if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
                     null !== $cooperation->number &&
                     null !== $cooperation->date
                 ) {
                     echo ' ';
                     echo Html::a(
-                        'Одобрить',
+                        'Одобрить ' . $periodLabel,
                         ['cooperate/confirm-contract', 'id' => $cooperation->id],
                         ['class' => 'btn btn-primary']
                     );
@@ -762,13 +770,15 @@ $this->registerJs($js, $this::POS_READY);
                 <br>
                 <br>
 
-                <div class="checkbox-container">
-                    <?= Html::checkbox('', !$futurePeriodCooperate ? false : true, [
-                        'label' => 'С поставщиком услуг заключен ' . Cooperate::documentNames()[$operatorSettings->document_name] . ', для оплаты услуг в будущем периоде (с ' . \Yii::$app->formatter->asDate($operatorSettings->future_program_date_from) . ' по ' . \Yii::$app->formatter->asDate($operatorSettings->future_program_date_to) . ').',
-                        'class' => 'future_period_checkbox',
-                        'disabled' => $futurePeriodCooperate ? true : false,
-                    ]) ?>
-                </div>
+                <?php if (Cooperate::STATUS_ACTIVE == $cooperation->status || $futurePeriodCooperate): ?>
+                    <div class="checkbox-container">
+                        <?= Html::checkbox('', !$futurePeriodCooperate ? false : true, [
+                            'label' => 'С поставщиком услуг заключен ' . Cooperate::documentNames()[$operatorSettings->document_name] . ', для оплаты услуг в будущем периоде (с ' . \Yii::$app->formatter->asDate($operatorSettings->future_program_date_from) . ' по ' . \Yii::$app->formatter->asDate($operatorSettings->future_program_date_to) . ').',
+                            'class' => 'future_period_checkbox',
+                            'disabled' => $futurePeriodCooperate ? true : false,
+                        ]) ?>
+                    </div>
+                <?php endif; ?>
 
                 <br>
 
@@ -861,14 +871,14 @@ $this->registerJs($js, $this::POS_READY);
             <?php } elseif ($futurePeriodCooperate) { ?>
                 <br>
                 <br>
-                <p>Договор с данным поставщиком услуг начнет действовать только <?= $futurePeriodCooperate->getPeriodValidity() ?></p>
+                <p>Договор с данным поставщиком услуг начнет действовать только <?= $futurePeriodCooperate->getPeriodValidityLabel() ?></p>
                 <br>
             <?php } ?>
 
             <?php if ($futurePeriodCooperate): ?>
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <?= Cooperate::documentNames()[$operatorSettings->document_name] ?>, использование которого предусматривается в будущем периоде:
+                        <?= Cooperate::documentNames()[$operatorSettings->document_name] ?>, использование которого предусматривается в будущем периоде <?= Cooperate::STATUS_NEW == $futurePeriodCooperate->status ? ', использование которого предусматривается ' . $futurePeriodCooperate->getPeriodValidityLabel() : '' ?>:
                     </div>
 
                     <table class="table table-striped table-bordered detail-view">
@@ -974,5 +984,6 @@ $this->registerJs($js, $this::POS_READY);
                 </div>
             <?php endif; ?>
         <?php } ?>
+        <?php echo Html::a('Назад', ['personal/payer-organizations'], ['class' => 'btn btn-primary']); ?>
     </div>
 </div>

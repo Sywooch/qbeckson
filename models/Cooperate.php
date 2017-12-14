@@ -264,6 +264,7 @@ class Cooperate extends ActiveRecord
             'appeal_reason' => 'Жалоба',
             'created_date' => 'Дата подачи заявки',
             'total_payment_limit' => 'Максимальная сумма',
+            'period' => 'Период действия соглашения',
         ];
     }
 
@@ -316,6 +317,29 @@ class Cooperate extends ActiveRecord
     }
 
     /**
+     * получить дату периода в которой находится указанная дата
+     *
+     * @param string $date
+     *
+     * @return int|null
+     */
+    public static function getPeriodFromDate($date)
+    {
+        /** @var OperatorSettings $operatorSettings */
+        $operatorSettings = Yii::$app->operator->identity->settings;
+
+        if (strtotime($date) > strtotime($operatorSettings->current_program_date_from) && strtotime($date) < strtotime($operatorSettings->current_program_date_to)) {
+            return self::PERIOD_CURRENT;
+        }
+
+        if (strtotime($date) > strtotime($operatorSettings->future_program_date_from) && strtotime($date) < strtotime($operatorSettings->future_program_date_to)) {
+            return self::PERIOD_FUTURE;
+        }
+
+        return null;
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getContracts()
@@ -326,9 +350,9 @@ class Cooperate extends ActiveRecord
     /**
      * получить период действия соглашения
      */
-    public function getPeriodValidity()
+    public function getPeriodValidityLabel()
     {
-        return self::periodValidityList($this->period);
+        return self::periodValidityLabelList($this->period);
     }
 
     /**
@@ -338,7 +362,7 @@ class Cooperate extends ActiveRecord
      *
      * @return array|string
      */
-    public static function periodValidityList($period = null)
+    public static function periodValidityLabelList($period = null)
     {
         /** @var OperatorSettings $operatorSettings */
         $operatorSettings = Yii::$app->operator->identity->settings;
@@ -492,13 +516,15 @@ class Cooperate extends ActiveRecord
         return null;
     }
 
-    public static function findCooperateByParams($payerId, $organizationId)
+    public static function findCooperateByParams($payerId, $organizationId, $period, $status = Cooperate::STATUS_ACTIVE)
     {
         $query = static::find()
             ->where([
                 'payer_id' => $payerId,
                 'organization_id' => $organizationId,
-            ]);
+                'period' => $period,
+            ])
+            ->andFilterWhere(['status' => $status]);
 
         return $query->one();
     }

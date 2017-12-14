@@ -116,8 +116,8 @@ class ContractCreatePermissionConfirmForm extends Model
             return false;
         }
 
-        $certificateUserIds = ArrayHelper::map($payer->getCertificates()->distinct()->select('user_id')->asArray()->all(), 'user_id', 'user_id');
-        $organizationUserIds = ArrayHelper::map($payer->getOrganizations()->select('user_id')->asArray()->all(), 'user_id', 'user_id');
+        $certificateUserIds = ArrayHelper::getColumn($payer->getCertificates()->distinct()->select('user_id')->asArray()->all(), 'user_id');
+        $organizationUserIds = ArrayHelper::getColumn($payer->getOrganizations()->select('user_id')->asArray()->all(), 'user_id');
 
         $messageForCertificates = 'C ' . \Yii::$app->formatter->asDate(date('Y-m-d', strtotime($payer->certificate_cant_use_current_balance_at))) . ' установлено ограничение на заключение новых договоров, с указанного числа Вы не сможете подать новые заявки на обучение на период с ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_from) . ' по ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_to) . '.';
         $messageForOrganizations = 'Уполномоченной организацией ' . $payer->name . ' установлено ограничение на заключение новых договоров с детьми с ' . \Yii::$app->formatter->asDate(date('Y-m-d', strtotime($payer->certificate_cant_use_current_balance_at))) . '. Формирование новых заявок по сертификатам данной уполномоченной организации на обучение будет недоступно с указанной даты.';

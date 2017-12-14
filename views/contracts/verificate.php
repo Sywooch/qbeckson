@@ -117,7 +117,14 @@ if ($model->status === \app\models\Contracts::STATUS_REFUSED) {
     <?= Html::a('Назад', Url::to(['/personal/organization-contracts', 'id' => $model->id]), ['class' => 'btn btn-primary']); ?>
     <?php
     if ($model->status === 0) {
-        echo Html::a('Продолжить', Url::to(['/contracts/generate', 'id' => $model->id]), ['class' => 'btn btn-primary']);
+        if (!$model->canBeAccepted()) {
+            echo Html::button('Продолжить', [
+                'class' => 'btn btn-primary disabled',
+                'title' => 'Выставить оферту по данному договору нельзя пока в систему не введены реквизиты договора, заключенного между Вами и уполномоченной организацией, обслуживающей сертификат, на соответствующий период',
+            ]);
+        } else {
+            echo Html::a('Продолжить', Url::to(['/contracts/generate', 'id' => $model->id]), ['class' => 'btn btn-primary']);
+        }
     }
     ?>
     <div class="pull-right">

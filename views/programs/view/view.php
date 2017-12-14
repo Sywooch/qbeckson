@@ -2,6 +2,10 @@
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Programs */
+/* @var $cooperate Cooperate */
+
+use app\models\Cooperate;
+
 $this->title = $model->name;
 
 if (Yii::$app->user->can('operators')) {

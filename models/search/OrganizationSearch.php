@@ -2,6 +2,7 @@
 
 namespace app\models\search;
 
+use app\models\Cooperate;
 use app\models\Organization;
 use app\models\OrganizationPayerAssignment;
 use app\models\UserIdentity;
@@ -128,8 +129,12 @@ class OrganizationSearch extends Organization
             'organization.status'         => $this->statusArray
         ]);
 
+        $payerIdQuery = $this->cooperatePayerId ? ' and cooperate.payer_id = ' . $this->cooperatePayerId : '';
+        $query->leftJoin(Cooperate::tableName(), 'cooperate.organization_id = organization.id' . $payerIdQuery)
+            ->andWhere(['cooperate.period' => [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE]]);
+
         if (null !== $this->cooperateStatus) {
-            $query->joinWith(['cooperates'])
+            $query
                 ->andWhere(['cooperate.status' => $this->cooperateStatus])
                 ->andFilterWhere(['cooperate.payer_id' => $this->cooperatePayerId])
                 ->groupBy(['cooperate.id']);

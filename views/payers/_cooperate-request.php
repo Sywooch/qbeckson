@@ -32,8 +32,8 @@ use yii\web\View;
     <p>Выберите период в котором предполагаете вступление в силу Вашего договора</p>
 
     <?= Html::radioList('cooperate-period', [Cooperate::PERIOD_FUTURE], [
-        Cooperate::PERIOD_CURRENT => 'текущий период: ' . Cooperate::periodValidityList(Cooperate::PERIOD_CURRENT),
-        Cooperate::PERIOD_FUTURE => 'будущий период: ' . Cooperate::periodValidityList(Cooperate::PERIOD_FUTURE),
+        Cooperate::PERIOD_CURRENT => 'текущий период: ' . Cooperate::periodValidityLabelList(Cooperate::PERIOD_CURRENT),
+        Cooperate::PERIOD_FUTURE => 'будущий период: ' . Cooperate::periodValidityLabelList(Cooperate::PERIOD_FUTURE),
     ], ['separator' => "<br>", 'item' => function ($index, $label, $name, $checked, $value) {
         $result = Html::radio($name, Cooperate::PERIOD_FUTURE == $value ? true : false, [
             'label' => $label,
