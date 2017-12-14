@@ -104,7 +104,7 @@ class CooperateController extends Controller
         /** @var OperatorSettings $operatorSettings */
         $operatorSettings = Yii::$app->operator->identity->settings;
 
-        if (null !== $this->findCurrentModel(null, $payerId, Yii::$app->user->getIdentity()->organization->id)) {
+        if (null !== $this->findCurrentModel(null, $payerId, Yii::$app->user->getIdentity()->organization->id, $period)) {
             throw new NotFoundHttpException('Model already exist!');
         }
 
@@ -322,10 +322,11 @@ class CooperateController extends Controller
      * @param null|integer $payerId
      * @param null|integer $organizationId
      * @param null|integer $status
+     * @param null/integer $period
+     *
      * @return Cooperate
-     * @throws \DomainException
      */
-    protected function findCurrentModel($id = null, $payerId = null, $organizationId = null, $status = null)
+    protected function findCurrentModel($id = null, $payerId = null, $organizationId = null, $status = null, $period = null)
     {
         if (null === $id && null === $payerId && null === $organizationId && null === $status) {
             throw new \DomainException('Something wrong');
@@ -335,6 +336,7 @@ class CooperateController extends Controller
         $query = null !== $payerId ? $query->andWhere(['payer_id' => $payerId]) : $query;
         $query = null !== $organizationId ? $query->andWhere(['organization_id' => $organizationId]) : $query;
         $query = null !== $status ? $query->andWhere(['status' => $status]) : $query;
+        $query = null !== $period ? $query->andWhere(['period' => $period]) : $query;
 
         return $query->one();
     }
@@ -451,7 +453,7 @@ class CooperateController extends Controller
                         ->one();
 
                 $model = $this->findModel($cooperate['id']);
-                $model->status = 2;
+                $model->status = Cooperate::STATUS_REJECTED;
                 $model->date_dissolution = date("Y-m-d");
 
                 if ($model->save()) {

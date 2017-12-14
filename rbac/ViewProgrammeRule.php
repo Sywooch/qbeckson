@@ -32,9 +32,9 @@ class ViewProgrammeRule extends Rule
             return true;
         }
         if (Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
-            $organizations = Yii::$app->user->identity->payer->findCooperateOrganizations();
+            $organizationIdList = Yii::$app->user->identity->payer->getOrganizationIdListWithCurrentOrFutureCooperate();
 
-            if (in_array($programme->organization_id, $organizations)) {
+            if (in_array($programme->organization_id, $organizationIdList)) {
                 return true;
             }
         }

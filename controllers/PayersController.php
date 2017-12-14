@@ -69,15 +69,15 @@ class PayersController extends Controller
     {
         $payer = $this->findModel($id);
 
-        $activeCooperateExists = $payer->getCooperation(Cooperate::STATUS_ACTIVE) ? true : false;
+        $futurePeriodCooperate = $payer->getCooperates()->where(['cooperate.status' => Cooperate::STATUS_ACTIVE, 'cooperate.period' => Cooperate::PERIOD_FUTURE])->one();
 
         /** @var OperatorSettings $operatorSettings */
         $operatorSettings = Yii::$app->operator->identity->settings;
 
         return $this->render('view', [
             'model' => $payer,
-            'activeCooperateExists' => $activeCooperateExists ? true : false,
             'operatorSettings' => $operatorSettings,
+            'futurePeriodCooperate' => $futurePeriodCooperate,
         ]);
     }
 

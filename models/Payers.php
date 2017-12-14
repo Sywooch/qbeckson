@@ -391,6 +391,20 @@ class Payers extends \yii\db\ActiveRecord
     }
 
     /**
+     * получить список id организаций имеющие договора текущего или будущего периода действия
+     */
+    public function getOrganizationIdListWithCurrentOrFutureCooperate()
+    {
+        return ArrayHelper::getColumn(
+            $this->getCooperates()
+                ->where(['cooperate.period' => [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE]])
+                ->select('cooperate.organization_id')
+                ->asArray()->all(),
+            'organization_id'
+        );
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getInvoices()
@@ -549,7 +563,7 @@ class Payers extends \yii\db\ActiveRecord
      *
      * @return boolean
      */
-    public function certificateCanCreateContract()
+    public function certificateCanUseCurrentBalance()
     {
         return $this->certificate_can_use_current_balance || date('Y-m-d H:i:s') <= $this->certificate_cant_use_current_balance_at;
     }
@@ -565,18 +579,18 @@ class Payers extends \yii\db\ActiveRecord
             return false;
         }
 
-        $organizationWithFutureCooperateUserIdList = ArrayHelper::map(
+        $organizationWithFutureCooperateUserIdList = ArrayHelper::getColumn(
             Organization::find()
             ->select('organization.user_id')
             ->leftJoin(Cooperate::tableName(), 'organization.id = cooperate.organization_id and cooperate.status = 1 and cooperate.period = 2')
             ->where('organization.id in (select organization.id from organization left join cooperate on (organization.id = cooperate.organization_id and cooperate.status = 1) where cooperate.period = 1)')
-            ->andWhere('cooperate.id is not null')->asArray()->all(),'user_id','user_id');
-        $organizationWithoutFutureCooperateUserIdList = ArrayHelper::map(
+            ->andWhere('cooperate.id is not null')->asArray()->all(),'user_id');
+        $organizationWithoutFutureCooperateUserIdList = ArrayHelper::getColumn(
             Organization::find()
             ->select('organization.user_id')
             ->leftJoin(Cooperate::tableName(), 'organization.id = cooperate.organization_id and cooperate.status = 1 and cooperate.period = 2')
             ->where('organization.id in (select organization.id from organization left join cooperate on (organization.id = cooperate.organization_id and cooperate.status = 1) where cooperate.period = 1)')
-            ->andWhere('cooperate.id is null')->asArray()->all(), 'user_id', 'user_id');
+            ->andWhere('cooperate.id is null')->asArray()->all(), 'user_id');
 
         $messageOrganizationsWithFutureCooperate = 'Уполномоченная организация ' . $this->name . ' (' . $this->municipality->name . ') установила возможность заключения договоров с ее сертификатами, которые будут действовать с ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_from);
         $messageOrganizationsWithoutFutureCooperate = $messageOrganizationsWithFutureCooperate . '. Однако, пока у Вас нет зарегистрированного (заключенного) соглашения с ней на будущий период. Обязательно свяжитесь с уполномоченной организацией и зарегистрируйте (если требуется заключите новый) '. Cooperate::documentNames()[Yii::$app->operator->identity->settings->document_name] .', который будет действовать в будущем периоде.';
