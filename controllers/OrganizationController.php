@@ -6,6 +6,8 @@ use app\models\Certificates;
 use app\models\Contracts;
 use app\models\Cooperate;
 use app\models\forms\ConfirmRequestForm;
+use app\models\forms\CooperateForFuturePeriodForm;
+use app\models\forms\CooperateForFuturePeriodTypeForm;
 use app\models\Informs;
 use app\models\Mun;
 use app\models\OperatorSettings;
@@ -19,6 +21,7 @@ use app\traits\AjaxValidationTrait;
 use Yii;
 use yii\base\DynamicModel;
 use yii\filters\VerbFilter;
+use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -30,7 +33,6 @@ use yii\widgets\ActiveForm;
  */
 class OrganizationController extends Controller
 {
-    use AjaxValidationTrait;
 
     /**
      * @inheritdoc
@@ -93,18 +95,62 @@ class OrganizationController extends Controller
         /** @var OperatorSettings $operatorSettings */
         $operatorSettings = Yii::$app->operator->identity->settings;
 
-        $confirmRequestForm = new ConfirmRequestForm;
-        $this->performAjaxValidation($confirmRequestForm);
-
         $activeCooperate = $model->getCooperation(Cooperate::STATUS_ACTIVE);
+        $currentPeriodCooperate = $model->getCooperation(Cooperate::STATUS_ACTIVE, Cooperate::PERIOD_CURRENT);
+        $futurePeriodCooperate = $model->getCooperation(Cooperate::STATUS_ACTIVE, Cooperate::PERIOD_FUTURE);
+
+        $confirmRequestForm = new ConfirmRequestForm(['type' => $activeCooperate->document_type, 'value' => number_format($activeCooperate->total_payment_limit, 0, '','')]);
+        $cooperateForFuturePeriodTypeForm = $futurePeriodCooperate ? new CooperateForFuturePeriodTypeForm(['type' => $futurePeriodCooperate->document_type, 'maximumAmount' => number_format($futurePeriodCooperate->total_payment_limit, 0, '', '')]) : null;
+
+        $cooperateForFuturePeriodForm = new CooperateForFuturePeriodForm();
+
+        if (\Yii::$app->user->can('payer') && Yii::$app->request->isAjax) {
+            if ($cooperateForFuturePeriodForm->load(\Yii::$app->request->post())) {
+                $cooperateForFuturePeriodForm->setCurrentPeriodCooperate($currentPeriodCooperate);
+
+                return $this->asJson(ActiveForm::validate($cooperateForFuturePeriodForm));
+            }
+
+            if ($cooperateForFuturePeriodTypeForm && $cooperateForFuturePeriodTypeForm->load(\Yii::$app->request->post())) {
+                return $this->asJson(ActiveForm::validate($cooperateForFuturePeriodTypeForm));
+            }
+
+            if ($confirmRequestForm->load(Yii::$app->request->post())) {
+                return $this->asJson(ActiveForm::validate($confirmRequestForm));
+            }
+        }
+        
+        if (\Yii::$app->user->can('payer') && $cooperateForFuturePeriodForm->load(Yii::$app->request->post())) {
+            $cooperateForFuturePeriodForm->createFuturePeriodCooperate($model->id);
+            $cooperateForFuturePeriodForm->setCurrentPeriodCooperate($currentPeriodCooperate);
+
+            if ($cooperateForFuturePeriodForm->save()) {
+                \Yii::$app->session->setFlash('success', 'Договор на будущий период создан.');
+            } else {
+                \Yii::$app->session->setFlash('error', 'Ошибка создания договора на будущий период.');
+            }
+
+            return $this->redirect(Url::to(['/organization/view', 'id' => $id]));
+        }
+
+        if (\Yii::$app->user->can('payer') && $cooperateForFuturePeriodTypeForm && $cooperateForFuturePeriodTypeForm->load(\Yii::$app->request->post())) {
+            $cooperateForFuturePeriodTypeForm->setCooperate($futurePeriodCooperate);
+
+            if ($cooperateForFuturePeriodTypeForm->changeCooperateType()) {
+                \Yii::$app->session->setFlash('success', 'Вы успешно изменили соглашение будущего периода.');
+            } else {
+                \Yii::$app->session->setFlash('error', 'Возникла ошибка при изменении соглашения будущего периода.');
+            }
+
+            return $this->refresh();
+        }
 
         if (\Yii::$app->user->can('payer') && $confirmRequestForm->load(Yii::$app->request->post())) {
             $confirmRequestForm->setModel($activeCooperate);
-
             if ($confirmRequestForm->changeCooperateType()) {
-                Yii::$app->session->setFlash('success', 'Вы успешно изменили соглашение.');
+                \Yii::$app->session->setFlash('success', 'Вы успешно изменили соглашение.');
             } else {
-                Yii::$app->session->setFlash('error', 'Возникла ошибка при изменении соглашения.');
+                \Yii::$app->session->setFlash('error', 'Возникла ошибка при изменении соглашения.');
             }
 
             return $this->refresh();
@@ -113,8 +159,10 @@ class OrganizationController extends Controller
         return $this->render('view', [
             'model' => $model,
             'confirmRequestForm' => $confirmRequestForm,
+            'cooperateForFuturePeriodForm' => $cooperateForFuturePeriodForm,
             'operatorSettings' => $operatorSettings,
-            'activeCooperateExists' => $activeCooperate ? true : false,
+            'futurePeriodCooperate' => $futurePeriodCooperate,
+            'cooperateForFuturePeriodTypeForm' => $cooperateForFuturePeriodTypeForm,
         ]);
     }
 

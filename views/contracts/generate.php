@@ -34,13 +34,7 @@ $operatorSettings = Yii::$app->operator->identity->settings;
             <?php endif; ?>
         <?php ActiveForm::end(); ?>
     <?php
-    $cooperate = (new \yii\db\Query())
-        ->select(['number', 'date'])
-        ->from('cooperate')
-        ->where(['organization_id' => $model->organization_id])
-        ->andWhere(['payer_id' => $model->payer_id])
-        ->andWhere(['status' => 1])
-        ->one();
+    $cooperate = Cooperate::find()->select(['number', 'date'])->where(['id' => $model->cooperate_id])->one();
 
     $date_cooperate = explode('-', $cooperate['date']);
 

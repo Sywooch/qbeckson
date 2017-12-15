@@ -1,8 +1,10 @@
 <?php
 
 /* @var $this yii\web\View */
-/* @var $model \app\models\programs\ProgramViewDecorator */
-/* @var $modules \app\models\module\ModuleViewDecoratorOrganisation[] */
+/* @var $model app\models\Programs */
+/* @var $cooperate Cooperate */
+
+use app\models\Cooperate;
 
 $this->title = $model->name;
 

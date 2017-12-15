@@ -91,7 +91,7 @@ class InvoicesController extends Controller
         }
 
         if (mb_strlen($builder->contractsData['contracts']) < 1) {
-            Yii::$app->session->setFlash('danger', 'Не обнаружено не одного договора');
+            Yii::$app->session->setFlash('danger', 'Не обнаружено ни одного договора');
         }
 
         return $this->render('number', [
@@ -111,7 +111,7 @@ class InvoicesController extends Controller
         }
 
         if (mb_strlen($builder->contractsData['contracts']) < 1) {
-            Yii::$app->session->setFlash('danger', 'Не обнаружено не одного договора');
+            Yii::$app->session->setFlash('danger', 'Не обнаружено ни одного договора');
         }
 
         return $this->render('number', [
