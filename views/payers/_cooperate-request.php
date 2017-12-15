@@ -24,7 +24,9 @@ use yii\web\View;
         'label' => 'Направить заявку на заключение соглашения с уполномоченной организацией',
     ],
 ]) ?>
-<p>Вы собираетесь подать заявку на заключение <?= Cooperate::documentNamesInGenitive()[$operatorSettings->document_name] ?> уполномоченной организации <?= $model->name ?></p>
+<p>Вы собираетесь подать заявку на
+    заключение <?= Cooperate::documentNamesInGenitive()[$operatorSettings->document_name] ?> уполномоченной
+    организации <?= $model->name ?></p>
 
 <br>
 
@@ -37,14 +39,16 @@ use yii\web\View;
     ], ['separator' => "<br>", 'item' => function ($index, $label, $name, $checked, $value) {
         $result = Html::radio($name, Cooperate::PERIOD_FUTURE == $value ? true : false, [
             'label' => $label,
-            'onClick' => '$(".cooperate-request-link").attr("href", $(".cooperate-request-link").data("cooperate-request-url") + "&period=' . $value .'");',
+            'onClick' => '$(".cooperate-request-link").attr("href", $(".cooperate-request-link").data("cooperate-request-url") + "&period=' . $value . '");',
         ]);
 
         return $result;
     }]) ?>
 <?php else: ?>
-    <p>Поскольку до окончания периода программы ПФ остается более 30 дней Ваша заявка будет подана в целях заключения договора, действующего уже в текущем периоде:
-        с <?= \Yii::$app->formatter->asDate($operatorSettings->current_program_date_from) ?> по <?= \Yii::$app->formatter->asDate($operatorSettings->current_program_date_to) ?></p>
+    <p>Поскольку до окончания периода программы ПФ остается более 30 дней Ваша заявка будет подана в целях заключения
+        договора, действующего уже в текущем периоде:
+        с <?= \Yii::$app->formatter->asDate($operatorSettings->current_program_date_from) ?>
+        по <?= \Yii::$app->formatter->asDate($operatorSettings->current_program_date_to) ?></p>
 <?php endif; ?>
 
 <div class="checkbox-container">

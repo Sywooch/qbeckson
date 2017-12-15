@@ -76,7 +76,7 @@ class CooperateForFuturePeriodForm extends Model
 
                 return true;
             }],
-            ['maximumAmount', 'required', 'when' => function() {
+            ['maximumAmount', 'required', 'when' => function () {
                 if (1 == $this->useCurrentCooperateType) {
                     if (Cooperate::DOCUMENT_TYPE_EXTEND == $this->currentPeriodCooperate->document_type) {
                         return true;
@@ -176,6 +176,30 @@ class CooperateForFuturePeriodForm extends Model
     }
 
     /**
+     * @return Cooperate
+     */
+    public function getCurrentPeriodCooperate()
+    {
+        return $this->currentPeriodCooperate;
+    }
+
+    /**
+     * @param Cooperate $cooperate
+     */
+    public function setCurrentPeriodCooperate($cooperate)
+    {
+        $this->currentPeriodCooperate = $cooperate;
+    }
+
+    /**
+     * получить соглашение для будущего периода
+     */
+    public function getFuturePeriodCooperate()
+    {
+        return $this->futurePeriodCooperate;
+    }
+
+    /**
      * @return OperatorSettings
      */
     public function getOperatorSettings()
@@ -183,6 +207,7 @@ class CooperateForFuturePeriodForm extends Model
         if (null === $this->operatorSettings) {
             $this->operatorSettings = Yii::$app->operator->identity->settings;
         }
+
         return $this->operatorSettings;
     }
 
@@ -209,29 +234,5 @@ class CooperateForFuturePeriodForm extends Model
         $this->futurePeriodCooperate = new Cooperate(['payer_id' => \Yii::$app->user->identity->payer->id, 'organization_id' => $organizationId]);
 
         return true;
-    }
-
-    /**
-     * получить соглашение для будущего периода
-     */
-    public function getFuturePeriodCooperate()
-    {
-        return $this->futurePeriodCooperate;
-    }
-
-    /**
-     * @param Cooperate $cooperate
-     */
-    public function setCurrentPeriodCooperate($cooperate)
-    {
-       $this->currentPeriodCooperate = $cooperate;
-    }
-
-    /**
-     * @return Cooperate
-     */
-    public function getCurrentPeriodCooperate()
-    {
-        return $this->currentPeriodCooperate;
     }
 }

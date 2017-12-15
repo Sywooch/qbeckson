@@ -2,16 +2,15 @@
 
 namespace app\commands;
 
-use app\models\Contracts;
-use app\models\Invoices;
-use Yii;
 use app\components\GoogleCoordinates;
 use app\models\CertGroup;
+use app\models\Contracts;
 use app\models\Organization;
 use app\models\OrganizationAddress;
 use app\models\Payers;
 use app\models\ProgramAddressAssignment;
 use app\models\ProgramModuleAddressAssignment;
+use Yii;
 use yii\console\Controller;
 use yii\helpers\ArrayHelper;
 

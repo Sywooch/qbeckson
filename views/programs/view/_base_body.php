@@ -2,6 +2,7 @@
 
 /** @var $model \app\models\Programs */
 /** @var $this yii\web\View */
+
 /** @var $cooperate Cooperate */
 
 use app\models\Cooperate;

@@ -256,7 +256,15 @@ $this->registerJs($js);
         'header' => 'Установите возможность заключения договоров за счет средств сертификатов, предусмотренных на период от 01.01.2018 до 31.12.2018',
     ]) ?>
 
-    <p>Вы собираетесь установить возможность заключения договоров на обучения для Ваших детей с поставщиками образовательных услуг на период <?= 'с ' . \Yii::$app->formatter->asDate($operatorSettings->future_program_date_from) . ' по ' . \Yii::$app->formatter->asDate($operatorSettings->future_program_date_to) ?>. Обратите внимание, что такая возможность появится лишь у тех поставщиков услуг для которых Вы указали сведения о Договоре с Вами, действующим с <?= \Yii::$app->formatter->asDate($operatorSettings->future_program_date_from) ?>. Сейчас таких организаций <?= $cooperateFuturePeriodCount ?>, а в данном периоде их <?= $cooperateCurrentPeriodCount ?>. Вам необходимо как можно скорее заключить необходимые Договоры на будущий период с теми поставщиками образовательных услуг, с которыми Вы их еще не заключили.</p>
+    <p>Вы собираетесь установить возможность заключения договоров на обучения для Ваших детей с поставщиками
+        образовательных услуг на
+        период <?= 'с ' . \Yii::$app->formatter->asDate($operatorSettings->future_program_date_from) . ' по ' . \Yii::$app->formatter->asDate($operatorSettings->future_program_date_to) ?>
+        . Обратите внимание, что такая возможность появится лишь у тех поставщиков услуг для которых Вы указали сведения
+        о Договоре с Вами, действующим
+        с <?= \Yii::$app->formatter->asDate($operatorSettings->future_program_date_from) ?>. Сейчас таких
+        организаций <?= $cooperateFuturePeriodCount ?>, а в данном периоде их <?= $cooperateCurrentPeriodCount ?>. Вам
+        необходимо как можно скорее заключить необходимые Договоры на будущий период с теми поставщиками образовательных
+        услуг, с которыми Вы их еще не заключили.</p>
 
     <div class="checkbox-container">
         <?= Html::checkbox('', false, [
@@ -289,7 +297,8 @@ $this->registerJs($js);
 
     <?php Modal::end() ?>
 
-    <div data-toogle="tooltip" title="<?= !$payer->canChangeContractCreatePermission() ? 'установить запрет на зачисление на обучение в текущем периоде невозможно до ' . Yii::$app->formatter->asDate(date('Y-m-d', strtotime(\Yii::$app->operator->identity->settings->current_program_date_to . '-2 Month'))) : '' ?>">
+    <div data-toogle="tooltip"
+         title="<?= !$payer->canChangeContractCreatePermission() ? 'установить запрет на зачисление на обучение в текущем периоде невозможно до ' . Yii::$app->formatter->asDate(date('Y-m-d', strtotime(\Yii::$app->operator->identity->settings->current_program_date_to . '-2 Month'))) : '' ?>">
         <?= $form->field($contractCreatePermissionConfirmForm, 'certificate_can_use_current_balance', ['enableAjaxValidation' => false])->checkbox(['class' => 'certificate-can-create-contract', 'disabled' => !$payer->canChangeContractCreatePermission()]) ?>
     </div>
 

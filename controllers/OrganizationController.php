@@ -17,7 +17,6 @@ use app\models\Programs;
 use app\models\search\OrganizationSearch;
 use app\models\User;
 use app\models\UserIdentity;
-use app\traits\AjaxValidationTrait;
 use Yii;
 use yii\base\DynamicModel;
 use yii\filters\VerbFilter;
@@ -99,7 +98,7 @@ class OrganizationController extends Controller
         $currentPeriodCooperate = $model->getCooperation(Cooperate::STATUS_ACTIVE, Cooperate::PERIOD_CURRENT);
         $futurePeriodCooperate = $model->getCooperation(Cooperate::STATUS_ACTIVE, Cooperate::PERIOD_FUTURE);
 
-        $confirmRequestForm = new ConfirmRequestForm(['type' => $activeCooperate->document_type, 'value' => number_format($activeCooperate->total_payment_limit, 0, '','')]);
+        $confirmRequestForm = new ConfirmRequestForm(['type' => $activeCooperate->document_type, 'value' => number_format($activeCooperate->total_payment_limit, 0, '', '')]);
         $cooperateForFuturePeriodTypeForm = $futurePeriodCooperate ? new CooperateForFuturePeriodTypeForm(['type' => $futurePeriodCooperate->document_type, 'maximumAmount' => number_format($futurePeriodCooperate->total_payment_limit, 0, '', '')]) : null;
 
         $cooperateForFuturePeriodForm = new CooperateForFuturePeriodForm();
@@ -119,7 +118,7 @@ class OrganizationController extends Controller
                 return $this->asJson(ActiveForm::validate($confirmRequestForm));
             }
         }
-        
+
         if (\Yii::$app->user->can('payer') && $cooperateForFuturePeriodForm->load(Yii::$app->request->post())) {
             $cooperateForFuturePeriodForm->createFuturePeriodCooperate($model->id);
             $cooperateForFuturePeriodForm->setCurrentPeriodCooperate($currentPeriodCooperate);
