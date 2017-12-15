@@ -71,6 +71,7 @@ $this->registerJs($js);
     }
     ?>
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'short_name')->textInput(['maxlength' => true]) ?>
     <?php
     echo $form->field($model, 'direction_id')->widget(Select2::class, [
         'data' => ArrayHelper::map(DirectoryProgramDirection::findAllRecords(), 'id', 'name'),
