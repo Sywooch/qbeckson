@@ -4,21 +4,15 @@ namespace app\controllers;
 
 use app\assets\programsAsset\ProgramsAsset;
 use app\components\EditableOperations;
-use app\helpers\FlashHelper;
 use app\models\AllProgramsSearch;
 use app\models\Cooperate;
 use app\models\forms\ProgramAddressesForm;
 use app\models\forms\ProgramSectionForm;
-use app\models\forms\TaskTransferForm;
 use app\models\Informs;
 use app\models\Model;
-use app\models\module\ModuleViewDecoratorOrganisation;
 use app\models\Organization;
 use app\models\ProgrammeModule;
 use app\models\Programs;
-use app\models\programs\ProgramsNormativePriceCalculator;
-use app\models\programs\ProgramsVerificator;
-use app\models\programs\ProgramViewDecorator;
 use app\models\ProgramsallSearch;
 use app\models\ProgramsFile;
 use app\models\ProgramsPreviusSearch;
@@ -51,7 +45,6 @@ class ProgramsController extends Controller
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
-                    'save' => ['POST'],
                 ],
             ],
         ];
@@ -205,19 +198,19 @@ class ProgramsController extends Controller
     }
 
     /**
-     * @param $id int
+     * Displays a single Programs model.
      *
-     * @return string
+     * @param integer $id
+     *
+     * @return mixed
      * @throws ForbiddenHttpException
-     * @throws NotFoundHttpException
      */
     public function actionView($id)
     {
         /** @var $user UserIdentity */
         $user = Yii::$app->user->identity;
-        $modelOriginal = $this->findModel($id);
-        $model = ProgramViewDecorator::decorate($modelOriginal);
-        $modules = ModuleViewDecoratorOrganisation::decorateMultiple($model->modules);
+        $model = $this->findModel($id);
+
         if (!$model->isActive) {
             throw new NotFoundHttpException();
         }
@@ -228,22 +221,18 @@ class ProgramsController extends Controller
 
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
-            if ($model->verification === Programs::VERIFICATION_DENIED) {
-                Yii::$app->session->setFlash(
-                    'danger',
-                    $this->renderPartial(
-                        'informers/list_of_reazon',
+            if ($model->verification === $model::VERIFICATION_DENIED) {
+                Yii::$app->session->setFlash('danger',
+                    $this->renderPartial('informers/list_of_reazon',
                         [
-                            'dataProvider' => new ActiveDataProvider(
-                                [
+                            'dataProvider' => new ActiveDataProvider([
                                     'query' => $model->getInforms()
-                                        ->andWhere(['status' => Programs::VERIFICATION_DENIED]),
+                                        ->andWhere(['status' => $model::VERIFICATION_DENIED]),
                                     'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
                                 ]
                             )
                         ]
-                    )
-                );
+                    ));
             }
         }
         $cooperate = null;
@@ -253,27 +242,22 @@ class ProgramsController extends Controller
                 Cooperate::tableName() . '.organization_id' => $model->organization_id,
                 'status' => Cooperate::STATUS_ACTIVE])->all();
             if (!count($cooperate)) {
-                Yii::$app->session->setFlash(
-                    'warning',
-                    'К сожалению, на данный момент Вы не можете'
-                    . ' записаться на обучение в организацию, реализующую выбранную программу.'
-                    . ' Уполномоченная организация пока не заключила с ней необходимое соглашение.'
-                );
+                Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в организацию, реализующую выбранную программу. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
             }
         }
 
         ProgramsAsset::register($this->view);
 
-        return $this->render('view/view', ['model' => $model, 'modules' => $modules, 'cooperate' => $cooperate]);
+        return $this->render('view/view', ['model' => $model, 'cooperate' => $cooperate]);
     }
 
-
     /**
-     * @param $id
+     * Displays a single Programs model.
      *
-     * @return string
+     * @param integer $id
+     *
+     * @return mixed
      * @throws ForbiddenHttpException
-     * @throws NotFoundHttpException
      */
     public function actionViewTask($id)
     {
@@ -281,9 +265,7 @@ class ProgramsController extends Controller
         $user = Yii::$app->user->identity;
         $model = $this->findModel($id);
 
-        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
-            && $user->organization->id !== $model->organization_id
-        ) {
+        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION) && $user->organization->id !== $model->organization_id) {
             throw new ForbiddenHttpException('Нет доступа');
         }
         // При первом просмотре от плательщика меняем статус, чтобы запретить редактирование организации
@@ -294,21 +276,17 @@ class ProgramsController extends Controller
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             || Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
             if ($model->verification === $model::VERIFICATION_DENIED) {
-                Yii::$app->session->setFlash(
-                    'danger',
-                    $this->renderPartial(
-                        'informers/list_of_reazon',
+                Yii::$app->session->setFlash('danger',
+                    $this->renderPartial('informers/list_of_reazon',
                         [
-                            'dataProvider' => new ActiveDataProvider(
-                                [
+                            'dataProvider' => new ActiveDataProvider([
                                     'query' => $model->getInforms()
                                         ->andWhere(['status' => $model::VERIFICATION_DENIED]),
                                     'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
                                 ]
                             )
                         ]
-                    )
-                );
+                    ));
             }
         }
 
@@ -333,44 +311,26 @@ class ProgramsController extends Controller
         }
 
         $file = new ProgramsFile();
-        $modelsYears = [
-            new ProgrammeModule(
-                [
-                    'kvfirst' => 'Педагог, обладающий соответствующей квалификацией',
-                    'scenario' => $model->isMunicipalTask
-                        ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK
-                        : ProgrammeModule::SCENARIO_CREATE
-                ]
-            )
-        ];
+        $modelsYears = [new ProgrammeModule(['kvfirst' => 'Педагог, обладающий соответствующей квалификацией', 'scenario' => $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : ProgrammeModule::SCENARIO_CREATE])];
 
         if ($model->load(Yii::$app->request->post())) {
-            $modelsYears = Model::createMultiple(
-                ProgrammeModule::classname(),
-                [],
-                $model->isMunicipalTask
-                    ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK
-                    : null
-            );
+            $modelsYears = Model::createMultiple(ProgrammeModule::classname(), [], $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : null);
             Model::loadMultiple($modelsYears, Yii::$app->request->post());
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
+
                 return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelsYears),
                     ActiveForm::validate($model)
                 ));
             }
 
-            /**@var $userIdentity UserIdentity */
-            $userIdentity = Yii::$app->user->identity;
-            $organization = $userIdentity->organization;
-            $model->organization_id = $organization->id;
-            if ($model->asDraft) {
-                $model->verification = Programs::VERIFICATION_DRAFT;
-            } else {
-                $model->verification = Programs::VERIFICATION_UNDEFINED;
-            }
+
+            $organizations = new Organization();
+            $organization = $organizations->getOrganization();
+            $model->organization_id = $organization['id'];
+            $model->verification = Programs::VERIFICATION_UNDEFINED;
             $model->open = 0;
             if ($model->ovz == 2) {
                 if (!empty($model->zab)) {
@@ -379,9 +339,10 @@ class ProgramsController extends Controller
             }
 
             if (Yii::$app->request->isPost) {
+
                 $file->docFile = UploadedFile::getInstance($file, 'docFile');
 
-                if (empty($file->docFile) && !$model->isADraft()) {
+                if (empty($file->docFile)) {
                     Yii::$app->session->setFlash('error', 'Пожалуйста, добавьте файл образовательной программы.');
 
                     return $this->render('create', [
@@ -389,16 +350,15 @@ class ProgramsController extends Controller
                         'file' => $file,
                         'modelsYears' => $modelsYears,
                     ]);
-                } elseif (empty($file->docFile)) {
-                    $model->link = null;
-                } else {
-                    $datetime = time();
-                    $filename = 'program-' . $organization['id'] . '-' . $datetime . '.' . $file->docFile->extension;
-                    $model->link = $filename;
                 }
+
+                $datetime = time();
+                $filename = 'program-' . $organization['id'] . '-' . $datetime . '.' . $file->docFile->extension;
+                $model->link = $filename;
                 $model->year = count($modelsYears);
 
                 if ($file->upload($filename)) {
+
                     $valid = $model->validate();
                     $valid = Model::validateMultiple($modelsYears) && $valid;
 
@@ -508,26 +468,19 @@ class ProgramsController extends Controller
                                 }
                             }
                             if ($flag) {
-                                if (!$model->isADraft()) {
-                                    $informs = new Informs();
-                                    $informs->program_id = $model->id;
-                                    $informs->text = 'Поступила программа на сертификацию';
-                                    $informs->from = UserIdentity::ROLE_ORGANIZATION_ID;
-                                    $informs->date = date("Y-m-d");
-                                    $informs->read = 0;
-                                    $flag = $flag && $informs->save();
-                                }
-                                $flag && ($transaction->commit() || true)
-                                || $transaction->rollBack();
+                                $transaction->commit();
 
-                                return $this->redirect(
-                                    $model->isMunicipalTask
-                                        ? ['/personal/organization-municipal-task']
-                                        : ['/personal/organization-programs']
-                                );
+                                $informs = new Informs();
+                                $informs->program_id = $model->id;
+                                $informs->text = 'Поступила программа на сертификацию';
+                                $informs->from = 1;
+                                $informs->date = date("Y-m-d");
+                                $informs->read = 0;
+                                $informs->save();
+
+                                return $this->redirect($model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']);
                             }
                         } catch (\Exception $e) {
-                            Yii::trace($e->getMessage());
                             $transaction->rollBack();
                         }
                     }
@@ -581,29 +534,224 @@ class ProgramsController extends Controller
 
     public function actionSave($id)
     {
-        $verificator = new ProgramsVerificator($id);
+        $model = $this->findModel($id);
 
-        if (!$verificator->save()) {
-            FlashHelper::flashFirst($verificator);
+        if ($model->directivity == 'Техническая (робототехника)') {
+            $model->limit = Yii::$app->coefficient->data->blimrob * $model->year;
+        }
+        if ($model->directivity == 'Техническая (иная)') {
+            $model->limit = Yii::$app->coefficient->data->blimtex * $model->year;
+        }
+        if ($model->directivity == 'Естественнонаучная') {
+            $model->limit = Yii::$app->coefficient->data->blimest * $model->year;
+        }
+        if ($model->directivity == 'Физкультурно-спортивная') {
+            $model->limit = Yii::$app->coefficient->data->blimfiz * $model->year;
+        }
+        if ($model->directivity == 'Художественная') {
+            $model->limit = Yii::$app->coefficient->data->blimxud * $model->year;
+        }
+        if ($model->directivity == 'Туристско-краеведческая') {
+            $model->limit = Yii::$app->coefficient->data->blimtur * $model->year;
+        }
+        if ($model->directivity == 'Социально-педагогическая') {
+            $model->limit = Yii::$app->coefficient->data->blimsoc * $model->year;
         }
 
-        return $this->redirect('/personal/operator-programs');
+        $model->verification = Programs::VERIFICATION_DONE;
+
+        //return var_dump($model->limit);
+        if ($model->save()) {
+            $informs = new Informs();
+            $informs->program_id = $model->id;
+            $informs->prof_id = $model->organization_id;
+            $informs->text = 'Сертифицированна программа';
+            $informs->from = 3;
+            $informs->date = date("Y-m-d");
+            $informs->read = 0;
+            if ($informs->save()) {
+                return $this->redirect('/personal/operator-programs');
+            }
+        }
     }
 
     public function actionCertificate($id)
     {
         $model = $this->findModel($id);
-        $modelsYears = $model->modules;
+        $modelsYears = $model->years;
 
-        if (Yii::$app->request->isPost) {
-            $calculator = new ProgramsNormativePriceCalculator($model);
-            ($calculator->save()) || FlashHelper::flashFirst($calculator);
+        if ($model->load(Yii::$app->request->post())) {
+
+            $oldIDs = ArrayHelper::map($modelsYears, 'id', 'id');
+            $modelsYears = Model::createMultiple(ProgrammeModule::classname(), $modelsYears);
+            Model::loadMultiple($modelsYears, Yii::$app->request->post());
+            $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelsYears, 'id', 'id')));
+
+            // ajax validation
+            if (Yii::$app->request->isAjax) {
+
+                return $this->asJson(ArrayHelper::merge(
+                    ActiveForm::validateMultiple($modelsYears),
+                    ActiveForm::validate($model)
+                ));
+            }
+
+            $valid = $model->validate();
+            $valid = Model::validateMultiple($modelsYears) && $valid;
+
+            if ($valid) {
+                $transaction = \Yii::$app->db->beginTransaction();
+
+                try {
+                    if ($flag = $model->save(false)) {
+                        if (!empty($deletedIDs)) {
+                            ProgrammeModule::deleteAll(['id' => $deletedIDs]);
+                        }
+                        /**
+                         * @var $modelYears ProgrammeModule
+                         */
+                        foreach ($modelsYears as $modelYears) {
+
+
+                            if ($model->p3z == 1) {
+                                $p3r = 'p3v';
+                            }
+                            if ($model->p3z == 2) {
+                                $p3r = 'p3s';
+                            }
+                            if ($model->p3z == 3) {
+                                $p3r = 'p3n';
+                            }
+
+                            $p3 = Yii::$app->coefficient->data->$p3r;
+
+                            $mun = (new \yii\db\Query())
+                                ->select(['pc', 'zp', 'cozp', 'stav', 'costav', 'dop', 'codop', 'uvel', 'couvel', 'otch', 'cootch', 'otpusk', 'cootpusk', 'polezn', 'copolezn', 'nopc', 'conopc', 'rob', 'corob', 'tex', 'cotex', 'est', 'coest', 'fiz', 'cofiz', 'xud', 'coxud', 'tur', 'cotur', 'soc', 'cosoc'])
+                                ->from('mun')
+                                ->where(['id' => $model->mun])
+                                ->one();
+
+                            if ($model->ground == 1) {
+                                $p5 = $mun['pc'];
+                                $p6 = $mun['zp'];
+                                $p12 = $mun['stav'];
+                                $p7 = $mun['dop'];
+                                $p8 = $mun['uvel'];
+                                $p9 = $mun['otch'];
+                                $p10 = $mun['otpusk'];
+                                $p11 = $mun['polezn'];
+                                $p4 = $mun['nopc'];
+                                if ($model->directivity == 'Техническая (робототехника)') {
+                                    $p1 = $mun['rob'];
+                                }
+                                if ($model->directivity == 'Техническая (иная)') {
+                                    $p1 = $mun['tex'];
+                                }
+                                if ($model->directivity == 'Естественнонаучная') {
+                                    $p1 = $mun['est'];
+                                }
+                                if ($model->directivity == 'Физкультурно-спортивная') {
+                                    $p1 = $mun['fiz'];
+                                }
+                                if ($model->directivity == 'Художественная') {
+                                    $p1 = $mun['xud'];
+                                }
+                                if ($model->directivity == 'Туристско-краеведческая') {
+                                    $p1 = $mun['tur'];
+                                }
+                                if ($model->directivity == 'Социально-педагогическая') {
+                                    $p1 = $mun['soc'];
+                                }
+                            }
+
+                            if ($model->ground == 2) {
+                                $p5 = $mun['pc'];
+                                $p6 = $mun['cozp'];
+                                $p12 = $mun['costav'];
+                                $p7 = $mun['codop'];
+                                $p8 = $mun['couvel'];
+                                $p9 = $mun['cootch'];
+                                $p10 = $mun['cootpusk'];
+                                $p11 = $mun['copolezn'];
+                                $p4 = $mun['conopc'];
+                                if ($model->directivity == 'Техническая (робототехника)') {
+                                    $p1 = $mun['corob'];
+                                }
+                                if ($model->directivity == 'Техническая (иная)') {
+                                    $p1 = $mun['cotex'];
+                                }
+                                if ($model->directivity == 'Естественнонаучная') {
+                                    $p1 = $mun['coest'];
+                                }
+                                if ($model->directivity == 'Физкультурно-спортивная') {
+                                    $p1 = $mun['cofiz'];
+                                }
+                                if ($model->directivity == 'Художественная') {
+                                    $p1 = $mun['coxud'];
+                                }
+                                if ($model->directivity == 'Туристско-краеведческая') {
+                                    $p1 = $mun['cotur'];
+                                }
+                                if ($model->directivity == 'Социально-педагогическая') {
+                                    $p1 = $mun['cosoc'];
+                                }
+                            }
+
+                            $p14 = Yii::$app->coefficient->data->weekmonth;
+                            $p16 = Yii::$app->coefficient->data->norm;
+                            $p15 = Yii::$app->coefficient->data->pk;
+                            $p13 = Yii::$app->coefficient->data->weekyear;
+
+                            if ($modelYears->p21z == 1) {
+                                $p1y = 'p21v';
+                            }
+                            if ($modelYears->p21z == 2) {
+                                $p1y = 'p21s';
+                            }
+                            if ($modelYears->p21z == 3) {
+                                $p1y = 'p21o';
+                            }
+                            $p21 = Yii::$app->coefficient->data->$p1y;
+
+                            if ($modelYears->p22z == 1) {
+                                $p2y = 'p22v';
+                            }
+                            if ($modelYears->p22z == 2) {
+                                $p2y = 'p22s';
+                            }
+                            if ($modelYears->p22z == 3) {
+                                $p2y = 'p22o';
+                            }
+                            $p22 = Yii::$app->coefficient->data->$p2y;
+
+                            $childrenAverage = $modelYears->getChildrenAverage() ? $modelYears->getChildrenAverage() : ($modelYears->maxchild + $modelYears->minchild) / 2;
+                            $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / ($childrenAverage)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * ($childrenAverage)) / ($p11 * ($childrenAverage))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * ($childrenAverage)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * ($childrenAverage))) * $p5;
+
+                            $modelYears->normative_price = round($nprice);
+
+
+                            if (!($flag = $modelYears->save(false))) {
+                                $transaction->rollBack();
+                                break;
+                            }
+                        }
+                    }
+                    if ($flag) {
+                        $transaction->commit();
+
+                        return $this->redirect(['certificate', 'id' => $id]);
+                    }
+                } catch (Exception $e) {
+                    $transaction->rollBack();
+                }
+            }
+
+        } else {
+            return $this->render('cert', [
+                'model' => $model,
+                'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
+            ]);
         }
-
-        return $this->render('cert', [
-            'model' => $model,
-            'modelsYears' => $modelsYears
-        ]);
     }
 
     public function actionNewnormprice($id)
@@ -785,37 +933,38 @@ class ProgramsController extends Controller
     }
 
 
-    /**
-     *
-     * @return Response
-     * @throws ForbiddenHttpException
-     */
-    public function actionNormpricesave()
+    public function actionNormpricesave($id)
     {
-        if (!Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
-            $response = ['output' => '', 'message' => 'Действие запрещено'];
 
-            return $this->asJson($response);
+        $model = ProgrammeModule::findOne($id);
+
+        if ($model->load(Yii::$app->request->post())) {
+            $model->save();
+
+            $programs = (new \yii\db\Query())
+                ->select(['verification'])
+                ->from('programs')
+                ->where(['id' => $model->program_id])
+                ->one();
+
+            if ($programs['verification'] == 1) {
+                return $this->redirect(['certificate', 'id' => $model->program_id]);
+            } else {
+                return $this->redirect(['newnormprice', 'id' => $model->program_id]);
+            }
         }
 
-        $programSaveResult = EditableOperations::getInstance(Yii::$app->request->post(), Programs::className())
-            ->setAttributes('p3z')
-            ->exec();
-        $programModuleSaveResult = EditableOperations::getInstance(
-            Yii::$app->request->post(),
-            ProgrammeModule::className()
-        )->setAttributes('p21z', 'p22z', 'normative_price')
-            ->exec();
-        ($response = $programSaveResult)
-        || ($response = $programModuleSaveResult)
-        || ($response = ['output' => '', 'message' => 'Неизвестная ошибка']);
-
-        return $this->asJson($response);
+        return $this->render('newnormpricesave', [
+            'title' => null,
+            'model' => $model,
+        ]);
     }
 
     public function actionCertificateold($id)
     {
         $model = $this->findModel($id);
+
+
         $params = (new \yii\db\Query())
             ->select(['id', 'hours', 'hoursindivid', 'hoursdop', 'minchild', 'maxchild', 'p21z', 'p22z'])
             ->from('years')
@@ -883,7 +1032,16 @@ class ProgramsController extends Controller
         $model = $this->findModel($id);
         $modelsYears = $model->years;
 
+        $oldIDs = ArrayHelper::map($modelsYears, 'id', 'id');
+        $modelYears = Model::createMultiple(ProgrammeModule::classname(), $modelsYears);
         Model::loadMultiple($modelsYears, Yii::$app->request->post());
+        $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelsYears, 'id', 'id')));
+
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            return ActiveForm::validateMultiple($modelsGroups);
+        }
 
         if (Yii::$app->request->isPost) {
             if ($model->verification == Programs::VERIFICATION_WAIT) {
@@ -893,6 +1051,7 @@ class ProgramsController extends Controller
             }
 
             foreach ($modelsYears as $modelYears) {
+
                 $modelYears->save();
             }
 
@@ -900,46 +1059,8 @@ class ProgramsController extends Controller
 
         } else {
             return $this->render('open', [
-                'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears,
-                'model' => $model
+                'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
             ]);
-        }
-    }
-
-    public function actionTransferTask($id)
-    {
-        $model = $this->findModel($id);
-        if (!$model->isMunicipalTask || !$model->canTaskBeTransferred) {
-            throw new BadRequestHttpException();
-        }
-        $model->setTransferParams();
-        $modelYears = $model->years;
-        $file = new ProgramsFile();
-
-        return $this->render('update', [
-            'strictAction' => ['/programs/update', 'id' => $model->id],
-            'model' => $model,
-            'file' => $file,
-            'modelYears' => (empty($modelYears)) ? [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])] : $modelYears
-        ]);
-    }
-
-    public function actionTransferProgramme($id)
-    {
-        $model = $this->findModel($id);
-        if ($model->isMunicipalTask || !$model->canProgrammeBeTransferred) {
-            throw new BadRequestHttpException();
-        }
-        $model->setTransferParams(false);
-
-        if ($model->save()) {
-            Yii::$app->session->setFlash('success', 'Вы успешно перевели программу на муниципальное задание в реестр "Ожидающие рассмотрения"');
-
-            return $this->redirect(['/programs/view-task', 'id' => $model->id]);
-        } else {
-            Yii::$app->session->setFlash('danger', 'Произошла ошибка в процессе переноса.');
-
-            return $this->redirect(['/programs/view', 'id' => $model->id]);
         }
     }
 
@@ -953,8 +1074,7 @@ class ProgramsController extends Controller
      */
     public function actionUpdate($id)
     {
-        $modelOriginal = $this->findModel($id);
-        $model = ProgramViewDecorator::decorate($modelOriginal);
+        $model = $this->findModel($id);
         if (!$model->isActive) {
             throw new NotFoundHttpException();
         }
@@ -987,37 +1107,20 @@ class ProgramsController extends Controller
                 $model->link = $filename;
                 $file->upload($filename);
             }
-            if ($model->asDraft) {
-                $model->verification = Programs::VERIFICATION_DRAFT;
-            } else {
-                $model->verification = Programs::VERIFICATION_UNDEFINED;
-            }
+            $model->verification = Programs::VERIFICATION_UNDEFINED;
             $model->open = 0;
             if ($model->zab) {
                 $model->zab = implode(',', $model->zab);
             }
 
             $oldIDs = ArrayHelper::map($modelYears, 'id', 'id');
-            /**@var $modelYears ProgrammeModule[] */
-            $modelYears = Model::createMultiple(
-                ProgrammeModule::classname(),
-                $modelYears,
-                $model->isMunicipalTask
-                    ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK
-                    : null
-            );
+            $modelYears = Model::createMultiple(ProgrammeModule::classname(), $modelYears, $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : null);
             Model::loadMultiple($modelYears, Yii::$app->request->post());
-            $deletedIDs = array_diff(
-                $oldIDs,
-                array_filter(ArrayHelper::map($modelYears, 'id', 'id'))
-            );
-
-            if ($model->inTransferProcess) {
-                $model->setTransferParams();
-            }
+            $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelYears, 'id', 'id')));
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
+
                 return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelYears),
                     ActiveForm::validate($model)
@@ -1047,29 +1150,19 @@ class ProgramsController extends Controller
                         }
                     }
                     if ($flag) {
-                        if (!$model->isADraft()) {
-                            $informs = new Informs();
-                            $informs->program_id = $model->id;
-                            $informs->text = 'Отредактирована программа для сертификации';
-                            $informs->from = 1;
-                            $informs->date = date("Y-m-d");
-                            $informs->read = 0;
-                            $flag = $flag && $informs->save();
-                        }
-                        ($flag && ($transaction->commit() || true))
-                        || $transaction->rollBack();
+                        $transaction->commit();
 
-                        if ($model->inTransferProcess) {
-                            Yii::$app->session->setFlash('success', 'Вы успешно перевели программу на персонифицированное финансирование в реестр "Ожидающие сертификации"');
-                        }
+                        $informs = new Informs();
+                        $informs->program_id = $model->id;
+                        $informs->text = 'Отредактирована программа для сертификации';
+                        $informs->from = 1;
+                        $informs->date = date("Y-m-d");
+                        $informs->read = 0;
+                        $informs->save();
 
-                        return $this->redirect(
-                            $model->isMunicipalTask
-                                ? ['/personal/organization-municipal-task']
-                                : ['/personal/organization-programs']
-                        );
+                        return $this->redirect($model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']);
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $transaction->rollBack();
                 }
             }
@@ -1078,10 +1171,7 @@ class ProgramsController extends Controller
             return $this->render('update', [
                 'model' => $model,
                 'file' => $file,
-                'modelYears' =>
-                    (empty($modelYears))
-                        ? [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])]
-                        : $modelYears
+                'modelYears' => (empty($modelYears)) ? [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])] : $modelYears
             ]);
         }
     }
@@ -1094,6 +1184,7 @@ class ProgramsController extends Controller
         $model->zab = explode(',', $model->zab);
 
         if ($model->load(Yii::$app->request->post())) {
+
             $oldIDs = ArrayHelper::map($modelYears, 'id', 'id');
             $modelYears = Model::createMultiple(ProgrammeModule::classname(), $modelYears);
             Model::loadMultiple($modelYears, Yii::$app->request->post());
@@ -1101,6 +1192,7 @@ class ProgramsController extends Controller
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
+
                 return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelYears),
                     ActiveForm::validate($model)

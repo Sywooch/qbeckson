@@ -4,12 +4,17 @@ namespace app\controllers;
 
 use app\models\CertGroup;
 use app\models\CertificateGroupQueue;
+use app\models\Cooperate;
 use app\models\forms\ContractCreatePermissionConfirmForm;
+use app\models\Notification;
+use app\models\NotificationUser;
+use app\models\Organization;
 use app\models\Payers;
 use app\models\search\CertGroupSearch;
 use app\services\PayerService;
 use kartik\widgets\ActiveForm;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
@@ -42,17 +47,17 @@ class CertGroupController extends Controller
             $payer->save();
         }
 
-        $contractCreatePermissionConfirmForm = new ContractCreatePermissionConfirmForm(['scenario' => $payer->certificate_can_create_contract == 1 ? 'deny_to_create_contract' : 'allow_to_create_contract', 'certificate_can_create_contract' => $payer->certificate_can_create_contract]);
+        $contractCreatePermissionConfirmForm = new ContractCreatePermissionConfirmForm(['scenario' => $payer->certificate_can_use_current_balance == 1 ? 'deny_to_create_contract' : 'allow_to_create_contract', 'certificate_can_use_current_balance' => $payer->certificate_can_use_current_balance]);
 
         if (Yii::$app->request->isAjax && $contractCreatePermissionConfirmForm->load(Yii::$app->request->post())) {
             if (Yii::$app->request->get('changePermission', 0)) {
                 $changed = $contractCreatePermissionConfirmForm->changeContractCreatePermission($payer);
 
-                return $this->asJson(['canCreate' => $payer->certificate_can_create_contract, 'changed' => $changed]);
+                return $this->asJson(['canCreate' => $payer->certificate_can_use_current_balance, 'changed' => $changed]);
             }
 
             if (Yii::$app->request->get('getPermission', 0)) {
-                return $this->asJson($payer->certificate_can_create_contract);
+                return $this->asJson($payer->certificate_can_use_current_balance);
             }
 
             return $this->asJson(ActiveForm::validate($contractCreatePermissionConfirmForm));
@@ -109,11 +114,20 @@ class CertGroupController extends Controller
             return $out;
         }
 
+        /** @var \app\models\OperatorSettings $operatorSettings */
+        $operatorSettings = Yii::$app->operator->identity->settings;
+
+        $cooperateCurrentPeriodCount = $payer->getCooperates()->where(['cooperate.status' => Cooperate::STATUS_ACTIVE, 'cooperate.period' => Cooperate::PERIOD_CURRENT])->count();
+        $cooperateFuturePeriodCount = $payer->getCooperates()->where(['cooperate.status' => Cooperate::STATUS_ACTIVE, 'cooperate.period' => Cooperate::PERIOD_FUTURE])->count();
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'payer' => $payer,
             'contractCreatePermissionConfirmForm' => $contractCreatePermissionConfirmForm,
+            'operatorSettings' => $operatorSettings,
+            'cooperateCurrentPeriodCount' => $cooperateCurrentPeriodCount,
+            'cooperateFuturePeriodCount' => $cooperateFuturePeriodCount,
         ]);
     }
 
