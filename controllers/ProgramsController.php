@@ -251,7 +251,9 @@ class ProgramsController extends Controller
             $cooperate = Cooperate::find()->where([
                 Cooperate::tableName() . '.payer_id' => $user->getCertificate()->select('payer_id'),
                 Cooperate::tableName() . '.organization_id' => $model->organization_id,
-                'status' => Cooperate::STATUS_ACTIVE])->all();
+                'status' => Cooperate::STATUS_ACTIVE,
+                'period' => [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE],
+                ])->all();
             if (!count($cooperate)) {
                 Yii::$app->session->setFlash(
                     'warning',

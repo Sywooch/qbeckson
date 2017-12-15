@@ -2,7 +2,9 @@
 
 /** @var $model \app\models\Programs */
 /** @var $this yii\web\View */
-/** @var $modules \app\models\module\ModuleViewDecoratorOrganisation[] */
+/** @var $cooperate Cooperate */
+
+use app\models\Cooperate;
 
 $moduleTemplate = '_base_module';
 if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_CERTIFICATE)) {
