@@ -97,9 +97,9 @@ use yii\bootstrap\Alert;
  * @property ProgramAddressAssignment[] $addressAssignments
  * @property ProgramAddressAssignment[] $mainAddressAssignments
  * @property bool $canProgrammeBeTransferred
- * @method  isADraft()
+ * @method   bool isADraft()
+ * @method  yii\db\ActiveQuery getInforms();
  *  ***
- * @property string shortNameWithHint
  */
 class ProgramViewDecorator extends ModelDecorator
 {
@@ -132,11 +132,6 @@ class ProgramViewDecorator extends ModelDecorator
         }
 
         return $headTemplate;
-    }
-
-    public function getShortNameWithHint(): string
-    {
-        return 'sssss';
     }
 
     public function attributeLabels()
