@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use yii\db\ActiveRecord;
+
 /**
  * This is the model class for table "coefficient".
  *
@@ -54,8 +56,15 @@ namespace app\models;
  *
  * @property Operators $operator
  */
-class Coefficient extends \yii\db\ActiveRecord
+class Coefficient extends ActiveRecord
 {
+    const PROVISION_HI = 1;
+    const PROVISION_MEDIUM = 2;
+    const PROVISION_LOW = 3;
+    const QUALIFICATION_FIRST = 2;
+    const QUALIFICATION_HI = 1;
+    const QUALIFICATION_OTHER = 3;
+
     /**
      * @inheritdoc
      */
@@ -136,4 +145,59 @@ class Coefficient extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Operators::className(), ['id' => 'operator_id'])->inverseOf('coefficient');
     }
+
+    /**
+     * @param $qualification
+     * @return int|null
+     */
+    public function getMainTeacherCoefficient($qualification)
+    {
+        switch ($qualification) {
+            case self::QUALIFICATION_HI:
+                return $this->p21v;
+            case self::QUALIFICATION_FIRST:
+                return $this->p21s;
+            case self::QUALIFICATION_OTHER:
+                return $this->p21o;
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * @param $qualification
+     * @return int|null
+     */
+    public function getAdditionalTeacherCoefficient($qualification)
+    {
+        switch ($qualification) {
+            case self::QUALIFICATION_HI:
+                return $this->p22v;
+            case self::QUALIFICATION_FIRST:
+                return $this->p22s;
+            case self::QUALIFICATION_OTHER:
+                return $this->p22o;
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * @param $coefficient
+     * @return int|null
+     */
+    public function getProvision($coefficient) {
+        switch ($coefficient) {
+            case self::PROVISION_HI:
+                return $this->p3v;
+            case self::PROVISION_MEDIUM:
+                return $this->p3s;
+            case self::PROVISION_LOW:
+                return $this->p3n;
+            default:
+                return null;
+        }
+    }
+
+
 }

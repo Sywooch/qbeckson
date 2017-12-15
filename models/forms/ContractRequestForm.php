@@ -94,6 +94,7 @@ class ContractRequestForm extends Model
             return;
         }*/
 
+
         $group = $this->getGroup();
         if (null === ($settings = $this->getSettings())) {
             $this->addError($attribute, 'Должны быть указаны периоды реализации программ в настройках.');
@@ -102,8 +103,18 @@ class ContractRequestForm extends Model
 
         /** @var Payers $payer */
         $payer = $this->getCertificate()->payer;
+        $settingsCurrentProgramDateFrom = \DateTime::createFromFormat('Y-m-d', $settings->current_program_date_from);
+        $attributeDate = \DateTime::createFromFormat('U', strtotime($this->$attribute));
+        $now = new \DateTime();
+        $nowDiffOffset = clone $now;
+        //Устанавливаем время в полночь, для корректного сравнения
+        $settingsCurrentProgramDateFrom->modify('midnight');
+        $now->modify('midnight');
+        $nowDiffOffset->modify('midnight');
+        $attributeDate->modify('midnight');
+        $nowDiffOffset->modify('- ' . $settings->day_offset . ' days');
 
-        if (!$payer->certificateCanCreateContract() && 1 == $payer->certificate_can_use_future_balance &&
+        if (!$payer->certificateCanUseCurrentBalance() && 1 == $payer->certificate_can_use_future_balance &&
             (strtotime($this->$attribute) < strtotime($settings->future_program_date_from) || strtotime($this->$attribute) > strtotime($group->datestop))) {
             if (strtotime($settings->future_program_date_from) > strtotime($group->datestop)) {
                 $this->addError(
@@ -122,7 +133,7 @@ class ContractRequestForm extends Model
             return;
         }
 
-        if ($payer->certificateCanCreateContract() && 1 != $payer->certificate_can_use_future_balance &&
+        if ($payer->certificateCanUseCurrentBalance() && 1 != $payer->certificate_can_use_future_balance &&
                 (strtotime($this->$attribute) > strtotime($settings->current_program_date_to))) {
             $this->addError(
                 $attribute,
@@ -131,7 +142,7 @@ class ContractRequestForm extends Model
             return;
         }
 
-        if ($payer->certificateCanCreateContract() && 1 == $payer->certificate_can_use_future_balance &&
+        if ($payer->certificateCanUseCurrentBalance() && 1 == $payer->certificate_can_use_future_balance &&
                 (strtotime($this->$attribute) < strtotime($group->datestart) || strtotime($this->$attribute) > strtotime($group->datestop))) {
             $this->addError(
                 $attribute,
@@ -168,6 +179,13 @@ class ContractRequestForm extends Model
         if ($this->dateFrom === $this->dateTo) {
             $this->addError($attribute, 'Даты должны отличаться');
             return;
+        }
+
+        if ($nowDiffOffset > $settingsCurrentProgramDateFrom) {
+            if ($now > $attributeDate) {
+                $this->addError($attribute, 'Дата не может быть раньше текущего дня');
+                return;
+            }
         }
 
     }

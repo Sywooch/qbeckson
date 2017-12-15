@@ -16,7 +16,7 @@ Modal::begin([
     'header' => '<h2>Реквизиты соглашения</h2>',
     'toggleButton' => [
         'tag' => 'a',
-        'class' => 'btn btn-primary',
+        'class' => !is_null($toggleButtonClass) ? $toggleButtonClass : 'btn btn-primary',
         'label' => $label,
     ],
 ]);

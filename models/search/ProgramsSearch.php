@@ -2,6 +2,7 @@
 
 namespace app\models\search;
 
+use app\models\Cooperate;
 use app\components\ActiveDataProviderWithDecorator;
 use app\models\OrganizationPayerAssignment;
 use app\models\Payers;
@@ -100,6 +101,10 @@ class ProgramsSearch extends Programs
                 'activities'
             ]);
 
+        $query->leftJoin(Payers::tableName(), 'programs.mun = payers.mun');
+        $query->leftJoin(Cooperate::tableName(), 'cooperate.organization_id = programs.organization_id and cooperate.payer_id = payers.id')
+            ->andWhere(['cooperate.status' => Cooperate::STATUS_ACTIVE, 'cooperate.period' => [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE]]);
+
         $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
 
         if ($this->isMunicipalTask) {
@@ -142,7 +147,7 @@ class ProgramsSearch extends Programs
         if ($this->payerId) {
             /** @var UserIdentity $user */
             $user = Yii::$app->user->getIdentity();
-            $organizationIds = ArrayHelper::getColumn($user->payer->cooperates, 'organization_id');
+            $organizationIds = $user->payer->getOrganizationIdListWithCurrentOrFutureCooperate();
             if ($this->organization_id && $organizationIds && $this->organization_id !== 'Array') {
                 $this->organization_id = ArrayHelper::isIn($this->organization_id, $organizationIds) ?
                     $this->organization_id : 0;
