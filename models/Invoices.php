@@ -14,7 +14,7 @@ use yii\helpers\ArrayHelper;
  *
  * @property integer      $id
  * @property integer      $month
- * @property integer $year
+ * @property int $year [int(11)]
  * @property integer      $organization_id
  * @property integer      $payers_id
  * @property string $contracts
@@ -26,8 +26,11 @@ use yii\helpers\ArrayHelper;
  * @property integer $completeness
  * @property integer      $status
  * @property String       $statusAsString
- * @property integer $cooperate_id
+ * @property int $completeness
+ * @property int $cooperate_id
+ * @property String $contracts
  * @property string $pdf
+ *
  *
  * @property InvoiceHaveContract[] $invoiceHaveContracts
  * @property Contracts[] $contractModels
@@ -158,11 +161,22 @@ class Invoices extends ActiveRecord
             ->viaTable('invoice_have_contract', ['invoice_id' => 'id']);
     }
 
-    public function setCooperate()
+
+    /**
+     * устанавливает соглашение счета
+     *
+     * @param boolean $preInvoice - предоплата
+     */
+    public function setCooperate($preInvoice)
     {
-        $cooperate = Cooperate::findCooperateByParams($this->payers_id, $this->organization_id);
+        if ($preInvoice) {
+            $cooperate = Cooperate::findCooperateByParams($this->payers_id, $this->organization_id, Cooperate::getPeriodFromDate($this->date));
+        } else {
+            $cooperate = Cooperate::findOne(['payer_id' => $this->payers_id, 'organization_id' => $this->organization_id, 'status' => Cooperate::STATUS_ACTIVE]);
+        }
         $this->cooperate_id = $cooperate->id;
     }
+
 
     public function setAsPaid()
     {

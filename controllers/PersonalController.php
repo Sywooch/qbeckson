@@ -756,7 +756,7 @@ class PersonalController extends Controller
         $exposedSearchInvoices = new InvoicesSearch([
             'status' => [Invoices::STATUS_NOT_VIEWED, Invoices::STATUS_IN_THE_WORK],
             'payers_id' => $user->payer->id,
-            'organization_id' => ArrayHelper::getColumn($user->payer->cooperates, 'organization_id'),
+            'organization_id' => $user->payer->getOrganizationIdListWithCurrentOrFutureCooperate(),
             'sum' => '0,10000000',
         ]);
         $exposedInvoicesProvider = $exposedSearchInvoices->search(Yii::$app->request->queryParams);
@@ -764,7 +764,7 @@ class PersonalController extends Controller
         $paidSearchInvoices = new InvoicesSearch([
             'status' => [Invoices::STATUS_PAID],
             'payers_id' => $user->payer->id,
-            'organization_id' => ArrayHelper::getColumn($user->payer->cooperates, 'organization_id'),
+            'organization_id' => $user->payer->getOrganizationIdListWithCurrentOrFutureCooperate(),
             'sum' => '0,10000000',
         ]);
         $paidInvoicesProvider = $paidSearchInvoices->search(Yii::$app->request->queryParams);
@@ -772,7 +772,7 @@ class PersonalController extends Controller
         $removedSearchInvoices = new InvoicesSearch([
             'status' => [Invoices::STATUS_REMOVED],
             'payers_id' => $user->payer->id,
-            'organization_id' => ArrayHelper::getColumn($user->payer->cooperates, 'organization_id'),
+            'organization_id' => $user->payer->getOrganizationIdListWithCurrentOrFutureCooperate(),
             'sum' => '0,10000000',
         ]);
         $removedInvoicesProvider = $removedSearchInvoices->search(Yii::$app->request->queryParams);
@@ -1444,7 +1444,7 @@ class PersonalController extends Controller
         }
         ProgramsAsset::register($this->view);
 
-        if (!$certificate->payer->certificateCanCreateContract()) {
+        if (!$certificate->payer->certificateCanUseCurrentBalance()) {
             /** @var OperatorSettings $operatorSettings */
             $operatorSettings = Yii::$app->operator->identity->settings;
 

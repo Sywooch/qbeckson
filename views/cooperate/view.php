@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'number',
                 'label'     => 'Реквизиты',
                 'format'    => 'raw',
-                'visible'   => (in_array($model->status, [Cooperate::STATUS_REJECTED, Cooperate::STATUS_APPEALED])) ? false : true,
+                'visible' => $model->status != Cooperate::STATUS_ACTIVE ? false : true,
                 'value'     => function ($model)
                 {
                     /** @var \app\models\Cooperate $model */
@@ -71,6 +71,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     /** @var \app\models\Cooperate $model */
                     return $model::statuses()[$model->status];
                 }
+            ],
+            [
+                'attribute' => 'period',
+                'label' => $model->attributeLabels()['period'],
+                'value' => $model->getPeriodValidityLabel(),
             ]
         ],
     ]) ?>
