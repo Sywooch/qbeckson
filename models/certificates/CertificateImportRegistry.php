@@ -2,9 +2,12 @@
 
 namespace app\models\certificates;
 
+use app\models\AuthAssignment;
 use app\models\Certificates;
 use app\models\Payers;
 use app\models\User;
+use app\models\UserIdentity;
+use app\models\UserPersonalAssign;
 use Box\Spout\Common\Exception\IOException;
 use Box\Spout\Common\Type;
 use Box\Spout\Reader\ReaderFactory;
@@ -243,9 +246,9 @@ class CertificateImportRegistry extends ActiveRecord
 
         $userColumns = ['username', 'password', 'access_token', 'auth_key', 'mun_id'];
 
-        $insertCount = 0;
+        $newUserInsertCount = 0;
         if (count($newUserList) > 0) {
-            $insertCount = Yii::$app->db->createCommand()->batchInsert(User::tableName(), $userColumns, $newUserList)->execute();
+            $newUserInsertCount = Yii::$app->db->createCommand()->batchInsert(User::tableName(), $userColumns, $newUserList)->execute();
         }
 
         if (count($userExistList) > 0) {
@@ -257,12 +260,16 @@ class CertificateImportRegistry extends ActiveRecord
         ArrayHelper::map(User::find()->select('username, id')->where(['username' => ArrayHelper::map($newUserList, 'username', 'username')])->asArray()->all(), 'username', 'id');
 
         $userIdListForLog = [];
+        $userAssign = [];
         foreach ($userIdList as $userId) {
             $userIdListForLog[] = ['user_id' => $userId, 'created_at' => date('Y-m-d H:i:s')];
+            $userAssign[] = ['item_name' => UserIdentity::ROLE_CERTIFICATE, 'user_id' => $userId, 'created_at' => strtotime(date('Y-m-d H:i:s'))];
         }
 
-        if ($insertCount > 0) {
+        if ($newUserInsertCount > 0) {
             Yii::$app->db->createCommand()->batchInsert(UserCreatedOnCertificateImportLog::tableName(), ['user_id', 'created_at'], $userIdListForLog)->execute();
+
+            Yii::$app->db->createCommand()->batchInsert(AuthAssignment::tableName(), ['item_name', 'user_id', 'created_at'], $userAssign)->execute();
         }
 
         $possibleCertGroupId = $payer->getCertGroups()->one()->id;
