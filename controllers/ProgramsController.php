@@ -224,7 +224,7 @@ class ProgramsController extends Controller
 
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
-            if ($model->verification === $model::VERIFICATION_DENIED) {
+            if ($model->verification === Programs::VERIFICATION_DENIED) {
                 Yii::$app->session->setFlash(
                     'danger',
                     $this->renderPartial(
@@ -233,7 +233,7 @@ class ProgramsController extends Controller
                             'dataProvider' => new ActiveDataProvider(
                                 [
                                     'query' => $model->getInforms()
-                                        ->andWhere(['status' => $model::VERIFICATION_DENIED]),
+                                        ->andWhere(['status' => Programs::VERIFICATION_DENIED]),
                                     'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
                                 ]
                             )
