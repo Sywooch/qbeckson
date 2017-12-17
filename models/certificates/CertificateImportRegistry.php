@@ -2,9 +2,12 @@
 
 namespace app\models\certificates;
 
+use app\models\AuthAssignment;
 use app\models\Certificates;
 use app\models\Payers;
 use app\models\User;
+use app\models\UserIdentity;
+use app\models\UserPersonalAssign;
 use Box\Spout\Common\Exception\IOException;
 use Box\Spout\Common\Type;
 use Box\Spout\Reader\ReaderFactory;
@@ -159,7 +162,7 @@ class CertificateImportRegistry extends ActiveRecord
         $payer = Yii::$app->user->identity->payer;
         $region = Yii::$app->operator->identity->region;
 
-        $usernameList = User::find()->select('username')->asArray()->all();
+        $usernameList = ArrayHelper::getColumn(User::find()->select('username')->asArray()->all(), 'username');
 
         $certificateImportList = [];
 
@@ -178,7 +181,7 @@ class CertificateImportRegistry extends ActiveRecord
 
                         do {
                             $username = $region . $payer->code . str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
-                        } while (in_array($username, $usernameList) || in_array($username, ArrayHelper::map($certificateImportList, 'username', 'username')));
+                        } while (in_array($username, $usernameList) || in_array($username, ArrayHelper::getColumn($certificateImportList, 'username')));
 
                         $certificateImportList[] = [
                             'payer_id' => $payer->id,
@@ -212,10 +215,10 @@ class CertificateImportRegistry extends ActiveRecord
     {
         $transaction = Yii::$app->db->beginTransaction();
 
-        $userNameList = ArrayHelper::map(User::find()->select('username')->asArray()->all(), 'username', 'username');
-        $certificateNumberList = ArrayHelper::map(Certificates::find()->select('number')->asArray()->all(), 'number', 'number');
+        $userNameList = ArrayHelper::getColumn(User::find()->select('username')->asArray()->all(), 'username');
+        $certificateNumberList = ArrayHelper::getColumn(Certificates::find()->select('number')->asArray()->all(), 'number');
 
-        $certificateImportBufferUsernameList = ArrayHelper::map($this->certificateImportList, 'username', 'username');
+        $certificateImportBufferUsernameList = ArrayHelper::getColumn($this->certificateImportList, 'username');
 
         /** @var Payers $payer */
         $payer = Yii::$app->user->identity->payer;
@@ -227,25 +230,25 @@ class CertificateImportRegistry extends ActiveRecord
 
         $certificateList = [];
 
-        foreach ($this->certificateImportList as &$certificateImportBuffer) {
+        foreach ($this->certificateImportList as &$certificateImportData) {
             $password = Yii::$app->getSecurity()->generateRandomString($length = 10);
             $passwordHash = Yii::$app->getSecurity()->generatePasswordHash($password);
 
-            $certificateImportBuffer['password'] = $password;
+            $certificateImportData['password'] = $password;
 
-            if (!in_array($certificateImportBuffer['username'], $userNameList)) {
-                $newUserList[] = ['username' => $certificateImportBuffer['username'], 'password' => $passwordHash, 'access_token' => '', 'auth_key' => '', 'mun_id' => $userMunId];
+            if (!in_array($certificateImportData['username'], $userNameList)) {
+                $newUserList[] = ['username' => $certificateImportData['username'], 'password' => $passwordHash, 'access_token' => '', 'auth_key' => '', 'mun_id' => $userMunId];
             } else {
                 $userExistList = ['password' => $passwordHash];
-                $userExistListCondition = ['username' => $certificateImportBuffer['username']];
+                $userExistListCondition = ['username' => $certificateImportData['username']];
             }
         }
 
         $userColumns = ['username', 'password', 'access_token', 'auth_key', 'mun_id'];
 
-        $insertCount = 0;
+        $newUserInsertCount = 0;
         if (count($newUserList) > 0) {
-            $insertCount = Yii::$app->db->createCommand()->batchInsert(User::tableName(), $userColumns, $newUserList)->execute();
+            $newUserInsertCount = Yii::$app->db->createCommand()->batchInsert(User::tableName(), $userColumns, $newUserList)->execute();
         }
 
         if (count($userExistList) > 0) {
@@ -257,12 +260,16 @@ class CertificateImportRegistry extends ActiveRecord
         ArrayHelper::map(User::find()->select('username, id')->where(['username' => ArrayHelper::map($newUserList, 'username', 'username')])->asArray()->all(), 'username', 'id');
 
         $userIdListForLog = [];
+        $userAssign = [];
         foreach ($userIdList as $userId) {
             $userIdListForLog[] = ['user_id' => $userId, 'created_at' => date('Y-m-d H:i:s')];
+            $userAssign[] = ['item_name' => UserIdentity::ROLE_CERTIFICATE, 'user_id' => $userId, 'created_at' => strtotime(date('Y-m-d H:i:s'))];
         }
 
-        if ($insertCount > 0) {
+        if ($newUserInsertCount > 0) {
             Yii::$app->db->createCommand()->batchInsert(UserCreatedOnCertificateImportLog::tableName(), ['user_id', 'created_at'], $userIdListForLog)->execute();
+
+            Yii::$app->db->createCommand()->batchInsert(AuthAssignment::tableName(), ['item_name', 'user_id', 'created_at'], $userAssign)->execute();
         }
 
         $possibleCertGroupId = $payer->getCertGroups()->one()->id;

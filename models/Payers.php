@@ -30,8 +30,8 @@ use Yii;
  * @property integer                $directionality_5_count
  * @property integer                $directionality_6_count
  * @property integer                $certificate_can_use_future_balance
- * @property bool                   $certificate_can_use_current_balance        разрешено ли сертификату создавать договор на текущий период
- * @property string                 $certificate_cant_use_current_balance_at    сертификату запрещается создавать договор на текущий период с указанной даты и времени
+ * @property bool $certificate_can_use_current_balance        разрешено ли сертификату создавать договор на текущий период
+ * @property string $certificate_cant_use_current_balance_at    сертификату запрещается создавать договор на текущий период с указанной даты и времени
  * @property int                    $operator_id
  * @property string                 $code
  * @property string                 $name_dat
@@ -166,7 +166,7 @@ class Payers extends \yii\db\ActiveRecord
             'cooperates'                             => 'Число заключенных соглашений',
             'certificates'                           => 'Число выданных сертификатов',
             'certificate_can_use_future_balance'     => 'Установите возможность заключения договоров за счет средств сертификатов, предусмотренных на период от ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_from) . ' до ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_to),
-            'certificate_can_use_current_balance'    => 'Доступно заключение договоров на текущий период:  от ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_from) . ' по ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_to),
+            'certificate_can_use_current_balance' => 'Доступно заключение договоров на текущий период:  от ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_from) . ' по ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_to),
             'certificate_cant_use_current_balance_at' => 'Дата и время с которой начинает действовать запрет на заключение договоров',
             'days_to_first_contract_request'         => 'Количество дней, предусмотренное для создания первой заявки после создания сертификата или его перевода в тип "сертификат ПФ"',
             'days_to_contract_request_after_refused' => 'Количество дней, предусмотренное для создания новой заявки после неудачной попытки заключения предыдущего договора',
@@ -581,19 +581,19 @@ class Payers extends \yii\db\ActiveRecord
 
         $organizationWithFutureCooperateUserIdList = ArrayHelper::getColumn(
             Organization::find()
-            ->select('organization.user_id')
-            ->leftJoin(Cooperate::tableName(), 'organization.id = cooperate.organization_id and cooperate.status = 1 and cooperate.period = 2')
-            ->where('organization.id in (select organization.id from organization left join cooperate on (organization.id = cooperate.organization_id and cooperate.status = 1) where cooperate.period = 1)')
-            ->andWhere('cooperate.id is not null')->asArray()->all(),'user_id');
+                ->select('organization.user_id')
+                ->leftJoin(Cooperate::tableName(), 'organization.id = cooperate.organization_id and cooperate.status = 1 and cooperate.period = 2')
+                ->where('organization.id in (select organization.id from organization left join cooperate on (organization.id = cooperate.organization_id and cooperate.status = 1) where cooperate.period = 1)')
+                ->andWhere('cooperate.id is not null')->asArray()->all(), 'user_id');
         $organizationWithoutFutureCooperateUserIdList = ArrayHelper::getColumn(
             Organization::find()
-            ->select('organization.user_id')
-            ->leftJoin(Cooperate::tableName(), 'organization.id = cooperate.organization_id and cooperate.status = 1 and cooperate.period = 2')
-            ->where('organization.id in (select organization.id from organization left join cooperate on (organization.id = cooperate.organization_id and cooperate.status = 1) where cooperate.period = 1)')
-            ->andWhere('cooperate.id is null')->asArray()->all(), 'user_id');
+                ->select('organization.user_id')
+                ->leftJoin(Cooperate::tableName(), 'organization.id = cooperate.organization_id and cooperate.status = 1 and cooperate.period = 2')
+                ->where('organization.id in (select organization.id from organization left join cooperate on (organization.id = cooperate.organization_id and cooperate.status = 1) where cooperate.period = 1)')
+                ->andWhere('cooperate.id is null')->asArray()->all(), 'user_id');
 
         $messageOrganizationsWithFutureCooperate = 'Уполномоченная организация ' . $this->name . ' (' . $this->municipality->name . ') установила возможность заключения договоров с ее сертификатами, которые будут действовать с ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_from);
-        $messageOrganizationsWithoutFutureCooperate = $messageOrganizationsWithFutureCooperate . '. Однако, пока у Вас нет зарегистрированного (заключенного) соглашения с ней на будущий период. Обязательно свяжитесь с уполномоченной организацией и зарегистрируйте (если требуется заключите новый) '. Cooperate::documentNames()[Yii::$app->operator->identity->settings->document_name] .', который будет действовать в будущем периоде.';
+        $messageOrganizationsWithoutFutureCooperate = $messageOrganizationsWithFutureCooperate . '. Однако, пока у Вас нет зарегистрированного (заключенного) соглашения с ней на будущий период. Обязательно свяжитесь с уполномоченной организацией и зарегистрируйте (если требуется заключите новый) ' . Cooperate::documentNames()[Yii::$app->operator->identity->settings->document_name] . ', который будет действовать в будущем периоде.';
 
         $notificationOrganizationsWithFutureCooperate = Notification::getExistOrCreate($messageOrganizationsWithFutureCooperate, 0, Notification::TYPE_CERTIFICATE_WITH_FUTURE_COOPERATE_CAN_USE_FUTURE_BALANCE);
         $notificationOrganizationsWithoutFutureCooperate = Notification::getExistOrCreate($messageOrganizationsWithoutFutureCooperate, 0, Notification::TYPE_CERTIFICATE_WITHOUT_FUTURE_COOPERATE_CAN_USE_FUTURE_BALANCE);

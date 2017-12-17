@@ -56,7 +56,8 @@ use yii\helpers\Html;
             <div class="col-md-12 search-settings collapse">
                 <br/>
                 <?php
-                $idHiden = Yii::$app->security->generateRandomString(6);
+                $idHiden = 'usersearchfiltersassignment-filter_id-'
+                    . Yii::$app->security->generateRandomString(6);
                 $idSelect = Yii::$app->security->generateRandomString(6);
                 $form = ActiveForm::begin(['action' => ['site/save-filter']]);
                 $columnLabels = [];
@@ -64,16 +65,19 @@ use yii\helpers\Html;
                     $columnLabels[$column] = $model->getAttributeLabel($column);
                 }
                 ?>
-                <?= $form->field($userFilter, 'filter_id', ['options' => ['id' => $idHiden]])->hiddenInput()->label(false) ?>
+                <?= $form->field(
+                    $userFilter,
+                    'filter_id'
+                )->hiddenInput(['id' => $idHiden])->label(false) ?>
                 <?= $form->field($userFilter, 'columns')->widget(Select2::class, [
                     'data' => array_combine(array_unique($userFilter->filter->columnsForUser), $columnLabels),
-                    'options'       => [
+                    'options' => [
                         'placeholder' => 'Выберите..',
                         'id' => $idSelect
                     ],
                     'pluginOptions' => [
                         'allowClear' => true,
-                        'multiple'   => true,
+                        'multiple' => true,
                     ],
                 ]); ?>
                 <?= Html::submitButton('Сохранить', ['class' => 'btn btn-warning']) ?>

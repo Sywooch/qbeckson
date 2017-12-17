@@ -2,6 +2,7 @@
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Programs */
+
 /* @var $cooperate Cooperate */
 
 use app\models\Cooperate;
@@ -38,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-xs-12">
         <?= $this->render(
             '_base_body',
-            ['model' => $model, 'cooperate' => $cooperate, 'modules' => $modules]
+            ['cooperate' => $cooperate, 'modules' => $modules]
         ) ?>
     </div>
 </div>

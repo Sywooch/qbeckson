@@ -14,7 +14,7 @@ use yii\helpers\ArrayHelper;
  *
  * @property integer      $id
  * @property integer      $month
- * @property int          $year [int(11)]
+ * @property int $year [int(11)]
  * @property integer      $organization_id
  * @property integer      $payers_id
  * @property string $contracts
@@ -26,10 +26,10 @@ use yii\helpers\ArrayHelper;
  * @property integer $completeness
  * @property integer      $status
  * @property String       $statusAsString
- * @property int          $completeness
- * @property int          $cooperate_id
- * @property String       $contracts
- * @property string       $pdf
+ * @property int $completeness
+ * @property int $cooperate_id
+ * @property String $contracts
+ * @property string $pdf
  *
  *
  * @property InvoiceHaveContract[] $invoiceHaveContracts

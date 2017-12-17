@@ -53,8 +53,8 @@ $municipality = [
     'value' => 'municipality.name',
 ];
 $name = [
-    'attribute' => 'name',
     'label' => 'Наименование',
+    'attribute' => 'name',
 ];
 $hours = [
     'attribute' => 'hours',
@@ -75,7 +75,7 @@ $directivity = [
 $form = [
     'attribute' => 'form',
     'value' => function ($model) {
-        return $model::forms()[$model->form];
+        return \app\models\Programs::forms()[$model->form];
     },
     'type' => SearchFilter::TYPE_DROPDOWN,
     'data' => $searchOpenPrograms::forms(),

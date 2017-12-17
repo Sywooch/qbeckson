@@ -97,11 +97,17 @@ use yii\bootstrap\Alert;
  * @property ProgramAddressAssignment[] $addressAssignments
  * @property ProgramAddressAssignment[] $mainAddressAssignments
  * @property bool $canProgrammeBeTransferred
- * @method  isADraft()
+ * @method   bool isADraft()
+ * @method  yii\db\ActiveQuery getInforms();
  *  ***
  */
 class ProgramViewDecorator extends ModelDecorator
 {
+    public static function illnesses()
+    {
+        return Programs::illnesses();
+    }
+
     public function getAlert(): string
     {
         if ($this->verification === Programs::VERIFICATION_DRAFT) {
@@ -126,5 +132,10 @@ class ProgramViewDecorator extends ModelDecorator
         }
 
         return $headTemplate;
+    }
+
+    public function attributeLabels()
+    {
+        return parent::attributeLabels();
     }
 }

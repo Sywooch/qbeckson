@@ -3,6 +3,7 @@
 namespace app\models\search;
 
 use app\models\Cooperate;
+use app\components\ActiveDataProviderWithDecorator;
 use app\models\OrganizationPayerAssignment;
 use app\models\Payers;
 use app\models\Programs;
@@ -26,6 +27,8 @@ class ProgramsSearch extends Programs
     public $modelName;
     public $payerId;
     public $taskPayerId;
+
+    public $decorator;
 
     /**
      * @return string
@@ -114,13 +117,24 @@ class ProgramsSearch extends Programs
             ]);
         }
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'pagination' => [
-                'pageSizeLimit' => false,
-                'pageSize' => $pageSize,
-            ]
-        ]);
+        if ($this->decorator) {
+            $dataProvider = new ActiveDataProviderWithDecorator([
+                'decoratorClass' => $this->decorator,
+                'query' => $query,
+                'pagination' => [
+                    'pageSizeLimit' => false,
+                    'pageSize' => $pageSize,
+                ]
+            ]);
+        } else {
+            $dataProvider = new ActiveDataProvider([
+                'query' => $query,
+                'pagination' => [
+                    'pageSizeLimit' => false,
+                    'pageSize' => $pageSize,
+                ]
+            ]);
+        }
 
         $this->load($params);
 

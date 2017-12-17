@@ -2,7 +2,6 @@
 
 use app\models\Cooperate;
 use app\models\OperatorSettings;
-use app\models\Organization;
 use yii\db\Query;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -163,7 +162,8 @@ $this->params['breadcrumbs'][] = $this->title;
         if (isset($roles['organizations'])) { ?>
 
             <?php if (isset($cooperation) && Cooperate::STATUS_NEW == $cooperation->status): ?>
-                <p>Вы отправили заявку на заключение договора действующего <?= $cooperation->getPeriodValidityLabel() ?>.</p>
+                <p>Вы отправили заявку на заключение договора действующего <?= $cooperation->getPeriodValidityLabel() ?>
+                    .</p>
             <?php endif; ?>
 
             <?php
@@ -198,7 +198,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 if ($activeDocumentLink) { ?>
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <?= Cooperate::documentNames()[$operatorSettings->document_name] ?>, используемый для оплаты услуг на текущий момент:
+                            <?= Cooperate::documentNames()[$operatorSettings->document_name] ?>, используемый для оплаты
+                            услуг на текущий момент:
                         </div>
 
                         <table class="table table-striped table-bordered detail-view">
@@ -227,7 +228,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         ); ?>
                                     </td>
                                 </tr>
-                            <?php } else if (($cooperation->status === Cooperate::STATUS_CONFIRMED &&
+                            <?php } elseif (($cooperation->status === Cooperate::STATUS_CONFIRMED &&
                                     null !== $cooperation->number &&
                                     null !== $cooperation->date) ||
                                 $cooperation->status === Cooperate::STATUS_ACTIVE
@@ -235,7 +236,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
                                 <tr>
                                     <th>Реквизиты соглашения</th>
-                                    <td>Договор от <?= \Yii::$app->formatter->asDate($cooperation->date) ?> №<?= $cooperation->number ?>
+                                    <td>Договор от <?= \Yii::$app->formatter->asDate($cooperation->date) ?>
+                                        №<?= $cooperation->number ?>
                                     </td>
                                 </tr>
                                 <?php if ($cooperation->status == Cooperate::STATUS_ACTIVE && $cooperation->document_type == Cooperate::DOCUMENT_TYPE_EXTEND) { ?>
@@ -295,7 +297,8 @@ $this->params['breadcrumbs'][] = $this->title;
             if ($futurePeriodCooperate): ?>
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <?= Cooperate::documentNames()[$operatorSettings->document_name] ?>, использование которого предусматривается в будущем периоде:
+                        <?= Cooperate::documentNames()[$operatorSettings->document_name] ?>, использование которого
+                        предусматривается в будущем периоде:
                     </div>
 
                     <table class="table table-striped table-bordered detail-view">
@@ -315,7 +318,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             <tr>
                                 <th>Реквизиты соглашения</th>
                                 <td>
-                                    Договор от <?= \Yii::$app->formatter->asDate($futurePeriodCooperate->date) ?> №<?= $futurePeriodCooperate->number ?>
+                                    Договор от <?= \Yii::$app->formatter->asDate($futurePeriodCooperate->date) ?>
+                                    №<?= $futurePeriodCooperate->number ?>
                                 </td>
                             </tr>
                             <?php if ($futurePeriodCooperate->status == Cooperate::STATUS_ACTIVE && $futurePeriodCooperate->document_type == Cooperate::DOCUMENT_TYPE_EXTEND): ?>

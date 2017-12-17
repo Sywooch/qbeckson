@@ -1,5 +1,5 @@
 <?php
-/** @var $model \app\models\module\ModuleViewDecoratorOrganisation */
+/** @var $model \app\models\module\ModuleViewDecorator */
 
 use app\components\widgets\modalCheckLink\ModalCheckLink;
 use yii\helpers\Html;

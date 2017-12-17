@@ -14,7 +14,7 @@ use yii\db\ActiveRecord;
  * @property integer        $nominal
  * @property float          $nominal_f
  * @property integer        $amount
- * @property integer        $nominals_limit
+ * @property integer $nominals_limit
  * @property integer        $is_special
  *
  * @property integer $countActualCertificates

@@ -1,4 +1,5 @@
 <?php
+
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -16,5 +17,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'file' => $file,
         'modelsYears' => $modelsYears,
+        'strictAction' => null
     ]) ?>
 </div>

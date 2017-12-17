@@ -2,19 +2,19 @@
 
 namespace app\controllers;
 
+use app\models\Cooperate;
 use app\models\forms\ConfirmRequestForm;
 use app\models\forms\RejectContractForm;
 use app\models\OperatorSettings;
-use app\models\UserIdentity;
-use app\traits\AjaxValidationTrait;
-use Yii;
-use app\models\Cooperate;
-use yii\web\Controller;
-use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use app\models\Organization;
 use app\models\Payers;
 use app\models\User;
+use app\models\UserIdentity;
+use app\traits\AjaxValidationTrait;
+use Yii;
+use yii\filters\VerbFilter;
+use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 /**
@@ -96,6 +96,7 @@ class CooperateController extends Controller
      *
      * @param $payerId
      * @param $period
+     *
      * @return string|Response
      * @throws NotFoundHttpException
      */
@@ -369,16 +370,16 @@ class CooperateController extends Controller
 
     public function actionViews($id)
     {
-         $payers = new Payers();
+        $payers = new Payers();
         $payer = $payers->getPayer();
 
         $cooperate = (new \yii\db\Query())
-                ->select(['id'])
-                ->from('cooperate')
-                ->where(['organization_id' => $id])
-                ->andWhere(['payer_id' => $payer['id']])
-                ->andWhere([ '<', 'status', 2])
-                ->one();
+            ->select(['id'])
+            ->from('cooperate')
+            ->where(['organization_id' => $id])
+            ->andWhere(['payer_id' => $payer['id']])
+            ->andWhere(['<', 'status', 2])
+            ->one();
 
         return $this->render('view', [
             'model' => $this->findModel($cooperate['id']),
@@ -408,7 +409,7 @@ class CooperateController extends Controller
      */
     public function actionDelete($id)
     {
-         $user = User::findOne(Yii::$app->user->id);
+        $user = User::findOne(Yii::$app->user->id);
 
         if ($user->load(Yii::$app->request->post())) {
             if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
@@ -416,21 +417,23 @@ class CooperateController extends Controller
                 $organization = $organizations->getOrganization();
 
                 $cooperate = (new \yii\db\Query())
-                        ->select(['id'])
-                        ->from('cooperate')
-                        ->where(['organization_id' => $organization['id']])
-                        ->andWhere(['payer_id' => $id])
-                        ->andWhere(['status' => 0])
-                        ->one();
+                    ->select(['id'])
+                    ->from('cooperate')
+                    ->where(['organization_id' => $organization['id']])
+                    ->andWhere(['payer_id' => $id])
+                    ->andWhere(['status' => 0])
+                    ->one();
 
                 $this->findModel($cooperate['id'])->delete();
 
                 return $this->redirect(['/personal/organization-payers#panel2']);
             } else {
                 Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
-                 return $this->redirect(['/personal/organization-payers#panel2']);
+
+                return $this->redirect(['/personal/organization-payers#panel2']);
             }
         }
+
         return $this->render('/user/delete', [
             'user' => $user,
         ]);
@@ -445,12 +448,12 @@ class CooperateController extends Controller
                 $organization = $organizations->getOrganization();
 
                 $cooperate = (new \yii\db\Query())
-                        ->select(['id'])
-                        ->from('cooperate')
-                        ->where(['organization_id' => $organization['id']])
-                        ->andWhere(['payer_id' => $id])
-                        ->andWhere(['status' => 1])
-                        ->one();
+                    ->select(['id'])
+                    ->from('cooperate')
+                    ->where(['organization_id' => $organization['id']])
+                    ->andWhere(['payer_id' => $id])
+                    ->andWhere(['status' => 1])
+                    ->one();
 
                 $model = $this->findModel($cooperate['id']);
                 $model->status = Cooperate::STATUS_REJECTED;
@@ -461,9 +464,11 @@ class CooperateController extends Controller
                 }
             } else {
                 Yii::$app->session->setFlash('error', 'Не правильно введен пароль.');
-                 return $this->redirect(['/personal/organization-payers']);
+
+                return $this->redirect(['/personal/organization-payers']);
             }
         }
+
         return $this->render('/user/delete', [
             'user' => $user,
         ]);
