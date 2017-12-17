@@ -7,10 +7,16 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 
 $fStrings = [];
-$fStrings['ageGroupShort'] = Yii::t('app', '{min}-{max} лет',
-    ['min' => $model->age_group_min, 'max' => $model->age_group_max]);
-$fStrings['ageGroupFull'] = Yii::t('app', 'Рекомендуемый возраст с {min} до {max} лет',
-    ['min' => $model->age_group_min, 'max' => $model->age_group_max]);
+$fStrings['ageGroupShort'] = Yii::t(
+    'app',
+    '{min, number, integer}-{max, number, integer} лет',
+    ['min' => $model->age_group_min, 'max' => $model->age_group_max]
+);
+$fStrings['ageGroupFull'] = Yii::t(
+    'app',
+    'Рекомендуемый возраст с {min, number, integer} до {max, number, integer} лет',
+    ['min' => $model->age_group_min, 'max' => $model->age_group_max]
+);
 if ($model->zab && mb_strlen($model->zab) > 0) {
     $fStrings['zabShort'] = 'С' . PHP_EOL . 'ОВЗ';
     $fStrings['zabFull'] = $model->illnessesList;
@@ -18,17 +24,26 @@ if ($model->zab && mb_strlen($model->zab) > 0) {
     $fStrings['zabShort'] = 'Без' . PHP_EOL . 'ОВЗ';
     $fStrings['zabFull'] = 'Не предусмотрено обучение учащихся с ОВЗ';
 }
-$fStrings['rateFull'] = Yii::t('app', 'Рейтинг программы: {rating}%',
-    ['rating' => Yii::$app->formatter->asInteger($model->rating)]);
-
-$fStrings['rateShort'] = Yii::t('app', '{rating}',
-    ['rating' => Yii::$app->formatter->asInteger($model->rating)]);
-
-$fStrings['costFirstModule'] = Yii::t('app', 'Заявленная: {formattedValue}',
-    ['formattedValue' => Yii::$app->formatter->asCurrency($model->getModules()->one()->price),]);
-
-$fStrings['costFirstModuleNotmativ'] = Yii::t('app', 'Нормативная: {formattedValue}',
-    ['formattedValue' => Yii::$app->formatter->asCurrency($model->getModules()->one()->normative_price),]);
+$fStrings['rateFull'] = Yii::t(
+    'app',
+    'Рейтинг программы: {rating}%',
+    ['rating' => Yii::$app->formatter->asInteger($model->rating)]
+);
+$fStrings['rateShort'] = Yii::t(
+    'app',
+    '{rating}',
+    ['rating' => Yii::$app->formatter->asInteger($model->rating)]
+);
+$fStrings['costFirstModule'] = Yii::t(
+    'app',
+    'Заявленная: {formattedValue}',
+    ['formattedValue' => Yii::$app->formatter->asCurrency($model->getModules()->one()->price),]
+);
+$fStrings['costFirstModuleNotmativ'] = Yii::t(
+    'app',
+    'Нормативная: {formattedValue}',
+    ['formattedValue' => Yii::$app->formatter->asCurrency($model->getModules()->one()->normative_price),]
+);
 
 $JS = <<<JS
  $('.js-ellipsis-title').dotdotdot({
@@ -51,8 +66,11 @@ $JS = <<<JS
 JS;
 
 if (!$photo = $model->getPhoto()) {
-    $photo = $this->getAssetManager()->getAssetUrl($this->assetBundles[\app\assets\programsAsset\ProgramsAsset::className()],
-        $model->defaultPhoto);
+    $photo = $this->getAssetManager()
+        ->getAssetUrl(
+            $this->assetBundles[\app\assets\programsAsset\ProgramsAsset::className()],
+            $model->defaultPhoto
+        );
 }
 $isAvailable = $model->isAvailable(Yii::$app->user->identity);
 $this->registerJs($JS, $this::POS_READY);
@@ -63,7 +81,10 @@ $this->registerJs($JS, $this::POS_READY);
             <div class="program-img socped"><img src="<?= $photo ?>"/></div>
         </div>
         <div class="col-xs-12 col-sm-8 col-md-8 col-lg-9">
-            <h2 class="card-title js-ellipsis-title"><?= $model->name ?></h2>
+            <h2 class="card-title js-ellipsis-title"
+                data-container="body" data-toggle="popover" data-placement="bottom"
+                data-trigger="hover" data-content="<?= htmlentities($model->name) ?>"
+            ><?= $model->short_name ?></h2>
             <div class="card-badges">
                 <div class="card-badges-item card-badges-item_violet" title="<?= $model->direction->name ?>"><span
                             class="large-size <?= $model->iconClass ?>"></span></div>
@@ -90,7 +111,11 @@ $this->registerJs($JS, $this::POS_READY);
                     <div><?= Html::a($model->organization->name, Url::to(['/organization/view',
                             'id' => $model->organization->id]),
                             ['target' => '_blank']); ?></div>
-                    <div><?= ($model->mainAddress ? $model->mainAddress->address : $model->organization->address_legal) ?></div>
+                    <div><?= (
+                        $model->mainAddress
+                            ? $model->mainAddress->address
+                            : $model->organization->address_legal
+                        ) ?></div>
                 </div>
                 <div class="card-info-paragraph card-info-paragraph_mh38">
                 </div>
@@ -101,25 +126,27 @@ $this->registerJs($JS, $this::POS_READY);
         <div class="col-xs-12">
             <div class="collapse pt-18 program-info-view" id="prog-detail-1">
                 <?= \yii\widgets\DetailView::widget([
-                    'options'    => [
-                        'tag'   => 'ul',
+                    'options' => [
+                        'tag' => 'ul',
                         'class' => 'text-info-lines'],
-                    'template'   => '<li><strong>{label}:</strong>{value}</li>',
-                    'model'      => $model,
+                    'template' => '<li><strong>{label}:</strong>{value}</li>',
+                    'model' => $model,
                     'attributes' => [
                         'direction.name',
                         ['attribute' => 'commonActivities'],
-                        ['label' => 'Возраст детей',
-                         'value' => $model->age_group_min . ' - ' . $model->age_group_max],
+                        [
+                            'label' => 'Возраст детей',
+                            'value' => intval($model->age_group_min) . ' - ' . intval($model->age_group_max)
+                        ],
                         'illnessesList',
                         ['label' => 'Число модулей',
-                         'value' => $model->getModules()->count()],
+                            'value' => $model->getModules()->count()],
                         [
-                            'label'     => 'Общая продолжительность (часов)',
+                            'label' => 'Общая продолжительность (часов)',
                             'attribute' => 'countHours',
                         ],
                         [
-                            'label'     => 'Общая продолжительность (месяцев)',
+                            'label' => 'Общая продолжительность (месяцев)',
                             'attribute' => 'countMonths',
                         ],
                         'municipality.name',
