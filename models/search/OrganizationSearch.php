@@ -130,10 +130,10 @@ class OrganizationSearch extends Organization
         ]);
 
         if (null !== $this->cooperateStatus) {
-//            $query->joinWith(['cooperates'])
-//                ->andWhere(['cooperate.status' => $this->cooperateStatus])
-//                ->andFilterWhere(['cooperate.payer_id' => $this->cooperatePayerId])
-//                ->groupBy(['cooperate.id']);
+            $query->joinWith(['cooperates'])
+                ->andWhere(['cooperate.status' => $this->cooperateStatus])
+                ->andFilterWhere(['cooperate.payer_id' => $this->cooperatePayerId])
+                ->groupBy(['cooperate.id']);
         } else {
             $query->groupBy(['organization.id']);
         }
