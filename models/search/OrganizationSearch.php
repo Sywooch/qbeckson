@@ -129,12 +129,8 @@ class OrganizationSearch extends Organization
             'organization.status'         => $this->statusArray
         ]);
 
-        $payerIdQuery = $this->cooperatePayerId ? ' and cooperate.payer_id = ' . $this->cooperatePayerId : '';
-        $query->leftJoin(Cooperate::tableName(), 'cooperate.organization_id = organization.id' . $payerIdQuery)
-            ->andWhere(['cooperate.period' => [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE]]);
-
         if (null !== $this->cooperateStatus) {
-            $query
+            $query->joinWith(['cooperates'])
                 ->andWhere(['cooperate.status' => $this->cooperateStatus])
                 ->andFilterWhere(['cooperate.payer_id' => $this->cooperatePayerId])
                 ->groupBy(['cooperate.id']);

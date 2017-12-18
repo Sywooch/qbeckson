@@ -43,7 +43,14 @@ class ContractCreatePermissionConfirmForm extends Model
         return [
             ['password', 'required', 'on' => 'deny_to_create_contract'],
             ['certificate_can_use_current_balance', 'boolean'],
-            ['changePermissionConfirm', 'compare', 'compareValue' => 1, 'operator' => '==', 'message' => 'необходимо подтвердить запрет на заключение новых договоров', 'except' => 'allow_to_create_contract'],
+            [
+                'changePermissionConfirm',
+                'compare',
+                'compareValue' => 1,
+                'operator' => '==',
+                'message' => 'необходимо подтвердить запрет на заключение новых договоров',
+                'except' => 'allow_to_create_contract'
+            ],
             ['password', 'passwordValidator'],
         ];
     }
@@ -55,7 +62,15 @@ class ContractCreatePermissionConfirmForm extends Model
     {
         return [
             'password' => 'Пароль',
-            'certificate_can_use_current_balance' => 'Доступно заключение договоров на текущий период:  от ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_from) . ' по ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_to),
+            'certificate_can_use_current_balance'
+            => 'Доступно заключение договоров на текущий период:  от '
+                . Yii::$app->formatter->asDate(
+                    Yii::$app->operator->identity->settings->current_program_date_from
+                )
+                . ' по '
+                . Yii::$app->formatter->asDate(
+                    Yii::$app->operator->identity->settings->current_program_date_to
+                ),
             'changePermissionConfirm' => 'Да, мы уверены',
         ];
     }
@@ -85,7 +100,8 @@ class ContractCreatePermissionConfirmForm extends Model
     /**
      * изменить разрешение на создание договоров
      * ---
-     * если наступила дата запрета создания договора в текущем периоде ($payer->certificate_cant_use_current_balance_at),
+     * если наступила дата запрета создания договора
+     * в текущем периоде ($payer->certificate_cant_use_current_balance_at),
      * то изменить разрешение уже нельзя
      *
      * @param Payers $payer - плательщик
@@ -111,19 +127,62 @@ class ContractCreatePermissionConfirmForm extends Model
         }
 
         if (!$payer->save()) {
-            $payer->certificate_can_use_current_balance = $payer->getOldAttribute('certificate_can_use_current_balance');
+            $payer->certificate_can_use_current_balance
+                = $payer->getOldAttribute('certificate_can_use_current_balance');
 
             return false;
         }
 
-        $certificateUserIds = ArrayHelper::getColumn($payer->getCertificates()->distinct()->select('user_id')->asArray()->all(), 'user_id');
-        $organizationUserIds = ArrayHelper::getColumn($payer->getOrganizations()->select('user_id')->asArray()->all(), 'user_id');
+        $certificateUserIds = ArrayHelper::getColumn(
+            $payer->getCertificates()
+                ->distinct()
+                ->select('user_id')
+                ->asArray()
+                ->all(),
+            'user_id'
+        );
+        $organizationUserIds = ArrayHelper::getColumn(
+            $payer->getOrganizations()
+                ->select('user_id')
+                ->asArray()
+                ->all(),
+            'user_id'
+        );
 
-        $messageForCertificates = 'C ' . \Yii::$app->formatter->asDate(date('Y-m-d', strtotime($payer->certificate_cant_use_current_balance_at))) . ' установлено ограничение на заключение новых договоров, с указанного числа Вы не сможете подать новые заявки на обучение на период с ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_from) . ' по ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_to) . '.';
-        $messageForOrganizations = 'Уполномоченной организацией ' . $payer->name . ' установлено ограничение на заключение новых договоров с детьми с ' . \Yii::$app->formatter->asDate(date('Y-m-d', strtotime($payer->certificate_cant_use_current_balance_at))) . '. Формирование новых заявок по сертификатам данной уполномоченной организации на обучение будет недоступно с указанной даты.';
+        $messageForCertificates = 'C '
+            . \Yii::$app->formatter->asDate(
+                date(
+                    'Y-m-d',
+                    strtotime($payer->certificate_cant_use_current_balance_at)
+                )
+            )
+            . ' установлено ограничение на заключение новых договоров, '
+            . 'с указанного числа Вы не сможете подать новые заявки на обучение на период с '
+            . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_from)
+            . ' по ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_to)
+            . '.';
+        $messageForOrganizations = 'Уполномоченной организацией '
+            . $payer->name
+            . ' установлено ограничение на заключение новых договоров с детьми с '
+            . \Yii::$app->formatter->asDate(
+                date(
+                    'Y-m-d',
+                    strtotime($payer->certificate_cant_use_current_balance_at)
+                )
+            )
+            . '. Формирование новых заявок по сертификатам данной уполномоченной организации '
+            . 'на обучение будет недоступно с указанной даты.';
 
-        $notificationForCertificates = Notification::getExistOrCreate($messageForCertificates, 0, Notification::TYPE_CERTIFICATE_CANT_USE_CURRENT_BALANCE);
-        $notificationForOrganizations = Notification::getExistOrCreate($messageForOrganizations, 0, Notification::TYPE_CERTIFICATE_CANT_USE_CURRENT_BALANCE);
+        $notificationForCertificates = Notification::getExistOrCreate(
+            $messageForCertificates,
+            0,
+            Notification::TYPE_CERTIFICATE_CANT_USE_CURRENT_BALANCE
+        );
+        $notificationForOrganizations = Notification::getExistOrCreate(
+            $messageForOrganizations,
+            0,
+            Notification::TYPE_CERTIFICATE_CANT_USE_CURRENT_BALANCE
+        );
 
         // уведомления сертификатов
         if ($notificationForCertificates) {
