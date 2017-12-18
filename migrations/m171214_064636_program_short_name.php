@@ -6,7 +6,6 @@ class m171214_064636_program_short_name extends Migration
 {
     public function safeUp()
     {
-        $this->dropColumn('{{%programs}}', 'short_name');
         $this->addColumn(
             '{{%programs}}',
             'short_name',
