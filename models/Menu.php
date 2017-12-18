@@ -268,6 +268,21 @@ class Menu
                 ['label' => 'Подведомственность', 'url' => ['/personal/organization-suborder']],
             ]],
             ['label' => 'Группы', 'url' => ['/personal/organization-groups']],
+            ['label' => 'Поддержка', 'items' => [
+                [
+                    'label' => 'Удаление договоров',
+                    'url' => '#',
+                    'linkOptions' => [
+                        'class' => 'text-red-muted',
+                        'id' => 'organization-menu-delete-order-link',
+                        'data' => [
+                            'url' => '/',
+                            'toggle' => 'modal',
+                            'target' => '#organization-menu-delete-order-modal',
+                        ],
+                    ],
+                ],
+            ]],
         ];
     }
 
