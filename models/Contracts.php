@@ -270,8 +270,13 @@ class Contracts extends ActiveRecord
 
     public function setCooperate()
     {
-        $cooperate = Cooperate::findCooperateByParams($this->payer_id, $this->organization_id);
+        if (!in_array($this->period, [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE]) || !$cooperate = Cooperate::findCooperateByParams($this->payer_id, $this->organization_id, $this->period)) {
+            return false;
+        }
+
         $this->cooperate_id = $cooperate->id;
+
+        return true;
     }
 
     public static function findByInterval($idStart, $idFinish, $organizationId = null)
@@ -900,5 +905,22 @@ class Contracts extends ActiveRecord
         $requested = new \DateTime($this->requested_at);
 
         return date_diff($now, $requested)->days > $tooLongTime;
+    }
+
+    /**
+     * контракт может быть подтвержден (переведен в status = 3)
+     * ---
+     * контракт может быть подтвержден, только если существует соглашение,
+     * действующего в периоде указанному в контракте
+     *
+     * @return boolean
+     */
+    public function canBeAccepted()
+    {
+        if (!in_array($this->period, [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE]) || is_null(Cooperate::findCooperateByParams($this->payer_id, $this->organization_id, $this->period))) {
+            return false;
+        }
+
+        return true;
     }
 }

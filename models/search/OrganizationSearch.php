@@ -2,6 +2,7 @@
 
 namespace app\models\search;
 
+use app\models\Cooperate;
 use app\models\Organization;
 use app\models\OrganizationPayerAssignment;
 use app\models\UserIdentity;

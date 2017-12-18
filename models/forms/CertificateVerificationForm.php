@@ -78,7 +78,7 @@ class CertificateVerificationForm extends Model
 
         $payer = $certificate->payer;
 
-        if (!$payer->certificateCanCreateContract() && $payer->certificate_can_use_future_balance != 1) {
+        if (!$payer->certificateCanUseCurrentBalance() && $payer->certificate_can_use_future_balance != 1) {
             $this->addError($attribute, 'На данный момент уполномоченной организацией выбранного сертификата установлен запрет на создание новых заявок как в текущем, так и в будущем периоде.');
             return;
         }
@@ -95,6 +95,7 @@ class CertificateVerificationForm extends Model
                     'organization_id' => Yii::$app->user->identity->organization->id,
                     'payer_id' => $this->getCertificate()->payer_id,
                     'status' => Cooperate::STATUS_ACTIVE,
+                    'period' => [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE],
                 ])
                 ->one();
         }

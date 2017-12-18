@@ -1,8 +1,9 @@
 <?php
 /** @var $model \app\models\ProgrammeModule */
-
 /** @var $this yii\web\View */
+/** @var $cooperate Cooperate */
 
+use app\models\Cooperate;
 
 $canViewGroups = false;
 $message = '';
