@@ -40,6 +40,7 @@ class CertGroupController extends Controller
 
         $payer = Payers::findOne(Yii::$app->user->identity->payer->id);
         if ($payer && $payer->load(Yii::$app->request->post())) {
+            $payer->setScenario(Payers::SCENARIO_DAYS_ONLY);
             Yii::trace('is post, payer to save');
             $payer->save();
         }
@@ -59,7 +60,7 @@ class CertGroupController extends Controller
         ) {
             if (Yii::$app->request->get('changePermission', 0)) {
                 $changed = $contractCreatePermissionConfirmForm->changeContractCreatePermission($payer);
-                Yii::trace('is ajax, contractCreatePermissionConfirmForm loaded');
+                Yii::trace('is ajax, contractCreatePermissionConfirmForm loaded and payer save');
 
                 return $this->asJson(
                     [
@@ -135,7 +136,7 @@ class CertGroupController extends Controller
                     }
                 }
 
-                if (false === $model->save(false)) {
+                if (!$model->save(false)) {
                     $out = ['output' => '', 'message' => 'Ошибка при сохранении.'];
                 }
             } else {
