@@ -53,6 +53,7 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
     const VERIFICATION_WAIT = 1;
     const VERIFICATION_DONE = 2;
     const VERIFICATION_DENIED = 3;
+    const VERIFICATION_DRAFT = 5;
     const VERIFICATION_IN_ARCHIVE = 10;
 
     const SCENARIO_CREATE = 'create';
@@ -73,6 +74,8 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
                     return 'Верифицированно успешно';
                 case self::VERIFICATION_DENIED:
                     return 'Отказ';
+                case self::VERIFICATION_DRAFT:
+                    return 'Черновик';
                 case self::VERIFICATION_IN_ARCHIVE:
                     return 'Программа в архиве';
                 default:
@@ -109,18 +112,30 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
     {
         return [
             [['month', 'hours', 'hoursindivid', 'hoursdop', 'kvfirst', 'kvdop'], 'required', 'on' => 'default'],
-            [['month', 'hours', 'hoursindivid', 'hoursdop', 'kvfirst', 'kvdop'], 'required', 'on' => self::SCENARIO_CREATE],
+            [
+                ['month', 'hours', 'hoursindivid', 'hoursdop', 'kvfirst', 'kvdop'],
+                'required', 'on' => self::SCENARIO_CREATE
+            ],
             [['month', 'hours', 'kvfirst'], 'required', 'on' => self::SCENARIO_MUNICIPAL_TASK],
             [['name', 'minchild', 'maxchild', 'results'], 'required', 'on' => self::SCENARIO_CREATE],
             [['name', 'minchild', 'maxchild', 'results'], 'required', 'on' => self::SCENARIO_MUNICIPAL_TASK],
-            [['hours', 'program_id', 'year', 'hoursdop', 'hoursindivid', 'minchild', 'maxchild', 'open', 'quality_control', 'p21z', 'p22z'], 'integer'],
+            [
+                [
+                    'hours', 'program_id', 'year', 'hoursdop', 'hoursindivid', 'minchild',
+                    'maxchild', 'open', 'quality_control', 'p21z', 'p22z'
+                ],
+                'integer'
+            ],
             [['price', 'normative_price'], 'number'],
             [['verification'], 'integer'],
             [['month'], 'integer', 'max' => 12],
             [['kvfirst', 'kvdop', 'name'], 'string', 'max' => 255],
             ['results', 'string'],
             [['minchild', 'maxchild'], 'integer', 'min' => 1],
-            [['program_id'], 'exist', 'skipOnError' => true, 'targetClass' => Programs::className(), 'targetAttribute' => ['program_id' => 'id']],
+            [
+                ['program_id'], 'exist', 'skipOnError' => true, 'targetClass' => Programs::className(),
+                'targetAttribute' => ['program_id' => 'id']
+            ],
         ];
     }
 
@@ -144,9 +159,13 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
             'month' => 'Число месяцев реализации',
             'hours' => 'Продолжительность реализации образовательной программы в часах',
             'kvfirst' => 'Сведения о необходимой квалификации педагогического работника для реализации программы',
-            'hoursindivid' => 'Число часов работы педагогического работника, предусмотренное на индивидуальное сопровождение детей',
-            'hoursdop' => 'Число часов сопровождения группы дополнительным педагогическим работником одновременно с педагогическим работником, непосредственно осуществляющим реализацию образовательной программы',
-            'kvdop' => 'Квалификация педагогического работника, дополнительно привлекаемого для совместной реализации образовательной программы в группе',
+            'hoursindivid' => 'Число часов работы педагогического работника, предусмотренное на '
+                . 'индивидуальное сопровождение детей',
+            'hoursdop' => 'Число часов сопровождения группы дополнительным педагогическим работником '
+                . 'одновременно с педагогическим работником, непосредственно осуществляющим реализацию '
+                . 'образовательной программы',
+            'kvdop' => 'Квалификация педагогического работника, дополнительно привлекаемого '
+                . 'для совместной реализации образовательной программы в группе',
             'minchild' => 'Ожидаемое минимальное число детей, обучающееся в одной группе',
             'maxchild' => 'Ожидаемое максимальное число детей, обучающееся в одной группе',
             'price' => 'Стоимость модуля',
@@ -154,8 +173,10 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
             'open' => 'Зачисление',
             'previus' => 'Предварительная запись',
             'quality_control' => 'Число оценок качества',
-            'p21z' => 'Квалификация педагогического работника непосредственно осуществляющего реализацию образовательной программы в группе детей',
-            'p22z' => 'Квалификация педагогического работника, дополнительно привлекаемого для совместной реализации образовательной программы в группе',
+            'p21z' => 'Квалификация педагогического работника непосредственно осуществляющего реализацию '
+                . 'образовательной программы в группе детей',
+            'p22z' => 'Квалификация педагогического работника, дополнительно привлекаемого для совместной '
+                . 'реализации образовательной программы в группе',
             'results' => 'Ожидаемые результаты освоения модуля',
             'fullname' => 'Наименование модуля',
             'edit' => 'Отправить на повторную сертификацию',
@@ -323,8 +344,8 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
 
     public function needCertificate(): bool
     {
-        return ($this->verification === ProgrammeModule::VERIFICATION_UNDEFINED
-                || $this->verification === ProgrammeModule::VERIFICATION_WAIT)
+        return ($this->verification === self::VERIFICATION_UNDEFINED
+                || $this->verification === self::VERIFICATION_WAIT)
             && ($this->program->verification !== Programs::VERIFICATION_UNDEFINED
                 && $this->program->verification !== Programs::VERIFICATION_WAIT);
     }
@@ -337,7 +358,7 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
         return $this->program->municipality->operator->settings->children_average;
     }
 
-    public function setVerificationWaitAndSave()
+    public function setVerificationWaitAndSave(): bool
     {
         if ($this->verification === self::VERIFICATION_WAIT) {
             return true;
@@ -345,5 +366,56 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
         $this->verification = self::VERIFICATION_WAIT;
 
         return $this->save(false);
+    }
+
+    public function setNeedVerification(): self
+    {
+        if ($this->verification === self::VERIFICATION_WAIT
+            || $this->verification === self::VERIFICATION_UNDEFINED
+        ) {
+            return $this;
+        }
+        $this->verification = self::VERIFICATION_UNDEFINED;
+
+        return $this;
+    }
+    
+    /**
+     * @param Coefficient $coefficientData
+     * @return bool|float
+     */
+    public function getNormativePrice(Coefficient $coefficientData)
+    {
+        $program = $this->program;
+        if (!$program) {
+            return false;
+        }
+        $municipality = $program->municipality;
+        if (!$municipality) {
+            return false;
+        }
+        if ($program->ground === $program::GROUND_COUNTRY) {
+            $prefix = $municipality::PREFIX_COUNTRY;
+        } else {
+            $prefix = $municipality::PREFIX_CITY;
+        }
+
+        $programDirection = $program->getProgramDirection();
+        $provision = $coefficientData->getProvision($program->p3z);
+        $mainTeacher = $coefficientData->getMainTeacherCoefficient($this->p21z);
+        $additionalTeacher= $coefficientData->getAdditionalTeacherCoefficient($this->p22z);
+
+        $childAverage = $this->getChildrenAverage() ? $this->getChildrenAverage() : ($this->maxchild + $this->minchild) / 2;
+        $normativePrice = $municipality[$prefix . 'zp'] * (((($mainTeacher * ($this->hours - $this->hoursindivid) + $additionalTeacher* $this->hoursdop) /
+                        ($childAverage)) + $mainTeacher * $this->hoursindivid) /
+                ($municipality[$prefix . 'stav'] * $coefficientData->norm * $coefficientData->weekmonth)) * $municipality[$prefix . 'dop'] *
+            (1 + $municipality[$prefix . 'uvel']) * $municipality[$prefix . 'otch'] * $municipality[$prefix . 'otpusk'] +
+            ((($this->hours - $this->hoursindivid) + $this->hoursindivid * ($childAverage)) /
+                ($municipality[$prefix . 'polezn'] * ($childAverage))) * ($programDirection * $provision + $municipality[$prefix . 'nopc']) +
+            (((($this->hours - $this->hoursindivid) + $this->hoursdop + $this->hoursindivid * ($childAverage)) *
+                    $municipality[$prefix . 'otpusk'] * $municipality[$prefix . 'dop']) / ($coefficientData->pk * $coefficientData->weekyear *
+                    $municipality[$prefix . 'stav'] * $coefficientData->norm * ($childAverage))) * $municipality[$prefix . 'pc'];
+
+        return round($normativePrice);
     }
 }

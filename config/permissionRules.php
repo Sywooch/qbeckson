@@ -6,7 +6,7 @@ return [
     'module' => [
         [
             'allow' => true,
-            'actions' => ['index', 'view', 'certificate-calc-normative', 'certificate-step-two'],
+            'actions' => ['index', 'view', 'certificate-calc-normative', 'save', 'normpricesave'],
             'roles' => ['operators'],
         ],
         [
@@ -148,6 +148,11 @@ return [
                 'actions' => ['update-task', 'refuse-task', 'decertificate'],
                 'allow' => true,
                 'roles' => ['payer']
+            ],
+            [
+                'actions' => ['transfer-task', 'transfer-programme'],
+                'allow' => true,
+                'roles' => ['organizations']
             ],
         ],
     'municipal-task-contract' =>
@@ -329,5 +334,19 @@ return [
             'roles' => ['operators', 'organizations', 'payer'],
             'actions' => ['contract'],
         ]
-    ]
+    ],
+    'groups' => [
+        [
+            'allow' => true,
+            'roles' => ['operators'],
+            'actions' => ['contracts']
+        ]
+    ],
+    'mun' => [
+        [
+            'allow' => true,
+            'roles' => ['payer'],
+            'actions' => ['view', 'update', 'upload'],
+        ]
+    ],
 ];

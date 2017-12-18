@@ -119,21 +119,30 @@ class ConfirmRequestForm extends Model
             $model->document_type = $this->type;
             if ($this->type === Cooperate::DOCUMENT_TYPE_CUSTOM) {
                 $model->document = $this->document;
+
+                if (1 == $this->isCustomValue) {
+                    $model->total_payment_limit = $this->value;
+                } else {
+                    $model->total_payment_limit = null;
+                }
             } else {
                 if ($this->type === Cooperate::DOCUMENT_TYPE_GENERAL) {
+                    $model->total_payment_limit = null;
+
                     $model->document = [
                         'path' => $this->getOperatorSettings()->general_document_path,
                         'base_url' => $this->getOperatorSettings()->general_document_base_url,
                     ];
                 }
                 if ($this->type === Cooperate::DOCUMENT_TYPE_EXTEND) {
+                    $model->total_payment_limit = $this->value;
+
                     $model->document = [
                         'path' => $this->getOperatorSettings()->extend_document_path,
                         'base_url' => $this->getOperatorSettings()->extend_document_base_url,
                     ];
                 }
             }
-            $model->total_payment_limit = $this->value;
 
             return $model->save();
         }

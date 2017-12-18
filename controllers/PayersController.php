@@ -4,7 +4,7 @@ namespace app\controllers;
 
 use app\models\CertGroup;
 use app\models\Cooperate;
-use app\models\forms\CooperateChangeTypeForm;
+use app\models\OperatorSettings;
 use app\models\Payers;
 use app\models\PayersSearch;
 use app\models\User;
@@ -69,11 +69,15 @@ class PayersController extends Controller
     {
         $payer = $this->findModel($id);
 
-        $activeCooperateExists = $payer->getCooperation(Cooperate::STATUS_ACTIVE) ? true : false;
+        $futurePeriodCooperate = $payer->getCooperates()->where(['cooperate.status' => Cooperate::STATUS_ACTIVE, 'cooperate.period' => Cooperate::PERIOD_FUTURE])->one();
+
+        /** @var OperatorSettings $operatorSettings */
+        $operatorSettings = Yii::$app->operator->identity->settings;
 
         return $this->render('view', [
             'model' => $payer,
-            'activeCooperateExists' => $activeCooperateExists ? true : false,
+            'operatorSettings' => $operatorSettings,
+            'futurePeriodCooperate' => $futurePeriodCooperate,
         ]);
     }
 
@@ -278,10 +282,14 @@ class PayersController extends Controller
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $post = Yii::$app->request->post();
+            /** @var Payers $model */
             $model = Yii::$app->user->identity->payer;
-            if ($model->load($post) && $model->save(false, ['certificate_can_use_future_balance'])) {
-                return true;
+
+            if ($model->load($post) && \Yii::$app->request->post('change') == 1) {
+                $model->changeCertificateCanUseFutureBalance();
             }
+
+            return $this->asJson(['certificate_can_use_future_balance' => $model->certificate_can_use_future_balance]);
         }
 
         return null;

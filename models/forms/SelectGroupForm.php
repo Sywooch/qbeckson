@@ -173,12 +173,12 @@ class SelectGroupForm extends Model
             return;
         }
 
-        if (!$payer->certificateCanCreateContract() && $payer->certificate_can_use_future_balance != 1) {
+        if (!$payer->certificateCanUseCurrentBalance() && $payer->certificate_can_use_future_balance != 1) {
             $this->addError($attribute, 'К сожалению заключение новых договоров с сертификатами данной уполномоченной организации временно недоступно, поскольку ею установлено ограничение на использование сертификата.');
             return;
         }
 
-        if (((int)$this->getCertificate()->balance < 0.00000001 && (int)$this->getCertificate()->balance_f < 0.0000001) || ((int)$this->getCertificate()->balance < 0.00000001 && $payer->certificate_can_use_future_balance != 1) || ((int)$this->getCertificate()->balance_f < 0.000001 && !$payer->certificateCanCreateContract())) {
+        if (((int)$this->getCertificate()->balance < 0.00000001 && (int)$this->getCertificate()->balance_f < 0.0000001) || ((int)$this->getCertificate()->balance < 0.00000001 && $payer->certificate_can_use_future_balance != 1) || ((int)$this->getCertificate()->balance_f < 0.000001 && !$payer->certificateCanUseCurrentBalance())) {
             $this->addError($attribute, 'Недостаточно средств на счету сертификата.');
             return;
         }
@@ -188,7 +188,7 @@ class SelectGroupForm extends Model
             return;
         }
 
-        if (!$payer->certificateCanCreateContract() && strtotime($group->datestop) < strtotime($operatorSettings->future_program_date_from)) {
+        if (!$payer->certificateCanUseCurrentBalance() && strtotime($group->datestop) < strtotime($operatorSettings->future_program_date_from)) {
             $this->addError($attribute, 'К сожалению зачисление в выбранную группу с учетом сроков реализации прекращено по решению уполномоченной организации.');
             return;
         }

@@ -8,6 +8,7 @@ use yii\base\Widget;
 
 class PostButtonWithModalConfirm extends Widget
 {
+    public $askPassword = true;
     public $url;
     public $confirm;
     public $userModel = null;
@@ -24,11 +25,14 @@ class PostButtonWithModalConfirm extends Widget
 
     public function run()
     {
-        return $this->render('index', ['model'        => $this->userModel,
-                                       'title'        => $this->title,
-                                       'confirm'      => $this->confirm,
-                                       'toggleButton' => $this->toggleButton,
-                                       'url'          => $this->url]);
+        return $this->render('index', [
+            'model' => $this->userModel,
+            'title' => $this->title,
+            'confirm' => $this->confirm,
+            'toggleButton' => $this->toggleButton,
+            'url' => $this->url,
+            'askPassword' => $this->askPassword,
+        ]);
     }
 
 }

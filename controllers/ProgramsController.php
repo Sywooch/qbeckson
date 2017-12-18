@@ -3,16 +3,17 @@
 namespace app\controllers;
 
 use app\assets\programsAsset\ProgramsAsset;
-use app\components\EditableOperations;
 use app\models\AllProgramsSearch;
 use app\models\Cooperate;
 use app\models\forms\ProgramAddressesForm;
 use app\models\forms\ProgramSectionForm;
 use app\models\Informs;
 use app\models\Model;
+use app\models\module\ModuleViewDecorator;
 use app\models\Organization;
 use app\models\ProgrammeModule;
 use app\models\Programs;
+use app\models\programs\ProgramViewDecorator;
 use app\models\ProgramsallSearch;
 use app\models\ProgramsFile;
 use app\models\ProgramsPreviusSearch;
@@ -209,7 +210,9 @@ class ProgramsController extends Controller
     {
         /** @var $user UserIdentity */
         $user = Yii::$app->user->identity;
-        $model = $this->findModel($id);
+        $modelOriginal = $this->findModel($id);
+        $model = ProgramViewDecorator::decorate($modelOriginal);
+        $modules = ModuleViewDecorator::decorateMultiple($model->modules);
 
         if (!$model->isActive) {
             throw new NotFoundHttpException();
@@ -221,18 +224,22 @@ class ProgramsController extends Controller
 
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
-            if ($model->verification === $model::VERIFICATION_DENIED) {
-                Yii::$app->session->setFlash('danger',
-                    $this->renderPartial('informers/list_of_reazon',
+            if ($model->verification === Programs::VERIFICATION_DENIED) {
+                Yii::$app->session->setFlash(
+                    'danger',
+                    $this->renderPartial(
+                        'informers/list_of_reazon',
                         [
-                            'dataProvider' => new ActiveDataProvider([
+                            'dataProvider' => new ActiveDataProvider(
+                                [
                                     'query' => $model->getInforms()
-                                        ->andWhere(['status' => $model::VERIFICATION_DENIED]),
+                                        ->andWhere(['status' => Programs::VERIFICATION_DENIED]),
                                     'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
                                 ]
                             )
                         ]
-                    ));
+                    )
+                );
             }
         }
         $cooperate = null;
@@ -242,13 +249,18 @@ class ProgramsController extends Controller
                 Cooperate::tableName() . '.organization_id' => $model->organization_id,
                 'status' => Cooperate::STATUS_ACTIVE])->all();
             if (!count($cooperate)) {
-                Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в организацию, реализующую выбранную программу. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
+                Yii::$app->session->setFlash(
+                    'warning',
+                    'К сожалению, на данный момент Вы не можете записаться на '
+                    . 'обучение в организацию, реализующую выбранную программу. '
+                    . 'Уполномоченная организация пока не заключила с ней необходимое соглашение.'
+                );
             }
         }
 
         ProgramsAsset::register($this->view);
 
-        return $this->render('view/view', ['model' => $model, 'cooperate' => $cooperate]);
+        return $this->render('view/view', ['model' => $model, 'cooperate' => $cooperate, 'modules' => $modules]);
     }
 
     /**
@@ -933,33 +945,31 @@ class ProgramsController extends Controller
     }
 
 
-    /**
-     * @param $id int идентификатор программы
-     *
-     * @return Response
-     * @throws ForbiddenHttpException
-     */
-    public function actionNormpricesave()
+    public function actionNormpricesave($id)
     {
-        if (!Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
-            $response = ['output' => '', 'message' => 'Действие запрещено'];
 
-            return $this->asJson($response);
+        $model = ProgrammeModule::findOne($id);
+
+        if ($model->load(Yii::$app->request->post())) {
+            $model->save();
+
+            $programs = (new \yii\db\Query())
+                ->select(['verification'])
+                ->from('programs')
+                ->where(['id' => $model->program_id])
+                ->one();
+
+            if ($programs['verification'] == 1) {
+                return $this->redirect(['certificate', 'id' => $model->program_id]);
+            } else {
+                return $this->redirect(['newnormprice', 'id' => $model->program_id]);
+            }
         }
 
-        $programSaveResult = EditableOperations::getInstance(Yii::$app->request->post(), Programs::className())
-            ->setAttributes('p3z')
-            ->exec();
-        $programModuleSaveResult = EditableOperations::getInstance(
-            Yii::$app->request->post(),
-            ProgrammeModule::className()
-        )->setAttributes('p21z', 'p22z', 'normative_price')
-            ->exec();
-        ($response = $programSaveResult)
-        || ($response = $programModuleSaveResult)
-        || ($response = ['output' => '', 'message' => 'Неизвестная ошибка']);
-
-        return $this->asJson($response);
+        return $this->render('newnormpricesave', [
+            'title' => null,
+            'model' => $model,
+        ]);
     }
 
     public function actionCertificateold($id)

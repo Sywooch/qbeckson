@@ -30,8 +30,8 @@ use Yii;
  * @property integer                $directionality_5_count
  * @property integer                $directionality_6_count
  * @property integer                $certificate_can_use_future_balance
- * @property bool                   $certificate_can_create_contract        разрешено ли сертификату создавать контракт
- * @property string                 $certificate_cant_create_contract_at    сертификату запрещается создавать контракт с указанной даты и времени
+ * @property bool $certificate_can_use_current_balance        разрешено ли сертификату создавать договор на текущий период
+ * @property string $certificate_cant_use_current_balance_at    сертификату запрещается создавать договор на текущий период с указанной даты и времени
  * @property int                    $operator_id
  * @property string                 $code
  * @property string                 $name_dat
@@ -119,7 +119,7 @@ class Payers extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'name_dat', 'INN', 'OGRN', 'KPP', 'OKPO', 'address_legal', 'address_actual', 'email', 'phone', 'position', 'fio', 'code'], 'required'],
-            [['user_id', 'INN', 'OGRN', 'KPP', 'OKPO', 'directionality_1rob_count', 'directionality_1_count', 'directionality_2_count', 'directionality_3_count', 'directionality_4_count', 'directionality_5_count', 'directionality_6_count', 'mun', 'certificate_can_use_future_balance', 'certificate_can_create_contract'], 'integer'],
+            [['user_id', 'INN', 'OGRN', 'KPP', 'OKPO', 'directionality_1rob_count', 'directionality_1_count', 'directionality_2_count', 'directionality_3_count', 'directionality_4_count', 'directionality_5_count', 'directionality_6_count', 'mun', 'certificate_can_use_future_balance', 'certificate_can_use_current_balance'], 'integer'],
             ['operator_id', 'integer'],
             [['code'], 'string', 'length' => [2, 2]],
             [['directionality'], 'safe'],
@@ -129,7 +129,7 @@ class Payers extends \yii\db\ActiveRecord
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
             ['days_to_first_contract_request', 'integer', 'min' => 5],
             ['days_to_contract_request_after_refused', 'integer', 'min' => 10],
-            ['certificate_cant_create_contract_at', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            ['certificate_cant_use_current_balance_at', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
         ];
     }
 
@@ -166,8 +166,8 @@ class Payers extends \yii\db\ActiveRecord
             'cooperates'                             => 'Число заключенных соглашений',
             'certificates'                           => 'Число выданных сертификатов',
             'certificate_can_use_future_balance'     => 'Установите возможность заключения договоров за счет средств сертификатов, предусмотренных на период от ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_from) . ' до ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_to),
-            'certificate_can_create_contract'        => 'Доступно заключение договоров на текущий период:  от ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_from) . ' по ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_to),
-            'certificate_cant_create_contract_at'    => 'Дата и время с которой начинает действовать запрет на заключение договоров',
+            'certificate_can_use_current_balance' => 'Доступно заключение договоров на текущий период:  от ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_from) . ' по ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->current_program_date_to),
+            'certificate_cant_use_current_balance_at' => 'Дата и время с которой начинает действовать запрет на заключение договоров',
             'days_to_first_contract_request'         => 'Количество дней, предусмотренное для создания первой заявки после создания сертификата или его перевода в тип "сертификат ПФ"',
             'days_to_contract_request_after_refused' => 'Количество дней, предусмотренное для создания новой заявки после неудачной попытки заключения предыдущего договора',
         ];
@@ -391,6 +391,20 @@ class Payers extends \yii\db\ActiveRecord
     }
 
     /**
+     * получить список id организаций имеющие договора текущего или будущего периода действия
+     */
+    public function getOrganizationIdListWithCurrentOrFutureCooperate()
+    {
+        return ArrayHelper::getColumn(
+            $this->getCooperates()
+                ->where(['cooperate.period' => [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE]])
+                ->select('cooperate.organization_id')
+                ->asArray()->all(),
+            'organization_id'
+        );
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getInvoices()
@@ -536,9 +550,9 @@ class Payers extends \yii\db\ActiveRecord
      *
      * @return boolean
      */
-    public function canChangePermission()
+    public function canChangeContractCreatePermission()
     {
-        $allowed = is_null($this->certificate_cant_create_contract_at) || date('Y-m-d H:i:s') <= $this->certificate_cant_create_contract_at;
+        $allowed = is_null($this->certificate_cant_use_current_balance_at) || date('Y-m-d H:i:s') <= $this->certificate_cant_use_current_balance_at;
         $allowed &= date('Y-m-d', strtotime('+2 Month')) >= \Yii::$app->operator->identity->settings->current_program_date_to;
 
         return $allowed;
@@ -549,8 +563,65 @@ class Payers extends \yii\db\ActiveRecord
      *
      * @return boolean
      */
-    public function certificateCanCreateContract()
+    public function certificateCanUseCurrentBalance()
     {
-        return $this->certificate_can_create_contract || date('Y-m-d H:i:s') <= $this->certificate_cant_create_contract_at;
+        return $this->certificate_can_use_current_balance || date('Y-m-d H:i:s') <= $this->certificate_cant_use_current_balance_at;
+    }
+
+    /**
+     * изменить возможность сертификата заключить договор будущего периода
+     */
+    public function changeCertificateCanUseFutureBalance()
+    {
+        if (!$this->save(false, ['certificate_can_use_future_balance'])) {
+            $this->certificate_can_use_future_balance = $this->getOldAttribute('certificate_can_use_future_balance');
+
+            return false;
+        }
+
+        $organizationWithFutureCooperateUserIdList = ArrayHelper::getColumn(
+            Organization::find()
+                ->select('organization.user_id')
+                ->leftJoin(Cooperate::tableName(), 'organization.id = cooperate.organization_id and cooperate.status = 1 and cooperate.period = 2')
+                ->where('organization.id in (select organization.id from organization left join cooperate on (organization.id = cooperate.organization_id and cooperate.status = 1) where cooperate.period = 1)')
+                ->andWhere('cooperate.id is not null')->asArray()->all(), 'user_id');
+        $organizationWithoutFutureCooperateUserIdList = ArrayHelper::getColumn(
+            Organization::find()
+                ->select('organization.user_id')
+                ->leftJoin(Cooperate::tableName(), 'organization.id = cooperate.organization_id and cooperate.status = 1 and cooperate.period = 2')
+                ->where('organization.id in (select organization.id from organization left join cooperate on (organization.id = cooperate.organization_id and cooperate.status = 1) where cooperate.period = 1)')
+                ->andWhere('cooperate.id is null')->asArray()->all(), 'user_id');
+
+        $messageOrganizationsWithFutureCooperate = 'Уполномоченная организация ' . $this->name . ' (' . $this->municipality->name . ') установила возможность заключения договоров с ее сертификатами, которые будут действовать с ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_from);
+        $messageOrganizationsWithoutFutureCooperate = $messageOrganizationsWithFutureCooperate . '. Однако, пока у Вас нет зарегистрированного (заключенного) соглашения с ней на будущий период. Обязательно свяжитесь с уполномоченной организацией и зарегистрируйте (если требуется заключите новый) ' . Cooperate::documentNames()[Yii::$app->operator->identity->settings->document_name] . ', который будет действовать в будущем периоде.';
+
+        $notificationOrganizationsWithFutureCooperate = Notification::getExistOrCreate($messageOrganizationsWithFutureCooperate, 0, Notification::TYPE_CERTIFICATE_WITH_FUTURE_COOPERATE_CAN_USE_FUTURE_BALANCE);
+        $notificationOrganizationsWithoutFutureCooperate = Notification::getExistOrCreate($messageOrganizationsWithoutFutureCooperate, 0, Notification::TYPE_CERTIFICATE_WITHOUT_FUTURE_COOPERATE_CAN_USE_FUTURE_BALANCE);
+
+        $organizationWithCurrentCooperateUserIdList = ArrayHelper::map(
+            Organization::find()
+                ->select('organization.user_id')
+                ->leftJoin(Cooperate::tableName(), 'organization.id = cooperate.organization_id and cooperate.status = 1')
+                ->where(['cooperate.period' => Cooperate::PERIOD_CURRENT])
+                ->asArray()->all(),
+            'user_id',
+            'user_id'
+        );
+        $messageCertificateCantUseFutureBalance = 'Уполномоченная организация ' . $this->name . ' (' . $this->municipality->name . ') приостановила возможность заключения договоров с ее сертификатами, которые будут действовать с ' . Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_from);
+        $notificationCertificateCantUseFutureBalance = Notification::getExistOrCreate($messageCertificateCantUseFutureBalance, 0, Notification::TYPE_CERTIFICATE_CANT_USE_FUTURE_BALANCE);
+
+        if (1 == $this->certificate_can_use_future_balance) {
+            $notificationCertificateCantUseFutureBalance->delete();
+
+            NotificationUser::assignToUsers($organizationWithFutureCooperateUserIdList, $notificationOrganizationsWithFutureCooperate->id);
+            NotificationUser::assignToUsers($organizationWithoutFutureCooperateUserIdList, $notificationOrganizationsWithoutFutureCooperate->id);
+        } else {
+            $notificationOrganizationsWithFutureCooperate->delete();
+            $notificationOrganizationsWithoutFutureCooperate->delete();
+
+            NotificationUser::assignToUsers($organizationWithCurrentCooperateUserIdList, $notificationCertificateCantUseFutureBalance->id);
+        }
+
+        return true;
     }
 }
