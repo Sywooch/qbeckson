@@ -1,8 +1,7 @@
 <?php
 
 use app\models\Cooperate;
-use app\models\forms\CooperateChangeTypeForm;
-use app\models\Organization;
+use app\models\OperatorSettings;
 use yii\db\Query;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -10,7 +9,8 @@ use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Payers */
-/* @var $activeCooperateExists boolean */
+/* @var $operatorSettings OperatorSettings */
+/* @var $futurePeriodCooperate Cooperate */
 
 $this->title = $model->name;
 
@@ -159,66 +159,32 @@ $this->params['breadcrumbs'][] = $this->title;
         if (isset($roles['payer'])) {
             echo Html::a('Назад', '/personal/payer-info', ['class' => 'btn btn-primary']);
         }
-        if (isset($roles['organizations'])) {
-            echo Html::a('Назад', '/personal/organization-payers', ['class' => 'btn btn-primary']);
+        if (isset($roles['organizations'])) { ?>
 
-            $organizations = new Organization();
-            $organization = $organizations->getOrganization();
+            <?php if (isset($cooperation) && Cooperate::STATUS_NEW == $cooperation->status): ?>
+                <p>Вы отправили заявку на заключение договора действующего <?= $cooperation->getPeriodValidityLabel() ?>
+                    .</p>
+            <?php endif; ?>
 
-            $status = (new Query())
-                ->select(['status'])
-                ->from('cooperate')
-                ->where(['payer_id' => $model->id])
-                ->andWhere(['organization_id' => $organization['id']])
-                ->andWhere(['status' => 1])
-                ->column();
-            if ($status) {
-                $contracts = (new Query())
-                    ->select(['id'])
-                    ->from('contracts')
-                    ->where(['payer_id' => $model->id])
-                    ->andWhere(['organization_id' => $organization['id']])
-                    ->count();
-                if ($contracts === 0) {
-                    echo ' ';
-                    echo Html::a(
-                        'Расторгнуть соглашение',
-                        Url::to(['/cooperate/decooperate', 'id' => $model->id]),
-                        [
-                            'class' => 'btn btn-danger',
-                            'data' => ['confirm' => 'Вы действительно хотите расторгнуть соглашение с этим плательщиком?'],
-                            'title' => 'Расторгнуть соглашение'
-                        ]
-                    );
-                }
-            } else {
-                $status2 = (new Query())
-                    ->select(['status'])
-                    ->from('cooperate')
-                    ->where(['payer_id' => $model->id])
-                    ->andWhere(['organization_id' => $organization['id']])
-                    ->andWhere(['status' => 0])
-                    ->column();
-
-                if ($status2) {
-                    echo ' ';
-                    echo Html::a(
-                        'Удалить соглашение',
-                        Url::to(['cooperate/delete', 'id' => $model->id]),
-                        [
-                            'class' => 'btn btn-danger',
-                            'data' => [
-                                'confirm' => 'Вы действительно хотите удалить соглашение с этим плательщиком?',
-                                'method' => 'post'
-                            ],
-                            'title' => 'Расторгнуть соглашение'
-                        ]
-                    );
-                }
+            <?php
+            if ($cooperation && Cooperate::STATUS_NEW == $cooperation->status) {
+                echo ' ';
+                echo Html::a(
+                    'Отменить заявку',
+                    Url::to(['cooperate/delete', 'id' => $model->id]),
+                    [
+                        'class' => 'btn btn-danger',
+                        'data' => [
+                            'confirm' => 'Вы действительно хотите отменить заявку?',
+                            'method' => 'post'
+                        ],
+                        'title' => 'Отменить заявку'
+                    ]
+                );
             }
 
             if (null !== $cooperation) {
-                if (count($cooperation->contracts) < 1) {
+                if (count($cooperation->contracts) < 1 && $cooperation->status != Cooperate::STATUS_NEW) {
                     echo $this->render(
                         '../cooperate/reject-contract',
                         ['cooperation' => $cooperation]
@@ -226,30 +192,91 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
 
                 $documentLabel = $cooperation->total_payment_limit ? 'Текст договора/соглашения c суммой' : 'Текст договора/соглашения без суммы';
-                $alternativeDocumentLabel = !$cooperation->total_payment_limit ? 'Текст договора/соглашения c суммой' : 'Текст договора/соглашения без суммы';
 
                 $activeDocumentLink = null !== $cooperation->getActiveDocumentUrl() ? Html::a($documentLabel, [$cooperation->getActiveDocumentUrl()], ['target' => 'blank']) : '';
-                $alternativeDocumentLink = null !== $cooperation->getAlternativeDocumentUrl() ? Html::a($alternativeDocumentLabel, [$cooperation->getAlternativeDocumentUrl()], ['target' => 'blank']) : '';
 
-                if ($activeDocumentLink) {
-                    echo '<hr><div class="panel panel-default">
-                        <div class="panel-body">
-                        <p>Действующее соглашение:</p>
-                        <br>' .
-                        $activeDocumentLink .
-                        ' </div>
-                </div>';
-                }
+                if ($activeDocumentLink) { ?>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <?= Cooperate::documentNames()[$operatorSettings->document_name] ?>, используемый для оплаты
+                            услуг на текущий момент:
+                        </div>
 
-                if ($activeCooperateExists && $alternativeDocumentLink) {
-                    echo '<hr><div class="panel panel-default">
-                        <div class="panel-body">
-                        <p>Альтернативное соглашение:</p>
-                        <br>' .
-                        $alternativeDocumentLink .
-                        ' </div>
-                </div>';
-                }
+                        <table class="table table-striped table-bordered detail-view">
+                            <tbody>
+                            <tr>
+                                <th>Тип соглашения</th>
+                                <td>
+                                    <?= $activeDocumentLink ?>
+                                </td>
+                            </tr>
+
+                            <?php if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
+                                null === $cooperation->number &&
+                                null === $cooperation->date
+                            ) { ?>
+                                <tr>
+                                    <th>Реквизиты соглашения</th>
+                                    <td>
+                                        <?= $this->render(
+                                            '../cooperate/requisites',
+                                            [
+                                                'model' => $cooperation,
+                                                'toggleButtonClass' => null,
+                                                'label' => 'Сведения о реквизитах соглашения/договора не внесены',
+                                            ]
+                                        ); ?>
+                                    </td>
+                                </tr>
+                            <?php } elseif (($cooperation->status === Cooperate::STATUS_CONFIRMED &&
+                                    null !== $cooperation->number &&
+                                    null !== $cooperation->date) ||
+                                $cooperation->status === Cooperate::STATUS_ACTIVE
+                            ) { ?>
+
+                                <tr>
+                                    <th>Реквизиты соглашения</th>
+                                    <td>Договор от <?= \Yii::$app->formatter->asDate($cooperation->date) ?>
+                                        №<?= $cooperation->number ?>
+                                    </td>
+                                </tr>
+                                <?php if ($cooperation->status == Cooperate::STATUS_ACTIVE && $cooperation->document_type == Cooperate::DOCUMENT_TYPE_EXTEND) { ?>
+                                    <tr>
+                                        <th>Установлена максимальная сумма по договору, рублей</th>
+                                        <td>
+                                            <?= round($cooperation->total_payment_limit, 2) ?>
+                                        </td>
+                                    </tr>
+                                <?php }
+                            } ?>
+
+                            <tr>
+                                <th>Период действия соглашения</th>
+                                <td>
+                                    <?= $cooperation->getPeriodValidityLabel() ?>
+                                </td>
+                            </tr>
+
+                            <?php if (!empty($commitments)): ?>
+                                <tr>
+                                    <th>Совокупная сумма подтвержденных обязательств по договору</th>
+                                    <td>
+                                        <?= round($commitments, 2) . ' рублей'; ?>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                            <?php if (!empty($summary)): ?>
+                                <tr>
+                                    <th>Совокупная сумма оплаченных ранее счетов</th>
+                                    <td>
+                                        <?= round($summary, 2) . ' рублей'; ?>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php }
 
                 if (Yii::$app->user->can('organizations') && $cooperation->status === Cooperate::STATUS_APPEALED) {
                     echo '<p class="pull-right text-warning">Ваша жалоба ожидает рассмотрения оператором</p>';
@@ -263,39 +290,71 @@ $this->params['breadcrumbs'][] = $this->title;
                     );
                 }
 
-                if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
-                    null === $cooperation->number &&
-                    null === $cooperation->date
-                ) {
-                    echo $this->render(
-                        '../cooperate/requisites',
-                        [
-                            'model' => $cooperation,
-                            'label' => 'Сведения о реквизитах соглашения/договора не внесены',
-                        ]
-                    );
-                    echo '<br /><br />';
-                } elseif ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
-                    null !== $cooperation->number &&
-                    null !== $cooperation->date
-                ) {
-                    echo '<p>Реквизиты соглашения: от ' . $cooperation->date . ' №' . $cooperation->number . '</p>';
-                }
-                if (!empty($commitments)) {
-                    echo '<div style="margin-top: 20px;">Совокупная сумма подтвержденных обязательств по договору &ndash; ' . round($commitments, 2) . ' рублей</div>';
-                }
-                if (!empty($summary)) {
-                    echo '<div style="margin-top: 20px;">Совокупная сумма оплаченных ранее счетов &ndash; ' . round($summary, 2) . ' рублей</div>';
-                }
             } else {
-                echo ' ';
-                echo Html::a(
-                    'Направить заявку на заключение соглашения с уполномоченной организацией',
-                    Url::to(['cooperate/request', 'payerId' => $model->id]),
-                    ['class' => 'btn btn-primary']
-                );
+                echo $this->render('_cooperate-request', ['model' => $model, 'operatorSettings' => $operatorSettings]);
             }
-        }
-        ?>
+
+            if ($futurePeriodCooperate): ?>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <?= Cooperate::documentNames()[$operatorSettings->document_name] ?>, использование которого
+                        предусматривается в будущем периоде:
+                    </div>
+
+                    <table class="table table-striped table-bordered detail-view">
+                        <tbody>
+                        <tr>
+                            <th>Тип соглашения</th>
+                            <td>
+                                <?= Cooperate::documentTypes()[$futurePeriodCooperate->document_type] ?>
+                            </td>
+                        </tr>
+
+                        <?php if (($futurePeriodCooperate->status === Cooperate::STATUS_CONFIRMED &&
+                                null !== $futurePeriodCooperate->number &&
+                                null !== $futurePeriodCooperate->date) ||
+                            $futurePeriodCooperate->status === Cooperate::STATUS_ACTIVE
+                        ) { ?>
+                            <tr>
+                                <th>Реквизиты соглашения</th>
+                                <td>
+                                    Договор от <?= \Yii::$app->formatter->asDate($futurePeriodCooperate->date) ?>
+                                    №<?= $futurePeriodCooperate->number ?>
+                                </td>
+                            </tr>
+                            <?php if ($futurePeriodCooperate->status == Cooperate::STATUS_ACTIVE && $futurePeriodCooperate->document_type == Cooperate::DOCUMENT_TYPE_EXTEND): ?>
+                                <tr>
+                                    <th>Установлена максимальная сумма по договору, рублей</th>
+                                    <td>
+                                        <?= round($futurePeriodCooperate->total_payment_limit, 2) ?>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                        <?php } ?>
+
+                        <?php if (!empty($commitments)): ?>
+                            <tr>
+                                <th>Совокупная сумма подтвержденных обязательств по договору</th>
+                                <td>
+                                    <?= round($commitments, 2) . ' рублей'; ?>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                        <?php if (!empty($summary)): ?>
+                            <tr>
+                                <th>Совокупная сумма оплаченных ранее счетов</th>
+                                <td>
+                                    <?= round($summary, 2) . ' рублей'; ?>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                        </tbody>
+                    </table>
+
+                </div>
+            <?php endif; ?>
+
+            <?= Html::a('Назад', '/personal/organization-payers', ['class' => 'btn btn-primary']); ?>
+        <?php } ?>
     </div>
 </div>

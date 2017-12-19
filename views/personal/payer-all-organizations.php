@@ -1,7 +1,7 @@
 <?php
-use yii\helpers\Html;
+
 use yii\grid\GridView;
-use yii\helpers\Url;
+use yii\helpers\Html;
 
 
 $this->title = 'Выберите организацию';
@@ -24,6 +24,9 @@ $this->title = 'Выберите организацию';
                 return $model::types()[$model->type];
             },
         ],
+        'address_actual',
+        'fio_contact',
+        'phone',
         ['class' => 'yii\grid\ActionColumn',
             'controller' => 'organization',
             'template' => '{view}',

@@ -3,27 +3,24 @@
 /** @var $model \app\models\Programs */
 /** @var $this yii\web\View */
 
-$moduleTemplate = '_base_module';
-if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_CERTIFICATE)) {
-    $moduleTemplate = '_certificate_module';
-} elseif (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)) {
-    $moduleTemplate = '_organisation_module';
-} elseif (Yii::$app->user->can(\app\models\UserIdentity::ROLE_OPERATOR)) {
-    $moduleTemplate = '_operator_module';
-}
+/** @var $cooperate Cooperate */
 
+use app\models\Cooperate;
 
 echo \yii\bootstrap\Tabs::widget([
-    'items'       => array_map(function ($module) use ($moduleTemplate, $cooperate)
+    'items' => array_map(function ($module) use ($cooperate)
     {
-        /** @var $module \app\models\ProgrammeModule */
+        /** @var $module \app\models\module\ModuleViewDecorator */
         /** @var $this yii\web\View */
         $result = [];
         $result['label'] = $module->getShortName();
-        $result['content'] = $this->render($moduleTemplate, ['model' => $module, 'cooperate' => $cooperate]);
+        $result['content'] = $this->render(
+            $module->getModuleTemplate(),
+            ['model' => $module, 'cooperate' => $cooperate]
+        );
 
         return $result;
-    }, $model->modules),
+    }, $modules),
     'itemOptions' => ['class' => 'program-info-view'],
     'navType'     => 'new-nav-tabs'
 ]);

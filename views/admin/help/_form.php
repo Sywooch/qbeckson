@@ -1,7 +1,7 @@
 <?php
 
-use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
+use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Help */
@@ -16,7 +16,7 @@ use yii\bootstrap\ActiveForm;
 
     <?= $form->field($model, 'body')->textarea(['rows' => 10]) ?>
 
-    <?= $form->field($model, 'for_guest')->checkbox(['uncheck'=>0]) ?>
+    <?= $form->field($model, 'for_guest')->checkbox(['uncheck' => 0]) ?>
 
     <?= $form->field($model, 'applied_to')->checkboxList(\yii\helpers\ArrayHelper::map(Yii::$app->authManager->roles, 'name', 'name')) ?>
 

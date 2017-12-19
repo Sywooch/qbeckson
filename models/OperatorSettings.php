@@ -130,4 +130,26 @@ class OperatorSettings extends ActiveRecord
             'children_average' => 'Среднее значение кол-ва детей',
         ];
     }
+
+    /**
+     * может ли плательщик создать соглашение будущего периода
+     *
+     * @return boolean
+     */
+    public function payerCanCreateFuturePeriodCooperate()
+    {
+        return $this->daysCountToCurrentProgramEnd() <= 30;
+    }
+
+    /**
+     * кол-во дней до окончания программы текущего периода
+     */
+    private function daysCountToCurrentProgramEnd()
+    {
+        if ((new \DateTime()) > (new \DateTime($this->current_program_date_to))) {
+            return (int)('-' . (new \DateTime())->diff(new \DateTime($this->current_program_date_to))->days);
+        } else {
+            return (new \DateTime())->diff(new \DateTime($this->current_program_date_to))->days;
+        }
+    }
 }

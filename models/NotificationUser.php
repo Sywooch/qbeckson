@@ -22,7 +22,7 @@ class NotificationUser extends ActiveRecord
      */
     public static function assignToUsers($userIdList, $notificationId)
     {
-        $notificationUserList = ArrayHelper::map(self::find()->select(['user_id'])->where(['notification_id' => $notificationId])->asArray()->all(), 'user_id', 'user_id');
+        $notificationUserList = ArrayHelper::getColumn(self::find()->select(['user_id'])->where(['notification_id' => $notificationId])->asArray()->all(), 'user_id');
 
         $rows = [];
         foreach ($userIdList as $userId) {

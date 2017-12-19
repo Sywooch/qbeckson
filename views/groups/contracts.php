@@ -57,13 +57,13 @@ $this->params['breadcrumbs'][] = $this->title;
         ->one();
     ?>
     <?= DetailView::widget([
-        'model'      => $model,
+        'model' => $model,
         'attributes' => [
             'name',
             [
                 'attribute' => 'program.name',
-                'format'    => 'raw',
-                'value'     => Html::a($model->program->name,
+                'format' => 'raw',
+                'value' => Html::a($model->program->name,
                     Url::to(['/programs/view', 'id' => $model->program->id]),
                     ['class' => 'blue', 'target' => '_blank']),
             ],
@@ -89,8 +89,8 @@ $this->params['breadcrumbs'][] = $this->title;
     if ($ContractsProvider->getTotalCount() > 0) {
         echo GridView::widget([
             'dataProvider' => $ContractsProvider,
-            'summary'      => false,
-            'columns'      => [
+            'summary' => false,
+            'columns' => [
                 'certificate.number',
                 'certificate.fio_child',
                 'date:date',

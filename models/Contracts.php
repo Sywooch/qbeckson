@@ -88,7 +88,6 @@ use yii\web\ForbiddenHttpException;
  * @property Disputes[]      $disputes
  * @property string          $statusName
  * @property mixed           $organizationname
- * @property mixed           $invoices
  * @property string          $yearyear
  * @property mixed           $payers
  * @property mixed           $certificatenumber
@@ -105,6 +104,8 @@ use yii\web\ForbiddenHttpException;
  * @property Groups          $group
  * @property Completeness[]  $completeness
  * @property string          $terminatorUserRole
+ * @property InvoiceHaveContract[] $invoiceHaveContracts
+ * @property Invoices[] $invoices
  */
 class Contracts extends ActiveRecord
 {
@@ -270,8 +271,13 @@ class Contracts extends ActiveRecord
 
     public function setCooperate()
     {
-        $cooperate = Cooperate::findCooperateByParams($this->payer_id, $this->organization_id);
+        if (!in_array($this->period, [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE]) || !$cooperate = Cooperate::findCooperateByParams($this->payer_id, $this->organization_id, $this->period)) {
+            return false;
+        }
+
         $this->cooperate_id = $cooperate->id;
+
+        return true;
     }
 
     public static function findByInterval($idStart, $idFinish, $organizationId = null)
@@ -473,9 +479,22 @@ class Contracts extends ActiveRecord
         return $this->hasMany(Informs::className(), ['contract_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getInvoiceHaveContracts()
+    {
+        return $this->hasMany(InvoiceHaveContract::className(), ['contract_id' => 'id'])
+            ->inverseOf('contract');
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getInvoices()
     {
-        return $this->hasMany(Invoices::className(), ['contract_id' => 'id']);
+        return $this->hasMany(Invoices::className(), ['id' => 'invoice_id'])
+            ->viaTable('invoice_have_contract', ['contract_id' => 'id']);
     }
 
     public function getContracts() {
@@ -900,5 +919,22 @@ class Contracts extends ActiveRecord
         $requested = new \DateTime($this->requested_at);
 
         return date_diff($now, $requested)->days > $tooLongTime;
+    }
+
+    /**
+     * контракт может быть подтвержден (переведен в status = 3)
+     * ---
+     * контракт может быть подтвержден, только если существует соглашение,
+     * действующего в периоде указанному в контракте
+     *
+     * @return boolean
+     */
+    public function canBeAccepted()
+    {
+        if (!in_array($this->period, [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE]) || is_null(Cooperate::findCooperateByParams($this->payer_id, $this->organization_id, $this->period))) {
+            return false;
+        }
+
+        return true;
     }
 }

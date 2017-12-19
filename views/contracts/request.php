@@ -16,6 +16,7 @@ use yii\widgets\Pjax;
 /* @var $contractRequestFormValid boolean */
 /** @var $groupId integer */
 /** @var $certificateId integer */
+/** @var $cooperateWithCorrespondingPeriodExists boolean */
 
 $this->title = 'Подать заявку на получение образовательных услуг';
 $this->params['breadcrumbs'][] = $this->title;
@@ -125,37 +126,65 @@ $this->params['breadcrumbs'][] = $this->title;
                             <?php if ($contract->all_parents_funds) : ?>
                                 <?= $confirm->field($confirmForm, 'secondConfirmation')->checkbox(); ?>
                             <?php endif; ?>
-                            <?= $confirm->field($confirmForm, 'thirdConfirmation')->checkbox(); ?>
-                            <hr>
-                            <?= Html::a(
-                                'Отменить',
-                                ['reject-request', 'id' => $contract->id],
-                                ['class' => 'btn btn-danger']
-                            ) ?>
-                            <?php Modal::begin([
-                                'header' => false,
-                                'id' => 'confirmation-modal',
-                                'toggleButton' => [
-                                    'tag' => 'a',
-                                    'label' => 'Направить заявку',
-                                    'class' => 'btn btn-primary'
-                                ],
-                                'clientOptions' => ['backdrop' => false]
-                            ]) ?>
-                            <p>
-                                Вы собираетесь подать заявку на обучение, после чего средства на Вашем сертификате
-                                будут зарезервированы для оплаты будущего договора.
-                                Пожалуйста подтвердите Ваше информированное согласие с условиями подачи заявки.
-                            </p>
-                            <?= $confirm->field($confirmForm, 'firstConfirmation')->checkbox(); ?>
-                            <hr>
-                            <div class="form-group">
-                                <?= Html::submitButton(
-                                    'Направить заявку поставщику образовательных услуг',
-                                    ['class' => 'btn btn-success btn-block']
-                                ) ?>
+                            <div class="checkbox-container">
+                                <?= $confirm->field($confirmForm, 'thirdConfirmation')->checkbox(['onClick' => 'showNextContainer(this)']); ?>
                             </div>
-                            <?php Modal::end() ?>
+                            <div style="display: none;">
+                                <hr>
+                                <?= Html::a(
+                                    'Отменить',
+                                    ['reject-request', 'id' => $contract->id],
+                                    ['class' => 'btn btn-danger']
+                                ) ?>
+
+                                <?php if (!$cooperateWithCorrespondingPeriodExists): ?>
+                                    <?php Modal::begin([
+                                        'header' => false,
+                                        'id' => 'no-cooperate-info-modal',
+                                        'toggleButton' => [
+                                            'tag' => 'a',
+                                            'label' => 'Направить заявку',
+                                            'class' => 'btn btn-primary'
+                                        ],
+                                        'clientOptions' => ['backdrop' => false]
+                                    ]) ?>
+
+                                    <p>Вы выбрали для обучения период, на который у поставщика услуг пока нет
+                                        формализованных оснований для формирования оферты. Это простая бюрократическая
+                                        процедура, но она должна быть исполнена прежде чем он сможет выставить Вам
+                                        оферту на заключение договора. Нажмите кнопку "продолжить" для перехода к окну
+                                        подтверждения подачи заявки</p>
+
+                                    <?= Html::button('отменить', ['class' => 'btn btn-danger', 'onClick' => '$("#no-cooperate-info-modal").modal("hide");']) ?>
+                                    <?= Html::button('продолжить', ['class' => 'btn btn-primary', 'onClick' => '$("#confirmation-modal").modal();']) ?>
+
+                                    <?php Modal::end() ?>
+                                <?php endif; ?>
+
+                                <?php Modal::begin([
+                                    'header' => false,
+                                    'id' => 'confirmation-modal',
+                                    'toggleButton' => !$cooperateWithCorrespondingPeriodExists ? false : [
+                                        'label' => 'Направить заявку',
+                                        'class' => 'btn btn-primary',
+                                    ],
+                                    'clientOptions' => ['backdrop' => false]
+                                ]) ?>
+                                <p>
+                                    Вы собираетесь подать заявку на обучение, после чего средства на Вашем сертификате
+                                    будут зарезервированы для оплаты будущего договора.
+                                    Пожалуйста подтвердите Ваше информированное согласие с условиями подачи заявки.
+                                </p>
+                                <?= $confirm->field($confirmForm, 'firstConfirmation')->checkbox(); ?>
+                                <hr>
+                                <div class="form-group">
+                                    <?= Html::submitButton(
+                                        'Направить заявку поставщику образовательных услуг',
+                                        ['class' => 'btn btn-success btn-block']
+                                    ) ?>
+                                </div>
+                                <?php Modal::end() ?>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -15,6 +15,7 @@ use yii\behaviors\TimestampBehavior;
  * @property integer $group_id
  * @property integer $status
  * @property integer $created_at
+ * @property integer $organization_id
  *
  * @property Certificates $certificate
  * @property Groups $group

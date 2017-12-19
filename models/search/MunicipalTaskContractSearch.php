@@ -2,10 +2,9 @@
 
 namespace app\models\search;
 
-use Yii;
+use app\models\MunicipalTaskContract;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\MunicipalTaskContract;
 
 /**
  * MunicipalTaskContractSearch represents the model behind the search form about `app\models\MunicipalTaskContract`.
@@ -18,7 +17,14 @@ class MunicipalTaskContractSearch extends MunicipalTaskContract
     public function rules()
     {
         return [
-            [['id', 'certificate_id', 'payer_id', 'organization_id', 'program_id', 'group_id', 'status', 'created_at'], 'integer'],
+            [
+                [
+                    'id', 'certificate_id', 'payer_id',
+                    'organization_id', 'program_id', 'group_id',
+                    'status', 'created_at'
+                ],
+                'integer'
+            ],
         ];
     }
 

@@ -1,9 +1,9 @@
 <?php
 
-use yii\helpers\Html;
-use yii\bootstrap\ActiveForm;
 use app\models\Mun;
+use yii\bootstrap\ActiveForm;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Payers */
@@ -89,7 +89,7 @@ $this->registerJs($js, $this::POS_READY);
 
     <label class="control-label">Оплачивает направленности</label>
 
-    <?php foreach ($model::directionalityAttributes() as $attribute => $name) : ?>
+    <?php foreach (\app\models\Payers::directionalityAttributes() as $attribute => $name) : ?>
         <hr>
         <?php if (!$model->isNewRecord && in_array($name, $model->directionality)) : ?>
             <?php $model->$attribute = 1; ?>
