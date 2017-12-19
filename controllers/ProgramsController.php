@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\forms\TaskTransferForm;
 use app\assets\programsAsset\ProgramsAsset;
 use app\models\AllProgramsSearch;
 use app\models\Cooperate;
@@ -178,6 +179,43 @@ class ProgramsController extends Controller
         ]);
     }
 
+    public function actionTransferTask($id)
+    {
+        $model = $this->findModel($id);
+        if (!$model->isMunicipalTask || !$model->canTaskBeTransferred) {
+            throw new BadRequestHttpException();
+        }
+        $model->setTransferParams();
+        $modelYears = $model->years;
+        $file = new ProgramsFile();
+
+        return $this->render('update', [
+            'strictAction' => ['/programs/update', 'id' => $model->id],
+            'model' => $model,
+            'file' => $file,
+            'modelYears' => (empty($modelYears)) ? [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])] : $modelYears
+        ]);
+    }
+
+    public function actionTransferProgramme($id)
+    {
+        $model = $this->findModel($id);
+        if ($model->isMunicipalTask || !$model->canProgrammeBeTransferred) {
+            throw new BadRequestHttpException();
+        }
+        $model->setTransferParams(false);
+
+        if ($model->save()) {
+            Yii::$app->session->setFlash('success', 'Вы успешно перевели программу на муниципальное задание в реестр "Ожидающие рассмотрения"');
+
+            return $this->redirect(['/programs/view-task', 'id' => $model->id]);
+        } else {
+            Yii::$app->session->setFlash('danger', 'Произошла ошибка в процессе переноса.');
+
+            return $this->redirect(['/programs/view', 'id' => $model->id]);
+        }
+    }
+
     public function actionRefuseTask($id)
     {
         $program = $this->findModel($id);
@@ -223,7 +261,8 @@ class ProgramsController extends Controller
         }
 
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
-            || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
+            || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)
+        ) {
             if ($model->verification === Programs::VERIFICATION_DENIED) {
                 Yii::$app->session->setFlash(
                     'danger',
@@ -286,7 +325,8 @@ class ProgramsController extends Controller
             $model->save(false, ['verification']);
         }
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
-            || Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
+            || Yii::$app->user->can(UserIdentity::ROLE_PAYER)
+        ) {
             if ($model->verification === $model::VERIFICATION_DENIED) {
                 Yii::$app->session->setFlash('danger',
                     $this->renderPartial('informers/list_of_reazon',
@@ -515,7 +555,8 @@ class ProgramsController extends Controller
             && count(array_filter($model->informs, function ($val) {
                 /**@var $val Informs */
                 return $val->status === Programs::VERIFICATION_DENIED;
-            })) > 0) {
+            })) > 0
+        ) {
             Yii::$app->session->setFlash(
                 'danger',
                 $this->renderPartial(
@@ -1102,7 +1143,8 @@ class ProgramsController extends Controller
         $model->zab = explode(',', $model->zab);
         $organization = Yii::$app->user->identity->organization;
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
-            && $organization->id !== $model->organization_id) {
+            && $organization->id !== $model->organization_id
+        ) {
             throw new ForbiddenHttpException('Нет доступа');
         }
 
