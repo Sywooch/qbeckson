@@ -210,7 +210,6 @@ class ProgramsController extends Controller
 
             return $this->redirect(['/programs/view-task', 'id' => $model->id]);
         } else {
-            print_r($model->errors);exit;
             Yii::$app->session->setFlash('danger', 'Произошла ошибка в процессе переноса.');
 
             return $this->redirect(['/programs/view', 'id' => $model->id]);
