@@ -108,6 +108,16 @@ class ContractDeleteApplication extends ActiveRecord
     }
 
     /**
+     * @inheritdoc
+     */
+    public function attributeHints()
+    {
+        return [
+            'confirmationFile' => 'Приложите сопроводительное письмо для удаления договора, подписанное руководителем организации (отсканированное)'
+        ];
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getContract()
