@@ -1086,7 +1086,8 @@ class ProgramsController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $modelOrigin = $this->findModel($id);
+        $model = ProgramViewDecorator::decorate($modelOrigin);
         if (!$model->isActive) {
             throw new NotFoundHttpException();
         }
