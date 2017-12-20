@@ -10,9 +10,7 @@ use yii\widgets\ActiveForm;
 
 <div class="completeness-form">
 
-    <?php $form = ActiveForm::begin([
-        'action' => date('m') != 12 ? '/groups/invoice' : '/groups/dec',
-    ]); ?>
+    <?php $form = ActiveForm::begin(); ?>
 
     <?= $form->field($model, 'completeness')->textInput() ?>
 
