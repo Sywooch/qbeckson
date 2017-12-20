@@ -85,7 +85,7 @@ $organization = Yii::$app->user->identity->organization;
                     'format' => 'raw',
                     'value' => function ($data) {
 
-                        if (date('m') == 1) {
+                        if (date('m') == 12) {
                             $completeness = (new \yii\db\Query())
                                 ->select(['completeness', 'id'])
                                 ->from('completeness')
