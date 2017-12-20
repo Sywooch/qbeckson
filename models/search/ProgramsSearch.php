@@ -26,6 +26,7 @@ class ProgramsSearch extends Programs
     public $modelName;
     public $payerId;
     public $taskPayerId;
+    public $idList;
 
     /**
      * @return string
@@ -271,6 +272,8 @@ class ProgramsSearch extends Programs
                 ['<=', 'programs.limit', (int)$limit[1]]
             ]);
         }
+
+        $query->andFilterWhere(['programs.id' => $this->idList]);
 
         $query->groupBy(['programs.id']);
 

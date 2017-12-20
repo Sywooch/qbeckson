@@ -281,12 +281,24 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
     $organizations = new Organization();
     $organization = $organizations->getOrganization();
 
-    if ($roles['organizations'] and $organization['actual'] != 0) {
-        echo "<p>";
-        echo Html::a('Создать новый договор', ['contracts/create'], ['class' => 'btn btn-success']);
-        echo "</p>";
-    }
-    ?>
+    if ($roles['organizations'] and $organization['actual'] != 0) { ?>
+
+        <div class="qwe">
+            <div class="row">
+                <div class="col-xs-6">
+                    <p><?= Html::a('Создать новый договор', ['contracts/create'], ['class' => 'btn btn-success']); ?></p>
+                </div>
+
+                <?php if ($organization->programsForAutoProlongationExists()): ?>
+                    <div class="col-xs-6 text-right">
+                        <p><?= Html::a('Автопролонгация', ['programs/program-list-for-auto-prolongation'], ['class' => 'btn btn-success']); ?></p>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+
+    <?php } ?>
+
     <div id="panel1" class="tab-pane fade in active">
         <?php if ($searchActiveContracts->payer_id) : ?>
             <p class="lead">Показаны результаты для программы: <?= $searchActiveContracts->programName; ?></p>

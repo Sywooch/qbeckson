@@ -13,6 +13,13 @@ use app\models\Contracts;
 class ContractsSearch extends Contracts
 {
     /**
+     * поиск по списку идентификаторов контрактов
+     *
+     * @var integer[]
+     */
+    public $idList;
+
+    /**
      * @inheritdoc
      */
     public function rules()
@@ -75,6 +82,8 @@ class ContractsSearch extends Contracts
         $query->andFilterWhere(['like', 'status_comment', $this->status_comment])
             ->andFilterWhere(['like', 'link_doc', $this->link_doc])
             ->andFilterWhere(['like', 'link_ofer', $this->link_ofer]);
+
+        $query->andFilterWhere(['id' => $this->idList]);
 
         return $dataProvider;
     }
