@@ -33,6 +33,7 @@ class ContractDeleteApplication extends ActiveRecord
     const SCENARIO_CREATE = 'create';
 
     public $confirmationFile;
+    public $isChecked;
 
     /**
      * @inheritdoc
@@ -72,6 +73,7 @@ class ContractDeleteApplication extends ActiveRecord
     {
         return [
             [['reason'], 'required'],
+            [['isChecked'], 'required', 'requiredValue' => 1, 'message' => 'Подтвердите ознакомление с условиями направления запроса на удаление договора'],
             [['created_at', 'confirmed_at'], 'safe'],
             [['contract_id', 'status'], 'integer'],
             [['status'], 'in', 'range' => [self::STATUS_WAITING, self::STATUS_CONFIRMED, self::STATUS_REFUSED]],
@@ -104,6 +106,7 @@ class ContractDeleteApplication extends ActiveRecord
             'status' => 'Статус',
             'fileUrl' => 'Подтверждающий документ',
             'confirmationFile' => 'Подтверждающий документ',
+            'isChecked' => 'Мы ознакомлены с условиями направления запроса на удаление договора. Подтверждаем, что наш запрос удовлетворяет всем четырем условиям. Уверены, что в нашем случае негативных последствий не возникнет',
         ];
     }
 
@@ -113,7 +116,8 @@ class ContractDeleteApplication extends ActiveRecord
     public function attributeHints()
     {
         return [
-            'confirmationFile' => 'Приложите сопроводительное письмо для удаления договора, подписанное руководителем организации (отсканированное)'
+            'confirmationFile' => 'Приложите сопроводительное письмо для удаления договора, подписанное руководителем организации (отсканированное)',
+            'isChecked' => 'Доступно после добавления подтверждающего документа',
         ];
     }
 
