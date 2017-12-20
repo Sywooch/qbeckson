@@ -279,36 +279,28 @@ $this->registerJs($js);
     }
 
     $roles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-
+    echo '<div class="form-group">';
+    echo '&nbsp';
+    if (!$model->isNewRecord && !isset($roles['operators']) && !$model->inTransferProcess) {
+        echo $form->field($model, 'edit')->checkbox(['value' => 1, 'ng-model' => 'edit']);
+    }
     echo Html::submitButton(
         'Сохранить как черновик',
         [
-            'class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary',
+            'class' => $model->isNewRecord ? 'btn btn-primary' : 'btn btn-primary',
             'name' => $model->formName() . '[asDraft]',
             'value' => 1
         ]
     );
-
+    echo '&nbsp';
     if (!$model->isNewRecord && !isset($roles['operators']) && !$model->inTransferProcess) {
-        echo $form->field($model, 'edit')->checkbox(['value' => 1, 'ng-model' => 'edit']);
-        echo '<div class="form-group" ng-show="edit">';
-        echo Html::a(
-            'Отменить',
-            $model->isMunicipalTask
-                ? ['/personal/organization-municipal-task']
-                : ['/personal/organization-programs'],
-            ['class' => 'btn btn-danger']
-        );
-        echo '&nbsp';
         echo Html::submitButton(
             $model->isNewRecord
                 ? 'Отправить программу на сертификацию'
                 : 'Обновить программу',
-            ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']
+            ['class' => $model->isNewRecord ? 'btn btn-primary' : 'btn btn-primary', 'ng-show' => "edit"]
         );
-        echo '</div>';
-    } else {
-        echo '<div class="form-group">';
+        echo '&nbsp';
         echo Html::a(
             'Отменить',
             $model->isMunicipalTask
@@ -316,15 +308,24 @@ $this->registerJs($js);
                 : ['/personal/organization-programs'],
             ['class' => 'btn btn-danger']
         );
-        echo '&nbsp';
+    } else {
         echo Html::submitButton(
             $model->isNewRecord
                 ? ($model->isMunicipalTask ? 'Создать программу' : 'Отправить программу на сертификацию')
                 : ($model->inTransferProcess ? 'Перевести программу на ПФ' : 'Обновить программу'),
-            ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']
+            ['class' => $model->isNewRecord ? 'btn btn-primary' : 'btn btn-primary']
         );
-        echo '</div>';
+        echo '&nbsp';
+        echo Html::a(
+            'Отменить',
+            $model->isMunicipalTask
+                ? ['/personal/organization-municipal-task']
+                : ['/personal/organization-programs'],
+            ['class' => 'btn btn-danger']
+        );
+
     }
+    echo '</div>';
     ?>
     <?php ActiveForm::end(); ?>
 </div>
