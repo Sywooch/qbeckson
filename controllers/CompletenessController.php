@@ -108,8 +108,6 @@ class CompletenessController extends Controller
                 
                 $contract = Contracts::findOne($complet->contract_id);
                 
-                //return var_dump($complet);
-                
                 $start_edu_contract  = explode("-", $contract->start_edu_contract);
                 
                 $month = $start_edu_contract[1];
