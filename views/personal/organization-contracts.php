@@ -298,7 +298,7 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
                     <p><?= Html::a('Создать новый договор', ['contracts/create'], ['class' => 'btn btn-success']); ?></p>
                 </div>
 
-                <?php if ($organization->programsForAutoProlongationExists()): ?>
+                <?php if (false && $organization->programsForAutoProlongationExists()): ?>
                     <div class="col-xs-6 text-right">
                         <p><?= Html::a('Автопролонгация', ['programs/program-list-for-auto-prolongation'], ['class' => 'btn btn-success']); ?></p>
                     </div>
