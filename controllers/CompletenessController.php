@@ -112,7 +112,7 @@ class CompletenessController extends Controller
                 
                 $month = $start_edu_contract[1];
 
-                if ($month != 12) {
+                if (date('m') != 12) {
                     if ($month == date('m')-1) {
                         $price = $contract->payer_first_month_payment;
                     } else {
