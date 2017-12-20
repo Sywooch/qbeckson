@@ -118,7 +118,6 @@ class ContractRequestForm extends Model
         ) {
             $this->addError($attribute, $this->contractRequest->errorMessage);
         }
-        }
 
         if (null === $this->getRealizationPeriod()) {
             $this->addError($attribute, 'В данный период времени реализация программы не осуществляется.');
