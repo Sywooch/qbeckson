@@ -14,6 +14,8 @@ use yii\grid\ActionColumn;
 /** @var $searchModel \app\models\ContractsSearch */
 
 $this->title = 'Выбрать договор для удаления';
+$this->params['breadcrumbs'][] = ['label' => 'Список запросов на удаление', 'url' => ['contract']];
+$this->params['breadcrumbs'][] = $this->title;
 
 $number = [
     'attribute' => 'number',

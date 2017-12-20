@@ -15,7 +15,8 @@ use app\helpers\ArrayHelper;
 /** @var $dataConfirmedProvider \yii\data\ActiveDataProvider */
 /** @var $dataRefusedProvider \yii\data\ActiveDataProvider */
 
-$this->title = 'Удаление контрактов';
+$this->title = 'Список запросов на удаление';
+$this->params['breadcrumbs'][] = $this->title;
 
 $waitingColumns = $confirmedColumns = $refusedColumns = [
     [
