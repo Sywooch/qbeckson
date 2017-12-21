@@ -180,6 +180,12 @@ class Menu
             ['label' => 'Сертификаты', 'url' => ['/personal/operator-certificates']],
             ['label' => 'Договоры', 'url' => ['/personal/operator-contracts']],
             ['label' => 'Программы', 'url' => ['/personal/operator-programs']],
+            ['label' => 'Поддержка', 'items' => [
+                [
+                    'label' => 'Удаление договоров',
+                    'url' => ['/operator/cleanup/contract'],
+                ],
+            ]],
         ];
     }
 
