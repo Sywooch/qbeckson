@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use app\models\forms\TaskTransferForm;
 use app\assets\programsAsset\ProgramsAsset;
 use app\models\AllProgramsSearch;
 use app\models\AutoProlongation;
@@ -10,6 +9,7 @@ use app\models\ContractsSearch;
 use app\models\Cooperate;
 use app\models\forms\ProgramAddressesForm;
 use app\models\forms\ProgramSectionForm;
+use app\models\forms\TaskTransferForm;
 use app\models\Informs;
 use app\models\Model;
 use app\models\module\ModuleViewDecorator;
@@ -305,7 +305,10 @@ class ProgramsController extends Controller
 
         ProgramsAsset::register($this->view);
 
-        return $this->render('view/view', ['model' => $model, 'cooperate' => $cooperate, 'modules' => $modules]);
+        return $this->render(
+            'view/view',
+            ['model' => $model, 'cooperate' => $cooperate, 'modules' => $modules]
+        );
     }
 
     /**
@@ -1175,13 +1178,16 @@ class ProgramsController extends Controller
             }
 
             $oldIDs = ArrayHelper::map($modelYears, 'id', 'id');
-            $modelYears = Model::createMultiple(ProgrammeModule::classname(), $modelYears, $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : null);
+            $modelYears = Model::createMultiple(
+                ProgrammeModule::classname(),
+                $modelYears,
+                $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : null
+            );
             Model::loadMultiple($modelYears, Yii::$app->request->post());
             $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelYears, 'id', 'id')));
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-
                 return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelYears),
                     ActiveForm::validate($model)
@@ -1221,7 +1227,11 @@ class ProgramsController extends Controller
                         $informs->read = 0;
                         $informs->save();
 
-                        return $this->redirect($model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']);
+                        return $this->redirect(
+                            $model->isMunicipalTask
+                                ? ['/personal/organization-municipal-task']
+                                : ['/personal/organization-programs']
+                        );
                     }
                 } catch (Exception $e) {
                     $transaction->rollBack();
@@ -1232,7 +1242,10 @@ class ProgramsController extends Controller
             return $this->render('update', [
                 'model' => $model,
                 'file' => $file,
-                'modelYears' => (empty($modelYears)) ? [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])] : $modelYears
+                'modelYears' => (empty($modelYears))
+                    ? [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])]
+                    : $modelYears,
+                'strictAction' => null,
             ]);
         }
     }

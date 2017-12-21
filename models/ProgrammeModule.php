@@ -121,10 +121,14 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
             [['name', 'minchild', 'maxchild', 'results'], 'required', 'on' => self::SCENARIO_MUNICIPAL_TASK],
             [
                 [
-                    'hours', 'program_id', 'year', 'hoursdop', 'hoursindivid', 'minchild',
+                    'program_id', 'year', 'hoursdop', 'hoursindivid', 'minchild',
                     'maxchild', 'open', 'quality_control', 'p21z', 'p22z'
                 ],
                 'integer'
+            ],
+            [
+                ['hours',],
+                'number', 'numberPattern' => '/^\s*[-+]?[0-9]*\.?[2,5,7,0]+([eE][-+]?[0-9]+)?\s*$/'
             ],
             [['price', 'normative_price'], 'number'],
             [['verification'], 'integer'],
