@@ -19,7 +19,7 @@ use yii\helpers\ArrayHelper;
  * @property integer      $payers_id
  * @property string $contracts
  * @property integer      $sum
- * @property integer      $number
+ * @property string      $number
  * @property string       $date
  * @property string       $link
  * @property integer      $prepayment
@@ -75,10 +75,10 @@ class Invoices extends ActiveRecord
     public function rules()
     {
         return [
-            // TODO: number сделать string
-            [['month', 'organization_id', 'payers_id', 'completeness', 'number', 'prepayment', 'status', 'cooperate_id'], 'integer'],
+            [['month', 'organization_id', 'payers_id', 'completeness', 'prepayment', 'status', 'cooperate_id'], 'integer'],
             [['organization_id', 'payers_id', 'contracts', 'status'], 'required'],
             [['date'], 'safe'],
+            [['number'], 'string'],
             [['sum'], 'number'],
             [['link', 'contracts', 'pdf'], 'string'],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],

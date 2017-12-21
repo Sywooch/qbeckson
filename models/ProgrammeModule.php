@@ -57,7 +57,7 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
     const VERIFICATION_IN_ARCHIVE = 10;
 
     const SCENARIO_CREATE = 'create';
-
+    const SCENARIO_DRAFT = 'scenarioDraft';
     const SCENARIO_MUNICIPAL_TASK = 'municipal-task';
 
     public $edit;
@@ -101,6 +101,7 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_CREATE] = $scenarios['default'];
         $scenarios[self::SCENARIO_MUNICIPAL_TASK] = $scenarios[self::SCENARIO_CREATE];
+        $scenarios[] = self::SCENARIO_DRAFT;
 
         return $scenarios;
     }
@@ -121,10 +122,14 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
             [['name', 'minchild', 'maxchild', 'results'], 'required', 'on' => self::SCENARIO_MUNICIPAL_TASK],
             [
                 [
-                    'hours', 'program_id', 'year', 'hoursdop', 'hoursindivid', 'minchild',
+                    'program_id', 'year', 'hoursdop', 'hoursindivid', 'minchild',
                     'maxchild', 'open', 'quality_control', 'p21z', 'p22z'
                 ],
                 'integer'
+            ],
+            [
+                ['hours',],
+                'number', 'numberPattern' => '/^\s*[-+]?[0-9]*\.?[2,5,7,0]+([eE][-+]?[0-9]+)?\s*$/'
             ],
             [['price', 'normative_price'], 'number'],
             [['verification'], 'integer'],

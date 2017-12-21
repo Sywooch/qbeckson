@@ -10,7 +10,7 @@ use yii\helpers\Html;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $date = explode(".", date("d.m.Y"));
-switch ($date[1] - 1) {
+switch ($date[1] != 12 ? $date[1] - 1 : $date[1]) {
     case 1:
         $m = 'январе';
         break;

@@ -112,7 +112,7 @@ class CompletenessController extends Controller
                 
                 $month = $start_edu_contract[1];
 
-                if ($month != 12) {
+                if (date('m') != 12) {
                     if ($month == date('m')-1) {
                         $price = $contract->payer_first_month_payment;
                     } else {
@@ -137,7 +137,7 @@ class CompletenessController extends Controller
                 //$model->payers_id = $contract->payer_id;
             }
             
-            return $this->redirect(['groups/invoice']);
+            return $this->redirect([date('m') != 12 ? '/groups/invoice' : '/groups/dec']);
         } else {
             return $this->render('update', [
                 'model' => $model,
