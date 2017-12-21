@@ -132,7 +132,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
     {
         return parent::scenarios()
             + [
-                self::SCENARIO_DRAFT
+                self::SCENARIO_DRAFT => parent::scenarios()[self::SCENARIO_DEFAULT]
             ];
     }
 
