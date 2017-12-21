@@ -2,10 +2,11 @@
 
 namespace app\models\search;
 
-use app\models\Cooperate;
 use app\components\ActiveDataProviderWithDecorator;
+use app\models\Cooperate;
 use app\models\OrganizationPayerAssignment;
 use app\models\Payers;
+use app\models\ProgrammeModule;
 use app\models\Programs;
 use app\models\UserIdentity;
 use Yii;
@@ -18,6 +19,12 @@ use yii\helpers\ArrayHelper;
  */
 class ProgramsSearch extends Programs
 {
+
+    const MODEL_WAIT = 'SearchWaitPrograms';
+    const MODEL_OPEN = 'SearchOpenPrograms';
+    const MODEL_CLOSED = 'SearchClosedPrograms';
+
+
     public $organization;
     public $municipality;
     public $hours;
@@ -103,14 +110,27 @@ class ProgramsSearch extends Programs
             ]);
 
         $query->leftJoin(Payers::tableName(), 'programs.mun = payers.mun');
-        $query->leftJoin(Cooperate::tableName(), 'cooperate.organization_id = programs.organization_id and cooperate.payer_id = payers.id')
-            ->andWhere(['cooperate.status' => Cooperate::STATUS_ACTIVE, 'cooperate.period' => [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE]]);
+
 
         $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
 
         if ($this->isMunicipalTask) {
             $query->andWhere(['>', 'programs.is_municipal_task', 0]);
         } else {
+            // TODO проверить, нужно ли это для вывода программ организации
+            if (!Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+                $query
+                    ->leftJoin(
+                        Cooperate::tableName(),
+                        'cooperate.organization_id = programs.organization_id
+                        and cooperate.payer_id = payers.id'
+                    )
+                    ->andWhere([
+                        'cooperate.status' => Cooperate::STATUS_ACTIVE,
+                        'cooperate.period' => [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE]
+                    ]);
+            }
+
             $query->andWhere([
                 'OR',
                 ['programs.is_municipal_task' => null],
@@ -200,10 +220,22 @@ class ProgramsSearch extends Programs
             'programs.municipal_task_matrix_id' => $this->municipal_task_matrix_id,
             'organization.mun' => $this->municipality,
         ]);
-
+        if ($this->formName() === self::MODEL_WAIT) {
+            $query->orFilterWhere([
+                'and',
+                [
+                    'programs.verification' => Programs::VERIFICATION_DONE,
+                ],
+                [
+                    '{{%years}}.verification' => [
+                        ProgrammeModule::VERIFICATION_UNDEFINED,
+                        ProgrammeModule::VERIFICATION_WAIT
+                    ]
+                ]
+            ]);
+        }
         $query->andFilterWhere(['<=', 'programs.age_group_min', $this->age]);
         $query->andFilterWhere(['>=', 'programs.age_group_max', $this->age]);
-
 
         $query->andFilterWhere(['like', 'programs.name', $this->name])
             ->andFilterWhere(['like', 'programs.vid', $this->vid])
@@ -290,8 +322,6 @@ class ProgramsSearch extends Programs
         $query->andFilterWhere(['programs.id' => $this->idList]);
 
         $query->groupBy(['programs.id']);
-
-        //print_r($query->prepare(Yii::$app->db->queryBuilder)->createCommand()->rawSql);exit;
 
         return $dataProvider;
     }
