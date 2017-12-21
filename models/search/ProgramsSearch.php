@@ -196,7 +196,7 @@ class ProgramsSearch extends Programs
         $query->andFilterWhere([
             'programs.id' => $this->id,
             'programs.organization_id' => $this->organization_id,
-            'programs.verification' => $this->verification,
+
             'programs.form' => $this->form,
             'programs.mun' => $this->mun,
             'programs.ground' => $this->ground,
@@ -221,18 +221,25 @@ class ProgramsSearch extends Programs
             'organization.mun' => $this->municipality,
         ]);
         if ($this->formName() === self::MODEL_WAIT) {
-            $query->orFilterWhere([
-                'and',
+            $query->andFilterWhere(
                 [
-                    'programs.verification' => Programs::VERIFICATION_DONE,
-                ],
-                [
-                    '{{%years}}.verification' => [
-                        ProgrammeModule::VERIFICATION_UNDEFINED,
-                        ProgrammeModule::VERIFICATION_WAIT
-                    ]
-                ]
-            ]);
+                    'or',
+                    ['programs.verification' => $this->verification,],
+                    [
+                        'and',
+                        [
+                            'programs.verification' => Programs::VERIFICATION_DONE,
+                        ],
+                        [
+                            '{{%years}}.verification' => [
+                                ProgrammeModule::VERIFICATION_UNDEFINED,
+                                ProgrammeModule::VERIFICATION_WAIT
+                            ]
+                        ]
+                    ]]
+            );
+        } else {
+            $query->andFilterWhere(['programs.verification' => $this->verification,]);
         }
         $query->andFilterWhere(['<=', 'programs.age_group_min', $this->age]);
         $query->andFilterWhere(['>=', 'programs.age_group_max', $this->age]);
