@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'number',
                 'label'     => 'Реквизиты',
                 'format'    => 'raw',
-                'visible'   => $model->status != Cooperate::STATUS_ACTIVE ? false : true,
+                'visible' => $model->status != Cooperate::STATUS_ACTIVE ? false : true,
                 'value'     => function ($model)
                 {
                     /** @var \app\models\Cooperate $model */

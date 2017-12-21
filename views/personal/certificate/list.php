@@ -200,7 +200,10 @@ $columns = [
             },
             'afterItem' => function ($model, $key, $index, $list) {
                 /** @var $list \yii\widgets\ListView */
-                if ((($index + 1) % 2 === 0 && ($index !== 0) || $index >= $list->dataProvider->getCount() - 1)) {
+                if (($index + 1) % 2 === 0
+                    && ($index !== 0)
+                    || $index >= $list->dataProvider->getCount() - 1
+                ) {
                     return '</div>';
                 }
 

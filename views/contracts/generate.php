@@ -1,11 +1,11 @@
 <?php
 
 use app\models\Cooperate;
-use yii\bootstrap\Modal;
-use yii\helpers\Url;
-use yii\helpers\Html;
-use yii\widgets\ActiveForm;
 use app\models\Payers;
+use yii\bootstrap\Modal;
+use yii\helpers\Html;
+use yii\helpers\Url;
+use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Contracts */

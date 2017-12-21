@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $model app\models\Completeness */
 
 $date=explode(".", date("d.m.Y"));
-            switch ($date[1] - 1){
+            switch ($date[1] != 12 ? $date[1] - 1 : $date[1]){
             case 1: $m='январе'; break;
             case 2: $m='феврале'; break;
             case 3: $m='марте'; break;

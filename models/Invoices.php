@@ -14,12 +14,11 @@ use yii\helpers\ArrayHelper;
  *
  * @property integer      $id
  * @property integer      $month
- * @property int          $year [int(11)]
+ * @property int          $year
  * @property integer      $organization_id
  * @property integer      $payers_id
- * @property integer      $contract_id
  * @property integer      $sum
- * @property integer      $number
+ * @property string       $number
  * @property string       $date
  * @property string       $link
  * @property integer      $prepayment
@@ -31,6 +30,8 @@ use yii\helpers\ArrayHelper;
  * @property string       $pdf
  *
  *
+ * @property InvoiceHaveContract[] $invoiceHaveContracts
+ * @property Contracts[] $contractModels
  * @property Contracts    $contract
  * @property Organization $organization
  * @property Payers       $payers
@@ -63,7 +64,7 @@ class Invoices extends ActiveRecord
      */
     public static function tableName()
     {
-        return 'invoices';
+        return '{{%invoices}}';
     }
 
     /**
@@ -72,10 +73,10 @@ class Invoices extends ActiveRecord
     public function rules()
     {
         return [
-            // TODO: number сделать string
-            [['month', 'organization_id', 'payers_id', 'completeness', 'number', 'prepayment', 'status', 'cooperate_id'], 'integer'],
+            [['month', 'organization_id', 'payers_id', 'completeness', 'prepayment', 'status', 'cooperate_id'], 'integer'],
             [['organization_id', 'payers_id', 'contracts', 'status'], 'required'],
             [['date'], 'safe'],
+            [['number'], 'string'],
             [['sum'], 'number'],
             [['link', 'contracts', 'pdf'], 'string'],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
@@ -141,6 +142,25 @@ class Invoices extends ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getInvoiceHaveContracts()
+    {
+        return $this->hasMany(InvoiceHaveContract::className(), ['invoice_id' => 'id'])
+            ->inverseOf('invoice');
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getContractModels()
+    {
+        return $this->hasMany(Contracts::className(), ['id' => 'contract_id'])
+            ->viaTable('invoice_have_contract', ['invoice_id' => 'id']);
+    }
+
+
+    /**
      * устанавливает соглашение счета
      *
      * @param boolean $preInvoice - предоплата
@@ -154,6 +174,7 @@ class Invoices extends ActiveRecord
         }
         $this->cooperate_id = $cooperate->id;
     }
+
 
     public function setAsPaid()
     {

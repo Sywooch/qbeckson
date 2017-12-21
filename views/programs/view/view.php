@@ -2,6 +2,7 @@
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Programs */
+
 /* @var $cooperate Cooperate */
 
 use app\models\Cooperate;
@@ -11,22 +12,22 @@ $this->title = $model->name;
 if (Yii::$app->user->can('operators')) {
     $this->params['breadcrumbs'][] = ['label' => 'Программы', 'url' => ['/personal/operator-programs']];
 } elseif (Yii::$app->user->can('organizations')) {
-    $this->params['breadcrumbs'][] = ['label' => $model->isMunicipalTask ? 'Муниципальные задания' : 'Программы', 'url' => $model->isMunicipalTask ? ['/personal/organization-municipal-task'] : ['/personal/organization-programs']];
+    $this->params['breadcrumbs'][] = [
+        'label' => $model->isMunicipalTask
+            ? 'Муниципальные задания'
+            : 'Программы',
+        'url' => $model->isMunicipalTask
+            ? ['/personal/organization-municipal-task']
+            : ['/personal/organization-programs']
+    ];
 }
-$headTemplate = '_base_head';
-if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)) {
-    $headTemplate = '_organisation_head';
-} elseif (Yii::$app->user->can(\app\models\UserIdentity::ROLE_OPERATOR)) {
-    $headTemplate = '_operator_head';
-} elseif (Yii::$app->user->can(\app\models\UserIdentity::ROLE_CERTIFICATE)) {
-    $headTemplate = '_certificate_head';
-}
+echo $model->getAlert();
 
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="row">
     <div class="col-xs-12">
-        <?= $this->render($headTemplate, ['model' => $model]) ?>
+        <?= $this->render($model->getHeadTemplate(), ['model' => $model]) ?>
     </div>
 </div>
 <div class="row">
@@ -36,6 +37,9 @@ $this->params['breadcrumbs'][] = $this->title;
 </div>
 <div class="row">
     <div class="col-xs-12">
-        <?= $this->render('_base_body', ['model' => $model, 'cooperate' => $cooperate]) ?>
+        <?= $this->render(
+            '_base_body',
+            ['cooperate' => $cooperate, 'modules' => $modules, 'model' => $model]
+        ) ?>
     </div>
 </div>

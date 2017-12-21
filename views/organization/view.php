@@ -557,7 +557,8 @@ $this->registerJs($js, $this::POS_READY);
         if (isset($roles['payer'])) { ?>
 
             <?php if (isset($cooperation) && Cooperate::STATUS_NEW == $cooperation->status): ?>
-                <p>Поставщиком услуг направлена заявка на заключение с Вами договора, действие которого предполагается <?= $cooperation->getPeriodValidityLabel() ?>.</p>
+                <p>Поставщиком услуг направлена заявка на заключение с Вами договора, действие которого
+                    предполагается <?= $cooperation->getPeriodValidityLabel() ?>.</p>
             <?php endif; ?>
 
             <?php if (!empty($cooperation)) {
@@ -574,19 +575,23 @@ $this->registerJs($js, $this::POS_READY);
                 $activeDocumentLink = null !== $cooperation->getActiveDocumentUrl() ? Html::a($documentLabel, [$cooperation->getActiveDocumentUrl()], ['target' => 'blank']) : '';
                 $alternativeDocumentLink = null !== $cooperation->getAlternativeDocumentUrl() ? Html::a($alternativeDocumentLabel, [$cooperation->getAlternativeDocumentUrl()], ['target' => 'blank']) : '';
 
-                if ($activeDocumentLink) { ?>
+                if (Cooperate::STATUS_ACTIVE == $cooperation->status) { ?>
 
                     <hr>
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <?= Cooperate::documentNames()[$operatorSettings->document_name] ?>, используемый для оплаты услуг на текущий момент<?= Cooperate::STATUS_NEW == $cooperation->status ? ', использование которого предусматривается ' . $cooperation->getPeriodValidityLabel() : '' ?>:
+                            <?= Cooperate::documentNames()[$operatorSettings->document_name] ?>, используемый для оплаты
+                            услуг на текущий
+                            момент<?= Cooperate::STATUS_NEW == $cooperation->status ? ', использование которого предусматривается ' . $cooperation->getPeriodValidityLabel() : '' ?>
+                            :
                         </div>
 
                         <table class="table table-striped table-bordered detail-view">
                             <tbody>
                             <tr>
                                 <th>Тип соглашения</th>
-                                <td><?= $activeDocumentLink ?> <a href="javascript:void(0);" onclick="$('#change-cooperate-type-modal').modal()">(изменить)</a>
+                                <td><?= $activeDocumentLink ?> <a href="javascript:void(0);"
+                                                                  onclick="$('#change-cooperate-type-modal').modal()">(изменить)</a>
                                     <?php Modal::begin([
                                         'id' => 'change-cooperate-type-modal',
                                         'header' => 'Изменить тип соглашения',
@@ -599,7 +604,8 @@ $this->registerJs($js, $this::POS_READY);
                                     ]); ?>
 
                                     <p>
-                                        Вы уверены, что хотите поменять соглашение? Не забудьте при необходимости изменить реквизиты,
+                                        Вы уверены, что хотите поменять соглашение? Не забудьте при необходимости
+                                        изменить реквизиты,
                                         но имейте ввиду, что если у Ваших детей уже есть договоры с данной организацией,
                                         то в них фигурируют прошлые реквизиты
                                     </p>
@@ -607,20 +613,27 @@ $this->registerJs($js, $this::POS_READY);
                                     <?= $form->field($confirmRequestForm, 'type')->dropDownList(Cooperate::documentTypes()) ?>
                                     <div class="item <?= Cooperate::DOCUMENT_TYPE_GENERAL ?>">
                                         <p class="text <?= Cooperate::DOCUMENT_TYPE_GENERAL ?>Text">
-                                            <small>* Рекомендуется заключать в случае если для расходования средств не требуется
+                                            <small>* Рекомендуется заключать в случае если для расходования средств не
+                                                требуется
                                                 постановки расходного обязательства в казначействе (подходит для СОНКО)
                                             </small>
                                             <br>
                                             <?= Html::a('Просмотр договора', $operatorSettings->getGeneralDocumentUrl()); ?>
                                         </p>
                                     </div>
-                                    <div class="item <?= Cooperate::DOCUMENT_TYPE_CUSTOM ?>" style="display: <?= Cooperate::DOCUMENT_TYPE_CUSTOM == $cooperation->document_type ? 'block' : 'none' ?>">
-                                        <p class="text <?= Cooperate::DOCUMENT_TYPE_CUSTOM ?>Text" style="display: none;">
-                                            <small>* Вы можете сделать свой вариант договора (например, проставить заранее реквизиты в
-                                                предлагаемый оператором), но не уходите от принципов ПФ. Если Вы выберите данный
+                                    <div class="item <?= Cooperate::DOCUMENT_TYPE_CUSTOM ?>"
+                                         style="display: <?= Cooperate::DOCUMENT_TYPE_CUSTOM == $cooperation->document_type ? 'block' : 'none' ?>">
+                                        <p class="text <?= Cooperate::DOCUMENT_TYPE_CUSTOM ?>Text"
+                                           style="display: none;">
+                                            <small>* Вы можете сделать свой вариант договора (например, проставить
+                                                заранее реквизиты в
+                                                предлагаемый оператором), но не уходите от принципов ПФ. Если Вы
+                                                выберите данный
                                                 вариант,
-                                                укажите, пожалуйста, сделан ли Ваш договор с указанием максимальной суммы (в этом случае
-                                                укажите сумму), или без нее, чтобы система отслеживала необходимость заключения
+                                                укажите, пожалуйста, сделан ли Ваш договор с указанием максимальной
+                                                суммы (в этом случае
+                                                укажите сумму), или без нее, чтобы система отслеживала необходимость
+                                                заключения
                                                 допсоглашений
                                                 и информировала Вас об этом при необходимости.
                                             </small>
@@ -633,12 +646,17 @@ $this->registerJs($js, $this::POS_READY);
                                             'acceptFileTypes' => new JsExpression('/(\.|\/)(doc|docx)$/i'),
                                         ]); ?>
                                     </div>
-                                    <div class="item <?= Cooperate::DOCUMENT_TYPE_EXTEND ?>" style="display: <?= Cooperate::DOCUMENT_TYPE_EXTEND == $cooperation->document_type ? 'block' : 'none' ?>">
-                                        <p class="text <?= Cooperate::DOCUMENT_TYPE_EXTEND ?>Text" style="display: none;">
-                                            <small>* Рекомендуется заключать в случае если для постановки расходного обязательства на
-                                                исполнение необходимо зафиксировать сумму договора (подходит для АУ). Использование
+                                    <div class="item <?= Cooperate::DOCUMENT_TYPE_EXTEND ?>"
+                                         style="display: <?= Cooperate::DOCUMENT_TYPE_EXTEND == $cooperation->document_type ? 'block' : 'none' ?>">
+                                        <p class="text <?= Cooperate::DOCUMENT_TYPE_EXTEND ?>Text"
+                                           style="display: none;">
+                                            <small>* Рекомендуется заключать в случае если для постановки расходного
+                                                обязательства на
+                                                исполнение необходимо зафиксировать сумму договора (подходит для АУ).
+                                                Использование
                                                 данного
-                                                договора предполагает необходимость регулярного заключения дополнительных соглашений
+                                                договора предполагает необходимость регулярного заключения
+                                                дополнительных соглашений
                                                 (информационная система будет давать подсказки)
                                             </small>
                                             <br>
@@ -673,39 +691,40 @@ $this->registerJs($js, $this::POS_READY);
                                         ); ?>
                                     </td>
                                 </tr>
-                            <?php } else if (($cooperation->status === Cooperate::STATUS_CONFIRMED &&
+                            <?php } elseif (($cooperation->status === Cooperate::STATUS_CONFIRMED &&
                                     null !== $cooperation->number &&
                                     null !== $cooperation->date) ||
                                 $cooperation->status === Cooperate::STATUS_ACTIVE
                             ) { ?>
-                            <tr>
-                                <th>Реквизиты соглашения</th>
-                                <td>договор от <?= \Yii::$app->formatter->asDate($cooperation->date) ?> №<?= $cooperation->number ?>
-                                    <?= $this->render(
-                                        '../cooperate/requisites',
-                                        [
-                                            'model' => $cooperation,
-                                            'toggleButtonClass' => '',
-                                            'label' => '(изменить)',
-                                        ]
-                                    ); ?>
-                                </td>
-                            </tr>
-                            <?php if ($cooperation->status == Cooperate::STATUS_ACTIVE && $cooperation->document_type == Cooperate::DOCUMENT_TYPE_EXTEND && Yii::$app->user->can('payers')) { ?>
                                 <tr>
-                                    <th>Установлена максимальная сумма по договору, рублей</th>
-                                    <td><?= round($cooperation->total_payment_limit, 2) ?>
+                                    <th>Реквизиты соглашения</th>
+                                    <td>договор от <?= \Yii::$app->formatter->asDate($cooperation->date) ?>
+                                        №<?= $cooperation->number ?>
                                         <?= $this->render(
-                                            '../cooperate/payment-limit',
+                                            '../cooperate/requisites',
                                             [
+                                                'model' => $cooperation,
                                                 'toggleButtonClass' => '',
                                                 'label' => '(изменить)',
-                                                'model' => $cooperation,
                                             ]
                                         ); ?>
                                     </td>
                                 </tr>
-                            <?php }
+                                <?php if ($cooperation->status == Cooperate::STATUS_ACTIVE && $cooperation->document_type == Cooperate::DOCUMENT_TYPE_EXTEND && Yii::$app->user->can('payers')) { ?>
+                                    <tr>
+                                        <th>Установлена максимальная сумма по договору, рублей</th>
+                                        <td><?= round($cooperation->total_payment_limit, 2) ?>
+                                            <?= $this->render(
+                                                '../cooperate/payment-limit',
+                                                [
+                                                    'toggleButtonClass' => '',
+                                                    'label' => '(изменить)',
+                                                    'model' => $cooperation,
+                                                ]
+                                            ); ?>
+                                        </td>
+                                    </tr>
+                                <?php }
                             } ?>
 
                             <tr>
@@ -802,8 +821,9 @@ $this->registerJs($js, $this::POS_READY);
                 <br>
 
                 <div class="cooperate-with-new-type" style="display: none;">
-                    <p class="cooperate-requisites" >
-                        Реквизиты соглашения: <span></span><a href="javascript:void(0); $('#set-requisites-modal').modal();">указать</a>
+                    <p class="cooperate-requisites">
+                        Реквизиты соглашения: <span></span><a
+                                href="javascript:void(0); $('#set-requisites-modal').modal();">указать</a>
                     </p>
 
                     <?php Modal::begin([
@@ -829,17 +849,21 @@ $this->registerJs($js, $this::POS_READY);
                     <?= $futurePeriodForm->field($cooperateForFuturePeriodForm, 'type')->dropDownList([Cooperate::DOCUMENT_TYPE_GENERAL => Cooperate::documentTypes()[Cooperate::DOCUMENT_TYPE_GENERAL], Cooperate::DOCUMENT_TYPE_EXTEND => Cooperate::documentTypes()[Cooperate::DOCUMENT_TYPE_EXTEND]], ['class' => ['form-control future-cooperate-type-change']]); ?>
                     <div class="item future-cooperate-<?= Cooperate::DOCUMENT_TYPE_GENERAL ?>">
                         <p class="future-cooperate-text <?= Cooperate::DOCUMENT_TYPE_GENERAL ?>FutureCooperateText">
-                            <small>* Рекомендуется заключать в случае если для расходования средств не требуется постановки расходного обязательства в казначействе (подходит для СОНКО)
+                            <small>* Рекомендуется заключать в случае если для расходования средств не требуется
+                                постановки расходного обязательства в казначействе (подходит для СОНКО)
                             </small>
                             <br>
                             <?= Html::a('Просмотр договора', $operatorSettings->getGeneralDocumentUrl()); ?>
                         </p>
                     </div>
                     <div class="item future-cooperate-<?= Cooperate::DOCUMENT_TYPE_EXTEND ?>" style="display: none">
-                        <p class="future-cooperate-text <?= Cooperate::DOCUMENT_TYPE_EXTEND ?>FutureCooperateText" style="display: none;">
-                            <small>* Рекомендуется заключать в случае если для постановки расходного обязательства на исполнение необходимо зафиксировать сумму договора (подходит для АУ).
+                        <p class="future-cooperate-text <?= Cooperate::DOCUMENT_TYPE_EXTEND ?>FutureCooperateText"
+                           style="display: none;">
+                            <small>* Рекомендуется заключать в случае если для постановки расходного обязательства на
+                                исполнение необходимо зафиксировать сумму договора (подходит для АУ).
                                 Использование данного
-                                договора предполагает необходимость регулярного заключения дополнительных соглашений (информационная система будет давать подсказки)
+                                договора предполагает необходимость регулярного заключения дополнительных соглашений
+                                (информационная система будет давать подсказки)
                             </small>
                             <br>
                             <?= Html::a('Просмотр договора', $operatorSettings->getExtendDocumentUrl()); ?>
@@ -848,7 +872,8 @@ $this->registerJs($js, $this::POS_READY);
                 </div>
 
                 <div class="cooperate-with-old-type" style="display: none;">
-                    <p>Реквизиты соглашения: договор от <?= \Yii::$app->formatter->asDate($cooperation->date) . ' №' . $cooperation->number ?></p>
+                    <p>Реквизиты соглашения: договор
+                        от <?= \Yii::$app->formatter->asDate($cooperation->date) . ' №' . $cooperation->number ?></p>
                 </div>
 
                 <div class="maximum-amount" style="display: none;">
@@ -871,14 +896,18 @@ $this->registerJs($js, $this::POS_READY);
             <?php } elseif ($futurePeriodCooperate) { ?>
                 <br>
                 <br>
-                <p>Договор с данным поставщиком услуг начнет действовать только <?= $futurePeriodCooperate->getPeriodValidityLabel() ?></p>
+                <p>Договор с данным поставщиком услуг начнет действовать
+                    только <?= $futurePeriodCooperate->getPeriodValidityLabel() ?></p>
                 <br>
             <?php } ?>
 
             <?php if ($futurePeriodCooperate): ?>
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <?= Cooperate::documentNames()[$operatorSettings->document_name] ?>, использование которого предусматривается в будущем периоде <?= Cooperate::STATUS_NEW == $futurePeriodCooperate->status ? ', использование которого предусматривается ' . $futurePeriodCooperate->getPeriodValidityLabel() : '' ?>:
+                        <?= Cooperate::documentNames()[$operatorSettings->document_name] ?>, использование которого
+                        предусматривается в будущем
+                        периоде <?= Cooperate::STATUS_NEW == $futurePeriodCooperate->status ? ', использование которого предусматривается ' . $futurePeriodCooperate->getPeriodValidityLabel() : '' ?>
+                        :
                     </div>
 
                     <table class="table table-striped table-bordered detail-view">
@@ -902,17 +931,24 @@ $this->registerJs($js, $this::POS_READY);
                                 <?= $futurePeriodCooperateTypeForm->field($cooperateForFuturePeriodTypeForm, 'type')->dropDownList([Cooperate::DOCUMENT_TYPE_GENERAL => Cooperate::documentTypes()[Cooperate::DOCUMENT_TYPE_GENERAL], Cooperate::DOCUMENT_TYPE_EXTEND => Cooperate::documentTypes()[Cooperate::DOCUMENT_TYPE_EXTEND]], ['class' => ['form-control']]); ?>
                                 <div class="item future-cooperate-type-<?= Cooperate::DOCUMENT_TYPE_GENERAL ?>">
                                     <p class="future-cooperate-type-text <?= Cooperate::DOCUMENT_TYPE_GENERAL ?>FutureCooperateTypeText">
-                                        <small>* Рекомендуется заключать в случае если для расходования средств не требуется постановки расходного обязательства в казначействе (подходит для СОНКО)
+                                        <small>* Рекомендуется заключать в случае если для расходования средств не
+                                            требуется постановки расходного обязательства в казначействе (подходит для
+                                            СОНКО)
                                         </small>
                                         <br>
                                         <?= Html::a('Просмотр договора', $operatorSettings->getGeneralDocumentUrl()); ?>
                                     </p>
                                 </div>
-                                <div class="item future-cooperate-type-<?= Cooperate::DOCUMENT_TYPE_EXTEND ?>" style="display: <?= Cooperate::DOCUMENT_TYPE_EXTEND == $futurePeriodCooperate->document_type ? 'block' : 'none' ?>">
-                                    <p class="future-cooperate-type-text <?= Cooperate::DOCUMENT_TYPE_EXTEND ?>FutureCooperateTypeText" style="display: none;">
-                                        <small>* Рекомендуется заключать в случае если для постановки расходного обязательства на исполнение необходимо зафиксировать сумму договора (подходит для АУ).
+                                <div class="item future-cooperate-type-<?= Cooperate::DOCUMENT_TYPE_EXTEND ?>"
+                                     style="display: <?= Cooperate::DOCUMENT_TYPE_EXTEND == $futurePeriodCooperate->document_type ? 'block' : 'none' ?>">
+                                    <p class="future-cooperate-type-text <?= Cooperate::DOCUMENT_TYPE_EXTEND ?>FutureCooperateTypeText"
+                                       style="display: none;">
+                                        <small>* Рекомендуется заключать в случае если для постановки расходного
+                                            обязательства на исполнение необходимо зафиксировать сумму договора
+                                            (подходит для АУ).
                                             Использование данного
-                                            договора предполагает необходимость регулярного заключения дополнительных соглашений (информационная система будет давать подсказки)
+                                            договора предполагает необходимость регулярного заключения дополнительных
+                                            соглашений (информационная система будет давать подсказки)
                                         </small>
                                         <br>
                                         <?= Html::a('Просмотр договора', $operatorSettings->getExtendDocumentUrl()); ?>
@@ -934,7 +970,8 @@ $this->registerJs($js, $this::POS_READY);
                         ) { ?>
                             <tr>
                                 <th>Реквизиты соглашения</th>
-                                <td>договор от <?= \Yii::$app->formatter->asDate($futurePeriodCooperate->date) ?> №<?= $futurePeriodCooperate->number ?>
+                                <td>договор от <?= \Yii::$app->formatter->asDate($futurePeriodCooperate->date) ?>
+                                    №<?= $futurePeriodCooperate->number ?>
                                     <?= $this->render(
                                         '../cooperate/requisites',
                                         [

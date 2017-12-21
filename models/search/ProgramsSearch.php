@@ -3,6 +3,7 @@
 namespace app\models\search;
 
 use app\models\Cooperate;
+use app\components\ActiveDataProviderWithDecorator;
 use app\models\OrganizationPayerAssignment;
 use app\models\Payers;
 use app\models\Programs;
@@ -27,6 +28,8 @@ class ProgramsSearch extends Programs
     public $payerId;
     public $taskPayerId;
     public $idList;
+
+    public $decorator;
 
     /**
      * @return string
@@ -99,15 +102,16 @@ class ProgramsSearch extends Programs
                 'activities'
             ]);
 
-        $query->leftJoin(Payers::tableName(), 'programs.mun = payers.mun');
-        $query->leftJoin(Cooperate::tableName(), 'cooperate.organization_id = programs.organization_id and cooperate.payer_id = payers.id')
-            ->andWhere(['cooperate.status' => Cooperate::STATUS_ACTIVE, 'cooperate.period' => [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE]]);
-
         $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
 
         if ($this->isMunicipalTask) {
             $query->andWhere(['>', 'programs.is_municipal_task', 0]);
         } else {
+            // TODO проверить, нужно ли это для вывода программ организации
+            $query->leftJoin(Payers::tableName(), 'programs.mun = payers.mun');
+            $query->leftJoin(Cooperate::tableName(), 'cooperate.organization_id = programs.organization_id and cooperate.payer_id = payers.id')
+                ->andWhere(['cooperate.status' => Cooperate::STATUS_ACTIVE, 'cooperate.period' => [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE]]);
+
             $query->andWhere([
                 'OR',
                 ['programs.is_municipal_task' => null],
@@ -115,13 +119,24 @@ class ProgramsSearch extends Programs
             ]);
         }
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'pagination' => [
-                'pageSizeLimit' => false,
-                'pageSize' => $pageSize,
-            ]
-        ]);
+        if ($this->decorator) {
+            $dataProvider = new ActiveDataProviderWithDecorator([
+                'decoratorClass' => $this->decorator,
+                'query' => $query,
+                'pagination' => [
+                    'pageSizeLimit' => false,
+                    'pageSize' => $pageSize,
+                ]
+            ]);
+        } else {
+            $dataProvider = new ActiveDataProvider([
+                'query' => $query,
+                'pagination' => [
+                    'pageSizeLimit' => false,
+                    'pageSize' => $pageSize,
+                ]
+            ]);
+        }
 
         $this->load($params);
 
@@ -147,6 +162,7 @@ class ProgramsSearch extends Programs
             /** @var UserIdentity $user */
             $payer = Payers::findOne($this->taskPayerId);
             $organizationIds = ArrayHelper::getColumn($payer->getOrganizations(null, OrganizationPayerAssignment::STATUS_ACTIVE)->all(), 'id');
+print_r($organizationIds);exit;
             if ($this->organization_id && $organizationIds && $this->organization_id !== 'Array') {
                 $this->organization_id = ArrayHelper::isIn($this->organization_id, $organizationIds) ?
                     $this->organization_id : 0;
@@ -189,7 +205,6 @@ class ProgramsSearch extends Programs
 
         $query->andFilterWhere(['<=', 'programs.age_group_min', $this->age]);
         $query->andFilterWhere(['>=', 'programs.age_group_max', $this->age]);
-
 
         $query->andFilterWhere(['like', 'programs.name', $this->name])
             ->andFilterWhere(['like', 'programs.vid', $this->vid])
@@ -276,8 +291,6 @@ class ProgramsSearch extends Programs
         $query->andFilterWhere(['programs.id' => $this->idList]);
 
         $query->groupBy(['programs.id']);
-
-        //print_r($query->prepare(Yii::$app->db->queryBuilder)->createCommand()->rawSql);exit;
 
         return $dataProvider;
     }

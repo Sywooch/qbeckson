@@ -17,7 +17,6 @@ use app\models\Programs;
 use app\models\search\OrganizationSearch;
 use app\models\User;
 use app\models\UserIdentity;
-use app\traits\AjaxValidationTrait;
 use Yii;
 use yii\base\DynamicModel;
 use yii\filters\VerbFilter;

@@ -14,6 +14,7 @@ use yii\db\ActiveRecord;
  * @property integer        $nominal
  * @property float          $nominal_f
  * @property integer        $amount
+ * @property integer $nominals_limit
  * @property integer        $is_special
  *
  * @property integer $countActualCertificates
@@ -39,7 +40,7 @@ class CertGroup extends ActiveRecord
     {
         return [
             [['payer_id', 'group', 'nominal', 'nominal_f', 'amount'], 'required'],
-            [['payer_id', 'is_special'], 'integer'],
+            [['payer_id', 'is_special', 'nominals_limit'], 'integer'],
             [['nominal', 'nominal_f'], 'number', 'max' => 100000],
             [['group'], 'string', 'max' => 255],
             [
@@ -85,6 +86,8 @@ class CertGroup extends ActiveRecord
             'nominal_f' => 'Номинал будущего периода',
             'countCertificates' => 'Количество используемых сертификатов',
             'countActualCertificates' => 'Количество используемых сертификатов',
+            'sumCertificatesNominals' => 'Сумма номиналов',
+            'nominals_limit' => 'Ограничение суммы номиналов',
             'amount' => 'Лимит',
         ];
     }
@@ -94,7 +97,8 @@ class CertGroup extends ActiveRecord
         if ($this->is_special) {
             return true;
         }
-        if ($this->amount - $this->countActualCertificates > 0) {
+        if ($this->amount - $this->countActualCertificates > 0 &&
+            ($this->nominals_limit < 1 || ($this->nominals_limit - $this->nominal - $this->getSumCertificatesNominals()) > 0)) {
             return true;
         }
 
@@ -107,6 +111,16 @@ class CertGroup extends ActiveRecord
     public function getCountActualCertificates(): int
     {
         return $this->getActualCertificates()->count();
+    }
+
+    /**
+     * @return int
+     */
+    public function getSumCertificatesNominals(): int
+    {
+        $sum = $this->getActualCertificates()->sum('nominal');
+
+        return !empty($sum) ? $sum : 0;
     }
 
     /**

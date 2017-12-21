@@ -29,19 +29,17 @@ $this->title = 'Программы';
 $this->params['breadcrumbs'][] = $this->title;
 
 $zab = [
-    'type'      => SearchFilter::TYPE_SELECT2,
-    'data'      => $searchOpenPrograms::illnesses(),
+    'type' => SearchFilter::TYPE_SELECT2,
+    'data' => $searchOpenPrograms::illnesses(),
     'attribute' => 'zab',
-    'label'     => 'Категория детей',
-    'value'     => function ($model)
-    {
+    'label' => 'Категория детей',
+    'value' => function ($model) {
         return $model->illnessesList;
     }
 ];
 $year = [
     'attribute' => 'year',
-    'value'     => function ($model)
-    {
+    'value' => function ($model) {
         /** @var \app\models\Programs $model */
         return Yii::$app->i18n->messageFormatter->format(
             '{n, plural, one{# модуль} few{# модуля} many{# модулей} other{# модуля}}',
@@ -49,14 +47,13 @@ $year = [
             Yii::$app->language
         );
     },
-    'type'      => SearchFilter::TYPE_TOUCH_SPIN,
+    'type' => SearchFilter::TYPE_TOUCH_SPIN,
 ];
 $organization = [
     'attribute' => 'organization',
-    'label'     => 'Организация',
-    'format'    => 'raw',
-    'value'     => function ($model)
-    {
+    'label' => 'Организация',
+    'format' => 'raw',
+    'value' => function ($model) {
         /** @var \app\models\Programs $model */
         return Html::a(
             $model->organization->name,
@@ -67,8 +64,7 @@ $organization = [
 ];
 $municipality = [
     'attribute' => 'mun',
-    'value'     => function ($model)
-    {
+    'value' => function ($model) {
         /** @var \app\models\Programs $model */
         return Html::a(
             $model->municipality->name,
@@ -76,70 +72,69 @@ $municipality = [
             ['target' => '_blank', 'data-pjax' => '0']
         );
     },
-    'format'    => 'raw',
-    'label'     => 'Муниципалитет',
-    'type'      => SearchFilter::TYPE_DROPDOWN,
-    'data'      => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
+    'format' => 'raw',
+    'label' => 'Муниципалитет',
+    'type' => SearchFilter::TYPE_DROPDOWN,
+    'data' => ArrayHelper::map(Mun::findAllRecords('id, name'), 'id', 'name'),
 ];
 $name = [
-    'attribute' => 'name',
-    'label'     => 'Наименование',
+    'label' => 'Наименование',
+    'attribute' => 'name'
 ];
 $hours = [
-    'attribute'     => 'hours',
-    'value'         => 'countHours',
-    'label'         => 'Кол-во часов',
-    'type'          => SearchFilter::TYPE_RANGE_SLIDER,
+    'attribute' => 'hours',
+    'value' => 'countHours',
+    'label' => 'Кол-во часов',
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
     'pluginOptions' => [
         'max' => 2000
     ]
 ];
 $directivity = [
     'attribute' => 'direction_id',
-    'value'     => 'direction.name',
-    'label'     => 'Направленность',
-    'type'      => SearchFilter::TYPE_DROPDOWN,
-    'data'      => ArrayHelper::map(DirectoryProgramDirection::find()->all(), 'id', 'name'),
+    'value' => 'direction.name',
+    'label' => 'Направленность',
+    'type' => SearchFilter::TYPE_DROPDOWN,
+    'data' => ArrayHelper::map(DirectoryProgramDirection::find()->all(), 'id', 'name'),
 ];
 $form = [
     'attribute' => 'form',
-    'value'     => function ($model)
-    {
-        return $model::forms()[$model->form];
+    'value' => function ($model) {
+        return \app\models\Programs::forms()[$model->form];
     },
-    'type'      => SearchFilter::TYPE_DROPDOWN,
-    'data'      => $searchOpenPrograms::forms(),
+    'type' => SearchFilter::TYPE_DROPDOWN,
+    'data' => $searchOpenPrograms::forms(),
 ];
 $ageGroupMin = [
     'attribute' => 'age_group_min',
-    'label'     => 'Возраст от',
-    'type'      => SearchFilter::TYPE_TOUCH_SPIN,
+    'label' => 'Возраст от',
+    'type' => SearchFilter::TYPE_TOUCH_SPIN,
 ];
 $ageGroupMax = [
     'attribute' => 'age_group_max',
-    'label'     => 'Возраст до',
-    'type'      => SearchFilter::TYPE_TOUCH_SPIN,
+    'label' => 'Возраст до',
+    'type' => SearchFilter::TYPE_TOUCH_SPIN,
 ];
 $rating = [
-    'attribute'     => 'rating',
-    'label'         => 'Рейтинг',
-    'type'          => SearchFilter::TYPE_RANGE_SLIDER,
+    'attribute' => 'rating',
+    'label' => 'Рейтинг',
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
     'pluginOptions' => [
         'max' => 100
     ]
 ];
 $limit = [
-    'attribute'     => 'limit',
-    'label'         => 'Лимит',
-    'type'          => SearchFilter::TYPE_RANGE_SLIDER,
+    'attribute' => 'limit',
+    'label' => 'Лимит',
+    'type' => SearchFilter::TYPE_RANGE_SLIDER,
     'pluginOptions' => [
         'max' => 10000
     ]
 ];
 $actions = [
-    'class'        => ActionColumn::class,
-    'controller'   => 'programs',
-    'template'     => '{view}',
+    'class' => ActionColumn::class,
+    'controller' => 'programs',
+    'template' => '{view}',
     'searchFilter' => false,
 ];
 
@@ -165,7 +160,7 @@ $openColumns = [
     $municipality,
     [
         'attribute' => 'organization_id',
-        'type'      => SearchFilter::TYPE_HIDDEN,
+        'type' => SearchFilter::TYPE_HIDDEN,
     ],
     $actions,
 ];
@@ -181,28 +176,25 @@ $waitColumns = [
     $organization,
     $municipality,
     [
-        'class'        => ActionColumn::class,
-        'controller'   => 'programs',
-        'template'     => '{permit}',
-        'buttons'      => [
-            'permit'        => function ($url, $model)
-            {
+        'class' => ActionColumn::class,
+        'controller' => 'programs',
+        'template' => '{permit}',
+        'buttons' => [
+            'permit' => function ($url, $model) {
                 return Html::a(
                     '<span class="glyphicon glyphicon-check"></span>',
                     Url::to(['/programs/verificate', 'id' => $model->id]),
                     ['title' => 'Сертифицировать программу']
                 );
             },
-            'decertificate' => function ($url, $model)
-            {
+            'decertificate' => function ($url, $model) {
                 return Html::a(
                     '<span class="glyphicon glyphicon-remove"></span>',
                     Url::to(['/programs/decertificate', 'id' => $model->id]),
                     ['title' => 'Отказать в сертификации программы']
                 );
             },
-            'update'        => function ($url, $model)
-            {
+            'update' => function ($url, $model) {
                 return Html::a(
                     '<span class="glyphicon glyphicon-pencil"></span>',
                     Url::to(['/programs/edit', 'id' => $model->id]),
@@ -255,17 +247,17 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
             <p class="lead">Показаны результаты для организации: <?= $searchOpenPrograms->organization; ?></p>
         <?php endif; ?>
         <?= SearchFilter::widget([
-            'model'  => $searchOpenPrograms,
+            'model' => $searchOpenPrograms,
             'action' => ['personal/operator-programs#panel1'],
-            'data'   => GridviewHelper::prepareColumns(
+            'data' => GridviewHelper::prepareColumns(
                 'programs',
                 $openColumns,
                 'open',
                 'searchFilter',
                 null
             ),
-            'role'   => UserIdentity::ROLE_OPERATOR,
-            'type'   => 'open'
+            'role' => UserIdentity::ROLE_OPERATOR,
+            'type' => 'open'
         ]); ?>
 
         <?= Html::a('Пересчитать нормативные стоимости', ['years/allnormprice'], ['class' => 'btn btn-success']) ?>
@@ -275,10 +267,10 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
         <br>
         <?= GridView::widget([
             'dataProvider' => $openProgramsProvider,
-            'filterModel'  => null,
-            'pjax'         => true,
-            'summary'      => false,
-            'columns'      => $preparedOpenColumns,
+            'filterModel' => null,
+            'pjax' => true,
+            'summary' => false,
+            'columns' => $preparedOpenColumns,
         ]); ?>
         <?= \app\widgets\Export::widget([
             'dataProvider' => $allOpenProgramsProvider,
@@ -290,31 +282,30 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
     </div>
     <div id="panel2" class="tab-pane fade">
         <?= SearchFilter::widget([
-            'model'  => $searchWaitPrograms,
+            'model' => $searchWaitPrograms,
             'action' => ['personal/operator-programs#panel2'],
-            'data'   => GridviewHelper::prepareColumns(
+            'data' => GridviewHelper::prepareColumns(
                 'programs',
                 $waitColumns,
                 'wait',
                 'searchFilter',
                 null
             ),
-            'role'   => UserIdentity::ROLE_OPERATOR,
-            'type'   => 'wait'
+            'role' => UserIdentity::ROLE_OPERATOR,
+            'type' => 'wait'
         ]); ?>
         <?= GridView::widget([
             'dataProvider' => $waitProgramsProvider,
-            'filterModel'  => null,
-            'rowOptions'   => function ($model, $index, $widget, $grid)
-            {
+            'filterModel' => null,
+            'rowOptions' => function ($model, $index, $widget, $grid) {
                 /** @var \app\models\Programs $model */
                 if ($model->verification === \app\models\Programs::VERIFICATION_WAIT) {
                     return ['class' => 'danger'];
                 }
             },
-            'summary'      => false,
-            'pjax'         => true,
-            'columns'      => $preparedWaitColumns,
+            'summary' => false,
+            'pjax' => true,
+            'columns' => $preparedWaitColumns,
         ]); ?>
         <?= \app\widgets\Export::widget([
             'dataProvider' => $allWaitProgramsProvider,
@@ -326,24 +317,24 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
     </div>
     <div id="panel3" class="tab-pane fade">
         <?= SearchFilter::widget([
-            'model'  => $searchClosedPrograms,
+            'model' => $searchClosedPrograms,
             'action' => ['personal/operator-programs#panel3'],
-            'data'   => GridviewHelper::prepareColumns(
+            'data' => GridviewHelper::prepareColumns(
                 'programs',
                 $closedPrograms,
                 'close',
                 'searchFilter',
                 null
             ),
-            'role'   => UserIdentity::ROLE_OPERATOR,
-            'type'   => 'close'
+            'role' => UserIdentity::ROLE_OPERATOR,
+            'type' => 'close'
         ]); ?>
         <?= GridView::widget([
             'dataProvider' => $closedProgramsProvider,
-            'filterModel'  => false,
-            'summary'      => false,
-            'pjax'         => true,
-            'columns'      => $preparedClosedPrograms,
+            'filterModel' => false,
+            'summary' => false,
+            'pjax' => true,
+            'columns' => $preparedClosedPrograms,
         ]); ?>
         <?= \app\widgets\Export::widget([
             'dataProvider' => $allClosedProgramsProvider,
@@ -356,23 +347,23 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
     <br>
     <?php
     echo ExportMenu::widget([
-        'dataProvider'       => $YearsallProvider,
-        'target'             => '_self',
+        'dataProvider' => $YearsallProvider,
+        'target' => '_self',
         'showColumnSelector' => false,
-        'filename'           => 'years',
-        'dropdownOptions'    => [
+        'filename' => 'years',
+        'dropdownOptions' => [
             'class' => 'btn btn-success',
             'label' => 'Модули',
-            'icon'  => false,
+            'icon' => false,
         ],
-        'exportConfig'       => [
-            ExportMenu::FORMAT_TEXT  => false,
-            ExportMenu::FORMAT_PDF   => false,
-            ExportMenu::FORMAT_CSV   => false,
-            ExportMenu::FORMAT_HTML  => false,
+        'exportConfig' => [
+            ExportMenu::FORMAT_TEXT => false,
+            ExportMenu::FORMAT_PDF => false,
+            ExportMenu::FORMAT_CSV => false,
+            ExportMenu::FORMAT_HTML => false,
             ExportMenu::FORMAT_EXCEL => false,
         ],
-        'columns'            => [
+        'columns' => [
             'id',
             'program_id',
             'year',
@@ -396,23 +387,23 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
     ]);
     echo '&nbsp;';
     echo ExportMenu::widget([
-        'dataProvider'       => $GroupsallProvider,
-        'target'             => '_self',
+        'dataProvider' => $GroupsallProvider,
+        'target' => '_self',
         'showColumnSelector' => false,
-        'filename'           => 'years',
-        'dropdownOptions'    => [
+        'filename' => 'years',
+        'dropdownOptions' => [
             'class' => 'btn btn-success',
             'label' => 'Группы',
-            'icon'  => false,
+            'icon' => false,
         ],
-        'exportConfig'       => [
-            ExportMenu::FORMAT_TEXT  => false,
-            ExportMenu::FORMAT_PDF   => false,
-            ExportMenu::FORMAT_CSV   => false,
-            ExportMenu::FORMAT_HTML  => false,
+        'exportConfig' => [
+            ExportMenu::FORMAT_TEXT => false,
+            ExportMenu::FORMAT_PDF => false,
+            ExportMenu::FORMAT_CSV => false,
+            ExportMenu::FORMAT_HTML => false,
             ExportMenu::FORMAT_EXCEL => false,
         ],
-        'columns'            => [
+        'columns' => [
             'id',
             'organization_id',
             'program_id',

@@ -7,14 +7,16 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model app\models\Mun */
 /* @var $form yii\widgets\ActiveForm */
+
+$isPayer = Yii::$app->user->can('payer');
 ?>
 
 <div class="mun-form">
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
-    
+    <?= $form->field($model, 'name')->textInput(['maxlength' => true, 'disabled' => $isPayer]) ?>
+
     <div class="table-responsive">
         <table class="table  table-condensed">
             <thead>
@@ -114,19 +116,29 @@ use yii\widgets\ActiveForm;
         </table>
     </div>
 
-    <?php 
- 
+    <?php
+
     echo $form->field($model, 'deystv')->textInput();
 
     echo $form->field($model, 'lastdeystv')->textInput();
 
     echo $form->field($model, 'countdet')->textInput();
+
+    if ($isPayer) {
+        echo $form->field($model, 'confirmationFile')->widget(\trntv\filekit\widget\Upload::class, [
+            'url' => ['file-storage/upload'],
+            'maxFileSize' => 10 * 1024 * 1024,
+            'acceptFileTypes' => new \yii\web\JsExpression('/(\.|\/)(pdf)$/i'),
+        ]);
+    }
     ?>
 
     <div class="form-group">
-       <?= Html::a('Отмена', Url::to(['/mun/index']), ['class' => 'btn btn-danger']); ?>
+       <?= Html::a('Отмена',
+           Url::to($isPayer ? ['/mun/view', 'id' => $model->id] : ['/mun/index']),
+           ['class' => 'btn btn-danger']); ?>
      &nbsp;
-        <?= Html::submitButton('Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
+        <?= Html::submitButton($isPayer ? 'Отправить заявку на изменение' : 'Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>
