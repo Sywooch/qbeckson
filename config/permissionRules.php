@@ -131,6 +131,13 @@ return [
                 'roles' => ['organizations'],
             ],
         ],
+    'operator/cleanup' =>
+        [
+            [
+                'allow' => true,
+                'roles' => ['operators'],
+            ],
+        ],
     'operators' =>
         [
             [
