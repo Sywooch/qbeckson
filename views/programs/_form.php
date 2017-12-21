@@ -285,6 +285,14 @@ $this->registerJs($js);
     if (!$model->isNewRecord && !isset($roles['operators']) && !$model->inTransferProcess) {
         echo $form->field($model, 'edit')->checkbox(['value' => 1, 'ng-model' => 'edit']);
     }
+    echo Html::a(
+        'Отменить',
+        $model->isMunicipalTask
+            ? ['/personal/organization-municipal-task']
+            : ['/personal/organization-programs'],
+        ['class' => 'btn btn-danger']
+    );
+    echo '&nbsp';
     echo Html::submitButton(
         'Сохранить как черновик',
         [
@@ -301,14 +309,8 @@ $this->registerJs($js);
                 : 'Обновить программу',
             ['class' => $model->isNewRecord ? 'btn btn-primary' : 'btn btn-primary', 'ng-show' => "edit"]
         );
-        echo '&nbsp';
-        echo Html::a(
-            'Отменить',
-            $model->isMunicipalTask
-                ? ['/personal/organization-municipal-task']
-                : ['/personal/organization-programs'],
-            ['class' => 'btn btn-danger']
-        );
+
+
     } else {
         echo Html::submitButton(
             $model->isNewRecord
@@ -316,14 +318,7 @@ $this->registerJs($js);
                 : ($model->inTransferProcess ? 'Перевести программу на ПФ' : 'Обновить программу'),
             ['class' => $model->isNewRecord ? 'btn btn-primary' : 'btn btn-primary']
         );
-        echo '&nbsp';
-        echo Html::a(
-            'Отменить',
-            $model->isMunicipalTask
-                ? ['/personal/organization-municipal-task']
-                : ['/personal/organization-programs'],
-            ['class' => 'btn btn-danger']
-        );
+
 
     }
     echo '</div>';
