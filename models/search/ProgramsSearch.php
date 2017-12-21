@@ -2,6 +2,7 @@
 
 namespace app\models\search;
 
+use app\models\Cooperate;
 use app\components\ActiveDataProviderWithDecorator;
 use app\models\Cooperate;
 use app\models\OrganizationPayerAssignment;
@@ -129,6 +130,11 @@ class ProgramsSearch extends Programs
         if ($this->isMunicipalTask) {
             $query->andWhere(['>', 'programs.is_municipal_task', 0]);
         } else {
+            // TODO проверить, нужно ли это для вывода программ организации
+            $query->leftJoin(Payers::tableName(), 'programs.mun = payers.mun');
+            $query->leftJoin(Cooperate::tableName(), 'cooperate.organization_id = programs.organization_id and cooperate.payer_id = payers.id')
+                ->andWhere(['cooperate.status' => Cooperate::STATUS_ACTIVE, 'cooperate.period' => [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE]]);
+
             $query->andWhere([
                 'OR',
                 ['programs.is_municipal_task' => null],
@@ -191,7 +197,6 @@ class ProgramsSearch extends Programs
             $query->andWhere(['OR', ['programs.open' => null], ['programs.open' => 0]]);
         }
 
-
         $query->andFilterWhere([
             'programs.id' => $this->id,
             'programs.organization_id' => $this->organization_id,
@@ -235,7 +240,6 @@ class ProgramsSearch extends Programs
         }
         $query->andFilterWhere(['<=', 'programs.age_group_min', $this->age]);
         $query->andFilterWhere(['>=', 'programs.age_group_max', $this->age]);
-
 
         $query->andFilterWhere(['like', 'programs.name', $this->name])
             ->andFilterWhere(['like', 'programs.vid', $this->vid])
@@ -322,8 +326,6 @@ class ProgramsSearch extends Programs
         $query->andFilterWhere(['programs.id' => $this->idList]);
 
         $query->groupBy(['programs.id']);
-
-        //print_r($query->prepare(Yii::$app->db->queryBuilder)->createCommand()->rawSql);exit;
 
         return $dataProvider;
     }
