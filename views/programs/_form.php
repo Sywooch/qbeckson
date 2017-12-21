@@ -62,6 +62,7 @@ $this->registerJs($js);
 <div class="programs-form" ng-app>
     <?php $form = ActiveForm::begin([
         'id' => 'dynamic-form',
+        'enableClientValidation' => false,
         'action' => !empty($strictAction) ? $strictAction : null,
         'options' => ['enctype' => 'multipart/form-data']
     ]); ?>

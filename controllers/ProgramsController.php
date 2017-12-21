@@ -378,9 +378,13 @@ class ProgramsController extends Controller
             new ProgrammeModule(
                 [
                     'kvfirst' => 'Педагог, обладающий соответствующей квалификацией',
-                    'scenario' => $model->isMunicipalTask
-                        ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK
-                        : ProgrammeModule::SCENARIO_CREATE
+                    'scenario' => $model->asDraft
+                        ? ProgrammeModule::SCENARIO_DRAFT
+                        : (
+                        $model->isMunicipalTask
+                            ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK
+                            : null
+                        )
                 ]
             )
         ];
@@ -403,6 +407,11 @@ class ProgramsController extends Controller
             if (Yii::$app->request->isAjax) {
                 if ($model->asDraft) {
                     $model->setScenario(Programs::SCENARIO_DRAFT);
+                    $modelsYears = array_map(function (ProgrammeModule $module) {
+                        $module->setScenario(ProgrammeModule::SCENARIO_DRAFT);
+
+                        return $module;
+                    }, $modelsYears);
                     $model->verification = Programs::VERIFICATION_DRAFT;
                 }
 
@@ -448,7 +457,7 @@ class ProgramsController extends Controller
                     $model->link = $filename;
                 }
                 $model->year = count($modelsYears);
-                if ($file->upload($filename)) {
+                if (($model->link && $file->upload($filename)) || $model->isADraft()) {
                     $valid = $model->validate();
                     $valid = Model::validateMultiple($modelsYears) && $valid;
                     if ($valid) {
@@ -552,12 +561,13 @@ class ProgramsController extends Controller
                                     $p13 = Yii::$app->coefficient->data->weekyear;
                                     $p21 = Yii::$app->coefficient->data->p21v;
                                     $p22 = Yii::$app->coefficient->data->p22v;
+                                    if (!$model->isADraft()) {
+                                        $childAverage = $modelYears->getChildrenAverage() ? $modelYears->getChildrenAverage() : ($modelYears->maxchild + $modelYears->minchild) / 2;
+                                        $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / ($childAverage)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * ($childAverage)) / ($p11 * ($childAverage))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * ($childAverage)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * ($childAverage))) * $p5;
 
-                                    $childAverage = $modelYears->getChildrenAverage() ? $modelYears->getChildrenAverage() : ($modelYears->maxchild + $modelYears->minchild) / 2;
-                                    $nprice = $p6 * (((($p21 * ($modelYears->hours - $modelYears->hoursindivid) + $p22 * $modelYears->hoursdop) / ($childAverage)) + $p21 * $modelYears->hoursindivid) / ($p12 * $p16 * $p14)) * $p7 * (1 + $p8) * $p9 * $p10 + ((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursindivid * ($childAverage)) / ($p11 * ($childAverage))) * ($p1 * $p3 + $p4) + (((($modelYears->hours - $modelYears->hoursindivid) + $modelYears->hoursdop + $modelYears->hoursindivid * ($childAverage)) * $p10 * $p7) / ($p15 * $p13 * $p12 * $p16 * ($childAverage))) * $p5;
-
-                                    $modelYears->normative_price = round($nprice);
-                                    $modelYears->previus = 1;
+                                        $modelYears->normative_price = round($nprice);
+                                        $modelYears->previus = 1;
+                                    }
                                     $i++;
                                     if (!($flag = $modelYears->save(false))) {
                                         $transaction->rollBack();
@@ -585,6 +595,7 @@ class ProgramsController extends Controller
                                 );
                             }
                         } catch (\Exception $e) {
+                            Yii::trace($e->getMessage());
                             $transaction->rollBack();
                         }
                     }

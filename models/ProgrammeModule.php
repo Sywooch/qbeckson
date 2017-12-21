@@ -101,7 +101,7 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_CREATE] = $scenarios['default'];
         $scenarios[self::SCENARIO_MUNICIPAL_TASK] = $scenarios[self::SCENARIO_CREATE];
-        $scenarios[] = self::SCENARIO_DRAFT;
+        $scenarios[self::SCENARIO_DRAFT] = $scenarios['default'];
 
         return $scenarios;
     }
