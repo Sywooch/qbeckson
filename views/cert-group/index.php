@@ -200,7 +200,11 @@ $this->registerJs($js);
                 },
             ],
             'countActualCertificates',
-            'sumCertificatesNominals',
+            [
+                'attribute' => 'sumCertificatesNominals',
+                'label' => '<span title="Объем обеспечения сертификатов в текущем периоде">Совокупное обеспечение</span>',
+                'encodeLabel' => false,
+            ],
             [
                 'class' => 'kartik\grid\EditableColumn',
                 'attribute' => 'nominals_limit',

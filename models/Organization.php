@@ -786,4 +786,16 @@ class Organization extends \yii\db\ActiveRecord
             self::DOC_TYPE_CHARTER => 'Устава'
         ];
     }
+
+    /**
+     * существуют ли программы для автопролонгации у организации
+     *
+     * @return boolean
+     */
+    public function programsForAutoProlongationExists()
+    {
+        $autoProlongation = AutoProlongation::makeForOrganization($this->id);
+
+        return $autoProlongation->getProgramIdList() ? true : false;
+    }
 }
