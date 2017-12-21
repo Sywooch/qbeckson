@@ -285,7 +285,7 @@ $this->registerJs($js);
     if (!$model->isNewRecord && !isset($roles['operators']) && !$model->inTransferProcess) {
         echo $form->field($model, 'edit')->checkbox(['value' => 1, 'ng-model' => 'edit']);
     }
-    /*echo Html::submitButton(
+    echo Html::submitButton(
         'Сохранить как черновик',
         [
             'class' => $model->isNewRecord ? 'btn btn-primary' : 'btn btn-primary',
@@ -293,7 +293,7 @@ $this->registerJs($js);
             'value' => 1
         ]
     );
-    echo '&nbsp';*/
+    echo '&nbsp';
     if (!$model->isNewRecord && !isset($roles['operators']) && !$model->inTransferProcess) {
         echo Html::submitButton(
             $model->isNewRecord
