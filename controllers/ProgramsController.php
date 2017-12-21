@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use app\models\forms\TaskTransferForm;
 use app\assets\programsAsset\ProgramsAsset;
 use app\models\AllProgramsSearch;
 use app\models\AutoProlongation;
@@ -10,6 +9,7 @@ use app\models\ContractsSearch;
 use app\models\Cooperate;
 use app\models\forms\ProgramAddressesForm;
 use app\models\forms\ProgramSectionForm;
+use app\models\forms\TaskTransferForm;
 use app\models\Informs;
 use app\models\Model;
 use app\models\module\ModuleViewDecorator;
@@ -1140,13 +1140,6 @@ class ProgramsController extends Controller
         $oldIDs = ArrayHelper::map($modelsYears, 'id', 'id');
         $modelYears = Model::createMultiple(ProgrammeModule::classname(), $modelsYears);
         Model::loadMultiple($modelsYears, Yii::$app->request->post());
-        $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelsYears, 'id', 'id')));
-
-        if (Yii::$app->request->isAjax) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-
-            return ActiveForm::validateMultiple($modelsGroups);
-        }
 
         if (Yii::$app->request->isPost) {
             if ($model->verification == Programs::VERIFICATION_WAIT) {
@@ -1156,7 +1149,6 @@ class ProgramsController extends Controller
             }
 
             foreach ($modelsYears as $modelYears) {
-
                 $modelYears->save();
             }
 
@@ -1164,7 +1156,8 @@ class ProgramsController extends Controller
 
         } else {
             return $this->render('open', [
-                'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears
+                'modelsYears' => (empty($modelsYears)) ? [new ProgrammeModule] : $modelsYears,
+                'model' => $model
             ]);
         }
     }
