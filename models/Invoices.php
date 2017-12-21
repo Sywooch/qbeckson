@@ -14,22 +14,20 @@ use yii\helpers\ArrayHelper;
  *
  * @property integer      $id
  * @property integer      $month
- * @property int $year [int(11)]
+ * @property int          $year
  * @property integer      $organization_id
  * @property integer      $payers_id
- * @property string $contracts
  * @property integer      $sum
- * @property string      $number
+ * @property string       $number
  * @property string       $date
  * @property string       $link
  * @property integer      $prepayment
- * @property integer $completeness
  * @property integer      $status
  * @property String       $statusAsString
- * @property int $completeness
- * @property int $cooperate_id
- * @property String $contracts
- * @property string $pdf
+ * @property int          $completeness
+ * @property int          $cooperate_id
+ * @property String       $contracts
+ * @property string       $pdf
  *
  *
  * @property InvoiceHaveContract[] $invoiceHaveContracts
