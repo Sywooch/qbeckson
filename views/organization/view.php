@@ -575,7 +575,7 @@ $this->registerJs($js, $this::POS_READY);
                 $activeDocumentLink = null !== $cooperation->getActiveDocumentUrl() ? Html::a($documentLabel, [$cooperation->getActiveDocumentUrl()], ['target' => 'blank']) : '';
                 $alternativeDocumentLink = null !== $cooperation->getAlternativeDocumentUrl() ? Html::a($alternativeDocumentLabel, [$cooperation->getAlternativeDocumentUrl()], ['target' => 'blank']) : '';
 
-                if ($activeDocumentLink) { ?>
+                if (Cooperate::STATUS_ACTIVE == $cooperation->status) { ?>
 
                     <hr>
                     <div class="panel panel-default">
