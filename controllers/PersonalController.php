@@ -386,7 +386,7 @@ class PersonalController extends Controller
             'hours' => '0,2000',
             'limit' => '0,10000',
             'rating' => '0,100',
-            'modelName' => 'SearchOpenPrograms',
+            'modelName' => ProgramsSearch::MODEL_OPEN,
         ]);
         $openProgramsProvider = $searchOpenPrograms->search(Yii::$app->request->queryParams);
         $allOpenProgramsProvider = $searchOpenPrograms->search(Yii::$app->request->queryParams, 999999);
@@ -395,7 +395,7 @@ class PersonalController extends Controller
             'verification' => [Programs::VERIFICATION_UNDEFINED, Programs::VERIFICATION_WAIT],
             'open' => 0,
             'hours' => '0,2000',
-            'modelName' => 'SearchWaitPrograms',
+            'modelName' => ProgramsSearch::MODEL_WAIT,
         ]);
         $waitProgramsProvider = $searchWaitPrograms->search(Yii::$app->request->queryParams);
         $allWaitProgramsProvider = $searchWaitPrograms->search(Yii::$app->request->queryParams, 999999);
@@ -403,7 +403,7 @@ class PersonalController extends Controller
         $searchClosedPrograms = new ProgramsSearch([
             'verification' => [Programs::VERIFICATION_DENIED],
             'hours' => '0,2000',
-            'modelName' => 'SearchClosedPrograms',
+            'modelName' => ProgramsSearch::MODEL_CLOSED,
         ]);
         $closedProgramsProvider = $searchClosedPrograms->search(Yii::$app->request->queryParams);
         $allClosedProgramsProvider = $searchClosedPrograms->search(Yii::$app->request->queryParams, 999999);

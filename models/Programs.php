@@ -478,6 +478,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
             'municipal_task_matrix_id' => 'Раздел муниципального задания',
             'auto_prolongation_enabled' => 'Установлена автоматическая пролонгация договоров (создание заявок и оферт на продолжение обучения)',
             'asDraft' => 'Сохранить как черновик',
+            'open' => 'Зачисление',
         ];
     }
 

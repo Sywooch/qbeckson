@@ -673,7 +673,13 @@ class ProgramsController extends Controller
         }
 
         $model->verification = Programs::VERIFICATION_DONE;
-
+        array_map(
+            function (ProgrammeModule $module) {
+                $module->verification = ProgrammeModule::VERIFICATION_DONE;
+                $module->save(false);
+            },
+            $model->modules
+        );
         //return var_dump($model->limit);
         if ($model->save()) {
             $informs = new Informs();
