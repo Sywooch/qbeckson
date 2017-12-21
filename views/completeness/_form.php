@@ -15,7 +15,7 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'completeness')->textInput() ?>
 
     <div class="form-group">
-       <?= Html::a('Назад', ['/groups/invoice'], ['class' => 'btn btn-primary']) ?>
+       <?= Html::a('Назад', [date('m') != 12 ? '/groups/invoice' : '/groups/dec'], ['class' => 'btn btn-primary']) ?>
 &nbsp;
         <?= Html::submitButton($model->isNewRecord ? 'Сохранить' : 'Обновить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
     </div>

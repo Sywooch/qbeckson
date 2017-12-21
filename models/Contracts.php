@@ -83,6 +83,7 @@ use yii\web\ForbiddenHttpException;
  * @property string          $accepted_at                   дата и время подтверждения заявки
  * @property string          $activated_at                  дата и время заключения договора
  * @property string          $termination_initiated_at      дата и время перевода в статус ожидания расторжения (wait_termnate = 1)
+ * @property string          $creation_status [varchar(50)] статус создания договора
  *
  * @property float           $balance
  * @property Disputes[]      $disputes
@@ -118,6 +119,9 @@ class Contracts extends ActiveRecord
     const STATUS_REFUSED = 2;
     const STATUS_ACCEPTED = 3;
     const STATUS_CLOSED = 4;
+
+    const CREATION_STATUS_NEW = 0;
+    const CREATION_STATUS_PROLONGED = 1;
 
     const SCENARIO_CREATE_DATE = 10;
 
@@ -158,7 +162,7 @@ class Contracts extends ActiveRecord
     public function rules()
     {
         return [
-            [['certificate_id', 'program_id', 'organization_id', 'status', 'status_year', 'funds_gone', 'group_id', 'year_id', 'sposob', 'prodolj_d', 'prodolj_m', 'prodolj_m_user', 'ocenka', 'wait_termnate', 'terminator_user', 'payment_order', 'period', 'cooperate_id'], 'integer'],
+            [['certificate_id', 'program_id', 'organization_id', 'status', 'status_year', 'funds_gone', 'group_id', 'year_id', 'sposob', 'prodolj_d', 'prodolj_m', 'prodolj_m_user', 'ocenka', 'wait_termnate', 'terminator_user', 'payment_order', 'period', 'cooperate_id', 'creation_status'], 'integer'],
             [['all_funds', 'funds_cert', 'all_parents_funds', 'first_m_price', 'other_m_price', 'first_m_nprice', 'other_m_nprice', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch', 'cert_dol', 'payer_dol', 'rezerv', 'paid', 'fontsize', 'balance', 'payer_first_month_payment', 'payer_other_month_payment', 'parents_other_month_payment', 'parents_first_month_payment'], 'number'],
             [['date', 'status_termination', 'start_edu_programm', 'stop_edu_contract', 'start_edu_contract', 'date_termnate', 'applicationIsReceived'], 'safe'],
             [['created_at', 'requested_at', 'refused_at', 'accepted_at', 'activated_at', 'termination_initiated_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
@@ -258,6 +262,7 @@ class Contracts extends ActiveRecord
             'accepted_at'              => 'дата и время подтверждения заявки',
             'activated_at'             => 'дата и время заключения договора',
             'termination_initiated_at' => 'дата и время перевода в статус ожидания расторжения',
+            'creation_status'          => 'Статус создания договора',
         ];
     }
 

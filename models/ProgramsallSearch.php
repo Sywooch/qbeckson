@@ -51,7 +51,7 @@ class ProgramsallSearch extends Programs
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
-                'pagesize' => 50,
+                'pageSize' => 50,
             ],
         ]);
 
