@@ -60,6 +60,7 @@ use yii\helpers\Html;
  * @property integer $p3z
  * @property integer $municipal_task_matrix_id
  * @property string $zabAsString
+ * @property bool $auto_prolongation_enabled
  *
  * @property string $iconClass
  * @property string $defaultPhoto
@@ -250,6 +251,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
             [['programPhoto'], 'safe'],
             ['inTransferProcess', 'boolean'],
             [['activity_ids'], 'each', 'rule' => ['integer']],
+            ['auto_prolongation_enabled', 'boolean'],
         ];
     }
 
@@ -458,6 +460,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
             'currentActiveContracts' => 'Обучающиеся в данный момент',
             'currentActiveContractsCount' => 'Обучающихся',
             'municipal_task_matrix_id' => 'Раздел муниципального задания',
+            'auto_prolongation_enabled' => 'Установлена автоматическая пролонгация договоров (создание заявок и оферт на продолжение обучения)',
             'asDraft' => 'Сохранить как черновик',
         ];
     }
