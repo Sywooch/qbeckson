@@ -2,25 +2,31 @@
 
 namespace app\controllers;
 
+use app\models\forms\TaskTransferForm;
 use app\assets\programsAsset\ProgramsAsset;
-use app\components\EditableOperations;
 use app\models\AllProgramsSearch;
+use app\models\AutoProlongation;
+use app\models\ContractsSearch;
 use app\models\Cooperate;
 use app\models\forms\ProgramAddressesForm;
 use app\models\forms\ProgramSectionForm;
 use app\models\Informs;
 use app\models\Model;
+use app\models\module\ModuleViewDecorator;
 use app\models\Organization;
 use app\models\ProgrammeModule;
 use app\models\Programs;
+use app\models\programs\ProgramViewDecorator;
 use app\models\ProgramsallSearch;
 use app\models\ProgramsFile;
 use app\models\ProgramsPreviusSearch;
+use app\models\search\ProgramsSearch;
 use app\models\UserIdentity;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
@@ -96,6 +102,8 @@ class ProgramsController extends Controller
 
     /**
      * @param integer $id
+     *
+     * @throws NotFoundHttpException
      *
      * @return string|Response
      */
@@ -177,6 +185,43 @@ class ProgramsController extends Controller
         ]);
     }
 
+    public function actionTransferTask($id)
+    {
+        $model = $this->findModel($id);
+        if (!$model->isMunicipalTask || !$model->canTaskBeTransferred) {
+            throw new BadRequestHttpException();
+        }
+        $model->setTransferParams();
+        $modelYears = $model->years;
+        $file = new ProgramsFile();
+
+        return $this->render('update', [
+            'strictAction' => ['/programs/update', 'id' => $model->id],
+            'model' => $model,
+            'file' => $file,
+            'modelYears' => (empty($modelYears)) ? [new ProgrammeModule(['scenario' => ProgrammeModule::SCENARIO_CREATE])] : $modelYears
+        ]);
+    }
+
+    public function actionTransferProgramme($id)
+    {
+        $model = $this->findModel($id);
+        if ($model->isMunicipalTask || !$model->canProgrammeBeTransferred) {
+            throw new BadRequestHttpException();
+        }
+        $model->setTransferParams(false);
+
+        if ($model->save()) {
+            Yii::$app->session->setFlash('success', 'Вы успешно перевели программу на муниципальное задание в реестр "Ожидающие рассмотрения"');
+
+            return $this->redirect(['/programs/view-task', 'id' => $model->id]);
+        } else {
+            Yii::$app->session->setFlash('danger', 'Произошла ошибка в процессе переноса.');
+
+            return $this->redirect(['/programs/view', 'id' => $model->id]);
+        }
+    }
+
     public function actionRefuseTask($id)
     {
         $program = $this->findModel($id);
@@ -209,7 +254,9 @@ class ProgramsController extends Controller
     {
         /** @var $user UserIdentity */
         $user = Yii::$app->user->identity;
-        $model = $this->findModel($id);
+        $modelOriginal = $this->findModel($id);
+        $model = ProgramViewDecorator::decorate($modelOriginal);
+        $modules = ModuleViewDecorator::decorateMultiple($model->modules);
 
         if (!$model->isActive) {
             throw new NotFoundHttpException();
@@ -220,19 +267,24 @@ class ProgramsController extends Controller
         }
 
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
-            || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)) {
-            if ($model->verification === $model::VERIFICATION_DENIED) {
-                Yii::$app->session->setFlash('danger',
-                    $this->renderPartial('informers/list_of_reazon',
+            || Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)
+        ) {
+            if ($model->verification === Programs::VERIFICATION_DENIED) {
+                Yii::$app->session->setFlash(
+                    'danger',
+                    $this->renderPartial(
+                        'informers/list_of_reazon',
                         [
-                            'dataProvider' => new ActiveDataProvider([
+                            'dataProvider' => new ActiveDataProvider(
+                                [
                                     'query' => $model->getInforms()
-                                        ->andWhere(['status' => $model::VERIFICATION_DENIED]),
+                                        ->andWhere(['status' => Programs::VERIFICATION_DENIED]),
                                     'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
                                 ]
                             )
                         ]
-                    ));
+                    )
+                );
             }
         }
         $cooperate = null;
@@ -242,13 +294,18 @@ class ProgramsController extends Controller
                 Cooperate::tableName() . '.organization_id' => $model->organization_id,
                 'status' => Cooperate::STATUS_ACTIVE])->all();
             if (!count($cooperate)) {
-                Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в организацию, реализующую выбранную программу. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
+                Yii::$app->session->setFlash(
+                    'warning',
+                    'К сожалению, на данный момент Вы не можете записаться на '
+                    . 'обучение в организацию, реализующую выбранную программу. '
+                    . 'Уполномоченная организация пока не заключила с ней необходимое соглашение.'
+                );
             }
         }
 
         ProgramsAsset::register($this->view);
 
-        return $this->render('view/view', ['model' => $model, 'cooperate' => $cooperate]);
+        return $this->render('view/view', ['model' => $model, 'cooperate' => $cooperate, 'modules' => $modules]);
     }
 
     /**
@@ -274,7 +331,8 @@ class ProgramsController extends Controller
             $model->save(false, ['verification']);
         }
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
-            || Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
+            || Yii::$app->user->can(UserIdentity::ROLE_PAYER)
+        ) {
             if ($model->verification === $model::VERIFICATION_DENIED) {
                 Yii::$app->session->setFlash('danger',
                     $this->renderPartial('informers/list_of_reazon',
@@ -503,7 +561,8 @@ class ProgramsController extends Controller
             && count(array_filter($model->informs, function ($val) {
                 /**@var $val Informs */
                 return $val->status === Programs::VERIFICATION_DENIED;
-            })) > 0) {
+            })) > 0
+        ) {
             Yii::$app->session->setFlash(
                 'danger',
                 $this->renderPartial(
@@ -1074,7 +1133,8 @@ class ProgramsController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $modelOrigin = $this->findModel($id);
+        $model = ProgramViewDecorator::decorate($modelOrigin);
         if (!$model->isActive) {
             throw new NotFoundHttpException();
         }
@@ -1090,7 +1150,8 @@ class ProgramsController extends Controller
         $model->zab = explode(',', $model->zab);
         $organization = Yii::$app->user->identity->organization;
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
-            && $organization->id !== $model->organization_id) {
+            && $organization->id !== $model->organization_id
+        ) {
             throw new ForbiddenHttpException('Нет доступа');
         }
 
@@ -1464,5 +1525,105 @@ class ProgramsController extends Controller
         }
 
         throw new ForbiddenHttpException();
+    }
+
+    /**
+     * отображение списка программ для автопролонгации
+     */
+    public function actionProgramListForAutoProlongation()
+    {
+        if (!\Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+            throw new ForbiddenHttpException('Нет доступа');
+        }
+
+        $autoProlongation = AutoProlongation::makeForOrganization(\Yii::$app->user->identity->organization->id);
+
+        if (count($autoProlongation->getProgramIdList()) < 1) {
+            return $this->redirect(Url::to(['/personal/organization-contracts']));
+        }
+
+        $program = new ProgramsSearch(['idList' => $autoProlongation->getProgramIdList() ?: 0]);
+        $programDataProvider = $program->search([]);
+
+        return $this->render('program-list-for-auto-prolongation', [
+            'programDataProvider' => $programDataProvider,
+        ]);
+    }
+
+    /**
+     * отображение списка договоров для автопролонгации
+     */
+    public function actionContractListForAutoProlongation()
+    {
+        if (!\Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+            return $this->asJson(false);
+        }
+
+        /** @var \app\models\OperatorSettings $operatorSettings */
+        $operatorSettings = Yii::$app->operator->identity->settings;
+
+        $autoProlongation = AutoProlongation::makeForOrganization(\Yii::$app->user->identity->organization->id);
+
+        if (count($autoProlongation->getContractIdList()) < 1) {
+            return $this->redirect(Url::to(['/personal/organization-contracts']));
+        }
+
+        $contract = new ContractsSearch(['idList' => $autoProlongation->getContractIdList() ?: 0]);
+        $contractDataProvider = $contract->search([]);
+
+        return $this->render('contract-list-for-auto-prolongation', [
+            'operatorSettings' => $operatorSettings,
+            'contractDataProvider' => $contractDataProvider
+        ]);
+    }
+
+    /**
+     * запустить автопролонгацию договоров
+     */
+    public function actionAutoProlongationInit()
+    {
+        if (!\Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+            return $this->asJson(false);
+        }
+        $autoProlongation = AutoProlongation::makeForOrganization(\Yii::$app->user->identity->organization->id);
+
+        if ($autoProlongation->init(array_diff($autoProlongation->getContractIdList(), \Yii::$app->request->post()))) {
+            $autoProlongMessage = Yii::$app->i18n->format('{n, plural, one{Автопролонгирована} few{Автопролонгированы} many{Автопролонгировано} other{Автопролонгирована}}', ['n' => $autoProlongation->getContractRequestedAutoProlongedCount()], 'ru_RU');
+            $contractRequestCountMessage = $autoProlongation->getContractRequestedAutoProlongedCount() ? Yii::$app->i18n->format('{n, plural, one{ # заявка} few{ # заявки} many{ # заявок} other{ # заявка}}', ['n' => $autoProlongation->getContractRequestedAutoProlongedCount()], 'ru_RU') : '';
+            $contractAcceptCountMessage = $autoProlongation->getContractAcceptedAutoProlongedCount() ? Yii::$app->i18n->format('{n, plural, one{ # оферта} few{ # оферты} many{ # оферт} other{ # оферта}}', ['n' => $autoProlongation->getContractAcceptedAutoProlongedCount()], 'ru_RU') : '';
+            $message = $autoProlongMessage . $contractRequestCountMessage . (($contractRequestCountMessage != '' && $contractAcceptCountMessage != '') ? ' и' : '') .$contractAcceptCountMessage;
+
+            \Yii::$app->session->addFlash('info', $message);
+        }
+
+        return $this->redirect(Url::to(['/personal/organization-contracts']));
+    }
+
+    /**
+     * @param integer $id
+     *
+     * @return Response
+     */
+    public function actionChangeAutoProlongation($id = null)
+    {
+        if (!\Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+            return $this->asJson(false);
+        }
+
+        if (isset(\Yii::$app->request->post()['change-auto-prolongation-for-all-programs'])) {
+            $autoProlongation = AutoProlongation::makeForOrganization(\Yii::$app->user->identity->organization->id);
+
+            $success = $autoProlongation->changeAutoProlongationForAllProgramsWithActiveCooperate(\Yii::$app->request->post()['change-auto-prolongation-for-all-programs']);
+
+            return $this->asJson(['changed' => $success, 'value' => \Yii::$app->request->post()['change-auto-prolongation-for-all-programs']]);
+        }
+
+        $program = $this->findModel($id);
+
+        if (\Yii::$app->request->isAjax && $program && $program->load(\Yii::$app->request->post()) && $program->save(true, ['auto_prolongation_enabled'])) {
+            return $this->asJson($program->auto_prolongation_enabled);
+        }
+
+        return $this->asJson(ActiveForm::validate($program, ['auto_prolongation_enabled']));
     }
 }

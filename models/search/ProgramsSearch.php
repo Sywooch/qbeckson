@@ -2,6 +2,8 @@
 
 namespace app\models\search;
 
+use app\models\Cooperate;
+use app\components\ActiveDataProviderWithDecorator;
 use app\models\OrganizationPayerAssignment;
 use app\models\Payers;
 use app\models\Programs;
@@ -25,6 +27,9 @@ class ProgramsSearch extends Programs
     public $modelName;
     public $payerId;
     public $taskPayerId;
+    public $idList;
+
+    public $decorator;
 
     /**
      * @return string
@@ -97,6 +102,10 @@ class ProgramsSearch extends Programs
                 'activities'
             ]);
 
+        $query->leftJoin(Payers::tableName(), 'programs.mun = payers.mun');
+        $query->leftJoin(Cooperate::tableName(), 'cooperate.organization_id = programs.organization_id and cooperate.payer_id = payers.id')
+            ->andWhere(['cooperate.status' => Cooperate::STATUS_ACTIVE, 'cooperate.period' => [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE]]);
+
         $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
 
         if ($this->isMunicipalTask) {
@@ -109,13 +118,24 @@ class ProgramsSearch extends Programs
             ]);
         }
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'pagination' => [
-                'pageSizeLimit' => false,
-                'pageSize' => $pageSize,
-            ]
-        ]);
+        if ($this->decorator) {
+            $dataProvider = new ActiveDataProviderWithDecorator([
+                'decoratorClass' => $this->decorator,
+                'query' => $query,
+                'pagination' => [
+                    'pageSizeLimit' => false,
+                    'pageSize' => $pageSize,
+                ]
+            ]);
+        } else {
+            $dataProvider = new ActiveDataProvider([
+                'query' => $query,
+                'pagination' => [
+                    'pageSizeLimit' => false,
+                    'pageSize' => $pageSize,
+                ]
+            ]);
+        }
 
         $this->load($params);
 
@@ -128,7 +148,7 @@ class ProgramsSearch extends Programs
         if ($this->payerId) {
             /** @var UserIdentity $user */
             $user = Yii::$app->user->getIdentity();
-            $organizationIds = ArrayHelper::getColumn($user->payer->cooperates, 'organization_id');
+            $organizationIds = $user->payer->getOrganizationIdListWithCurrentOrFutureCooperate();
             if ($this->organization_id && $organizationIds && $this->organization_id !== 'Array') {
                 $this->organization_id = ArrayHelper::isIn($this->organization_id, $organizationIds) ?
                     $this->organization_id : 0;
@@ -266,6 +286,8 @@ class ProgramsSearch extends Programs
                 ['<=', 'programs.limit', (int)$limit[1]]
             ]);
         }
+
+        $query->andFilterWhere(['programs.id' => $this->idList]);
 
         $query->groupBy(['programs.id']);
 

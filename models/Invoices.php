@@ -14,19 +14,26 @@ use yii\helpers\ArrayHelper;
  *
  * @property integer      $id
  * @property integer      $month
+ * @property int $year [int(11)]
  * @property integer      $organization_id
  * @property integer      $payers_id
- * @property integer      $contract_id
+ * @property string $contracts
  * @property integer      $sum
  * @property string      $number
  * @property string       $date
  * @property string       $link
  * @property integer      $prepayment
+ * @property integer $completeness
  * @property integer      $status
  * @property String       $statusAsString
+ * @property int $completeness
+ * @property int $cooperate_id
  * @property String $contracts
+ * @property string $pdf
  *
  *
+ * @property InvoiceHaveContract[] $invoiceHaveContracts
+ * @property Contracts[] $contractModels
  * @property Contracts    $contract
  * @property Organization $organization
  * @property Payers       $payers
@@ -59,7 +66,7 @@ class Invoices extends ActiveRecord
      */
     public static function tableName()
     {
-        return 'invoices';
+        return '{{%invoices}}';
     }
 
     /**
@@ -136,11 +143,40 @@ class Invoices extends ActiveRecord
         return $this->hasOne(Payers::className(), ['id' => 'payers_id']);
     }
 
-    public function setCooperate()
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getInvoiceHaveContracts()
     {
-        $cooperate = Cooperate::findCooperateByParams($this->payers_id, $this->organization_id);
+        return $this->hasMany(InvoiceHaveContract::className(), ['invoice_id' => 'id'])
+            ->inverseOf('invoice');
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getContractModels()
+    {
+        return $this->hasMany(Contracts::className(), ['id' => 'contract_id'])
+            ->viaTable('invoice_have_contract', ['invoice_id' => 'id']);
+    }
+
+
+    /**
+     * устанавливает соглашение счета
+     *
+     * @param boolean $preInvoice - предоплата
+     */
+    public function setCooperate($preInvoice)
+    {
+        if ($preInvoice) {
+            $cooperate = Cooperate::findCooperateByParams($this->payers_id, $this->organization_id, Cooperate::getPeriodFromDate($this->date));
+        } else {
+            $cooperate = Cooperate::findOne(['payer_id' => $this->payers_id, 'organization_id' => $this->organization_id, 'status' => Cooperate::STATUS_ACTIVE]);
+        }
         $this->cooperate_id = $cooperate->id;
     }
+
 
     public function setAsPaid()
     {

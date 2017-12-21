@@ -1,10 +1,10 @@
 <?php
 
-use yii\helpers\Html;
-use kartik\grid\GridView;
-use yii\helpers\Url;
 use app\models\Certificates;
 use app\models\ProgrammeModuleSearch;
+use kartik\grid\GridView;
+use yii\helpers\Html;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ProgramsSearch */
@@ -16,13 +16,12 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="programs-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-   
-    
+
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
-    'pjax'=>true,
+        'pjax' => true,
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
@@ -31,40 +30,60 @@ $this->params['breadcrumbs'][] = $this->title;
             //'organization_id',
             //'verification',
             [
-                'class'=>'kartik\grid\ExpandRowColumn',
-                'width'=>'50px',
-                'value'=>function ($model, $key, $index, $column) {
+                'class' => 'kartik\grid\ExpandRowColumn',
+                'width' => '50px',
+                'value' => function ($model, $key, $index, $column) {
                     return GridView::ROW_COLLAPSED;
                 },
-                'detail'=>function ($model, $key, $index, $column) {
+                'detail' => function ($model, $key, $index, $column) {
                     $searchModel = new ProgrammeModuleSearch();
                     $searchModel->program_id = $model->id;
                     $searchModel->open = 1;
                     $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-                    
-                    return Yii::$app->controller->renderPartial('/years/detail', ['searchModel'=>$searchModel, 'dataProvider'=>$dataProvider]);
+
+                    return Yii::$app->controller->renderPartial(
+                        '/years/detail',
+                        ['searchModel' => $searchModel, 'dataProvider' => $dataProvider]
+                    );
                 },
-                'headerOptions'=>['class'=>'kartik-sheet-style'], 
-                'expandOneOnly'=>true
+                'headerOptions' => ['class' => 'kartik-sheet-style'],
+                'expandOneOnly' => true
             ],
-            'name',
+            ['attribute' => 'name',
+                'value' => function (\app\models\Programs $program) {
+                    return Html::tag(
+                        'span',
+                        $program->short_name,
+                        [
+                            'data' => [
+                                'container' => 'body',
+                                'toggle' => 'popover',
+                                'placement' => 'bottom',
+                                'trigger' => 'gover',
+                                'content' => $program->name,
+                            ],
+                        ]
+                    );
+                },
+                'format' => 'raw',
+            ],
             'organization.name',
             'year',
-             'directivity',
+            'directivity',
             //'age_group_min',
             //'age_group_max',
-             //'price',
-             ['attribute' => 'ovz',
-              'label' => 'Наличие ОВЗ',
-                  'value' => function($data){
-                         if ($data->ovz == 1) {
-                             return 'Без ОВЗ';
-                         } else {
-                             return 'С ОВЗ';
-                         }
-                  }
-             ],
-             //'limit',
+            //'price',
+            ['attribute' => 'ovz',
+                'label' => 'Наличие ОВЗ',
+                'value' => function ($data) {
+                    if ($data->ovz == 1) {
+                        return 'Без ОВЗ';
+                    } else {
+                        return 'С ОВЗ';
+                    }
+                }
+            ],
+            //'limit',
             // 'study',
             // 'open',
             // 'goal:ntext',
@@ -78,30 +97,30 @@ $this->params['breadcrumbs'][] = $this->title;
 
             ['class' => 'yii\grid\ActionColumn',
                 'template' => '{favorites}',
-                 'buttons' =>
-                     [
-                         'favorites' => function ($url, $model) {
-                                $certificates = new Certificates();
-                                $certificate = $certificates->getCertificates();
+                'buttons' =>
+                    [
+                        'favorites' => function ($url, $model) {
+                            $certificates = new Certificates();
+                            $certificate = $certificates->getCertificates();
 
-                             $rows = (new \yii\db\Query())
+                            $rows = (new \yii\db\Query())
                                 ->from('favorites')
                                 ->where(['certificate_id' => $certificate['id']])
                                 ->andWhere(['program_id' => $model->id])
                                 ->andWhere(['type' => 1])
                                 ->one();
-                             if (!$rows) {
-                                  return Html::a('<span class="glyphicon glyphicon-star-empty"></span>', Url::to(['/favorites/new', 'id' => $model->id]), [
-                                     'title' => Yii::t('yii', 'Добавить в избранное')
-                                 ]);
-                             } else {
-                                  return Html::a('<span class="glyphicon glyphicon-star"></span>', Url::to(['/favorites/terminate', 'id' => $model->id]), [
-                                     'title' => Yii::t('yii', 'Убрать из избранного')
-                                 ]);
-                             }
+                            if (!$rows) {
+                                return Html::a('<span class="glyphicon glyphicon-star-empty"></span>', Url::to(['/favorites/new', 'id' => $model->id]), [
+                                    'title' => Yii::t('yii', 'Добавить в избранное')
+                                ]);
+                            } else {
+                                return Html::a('<span class="glyphicon glyphicon-star"></span>', Url::to(['/favorites/terminate', 'id' => $model->id]), [
+                                    'title' => Yii::t('yii', 'Убрать из избранного')
+                                ]);
+                            }
                         },
-                     ]
-             ],
+                    ]
+            ],
         ],
     ]); ?>
 </div>

@@ -18,11 +18,23 @@ use yii\db\ActiveRecord;
  */
 class Notification extends ActiveRecord
 {
-    /** уведомление о запрете на создание контрактов плательщиком */
-    const TYPE_DENY_CONTRACT_CREATE = 'deny_contract_create';
+    /** уведомление сертификатов о запрете на создание контрактов текущего периода */
+    const TYPE_CERTIFICATE_CANT_USE_CURRENT_BALANCE = 'certificate_cant_use_current_balance';
+
+    /** уведомление организаций (имеющих соглашение на будущий период) о запрете на создание контрактов будущего периода */
+    const TYPE_CERTIFICATE_WITH_FUTURE_COOPERATE_CAN_USE_FUTURE_BALANCE = 'certificate_with_future_cooperate_can_use_future_balance';
+
+    /** уведомление организаций (не имеющих соглашение на будущий период) о запрете на создание контрактов будущего периода */
+    const TYPE_CERTIFICATE_WITHOUT_FUTURE_COOPERATE_CAN_USE_FUTURE_BALANCE = 'certificate_without_future_cooperate_can_use_future_balance';
+
+    /** уведомление организаций (имеющие действующее соглашение) о приостановлении возможности заключения договоров в будущем периоде */
+    const TYPE_CERTIFICATE_CANT_USE_FUTURE_BALANCE = 'certificate_cant_use_future_balance';
 
     /** уведомление о переводе сертификатов в "сертификат учета" */
     const TYPE_CERTIFICATE_TO_ACCOUNTING = 'certificate_to_accounting_type';
+
+    /** уведомление об отклонении заявки на изменение данных муниципалитета */
+    const TYPE_MUN_APPLICATION_REJECT = 'mun_application_reject';
 
     /** @inheritdoc */
     public static function tableName()

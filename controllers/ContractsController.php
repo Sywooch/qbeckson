@@ -31,6 +31,7 @@ use yii\base\Response;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
+use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotAcceptableHttpException;
@@ -210,6 +211,15 @@ class ContractsController extends Controller
             }
         }
 
+        $cooperateWithCorrespondingPeriodExists = null;
+        if ($contract) {
+            $cooperateWithCorrespondingPeriodExists = $contract->payer->getCooperates()->where([
+                'cooperate.organization_id' => $contract->organization_id,
+                'cooperate.status' => Cooperate::STATUS_ACTIVE,
+                'cooperate.period' => Cooperate::getPeriodFromDate($model->dateFrom)
+            ])->exists();
+        }
+
         return $this->render('request', [
             'model' => $model,
             'contract' => $contract ?: null,
@@ -217,6 +227,7 @@ class ContractsController extends Controller
             'contractRequestFormValid' => $contractRequestFormValid,
             'groupId' => $groupId,
             'certificateId' => $certificateId,
+            'cooperateWithCorrespondingPeriodExists' => $cooperateWithCorrespondingPeriodExists,
         ]);
     }
 
@@ -278,7 +289,23 @@ class ContractsController extends Controller
         }
         $model = $this->findModel($id);
         $completenessQuery = $model->getTransactions();
-        
+
+        /** @var \app\models\OperatorSettings $operatorSettings */
+        $operatorSettings = Yii::$app->operator->identity->settings;
+
+        if (!$model->canBeAccepted()) {
+            $message = null;
+
+            if (\Yii::$app->user->can('certificate') || \Yii::$app->user->can('operators')) {
+                $message = 'Поставщик услуг пока не может выставить оферту по данному договору - нет реквизитов о договоре между ним и уполномоченной организацией';
+            }
+            if (\Yii::$app->user->can('payers')) {
+                $message = 'Поставщик услуг не сможет выставить оферту по данному договору прежде чем Вы заключите с ним ' . Cooperate::documentNames()[$operatorSettings->document_name] . ' на соответствующий период';
+            }
+
+            \Yii::$app->session->addFlash('danger', $message);
+        }
+
         return $this->render('view', [
             'model' => $model,
             'completenessQuery' => $completenessQuery
@@ -601,8 +628,14 @@ class ContractsController extends Controller
     public function actionGenerate($id)
     {
         $model = $this->findModel($id);
+
+        if (!$model->canBeAccepted()) {
+            return $this->redirect(Url::to(['/contracts/verificate', 'id' => $id]));
+        }
+
+        $model->setCooperate();
+        $model->save();
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            $model->setCooperate();
             $model->save(false);
 
             return $this->refresh();
@@ -751,13 +784,7 @@ class ContractsController extends Controller
 
         $date_elements_user = explode("-", $model->start_edu_contract);
 
-        $cooperate = (new \yii\db\Query())
-            ->select(['number', 'date'])
-            ->from('cooperate')
-            ->where(['organization_id' => $model->organization_id])
-            ->andWhere(['payer_id' => $model->payer_id])
-            ->andWhere(['status' => 1])
-            ->one();
+        $cooperate = Cooperate::find()->select(['number', 'date'])->where(['id' => $model->cooperate_id])->one();
         $date_cooperate = explode("-", $cooperate['date']);
 
         if ($program->form == 1) {
@@ -1145,6 +1172,11 @@ EOD;
     public function actionOk($id)
     {
         $model = $this->findModel($id);
+
+        if (!$model->canBeAccepted()) {
+
+            return $this->redirect(Url::to(['/contracts/generate', 'id' => $id]));
+        }
 
         $model->status = Contracts::STATUS_ACCEPTED;
         $model->accepted_at = date('Y-m-d H:i:s');

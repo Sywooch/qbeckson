@@ -1,11 +1,11 @@
 <?php
 
 use app\models\Cooperate;
-use yii\bootstrap\Modal;
-use yii\helpers\Url;
-use yii\helpers\Html;
-use yii\widgets\ActiveForm;
 use app\models\Payers;
+use yii\bootstrap\Modal;
+use yii\helpers\Html;
+use yii\helpers\Url;
+use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Contracts */
@@ -34,13 +34,7 @@ $operatorSettings = Yii::$app->operator->identity->settings;
             <?php endif; ?>
         <?php ActiveForm::end(); ?>
     <?php
-    $cooperate = (new \yii\db\Query())
-        ->select(['number', 'date'])
-        ->from('cooperate')
-        ->where(['organization_id' => $model->organization_id])
-        ->andWhere(['payer_id' => $model->payer_id])
-        ->andWhere(['status' => 1])
-        ->one();
+    $cooperate = Cooperate::find()->select(['number', 'date'])->where(['id' => $model->cooperate_id])->one();
 
     $date_cooperate = explode('-', $cooperate['date']);
 

@@ -1,95 +1,26 @@
 <?php
-/** @var $model \app\models\ProgrammeModule */
+/** @var $model \app\models\module\ModuleViewDecorator */
 
 use app\components\widgets\modalCheckLink\ModalCheckLink;
-use app\models\Programs;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
 ?>
 <div class="btn-row">
-
     <?php
-    if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)
-        && ($model->program->verification !== Programs::VERIFICATION_DENIED
-            || $model->program->verification !== Programs::VERIFICATION_WAIT
-        )
-        && ($model->verification !== \app\models\ProgrammeModule::VERIFICATION_DENIED
-            || $model->verification !== \app\models\ProgrammeModule::VERIFICATION_WAIT)
-    ) {
-        $message = '';
-        $url = '#';
-        $classButton = 'btn-theme';
-        $active = false;
-
-        /**@var $organization \app\models\Organization */
-        $organization = Yii::$app->user->identity->organization;
-        if ($organization->actual) {
-            if ($model->price > 0) {
-                if ($organization->type !== \app\models\Organization::TYPE_IP_WITHOUT_WORKERS) {
-                    if ($organization->license_issued_dat
-                        && $organization->fio
-                        && $organization->position
-                        && $organization->doc_type
-                    ) {
-                        if ($organization->doc_type === \app\models\Organization::DOC_TYPE_PROXY) {
-                            if ($organization->date_proxy && $organization->number_proxy) {
-                                $active = true;
-                                if ($model->open) {
-                                    $message = 'Закрыть зачисление';
-                                    $url = Url::to(['years/stop', 'id' => $model->id]);
-                                    $classButton = 'btn-danger';
-                                } else {
-                                    $message = 'Открыть зачисление';
-                                    $url = Url::to(['years/start', 'id' => $model->id]);
-                                }
-                            } else {
-                                $active = false;
-                                $message = 'Заполните информацию "Для договора"';
-                            }
-                        } else {
-                            $active = true;
-                            if ($model->open) {
-                                $message = 'Закрыть зачисление';
-                                $url = Url::to(['years/stop', 'id' => $model->id]);
-                                $classButton = 'btn-danger';
-                            } else {
-                                $message = 'Открыть зачисление';
-                                $url = Url::to(['years/start', 'id' => $model->id]);
-                            }
-                        }
-                    } else {
-                        $active = false;
-                        $message = 'Заполните информацию "Для договора"';
-                    }
-                } else {
-                    $active = true;
-                    if ($model->open) {
-                        $message = 'Закрыть зачисление';
-                        $url = Url::to(['years/stop', 'id' => $model->id]);
-                        $classButton = 'btn-danger';
-                    } else {
-                        $message = 'Открыть зачисление';
-                        $url = Url::to(['years/start', 'id' => $model->id]);
-                    }
-                }
-            } else {
-                $active = false;
-                $message = 'Нет цены, нельзя открыть';
-            }
-        } else {
-            $active = false;
-            $message = 'Деятельность приостановлена';
-        }
-
+    if ($model->haveAccess()) {
         /** Зачисление отккыть/закрыть */
-        if ($model->program->verification == Programs::VERIFICATION_DONE) {
-            if ($active) {
-                echo Html::a($message, $url, ['class' => 'btn ' . $classButton]);
+        if ($model->isVerificate()) {
+            if ($model->haveAccessToEnlistment()) {
+                echo Html::a(
+                    $model->getLabelEnlistment(),
+                    $model->getEnlistmentActionUrl(),
+                    ['class' => ['btn', $model->getClassButtonEnlistment()]]
+                );
             } else {
                 echo \app\components\widgets\ButtonWithInfo::widget([
                     'label' => 'Зачисление',
-                    'message' => $message,
+                    'message' => $model->getEnlistmentWarning(),
                     'options' => ['disabled' => 'disabled',
                         'class' => 'btn btn-theme',]
                 ]);
@@ -97,8 +28,8 @@ use yii\helpers\Url;
         }
 
         /** установка цены */
-        if ($model->price) {
-            if ($model->open && $model->price) {
+        if ($model->havePrice()) {
+            if (!$model->canEditPrice()) {
                 echo \app\components\widgets\ButtonWithInfo::widget([
                     'label' => 'Изменить цену',
                     'message' => 'Невозможно мзмнеть цену когда открыто зачисление',
@@ -180,17 +111,10 @@ use yii\helpers\Url;
                     'class' => 'btn btn-theme',]
             ]);
         }
-
-
-        ?>
-
-    <?php } elseif (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)
-        && ($model->program->verification === Programs::VERIFICATION_DENIED
-            || $model->program->verification === Programs::VERIFICATION_WAIT)) {
-
+    } elseif ($model->havePermissions()) {
         echo \app\components\widgets\ButtonWithInfo::widget([
             'label' => 'Действия',
-            'message' => 'Недоступно по причине отказа',
+            'message' => $model->getNoAccessMessage(),
             'options' => ['disabled' => 'disabled',
                 'class' => 'btn btn-theme',]
         ]);
