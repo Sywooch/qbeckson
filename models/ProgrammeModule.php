@@ -6,6 +6,7 @@ use app\components\periodicField\PeriodicField;
 use app\components\periodicField\PeriodicFieldAR;
 use app\components\periodicField\PeriodicFieldBehavior;
 use app\components\periodicField\RecordWithHistory;
+use yii\base\Event;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -86,6 +87,30 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
         } else {
             return $history->value;
         }
+    }
+
+    public function init()
+    {
+        parent::init();
+        $actionsOnDraftSave = function (Event $event) {
+            /**@var $module ProgrammeModule */
+            $module = $event->sender;
+
+            if ($module->getScenario() === ProgrammeModule::SCENARIO_DRAFT) {
+                $module->month = !$module->month ? 0 : $module->month;
+                $module->hours = !$module->hours ? 0 : $module->hours;
+                $module->hoursindivid = !$module->hoursindivid ? 0 : $module->hoursindivid;
+                $module->hoursdop = !$module->hoursdop ? 0 : $module->hoursdop;
+                $module->kvfirst = !$module->kvfirst ? '' : $module->kvfirst;
+                $module->kvdop = !$module->kvdop ? '' : $module->kvdop;
+                $module->minchild = !$module->minchild ? 0 : $module->minchild;
+                $module->maxchild = !$module->maxchild ? 0 : $module->maxchild;
+                $module->normative_price = !$module->normative_price ? 0 : $module->normative_price;
+                $module->results = !$module->results ? '' : $module->results;
+            }
+        };
+        $this->on(ActiveRecord::EVENT_BEFORE_UPDATE, $actionsOnDraftSave);
+        $this->on(ActiveRecord::EVENT_BEFORE_INSERT, $actionsOnDraftSave);
     }
 
     /**

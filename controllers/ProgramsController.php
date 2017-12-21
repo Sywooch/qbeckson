@@ -378,13 +378,11 @@ class ProgramsController extends Controller
             new ProgrammeModule(
                 [
                     'kvfirst' => 'Педагог, обладающий соответствующей квалификацией',
-                    'scenario' => $model->asDraft
-                        ? ProgrammeModule::SCENARIO_DRAFT
-                        : (
+                    'scenario' =>
                         $model->isMunicipalTask
                             ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK
                             : null
-                        )
+
                 ]
             )
         ];
@@ -1663,7 +1661,7 @@ class ProgramsController extends Controller
             $autoProlongMessage = Yii::$app->i18n->format('{n, plural, one{Автопролонгирована} few{Автопролонгированы} many{Автопролонгировано} other{Автопролонгирована}}', ['n' => $autoProlongation->getContractRequestedAutoProlongedCount()], 'ru_RU');
             $contractRequestCountMessage = $autoProlongation->getContractRequestedAutoProlongedCount() ? Yii::$app->i18n->format('{n, plural, one{ # заявка} few{ # заявки} many{ # заявок} other{ # заявка}}', ['n' => $autoProlongation->getContractRequestedAutoProlongedCount()], 'ru_RU') : '';
             $contractAcceptCountMessage = $autoProlongation->getContractAcceptedAutoProlongedCount() ? Yii::$app->i18n->format('{n, plural, one{ # оферта} few{ # оферты} many{ # оферт} other{ # оферта}}', ['n' => $autoProlongation->getContractAcceptedAutoProlongedCount()], 'ru_RU') : '';
-            $message = $autoProlongMessage . $contractRequestCountMessage . (($contractRequestCountMessage != '' && $contractAcceptCountMessage != '') ? ' и' : '') .$contractAcceptCountMessage;
+            $message = $autoProlongMessage . $contractRequestCountMessage . (($contractRequestCountMessage != '' && $contractAcceptCountMessage != '') ? ' и' : '') . $contractAcceptCountMessage;
 
             \Yii::$app->session->addFlash('info', $message);
         }
