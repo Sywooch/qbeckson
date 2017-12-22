@@ -99,8 +99,11 @@ class OrganizationController extends Controller
             $currentPeriodCooperate = $model->getCooperation(Cooperate::STATUS_ACTIVE, Cooperate::PERIOD_CURRENT);
             $futurePeriodCooperate = $model->getCooperation(Cooperate::STATUS_ACTIVE, Cooperate::PERIOD_FUTURE);
 
-
-            $confirmRequestForm = new ConfirmRequestForm(['type' => $activeCooperate->document_type, 'value' => number_format($activeCooperate->total_payment_limit, 0, '', '')]);
+            if ($activeCooperate) {
+                $confirmRequestForm = new ConfirmRequestForm(['type' => $activeCooperate->document_type, 'value' => number_format($activeCooperate->total_payment_limit, 0, '', '')]);
+            } else {
+                $confirmRequestForm = new ConfirmRequestForm();
+            }
             $cooperateForFuturePeriodTypeForm = $futurePeriodCooperate ? new CooperateForFuturePeriodTypeForm(['type' => $futurePeriodCooperate->document_type, 'maximumAmount' => number_format($futurePeriodCooperate->total_payment_limit, 0, '', '')]) : null;
 
             $cooperateForFuturePeriodForm = new CooperateForFuturePeriodForm();
@@ -163,6 +166,7 @@ class OrganizationController extends Controller
             'operatorSettings' => $operatorSettings,
             'confirmRequestForm' => $confirmRequestForm,
             'cooperateForFuturePeriodForm' => $cooperateForFuturePeriodForm,
+            'currentPeriodCooperate' => $currentPeriodCooperate,
             'futurePeriodCooperate' => $futurePeriodCooperate,
             'cooperateForFuturePeriodTypeForm' => $cooperateForFuturePeriodTypeForm,
         ]);
