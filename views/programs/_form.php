@@ -62,6 +62,7 @@ $this->registerJs($js);
 <div class="programs-form" ng-app>
     <?php $form = ActiveForm::begin([
         'id' => 'dynamic-form',
+        'enableClientValidation' => false,
         'action' => !empty($strictAction) ? $strictAction : null,
         'options' => ['enctype' => 'multipart/form-data']
     ]); ?>
@@ -284,7 +285,15 @@ $this->registerJs($js);
     if (!$model->isNewRecord && !isset($roles['operators']) && !$model->inTransferProcess) {
         echo $form->field($model, 'edit')->checkbox(['value' => 1, 'ng-model' => 'edit']);
     }
-    /*echo Html::submitButton(
+    echo Html::a(
+        'Отменить',
+        $model->isMunicipalTask
+            ? ['/personal/organization-municipal-task']
+            : ['/personal/organization-programs'],
+        ['class' => 'btn btn-danger']
+    );
+    echo '&nbsp';
+    echo Html::submitButton(
         'Сохранить как черновик',
         [
             'class' => $model->isNewRecord ? 'btn btn-primary' : 'btn btn-primary',
@@ -292,7 +301,7 @@ $this->registerJs($js);
             'value' => 1
         ]
     );
-    echo '&nbsp';*/
+    echo '&nbsp';
     if (!$model->isNewRecord && !isset($roles['operators']) && !$model->inTransferProcess) {
         echo Html::submitButton(
             $model->isNewRecord
@@ -300,14 +309,8 @@ $this->registerJs($js);
                 : 'Обновить программу',
             ['class' => $model->isNewRecord ? 'btn btn-primary' : 'btn btn-primary', 'ng-show' => "edit"]
         );
-        echo '&nbsp';
-        echo Html::a(
-            'Отменить',
-            $model->isMunicipalTask
-                ? ['/personal/organization-municipal-task']
-                : ['/personal/organization-programs'],
-            ['class' => 'btn btn-danger']
-        );
+
+
     } else {
         echo Html::submitButton(
             $model->isNewRecord
@@ -315,14 +318,7 @@ $this->registerJs($js);
                 : ($model->inTransferProcess ? 'Перевести программу на ПФ' : 'Обновить программу'),
             ['class' => $model->isNewRecord ? 'btn btn-primary' : 'btn btn-primary']
         );
-        echo '&nbsp';
-        echo Html::a(
-            'Отменить',
-            $model->isMunicipalTask
-                ? ['/personal/organization-municipal-task']
-                : ['/personal/organization-programs'],
-            ['class' => 'btn btn-danger']
-        );
+
 
     }
     echo '</div>';

@@ -6,10 +6,16 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 
 $fStrings = [];
-$fStrings['ageGroupShort'] = Yii::t('app', '{min}-{max} лет',
-    ['min' => $model->age_group_min, 'max' => $model->age_group_max]);
-$fStrings['ageGroupFull'] = Yii::t('app', 'Рекомендуемый возраст с {min} до {max} лет',
-    ['min' => $model->age_group_min, 'max' => $model->age_group_max]);
+$fStrings['ageGroupShort'] = Yii::t(
+    'app',
+    '{min, number, integer}-{max, number, integer} лет',
+    ['min' => $model->age_group_min, 'max' => $model->age_group_max]
+);
+$fStrings['ageGroupFull'] = Yii::t(
+    'app',
+    'Рекомендуемый возраст с {min, number, integer} до {max, number, integer} лет',
+    ['min' => $model->age_group_min, 'max' => $model->age_group_max]
+);
 if ($model->zab && mb_strlen($model->zab) > 0) {
     $fStrings['zabShort'] = 'С' . PHP_EOL . 'ОВЗ';
     $fStrings['zabFull'] = $model->illnessesList;
@@ -17,11 +23,21 @@ if ($model->zab && mb_strlen($model->zab) > 0) {
     $fStrings['zabShort'] = 'Без' . PHP_EOL . 'ОВЗ';
     $fStrings['zabFull'] = 'Не предусмотрено обучение учащихся с ОВЗ';
 }
-$fStrings['rateFull'] = Yii::t('app', 'Рейтинг программы: {rating}%',
-    ['rating' => Yii::$app->formatter->asInteger($model->rating)]);
+$fStrings['rateFull'] = Yii::t(
+    'app',
+    'Рейтинг программы: {rating}%',
+    ['rating' => Yii::$app->formatter->asInteger($model->rating)]
+);
 
-$fStrings['rateShort'] = Yii::t('app', '{rating}',
-    ['rating' => Yii::$app->formatter->asInteger($model->rating)]);
+$fStrings['rateShort'] = Yii::t('app',
+    '{rating}',
+    ['rating' => Yii::$app->formatter->asInteger($model->rating)]
+);
+$fStrings['costFirstModule'] = Yii::t(
+    'app',
+    'Заявленная: {formattedValue}',
+    ['formattedValue' => Yii::$app->formatter->asCurrency($model->getModules()->one()->price),]
+);
 
 $fStrings['costFirstModule'] = Yii::t('app', 'Заявленная: {formattedValue}',
     ['formattedValue' => Yii::$app->formatter->asCurrency($model->getModules()->one()->price),]);
@@ -62,7 +78,10 @@ $this->registerJs($JS, $this::POS_READY);
             <div class="program-img socped"><img src="<?= $photo ?>"/></div>
         </div>
         <div class="col-xs-12 col-sm-8 col-md-8 col-lg-9">
-            <h2 class="card-title js-ellipsis-title"><?= $model->name ?></h2>
+            <h2 class="card-title js-ellipsis-title"
+                data-container="body" data-toggle="popover" data-placement="bottom"
+                data-trigger="hover" data-content="<?= htmlentities($model->name) ?>"
+            ><?= $model->short_name ?></h2>
             <div class="card-badges">
                 <div class="card-badges-item card-badges-item_violet" title="<?= $model->direction->name ?>"><span
                             class="large-size <?= $model->iconClass ?>"></span></div>
@@ -102,8 +121,10 @@ $this->registerJs($JS, $this::POS_READY);
                     'model'      => $model,
                     'attributes' => [
                         'direction.name',
-                        ['label' => 'Возраст детей',
-                         'value' => $model->age_group_min . ' - ' . $model->age_group_max],
+                        [
+                            'label' => 'Возраст детей',
+                            'value' => intval($model->age_group_min) . ' - ' . intval($model->age_group_max)
+                        ],
                         'illnessesList',
                         'limit',
                         ['label' => 'Число обучающихся',
