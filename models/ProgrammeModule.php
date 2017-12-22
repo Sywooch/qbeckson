@@ -154,7 +154,7 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
             ],
             [
                 ['hours',],
-                'number', 'numberPattern' => '/^\s*[-+]?[0-9]*\.?[2,5,7,0]+([eE][-+]?[0-9]+)?\s*$/'
+                'number', 'numberPattern' => '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/'
             ],
             [['price', 'normative_price'], 'number'],
             [['verification'], 'integer'],
