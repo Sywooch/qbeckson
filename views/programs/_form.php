@@ -304,9 +304,7 @@ $this->registerJs($js);
     echo '&nbsp';
     if (!$model->isNewRecord && !isset($roles['operators']) && !$model->inTransferProcess) {
         echo Html::submitButton(
-            $model->isNewRecord
-                ? 'Отправить программу на сертификацию'
-                : 'Обновить программу',
+            'Отправить программу на сертификацию',
             ['class' => $model->isNewRecord ? 'btn btn-primary' : 'btn btn-primary', 'ng-show' => "edit"]
         );
 
