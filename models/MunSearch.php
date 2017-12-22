@@ -92,8 +92,13 @@ class MunSearch extends Mun
             'deystv' => $this->deystv,
             'lastdeystv' => $this->lastdeystv,
             'countdet' => $this->countdet,
-            'type' => $this->type,
         ]);
+
+        if ($this->type) {
+            $query->andFilterWhere(['type' => $this->type]);
+        } else {
+            $query->andFilterWhere(['type' => self::TYPE_MAIN]);
+        }
 
         $query->andFilterWhere(['like', 'name', $this->name]);
 
