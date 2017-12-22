@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 \app\assets\operatorDeleteContractAsset\OperatorDeleteContractAsset::register($this);
 
-$waitingColumns = $confirmedColumns = $refusedColumns = [
+$waitingColumns = $refusedColumns = [
     [
         'attribute' => 'contractNumber',
         'value' => function (ContractDeleteApplication $data) {
@@ -50,10 +50,37 @@ $waitingColumns = $confirmedColumns = $refusedColumns = [
         'format' => 'datetime',
     ],
 ];
+
+$confirmedColumns = [
+    [
+        'attribute' => 'contract_number',
+    ],
+    [
+        'attribute' => 'contract_date',
+        'format' => 'date',
+    ],
+    [
+        'attribute' => 'fileUrl',
+        'format' => 'url',
+    ],
+    [
+        'attribute' => 'certificate_number',
+    ],
+    [
+        'attribute' => 'created_at',
+        'format' => 'datetime',
+    ],
+    [
+        'attribute' => 'confirmed_at',
+        'format' => 'datetime'
+    ],
+    [
+        'attribute' => 'reason'
+    ]
+];
+
 $refusedColumns[] = ['attribute' => 'confirmed_at', 'format' => 'datetime'];
-$confirmedColumns[] = ['attribute' => 'confirmed_at', 'format' => 'datetime'];
 $refusedColumns[] = ['attribute' => 'reason'];
-$confirmedColumns[] = ['attribute' => 'reason'];
 $waitingColumns[] = ['attribute' => 'reason'];
 $waitingColumns[] = [
     'label' => 'Решение',

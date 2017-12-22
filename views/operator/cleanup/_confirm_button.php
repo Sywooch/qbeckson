@@ -15,6 +15,7 @@ use yii\helpers\Html;
    data-modal-certificate-number="<?= ArrayHelper::getValue($model, ['contract', 'certificate', 'number']) ?>"
    data-modal-delete-reason="<?= Html::encode($model->reason) ?>"
    data-modal-delete-document="<?= $model->getFileUrl() ?>"
+   data-modal-invoices-count="<?= count(ArrayHelper::getValue($model, ['contract', 'invoiceHaveContracts'])) ?>"
 >
     <i class="glyphicon glyphicon-trash"></i>
 </a>

@@ -3,10 +3,8 @@
 namespace app\controllers\operator;
 
 use app\models\ContractDeleteApplication;
-use app\models\Contracts;
 use app\models\forms\ContractDeleteApplicationForm;
 use app\models\search\ContractDeleteApplicationSearch;
-use yii\db\Expression;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
@@ -20,6 +18,7 @@ class CleanupController extends Controller
         $modelForm = new ContractDeleteApplicationForm();
         $waitingModel = new ContractDeleteApplicationSearch([
             'status' => ContractDeleteApplication::STATUS_WAITING,
+            'withInvoiceHaveContracts' => true,
         ]);
         $confirmedModel = new ContractDeleteApplicationSearch([
             'status' => ContractDeleteApplication::STATUS_CONFIRMED,
@@ -46,32 +45,30 @@ class CleanupController extends Controller
     public function actionResolution()
     {
         //TODO: Запретить удалять договоры в чужих муниципалитетах
-        //TODO: Разобраться с внешними ключами (пример договор N 35)
         $model = new ContractDeleteApplicationForm();
         if ($model->load(\Yii::$app->request->post()) && $model->validate()) {
             $application = ContractDeleteApplication::findOne(['id' => $model->appId]);
             if (!$application) {
                 throw new NotFoundHttpException('Заявка не найдена');
             }
-            $application->confirmed_at = new Expression('NOW()');
 
-            $contract = Contracts::findOne(['id' => $model->contractId]);
-            if (!$contract || $application->contract_id !== $contract->id) {
+            $contract = $application->contract;
+            if (!$contract) {
                 throw new NotFoundHttpException('Договор не найден');
             }
-            if (intval($model->status)) {
-                $application->status = ContractDeleteApplication::STATUS_CONFIRMED;
-                $transaction = \Yii::$app->db->beginTransaction();
-                if ($contract->refoundMoney() && $contract->delete() !== false && $application->save(false)) {
-                    $transaction->commit();
-                    \Yii::$app->session->setFlash('success', 'Договор удален.');
+            if (intval($model->status)) { // Если подтверждаем
+                if ($contract->invoiceHaveContracts) {
+                    \Yii::$app->session->setFlash('error',
+                        'Договор нельзя удалить, он включен, как минимум в один из выставленных счетов.');
                 } else {
-                    $transaction->rollBack();
-                    \Yii::$app->session->setFlash('error', 'Не удалось удалить договор.');
+                    if ($application->deleteContractConfirm()) {
+                        \Yii::$app->session->setFlash('success', 'Договор удален.');
+                    } else {
+                        \Yii::$app->session->setFlash('error', 'Не удалось удалить договор.');
+                    }
                 }
-            } else {
-                $application->status = ContractDeleteApplication::STATUS_REFUSED;
-                if ($application->save(false)) {
+            } else { // Если отклоняем
+                if ($application->deleteContractReject()) {
                     \Yii::$app->session->setFlash('success', 'Запрос отклонен.');
                 } else {
                     \Yii::$app->session->setFlash('error', 'Не удалось отклонить запрос.');

@@ -8,16 +8,26 @@ $(function () {
     var modalAppId = $('#modal-app-id', modal);
     var modalDeleteReason = $('#modal-delete-reason', modal);
     var modalDeleteDocument = $('#modal-delete-document', modal);
+    var modalConfirmButton = $('#modal-confirm-button', modal);
+    var modalAlertMessage = $('#modal-alert-message', modal);
 
     confirmButton.on('click', function (e) {
         e.preventDefault();
         var data = $(this).data();
-        console.log(data);
         updateData(data);
         modal.modal('show');
     });
 
     function updateData(data) {
+        var countInvoices = parseInt(data['modalInvoicesCount'], 10);
+        if (countInvoices) {
+            modalConfirmButton.prop('disabled', true);
+            modalAlertMessage.text('Договор нельзя удалить, он включен, как минимум в один из выставленных счетов!');
+        } else {
+            modalConfirmButton.prop('disabled', false);
+            modalAlertMessage.text('');
+        }
+
         modalCertificateNumber.text(data['modalCertificateNumber']);
         modalContractNumber.text(data['modalContractNumber']);
         modalContractDate.text(data['modalContractDate']);

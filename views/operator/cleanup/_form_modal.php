@@ -23,6 +23,7 @@ $statusInputName = Html::getInputName($model, 'status');
                 <p>Заключён по сертификату ПФ <span id="modal-certificate-number"></span>.</p>
                 <p>Основание удаления: <span id="modal-delete-reason"></span>.</p>
                 <p><a href="#" id="modal-delete-document">Скачать подтверждающий документ</a>.</p>
+                <p><strong id="modal-alert-message" class="text-danger"></strong></p>
             </div>
             <div class="modal-footer">
                 <?php $form = ActiveForm::begin([
@@ -31,12 +32,15 @@ $statusInputName = Html::getInputName($model, 'status');
                 ]); ?>
                 <?= Html::activeHiddenInput($model, 'contractId', ['id' => 'modal-contract-id']) ?>
                 <?= Html::activeHiddenInput($model, 'appId', ['id' => 'modal-app-id']) ?>
-                <?= $form->field($model, 'captcha')->widget(\yii\captcha\Captcha::className(), [
-//                    'captchaAction' => 'site/captcha-numeric',
-                ]) ?>
+                <?= $form->field($model, 'captcha')->widget(\yii\captcha\Captcha::className()) ?>
                 <br>
                 <?= Html::submitButton('Продолжить',
-                    ['class' => 'btn btn-success', 'name' => $statusInputName, 'value' => '1']); ?>
+                    [
+                        'id' => 'modal-confirm-button',
+                        'class' => 'btn btn-success',
+                        'name' => $statusInputName,
+                        'value' => '1'
+                    ]); ?>
                 <?= Html::submitButton('Отклонить',
                     ['class' => 'btn btn-danger', 'name' => $statusInputName, 'value' => '0']); ?>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>

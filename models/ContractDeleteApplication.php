@@ -5,7 +5,9 @@ namespace app\models;
 use app\behaviors\UploadBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\Exception;
 use yii\db\Expression;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 
 /**
@@ -18,7 +20,10 @@ use yii\helpers\Url;
  * @property string $filename
  * @property string $created_at
  * @property string $confirmed_at
+ * @property string $contract_date
+ * @property string $contract_number
  * @property integer $contract_id
+ * @property integer $certificate_number
  * @property integer $status
  *
  * @property Contracts $contract
@@ -29,8 +34,9 @@ class ContractDeleteApplication extends ActiveRecord
     const STATUS_CONFIRMED = 2;
     const STATUS_REFUSED = 3;
 
-    /** Сценарий для подачи заявки на удаление договора */
     const SCENARIO_CREATE = 'create';
+    const SCENARIO_CONFIRM = 'confirm';
+    const SCENARIO_REJECT = 'reject';
 
     public $confirmationFile;
     public $isChecked;
@@ -73,12 +79,20 @@ class ContractDeleteApplication extends ActiveRecord
     {
         return [
             [['reason'], 'required'],
-            [['isChecked'], 'required', 'requiredValue' => 1, 'message' => 'Подтвердите ознакомление с условиями направления запроса на удаление договора'],
+            [
+                ['isChecked'],
+                'required',
+                'requiredValue' => 1,
+                'except' => [self::SCENARIO_CONFIRM, self::SCENARIO_REJECT],
+                'message' => 'Подтвердите ознакомление с условиями направления запроса на удаление договора'
+            ],
             [['created_at', 'confirmed_at'], 'safe'],
-            [['contract_id', 'status'], 'integer'],
+            [['contract_date'], 'date', 'format' => 'php:Y-m-d'],
+            [['contract_id', 'status', 'certificate_number'], 'integer'],
             [['status'], 'in', 'range' => [self::STATUS_WAITING, self::STATUS_CONFIRMED, self::STATUS_REFUSED]],
             [['status'], 'default', 'value' => self::STATUS_WAITING],
             [['reason', 'file', 'base_url', 'filename'], 'string', 'max' => 255],
+            [['contract_number'], 'string'],
             [['confirmationFile'], 'required', 'on' => self::SCENARIO_CREATE],
             [['contract_id'], 'unique', 'message' => 'Запрос на удаление этого договора уже отправлен.'],
             [
@@ -86,7 +100,8 @@ class ContractDeleteApplication extends ActiveRecord
                 'exist',
                 'skipOnError' => true,
                 'targetClass' => Contracts::className(),
-                'targetAttribute' => ['contract_id' => 'id']
+                'targetAttribute' => ['contract_id' => 'id'],
+                'except' => self::SCENARIO_CONFIRM
             ],
         ];
     }
@@ -106,6 +121,9 @@ class ContractDeleteApplication extends ActiveRecord
             'status' => 'Статус',
             'fileUrl' => 'Подтверждающий документ',
             'confirmationFile' => 'Подтверждающий документ',
+            'contract_number' => 'Номер договора',
+            'contract_date' => 'Дата договора',
+            'certificate_number' => 'Номер сертификата',
             'isChecked' => 'Мы ознакомлены с условиями направления запроса на удаление договора. Подтверждаем, что наш запрос удовлетворяет всем четырем условиям. Уверены, что в нашем случае негативных последствий не возникнет',
         ];
     }
@@ -135,5 +153,54 @@ class ContractDeleteApplication extends ActiveRecord
     public function getFileUrl()
     {
         return $this->base_url ? Url::to([$this->base_url . DIRECTORY_SEPARATOR . $this->file], true) : null;
+    }
+
+    /**
+     * @return bool
+     * @throws Exception
+     */
+    public function deleteContractConfirm()
+    {
+        $contract = $this->contract;
+        if ($contract) {
+            $this->status = self::STATUS_CONFIRMED;
+            $this->confirmed_at = new Expression('NOW()');
+            $this->contract_date = $contract->date;
+            $this->contract_number = $contract->number;
+            $this->contract_id = null;
+            $this->certificate_number = ArrayHelper::getValue($contract, ['certificate', 'number']);
+            $this->setScenario(self::SCENARIO_CONFIRM);
+            $transaction = \Yii::$app->db->beginTransaction();
+            try {
+                if ($contract->refoundMoney() && $contract->delete() !== false && $this->save()) {
+                    $transaction->commit();
+                    return true;
+                } else {
+                    $transaction->rollBack();
+                    return false;
+                }
+            } catch (Exception $exception) {
+                if ($transaction->isActive) {
+                    $transaction->rollBack();
+                }
+                throw $exception;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function deleteContractReject()
+    {
+        $this->status = self::STATUS_REFUSED;
+        $this->confirmed_at = new Expression('NOW()');
+        $this->setScenario(self::SCENARIO_REJECT);
+        if ($this->save(false)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
