@@ -61,8 +61,18 @@ class MunController extends Controller
      */
     public function actionView($id)
     {
+        $model = Mun::find()->where([
+            'mun_id' => $id,
+            'user_id' => Yii::$app->user->id,
+            'type' => Mun::TYPE_APPLICATION
+        ])->limit(1)->one();
+
+        if (!$model) {
+            $model = $this->findModel($id);
+        }
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
         ]);
     }
 
