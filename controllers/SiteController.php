@@ -146,7 +146,8 @@ class SiteController extends Controller
 
         $municipalities = Mun::find()
             ->andWhere([
-                'operator_id' => Yii::$app->operator->identity->id
+                'operator_id' => Yii::$app->operator->identity->id,
+                'type' => Mun::TYPE_MAIN
             ])
             ->all();
 
