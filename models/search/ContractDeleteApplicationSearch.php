@@ -15,6 +15,7 @@ class ContractDeleteApplicationSearch extends ContractDeleteApplication
     public $certificateNumber;
     public $contractNumber;
     public $contractDate;
+    public $withInvoiceHaveContracts;
 
     /**
      * @inheritdoc
@@ -67,6 +68,10 @@ class ContractDeleteApplicationSearch extends ContractDeleteApplication
             return $dataProvider;
         }
 
+        if ($this->withInvoiceHaveContracts) {
+            $query->joinWith('contract.invoiceHaveContracts');
+        }
+
         $query->andFilterWhere([
             self::tableName() . '.[[status]]' => $this->status,
             Certificates::tableName() . '.[[number]]' => $this->certificateNumber,
@@ -77,3 +82,4 @@ class ContractDeleteApplicationSearch extends ContractDeleteApplication
         return $dataProvider;
     }
 }
+
