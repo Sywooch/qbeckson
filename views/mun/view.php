@@ -34,9 +34,9 @@ $this->params['breadcrumbs'][] = $this->title;
         $fileTag = Html::tag('span', '', ['class' => 'glyphicon glyphicon-download-alt']);
         $link = Html::a($fileTag . ' Файл-подтвержение', $model->getFileUrl());
         echo Html::tag('h4', $link);
-    }
-
-    if ($isOperator) { ?>
+    } ?>
+    <br>
+    <?php if ($isOperator) { ?>
         <?= Html::a('Назад', Url::to(['/mun/index']), ['class' => 'btn btn-primary']); ?>
     <?php } ?>
 

@@ -165,7 +165,7 @@ class Invoices extends ActiveRecord
      *
      * @param boolean $preInvoice - предоплата
      */
-    public function setCooperate($preInvoice)
+    public function setCooperate($preInvoice = null)
     {
         if ($preInvoice) {
             $cooperate = Cooperate::findCooperateByParams($this->payers_id, $this->organization_id, Cooperate::getPeriodFromDate($this->date));
