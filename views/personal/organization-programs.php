@@ -197,7 +197,7 @@ $preparedDraftPrograms = GridviewHelper::prepareColumns('programs', $draftProgra
     <?php
     if (Yii::$app->user->can('organizations') && Yii::$app->user->identity->organization->actual > 0) {
         echo "<p>";
-        echo Html::a('Отправить программу на сертификацию', ['programs/create'], ['class' => 'btn btn-success']);
+        echo Html::a('Создать программу', ['programs/create'], ['class' => 'btn btn-success']);
         echo "</p>";
     }
     ?>

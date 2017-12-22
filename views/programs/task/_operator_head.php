@@ -7,10 +7,13 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 
 $fStrings = [];
-$fStrings['ageGroupShort'] = Yii::t('app', '{min}-{max} лет',
+$fStrings['ageGroupShort'] = Yii::t('app', '{min, number, integer}-{max, number, integer} лет',
     ['min' => $model->age_group_min, 'max' => $model->age_group_max]);
-$fStrings['ageGroupFull'] = Yii::t('app', 'Рекомендуемый возраст с {min} до {max} лет',
-    ['min' => $model->age_group_min, 'max' => $model->age_group_max]);
+$fStrings['ageGroupFull'] = Yii::t(
+    'app',
+    'Рекомендуемый возраст с {min, number, integer} до {max, number, integer} лет',
+    ['min' => $model->age_group_min, 'max' => $model->age_group_max]
+);
 if ($model->zab && mb_strlen($model->zab) > 0) {
     $fStrings['zabShort'] = 'С' . PHP_EOL . 'ОВЗ';
     $fStrings['zabFull'] = $model->illnessesList;

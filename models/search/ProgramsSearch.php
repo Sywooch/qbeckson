@@ -2,10 +2,11 @@
 
 namespace app\models\search;
 
-use app\models\Cooperate;
 use app\components\ActiveDataProviderWithDecorator;
+use app\models\Cooperate;
 use app\models\OrganizationPayerAssignment;
 use app\models\Payers;
+use app\models\ProgrammeModule;
 use app\models\Programs;
 use app\models\UserIdentity;
 use Yii;
@@ -18,6 +19,12 @@ use yii\helpers\ArrayHelper;
  */
 class ProgramsSearch extends Programs
 {
+
+    const MODEL_WAIT = 'SearchWaitPrograms';
+    const MODEL_OPEN = 'SearchOpenPrograms';
+    const MODEL_CLOSED = 'SearchClosedPrograms';
+
+
     public $organization;
     public $municipality;
     public $hours;
@@ -102,15 +109,27 @@ class ProgramsSearch extends Programs
                 'activities'
             ]);
 
+        $query->leftJoin(Payers::tableName(), 'programs.mun = payers.mun');
+
+
         $query->andWhere('mun.operator_id = ' . Yii::$app->operator->identity->id);
 
         if ($this->isMunicipalTask) {
             $query->andWhere(['>', 'programs.is_municipal_task', 0]);
         } else {
             // TODO проверить, нужно ли это для вывода программ организации
-            $query->leftJoin(Payers::tableName(), 'programs.mun = payers.mun');
-            $query->leftJoin(Cooperate::tableName(), 'cooperate.organization_id = programs.organization_id and cooperate.payer_id = payers.id')
-                ->andWhere(['cooperate.status' => Cooperate::STATUS_ACTIVE, 'cooperate.period' => [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE]]);
+            if (!Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+                $query
+                    ->leftJoin(
+                        Cooperate::tableName(),
+                        'cooperate.organization_id = programs.organization_id
+                        and cooperate.payer_id = payers.id'
+                    )
+                    ->andWhere([
+                        'cooperate.status' => Cooperate::STATUS_ACTIVE,
+                        'cooperate.period' => [Cooperate::PERIOD_CURRENT, Cooperate::PERIOD_FUTURE]
+                    ]);
+            }
 
             $query->andWhere([
                 'OR',
@@ -162,7 +181,6 @@ class ProgramsSearch extends Programs
             /** @var UserIdentity $user */
             $payer = Payers::findOne($this->taskPayerId);
             $organizationIds = ArrayHelper::getColumn($payer->getOrganizations(null, OrganizationPayerAssignment::STATUS_ACTIVE)->all(), 'id');
-print_r($organizationIds);exit;
             if ($this->organization_id && $organizationIds && $this->organization_id !== 'Array') {
                 $this->organization_id = ArrayHelper::isIn($this->organization_id, $organizationIds) ?
                     $this->organization_id : 0;
@@ -178,7 +196,7 @@ print_r($organizationIds);exit;
         $query->andFilterWhere([
             'programs.id' => $this->id,
             'programs.organization_id' => $this->organization_id,
-            'programs.verification' => $this->verification,
+
             'programs.form' => $this->form,
             'programs.mun' => $this->mun,
             'programs.ground' => $this->ground,
@@ -202,7 +220,27 @@ print_r($organizationIds);exit;
             'programs.municipal_task_matrix_id' => $this->municipal_task_matrix_id,
             'organization.mun' => $this->municipality,
         ]);
-
+        if ($this->formName() === self::MODEL_WAIT) {
+            $query->andFilterWhere(
+                [
+                    'or',
+                    ['programs.verification' => $this->verification,],
+                    [
+                        'and',
+                        [
+                            'programs.verification' => Programs::VERIFICATION_DONE,
+                        ],
+                        [
+                            '{{%years}}.verification' => [
+                                ProgrammeModule::VERIFICATION_UNDEFINED,
+                                ProgrammeModule::VERIFICATION_WAIT
+                            ]
+                        ]
+                    ]]
+            );
+        } else {
+            $query->andFilterWhere(['programs.verification' => $this->verification,]);
+        }
         $query->andFilterWhere(['<=', 'programs.age_group_min', $this->age]);
         $query->andFilterWhere(['>=', 'programs.age_group_max', $this->age]);
 
