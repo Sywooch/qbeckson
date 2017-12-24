@@ -69,7 +69,8 @@ class PayersController extends Controller
     {
         $payer = $this->findModel($id);
 
-        $futurePeriodCooperate = $payer->getCooperates()->where(['cooperate.status' => Cooperate::STATUS_ACTIVE, 'cooperate.period' => Cooperate::PERIOD_FUTURE])->one();
+        $futurePeriodCooperate = $payer->getCooperates()->andWhere(['cooperate.organization_id' => Yii::$app->user->identity->organization->id, 'cooperate.status' => Cooperate::STATUS_ACTIVE, 'cooperate.period' => Cooperate::PERIOD_FUTURE])->one();
+        $currentPeriodCooperate = $payer->getCooperates()->andWhere(['cooperate.organization_id' => Yii::$app->user->identity->organization->id, 'cooperate.status' => Cooperate::STATUS_ACTIVE, 'cooperate.period' => Cooperate::PERIOD_CURRENT])->one();
 
         /** @var OperatorSettings $operatorSettings */
         $operatorSettings = Yii::$app->operator->identity->settings;
@@ -78,6 +79,7 @@ class PayersController extends Controller
             'model' => $payer,
             'operatorSettings' => $operatorSettings,
             'futurePeriodCooperate' => $futurePeriodCooperate,
+            'currentPeriodCooperate' => $currentPeriodCooperate,
         ]);
     }
 
