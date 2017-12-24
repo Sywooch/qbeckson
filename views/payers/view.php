@@ -11,6 +11,7 @@ use yii\widgets\DetailView;
 /* @var $model app\models\Payers */
 /* @var $operatorSettings OperatorSettings */
 /* @var $futurePeriodCooperate Cooperate */
+/* @var $currentPeriodCooperate Cooperate */
 
 $this->title = $model->name;
 
@@ -20,7 +21,7 @@ if (isset($roles['operators'])) {
 }
 if (isset($roles['organizations'])) {
     $this->params['breadcrumbs'][] = ['label' => 'Плательщики', 'url' => ['/personal/organization-payers']];
-    if ($cooperation = $model->getCooperation()) {
+    if ($cooperation = $model->getCooperation([0,2,3,4])) {
         $commitments = \app\models\Contracts::getCommitments($cooperation->id);
         $summary = \app\models\Invoices::getSummary($cooperation->id);
     }
@@ -162,8 +163,11 @@ $this->params['breadcrumbs'][] = $this->title;
         if (isset($roles['organizations'])) { ?>
 
             <?php if (isset($cooperation) && Cooperate::STATUS_NEW == $cooperation->status): ?>
-                <p>Вы отправили заявку на заключение договора действующего <?= $cooperation->getPeriodValidityLabel() ?>
-                    .</p>
+                <p>Вы отправили заявку на заключение договора действующего <?= $cooperation->getPeriodValidityLabel() ?>.</p>
+            <?php endif; ?>
+
+            <?php if (isset($cooperation) && Cooperate::STATUS_CONFIRMED == $cooperation->status): ?>
+                <p>Ваша заявка на заключение договора действующего <?= $cooperation->getPeriodValidityLabel() ?> одобрена.</p>
             <?php endif; ?>
 
             <?php
@@ -193,9 +197,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 $documentLabel = $cooperation->total_payment_limit ? 'Текст договора/соглашения c суммой' : 'Текст договора/соглашения без суммы';
 
-                $activeDocumentLink = null !== $cooperation->getActiveDocumentUrl() ? Html::a($documentLabel, [$cooperation->getActiveDocumentUrl()], ['target' => 'blank']) : '';
+                $activeDocumentLink = null !== $cooperation->getActiveDocumentUrl() ? Html::a($documentLabel, [$cooperation->getActiveDocumentUrl()], ['target' => 'blank']) : ''; ?>
 
-                if ($activeDocumentLink) { ?>
+                <br>
+                <br>
+
+                <?php if ($currentPeriodCooperate): ?>
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <?= Cooperate::documentNames()[$operatorSettings->document_name] ?>, используемый для оплаты
@@ -211,9 +218,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                 </td>
                             </tr>
 
-                            <?php if ($cooperation->status === Cooperate::STATUS_CONFIRMED &&
-                                null === $cooperation->number &&
-                                null === $cooperation->date
+                            <?php if ($currentPeriodCooperate->status === Cooperate::STATUS_CONFIRMED &&
+                                null === $currentPeriodCooperate->number &&
+                                null === $currentPeriodCooperate->date
                             ) { ?>
                                 <tr>
                                     <th>Реквизиты соглашения</th>
@@ -221,30 +228,30 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <?= $this->render(
                                             '../cooperate/requisites',
                                             [
-                                                'model' => $cooperation,
+                                                'model' => $currentPeriodCooperate,
                                                 'toggleButtonClass' => null,
                                                 'label' => 'Сведения о реквизитах соглашения/договора не внесены',
                                             ]
                                         ); ?>
                                     </td>
                                 </tr>
-                            <?php } elseif (($cooperation->status === Cooperate::STATUS_CONFIRMED &&
-                                    null !== $cooperation->number &&
-                                    null !== $cooperation->date) ||
-                                $cooperation->status === Cooperate::STATUS_ACTIVE
+                            <?php } elseif (($currentPeriodCooperate->status === Cooperate::STATUS_CONFIRMED &&
+                                    null !== $currentPeriodCooperate->number &&
+                                    null !== $currentPeriodCooperate->date) ||
+                                $currentPeriodCooperate->status === Cooperate::STATUS_ACTIVE
                             ) { ?>
 
                                 <tr>
                                     <th>Реквизиты соглашения</th>
-                                    <td>Договор от <?= \Yii::$app->formatter->asDate($cooperation->date) ?>
-                                        №<?= $cooperation->number ?>
+                                    <td>Договор от <?= \Yii::$app->formatter->asDate($currentPeriodCooperate->date) ?>
+                                        №<?= $currentPeriodCooperate->number ?>
                                     </td>
                                 </tr>
-                                <?php if ($cooperation->status == Cooperate::STATUS_ACTIVE && $cooperation->document_type == Cooperate::DOCUMENT_TYPE_EXTEND) { ?>
+                                <?php if ($currentPeriodCooperate->status == Cooperate::STATUS_ACTIVE && $currentPeriodCooperate->document_type == Cooperate::DOCUMENT_TYPE_EXTEND) { ?>
                                     <tr>
                                         <th>Установлена максимальная сумма по договору, рублей</th>
                                         <td>
-                                            <?= round($cooperation->total_payment_limit, 2) ?>
+                                            <?= round($currentPeriodCooperate->total_payment_limit, 2) ?>
                                         </td>
                                     </tr>
                                 <?php }
@@ -253,7 +260,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <tr>
                                 <th>Период действия соглашения</th>
                                 <td>
-                                    <?= $cooperation->getPeriodValidityLabel() ?>
+                                    <?= $currentPeriodCooperate->getPeriodValidityLabel() ?>
                                 </td>
                             </tr>
 
@@ -276,25 +283,34 @@ $this->params['breadcrumbs'][] = $this->title;
                             </tbody>
                         </table>
                     </div>
-                <?php }
 
-                if (Yii::$app->user->can('organizations') && $cooperation->status === Cooperate::STATUS_APPEALED) {
+                    <?php if (count($currentPeriodCooperate->contracts) < 1) {
+                        echo $this->render(
+                            '../cooperate/reject-contract',
+                            ['cooperation' => $currentPeriodCooperate]
+                        );
+                    } ?>
+                <?php endif; ?>
+
+                <?php if (Yii::$app->user->can('organizations') && $currentPeriodCooperate->status === Cooperate::STATUS_APPEALED) {
                     echo '<p class="pull-right text-warning">Ваша жалоба ожидает рассмотрения оператором</p>';
                 }
 
-                if ($cooperation->status === Cooperate::STATUS_REJECTED) {
+                if ($currentPeriodCooperate->status === Cooperate::STATUS_REJECTED) {
                     echo ' ';
                     echo $this->render(
                         '../cooperate/appeal-request',
-                        ['model' => $cooperation]
+                        ['model' => $currentPeriodCooperate]
                     );
                 }
 
-            } else {
-                echo $this->render('_cooperate-request', ['model' => $model, 'operatorSettings' => $operatorSettings]);
-            }
+            } elseif (!$currentPeriodCooperate || !$futurePeriodCooperate) { ?>
+                <?= $this->render('_cooperate-request', ['model' => $model, 'operatorSettings' => $operatorSettings]); ?>
+            <?php } ?>
 
-            if ($futurePeriodCooperate): ?>
+            <hr>
+
+            <?php if ($futurePeriodCooperate): ?>
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <?= Cooperate::documentNames()[$operatorSettings->document_name] ?>, использование которого
@@ -331,7 +347,12 @@ $this->params['breadcrumbs'][] = $this->title;
                                 </tr>
                             <?php endif; ?>
                         <?php } ?>
-
+                        <tr>
+                            <th>Период действия соглашения</th>
+                            <td>
+                                <?= $futurePeriodCooperate->getPeriodValidityLabel() ?>
+                            </td>
+                        </tr>
                         <?php if (!empty($commitments)): ?>
                             <tr>
                                 <th>Совокупная сумма подтвержденных обязательств по договору</th>
@@ -352,6 +373,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     </table>
 
                 </div>
+
+                <?php if (count($futurePeriodCooperate->contracts) < 1) {
+                    echo $this->render(
+                        '../cooperate/reject-contract',
+                        ['cooperation' => $futurePeriodCooperate]
+                    );
+                } ?>
             <?php endif; ?>
 
             <?= Html::a('Назад', '/personal/organization-payers', ['class' => 'btn btn-primary']); ?>
