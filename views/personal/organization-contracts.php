@@ -303,7 +303,6 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
                         <p><?= Html::a('Автопролонгация', ['programs/program-list-for-auto-prolongation'], ['class' => 'btn btn-success']); ?></p>
                     </div>
                 <?php endif; ?>
-            </div>
         </div>
 
     <?php } ?>
