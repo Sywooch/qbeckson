@@ -2,6 +2,7 @@
 
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
+use app\helpers\ArrayHelper;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Organization */
@@ -15,7 +16,12 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="organization-form">
         <?php $form = ActiveForm::begin(); ?>
 
-        <?= $form->field($model, 'contract_id')->textInput(['disabled' => true]) ?>
+        <p>
+            <label>
+                Договор №<?= ArrayHelper::getValue($model, ['contract', 'number']) ?> от
+                <?= \Yii::$app->formatter->asDate(ArrayHelper::getValue($model, ['contract', 'date'])) ?>
+            </label>
+        </p>
 
         <?= $form->field($model, 'reason')->textarea() ?>
 
