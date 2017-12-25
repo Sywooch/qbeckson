@@ -35,7 +35,7 @@ class UserPersonalAssign extends ActiveRecord
     public function assignExistValidator()
     {
         if (in_array($this->assign_user_id, PersonalAssignment::getAssignedUserIdList($this->user_id))) {
-            $this->addError('user_id', 'Указанные идентификаторы пользотвателей уже связаны');
+            $this->addError('user_id', 'Указанные идентификаторы пользователей уже связаны');
         }
     }
 }

@@ -9,6 +9,7 @@ use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Contracts */
+/* @var $parentContractExists boolean */
 
 if ($model->status === 0) {
     $this->title = 'Просмотр заявки';
@@ -90,7 +91,7 @@ if ($model->status === \app\models\Contracts::STATUS_REFUSED) {
     <?php if ($model->status === \app\models\Contracts::STATUS_ACCEPTED
         && \Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)) : ?>
         <p class="text-justify">
-            Вами выставлена оферта на заключение договора Заказчику, после получения заявления на зачисление по требуемой <a href="<?= Url::to(['application-pdf', 'id' => $model->id]) ?>"><b>форме</b></a> Вы можете зарегистрировать договор.
+            <?= $parentContractExists ? 'Настоящий договор будет акцептирован Заказчиком в случае отсутствия возражений с его стороны, получение заявления от Заказчика на обучение по представленной <a href="' . Url::to(['application-pdf', 'id' => $model->id]) . '"><b>форме</b></a> не обязательно, но на первых этапах работы в рамках персонифицированного финансирования рекомендуем подкрепляться бумагами.' : 'Вами выставлена оферта на заключение договора Заказчику, после получения заявления на зачисление по требуемой <a href="' . Url::to(['application-pdf', 'id' => $model->id]) . '"><b>форме</b></a> Вы можете зарегистрировать договор.' ?>
         </p>
     <?php endif; ?>
 
@@ -102,6 +103,7 @@ if ($model->status === \app\models\Contracts::STATUS_REFUSED) {
     <div id="vform" style="<?= ($model->applicationIsReceived > 0 ? '' : 'display:none;')?>">
         <?= $form->field($model, 'number')->textInput(['readonly' => true]) ?>
         <?= $form->field($model, 'date')->widget(DateControl::classname(), [
+            'disabled' => $parentContractExists ? true : false,
             'type' => DateControl::FORMAT_DATE,
             'ajaxConversion' => false,
             'options' => [
@@ -110,7 +112,10 @@ if ($model->status === \app\models\Contracts::STATUS_REFUSED) {
                 ]
             ]
         ]) ?>
-        <?= Html::submitButton('Зарегистрировать договор', ['class' => 'btn btn-success']); ?><br /><br />
+
+        <?php if (!$model->parentExists() || Yii::$app->user->identity->organization->canRegisterAutoProlongedContract($model->id)): ?>
+            <?= Html::submitButton('Зарегистрировать договор', ['class' => 'btn btn-success']); ?><br /><br />
+        <?php endif; ?>
     </div>
     <?php endif; ?>
 

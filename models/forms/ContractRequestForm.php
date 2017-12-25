@@ -129,7 +129,6 @@ class ContractRequestForm extends Model
         );
 
         if (is_null($contractRequestData) || is_null($contract = $this->getContract())) {
-            d($contractRequestData);
             return false;
         }
 
