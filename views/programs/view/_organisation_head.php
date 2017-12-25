@@ -7,12 +7,12 @@ $fStrings = [];
 $fStrings['ageGroupShort'] = Yii::t(
     'app',
     '{min, number, integer}-{max, number, integer} лет',
-    ['min' => $model->age_group_min, 'max' => $model->age_group_max]
+    ['min' => $model->age_group_min ?? 0, 'max' => $model->age_group_max ?? 0]
 );
 $fStrings['ageGroupFull'] = Yii::t(
     'app',
     'Рекомендуемый возраст с {min, number, integer} до {max, number, integer} лет',
-    ['min' => $model->age_group_min, 'max' => $model->age_group_max]
+    ['min' => $model->age_group_min ?? 0, 'max' => $model->age_group_max ?? 0]
 );
 if ($model->zab && mb_strlen($model->zab) > 0) {
     $fStrings['zabShort'] = 'С' . PHP_EOL . 'ОВЗ';
@@ -75,7 +75,8 @@ $this->registerJs($JS, $this::POS_READY);
                 data-trigger="hover" data-content="<?= htmlentities($model->name) ?>"
             ><?= $model->short_name ?></h2>
             <div class="card-badges">
-                <div class="card-badges-item card-badges-item_violet" title="<?= $model->direction->name ?>"><span
+                <div class="card-badges-item card-badges-item_violet"
+                     title="<?= $model->direction ? $model->direction->name : 'не заполено' ?>"><span
                             class="large-size <?= $model->iconClass ?>"></span></div>
                 <div class="card-badges-item card-badges-item_green" title="<?= $fStrings['ageGroupFull'] ?>">
                     <span><?= $fStrings['ageGroupShort'] ?></span>

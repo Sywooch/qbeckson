@@ -124,6 +124,20 @@ return [
                 'roles' => ['payers'],
             ],
         ],
+    'organization/cleanup' =>
+        [
+            [
+                'allow' => true,
+                'roles' => ['organizations'],
+            ],
+        ],
+    'operator/cleanup' =>
+        [
+            [
+                'allow' => true,
+                'roles' => ['operators'],
+            ],
+        ],
     'operators' =>
         [
             [
@@ -289,7 +303,6 @@ return [
             'roles' => ['organizations']
         ]
     ],
-
     'organization/contract-settings' => [
         [
             'allow' => true,
