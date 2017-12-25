@@ -25,8 +25,10 @@ use yii\helpers\Url;
  * @property integer $contract_id
  * @property integer $certificate_number
  * @property integer $status
+ * @property integer $organization_id
  *
  * @property Contracts $contract
+ * @property Organization $organization
  */
 class ContractDeleteApplication extends ActiveRecord
 {
@@ -88,7 +90,7 @@ class ContractDeleteApplication extends ActiveRecord
             ],
             [['created_at', 'confirmed_at'], 'safe'],
             [['contract_date'], 'date', 'format' => 'php:Y-m-d'],
-            [['contract_id', 'status', 'certificate_number'], 'integer'],
+            [['contract_id', 'status', 'certificate_number', 'organization_id'], 'integer'],
             [['status'], 'in', 'range' => [self::STATUS_WAITING, self::STATUS_CONFIRMED, self::STATUS_REFUSED]],
             [['status'], 'default', 'value' => self::STATUS_WAITING],
             [['reason', 'file', 'base_url', 'filename'], 'string', 'max' => 255],
@@ -102,6 +104,13 @@ class ContractDeleteApplication extends ActiveRecord
                 'targetClass' => Contracts::className(),
                 'targetAttribute' => ['contract_id' => 'id'],
                 'except' => self::SCENARIO_CONFIRM
+            ],
+            [
+                ['organization_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => Organization::className(),
+                'targetAttribute' => ['organization_id' => 'id'],
             ],
         ];
     }
@@ -145,6 +154,14 @@ class ContractDeleteApplication extends ActiveRecord
     public function getContract()
     {
         return $this->hasOne(Contracts::className(), ['id' => 'contract_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrganization()
+    {
+        return $this->hasOne(Organization::className(), ['id' => 'organization_id']);
     }
 
     /**
