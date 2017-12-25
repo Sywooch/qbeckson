@@ -5,6 +5,7 @@ namespace app\models\search;
 use app\models\Certificates;
 use app\models\ContractDeleteApplication;
 use app\models\Contracts;
+use app\models\Mun;
 use yii\data\ActiveDataProvider;
 
 /**
@@ -16,6 +17,8 @@ class ContractDeleteApplicationSearch extends ContractDeleteApplication
     public $contractNumber;
     public $contractDate;
     public $withInvoiceHaveContracts;
+    public $operatorId;
+    public $organizationId;
 
     /**
      * @inheritdoc
@@ -70,6 +73,15 @@ class ContractDeleteApplicationSearch extends ContractDeleteApplication
 
         if ($this->withInvoiceHaveContracts) {
             $query->joinWith('contract.invoiceHaveContracts');
+        }
+
+        if ($this->operatorId) {
+            $query->joinWith('organization.municipality');
+                $query->andFilterWhere([Mun::tableName() . '.[[operator_id]]' => $this->operatorId]);
+        }
+
+        if ($this->organizationId) {
+            $query->andFilterWhere([self::tableName() . '.[[organization_id]]' => $this->organizationId]);
         }
 
         $query->andFilterWhere([
