@@ -14,39 +14,52 @@ use yii\helpers\Url;
 </div>
 <div class="row">
     <div class="col-xs-12">
+        <?php
+        if ($model->verification !== \app\models\ProgrammeModule::VERIFICATION_DONE) {
+            echo \yii\bootstrap\Alert::widget(
+                [
+                    'options' => [
+                        'class' => 'alert-danger',
+                    ],
+                    'body' => 'Модуль не сертифицирован',
+                ]
+            );
+        }
+        ?>
         <?= $this->render('_base_module_controls', ['model' => $model]); ?>
     </div>
 </div>
 <div class="row">
     <div class="col-xs-12">
+
         <?= \yii\widgets\DetailView::widget([
-            'options'    => [
-                'tag'   => 'ul',
+            'options' => [
+                'tag' => 'ul',
                 'class' => 'text-info-lines'],
-            'template'   => '<li {captionOptions}><strong>{label}:</strong>{value}</li>',
-            'model'      => $model,
+            'template' => '<li {captionOptions}><strong>{label}:</strong>{value}</li>',
+            'model' => $model,
             'attributes' => array_merge([
                 ['attribute' => 'month',
-                 'label'     => 'Продолжительность (месяцев)'
+                    'label' => 'Продолжительность (месяцев)'
                 ],
                 ['attribute' => 'hours',
-                 'label'     => 'Продолжительность (часов)'
+                    'label' => 'Продолжительность (часов)'
                 ],
                 ['label' => 'Наполняемость группы',
-                 'value' => Yii::t('app', '{from} - {to} человек',
-                     ['from' => $model->minchild, 'to' => $model->maxchild])
+                    'value' => Yii::t('app', '{from} - {to} человек',
+                        ['from' => $model->minchild, 'to' => $model->maxchild])
                 ],
                 [
-                    'label'     => 'Квалификация руководителя кружка',
+                    'label' => 'Квалификация руководителя кружка',
                     'attribute' => 'kvfirst',
                 ],
                 [
                     'attribute' => 'price',
-                    'format'    => 'currency',
+                    'format' => 'currency',
                 ],
                 [
                     'attribute' => 'normative_price',
-                    'format'    => 'currency',
+                    'format' => 'currency',
                 ],
                 [
                     'label' => 'Адреса реализации модуля',
@@ -54,16 +67,14 @@ use yii\helpers\Url;
                 ],
 
             ],
-                array_map(function ($index, $address)
-                {
+                array_map(function ($index, $address) {
                     /** @var $address \app\models\OrganizationAddress */
                     return [
-                        'label'          => sprintf('Адрес %d', $index + 1),
-                        'value'          => $address->address,
+                        'label' => sprintf('Адрес %d', $index + 1),
+                        'value' => $address->address,
                         'captionOptions' => ['style' => ['padding-left' => '20px']]];
                 }, array_keys($model->addresses), $model->addresses),
-                call_user_func(function ($model): array
-                {
+                call_user_func(function ($model): array {
                     /**@var $model \app\models\ProgrammeModule */
                     $result = [];
                     if ($model->hoursindivid) {
@@ -82,26 +93,25 @@ use yii\helpers\Url;
         ]) ?>
         <?= \yii\grid\GridView::widget([
             'dataProvider' => new \yii\data\ActiveDataProvider(['query' => $model->getGroups()]),
-            'summary'      => false,
+            'summary' => false,
             'tableOptions' => ['class' => 'theme-table'],
-            'columns'      => [
+            'columns' => [
                 'name',
                 'program.name',
                 'fullSchedule:raw',
                 'datestart:date',
                 'datestop:date',
                 'freePlaces',
-                ['class'    => 'yii\grid\ActionColumn',
-                 'template' => '{view}',
+                ['class' => 'yii\grid\ActionColumn',
+                    'template' => '{view}',
 
-                 'buttons' =>
-                     [
-                         'view' => function ($url, $model)
-                         {
-                             return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', Url::to(['/groups/contracts', 'id' => $model->id]));
+                    'buttons' =>
+                        [
+                            'view' => function ($url, $model) {
+                                return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', Url::to(['/groups/contracts', 'id' => $model->id]));
 
-                         },
-                     ]
+                            },
+                        ]
                 ],
 
             ],

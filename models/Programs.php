@@ -60,6 +60,7 @@ use yii\helpers\Html;
  * @property integer $p3z
  * @property integer $municipal_task_matrix_id
  * @property string $zabAsString
+ * @property bool $auto_prolongation_enabled
  *
  * @property string $iconClass
  * @property string $defaultPhoto
@@ -96,6 +97,8 @@ class Programs extends ActiveRecord implements RecordWithHistory
 {
     use PeriodicField;
 
+    const SCENARIO_DRAFT = 'scenarioDraft';
+
     const VERIFICATION_UNDEFINED = 0;
     const VERIFICATION_WAIT = 1;
     const VERIFICATION_DONE = 2;
@@ -124,6 +127,14 @@ class Programs extends ActiveRecord implements RecordWithHistory
     public $inTransferProcess = false;
 
     public $asDraft = false;
+
+    public function scenarios()
+    {
+        return parent::scenarios()
+            + [
+                self::SCENARIO_DRAFT => parent::scenarios()[self::SCENARIO_DEFAULT]
+            ];
+    }
 
     public function isADraft(): bool
     {
@@ -213,7 +224,13 @@ class Programs extends ActiveRecord implements RecordWithHistory
                     'direction_id', 'name', 'short_name', 'task', 'annotation',
                     'ovz', 'norm_providing', 'age_group_min', 'age_group_max', 'ground'
                 ],
-                'required'
+                'required', 'on' => self::SCENARIO_DEFAULT
+            ],
+            [
+                [
+                    'name', 'short_name', 'ground'
+                ],
+                'required', 'on' => self::SCENARIO_DRAFT
             ],
             [
                 [
@@ -250,6 +267,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
             [['programPhoto'], 'safe'],
             ['inTransferProcess', 'boolean'],
             [['activity_ids'], 'each', 'rule' => ['integer']],
+            ['auto_prolongation_enabled', 'boolean'],
         ];
     }
 
@@ -458,7 +476,9 @@ class Programs extends ActiveRecord implements RecordWithHistory
             'currentActiveContracts' => 'Обучающиеся в данный момент',
             'currentActiveContractsCount' => 'Обучающихся',
             'municipal_task_matrix_id' => 'Раздел муниципального задания',
+            'auto_prolongation_enabled' => 'Установлена автоматическая пролонгация договоров (создание заявок и оферт на продолжение обучения)',
             'asDraft' => 'Сохранить как черновик',
+            'open' => 'Зачисление',
         ];
     }
 

@@ -14,22 +14,20 @@ use yii\helpers\ArrayHelper;
  *
  * @property integer      $id
  * @property integer      $month
- * @property int $year [int(11)]
+ * @property int          $year
  * @property integer      $organization_id
  * @property integer      $payers_id
- * @property string $contracts
  * @property integer      $sum
- * @property integer      $number
+ * @property string       $number
  * @property string       $date
  * @property string       $link
  * @property integer      $prepayment
- * @property integer $completeness
  * @property integer      $status
  * @property String       $statusAsString
- * @property int $completeness
- * @property int $cooperate_id
- * @property String $contracts
- * @property string $pdf
+ * @property int          $completeness
+ * @property int          $cooperate_id
+ * @property String       $contracts
+ * @property string       $pdf
  *
  *
  * @property InvoiceHaveContract[] $invoiceHaveContracts
@@ -75,10 +73,10 @@ class Invoices extends ActiveRecord
     public function rules()
     {
         return [
-            // TODO: number сделать string
-            [['month', 'organization_id', 'payers_id', 'completeness', 'number', 'prepayment', 'status', 'cooperate_id'], 'integer'],
+            [['month', 'organization_id', 'payers_id', 'completeness', 'prepayment', 'status', 'cooperate_id'], 'integer'],
             [['organization_id', 'payers_id', 'contracts', 'status'], 'required'],
             [['date'], 'safe'],
+            [['number'], 'string'],
             [['sum'], 'number'],
             [['link', 'contracts', 'pdf'], 'string'],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
@@ -167,7 +165,7 @@ class Invoices extends ActiveRecord
      *
      * @param boolean $preInvoice - предоплата
      */
-    public function setCooperate($preInvoice)
+    public function setCooperate($preInvoice = null)
     {
         if ($preInvoice) {
             $cooperate = Cooperate::findCooperateByParams($this->payers_id, $this->organization_id, Cooperate::getPeriodFromDate($this->date));

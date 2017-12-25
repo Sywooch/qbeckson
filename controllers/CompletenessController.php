@@ -108,18 +108,24 @@ class CompletenessController extends Controller
                 
                 $contract = Contracts::findOne($complet->contract_id);
                 
-                //return var_dump($complet);
-                
                 $start_edu_contract  = explode("-", $contract->start_edu_contract);
                 
                 $month = $start_edu_contract[1];
-                        
-                        if ($month == date('m')-1) {
-                            $price = $contract->payer_first_month_payment;
-                        } else {
-                            $price = $contract->payer_other_month_payment;
-                        }
-                
+
+                if (date('m') != 12) {
+                    if ($month == date('m')-1) {
+                        $price = $contract->payer_first_month_payment;
+                    } else {
+                        $price = $contract->payer_other_month_payment;
+                    }
+                } else {
+                    if ($month == date('m')) {
+                        $price = $contract->payer_first_month_payment;
+                    } else {
+                        $price = $contract->payer_other_month_payment;
+                    }
+                }
+
                 
                         
                 $complet->completeness = $model->completeness;
@@ -131,7 +137,7 @@ class CompletenessController extends Controller
                 //$model->payers_id = $contract->payer_id;
             }
             
-            return $this->redirect(['groups/invoice']);
+            return $this->redirect([date('m') != 12 ? '/groups/invoice' : '/groups/dec']);
         } else {
             return $this->render('update', [
                 'model' => $model,
