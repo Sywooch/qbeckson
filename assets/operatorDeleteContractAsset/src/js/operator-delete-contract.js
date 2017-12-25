@@ -10,6 +10,7 @@ $(function () {
     var modalDeleteDocument = $('#modal-delete-document', modal);
     var modalConfirmButton = $('#modal-confirm-button', modal);
     var modalAlertMessage = $('#modal-alert-message', modal);
+    var modalCaptchaInput = $('#contractdeleteapplicationform-captcha', modal);
 
     confirmButton.on('click', function (e) {
         e.preventDefault();
@@ -18,8 +19,13 @@ $(function () {
         modal.modal('show');
     });
 
+    modalDeleteDocument.on('click', function () {
+        modalCaptchaInput.prop('disabled', false);
+    });
+
     function updateData(data) {
         var countInvoices = parseInt(data['modalInvoicesCount'], 10);
+        modalCaptchaInput.prop('disabled', true);
         if (countInvoices) {
             modalConfirmButton.prop('disabled', true);
             modalAlertMessage.text('Договор нельзя удалить, он включен, как минимум в один из выставленных счетов!');

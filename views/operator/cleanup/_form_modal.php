@@ -32,7 +32,8 @@ $statusInputName = Html::getInputName($model, 'status');
                 ]); ?>
                 <?= Html::activeHiddenInput($model, 'contractId', ['id' => 'modal-contract-id']) ?>
                 <?= Html::activeHiddenInput($model, 'appId', ['id' => 'modal-app-id']) ?>
-                <?= $form->field($model, 'captcha')->widget(\yii\captcha\Captcha::className()) ?>
+                <?= $form->field($model, 'captcha')->widget(\yii\captcha\Captcha::className())
+                    ->hint('Поле доступно после проверки подтверждающего документа') ?>
                 <br>
                 <?= Html::submitButton('Продолжить',
                     [
