@@ -16,6 +16,9 @@ return [
     'yandexMapsApi' => [
         'class' => 'mirocow\yandexmaps\Api',
     ],
+    'MonitorAccess' => [
+        'class' => 'app\components\MonitorAccess',
+    ],
     'request' => [
         // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
         'cookieValidationKey' => 'BiX8pOuGw7eu1QX9cP19jptOtNg9vYA7',
