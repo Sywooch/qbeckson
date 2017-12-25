@@ -61,7 +61,7 @@ $('.auto-prolongation-init-button').on('click', function() {
 
     $('.progress').show();
     
-    autoProlongation(url, contractToAutoProlongationCount, true);
+    autoProlongation(url, contractToAutoProlongationCount, 1);
 });
 
 function autoProlongation(url, contractToAutoProlongationCount, isNew) {
@@ -73,16 +73,16 @@ function autoProlongation(url, contractToAutoProlongationCount, isNew) {
             console.log(data);
             if(data.remainCount > 0) {
                 if (contractToAutoProlongationCount == 0) {
-                    contractToAutoProlongationCount = data;
+                    contractToAutoProlongationCount = data.remainCount;
                 }
 
                 var reg=/([0-9]+).*/g;
-                var percent = ((contractToAutoProlongationCount - data)/contractToAutoProlongationCount * 100).toString().replace(reg, '$1');
+                var percent = ((contractToAutoProlongationCount - data.remainCount)/contractToAutoProlongationCount * 100).toString().replace(reg, '$1');
 
                 $('.progress-bar').css('width', percent +'%');
                 $('.progress-bar').html(percent + '%');
                 
-                autoProlongation(url, contractToAutoProlongationCount, false);
+                autoProlongation(url, contractToAutoProlongationCount, 0);
             } else if (data.status == 'done') {
                 $('.progress-bar').css('width', '100%');
                 $('.progress-bar').html('100%');
