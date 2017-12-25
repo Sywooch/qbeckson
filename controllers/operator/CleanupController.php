@@ -2,9 +2,12 @@
 
 namespace app\controllers\operator;
 
+use app\helpers\ArrayHelper;
 use app\models\ContractDeleteApplication;
 use app\models\forms\ContractDeleteApplicationForm;
+use app\models\Mun;
 use app\models\search\ContractDeleteApplicationSearch;
+use app\models\UserIdentity;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
@@ -15,16 +18,21 @@ class CleanupController extends Controller
      */
     public function actionContract()
     {
+        /** @var UserIdentity $identity */
+        $identity = \Yii::$app->user->identity;
         $modelForm = new ContractDeleteApplicationForm();
         $waitingModel = new ContractDeleteApplicationSearch([
             'status' => ContractDeleteApplication::STATUS_WAITING,
             'withInvoiceHaveContracts' => true,
+            'operatorId' => ArrayHelper::getValue($identity, ['operator', 'id']),
         ]);
         $confirmedModel = new ContractDeleteApplicationSearch([
             'status' => ContractDeleteApplication::STATUS_CONFIRMED,
+            'operatorId' => ArrayHelper::getValue($identity, ['operator', 'id']),
         ]);
         $refusedModel = new ContractDeleteApplicationSearch([
             'status' => ContractDeleteApplication::STATUS_REFUSED,
+            'operatorId' => ArrayHelper::getValue($identity, ['operator', 'id']),
         ]);
 
         $dataProvider = $waitingModel->search(\Yii::$app->request->queryParams);
@@ -44,10 +52,16 @@ class CleanupController extends Controller
 
     public function actionResolution()
     {
-        //TODO: Запретить удалять договоры в чужих муниципалитетах
+        /** @var UserIdentity $identity */
+        $identity = \Yii::$app->user->identity;
         $model = new ContractDeleteApplicationForm();
         if ($model->load(\Yii::$app->request->post()) && $model->validate()) {
-            $application = ContractDeleteApplication::findOne(['id' => $model->appId]);
+            /** @var ContractDeleteApplication $application */
+            $application = ContractDeleteApplication::find()->joinWith('contract.organization.municipality')
+                ->where([
+                    ContractDeleteApplication::tableName() . '.[[id]]' => $model->appId,
+                    Mun::tableName() . '.[[operator_id]]' => ArrayHelper::getValue($identity, ['operator', 'id'])
+                ])->one();
             if (!$application) {
                 throw new NotFoundHttpException('Заявка не найдена');
             }
