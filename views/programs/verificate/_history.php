@@ -4,43 +4,18 @@
  * @var $model \app\models\Programs
  */
 
-use app\components\periodicField\PeriodicFieldAR;
-
-$programmeTable = \yii\grid\GridView::widget([
-    'dataProvider' => new \yii\data\ActiveDataProvider([
-        'query' => $model->getHistoryQuery(),
-        'sort' => [
-            'defaultOrder' => [
-                'field_name' => ['field_name' => SORT_ASC, 'created_at' => SORT_ASC]
-            ]
-        ]
-    ]),
-    'columns' => PeriodicFieldAR::getColumns(),
-]);
+$programmeTable = $this->render('_history_programme_table', ['model' => $model]);
 
 $modules = $model->modules;
 
 $modulesItems = array_map(
     function (\app\models\ProgrammeModule $module) {
-        $dataProvider = new \yii\data\ActiveDataProvider(
-            [
-                'query' => $module->getHistoryQuery(),
-                'sort' => [
-                    'defaultOrder' => [
-                        'field_name' => ['field_name' => SORT_ASC, 'created_at' => SORT_ASC]
-                    ]
-                ]
-            ]
-        );
-        $grid = \yii\grid\GridView::widget([
-            'dataProvider' => $dataProvider,
-            'columns' => PeriodicFieldAR::getColumns(),
-        ]);
+        /**@var $this \yii\web\View */
 
         return
             [
                 'label' => 'История модуля: ' . $module->name,
-                'content' => $grid,
+                'content' => $this->render('_history_module_table', ['module' => $module]),
                 'contentOptions' => [],
                 'options' => [],
                 //'footer' => 'Footer'
@@ -52,7 +27,10 @@ $programmeItem = [
     [
         'label' => 'История программы',
         'content' => [
-            $programmeTable
+            $programmeTable,
+            \yii\bootstrap\Collapse::widget([
+                'items' => $modulesItems
+            ]),
         ],
         'contentOptions' => [],
         'options' => [],
@@ -60,8 +38,6 @@ $programmeItem = [
     ],
 ];
 
-$items = array_merge($programmeItem, $modulesItems);
-
 echo \yii\bootstrap\Collapse::widget([
-    'items' => $items
+    'items' => $programmeItem
 ]);

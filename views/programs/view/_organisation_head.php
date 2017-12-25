@@ -4,10 +4,16 @@
 /* @var $model app\models\Programs */
 
 $fStrings = [];
-$fStrings['ageGroupShort'] = Yii::t('app', '{min}-{max} лет',
-    ['min' => $model->age_group_min, 'max' => $model->age_group_max]);
-$fStrings['ageGroupFull'] = Yii::t('app', 'Рекомендуемый возраст с {min} до {max} лет',
-    ['min' => $model->age_group_min, 'max' => $model->age_group_max]);
+$fStrings['ageGroupShort'] = Yii::t(
+    'app',
+    '{min, number, integer}-{max, number, integer} лет',
+    ['min' => $model->age_group_min ?? 0, 'max' => $model->age_group_max ?? 0]
+);
+$fStrings['ageGroupFull'] = Yii::t(
+    'app',
+    'Рекомендуемый возраст с {min, number, integer} до {max, number, integer} лет',
+    ['min' => $model->age_group_min ?? 0, 'max' => $model->age_group_max ?? 0]
+);
 if ($model->zab && mb_strlen($model->zab) > 0) {
     $fStrings['zabShort'] = 'С' . PHP_EOL . 'ОВЗ';
     $fStrings['zabFull'] = $model->illnessesList;
@@ -48,8 +54,12 @@ $JS = <<<JS
 JS;
 
 if (!$photo = $model->getPhoto()) {
-    $photo = $this->getAssetManager()->getAssetUrl($this->assetBundles[\app\assets\programsAsset\ProgramsAsset::className()],
-        $model->defaultPhoto);
+    $photo = $this
+        ->getAssetManager()
+        ->getAssetUrl(
+            $this->assetBundles[\app\assets\programsAsset\ProgramsAsset::className()],
+            $model->defaultPhoto
+        );
 }
 
 $this->registerJs($JS, $this::POS_READY);
@@ -60,9 +70,13 @@ $this->registerJs($JS, $this::POS_READY);
             <div class="program-img socped"><img src="<?= $photo ?>"/></div>
         </div>
         <div class="col-xs-12 col-sm-8 col-md-8 col-lg-9">
-            <h2 class="card-title js-ellipsis-title"><?= $model->name ?></h2>
+            <h2 class="card-title js-ellipsis-title"
+                data-container="body" data-toggle="popover" data-placement="bottom"
+                data-trigger="hover" data-content="<?= htmlentities($model->name) ?>"
+            ><?= $model->short_name ?></h2>
             <div class="card-badges">
-                <div class="card-badges-item card-badges-item_violet" title="<?= $model->direction->name ?>"><span
+                <div class="card-badges-item card-badges-item_violet"
+                     title="<?= $model->direction ? $model->direction->name : 'не заполено' ?>"><span
                             class="large-size <?= $model->iconClass ?>"></span></div>
                 <div class="card-badges-item card-badges-item_green" title="<?= $fStrings['ageGroupFull'] ?>">
                     <span><?= $fStrings['ageGroupShort'] ?></span>
@@ -80,7 +94,11 @@ $this->registerJs($JS, $this::POS_READY);
             <div class="card-info">
                 <div class="card-info-paragraph card-info-paragraph_mh50">
                     <div><?= $model->organization->name ?></div>
-                    <div><?= ($model->mainAddress ? $model->mainAddress->address : $model->organization->address_legal) ?></div>
+                    <div><?= (
+                        $model->mainAddress
+                            ? $model->mainAddress->address
+                            : $model->organization->address_legal
+                        ) ?></div>
                 </div>
                 <div class="card-info-paragraph card-info-paragraph_mh38">
 
@@ -92,45 +110,52 @@ $this->registerJs($JS, $this::POS_READY);
         <div class="col-xs-12">
             <div class="collapse pt-18 program-info-view" id="prog-detail-1">
                 <?= \yii\widgets\DetailView::widget([
-                    'options'    => [
-                        'tag'   => 'ul',
+                    'options' => [
+                        'tag' => 'ul',
                         'class' => 'text-info-lines'],
-                    'template'   => '<li {captionOptions}><strong>{label}:</strong>{value}</li>',
-                    'model'      => $model,
-                    'attributes' => array_merge([
-                        'direction.name',
-                        ['label' => 'Возраст детей',
-                         'value' => $model->age_group_min . ' - ' . $model->age_group_max],
-                        'illnessesList',
-                        'limit',
-                        ['label' => 'Число обучающихся',
-                         'value' => $model->GetActiveContracts()->count(),],
-                        ['label' => 'Число модулей',
-                         'value' => $model->getModules()->count()],
+                    'template' => '<li {captionOptions}><strong>{label}:</strong>{value}</li>',
+                    'model' => $model,
+                    'attributes' => array_merge(
                         [
-                            'label'     => 'Общая продолжительность (часов)',
-                            'attribute' => 'countHours',
-                        ],
-                        [
-                            'label'     => 'Общая продолжительность (месяцев)',
-                            'attribute' => 'countMonths',
-                        ],
-                        'municipality.name',
-                        'groundName',
-                        [
-                            'label' => 'Адреса реализации программы',
-                            'value' => ($model->addresses ? '' : 'не указаны'),
-                        ],
+                            'direction.name',
+                            [
+                                'label' => 'Возраст детей',
+                                'value' => intval($model->age_group_min) . ' - ' . intval($model->age_group_max)
+                            ],
+                            'illnessesList',
+                            'limit',
+                            ['label' => 'Число обучающихся',
+                                'value' => $model->GetActiveContracts()->count(),],
+                            ['label' => 'Число модулей',
+                                'value' => $model->getModules()->count()],
+                            [
+                                'label' => 'Общая продолжительность (часов)',
+                                'attribute' => 'countHours',
+                            ],
+                            [
+                                'label' => 'Общая продолжительность (месяцев)',
+                                'attribute' => 'countMonths',
+                            ],
+                            'municipality.name',
+                            'groundName',
+                            [
+                                'label' => 'Адреса реализации программы',
+                                'value' => ($model->addresses ? '' : 'не указаны'),
+                            ],
 
-                    ],
-                        array_map(function ($index, $address)
-                        {
-                            /** @var $address \app\models\OrganizationAddress */
-                            return [
-                                'label'          => sprintf('Адрес %d', $index + 1),
-                                'value'          => $address->address,
-                                'captionOptions' => ['style' => ['padding-left' => '20px']]];
-                        }, array_keys($model->addresses), $model->addresses))
+                        ],
+                        array_map(
+                            function ($index, $address) {
+                                /** @var $address \app\models\OrganizationAddress */
+                                return [
+                                    'label' => sprintf('Адрес %d', $index + 1),
+                                    'value' => $address->address,
+                                    'captionOptions' => ['style' => ['padding-left' => '20px']]];
+                            },
+                            array_keys($model->addresses),
+                            $model->addresses
+                        )
+                    )
                 ]) ?>
                 <div class="strong">Цели и задачи</div>
                 <p class="text-justify"><?= $model->task; ?></p>

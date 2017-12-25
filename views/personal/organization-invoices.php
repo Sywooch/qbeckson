@@ -105,6 +105,8 @@ $columns = [
 ];
 
 $preparedColumns = GridviewHelper::prepareColumns('invoices', $columns);
+$month = date('m');
+$year = date('Y');
 ?>
 
 <?php
@@ -119,21 +121,42 @@ $preparedColumns = GridviewHelper::prepareColumns('invoices', $columns);
                 ->where(['organization_id' => $organization['id']])
                 ->andWhere(['status' => 1])
                 ->column();
-            
-            $preinvoice = array();
+
+        if (date('m') == Yii::$app->params['decemberNumber']) {
+            $dec = array();
             foreach ($rows as $payer_id) {
-                $payer = (new Query())
+                $payer3 = (new Query())
                     ->select(['id'])
                     ->from('invoices')
                     ->where(['organization_id' => $organization['id']])
                     ->andWhere(['payers_id' => $payer_id])
-                    ->andWhere(['month' => date('m')])
-                    ->andWhere(['prepayment' => 1])
-                    ->andWhere(['status' => [0,1,2]])
+                    ->andWhere(['month' => Yii::$app->params['decemberNumber'], 'year' => $year])
+                    ->andWhere(['prepayment' => 0])
+                    ->andWhere(['status' => [0, 1, 2]])
                     ->column();
-                
-                if (!$payer) {
-                    array_push($preinvoice, $payer_id);
+
+                if (!$payer3) {
+                    array_push($dec, $payer_id);
+                }
+            }
+        }
+            
+            $preinvoice = array();
+            foreach ($rows as $payer_id) {
+                if ($month != Yii::$app->params['decemberNumber'] || (isset($dec) && in_array($payer_id, $dec))) {
+                    $payer = (new Query())
+                        ->select(['id'])
+                        ->from('invoices')
+                        ->where(['organization_id' => $organization['id']])
+                        ->andWhere(['payers_id' => $payer_id])
+                        ->andWhere(['month' => date('m'), 'year' => $year])
+                        ->andWhere(['prepayment' => 1])
+                        ->andWhere(['status' => [0, 1, 2]])
+                        ->column();
+
+                    if (!$payer) {
+                        array_push($preinvoice, $payer_id);
+                    }
                 }
             }
         
@@ -144,7 +167,7 @@ $preparedColumns = GridviewHelper::prepareColumns('invoices', $columns);
                     ->from('invoices')
                     ->where(['organization_id' => $organization['id']])
                     ->andWhere(['payers_id' => $payer_id])
-                    ->andWhere(['month' => date('m')-1])
+                    ->andWhere(['month' => date('m') - 1, 'year' => $year])
                     ->andWhere(['prepayment' => 0])
                     ->andWhere(['status' => [0,1,2]])
                     ->column();
@@ -152,25 +175,6 @@ $preparedColumns = GridviewHelper::prepareColumns('invoices', $columns);
                 if (!$payer2) {
                     array_push($invoice, $payer_id);
                 }
-            }
-        
-            if (date('m') == Yii::$app->params['decemberNumber']) {
-            $dec = array();
-            foreach ($rows as $payer_id) {
-                $payer3 = (new Query())
-                    ->select(['id'])
-                    ->from('invoices')
-                    ->where(['organization_id' => $organization['id']])
-                    ->andWhere(['payers_id' => $payer_id])
-                    ->andWhere(['month' => Yii::$app->params['decemberNumber']])
-                    ->andWhere(['prepayment' => 0])
-                    ->andWhere(['status' => [0,1,2]])
-                    ->column();
-                
-                if (!$payer3) {
-                    array_push($dec, $payer_id);
-                }
-            }
             }
 
         $month_last = \app\helpers\AppHelper::getMonthName(date('n', strtotime('first day of previous month')));

@@ -536,6 +536,23 @@ class Certificates extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param $yearId int
+     *
+     * @return \yii\db\ActiveQuery
+     * */
+    public function getContractByYearId($yearId)
+    {
+        return $this->getContractsModels()->where([
+            Contracts::tableName() . '.status' => [
+                Contracts::STATUS_REQUESTED,
+                Contracts::STATUS_ACTIVE,
+                Contracts::STATUS_ACCEPTED
+            ],
+            Contracts::tableName() . '.year_id' => $yearId
+        ]);
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getContractsModels()
@@ -635,7 +652,48 @@ class Certificates extends \yii\db\ActiveRecord
             $notification = Notification::getExistOrCreate($message, 0, Notification::TYPE_CERTIFICATE_TO_ACCOUNTING);
             NotificationUser::assignToUsers($userIdList, $notification->id);
 
-            return $changedCount;
         }
+
+        return $changedCount;
+    }
+
+    /**
+     * существует ли контракт сертификата для той же программы, но в другом модуле
+     *
+     * @param $programId - id программы
+     * @param $yearId - id модуля
+     *
+     * @return bool
+     */
+    public function contractExistInAnotherModuleOfProgram($programId, $yearId)
+    {
+        $contractExist = $this->getContractsModels()
+            ->andWhere(['contracts.program_id' => $programId])
+            ->andWhere(['not in', 'contracts.year_id', $yearId])
+            ->andWhere(
+                ['or',
+                    ['and',
+                        ['contracts.status' => Contracts::STATUS_ACTIVE],
+                        ['or',
+                            ['contracts.wait_termnate' => null],
+                            ['and',
+                                ['contracts.wait_termnate' => 1],
+                                'contracts.date_termnate = contracts.stop_edu_contract'
+                            ]
+                        ]
+                    ],
+                    ['and',
+                        ['contracts.status' => Contracts::STATUS_CLOSED],
+                        ['and',
+                            ['and', 'contracts.stop_edu_contract = contracts.date_termnate'],
+                            ['and',
+                                ['>', 'contracts.stop_edu_contract', date('Y-m-d', strtotime('-4 Month'))]
+                            ]
+                        ],
+                    ]
+                ])
+            ->exists();
+
+        return $contractExist;
     }
 }

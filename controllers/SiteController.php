@@ -101,6 +101,10 @@ class SiteController extends Controller
     {
         $userRoles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
         $searchModel = new HelpSearch(['role' => array_shift($userRoles)]);
+        if (Yii::$app->user->isGuest) {
+            $searchModel->for_guest = $searchModel::FOR_GUEST_YES;
+        }
+
         $dataProvider = $searchModel->search(null);
         $models = $dataProvider->models;
 
@@ -109,7 +113,12 @@ class SiteController extends Controller
 
     public function actionManual($id)
     {
-        if (!$model = Help::findOne($id)) {
+        $condition = ['id' => $id];
+        if (Yii::$app->user->isGuest) {
+            $condition['for_guest'] = Help::FOR_GUEST_YES;
+        }
+
+        if (!$model = Help::findOne($condition)) {
             throw new NotFoundHttpException('Такой страницы не существует.');
         }
 
@@ -137,7 +146,8 @@ class SiteController extends Controller
 
         $municipalities = Mun::find()
             ->andWhere([
-                'operator_id' => Yii::$app->operator->identity->id
+                'operator_id' => Yii::$app->operator->identity->id,
+                'type' => Mun::TYPE_MAIN
             ])
             ->all();
 

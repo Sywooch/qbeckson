@@ -1,6 +1,7 @@
 <?php
 
 use app\components\widgets\postButtonWithModalConfirm\PostButtonWithModalConfirm;
+use app\models\UserIdentity;
 use yii\bootstrap\Alert;
 use yii\grid\GridView;
 use yii\helpers\Html;
@@ -10,8 +11,11 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\Groups */
 
+$isOperator = Yii::$app->user->can(\app\models\UserIdentity::ROLE_OPERATOR);
 $this->title = 'Просмотр группы: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Группы', 'url' => ['/personal/organization-groups']];
+if (!$isOperator) {
+    $this->params['breadcrumbs'][] = ['label' => 'Группы', 'url' => ['/personal/organization-groups']];
+}
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="contracts-view col-md-10 col-md-offset-1">
@@ -53,13 +57,13 @@ $this->params['breadcrumbs'][] = $this->title;
         ->one();
     ?>
     <?= DetailView::widget([
-        'model'      => $model,
+        'model' => $model,
         'attributes' => [
             'name',
             [
                 'attribute' => 'program.name',
-                'format'    => 'raw',
-                'value'     => Html::a($model->program->name,
+                'format' => 'raw',
+                'value' => Html::a($model->program->name,
                     Url::to(['/programs/view', 'id' => $model->program->id]),
                     ['class' => 'blue', 'target' => '_blank']),
             ],
@@ -85,8 +89,8 @@ $this->params['breadcrumbs'][] = $this->title;
     if ($ContractsProvider->getTotalCount() > 0) {
         echo GridView::widget([
             'dataProvider' => $ContractsProvider,
-            'summary'      => false,
-            'columns'      => [
+            'summary' => false,
+            'columns' => [
                 'certificate.number',
                 'certificate.fio_child',
                 'date:date',
@@ -100,7 +104,8 @@ $this->params['breadcrumbs'][] = $this->title;
                          {
                              return Html::a('Сменить группу', Url::to(['/contracts/newgroup', 'id' => $model->id]), ['class' => 'btn btn-primary']);
                          },
-                     ]
+                     ],
+                'visible' => Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION),
                 ],
             ],
         ]);
@@ -109,27 +114,35 @@ $this->params['breadcrumbs'][] = $this->title;
         echo "<h3>В этой группе нет обучающихся</h3>";
         $del = 1;
     }
-    if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_OPERATOR)) {
+    if ($isOperator) {
         echo Html::a('Назад', ['/programs/view', 'id' => $model->program_id], ['class' => 'btn btn-primary']);
     } else {
         echo Html::a('Назад', '/personal/organization-groups', ['class' => 'btn btn-primary']);
     }
 
-    echo Html::a('Редактировать',
-        ($model->isActive ? ['/groups/update', 'id' => $model->id] : '#'),
-        ['class' => 'btn btn-primary '.($model->isActive ? '' : 'disabled')]);
-    echo '<div class="pull-right">';
-    if ($del && $model->isActive) {
-        echo PostButtonWithModalConfirm::widget(['title'        => 'Удалить группу',
-                                                 'url'          => Url::to(['/groups/delete', 'id' => $model->id]),
-                                                 'confirm'      => 'Вы действительно хотите удалить эту группу?',
-                                                 'toggleButton' => ['class' => 'btn btn-danger', 'label' => 'Удалить']]);
+    if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+        echo Html::a('Редактировать',
+            ($model->isActive ? ['/groups/update', 'id' => $model->id] : '#'),
+            ['class' => 'btn btn-primary ' . ($model->isActive ? '' : 'disabled')]);
+        echo '<div class="pull-right">';
+        if ($del && $model->isActive) {
+            echo PostButtonWithModalConfirm::widget([
+                'title' => 'Удалить группу',
+                'url' => Url::to(['/groups/delete', 'id' => $model->id]),
+                'confirm' => 'Вы действительно хотите удалить эту группу?',
+                'toggleButton' => ['class' => 'btn btn-danger', 'label' => 'Удалить']
+            ]);
 
-    }else{
-        echo \yii\bootstrap\Button::widget(['label' => 'Удалить группу нельзя',
-                                            'options' => ['class' => 'btn btn-danger',
-                                                          'disabled'=>'disabled'],]);
+        } else {
+            echo \yii\bootstrap\Button::widget([
+                'label' => 'Удалить группу нельзя',
+                'options' => [
+                    'class' => 'btn btn-danger',
+                    'disabled' => 'disabled'
+                ],
+            ]);
+        }
+        echo '</div>';
     }
-    echo '</div>';
     ?>
 </div>

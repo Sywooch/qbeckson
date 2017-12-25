@@ -17,6 +17,18 @@ use yii\helpers\Url;
 
 <div class="row">
     <div class="col-xs-12">
+        <?php
+        if ($model->verification !== \app\models\ProgrammeModule::VERIFICATION_DONE) {
+            echo \yii\bootstrap\Alert::widget(
+                [
+                    'options' => [
+                        'class' => 'alert-danger',
+                    ],
+                    'body' => 'Модуль не сертифицирован',
+                ]
+            );
+        }
+        ?>
         <?= $this->render('_base_module_controls', ['model' => $model]); ?>
     </div>
 </div>

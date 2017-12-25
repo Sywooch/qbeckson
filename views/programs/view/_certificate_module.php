@@ -1,9 +1,14 @@
 <?php
 /** @var $model \app\models\ProgrammeModule */
 /** @var $this yii\web\View */
+
 /** @var $cooperate Cooperate */
 
 use app\models\Cooperate;
+use app\models\Groups;
+use yii\bootstrap\Modal;
+use yii\helpers\Html;
+use yii\helpers\Url;
 
 $canViewGroups = false;
 $message = '';
@@ -36,13 +41,12 @@ if (count($cooperate)) {
                         if (!$model->program->existsFreePlace()) {
                             $message = '<h4>Достигнут максимальный лимит зачисления на обучение по программе. Свяжитесь с представителем организации.</h4>';
                         } else {
-                            if ($certificate->getActiveContractsByProgram($model->program_id)->exists()) {
-                                $message = '<p>Вы уже подали заявку на программу/заключили договор на обучение</p>';
+                            if ($certificate->getContractByYearId($model->id)->exists()) {
+                                $message = '<p>Вы уже подали заявку на модуль/заключили договор на обучение</p>';
                             } else {
                                 $message = '<p>Вы можете записаться на программу. Выберете группу:</p>';
                                 $canViewGroups = true;
                             }
-
                         }
                     }
                 }
@@ -137,14 +141,22 @@ if (count($cooperate)) {
                              {
                                  /** @var $identity \app\models\UserIdentity */
                                  $identity = Yii::$app->user->identity;
+                                 /** @var $model Groups */
                                  if ($model->freePlaces && $identity->certificate->actual) {
-
-                                     return \yii\helpers\Html::a('Выбрать',
-                                         \yii\helpers\Url::to(['/contracts/request', 'groupId' => $model->id]),
-                                         [
-                                             'class' => 'btn btn-success',
-                                             'title' => 'Выбрать'
-                                         ]);
+                                         if ($identity->certificate->contractExistInAnotherModuleOfProgram($model->module->program_id, $model->year_id)) {
+                                             return Html::button('Выбрать', [
+                                                 'class' => 'btn btn-success',
+                                                 'onClick' => '$("#ask-for-contract-prolongation-modal-' . $model->year_id . '").modal(); $("#contract-request-link-' . $model->year_id . '").prop("href", \'' . Url::to(['/contracts/request', 'groupId' => $model->id]) . '\');',
+                                                 'data' => ['url' => Url::to(['/contracts/request', 'groupId' => $model->id])]
+                                             ]);
+                                         } else {
+                                             return Html::a('Выбрать',
+                                                 Url::to(['/contracts/request', 'groupId' => $model->id]),
+                                                 [
+                                                     'class' => 'btn btn-success',
+                                                     'title' => 'Выбрать'
+                                                 ]);
+                                         }
                                  }
 
                                  return \app\components\widgets\ButtonWithInfo::widget([
@@ -165,3 +177,34 @@ if (count($cooperate)) {
         <?php endif; ?>
     </div>
 </div>
+
+<?php Modal::begin([
+    'id' => 'ask-for-contract-prolongation-modal-' . $model->id,
+    'header' => 'Подача новой заявки'
+]) ?>
+
+<p>Выбранная образовательная услуга предполагает продолжение освоение программы,
+    по которой уже осуществлялось обучение ребенка. Вы уверены, что хотите подать новую отдельную заявку,
+    а не дождаться пролонгации договора?</p>
+
+<?= Html::a('Да, подать новую заявку',
+    '',
+    [
+        'id' => 'contract-request-link-' . $model->id,
+        'class' => 'btn btn-success',
+        'title' => 'Выбрать'
+    ]); ?>
+
+<?php Modal::begin([
+    'header' => 'Дождаться пролонгации договора',
+    'toggleButton' => [
+        'label' => 'Нет, дождаться пролонгации договора',
+        'class' => 'btn btn-primary',
+    ],
+    'clientOptions' => ['backdrop' => false]
+]) ?>
+<p>Поставщик услуг по завершению срока действия договора самостоятельно сформирует оферту.
+    Если Вы в течение установленного срока не отзовете ее – договор на продолжение обучения вступит в силу</p>
+<?= Html::button('Закрыть', ['class' => 'btn btn-primary', 'onClick' => '$(".modal").modal("hide")']) ?>
+<?php Modal::end() ?>
+<?php Modal::end() ?>

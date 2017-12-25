@@ -8,7 +8,7 @@ use yii\helpers\Url;
 /* @var $this yii\web\View */
 
 $date = explode(".", date("d.m.Y"));
-switch ($date[1] - 1) {
+switch ($date[1] != 12 ? $date[1] - 1 : $date[1]) {
     case 1:
         $m = 'январе';
         break;
@@ -85,7 +85,7 @@ $organization = Yii::$app->user->identity->organization;
                     'format' => 'raw',
                     'value' => function ($data) {
 
-                        if (date('m') == 1) {
+                        if (date('m') == 12) {
                             $completeness = (new \yii\db\Query())
                                 ->select(['completeness', 'id'])
                                 ->from('completeness')

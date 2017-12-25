@@ -2,6 +2,10 @@
 
 namespace app\controllers;
 
+use app\models\Coefficient;
+use app\models\Notification;
+use app\models\NotificationUser;
+use app\models\ProgrammeModule;
 use Yii;
 use app\models\Mun;
 use app\models\User;
@@ -37,11 +41,16 @@ class MunController extends Controller
     public function actionIndex()
     {
         $searchModel = new MunSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $queryParams = Yii::$app->request->queryParams;
+        $queryParams['MunSearch']['type'] = $searchModel::TYPE_MAIN;
+        $dataProvider = $searchModel->search($queryParams);
+        $queryParams['MunSearch']['type'] = $searchModel::TYPE_APPLICATION;
+        $dataProviderApplication = $searchModel->search($queryParams);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'dataProviderApplication' => $dataProviderApplication,
         ]);
     }
 
@@ -52,8 +61,18 @@ class MunController extends Controller
      */
     public function actionView($id)
     {
+        $model = Mun::find()->where([
+            'mun_id' => $id,
+            'user_id' => Yii::$app->user->id,
+            'type' => Mun::TYPE_APPLICATION
+        ])->limit(1)->one();
+
+        if (!$model) {
+            $model = $this->findModel($id);
+        }
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
         ]);
     }
 
@@ -84,14 +103,38 @@ class MunController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $isPayer = Yii::$app->user->can('payer');
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        } else {
-            return $this->render('update', [
-                'model' => $model,
-            ]);
+        // Если payer и это основная запись муниципалитета, то подается заявка на изменение
+        if ($isPayer && $model->type === $model::TYPE_MAIN) {
+            // Если пользователь уже подавал заявку, то выводим ее, иначе, создаем новую
+            $application = Mun::find()->where([
+                'user_id' => Yii::$app->user->id,
+                'mun_id' => $model->id,
+            ])->limit(1)->one();
+
+            if(!$application) {
+                $application = new Mun();
+                $application->setAttributes($model->attributes);
+                $application->user_id = \Yii::$app->user->id;
+                $application->mun_id = $model->id;
+            }
+
+            $model = $application;
         }
+
+        if ($model->load(Yii::$app->request->post())) {
+            if ($isPayer) {
+                $model->type = $model::TYPE_APPLICATION;
+                $model->setScenario($model::SCENARIO_APPLICATION);
+            }
+            if ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+        }
+        return $this->render('update', [
+            'model' => $model,
+        ]);
     }
 
     /**
@@ -107,7 +150,7 @@ class MunController extends Controller
         if($user->load(Yii::$app->request->post())) {
 
             if (Yii::$app->getSecurity()->validatePassword($user->confirm, $user->password)) {
-                
+
                 $this->findModel($id)->delete();
 
                 return $this->redirect(['index']);
@@ -121,6 +164,57 @@ class MunController extends Controller
             'user' => $user,
             'title' => 'Удалить муниципалитет',
         ]);
+    }
+
+    /**
+     * @param $id
+     * @return \yii\web\Response
+     */
+    public function actionConfirm($id) {
+        $newModel = $this->findModel($id);
+        $mainModel = $this->findModel($newModel->mun_id);
+        $mainModel->setAttributes($newModel->attributes);
+        $mainModel->confirmationFile = $newModel->confirmationFile;
+        if ($mainModel->save()) {
+            //обнуляем значения, чтобы не удалился файл при удалении заявки
+            $newModel->file = null;
+            $newModel->base_url = null;
+            if (!$this->recountNormativePrice($mainModel->id)) {
+                Yii::$app->session->addFlash('error', 'Не удалось пересчитать нормативную стоимость программ.');
+            }
+            if ($newModel->delete()) {
+                Yii::$app->session->addFlash('success', 'Данные муниципалитета изменены.');
+                return $this->redirect(['view', 'id' => $mainModel->id]);
+            } else {
+                Yii::$app->session->addFlash('error', 'Данные муниципалитета изменены, но не удалось удалить заявку.');
+                return $this->redirect(['view', 'id' => $newModel->id]);
+            }
+        } else {
+            Yii::$app->session->addFlash('error', 'Не удалось изменить данные муниципалитета.');
+            return $this->redirect(['view', 'id' => $newModel->id]);
+        }
+    }
+
+    /**
+     * @param $id
+     * @return \yii\web\Response
+     */
+    public function actionReject($id) {
+        $model = $this->findModel($id);
+        $model->type = $model::TYPE_REJECTED;
+        if ($model->save()) {
+            // Добавляем оповещение пользователю, что его заявку отклонили
+            $message = 'В применении новых параметров отказано.';
+            $notification = Notification::getExistOrCreate($message, 1, Notification::TYPE_MUN_APPLICATION_REJECT);
+            if ($notification) {
+                NotificationUser::assignToUsers([$model->user_id], $notification->id);
+            }
+            Yii::$app->session->setFlash('success', 'Заявка отклонена.');
+            return $this->redirect(['index']);
+        } else {
+            Yii::$app->session->setFlash('error', 'Не удалось отклонить заявку.');
+            return $this->redirect(['view', 'id' => $id]);
+        }
     }
 
     /**
@@ -143,5 +237,33 @@ class MunController extends Controller
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
+    }
+
+    /**
+     * @param $munId
+     * @return bool
+     */
+    protected function recountNormativePrice($munId)
+    {
+        $munTable = Mun::tableName();
+        $modules = ProgrammeModule::find()
+            ->joinWith('program.municipality')
+            ->andWhere([$munTable . '.[[id]]' => $munId])
+            ->all();
+
+        /** @var Coefficient $coefficientData */
+        $coefficientData = Yii::$app->coefficient->data;
+
+        /** @var ProgrammeModule $module */
+        foreach ($modules as $module) {
+            $program = $module->program;
+            if ($program) {
+                $module->normative_price = $module->getNormativePrice($coefficientData);
+                if (false === $module->normative_price || !$module->save()) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

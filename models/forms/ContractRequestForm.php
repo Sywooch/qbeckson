@@ -97,7 +97,7 @@ class ContractRequestForm extends Model
             $group->datestop,
             $payer->certificateCanUseCurrentBalance(),
             $payer->certificate_can_use_future_balance
-            )
+        )
         ) {
             $this->addError($attribute, $this->contractRequest->errorMessage);
         }
@@ -129,7 +129,6 @@ class ContractRequestForm extends Model
         );
 
         if (is_null($contractRequestData) || is_null($contract = $this->getContract())) {
-            d($contractRequestData);
             return false;
         }
 

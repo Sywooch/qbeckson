@@ -14,9 +14,11 @@ use yii\helpers\Html;
 /* @var $searchOpenPrograms \app\models\search\ProgramsSearch */
 /* @var $searchWaitPrograms \app\models\search\ProgramsSearch */
 /* @var $searchClosedPrograms \app\models\search\ProgramsSearch */
+/* @var $searchDraftPrograms \app\models\search\ProgramsSearch */
 /* @var $openProgramsProvider \yii\data\ActiveDataProvider */
 /* @var $waitProgramsProvider \yii\data\ActiveDataProvider */
 /* @var $closedProgramsProvider \yii\data\ActiveDataProvider */
+/* @var $draftProgramsProvider \yii\data\ActiveDataProvider */
 
 $this->title = 'Программы';
 $this->params['breadcrumbs'][] = $this->title;
@@ -51,8 +53,8 @@ $municipality = [
     'value' => 'municipality.name',
 ];
 $name = [
-    'attribute' => 'name',
     'label' => 'Наименование',
+    'attribute' => 'name',
 ];
 $hours = [
     'attribute' => 'hours',
@@ -73,7 +75,7 @@ $directivity = [
 $form = [
     'attribute' => 'form',
     'value' => function ($model) {
-        return $model::forms()[$model->form];
+        return \app\models\Programs::forms()[$model->form];
     },
     'type' => SearchFilter::TYPE_DROPDOWN,
     'data' => $searchOpenPrograms::forms(),
@@ -149,10 +151,23 @@ $closedPrograms = [
     $ageGroupMax,
     $actions
 ];
+$draftPrograms = [
+    $municipality,
+    $name,
+    $year,
+    $hours,
+    $directivity,
+    $form,
+    $zab,
+    $ageGroupMin,
+    $ageGroupMax,
+    $actions
+];
 
 $preparedOpenColumns = GridviewHelper::prepareColumns('programs', $openColumns, 'open');
 $preparedWaitColumns = GridviewHelper::prepareColumns('programs', $waitColumns, 'wait');
 $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedPrograms, 'close');
+$preparedDraftPrograms = GridviewHelper::prepareColumns('programs', $draftPrograms, 'close');
 
 ?>
 <ul class="nav nav-tabs">
@@ -171,13 +186,18 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
             <span class="badge"><?= $closedProgramsProvider->getTotalCount() ?></span>
         </a>
     </li>
+    <li>
+        <a data-toggle="tab" href="#panel4">Черновики
+            <span class="badge"><?= $draftProgramsProvider->getTotalCount() ?></span>
+        </a>
+    </li>
 </ul>
 <br>
 <div class="tab-content">
     <?php
     if (Yii::$app->user->can('organizations') && Yii::$app->user->identity->organization->actual > 0) {
         echo "<p>";
-        echo Html::a('Отправить программу на сертификацию', ['programs/create'], ['class' => 'btn btn-success']);
+        echo Html::a('Создать программу', ['programs/create'], ['class' => 'btn btn-success']);
         echo "</p>";
     }
     ?>
@@ -251,6 +271,28 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
             'pjax' => true,
             'summary' => false,
             'columns' => $preparedClosedPrograms,
+        ]); ?>
+    </div>
+    <div id="panel4" class="tab-pane fade">
+        <?= SearchFilter::widget([
+            'model' => $searchDraftPrograms,
+            'action' => ['personal/organization-programs#panel4'],
+            'data' => GridviewHelper::prepareColumns(
+                'programs',
+                $draftPrograms,
+                'draft',
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_ORGANIZATION,
+            'type' => 'draft'
+        ]); ?>
+        <?= GridView::widget([
+            'dataProvider' => $draftProgramsProvider,
+            'filterModel' => false,
+            'pjax' => true,
+            'summary' => false,
+            'columns' => $preparedDraftPrograms,
         ]); ?>
     </div>
 </div>

@@ -18,11 +18,14 @@ use yii\helpers\Url;
 /* @var $pendingContractsProvider \yii\data\ActiveDataProvider */
 /* @var $dissolvedContractsProvider \yii\data\ActiveDataProvider */
 /* @var $endsContractsProvider \yii\data\ActiveDataProvider */
+/** @var $futureContractsProvider \yii\data\ActiveDataProvider */
 /* @var $searchActiveContracts \app\models\search\ContractsSearch */
 /* @var $searchConfirmedContracts \app\models\search\ContractsSearch */
 /* @var $searchPendingContracts \app\models\search\ContractsSearch */
 /* @var $searchDissolvedContracts \app\models\search\ContractsSearch */
 /* @var $searchEndsContracts \app\models\search\ContractsSearch */
+/** @var $searchFutureContracts \app\models\search\ContractsSearch */
+
 $this->title = 'Договоры';
 $this->params['breadcrumbs'][] = $this->title;
 
@@ -241,6 +244,7 @@ $dissolvedColumns = [
 ];
 
 $preparedActiveColumns = GridviewHelper::prepareColumns('contracts', $activeColumns, 'active');
+$preparedFutureColumns = GridviewHelper::prepareColumns('contracts', $activeColumns, 'active');
 $preparedConfirmedColumns = GridviewHelper::prepareColumns('contracts', $confirmedColumns, 'confirmed');
 $preparedPendingColumns = GridviewHelper::prepareColumns('contracts', $pendingColumns, 'pending');
 $preparedDissolvedColumns = GridviewHelper::prepareColumns('contracts', $dissolvedColumns, 'dissolved');
@@ -253,22 +257,27 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
         </a>
     </li>
     <li>
-        <a data-toggle="tab" href="#panel2">Подтвержденные
+        <a data-toggle="tab" href="#panel2">Не вступившие в силу
+            <span class="badge"><?= $futureContractsProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel3">Подтвержденные
             <span class="badge"><?= $confirmedContractsProvider->getTotalCount() ?></span>
         </a>
     </li>
     <li>
-        <a data-toggle="tab" href="#panel3">Ожидающие подтверждения
+        <a data-toggle="tab" href="#panel4">Ожидающие подтверждения
             <span class="badge"><?= $pendingContractsProvider->getTotalCount() ?></span>
         </a>
     </li>
     <li>
-        <a data-toggle="tab" href="#panel4">Заканчивающие действие
+        <a data-toggle="tab" href="#panel5">Заканчивающие действие
             <span class="badge"><?= $endsContractsProvider->getTotalCount() ?></span>
         </a>
     </li>
     <li>
-        <a data-toggle="tab" href="#panel5">Расторгнутые
+        <a data-toggle="tab" href="#panel6">Расторгнутые
             <span class="badge"><?= $dissolvedContractsProvider->getTotalCount() ?></span>
         </a>
     </li>
@@ -283,18 +292,17 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
 
     if ($roles['organizations'] and $organization['actual'] != 0) { ?>
 
-        <div class="qwe">
-            <div class="row">
-                <div class="col-xs-6">
-                    <p><?= Html::a('Создать новый договор', ['contracts/create'], ['class' => 'btn btn-success']); ?></p>
-                </div>
-
-                <?php if (false && $organization->programsForAutoProlongationExists()): ?>
-                    <div class="col-xs-6 text-right">
-                        <p><?= Html::a('Автопролонгация', ['programs/program-list-for-auto-prolongation'], ['class' => 'btn btn-success']); ?></p>
-                    </div>
-                <?php endif; ?>
+        <div class="row"></div>
+        <div class="row">
+            <div class="col-xs-6">
+                <p><?= Html::a('Создать новый договор', ['contracts/create'], ['class' => 'btn btn-success']); ?></p>
             </div>
+
+            <?php if ($organization->programsForAutoProlongationExists()): ?>
+                <div class="col-xs-6 text-right">
+                    <p><?= Html::a('Автопролонгация', ['programs/program-list-for-auto-prolongation'], ['class' => 'btn btn-success']); ?></p>
+                </div>
+            <?php endif; ?>
         </div>
 
     <?php } ?>
@@ -332,9 +340,45 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
         ]); ?>
     </div>
     <div id="panel2" class="tab-pane fade">
+        <?php if ($searchFutureContracts->payer_id) : ?>
+            <p class="lead">Показаны результаты для программы: <?= $searchFutureContracts->programName; ?></p>
+        <?php endif; ?>
+        <?= SearchFilter::widget([
+            'model' => $searchFutureContracts,
+            'action' => ['personal/organization-contracts#panel2'],
+            'data' => GridviewHelper::prepareColumns(
+                'contracts',
+                $activeColumns,
+                'active',
+                'searchFilter',
+                null
+            ),
+            'role' => UserIdentity::ROLE_ORGANIZATION,
+            'type' => 'active'
+        ]); ?>
+        <?= GridView::widget([
+            'dataProvider' => $futureContractsProvider,
+            'filterModel' => null,
+            'pjax' => true,
+            'summary' => false,
+            'rowOptions' => function ($model, $index, $widget, $grid) {
+                if ($model->wait_termnate > 0) {
+                    return ['class' => 'danger'];
+                } elseif ($model->wait_termnate < 1 && in_array($model->status, [
+                        Contracts::STATUS_ACTIVE,
+                        Contracts::STATUS_REQUESTED,
+                        Contracts::STATUS_ACCEPTED
+                    ]) && $model->all_parents_funds > 0) {
+                    return ['class' => 'warning'];
+                }
+            },
+            'columns' => $preparedActiveColumns,
+        ]); ?>
+    </div>
+    <div id="panel3" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchConfirmedContracts,
-            'action' => ['personal/organization-contracts#panel2'],
+            'action' => ['personal/organization-contracts#panel3'],
             'data' => GridviewHelper::prepareColumns(
                 'contracts',
                 $confirmedColumns,
@@ -360,10 +404,10 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
             'columns' => $preparedConfirmedColumns,
         ]); ?>
     </div>
-    <div id="panel3" class="tab-pane fade">
+    <div id="panel4" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchPendingContracts,
-            'action' => ['personal/organization-contracts#panel3'],
+            'action' => ['personal/organization-contracts#panel4'],
             'data' => GridviewHelper::prepareColumns(
                 'contracts',
                 $pendingColumns,
@@ -390,10 +434,10 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
             'columns'      => $preparedPendingColumns,
         ]); ?>
     </div>
-    <div id="panel5" class="tab-pane fade">
+    <div id="panel6" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchDissolvedContracts,
-            'action' => ['personal/organization-contracts#panel5'],
+            'action' => ['personal/organization-contracts#panel6'],
             'data' => GridviewHelper::prepareColumns(
                 'contracts',
                 $dissolvedColumns,
@@ -417,10 +461,10 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
             'columns' => $preparedDissolvedColumns,
         ]); ?>
     </div>
-    <div id="panel4" class="tab-pane fade">
+    <div id="panel5" class="tab-pane fade">
         <?= SearchFilter::widget([
             'model' => $searchEndsContracts,
-            'action' => ['personal/operator-contracts#panel4'],
+            'action' => ['personal/operator-contracts#panel5'],
             'data' => GridviewHelper::prepareColumns(
                 'contracts',
                 $endsColumns,

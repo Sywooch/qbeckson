@@ -3,7 +3,6 @@
 namespace app\models\search;
 
 use app\models\Help;
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
@@ -21,7 +20,7 @@ class HelpSearch extends Help
     public function rules()
     {
         return [
-            [['id'], 'integer'],
+            [['id', 'for_guest'], 'integer'],
             [['name', 'body', 'applied_to', 'role'], 'safe'],
         ];
     }
@@ -77,6 +76,7 @@ class HelpSearch extends Help
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
+            'for_guest' => $this->for_guest,
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])

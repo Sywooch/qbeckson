@@ -36,6 +36,7 @@ use app\models\PersonalAssignment;
 use app\models\PreviusSearch;
 use app\models\ProgrammeModuleSearch;
 use app\models\Programs;
+use app\models\programs\ProgramViewDecorator;
 use app\models\ProgramsclearSearch;
 use app\models\search\CertificatesSearch;
 use app\models\search\ContractsSearch;
@@ -125,6 +126,7 @@ class PersonalController extends Controller
      * Update user municipality binding.
      *
      * @param $munId
+     *
      * @return \yii\web\Response
      * @throws NotFoundHttpException
      */
@@ -275,12 +277,19 @@ class PersonalController extends Controller
             'rezerv' => '0,150000',
             'balance' => '0,150000',
         ]);
-        $certificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
+
         $allCertificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams, 999999);
+        // Только сертификаты ПФ
+        $searchCertificates->selectCertGroup = $searchCertificates::TYPE_PF;
+        $certificatesProviderPf = $searchCertificates->search(Yii::$app->request->queryParams);
+        // Только сертификаты учета
+        $searchCertificates->selectCertGroup = $searchCertificates::TYPE_ACCOUNTING;
+        $certificatesProviderAccounting = $searchCertificates->search(Yii::$app->request->queryParams);
 
         return $this->render('operator-certificates', [
             'searchCertificates' => $searchCertificates,
-            'certificatesProvider' => $certificatesProvider,
+            'certificatesProviderPf' => $certificatesProviderPf,
+            'certificatesProviderAccounting' => $certificatesProviderAccounting,
             'allCertificatesProvider' => $allCertificatesProvider,
         ]);
     }
@@ -292,12 +301,23 @@ class PersonalController extends Controller
     {
         $searchActiveContracts = new ContractsSearch([
             'status' => Contracts::STATUS_ACTIVE,
+            'started' => ContractsSearch::STARTED_YES,
             'paid' => '0,150000',
             'rezerv' => '0,150000',
             'modelName' => 'SearchActiveContracts'
         ]);
         $activeContractsProvider = $searchActiveContracts->search(Yii::$app->request->queryParams);
         $allActiveContractsProvider = $searchActiveContracts->search(Yii::$app->request->queryParams, 999999);
+
+        $searchFutureContracts = new ContractsSearch([
+            'status' => Contracts::STATUS_ACTIVE,
+            'started' => ContractsSearch::STARTED_NO,
+            'paid' => '0,150000',
+            'rezerv' => '0,150000',
+            'modelName' => 'SearchFutureContracts',
+        ]);
+        $futureContractsProvider = $searchFutureContracts->search(Yii::$app->request->queryParams);
+        $allFutureContractsProvider = $searchFutureContracts->search(Yii::$app->request->queryParams, 999999);
 
         $searchConfirmedContracts = new ContractsSearch([
             'status' => Contracts::STATUS_ACCEPTED,
@@ -334,6 +354,8 @@ class PersonalController extends Controller
         return $this->render('operator-contracts', [
             'searchActiveContracts' => $searchActiveContracts,
             'activeContractsProvider' => $activeContractsProvider,
+            'searchFutureContracts' => $searchFutureContracts,
+            'futureContractsProvider' => $futureContractsProvider,
             'searchConfirmedContracts' => $searchConfirmedContracts,
             'confirmedContractsProvider' => $confirmedContractsProvider,
             'searchPendingContracts' => $searchPendingContracts,
@@ -346,6 +368,7 @@ class PersonalController extends Controller
 
 
             'allActiveContractsProvider' => $allActiveContractsProvider,
+            'allFutureContractsProvider' => $allFutureContractsProvider,
             'allPendingContractsProvider' => $allPendingContractsProvider,
             'allDissolvedContractsProvider' => $allDissolvedContractsProvider,
             'allContractsProvider' => $allContractsProvider,
@@ -363,7 +386,7 @@ class PersonalController extends Controller
             'hours' => '0,2000',
             'limit' => '0,10000',
             'rating' => '0,100',
-            'modelName' => 'SearchOpenPrograms',
+            'modelName' => ProgramsSearch::MODEL_OPEN,
         ]);
         $openProgramsProvider = $searchOpenPrograms->search(Yii::$app->request->queryParams);
         $allOpenProgramsProvider = $searchOpenPrograms->search(Yii::$app->request->queryParams, 999999);
@@ -372,7 +395,7 @@ class PersonalController extends Controller
             'verification' => [Programs::VERIFICATION_UNDEFINED, Programs::VERIFICATION_WAIT],
             'open' => 0,
             'hours' => '0,2000',
-            'modelName' => 'SearchWaitPrograms',
+            'modelName' => ProgramsSearch::MODEL_WAIT,
         ]);
         $waitProgramsProvider = $searchWaitPrograms->search(Yii::$app->request->queryParams);
         $allWaitProgramsProvider = $searchWaitPrograms->search(Yii::$app->request->queryParams, 999999);
@@ -380,7 +403,7 @@ class PersonalController extends Controller
         $searchClosedPrograms = new ProgramsSearch([
             'verification' => [Programs::VERIFICATION_DENIED],
             'hours' => '0,2000',
-            'modelName' => 'SearchClosedPrograms',
+            'modelName' => ProgramsSearch::MODEL_CLOSED,
         ]);
         $closedProgramsProvider = $searchClosedPrograms->search(Yii::$app->request->queryParams);
         $allClosedProgramsProvider = $searchClosedPrograms->search(Yii::$app->request->queryParams, 999999);
@@ -433,8 +456,13 @@ class PersonalController extends Controller
             'rezerv' => '0,150000',
             'balance' => '0,150000',
         ]);
-        $certificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams);
         $allCertificatesProvider = $searchCertificates->search(Yii::$app->request->queryParams, 999999);
+        // Только сертификаты ПФ
+        $searchCertificates->selectCertGroup = $searchCertificates::TYPE_PF;
+        $certificatesProviderPf = $searchCertificates->search(Yii::$app->request->queryParams);
+        // Только сертификаты учета
+        $searchCertificates->selectCertGroup = $searchCertificates::TYPE_ACCOUNTING;
+        $certificatesProviderAccounting = $searchCertificates->search(Yii::$app->request->queryParams);
 
         $certificateToAccountingConfirmForm = new CertificateToAccountingConfirmForm;
         if (Yii::$app->request->isAjax && $certificateToAccountingConfirmForm->load(Yii::$app->request->post())) {
@@ -448,7 +476,8 @@ class PersonalController extends Controller
         $certificateImportTemplateExists = CertificateImportTemplate::exists();
 
         return $this->render('payer-certificates', [
-            'certificatesProvider' => $certificatesProvider,
+            'certificatesProviderPf' => $certificatesProviderPf,
+            'certificatesProviderAccounting' => $certificatesProviderAccounting,
             'searchCertificates' => $searchCertificates,
             'allCertificatesProvider' => $allCertificatesProvider,
             'certificateToAccountingConfirmForm' => $certificateToAccountingConfirmForm,
@@ -467,11 +496,22 @@ class PersonalController extends Controller
         $searchActiveContracts = new ContractsSearch([
             'payer_id' => $payer->id,
             'status' => Contracts::STATUS_ACTIVE,
+            'started' => ContractsSearch::STARTED_YES,
             'paid' => '0,150000',
             'rezerv' => '0,150000',
             'modelName' => 'SearchActiveContracts'
         ]);
         $activeContractsProvider = $searchActiveContracts->search(Yii::$app->request->queryParams);
+
+        $searchFutureContracts = new ContractsSearch([
+            'payer_id' => $payer->id,
+            'status' => Contracts::STATUS_ACTIVE,
+            'started' => ContractsSearch::STARTED_NO,
+            'paid' => '0,150000',
+            'rezerv' => '0,150000',
+            'modelName' => 'SearchFutureContracts'
+        ]);
+        $futureContractsProvider = $searchFutureContracts->search(Yii::$app->request->queryParams);
 
         $searchConfirmedContracts = new ContractsSearch([
             'payer_id' => $payer->id,
@@ -501,6 +541,8 @@ class PersonalController extends Controller
         return $this->render('payer-contracts', [
             'searchActiveContracts' => $searchActiveContracts,
             'activeContractsProvider' => $activeContractsProvider,
+            'searchFutureContracts' => $searchFutureContracts,
+            'futureContractsProvider' => $futureContractsProvider,
             'searchConfirmedContracts' => $searchConfirmedContracts,
             'confirmedContractsProvider' => $confirmedContractsProvider,
             'searchPendingContracts' => $searchPendingContracts,
@@ -846,6 +888,16 @@ class PersonalController extends Controller
         ]);
         $closedProgramsProvider = $searchClosedPrograms->search(Yii::$app->request->queryParams);
 
+        $searchDraftPrograms = new ProgramsSearch([
+            'organization_id' => Yii::$app->user->identity->organization->id,
+            'verification' => [Programs::VERIFICATION_DRAFT],
+            'hours' => '0,2000',
+            'limit' => '0,10000',
+            'rating' => '0,100',
+            'modelName' => 'SearchDraftPrograms',
+        ]);
+        $draftProgramsProvider = $searchDraftPrograms->search(Yii::$app->request->queryParams);
+
         return $this->render('organization-programs', [
             'searchOpenPrograms' => $searchOpenPrograms,
             'openProgramsProvider' => $openProgramsProvider,
@@ -853,6 +905,8 @@ class PersonalController extends Controller
             'waitProgramsProvider' => $waitProgramsProvider,
             'searchClosedPrograms' => $searchClosedPrograms,
             'closedProgramsProvider' => $closedProgramsProvider,
+            'searchDraftPrograms' => $searchDraftPrograms,
+            'draftProgramsProvider' => $draftProgramsProvider,
         ]);
     }
 
@@ -919,6 +973,7 @@ class PersonalController extends Controller
 
         $searchActiveContracts = new ContractsSearch([
             'status' => Contracts::STATUS_ACTIVE,
+            'started' => ContractsSearch::STARTED_YES,
             'paid' => '0,150000',
             'rezerv' => '0,150000',
             'all_parents_funds' => '0,10000',
@@ -926,6 +981,17 @@ class PersonalController extends Controller
             'organization_id' => $user->organization->id,
         ]);
         $activeContractsProvider = $searchActiveContracts->search(Yii::$app->request->queryParams);
+
+        $searchFutureContracts = new ContractsSearch([
+            'status' => Contracts::STATUS_ACTIVE,
+            'started' => ContractsSearch::STARTED_NO,
+            'paid' => '0,150000',
+            'rezerv' => '0,150000',
+            'all_parents_funds' => '0,10000',
+            'modelName' => 'SearchActiveContracts',
+            'organization_id' => $user->organization->id,
+        ]);
+        $futureContractsProvider = $searchFutureContracts->search(Yii::$app->request->queryParams);
 
         $searchConfirmedContracts = new ContractsSearch([
             'status' => Contracts::STATUS_ACCEPTED,
@@ -973,6 +1039,8 @@ class PersonalController extends Controller
             'dissolvedContractsProvider' => $dissolvedContractsProvider,
             'searchEndsContracts' => $searchEndsContracts,
             'endsContractsProvider' => $endsContractsProvider,
+            'searchFutureContracts' => $searchFutureContracts,
+            'futureContractsProvider' => $futureContractsProvider,
 
             'ContractsallProvider' => $ContractsallProvider,
         ]);
@@ -1348,7 +1416,12 @@ class PersonalController extends Controller
         /** @var $certificate Certificates */
         $certificate = Yii::$app->user->identity->certificate;
 
-        $matrix = MunicipalTaskPayerMatrixAssignment::findByPayerId($certificate->payer_id, $certificate->certGroup->is_special > 0 ? MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_AC : MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_PF);
+        $matrix = MunicipalTaskPayerMatrixAssignment::findByPayerId(
+            $certificate->payer_id,
+            $certificate->certGroup->is_special > 0
+                ? MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_AC
+                : MunicipalTaskPayerMatrixAssignment::CERTIFICATE_TYPE_PF
+        );
         $tabs = [];
         foreach ($matrix as $item) {
             $searchTasks = new ProgramsSearch([
@@ -1370,11 +1443,18 @@ class PersonalController extends Controller
             'rating' => '0,100',
             'mun' => Yii::$app->user->identity->mun_id,
             'modelName' => '',
+            'decorator' => ProgramViewDecorator::className()
         ]);
+
+
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         if ($searchModel->organization_id) {
-            Yii::$app->session->setFlash('success', 'Поиск по организации ' . $searchModel->getOrganization()->one()->name);
+            Yii::$app->session->setFlash(
+                'success',
+                'Поиск по организации '
+                . $searchModel->getOrganization()->one()->name
+            );
         }
         ProgramsAsset::register($this->view);
 
@@ -1382,10 +1462,22 @@ class PersonalController extends Controller
             /** @var OperatorSettings $operatorSettings */
             $operatorSettings = Yii::$app->operator->identity->settings;
 
-            $nextPeriodBeginDate = \Yii::$app->formatter->asDate(strtotime($operatorSettings->future_program_date_from));
-            $additionMessage = $certificate->payer->certificate_can_use_future_balance ? ' Вы можете подать заявки на обучение на период с ' . $nextPeriodBeginDate . '.' : 'Дождитесь появления возможности подачи заявки на обучение на период с ' . $nextPeriodBeginDate . '.';
+            $nextPeriodBeginDate = \Yii::$app->formatter->asDate(
+                strtotime($operatorSettings->future_program_date_from)
+            );
+            $additionMessage = $certificate->payer->certificate_can_use_future_balance
+                ? ' Вы можете подать заявки на обучение на период с ' . $nextPeriodBeginDate . '.'
+                : 'Дождитесь появления возможности подачи заявки на обучение на период с '
+                . $nextPeriodBeginDate . '.';
 
-            \Yii::$app->session->setFlash('warning', 'Заявки на обучение на период до ' . \Yii::$app->formatter->asDate(strtotime($operatorSettings->current_program_date_to)) . ' не принимаются.' . $additionMessage);
+            \Yii::$app->session->setFlash(
+                'warning',
+                'Заявки на обучение на период до '
+                . \Yii::$app->formatter->asDate(
+                    strtotime($operatorSettings->current_program_date_to)
+                )
+                . ' не принимаются.' . $additionMessage
+            );
         }
 
         return $this->render('certificate/list', [
