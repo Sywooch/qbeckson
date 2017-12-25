@@ -61,7 +61,7 @@ $programMunicipality = [
     'value' => 'program.municipality.name',
     'label' => 'Муниципалитет',
     'type' => SearchFilter::TYPE_DROPDOWN,
-    'data' => ArrayHelper::map(Mun::find()->all(), 'id', 'name'),
+    'data' => ArrayHelper::map(Mun::findAllRecords(), 'id', 'name'),
 ];
 $childFullName = [
     'attribute' => 'childFullName',

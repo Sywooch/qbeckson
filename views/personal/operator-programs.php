@@ -301,6 +301,12 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
                 /** @var \app\models\Programs $model */
                 if ($model->verification === \app\models\Programs::VERIFICATION_WAIT) {
                     return ['class' => 'danger'];
+                } elseif ($model->verification !== \app\models\Programs::VERIFICATION_WAIT
+                    && $model->verification !== \app\models\Programs::VERIFICATION_UNDEFINED
+                ) {
+                    return [
+                        'class' => 'warning',
+                    ];
                 }
             },
             'summary' => false,

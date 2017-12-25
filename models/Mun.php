@@ -209,7 +209,10 @@ class Mun extends ActiveRecord
     {
         $query = static::find()
             ->select($columns)
-            ->where(['operator_id' => Yii::$app->operator->identity->id]);
+            ->where([
+                'operator_id' => Yii::$app->operator->identity->id,
+                'type' => Mun::TYPE_MAIN
+            ]);
 
         return $query->all();
     }
