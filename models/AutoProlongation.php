@@ -4,6 +4,10 @@ namespace app\models;
 
 use app\helpers\ArrayHelper;
 use app\models\contracts\ContractRequest;
+use Box\Spout\Common\Exception\IOException;
+use Box\Spout\Common\Type;
+use Box\Spout\Reader\ReaderFactory;
+use Box\Spout\Writer\WriterFactory;
 use Yii;
 use yii\db\ActiveQuery;
 
@@ -170,10 +174,11 @@ class AutoProlongation
      * запустить авто пролонгацию договоров
      *
      * @param null $limit
+     * @param bool $isNew
      *
      * @return bool
      */
-    public function init($limit = null)
+    public function init($limit = null, $isNew = false)
     {
         $autoProlongationEnabled = true;
         $contractIdList = $this->getContractIdList($autoProlongationEnabled, $limit);
@@ -188,7 +193,10 @@ class AutoProlongation
         /** @var \app\models\OperatorSettings $operatorSettings */
         $operatorSettings = Yii::$app->operator->identity->settings;
 
-        $dataContractForAutoProlongationList = $this->getContractDataListForAutoProlongation($contractIdList);
+        $filePath = 'organization-auto-prolongation-registry-' . Yii::$app->user->identity->organization->id . '.xlsx';
+        $processedContractIdList = ArrayHelper::getColumn($this->readProcessedContractIdFromXlsx($filePath), 0);
+
+        $dataContractForAutoProlongationList = $this->getContractDataListForAutoProlongation(array_diff($contractIdList, $processedContractIdList));
 
         if (count($dataContractForAutoProlongationList) < 1) {
             return false;
@@ -196,6 +204,8 @@ class AutoProlongation
 
         $contractRequest = new ContractRequest();
         $contractRequest->setStartEduContract(date('d.m.Y', strtotime($operatorSettings->future_program_date_from)));
+
+        $registry = [];
 
         $contractNumberCount = 1;
         $futurePeriodCertificateDataListRows = [];
@@ -254,60 +264,71 @@ class AutoProlongation
                     'rezerv' => $dataList['fundsCert'],
                 ];
 
-                if ($contractData['balance'] - $dataList['fundsCert'] > 0 && isset($contractRequestData['period']) && in_array($contractRequestData['period'], [Contracts::CURRENT_REALIZATION_PERIOD, Contracts::FUTURE_REALIZATION_PERIOD])) {
-                    if ($contractRequestData['period'] == Contracts::CURRENT_REALIZATION_PERIOD) {
-                        if (in_array($dataList['certificateId'], ArrayHelper::getColumn($currentPeriodCertificateDataListRows, 'id'))) {
-                            foreach ($currentPeriodCertificateDataListRows as &$currentPeriodCertificateData) {
-                                if ($currentPeriodCertificateData['id'] == $dataList['certificateId']) {
-                                    $contractsWithSameCertificateCount++;
-                                    $currentPeriodCertificateData['balance_f'] = $currentPeriodCertificateData['balance_f'] - $dataList['fundsCert'];
-                                    $currentPeriodCertificateData['rezerv_f'] = $currentPeriodCertificateData['rezerv_f'] + $dataList['fundsCert'];
+                if (isset($contractRequestData['period']) && in_array($contractRequestData['period'], [Contracts::CURRENT_REALIZATION_PERIOD, Contracts::FUTURE_REALIZATION_PERIOD])) {
+                    if ($contractData['balance'] - $dataList['fundsCert'] > 0) {
+                        if ($contractRequestData['period'] == Contracts::CURRENT_REALIZATION_PERIOD) {
+                            if (in_array($dataList['certificateId'], ArrayHelper::getColumn($currentPeriodCertificateDataListRows, 'id'))) {
+                                foreach ($currentPeriodCertificateDataListRows as &$currentPeriodCertificateData) {
+                                    if ($currentPeriodCertificateData['id'] == $dataList['certificateId']) {
+                                        $contractsWithSameCertificateCount++;
+                                        $currentPeriodCertificateData['balance_f'] = $currentPeriodCertificateData['balance_f'] - $dataList['fundsCert'];
+                                        $currentPeriodCertificateData['rezerv_f'] = $currentPeriodCertificateData['rezerv_f'] + $dataList['fundsCert'];
+                                    }
                                 }
+                            } else {
+                                $currentPeriodCertificateDataListRows[] = [
+                                    'id' => $dataList['certificateId'],
+                                    'user_id' => $dataList['certificateUserId'],
+                                    'number' => $dataList['certificateNumber'],
+                                    'payer_id' => $dataList['certificatePayerId'],
+                                    'cert_group' => $dataList['certificateCertGroup'],
+                                    'updated_cert_group' => $dataList['certificateUpdatedCertGroup'],
+                                    'balance' => $dataList['certificateBalance'] - $dataList['fundsCert'],
+                                    'rezerv' => $dataList['certificateRezerv'] + $dataList['fundsCert'],
+                                ];
                             }
-                        } else {
-                            $currentPeriodCertificateDataListRows[] = [
-                                'id' => $dataList['certificateId'],
-                                'user_id' => $dataList['certificateUserId'],
-                                'number' => $dataList['certificateNumber'],
-                                'payer_id' => $dataList['certificatePayerId'],
-                                'cert_group' => $dataList['certificateCertGroup'],
-                                'updated_cert_group' => $dataList['certificateUpdatedCertGroup'],
-                                'balance' => $dataList['certificateBalance'] - $dataList['fundsCert'],
-                                'rezerv' => $dataList['certificateRezerv'] + $dataList['fundsCert'],
-                            ];
                         }
+
+                        if ($contractRequestData['period'] == Contracts::FUTURE_REALIZATION_PERIOD) {
+                            if (in_array($dataList['certificateId'], ArrayHelper::getColumn($futurePeriodCertificateDataListRows, 'id'))) {
+                                foreach ($futurePeriodCertificateDataListRows as &$futurePeriodCertificateData) {
+                                    if ($futurePeriodCertificateData['id'] == $dataList['certificateId']) {
+                                        $contractsWithSameCertificateCount++;
+                                        $futurePeriodCertificateData['balance_f'] = $futurePeriodCertificateData['balance_f'] - $dataList['fundsCert'];
+                                        $futurePeriodCertificateData['rezerv_f'] = $futurePeriodCertificateData['rezerv_f'] + $dataList['fundsCert'];
+                                    }
+                                }
+                            } else {
+                                $futurePeriodCertificateDataListRows[] = [
+                                    'id' => $dataList['certificateId'],
+                                    'user_id' => $dataList['certificateUserId'],
+                                    'number' => $dataList['certificateNumber'],
+                                    'payer_id' => $dataList['certificatePayerId'],
+                                    'cert_group' => $dataList['certificateUpdatedCertGroup'],
+                                    'updated_cert_group' => $dataList['certificateCertGroup'],
+                                    'balance_f' => $dataList['certificateBalanceF'] - $dataList['fundsCert'],
+                                    'rezerv_f' => $dataList['certificateRezervF'] + $dataList['fundsCert'],
+                                ];
+                            }
+                        }
+
+                        $contractDataListRows[] = $contractData;
                     }
 
-                    if ($contractRequestData['period'] == Contracts::FUTURE_REALIZATION_PERIOD) {
-                        if (in_array($dataList['certificateId'], ArrayHelper::getColumn($futurePeriodCertificateDataListRows, 'id'))) {
-                            foreach ($futurePeriodCertificateDataListRows as &$futurePeriodCertificateData) {
-                                if ($futurePeriodCertificateData['id'] == $dataList['certificateId']) {
-                                    $contractsWithSameCertificateCount++;
-                                    $futurePeriodCertificateData['balance_f'] = $futurePeriodCertificateData['balance_f'] - $dataList['fundsCert'];
-                                    $futurePeriodCertificateData['rezerv_f'] = $futurePeriodCertificateData['rezerv_f'] + $dataList['fundsCert'];
-                                }
-                            }
-                        } else {
-                            $futurePeriodCertificateDataListRows[] = [
-                                'id' => $dataList['certificateId'],
-                                'user_id' => $dataList['certificateUserId'],
-                                'number' => $dataList['certificateNumber'],
-                                'payer_id' => $dataList['certificatePayerId'],
-                                'cert_group' => $dataList['certificateUpdatedCertGroup'],
-                                'updated_cert_group' => $dataList['certificateCertGroup'],
-                                'balance_f' => $dataList['certificateBalanceF'] - $dataList['fundsCert'],
-                                'rezerv_f' => $dataList['certificateRezervF'] + $dataList['fundsCert'],
-                            ];
-                        }
-                    }
-
-                    $contractDataListRows[] = $contractData;
+                    $registry[$dataList['contractId']] = [
+                        'contractNumber' => $contractData['number'],
+                        'date' => \Yii::$app->formatter->asDate($dataList['contractDate']),
+                        'certificateNumber' => $dataList['certificateNumber'],
+                        'certificateBalance' => $contractData['balance'],
+                    ];
                 }
             }
         }
 
         if (count($contractDataListRows) < 1) {
-            return false;
+            $this->writeToXlsx($isNew, $registry);
+
+            return true;
         }
 
         $contractColumns = array_keys($contractDataListRows[0]);
@@ -354,6 +375,12 @@ class AutoProlongation
                 $mpdf->Output(Yii::getAlias('@pfdoroot/uploads/contracts/') . $contract->url, 'F');
             }
 
+            foreach ($newProlongedContractIdList as $newProlongedContractId) {
+                $contract = Contracts::findOne($newProlongedContractId);
+                $registry[$contract->parent_id] += ['childContractId' => $contract->id, 'childContractNumber' => $contract->number];
+            }
+
+            $this->writeToXlsx($isNew, $registry);
         } catch (\Exception $e) {
             $transaction->rollBack();
 
@@ -361,6 +388,93 @@ class AutoProlongation
         }
 
         return true;
+    }
+
+    /**
+     * записать в файл автопролонгированные контракты
+     *
+     * @param $isNew
+     * @param $registry
+     */
+    private function writeToXlsx($isNew, $registry)
+    {
+        $filePath = 'organization-auto-prolongation-registry-' . Yii::$app->user->identity->organization->id . '.xlsx';
+
+        if (!$isNew) {
+            $oldRows = $this->readProcessedContractIdFromXlsx($filePath);
+        }
+
+        $writer = WriterFactory::create(Type::XLSX);
+        $writer->openToFile(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $filePath);
+        if ($isNew) {
+            $writer->addRow(['id родительского договора', '№ родительского договора', 'дата родительского договора', 'Номер сертификата', 'id дочернего договора', '№ дочернего договора', 'дата дочернего договора']);
+        } else {
+            $writer->addRows($oldRows);
+        }
+
+        foreach ($registry as $id => $item) {
+            if (isset($item[''])) {
+
+            } else {
+                $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], 'не создан договор продления обучения, поскольку на сертификате доступный остаток составляет ' . $item['certificateBalance']]);
+            }
+        }
+
+        $writer->close();
+    }
+
+    /**
+     * считать все контракты обработанные для автопролонгации
+     *
+     * @param $filePath
+     *
+     * @return array
+     */
+    private function readProcessedContractIdFromXlsx($filePath)
+    {
+        $oldRows = [];
+
+        if (file_exists(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $filePath)) {
+            try {
+                libxml_disable_entity_loader(false);
+                $reader = ReaderFactory::create(Type::XLSX);
+                $reader->open(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $filePath);
+
+                foreach ($reader->getSheetIterator() as $sheet) {
+                    foreach ($sheet->getRowIterator() as $row) {
+                        if ($row[0] > 0 || $row[0] == 'id родительского договора') {
+                            $oldRows[] = $row;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    break;
+                }
+
+                $reader->close();
+            } catch (IOException $e) {
+                return [];
+            }
+        }
+
+        return $oldRows;
+    }
+
+    public function getCount()
+    {
+        $filePath = 'organization-auto-prolongation-registry-' . Yii::$app->user->identity->organization->id . '.xlsx';
+
+        $childContractIdColumn = 4;
+        $childContractList = ArrayHelper::getColumn($this->readProcessedContractIdFromXlsx($filePath), $childContractIdColumn);
+        $count = 0;
+        foreach ($childContractList as $childContract) {
+            if (is_integer($childContract)) {
+                $count++;
+            }
+        }
+
+        return $count;
     }
 
     /**
@@ -375,6 +489,7 @@ class AutoProlongation
         return Contracts::find()
             ->select([
                 'contractId' => 'contracts.id',
+                'contractDate' => 'contracts.date',
                 'groupDateStart' => 'groups.datestart',
                 'groupDateStop' => 'groups.datestop',
                 'payers.certificate_can_use_current_balance',

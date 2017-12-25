@@ -1666,21 +1666,37 @@ class ProgramsController extends Controller
         $contractToAutoProlongationCount = count($autoProlongation->getContractIdList(true));
 
         if (\Yii::$app->request->isAjax) {
-            $autoProlongation->init(10);
-
-            if (\Yii::$app->request->post('contractToAutoProlongationCount')) {
-                $autoProlongMessage = Yii::$app->i18n->format('{n, plural, one{Создана} few{Созданы} many{Создана} other{Создано}}', ['n' => $autoProlongation->getContractRequestedAutoProlongedCount()], 'ru_RU');
-                $message = $autoProlongMessage . ' ' . \Yii::$app->request->post('contractToAutoProlongationCount') . ' заявка/оферта';
+            if (\Yii::$app->request->post('allCreated')) {
+                if ($autoProlongation->getCount()) {
+                    $autoProlongMessage = Yii::$app->i18n->format('{n, plural, one{Создана} few{Созданы} many{Создана} other{Создано}}', ['n' =>  $autoProlongation->getCount()], 'ru_RU');
+                    $message = $autoProlongMessage . ' заявка/оферта';
+                } else {
+                    $message = 'Не создано ни одной заявки или оферты';
+                }
 
                 \Yii::$app->session->addFlash('info', $message);
 
-                return $this->redirect(Url::to(['/personal/organization-contracts']));
+                $filePath = 'organization-auto-prolongation-registry-' . Yii::$app->user->identity->organization->id . '.xlsx';
+                Yii::$app->response->sendFile(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $filePath);
+
+                return $this->redirect('/programs/auto-prolonged-registry');
             }
 
-            return $this->asJson($contractToAutoProlongationCount);
+            if (!$autoProlongation->init(10, \Yii::$app->request->post('isNew', true))) {
+                return $this->asJson(['status' => 'done']);
+            }
+
+            return $this->asJson(['status' => 'created', 'remainCount' => $contractToAutoProlongationCount]);
         }
 
         return $this->redirect(Url::to(['/personal/organization-contracts']));
+    }
+
+    public function actionAutoProlongedRegistry()
+    {
+        $filePath = 'organization-auto-prolongation-registry-' . Yii::$app->user->identity->organization->id . '.xlsx';
+
+        return Yii::$app->response->sendFile(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $filePath);
     }
 
     /**
