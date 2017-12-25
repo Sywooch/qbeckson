@@ -291,7 +291,7 @@ $this->registerJs($js, $this::POS_READY);
         ],
     ])
     ?>
-    
+
     <?php
     if (isset($roles['operators'])) {
 
@@ -410,7 +410,7 @@ $this->registerJs($js, $this::POS_READY);
                 ],
             ]);
         }
-    
+
         if (isset($roles['operators'])) {
             echo DetailView::widget([
                 'model' => $model,
@@ -448,7 +448,7 @@ $this->registerJs($js, $this::POS_READY);
             ]);
         }
         ?>
-    
+
     <?php
     if (isset($roles['payer'])) {
 
@@ -694,110 +694,6 @@ $this->registerJs($js, $this::POS_READY);
                 <br>
                 <br>
 
-                <?php if (Cooperate::STATUS_ACTIVE == $cooperation->status || $futurePeriodCooperate): ?>
-                    <div class="checkbox-container">
-                        <?= Html::checkbox('', !$futurePeriodCooperate ? false : true, [
-                            'label' => 'С поставщиком услуг заключен ' . Cooperate::documentNames()[$operatorSettings->document_name] . ', для оплаты услуг в будущем периоде (с ' . \Yii::$app->formatter->asDate($operatorSettings->future_program_date_from) . ' по ' . \Yii::$app->formatter->asDate($operatorSettings->future_program_date_to) . ').',
-                            'class' => 'future_period_checkbox',
-                            'disabled' => $futurePeriodCooperate ? true : false,
-                        ]) ?>
-                    </div>
-                <?php endif; ?>
-
-                <br>
-
-                <?php Modal::begin([
-                    'id' => 'choose-next-year-cooperate-type-modal',
-                    'header' => 'Выберите тип соглашения действующем в будущем периоде (с ' . \Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_from) . ' по ' . \Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_to) . ')',
-                ]); ?>
-                <?php $futurePeriodForm = ActiveForm::begin([
-                    'id' => 'choose-next-year-cooperate-type-form',
-                    'enableAjaxValidation' => true,
-                    'enableClientValidation' => false,
-                ]); ?>
-
-                <?= $futurePeriodForm->field($cooperateForFuturePeriodForm, 'useCurrentCooperateType')->checkbox(['data' => ['cooperate-with-maximum-amount' => $cooperation->document_type == 'extend' ? 1 : 0], 'class' => 'use-current-cooperate-type']) ?>
-                <?= Html::checkbox('', false, [
-                'class' => 'use-new-cooperate-type',
-                'label' => 'Указать сведения о соглашении, которое будет использоваться для оплаты по договорам в будущем периоде',
-            ]) ?>
-
-                <hr>
-                <br>
-
-                <div class="cooperate-with-new-type" style="display: none;">
-                    <p class="cooperate-requisites">
-                        Реквизиты соглашения: <span></span><a
-                                href="javascript:void(0); $('#set-requisites-modal').modal();">указать</a>
-                    </p>
-
-                    <?php Modal::begin([
-                        'id' => 'set-requisites-modal',
-                        'header' => '<h2>Реквизиты соглашения</h2>',
-                    ]);
-                    ?>
-                    <?= $futurePeriodForm->field($cooperateForFuturePeriodForm, 'futureCooperateNumber')->textInput(['maxlength' => true]) ?>
-                    <?= $futurePeriodForm->field($cooperateForFuturePeriodForm, 'futureCooperateDate')->widget(DateControl::class, [
-                        'type' => DateControl::FORMAT_DATE,
-                        'ajaxConversion' => false,
-                        'options' => [
-                            'pluginOptions' => [
-                                'autoclose' => true
-                            ]
-                        ]
-                    ]) ?>
-                    <div class="form-group clearfix">
-                        <?= Html::button('Сохранить', ['class' => 'btn btn-success save-requisites-button']) ?>
-                    </div>
-                    <?php Modal::end(); ?>
-
-                    <?= $futurePeriodForm->field($cooperateForFuturePeriodForm, 'type')->dropDownList([Cooperate::DOCUMENT_TYPE_GENERAL => Cooperate::documentTypes()[Cooperate::DOCUMENT_TYPE_GENERAL], Cooperate::DOCUMENT_TYPE_EXTEND => Cooperate::documentTypes()[Cooperate::DOCUMENT_TYPE_EXTEND]], ['class' => ['form-control future-cooperate-type-change']]); ?>
-                    <div class="item future-cooperate-<?= Cooperate::DOCUMENT_TYPE_GENERAL ?>">
-                        <p class="future-cooperate-text <?= Cooperate::DOCUMENT_TYPE_GENERAL ?>FutureCooperateText">
-                            <small>* Рекомендуется заключать в случае если для расходования средств не требуется
-                                постановки расходного обязательства в казначействе (подходит для СОНКО)
-                            </small>
-                            <br>
-                            <?= Html::a('Просмотр договора', $operatorSettings->getGeneralDocumentUrl()); ?>
-                        </p>
-                    </div>
-                    <div class="item future-cooperate-<?= Cooperate::DOCUMENT_TYPE_EXTEND ?>" style="display: none">
-                        <p class="future-cooperate-text <?= Cooperate::DOCUMENT_TYPE_EXTEND ?>FutureCooperateText"
-                           style="display: none;">
-                            <small>* Рекомендуется заключать в случае если для постановки расходного обязательства на
-                                исполнение необходимо зафиксировать сумму договора (подходит для АУ).
-                                Использование данного
-                                договора предполагает необходимость регулярного заключения дополнительных соглашений
-                                (информационная система будет давать подсказки)
-                            </small>
-                            <br>
-                            <?= Html::a('Просмотр договора', $operatorSettings->getExtendDocumentUrl()); ?>
-                        </p>
-                    </div>
-                </div>
-
-                <div class="cooperate-with-old-type" style="display: none;">
-                    <p>Реквизиты соглашения: договор
-                        от <?= \Yii::$app->formatter->asDate($cooperation->date) . ' №' . $cooperation->number ?></p>
-                </div>
-
-                <div class="maximum-amount" style="display: none;">
-                    <?= $futurePeriodForm->field($cooperateForFuturePeriodForm, 'maximumAmount')->textInput() ?>
-                </div>
-
-                <div class="checkbox-container add-cooperate-confirm" style="display: none">
-                    <?= Html::checkbox('', false, [
-                        'label' => 'Уверены, что необходимая информация о соглашении введена правильно',
-                        'onClick' => 'showNextContainer(this);'
-                    ]) ?>
-                </div>
-
-                <div class="form-group clearfix center add-cooperate-button" style="display: none;">
-                    <?= Html::submitButton('добавить соглашение', ['class' => 'btn btn-success']) ?>
-                </div>
-
-                <?php $futurePeriodForm->end(); ?>
-                <?php Modal::end(); ?>
             <?php }
 
             if ($currentPeriodCooperate) {
@@ -954,6 +850,111 @@ $this->registerJs($js, $this::POS_READY);
                     только <?= $futurePeriodCooperate->getPeriodValidityLabel() ?></p>
                 <br>
             <?php } ?>
+
+            <?php if ($currentPeriodCooperate || $futurePeriodCooperate): ?>
+                <div class="checkbox-container">
+                    <?= Html::checkbox('', !$futurePeriodCooperate ? false : true, [
+                        'label' => 'С поставщиком услуг заключен ' . Cooperate::documentNames()[$operatorSettings->document_name] . ', для оплаты услуг в будущем периоде (с ' . \Yii::$app->formatter->asDate($operatorSettings->future_program_date_from) . ' по ' . \Yii::$app->formatter->asDate($operatorSettings->future_program_date_to) . ').',
+                        'class' => 'future_period_checkbox',
+                        'disabled' => $futurePeriodCooperate ? true : false,
+                    ]) ?>
+                </div>
+            <?php endif; ?>
+
+            <br>
+
+            <?php Modal::begin([
+                'id' => 'choose-next-year-cooperate-type-modal',
+                'header' => 'Выберите тип соглашения действующем в будущем периоде (с ' . \Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_from) . ' по ' . \Yii::$app->formatter->asDate(Yii::$app->operator->identity->settings->future_program_date_to) . ')',
+            ]); ?>
+            <?php $futurePeriodForm = ActiveForm::begin([
+                'id' => 'choose-next-year-cooperate-type-form',
+                'enableAjaxValidation' => true,
+                'enableClientValidation' => false,
+            ]); ?>
+
+            <?= $futurePeriodForm->field($cooperateForFuturePeriodForm, 'useCurrentCooperateType')->checkbox(['data' => ['cooperate-with-maximum-amount' => $cooperation->document_type == 'extend' ? 1 : 0], 'class' => 'use-current-cooperate-type']) ?>
+            <?= Html::checkbox('', false, [
+            'class' => 'use-new-cooperate-type',
+            'label' => 'Указать сведения о соглашении, которое будет использоваться для оплаты по договорам в будущем периоде',
+        ]) ?>
+
+            <hr>
+            <br>
+
+            <div class="cooperate-with-new-type" style="display: none;">
+                <p class="cooperate-requisites">
+                    Реквизиты соглашения: <span></span><a
+                        href="javascript:void(0); $('#set-requisites-modal').modal();">указать</a>
+                </p>
+
+                <?php Modal::begin([
+                    'id' => 'set-requisites-modal',
+                    'header' => '<h2>Реквизиты соглашения</h2>',
+                ]);
+                ?>
+                <?= $futurePeriodForm->field($cooperateForFuturePeriodForm, 'futureCooperateNumber')->textInput(['maxlength' => true]) ?>
+                <?= $futurePeriodForm->field($cooperateForFuturePeriodForm, 'futureCooperateDate')->widget(DateControl::class, [
+                    'type' => DateControl::FORMAT_DATE,
+                    'ajaxConversion' => false,
+                    'options' => [
+                        'pluginOptions' => [
+                            'autoclose' => true
+                        ]
+                    ]
+                ]) ?>
+                <div class="form-group clearfix">
+                    <?= Html::button('Сохранить', ['class' => 'btn btn-success save-requisites-button']) ?>
+                </div>
+                <?php Modal::end(); ?>
+
+                <?= $futurePeriodForm->field($cooperateForFuturePeriodForm, 'type')->dropDownList([Cooperate::DOCUMENT_TYPE_GENERAL => Cooperate::documentTypes()[Cooperate::DOCUMENT_TYPE_GENERAL], Cooperate::DOCUMENT_TYPE_EXTEND => Cooperate::documentTypes()[Cooperate::DOCUMENT_TYPE_EXTEND]], ['class' => ['form-control future-cooperate-type-change']]); ?>
+                <div class="item future-cooperate-<?= Cooperate::DOCUMENT_TYPE_GENERAL ?>">
+                    <p class="future-cooperate-text <?= Cooperate::DOCUMENT_TYPE_GENERAL ?>FutureCooperateText">
+                        <small>* Рекомендуется заключать в случае если для расходования средств не требуется
+                            постановки расходного обязательства в казначействе (подходит для СОНКО)
+                        </small>
+                        <br>
+                        <?= Html::a('Просмотр договора', $operatorSettings->getGeneralDocumentUrl()); ?>
+                    </p>
+                </div>
+                <div class="item future-cooperate-<?= Cooperate::DOCUMENT_TYPE_EXTEND ?>" style="display: none">
+                    <p class="future-cooperate-text <?= Cooperate::DOCUMENT_TYPE_EXTEND ?>FutureCooperateText"
+                       style="display: none;">
+                        <small>* Рекомендуется заключать в случае если для постановки расходного обязательства на
+                            исполнение необходимо зафиксировать сумму договора (подходит для АУ).
+                            Использование данного
+                            договора предполагает необходимость регулярного заключения дополнительных соглашений
+                            (информационная система будет давать подсказки)
+                        </small>
+                        <br>
+                        <?= Html::a('Просмотр договора', $operatorSettings->getExtendDocumentUrl()); ?>
+                    </p>
+                </div>
+            </div>
+
+            <div class="cooperate-with-old-type" style="display: none;">
+                <p>Реквизиты соглашения: договор
+                    от <?= \Yii::$app->formatter->asDate($cooperation->date) . ' №' . $cooperation->number ?></p>
+            </div>
+
+            <div class="maximum-amount" style="display: none;">
+                <?= $futurePeriodForm->field($cooperateForFuturePeriodForm, 'maximumAmount')->textInput() ?>
+            </div>
+
+            <div class="checkbox-container add-cooperate-confirm" style="display: none">
+                <?= Html::checkbox('', false, [
+                    'label' => 'Уверены, что необходимая информация о соглашении введена правильно',
+                    'onClick' => 'showNextContainer(this);'
+                ]) ?>
+            </div>
+
+            <div class="form-group clearfix center add-cooperate-button" style="display: none;">
+                <?= Html::submitButton('добавить соглашение', ['class' => 'btn btn-success']) ?>
+            </div>
+
+            <?php $futurePeriodForm->end(); ?>
+            <?php Modal::end(); ?>
 
             <?php if ($futurePeriodCooperate): ?>
                 <div class="panel panel-default">

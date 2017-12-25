@@ -61,16 +61,17 @@ $('.auto-prolongation-init-button').on('click', function() {
 
     $('.progress').show();
     
-    autoProlongation(url, contractToAutoProlongationCount);
+    autoProlongation(url, contractToAutoProlongationCount, true);
 });
 
-function autoProlongation(url, contractToAutoProlongationCount) {
+function autoProlongation(url, contractToAutoProlongationCount, isNew) {
     $.ajax({
         url: url,
         method: 'POST',
+        data: {isNew: isNew},
         success: function(data) {
             console.log(data);
-            if(data > 0) {
+            if(data.remainCount > 0) {
                 if (contractToAutoProlongationCount == 0) {
                     contractToAutoProlongationCount = data;
                 }
@@ -81,12 +82,15 @@ function autoProlongation(url, contractToAutoProlongationCount) {
                 $('.progress-bar').css('width', percent +'%');
                 $('.progress-bar').html(percent + '%');
                 
-                autoProlongation(url, contractToAutoProlongationCount);
-            } else {
+                autoProlongation(url, contractToAutoProlongationCount, false);
+            } else if (data.status == 'done') {
+                $('.progress-bar').css('width', '100%');
+                $('.progress-bar').html('100%');
+                
                 $.ajax({
                     url: url,
                     method: 'POST',
-                    data: {contractToAutoProlongationCount: contractToAutoProlongationCount}
+                    data: {allCreated: true}
                 })
             }
         }
