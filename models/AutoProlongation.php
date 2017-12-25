@@ -123,15 +123,17 @@ class AutoProlongation
      *
      * @param null $autoProlongationEnabled
      * @param null $limit
+     * @param [] $exceptContractIdList
      *
      * @return integer[]
      */
-    public function getContractIdList($autoProlongationEnabled = null, $limit = null)
+    public function getContractIdList($autoProlongationEnabled = null, $limit = null, $exceptContractIdList = [])
     {
         $contractIdList = $this->getQuery()
             ->select('contracts.id')
             ->andWhere(['programs.auto_prolongation_enabled' => 1])
             ->andFilterWhere(['contracts.auto_prolongation_enabled' => $autoProlongationEnabled])
+            ->andWhere(['not in', 'contracts.id', $exceptContractIdList])
             ->limit($limit)
             ->column();
 
@@ -180,8 +182,15 @@ class AutoProlongation
      */
     public function init($limit = null, $isNew = false)
     {
+        $filePath = 'organization-auto-prolongation-registry-' . Yii::$app->user->identity->organization->id . '.xlsx';
+        $processedContractIdList = ArrayHelper::getColumn($this->readProcessedContractIdFromXlsx($filePath), 0);
+
         $autoProlongationEnabled = true;
-        $contractIdList = $this->getContractIdList($autoProlongationEnabled, $limit);
+        $contractIdList = $this->getContractIdList($autoProlongationEnabled, $limit, !$isNew ? $processedContractIdList : []);
+
+        if (!$isNew) {
+            $contractIdList = array_diff($contractIdList, $processedContractIdList);
+        }
 
         $contractWithFutureCooperateIdList = Contracts::find()
             ->select('contracts.id')
@@ -193,10 +202,7 @@ class AutoProlongation
         /** @var \app\models\OperatorSettings $operatorSettings */
         $operatorSettings = Yii::$app->operator->identity->settings;
 
-        $filePath = 'organization-auto-prolongation-registry-' . Yii::$app->user->identity->organization->id . '.xlsx';
-        $processedContractIdList = ArrayHelper::getColumn($this->readProcessedContractIdFromXlsx($filePath), 0);
-
-        $dataContractForAutoProlongationList = $this->getContractDataListForAutoProlongation(array_diff($contractIdList, $processedContractIdList));
+        $dataContractForAutoProlongationList = $this->getContractDataListForAutoProlongation($contractIdList);
 
         if (count($dataContractForAutoProlongationList) < 1) {
             return false;
@@ -375,11 +381,12 @@ class AutoProlongation
                 $mpdf->Output(Yii::getAlias('@pfdoroot/uploads/contracts/') . $contract->url, 'F');
             }
 
-            foreach ($newProlongedContractIdList as $newProlongedContractId) {
-                $contract = Contracts::findOne($newProlongedContractId);
-                $registry[$contract->parent_id] += ['childContractId' => $contract->id, 'childContractNumber' => $contract->number];
+            foreach (array_diff($newProlongedContractIdList, $oldProlongedContractIdList) as $contractId) {
+                $contract = Contracts::findOne($contractId);
+                $registry[$contract->parent_id]['childContractId'] = $contract->id;
+                $registry[$contract->parent_id]['childContractNumber'] = $contract->number;
+                $registry[$contract->parent_id]['childContractDate'] = $contract->date;
             }
-
             $this->writeToXlsx($isNew, $registry);
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -413,8 +420,8 @@ class AutoProlongation
         }
 
         foreach ($registry as $id => $item) {
-            if (isset($item[''])) {
-
+            if (isset($item['childContractId']) && isset($item['childContractNumber']) && $item['childContractDate']) {
+                $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], $item['childContractId'], $item['childContractNumber'], $item['childContractDate']]);
             } else {
                 $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], 'не создан договор продления обучения, поскольку на сертификате доступный остаток составляет ' . $item['certificateBalance']]);
             }
@@ -461,6 +468,11 @@ class AutoProlongation
         return $oldRows;
     }
 
+    /**
+     * получить кол-во автопролонгированных заявок или оферт
+     *
+     * @return int
+     */
     public function getCount()
     {
         $filePath = 'organization-auto-prolongation-registry-' . Yii::$app->user->identity->organization->id . '.xlsx';

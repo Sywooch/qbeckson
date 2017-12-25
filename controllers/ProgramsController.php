@@ -1667,22 +1667,10 @@ class ProgramsController extends Controller
 
         if (\Yii::$app->request->isAjax) {
             if (\Yii::$app->request->post('allCreated')) {
-                if ($autoProlongation->getCount()) {
-                    $autoProlongMessage = Yii::$app->i18n->format('{n, plural, one{Создана} few{Созданы} many{Создана} other{Создано}}', ['n' =>  $autoProlongation->getCount()], 'ru_RU');
-                    $message = $autoProlongMessage . ' заявка/оферта';
-                } else {
-                    $message = 'Не создано ни одной заявки или оферты';
-                }
-
-                \Yii::$app->session->addFlash('info', $message);
-
-                $filePath = 'organization-auto-prolongation-registry-' . Yii::$app->user->identity->organization->id . '.xlsx';
-                Yii::$app->response->sendFile(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $filePath);
-
                 return $this->redirect('/programs/auto-prolonged-registry');
             }
 
-            if (!$autoProlongation->init(10, \Yii::$app->request->post('isNew', true))) {
+            if (!$autoProlongation->init(10, \Yii::$app->request->post('isNew') == 1 ? true : false)) {
                 return $this->asJson(['status' => 'done']);
             }
 
