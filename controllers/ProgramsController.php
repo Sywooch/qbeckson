@@ -1684,7 +1684,11 @@ class ProgramsController extends Controller
     {
         $filePath = 'organization-auto-prolongation-registry-' . Yii::$app->user->identity->organization->id . '.xlsx';
 
-        return Yii::$app->response->sendFile(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $filePath);
+        if (file_exists(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $filePath)) {
+            return Yii::$app->response->sendFile(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $filePath);
+        } else {
+            return $this->redirect(Url::to(['/personal/organization-contracts']));
+        }
     }
 
     /**
