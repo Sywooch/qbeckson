@@ -376,9 +376,11 @@ class AutoProlongation
             foreach (array_diff($newProlongedContractIdList, $oldProlongedContractIdList) as $contractId) {
                 $contract = Contracts::find()->where(['id' => $contractId, 'status' => Contracts::STATUS_ACCEPTED])->one();
 
-                $contractRequest = new ContractRequest();
-                $mpdf = $contractRequest->makePdfForContract($contract);
-                $mpdf->Output(Yii::getAlias('@pfdoroot/uploads/contracts/') . $contract->url, 'F');
+                if ($contract) {
+                    $contractRequest = new ContractRequest();
+                    $mpdf = $contractRequest->makePdfForContract($contract);
+                    $mpdf->Output(Yii::getAlias('@pfdoroot/uploads/contracts/') . $contract->url, 'F');
+                }
             }
 
             foreach (array_diff($newProlongedContractIdList, $oldProlongedContractIdList) as $contractId) {
