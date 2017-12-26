@@ -8,6 +8,7 @@ use yii\db\ActiveRecord;
 use yii\db\Exception;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
+use yii\helpers\FileHelper;
 use yii\helpers\Url;
 
 /**
@@ -39,6 +40,8 @@ class ContractDeleteApplication extends ActiveRecord
     const SCENARIO_CREATE = 'create';
     const SCENARIO_CONFIRM = 'confirm';
     const SCENARIO_REJECT = 'reject';
+
+    const FILE_UPLOAD_PATH = '/uploads/contract-delete-application';
 
     public $confirmationFile;
     public $isChecked;
@@ -169,7 +172,7 @@ class ContractDeleteApplication extends ActiveRecord
      */
     public function getFileUrl()
     {
-        return $this->base_url ? Url::to([$this->base_url . DIRECTORY_SEPARATOR . $this->file], true) : null;
+        return $this->base_url ? Url::to(['/file/contract-delete-document', 'id' => $this->id]) : null;
     }
 
     /**
@@ -218,6 +221,36 @@ class ContractDeleteApplication extends ActiveRecord
             return true;
         } else {
             return false;
+        }
+    }
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        //Переносим файл в другое место
+        if ($insert || isset($changedAttributes['file']) || isset($changedAttributes['base_url'])) {
+            $parts = explode('.', $this->file);
+            $ext = $parts[count($parts) - 1];
+            $filename = 'delete-' . $this->contract_id . '-' . $this->id . '.' . $ext;
+            $file_path = \Yii::getAlias('@pfdoroot') . self::FILE_UPLOAD_PATH;
+            $oldFile = \Yii::getAlias('@pfdoroot/uploads') . DIRECTORY_SEPARATOR . $this->file;
+            $newFile = $file_path . DIRECTORY_SEPARATOR . $filename;
+
+            if (file_exists($oldFile)) {
+                if (!file_exists($file_path)) {
+                    FileHelper::createDirectory($file_path);
+                }
+                if (rename($oldFile, $newFile)) {
+                    //updateAll не запустит повторно событие afterSave
+                    static::updateAll(['file' => $filename, 'base_url' => self::FILE_UPLOAD_PATH], ['id' => $this->id]);
+                }
+            }
+
         }
     }
 }
