@@ -65,6 +65,12 @@ class CleanupController extends Controller
         if (!$contract) {
             throw new NotFoundHttpException('Договор не найден');
         }
+
+        //Если запрос на удаление этого договора уже создан
+        if (ContractDeleteApplication::find()->where(['contract_id' => $id,])->exists()) {
+            return $this->render('exists');
+        }
+
         $model = new ContractDeleteApplication([
             'status' => ContractDeleteApplication::STATUS_WAITING,
             'contract_id' => $id,
