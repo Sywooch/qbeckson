@@ -40,7 +40,6 @@ class InvoiceHaveContract extends ActiveRecord
                 ['invoice_id'], 'exist', 'skipOnError' => true,
                 'targetClass' => Invoices::className(), 'targetAttribute' => ['invoice_id' => 'id']
             ],
-            ['contract_id', 'unique', 'targetAttribute' => ['contract_id', 'invoice_id']]
         ];
     }
 
