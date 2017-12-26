@@ -34,6 +34,11 @@ class AutoProlongation
     private $programId;
 
     /**
+     * id группы для поиска контрактов доступных для автопролонгации
+     */
+    private $groupId;
+
+    /**
      * количество автопролонгированных заявок
      *
      * @var integer
@@ -48,6 +53,20 @@ class AutoProlongation
     private $contractAcceptedAutoProlongedCount = 0;
 
     /**
+     * сообщение ошибки при автопролонгации
+     *
+     * @var string
+     */
+    public $errorMessage = '';
+
+    /**
+     * кол-во оставшихся контрактов для автопролонгации
+     *
+     * @var int
+     */
+    public $remainCount = null;
+
+    /**
      * создать экземпляр класса
      * ---
      * аргументы указываются для уточнения поиска доступных контрактов для автопролонгации,
@@ -56,10 +75,11 @@ class AutoProlongation
      * @param $organizationId - id организации
      * @param $certificateId - id сертификата
      * @param $programId - id программы
+     * @param $groupId - id группы
      *
      * @return static
      */
-    public static function make($organizationId = null, $certificateId = null, $programId = null)
+    public static function make($organizationId = null, $certificateId = null, $programId = null, $groupId = null)
     {
         $autoProlongation = new static;
 
@@ -75,11 +95,17 @@ class AutoProlongation
 
         $autoProlongation->certificateId = $certificateId;
 
-        if (!is_null($programId) && !Groups::find()->where(['id' => $programId])->exists()) {
+        if (!is_null($programId) && !Programs::find()->where(['id' => $programId])->exists()) {
             return null;
         }
 
         $autoProlongation->programId = $programId;
+
+        if (!is_null($groupId) && !Groups::find()->where(['id' => $groupId])->exists()) {
+            return null;
+        }
+
+        $autoProlongation->groupId = $programId;
 
         return $autoProlongation;
     }
@@ -91,15 +117,21 @@ class AutoProlongation
     {
         $query = Contracts::find()
             ->distinct()
+            ->leftJoin(Payers::tableName(), 'payers.id = contracts.payer_id')
             ->leftJoin(Programs::tableName(), 'programs.id = contracts.program_id')
             ->leftJoin(Groups::tableName(), 'groups.id = contracts.group_id')
             ->andWhere(['contracts.status' => Contracts::STATUS_ACTIVE, 'contracts.period' => Contracts::CURRENT_REALIZATION_PERIOD])
-            ->andWhere('contracts.stop_edu_contract < groups.datestop')
             ->andWhere(['groups.status' => Groups::STATUS_ACTIVE])
             ->andWhere(['not in', 'contracts.id', Contracts::getAutoProlongedParentContractIdList()])
+            ->andWhere(['payers.certificate_can_use_future_balance' => 1])
             ->andFilterWhere(['programs.organization_id' => $this->organizationId])
             ->andFilterWhere(['contracts.certificate_id' => $this->certificateId])
-            ->andFilterWhere(['contracts.program_id' => $this->programId]);
+            ->andFilterWhere(['contracts.program_id' => $this->programId])
+            ->andFilterWhere(['contracts.group_id' => $this->groupId]);
+
+        if (!is_null($this->groupId)) {
+            $query->andWhere('contracts.stop_edu_contract < groups.datestop');
+        }
 
         return $query;
     }
@@ -138,6 +170,40 @@ class AutoProlongation
             ->column();
 
         return $contractIdList;
+    }
+
+    /**
+     * получить список сертификатов для пролонгации
+     */
+    public function getCertificateIdList()
+    {
+        $certificateIdList = $this->getQuery()
+            ->select('contracts.certificate_id')
+            ->andWhere(
+                ['or',
+                    ['and',
+                        ['contracts.status' => Contracts::STATUS_ACTIVE],
+                        ['or',
+                            ['contracts.wait_termnate' => null],
+                            ['and',
+                                ['contracts.wait_termnate' => 1],
+                                'contracts.date_termnate = contracts.stop_edu_contract'
+                            ]
+                        ]
+                    ],
+                    ['and',
+                        ['contracts.status' => Contracts::STATUS_CLOSED],
+                        ['and',
+                            ['and', 'contracts.stop_edu_contract = contracts.date_termnate'],
+                            ['and',
+                                ['>', 'contracts.stop_edu_contract', date('Y-m-d', strtotime('-4 Month'))]
+                            ]
+                        ],
+                    ]
+                ])
+            ->column();
+
+        return $certificateIdList;
     }
 
     /**
@@ -190,6 +256,8 @@ class AutoProlongation
 
         if (!$isNew) {
             $contractIdList = array_diff($contractIdList, $processedContractIdList);
+
+            $this->remainCount = count(array_diff($this->getContractIdList($autoProlongationEnabled), $processedContractIdList));
         }
 
         $contractWithFutureCooperateIdList = Contracts::find()
@@ -204,20 +272,27 @@ class AutoProlongation
 
         $dataContractForAutoProlongationList = $this->getContractDataListForAutoProlongation($contractIdList);
 
+        $registry = [];
+
         if (count($dataContractForAutoProlongationList) < 1) {
+            foreach ($contractIdList as $contractId) {
+                $registry[$contractId] = ['contractNumber' => '', 'date' => '', 'certificateNumber' => ''];
+            }
+
+            $this->writeToXlsx($isNew, $registry);
+
             return false;
         }
 
         $contractRequest = new ContractRequest();
         $contractRequest->setStartEduContract(date('d.m.Y', strtotime($operatorSettings->future_program_date_from)));
 
-        $registry = [];
-
         $contractNumberCount = 1;
         $futurePeriodCertificateDataListRows = [];
         $currentPeriodCertificateDataListRows = [];
         $contractDataListRows = [];
         $contractsWithSameCertificateCount = 0;
+
         foreach ($dataContractForAutoProlongationList as $dataList) {
             if ($contractRequest->validate(
                 $dataList['groupDateStart'],
@@ -270,7 +345,7 @@ class AutoProlongation
                     'rezerv' => $dataList['fundsCert'],
                 ];
 
-                if (isset($contractRequestData['period']) && in_array($contractRequestData['period'], [Contracts::CURRENT_REALIZATION_PERIOD, Contracts::FUTURE_REALIZATION_PERIOD])) {
+                if (isset($contractData['period']) && in_array($contractData['period'], [Contracts::CURRENT_REALIZATION_PERIOD, Contracts::FUTURE_REALIZATION_PERIOD])) {
                     if ($contractData['balance'] - $dataList['fundsCert'] > 0) {
                         if ($contractRequestData['period'] == Contracts::CURRENT_REALIZATION_PERIOD) {
                             if (in_array($dataList['certificateId'], ArrayHelper::getColumn($currentPeriodCertificateDataListRows, 'id'))) {
@@ -328,6 +403,10 @@ class AutoProlongation
                         'certificateBalance' => $contractData['balance'],
                     ];
                 }
+            } else {
+                $this->errorMessage = $contractRequest->errorMessage;
+
+                return false;
             }
         }
 
@@ -425,7 +504,7 @@ class AutoProlongation
             if (isset($item['childContractId']) && isset($item['childContractNumber']) && $item['childContractDate']) {
                 $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], $item['childContractId'], $item['childContractNumber'], $item['childContractDate']]);
             } else {
-                $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], 'не создан договор продления обучения, поскольку на сертификате доступный остаток составляет ' . $item['certificateBalance']]);
+                $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], 'договор продления обучения не создан.']);
             }
         }
 
@@ -475,7 +554,7 @@ class AutoProlongation
      *
      * @return int
      */
-    public function getCount()
+    public function getAutoProlongedCount()
     {
         $filePath = 'organization-auto-prolongation-registry-' . Yii::$app->user->identity->organization->id . '.xlsx';
 

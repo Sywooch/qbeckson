@@ -1670,8 +1670,16 @@ class ProgramsController extends Controller
                 return $this->redirect('/programs/auto-prolonged-registry');
             }
 
-            if (!$autoProlongation->init(10, \Yii::$app->request->post('isNew') == 1 ? true : false)) {
-                return $this->asJson(['status' => 'done']);
+            $autoProlongation->init(10, \Yii::$app->request->post('isNew') == 1 ? true : false);
+
+            if ($autoProlongation->errorMessage) {
+                \Yii::$app->session->addFlash('error', $autoProlongation->errorMessage);
+
+                return $this->redirect(Url::to(['/personal/organization-contracts']));
+            }
+
+            if ($autoProlongation->remainCount === 0) {
+                return $this->asJson(['status' => 'processed']);
             }
 
             return $this->asJson(['status' => 'created', 'remainCount' => $contractToAutoProlongationCount]);

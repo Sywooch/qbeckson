@@ -71,7 +71,7 @@ function autoProlongation(url, contractToAutoProlongationCount, isNew) {
         data: {isNew: isNew},
         success: function(data) {
             console.log(data);
-            if(data.remainCount > 0) {
+            if(data.remainCount >= 0) {
                 if (contractToAutoProlongationCount == 0) {
                     contractToAutoProlongationCount = data.remainCount;
                 }
@@ -83,7 +83,7 @@ function autoProlongation(url, contractToAutoProlongationCount, isNew) {
                 $('.progress-bar').html(percent + '%');
                 
                 autoProlongation(url, contractToAutoProlongationCount, 0);
-            } else if (data.status == 'done') {
+            } else if (data.status == 'processed') {
                 $('.progress-bar').css('width', '100%');
                 $('.progress-bar').html('100%');
                 
