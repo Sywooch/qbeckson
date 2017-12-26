@@ -8,6 +8,7 @@ use yii\helpers\Html;
 use kartik\grid\GridView;
 use yii\helpers\Url;
 use yii\helpers\ArrayHelper;
+use app\helpers\PermissionHelper;
 use app\models\Mun;
 
 /* @var $this yii\web\View */
@@ -173,9 +174,11 @@ $preparedColumns = GridviewHelper::prepareColumns('programs', $columns);
 <?php if ($searchWaitTasks->organization_id && $searchWaitTasks->organization) : ?>
     <p class="lead">Показаны результаты для организации: <?= $searchWaitTasks->organization; ?></p>
 <?php endif; ?>
+<?php if (PermissionHelper::checkMonitorUrl('matrix')) : ?>
 <p>
     <?= Html::a('Настроить параметры', ['/payer/matrix/params'], ['class' => 'btn btn-success']) ?>
 </p>
+<?php endif; ?>
 <ul class="nav nav-tabs">
     <li class="active">
         <a data-toggle="tab" href="#panel0">Неразобранные

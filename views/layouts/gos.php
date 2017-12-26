@@ -45,7 +45,7 @@ $user = Yii::$app->user->getIdentity();
                         'items' => [
                             PersonalAssignmentViewHelper::getAssignedUsersNavItems(),
                             [
-                                'label' => 'Выйти(' . $user->username . ')',
+                                'label' => 'Выйти(' .  ($user->isMonitored ? $user->monitor->username : $user->username) . ')',
                                 'url' => ['site/logout'],
                                 'linkOptions' => [
                                     'data-method' => 'post',
