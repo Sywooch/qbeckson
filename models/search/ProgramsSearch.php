@@ -117,9 +117,7 @@ class ProgramsSearch extends Programs
         if ($this->isMunicipalTask) {
             $query->andWhere(['>', 'programs.is_municipal_task', 0]);
         } else {
-            // TODO проверить, нужно ли это для вывода программ организации
-            if (!Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
-                && !Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)
+            if (Yii::$app->user->can(UserIdentity::ROLE_PAYER)
             ) {
                 $query
                     ->leftJoin(
