@@ -147,7 +147,7 @@ class SelectGroupForm extends Model
             ])
             ->andWhere(['or',
                 ['status' => [0, 3]],
-                ['and', ['status' => 1], 'wait_termnate is null']
+                ['and', ['status' => 1], ['or', 'wait_termnate is null', 'wait_termnate != 1']]
             ])
             ->exists();
 
