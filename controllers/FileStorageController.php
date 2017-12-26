@@ -36,6 +36,13 @@ class FileStorageController extends Controller
     public function actions()
     {
         return [
+            'contract-delete-application' => [
+                'class' => UploadAction::className(),
+                'deleteRoute' => 'delete',
+                'validationRules' => [
+                    [['file'], 'file', 'extensions' => 'jpg, jpeg, png, gif, pdf', 'maxSize' => 3145728/* 3mb */]
+                ]
+            ],
             'contract-upload' => [
                 'class' => TrntvUploadAction::class,
                 'deleteRoute' => 'delete'

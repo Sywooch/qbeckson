@@ -168,6 +168,7 @@ $user = Yii::$app->user->getIdentity();
 </div>
 <div class="input-title-body"></div>
 <?= MainFooter::widget(); ?>
+<?= $this->render('../parts/_popups') ?>
 <?php $this->endBody() ?>
 </body>
 </html>
