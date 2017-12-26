@@ -340,6 +340,11 @@ return [
             'allow' => true,
             'roles' => ['operators', 'organizations', 'payer'],
             'actions' => ['contract'],
+        ],
+        [
+            'allow' => true,
+            'roles' => ['operators', 'organizations'],
+            'actions' => ['contract-delete-document'],
         ]
     ],
     'groups' => [
