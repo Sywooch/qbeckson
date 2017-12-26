@@ -171,6 +171,9 @@ class InvoiceBuilder extends InvoicesActions
     public function setAfterSaveInvoiceHaveContractsCreateAction(\Closure $transactionTerminator)
     {
         $contractIds = $this->getContractsIds();
+        Yii::trace('всего id: ' . count($contractIds));
+        $uniqIds = array_unique($contractIds);
+        Yii::trace('уникальных id: ' . count($uniqIds));
 
         $action = function (Event $event) use ($transactionTerminator, $contractIds) {
             /**@var $invoice Invoices */
