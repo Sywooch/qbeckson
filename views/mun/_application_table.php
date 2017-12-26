@@ -35,7 +35,7 @@
             </td>
         </tr>
         <tr>
-            <td><label class="control-label">Базовая потребность в приобретении услуг ПК</label></td>
+            <td><label class="control-label">Базовая потребность в приобретении услуг ПК и медицинских услуг</label></td>
             <td>
                 <?php if (!$model->compareWithMunValue('pc')) { ?>
                     <s class="bg-danger"><?= $model->getMunValue('pc') ?></s>
