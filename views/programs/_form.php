@@ -292,7 +292,7 @@ $this->registerJs($js);
             : ['/personal/organization-programs'],
         ['class' => 'btn btn-danger']
     );
-    /*echo '&nbsp';
+    echo '&nbsp';
     echo Html::submitButton(
         'Сохранить как черновик',
         [
@@ -300,7 +300,7 @@ $this->registerJs($js);
             'name' => $model->formName() . '[asDraft]',
             'value' => 1
         ]
-    );*/
+    );
     echo '&nbsp';
     if (!$model->isNewRecord && !isset($roles['operators']) && !$model->inTransferProcess) {
         echo Html::submitButton(
