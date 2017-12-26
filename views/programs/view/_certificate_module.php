@@ -1,5 +1,5 @@
 <?php
-/** @var $model \app\models\ProgrammeModule */
+/** @var $model \app\models\module\ModuleViewDecorator */
 /** @var $this yii\web\View */
 
 /** @var $cooperate Cooperate */
@@ -15,7 +15,6 @@ $certificate = Yii::$app->user->identity->certificate;
 $organization = $model->program->organization;
 $payer = $certificate->payer;
 $activeContractsByProgramInPayer = $payer->getActiveContractsByProgram($model->program_id)->count();
-$limit_napr = $payer->getDirectionalityCountByName($model->program->directivity);
 
 
 if (count($cooperate)) {
