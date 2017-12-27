@@ -1,6 +1,7 @@
 <?php
 
 use app\components\widgets\modalCheckLink\ModalCheckLink;
+use app\models\Organization;
 use kartik\datecontrol\DateControl;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -113,7 +114,10 @@ if ($model->status === \app\models\Contracts::STATUS_REFUSED) {
             ]
         ]) ?>
 
-        <?php if (!$model->parentExists() || Yii::$app->user->identity->organization->canRegisterAutoProlongedContract($model->id)): ?>
+        <?php
+        /** @var $organization Organization */
+        $organization = Yii::$app->user->identity->organization;
+        if (!$model->parentExists() || $organization->canRegisterAutoProlongedContract($model->id)): ?>
             <?= Html::submitButton('Зарегистрировать договор', ['class' => 'btn btn-success']); ?><br /><br />
         <?php endif; ?>
     </div>

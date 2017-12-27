@@ -658,42 +658,17 @@ class Certificates extends \yii\db\ActiveRecord
     }
 
     /**
-     * существует ли контракт сертификата для той же программы, но в другом модуле
+     * существует ли контракт сертификата для автопролонгации в указанном модуле
      *
      * @param $programId - id программы
      * @param $yearId - id модуля
      *
      * @return bool
      */
-    public function contractExistInAnotherModuleOfProgram($programId, $yearId)
+    public function contractCanAutoProlongInModule($programId, $yearId)
     {
-        $contractExist = $this->getContractsModels()
-            ->andWhere(['contracts.program_id' => $programId])
-            ->andWhere(['not in', 'contracts.year_id', $yearId])
-            ->andWhere(
-                ['or',
-                    ['and',
-                        ['contracts.status' => Contracts::STATUS_ACTIVE],
-                        ['or',
-                            ['contracts.wait_termnate' => null],
-                            ['and',
-                                ['contracts.wait_termnate' => 1],
-                                'contracts.date_termnate = contracts.stop_edu_contract'
-                            ]
-                        ]
-                    ],
-                    ['and',
-                        ['contracts.status' => Contracts::STATUS_CLOSED],
-                        ['and',
-                            ['and', 'contracts.stop_edu_contract = contracts.date_termnate'],
-                            ['and',
-                                ['>', 'contracts.stop_edu_contract', date('Y-m-d', strtotime('-4 Month'))]
-                            ]
-                        ],
-                    ]
-                ])
-            ->exists();
+        $autoProlongation = AutoProlongation::make(null, $this->id, $programId);
 
-        return $contractExist;
+        return in_array($this->id, $autoProlongation->getCertificateIdList($yearId));
     }
 }
