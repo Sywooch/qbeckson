@@ -10,6 +10,7 @@ use Box\Spout\Reader\ReaderFactory;
 use Box\Spout\Writer\WriterFactory;
 use Yii;
 use yii\db\ActiveQuery;
+use yii\db\Query;
 
 /**
  * автопролонгация договоров
@@ -86,26 +87,22 @@ class AutoProlongation
         if (!is_null($organizationId) && !Organization::find()->where(['id' => $organizationId])->exists()) {
             return null;
         }
-
         $autoProlongation->organizationId = $organizationId;
 
         if (!is_null($certificateId) && !Certificates::find()->where(['id' => $certificateId])->exists()) {
             return null;
         }
-
         $autoProlongation->certificateId = $certificateId;
 
         if (!is_null($programId) && !Programs::find()->where(['id' => $programId])->exists()) {
             return null;
         }
-
         $autoProlongation->programId = $programId;
 
         if (!is_null($groupId) && !Groups::find()->where(['id' => $groupId])->exists()) {
             return null;
         }
-
-        $autoProlongation->groupId = $programId;
+        $autoProlongation->groupId = $groupId;
 
         return $autoProlongation;
     }
@@ -124,6 +121,27 @@ class AutoProlongation
             ->andWhere(['groups.status' => Groups::STATUS_ACTIVE])
             ->andWhere(['not in', 'contracts.id', Contracts::getAutoProlongedParentContractIdList()])
             ->andWhere(['payers.certificate_can_use_future_balance' => 1])
+            ->andWhere(['or',
+                ['and',
+                    ['contracts.status' => Contracts::STATUS_ACTIVE],
+                    ['or',
+                        ['contracts.wait_termnate' => null],
+                        ['and',
+                            ['contracts.wait_termnate' => 1],
+                            'contracts.terminator_user = 0'
+                        ]
+                    ]
+                ],
+                ['and',
+                    ['contracts.status' => Contracts::STATUS_CLOSED],
+                    ['and',
+                        ['and', 'contracts.stop_edu_contract = contracts.date_termnate'],
+                        ['and',
+                            ['>', 'contracts.stop_edu_contract', date('Y-m-d', strtotime('-4 Month'))]
+                        ]
+                    ],
+                ]
+            ])
             ->andFilterWhere(['programs.organization_id' => $this->organizationId])
             ->andFilterWhere(['contracts.certificate_id' => $this->certificateId])
             ->andFilterWhere(['contracts.program_id' => $this->programId])
@@ -178,36 +196,81 @@ class AutoProlongation
 
     /**
      * получить список сертификатов для пролонгации
+     *
+     * @param $exceptYearId
+     *
+     * @return array
      */
-    public function getCertificateIdList()
+    public function getCertificateIdList($exceptYearId = null)
     {
-        $certificateIdList = $this->getQuery()
-            ->select('contracts.certificate_id')
-            ->andWhere(
-                ['or',
-                    ['and',
-                        ['contracts.status' => Contracts::STATUS_ACTIVE],
-                        ['or',
-                            ['contracts.wait_termnate' => null],
-                            ['and',
-                                ['contracts.wait_termnate' => 1],
-                                'contracts.date_termnate = contracts.stop_edu_contract'
-                            ]
-                        ]
-                    ],
-                    ['and',
-                        ['contracts.status' => Contracts::STATUS_CLOSED],
-                        ['and',
-                            ['and', 'contracts.stop_edu_contract = contracts.date_termnate'],
-                            ['and',
-                                ['>', 'contracts.stop_edu_contract', date('Y-m-d', strtotime('-4 Month'))]
-                            ]
-                        ],
-                    ]
-                ])
+        $certificateIdListQuery = $this->getQuery()
+            ->select('contracts.certificate_id');
+
+        if ($exceptYearId) {
+            $certificateIdListQuery->andWhere(['not in', 'contracts.year_id', $exceptYearId]);
+        }
+
+        return $certificateIdListQuery->column();
+    }
+
+    /**
+     * получить список модулей программы не включающие указанную группу
+     *
+     * @param $programId - id программы
+     * @param $exceptGroupId - id группы из которой осуществляется перевод
+     *
+     * @return array
+     */
+    public static function getModuleIdList($programId, $exceptGroupId)
+    {
+        $exceptYearId = Groups::find()->select(['groups.year_id'])->where(['id' => $exceptGroupId])->column();
+
+        $moduleListId = ProgrammeModule::find()
+            ->select(['id'])
+            ->where(['program_id' => $programId])
+            ->andWhere(['!=', 'years.id', $exceptYearId])
             ->column();
 
-        return $certificateIdList;
+        return $moduleListId;
+    }
+
+    /**
+     * получить список id групп, в которые возможен перевод при автопролонгации договоров
+     *
+     * @param $yearId
+     * @param $groupId - id группы из которой переводятся
+     *
+     * @return array
+     */
+    public static function getGroupIdList($yearId, $groupId)
+    {
+
+
+        $groupIdList = Groups::find()
+            ->select(['id', 'name'])
+            ->where(['status' => Groups::STATUS_ACTIVE, 'year_id' => $yearId])
+            ->andWhere(['>', 'datestart', (new Query())->select(['groups.datestop'])->from(Groups::tableName())->where(['groups.id' => $groupId])])
+            ->asArray()->all();
+
+        return $groupIdList;
+    }
+
+    /**
+     * может ли контракты группы автопролонгироваться в другую группу
+     *
+     * @param $groupId - id группы для перевода
+     *
+     * @return bool
+     */
+    public static function canGroupBeAutoProlong($groupId)
+    {
+        $group = Groups::findOne($groupId);
+
+        if (date('Y-m-d', strtotime('+1 Month')) > $group->datestop && date('Y-m-d', strtotime('-1 Month')) < $group->datestop) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

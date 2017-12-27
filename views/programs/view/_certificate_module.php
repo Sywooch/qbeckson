@@ -143,7 +143,7 @@ if (count($cooperate)) {
                                  $identity = Yii::$app->user->identity;
                                  /** @var $model Groups */
                                  if ($model->freePlaces && $identity->certificate->actual) {
-                                         if ($identity->certificate->contractExistInAnotherModuleOfProgram($model->module->program_id, $model->year_id)) {
+                                         if ($identity->certificate->contractCanAutoProlongInModule($model->module->program_id, $model->year_id)) {
                                              return Html::button('Выбрать', [
                                                  'class' => 'btn btn-success',
                                                  'onClick' => '$("#ask-for-contract-prolongation-modal-' . $model->year_id . '").modal(); $("#contract-request-link-' . $model->year_id . '").prop("href", \'' . Url::to(['/contracts/request', 'groupId' => $model->id]) . '\');',
