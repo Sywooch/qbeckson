@@ -103,6 +103,10 @@ class Menu
                         'label' => 'Руководство пользователей',
                         'url'   => ['/admin/help/index']
                     ],
+                    [
+                        'label' => 'Отчеты',
+                        'url' => ['/reports']
+                    ],
                 ],
 
             ]
