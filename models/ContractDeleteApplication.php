@@ -9,7 +9,6 @@ use yii\db\Exception;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
-use yii\helpers\Url;
 
 /**
  * This is the model class for table "contract_delete_application".
@@ -173,7 +172,7 @@ class ContractDeleteApplication extends ActiveRecord
      */
     public function getFileUrl()
     {
-        return $this->base_url ? Url::to(['/file/contract-delete-document', 'id' => $this->id]) : null;
+        return $this->file ? \Yii::getAlias('@pfdo') . $this::FILE_UPLOAD_PATH . DIRECTORY_SEPARATOR . $this->file : null;
     }
 
     /**
