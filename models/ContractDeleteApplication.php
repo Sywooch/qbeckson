@@ -24,7 +24,7 @@ use yii\helpers\Url;
  * @property string $contract_date
  * @property string $contract_number
  * @property integer $contract_id
- * @property integer $certificate_number
+ * @property string $certificate_number
  * @property integer $status
  * @property integer $organization_id
  *
@@ -93,11 +93,12 @@ class ContractDeleteApplication extends ActiveRecord
             ],
             [['created_at', 'confirmed_at'], 'safe'],
             [['contract_date'], 'date', 'format' => 'php:Y-m-d'],
-            [['contract_id', 'status', 'certificate_number', 'organization_id'], 'integer'],
+            [['contract_id', 'status', 'organization_id'], 'integer'],
             [['status'], 'in', 'range' => [self::STATUS_WAITING, self::STATUS_CONFIRMED, self::STATUS_REFUSED]],
             [['status'], 'default', 'value' => self::STATUS_WAITING],
             [['reason', 'file', 'base_url', 'filename'], 'string', 'max' => 255],
-            [['contract_number'], 'string'],
+            [['contract_number'], 'string', 'max' => 11],
+            [['certificate_number'], 'string', 'max' => 45],
             [['confirmationFile'], 'required', 'on' => self::SCENARIO_CREATE],
             [['contract_id'], 'unique', 'message' => 'Запрос на удаление этого договора уже отправлен.'],
             [
