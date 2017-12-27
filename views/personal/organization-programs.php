@@ -120,6 +120,9 @@ $openColumns = [
     $directivity,
     $form,
     $zab,
+    [
+        'attribute' => 'currentActiveContractsCount'
+    ],
     $ageGroupMin,
     $ageGroupMax,
     $rating,
