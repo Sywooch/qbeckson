@@ -40,7 +40,7 @@ $waitingColumns = $refusedColumns = [
         'attribute' => 'fileUrl',
         'format' => 'html',
         'value' => function(ContractDeleteApplication $data) {
-            return Html::a($data->file, $data->getFileUrl());
+            return Html::a($data->getFileUrl(), $data->getFileUrl());
         }
     ],
     [
@@ -67,7 +67,7 @@ $confirmedColumns = [
         'attribute' => 'fileUrl',
         'format' => 'html',
         'value' => function(ContractDeleteApplication $data) {
-            return Html::a($data->file, $data->getFileUrl());
+            return Html::a($data->getFileUrl(), $data->getFileUrl());
         }
     ],
     [
