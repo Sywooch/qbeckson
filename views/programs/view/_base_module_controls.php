@@ -32,7 +32,8 @@ use yii\helpers\Url;
             if (!$model->canEditPrice()) {
                 echo \app\components\widgets\ButtonWithInfo::widget([
                     'label' => 'Изменить цену',
-                    'message' => 'Невозможно мзмнеть цену когда открыто зачисление',
+                    'message' => 'Невозможно мзмнеть цену когда открыто зачисление,'
+                        . ' либо существуют активные договора',
                     'options' => ['disabled' => 'disabled',
                         'class' => 'btn btn-theme',]
                 ]);
