@@ -63,7 +63,7 @@ $this->registerJs($js);
         'id' => 'auto-prolongation-init',
         'header' => 'Указать договора для автопролонгации',
         'toggleButton' => [
-            'label' => 'Запустить авто пролонгацию',
+            'label' => 'Запустить автопролонгацию',
             'class' => 'btn btn-primary',
         ],
     ]) ?>

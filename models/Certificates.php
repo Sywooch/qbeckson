@@ -536,6 +536,23 @@ class Certificates extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param $yearId int
+     *
+     * @return \yii\db\ActiveQuery
+     * */
+    public function getContractByYearId($yearId)
+    {
+        return $this->getContractsModels()->where([
+            Contracts::tableName() . '.status' => [
+                Contracts::STATUS_REQUESTED,
+                Contracts::STATUS_ACTIVE,
+                Contracts::STATUS_ACCEPTED
+            ],
+            Contracts::tableName() . '.year_id' => $yearId
+        ]);
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getContractsModels()
@@ -635,7 +652,23 @@ class Certificates extends \yii\db\ActiveRecord
             $notification = Notification::getExistOrCreate($message, 0, Notification::TYPE_CERTIFICATE_TO_ACCOUNTING);
             NotificationUser::assignToUsers($userIdList, $notification->id);
 
-            return $changedCount;
         }
+
+        return $changedCount;
+    }
+
+    /**
+     * существует ли контракт сертификата для автопролонгации в указанном модуле
+     *
+     * @param $programId - id программы
+     * @param $yearId - id модуля
+     *
+     * @return bool
+     */
+    public function contractCanAutoProlongInModule($programId, $yearId)
+    {
+        $autoProlongation = AutoProlongation::make(null, $this->id, $programId);
+
+        return in_array($this->id, $autoProlongation->getCertificateIdList($yearId));
     }
 }
