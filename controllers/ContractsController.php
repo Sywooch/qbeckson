@@ -18,6 +18,7 @@ use app\models\forms\SelectGroupForm;
 use app\models\Groups;
 use app\models\GroupsSearch;
 use app\models\Informs;
+use app\models\module\CertificateAccessModuleDecorator;
 use app\models\Organization;
 use app\models\ProgrammeModule;
 use app\models\Programs;
@@ -170,6 +171,17 @@ class ContractsController extends Controller
             ]);
 
         $group = Groups::findOne(['id' => $groupId]);
+
+        if (Yii::$app->request->isPost && $group) {
+            $module = $group->module;
+            $decoratedModule = CertificateAccessModuleDecorator::decorate($module);
+            if (!$decoratedModule->certificateCanEnlistmentToProgram()) {
+                Yii::$app->session->setFlash('modal-danger', $decoratedModule->getLastMessage());
+
+                return $this->redirect('/personal/certificate-programs');
+            }
+        }
+
         if ($group && !$group->freePlaces) {
             Yii::$app->session->setFlash('modal-danger', 'К сожалению заявка на обучение '
                 . 'по программе не будет отправлена, пока Вы ее составляли '
