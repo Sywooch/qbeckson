@@ -5,55 +5,16 @@ namespace app\models\module;
 
 use app\components\ModelDecorator;
 use app\models\Contracts;
-use app\models\Groups;
 use app\models\Organization;
-use app\models\OrganizationAddress;
 use app\models\ProgrammeModule;
-use app\models\ProgramModuleAddress;
-use app\models\ProgramModuleAddressAssignment;
 use app\models\Programs;
 use Yii;
 use yii\helpers\Url;
 
 /**
  * @property ProgrammeModule $entity
- * entity fields:
- * @property integer $id
- * @property string $name
- * @property integer $program_id
- * @property integer $year  порядковый номер модуля
- * @property integer $month Число месяцев реализации
- * @property integer $hours
- * @property string $kvfirst  Квалификация пед работника
- * @property string $kvdop    Квалификация дополнительно пед работника
- * @property integer $hoursindivid
- * @property integer $hoursdop
- * @property integer $maxchild
- * @property integer $minchild
- * @property float $price
- * @property float $normative_price
- * @property integer $rating
- * @property integer $limits
- * @property integer $open
- * @property integer $previus
- * @property integer $quality_control
- * @property integer $p21z
- * @property integer $p22z
- * @property string $results
- * @property string $fullname
- * @property integer $verification
- *
- * @property Programs $program
- * @property Contracts[] $activeContracts
- * @property OrganizationAddress[] $addresses
- * @property ProgramModuleAddress[] $oldAddresses
- * @property OrganizationAddress $mainAddress
- * @property ProgramModuleAddressAssignment[] $moduleAddressAssignments
- * @property Groups[] $groups
- * @method string getShortName()
- * @method bool canEdit()
  * ***********************
- *
+ * @mixin ProgrammeModule
  *
  */
 class ModuleViewDecorator extends ModelDecorator

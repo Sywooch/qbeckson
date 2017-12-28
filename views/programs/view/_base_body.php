@@ -3,14 +3,11 @@
 /** @var $model \app\models\Programs */
 /** @var $this yii\web\View */
 
-/** @var $cooperate Cooperate */
-
-use app\models\Cooperate;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 
 echo \yii\bootstrap\Tabs::widget([
-    'items' => array_map(function ($module) use ($cooperate)
+    'items' => array_map(function ($module)
     {
         /** @var $module \app\models\module\ModuleViewDecorator */
         /** @var $this yii\web\View */
@@ -18,7 +15,7 @@ echo \yii\bootstrap\Tabs::widget([
         $result['label'] = $module->getShortName();
         $result['content'] = $this->render(
             $module->getModuleTemplate(),
-            ['model' => $module, 'cooperate' => $cooperate]
+            ['model' => $module]
         );
 
         return $result;
