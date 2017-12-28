@@ -15,10 +15,12 @@ use DateTime;
 use Yii;
 use yii\base\Event;
 use yii\base\InvalidParamException;
+use yii\data\ArrayDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 use yii\validators\InlineValidator;
 
 /**
@@ -107,6 +109,40 @@ class InvoiceBuilder extends InvoicesActions
         ]);
     }
 
+
+    public function emitDuplicatedContractIdErrsDangerFlash($contractIds)
+    {
+        $message = \yii\widgets\ListView::widget([
+            'dataProvider' => new ArrayDataProvider(['allModels' => $contractIds]),
+            'summary' => 'ОШИБКА! Договоров в дубликатами комплитнесов: {totalCount}',
+            'options' => ['tag' => 'ul', 'class' => 'list-unstyled'],
+            'itemOptions' => ['tag' => 'li'],
+            'itemView' => function ($value, $key, $index, $widget) {
+                $link = Html::a('Договор: ' . $value, ['contracts/view', 'id' => $value]);
+
+                return $link;
+            }
+        ]);
+        Yii::$app->session->addFlash('danger', $message);
+    }
+
+    public function contractUniqueValidator($attribute, $params, InlineValidator $validator)
+    {
+        $contractsQuery = Contracts::find()
+            ->innerJoin(
+                Completeness::tableName(),
+                ['contract_id' => new Expression(Contracts::tableName() . '.[[id]]')]
+            );
+        $duplicatedContractId = $this->applyContractsCondition($contractsQuery)
+            ->having('count(' . Contracts::tableName() . '.[[id]]) > 1')
+            ->groupBy(Contracts::tableName() . '.[[id]]')
+            ->select(['id' => 'max(' . Contracts::tableName() . '.[[id]])'])
+            ->column();
+
+        $this->addError($attribute, 'Дубликаты договоров: ' . implode(', ', $duplicatedContractId));
+        $this->emitDuplicatedContractIdErrsDangerFlash($duplicatedContractId);
+    }
+
     public function contractsValidator($attribute, $params, InlineValidator $validator)
     {
         if (mb_strlen($this->contractsData['contracts']) < 1) {
@@ -170,8 +206,6 @@ class InvoiceBuilder extends InvoicesActions
 
     public function setAfterSaveInvoiceHaveContractsCreateAction(\Closure $transactionTerminator)
     {
-        $contractIds = $this->getContractsIds();
-
         $action = function (Event $event) use ($transactionTerminator, $contractIds) {
             /**@var $invoice Invoices */
             $invoice = $event->sender;

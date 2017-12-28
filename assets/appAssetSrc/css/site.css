@@ -352,6 +352,10 @@ form-group field-organization-license_issued_dat {
     font-size: 17px;
 }
 
+.dropdown-menu > li > a.text-red-muted {
+    color: #ff7c72;
+}
+
 .breadcrumb {
     padding: 12px 20px;
     margin-bottom: 20px;
