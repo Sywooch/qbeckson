@@ -184,6 +184,12 @@ class Menu
             ['label' => 'Сертификаты', 'url' => ['/personal/operator-certificates']],
             ['label' => 'Договоры', 'url' => ['/personal/operator-contracts']],
             ['label' => 'Программы', 'url' => ['/personal/operator-programs']],
+            ['label' => 'Поддержка', 'items' => [
+                [
+                    'label' => 'Удаление договоров',
+                    'url' => ['/operator/cleanup/contract'],
+                ],
+            ]],
         ];
     }
 
@@ -272,6 +278,21 @@ class Menu
                 ['label' => 'Подведомственность', 'url' => ['/personal/organization-suborder']],
             ]],
             ['label' => 'Группы', 'url' => ['/personal/organization-groups']],
+            ['label' => 'Поддержка', 'items' => [
+                [
+                    'label' => 'Удаление договоров',
+                    'url' => '#',
+                    'linkOptions' => [
+                        'class' => 'text-red-muted',
+                        'id' => 'organization-menu-delete-order-link',
+                        'data' => [
+                            'url' => '/',
+                            'toggle' => 'modal',
+                            'target' => '#organization-menu-delete-order-modal',
+                        ],
+                    ],
+                ],
+            ]],
         ];
     }
 
