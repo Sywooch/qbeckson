@@ -292,18 +292,17 @@ $preparedEndsColumns = GridviewHelper::prepareColumns('contracts', $endsColumns,
 
     if ($roles['organizations'] and $organization['actual'] != 0) { ?>
 
-        <div class="qwe">
-            <div class="row">
-                <div class="col-xs-6">
-                    <p><?= Html::a('Создать новый договор', ['contracts/create'], ['class' => 'btn btn-success']); ?></p>
-                </div>
+        <div class="row"></div>
+        <div class="row">
+            <div class="col-xs-6">
+                <p><?= Html::a('Создать новый договор', ['contracts/create'], ['class' => 'btn btn-success']); ?></p>
+            </div>
 
-                <?php if (false && $organization->programsForAutoProlongationExists()): ?>
+                <?php if ($organization->programsForAutoProlongationExists()): ?>
                     <div class="col-xs-6 text-right">
                         <p><?= Html::a('Автопролонгация', ['programs/program-list-for-auto-prolongation'], ['class' => 'btn btn-success']); ?></p>
                     </div>
                 <?php endif; ?>
-            </div>
         </div>
 
     <?php } ?>

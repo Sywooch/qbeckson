@@ -1,6 +1,12 @@
 <?php
 /** @var $model \app\models\module\CertificateAccessModuleDecorator */
+
 /** @var $this yii\web\View */
+
+use app\models\Groups;
+use yii\bootstrap\Modal;
+use yii\helpers\Html;
+use yii\helpers\Url;
 
 ?>
 <div class="row">
@@ -32,8 +38,11 @@
                     'label' => 'Продолжительность (часов)'
                 ],
                 ['label' => 'Наполняемость группы',
-                    'value' => Yii::t('app', '{from} - {to} человек',
-                        ['from' => $model->minchild, 'to' => $model->maxchild])
+                    'value' => Yii::t(
+                        'app',
+                        '{from} - {to} человек',
+                        ['from' => $model->minchild, 'to' => $model->maxchild]
+                    )
                 ],
                 [
                     'label' => 'Квалификация руководителя кружка',
@@ -86,15 +95,38 @@
                                 'permit' => function ($url, $model) {
                                     /** @var $identity \app\models\UserIdentity */
                                     $identity = Yii::$app->user->identity;
+                                    /** @var $model Groups */
                                     if ($model->freePlaces && $identity->certificate->actual) {
-                                        return \yii\helpers\Html::a(
-                                            'Выбрать',
-                                            \yii\helpers\Url::to(['/contracts/request', 'groupId' => $model->id]),
-                                            [
+                                        if ($identity->certificate
+                                            ->contractCanAutoProlongInModule(
+                                                $model->module->program_id,
+                                                $model->year_id
+                                            )
+                                        ) {
+                                            return Html::button('Выбрать', [
                                                 'class' => 'btn btn-success',
-                                                'title' => 'Выбрать'
-                                            ]
-                                        );
+                                                'onClick' => '$("#ask-for-contract-prolongation-modal-'
+                                                    . $model->year_id . '").modal(); $("#contract-request-link-'
+                                                    . $model->year_id . '").prop("href", \''
+                                                    . Url::to(['/contracts/request', 'groupId' => $model->id])
+                                                    . '\');',
+                                                'data' => [
+                                                    'url' => Url::to([
+                                                        '/contracts/request',
+                                                        'groupId' => $model->id
+                                                    ])
+                                                ]
+                                            ]);
+                                        } else {
+                                            return Html::a(
+                                                'Выбрать',
+                                                Url::to(['/contracts/request', 'groupId' => $model->id]),
+                                                [
+                                                    'class' => 'btn btn-success',
+                                                    'title' => 'Выбрать'
+                                                ]
+                                            );
+                                        }
                                     }
 
                                     return \app\components\widgets\ButtonWithInfo::widget([
@@ -118,3 +150,36 @@
         <?php endif; ?>
     </div>
 </div>
+
+<?php Modal::begin([
+    'id' => 'ask-for-contract-prolongation-modal-' . $model->id,
+    'header' => 'Подача новой заявки'
+]) ?>
+
+<p>Выбранная образовательная услуга предполагает продолжение освоение программы,
+    по которой уже осуществлялось обучение ребенка. Вы уверены, что хотите подать новую отдельную заявку,
+    а не дождаться пролонгации договора?</p>
+
+<?= Html::a(
+    'Да, подать новую заявку',
+    '',
+    [
+        'id' => 'contract-request-link-' . $model->id,
+        'class' => 'btn btn-success',
+        'title' => 'Выбрать'
+    ]
+); ?>
+
+<?php Modal::begin([
+    'header' => 'Дождаться пролонгации договора',
+    'toggleButton' => [
+        'label' => 'Нет, дождаться пролонгации договора',
+        'class' => 'btn btn-primary',
+    ],
+    'clientOptions' => ['backdrop' => false]
+]) ?>
+<p>Поставщик услуг по завершению срока действия договора самостоятельно сформирует оферту.
+    Если Вы в течение установленного срока не отзовете ее – договор на продолжение обучения вступит в силу</p>
+<?= Html::button('Закрыть', ['class' => 'btn btn-primary', 'onClick' => '$(".modal").modal("hide")']) ?>
+<?php Modal::end() ?>
+<?php Modal::end() ?>

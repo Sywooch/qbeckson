@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\assets\programsAsset\ProgramsAsset;
 use app\models\AllProgramsSearch;
 use app\models\AutoProlongation;
+use app\models\Contracts;
 use app\models\ContractsSearch;
 use app\models\forms\ProgramAddressesForm;
 use app\models\forms\ProgramSectionForm;
@@ -257,16 +258,14 @@ class ProgramsController extends Controller
         }
         $modelOriginal = $this->findModel($id);
         $model = ProgramViewDecorator::decorate($modelOriginal);
-
+        $modules = ModuleViewDecorator::decorateMultiple($model->modules);
 
         if (!$model->isActive) {
             throw new NotFoundHttpException();
         }
 
         if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
-            $modules = CertificateAccessModuleDecorator::decorateMultiple($model->modules);
-        } else {
-            $modules = ModuleViewDecorator::decorateMultiple($model->modules);
+            $modules = CertificateAccessModuleDecorator::decorateMultiple($modules);
         }
 
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
@@ -1603,7 +1602,7 @@ class ProgramsController extends Controller
             throw new ForbiddenHttpException('Нет доступа');
         }
 
-        $autoProlongation = AutoProlongation::makeForOrganization(\Yii::$app->user->identity->organization->id);
+        $autoProlongation = AutoProlongation::make(\Yii::$app->user->identity->organization->id);
 
         if (count($autoProlongation->getProgramIdList()) < 1) {
             return $this->redirect(Url::to(['/personal/organization-contracts']));
@@ -1629,7 +1628,7 @@ class ProgramsController extends Controller
         /** @var \app\models\OperatorSettings $operatorSettings */
         $operatorSettings = Yii::$app->operator->identity->settings;
 
-        $autoProlongation = AutoProlongation::makeForOrganization(\Yii::$app->user->identity->organization->id);
+        $autoProlongation = AutoProlongation::make(\Yii::$app->user->identity->organization->id);
 
         if (count($autoProlongation->getContractIdList()) < 1) {
             return $this->redirect(Url::to(['/personal/organization-contracts']));
@@ -1652,18 +1651,41 @@ class ProgramsController extends Controller
         if (!\Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
             return $this->asJson(false);
         }
-        $autoProlongation = AutoProlongation::makeForOrganization(\Yii::$app->user->identity->organization->id);
+        $autoProlongation = AutoProlongation::make(\Yii::$app->user->identity->organization->id);
+        $contractToAutoProlongationCount = count($autoProlongation->getContractIdList(true));
 
-        if ($autoProlongation->init(array_diff($autoProlongation->getContractIdList(), \Yii::$app->request->post()))) {
-            $autoProlongMessage = Yii::$app->i18n->format('{n, plural, one{Автопролонгирована} few{Автопролонгированы} many{Автопролонгировано} other{Автопролонгирована}}', ['n' => $autoProlongation->getContractRequestedAutoProlongedCount()], 'ru_RU');
-            $contractRequestCountMessage = $autoProlongation->getContractRequestedAutoProlongedCount() ? Yii::$app->i18n->format('{n, plural, one{ # заявка} few{ # заявки} many{ # заявок} other{ # заявка}}', ['n' => $autoProlongation->getContractRequestedAutoProlongedCount()], 'ru_RU') : '';
-            $contractAcceptCountMessage = $autoProlongation->getContractAcceptedAutoProlongedCount() ? Yii::$app->i18n->format('{n, plural, one{ # оферта} few{ # оферты} many{ # оферт} other{ # оферта}}', ['n' => $autoProlongation->getContractAcceptedAutoProlongedCount()], 'ru_RU') : '';
-            $message = $autoProlongMessage . $contractRequestCountMessage . (($contractRequestCountMessage != '' && $contractAcceptCountMessage != '') ? ' и' : '') . $contractAcceptCountMessage;
+        if (\Yii::$app->request->isAjax) {
+            if (\Yii::$app->request->post('allCreated')) {
+                return $this->redirect('/programs/auto-prolonged-registry');
+            }
 
-            \Yii::$app->session->addFlash('info', $message);
+            $autoProlongation->init(10, \Yii::$app->request->post('isNew') == 1 ? true : false);
+
+            if ($autoProlongation->errorMessage) {
+                \Yii::$app->session->addFlash('error', $autoProlongation->errorMessage);
+
+                return $this->redirect(Url::to(['/personal/organization-contracts']));
+            }
+
+            if ($autoProlongation->remainCount === 0) {
+                return $this->asJson(['status' => 'processed']);
+            }
+
+            return $this->asJson(['status' => 'created', 'remainCount' => $contractToAutoProlongationCount]);
         }
 
         return $this->redirect(Url::to(['/personal/organization-contracts']));
+    }
+
+    public function actionAutoProlongedRegistry()
+    {
+        $filePath = 'organization-auto-prolongation-registry-' . Yii::$app->user->identity->organization->id . '.xlsx';
+
+        if (file_exists(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $filePath)) {
+            return Yii::$app->response->sendFile(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $filePath);
+        } else {
+            return $this->redirect(Url::to(['/personal/organization-contracts']));
+        }
     }
 
     /**
@@ -1678,7 +1700,7 @@ class ProgramsController extends Controller
         }
 
         if (isset(\Yii::$app->request->post()['change-auto-prolongation-for-all-programs'])) {
-            $autoProlongation = AutoProlongation::makeForOrganization(\Yii::$app->user->identity->organization->id);
+            $autoProlongation = AutoProlongation::make(\Yii::$app->user->identity->organization->id);
 
             $success = $autoProlongation->changeAutoProlongationForAllProgramsWithActiveCooperate(\Yii::$app->request->post()['change-auto-prolongation-for-all-programs']);
 
@@ -1692,5 +1714,33 @@ class ProgramsController extends Controller
         }
 
         return $this->asJson(ActiveForm::validate($program, ['auto_prolongation_enabled']));
+    }
+
+    /**
+     * @param integer $id
+     *
+     * @return Response
+     */
+    public function actionChangeAutoProlongationForContract($id = null)
+    {
+        if (!\Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+            return $this->asJson(false);
+        }
+
+        if (isset(\Yii::$app->request->post()['change-auto-prolongation-for-all-contracts'])) {
+            $autoProlongation = AutoProlongation::make(\Yii::$app->user->identity->organization->id);
+
+            $success = $autoProlongation->changeAutoProlongationForAllContractsWithActiveCooperate(\Yii::$app->request->post()['change-auto-prolongation-for-all-contracts']);
+
+            return $this->asJson(['changed' => $success, 'value' => \Yii::$app->request->post()['change-auto-prolongation-for-all-contracts']]);
+        }
+
+        $contract = Contracts::findOne($id);
+
+        if (\Yii::$app->request->isAjax && $contract && $contract->load(\Yii::$app->request->post()) && $contract->save(true, ['auto_prolongation_enabled'])) {
+            return $this->asJson($contract->auto_prolongation_enabled);
+        }
+
+        return $this->asJson(ActiveForm::validate($contract, ['auto_prolongation_enabled']));
     }
 }

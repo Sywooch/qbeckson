@@ -352,7 +352,7 @@ return [
     'file' => [
         [
             'allow' => true,
-            'roles' => ['operators', 'organizations', 'payer'],
+            'roles' => ['operators', 'organizations', 'payer', 'certificate'],
             'actions' => ['contract'],
         ],
         [

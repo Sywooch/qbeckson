@@ -57,7 +57,7 @@ class CertificateAccessModuleDecorator extends ModelDecorator
         return Cooperate::find()->where([
                 Cooperate::tableName() . '.[[payer_id]]' => $this->getUser()
                     ->getCertificate()->select('payer_id'),
-                Cooperate::tableName() . '.[[organization_id]]' => $this->getCertificate()
+                Cooperate::tableName() . '.[[organization_id]]' => $this->getModule()->program
                     ->organization_id,
                 'status' => Cooperate::STATUS_ACTIVE])->exists()
             || $this->pushMessage(
@@ -109,7 +109,8 @@ class CertificateAccessModuleDecorator extends ModelDecorator
             || $this->pushMessage('Вы не можете записаться на программу. Зачисление закрыто.');
     }
 
-    public function getModule(): ProgrammeModule
+    /**@return ProgrammeModule */
+    public function getModule()
     {
         return $this->entity;
     }

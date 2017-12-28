@@ -15,6 +15,7 @@ use yii\web\ForbiddenHttpException;
  * This is the model class for table "contracts".
  *
  * @property integer         $id
+ * @property int             $parent_id
  * @property string          $number
  * @property string          $date
  * @property integer         $certificate_id
@@ -83,7 +84,7 @@ use yii\web\ForbiddenHttpException;
  * @property string          $accepted_at                   дата и время подтверждения заявки
  * @property string          $activated_at                  дата и время заключения договора
  * @property string          $termination_initiated_at      дата и время перевода в статус ожидания расторжения (wait_termnate = 1)
- * @property string          $creation_status [varchar(50)] статус создания договора
+ * @property bool            $auto_prolongation_enabled     установлена ли автоматическая пролонгация контракта, 0 - нет, 1 - да
  *
  * @property float           $balance
  * @property Disputes[]      $disputes
@@ -106,7 +107,8 @@ use yii\web\ForbiddenHttpException;
  * @property Completeness[]  $completeness
  * @property string          $terminatorUserRole
  * @property InvoiceHaveContract[] $invoiceHaveContracts
- * @property Invoices[] $invoices
+ * @property Invoices[]      $invoices
+ * @property string          $fullUrl
  */
 class Contracts extends ActiveRecord
 {
@@ -119,9 +121,6 @@ class Contracts extends ActiveRecord
     const STATUS_REFUSED = 2;
     const STATUS_ACCEPTED = 3;
     const STATUS_CLOSED = 4;
-
-    const CREATION_STATUS_NEW = 0;
-    const CREATION_STATUS_PROLONGED = 1;
 
     const SCENARIO_CREATE_DATE = 10;
 
@@ -162,7 +161,7 @@ class Contracts extends ActiveRecord
     public function rules()
     {
         return [
-            [['certificate_id', 'program_id', 'organization_id', 'status', 'status_year', 'funds_gone', 'group_id', 'year_id', 'sposob', 'prodolj_d', 'prodolj_m', 'prodolj_m_user', 'ocenka', 'wait_termnate', 'terminator_user', 'payment_order', 'period', 'cooperate_id', 'creation_status'], 'integer'],
+            [['parent_id', 'certificate_id', 'program_id', 'organization_id', 'status', 'status_year', 'funds_gone', 'group_id', 'year_id', 'sposob', 'prodolj_d', 'prodolj_m', 'prodolj_m_user', 'ocenka', 'wait_termnate', 'terminator_user', 'payment_order', 'period', 'cooperate_id'], 'integer'],
             [['all_funds', 'funds_cert', 'all_parents_funds', 'first_m_price', 'other_m_price', 'first_m_nprice', 'other_m_nprice', 'ocen_fact', 'ocen_kadr', 'ocen_mat', 'ocen_obch', 'cert_dol', 'payer_dol', 'rezerv', 'paid', 'fontsize', 'balance', 'payer_first_month_payment', 'payer_other_month_payment', 'parents_other_month_payment', 'parents_first_month_payment'], 'number'],
             [['date', 'status_termination', 'start_edu_programm', 'stop_edu_contract', 'start_edu_contract', 'date_termnate', 'applicationIsReceived'], 'safe'],
             [['created_at', 'requested_at', 'refused_at', 'accepted_at', 'activated_at', 'termination_initiated_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
@@ -178,6 +177,8 @@ class Contracts extends ActiveRecord
             [['certificate_id'], 'exist', 'skipOnError' => true, 'targetClass' => Certificates::className(), 'targetAttribute' => ['certificate_id' => 'id']],
             [['group_id'], 'exist', 'skipOnError' => true, 'targetClass' => Groups::className(), 'targetAttribute' => ['group_id' => 'id']],
             [['year_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProgrammeModule::className(), 'targetAttribute' => ['year_id' => 'id']],
+            ['parent_id', 'exist', 'targetClass' => Contracts::className(), 'targetAttribute' => 'id'],
+            ['auto_prolongation_enabled', 'boolean'],
         ];
     }
 
@@ -195,74 +196,75 @@ class Contracts extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id'                       => 'ID',
-            'number'                   => 'Номер договора',
-            'date'                     => 'Дата договора',
-            'certificate_id'           => 'Номер сертификата',
-            'payer_id'                 => 'Плательщик',
-            'program_id'               => 'Программа',
-            'year_id'                  => 'Год',
-            'organization_id'          => 'ID Организации',
-            'group_id'                 => 'Шифр группы',
-            'status'                   => 'Статус договора',
-            'status_termination'       => 'Дата прекращения действия договора',
-            'status_comment'           => 'Причина',
-            'status_year'              => 'Причина',
-            'link_doc'                 => 'Ссылка на договор',
-            'link_ofer'                => 'Ссылка на оферту',
-            'all_funds'                => 'Cовокупный объем средств, необходимый для оплаты договора',
-            'funds_cert'               => 'Объем платежей, покрываемый за счет сертификата',
-            'all_parents_funds' => 'Родительская плата',
-            'start_edu_programm'       => 'Дата начала обучения по программе',
-            'funds_gone'               => 'Объем средств, ушедших в уплату договора ',
-            'start_edu_contract'       => 'Дата начала обучения по договору',
-            'month_start_edu_contract' => 'Месяц начала обучения по договору',
-            'stop_edu_contract'        => 'Дата окончания обучения по договору',
-            'certnumber'               => 'Номер сертификата',
-            'certfio'                  => 'ФИО ребенка',
-            'sposob'                   => 'Заказчик осуществляет оплату',
-            'prodolj_d'                => 'Продолжительность дней',
-            'prodolj_m'                => 'Продолжительность месяцев',
-            'prodolj_m_user'           => 'Продолжительность месяцев ученика',
-            'first_m_price'            => 'Цена первого месяца',
-            'other_m_price'            => 'Цена остальных месяцев',
-            'first_m_nprice'           => 'Нормативная цена первого месяца',
-            'other_m_nprice'           => 'Нормативная цена остальных месяцев',
-            'change1'                  => '1 поле с "ая"',
-            'change2'                  => '2 поле с "ая"',
-            'change_org_fio'           => 'Поле с фио представителя организации',
-            'org_position'             => 'Должность представителя организации',
-            'org_position_min'         => 'Должность представителя организации (кратко)',
-            'change_doctype'           => 'Поле с типом документа',
-            'change_fioparent'         => 'Поле с фио родителя',
-            'change6'                  => '6 поле с "ая"',
-            'change_fiochild'          => 'Поле с фио ребенка',
-            'change8'                  => '8 поле с "ая"',
-            'change9'                  => '9 поле с "ая"',
-            'change10'                 => '10 поле с "го"',
-            'ocen_fact'                => 'Оценка достижения заявленных результатов',
-            'ocen_kadr'                => 'Оценка выполнения кадровых требований',
-            'ocen_mat'                 => 'Оценка выполнения требований к средствам обучения',
-            'ocen_obch'                => 'Оценка общей удовлетворенности программой',
-            'ocenka'                   => 'Наличие оценки',
-            'wait_termnate'            => 'Ожидает расторжения',
-            'date_termnate'            => 'Дата расторжения',
-            'cert_dol'                 => 'Доля сертификата',
-            'payer_dol'                => 'Доля плательщика',
-            'rezerv'                   => 'Зарезервированно средств',
-            'paid'                     => 'Оплачено',
-            'terminator_user'          => 'Инициатор расторжения',
-            'fontsize'                 => 'Размер шрифта',
-            'certificatenumber'        => 'Номер сертификата',
-            'payment_order'            => 'Порядок оплаты',
-            'applicationIsReceived'    => 'заявление от Заказчика получено',
-            'created_at'               => 'дата и время создания договора',
-            'requested_at'             => 'дата и время создания заявки',
-            'refused_at'               => 'дата и время отклонения заявки',
-            'accepted_at'              => 'дата и время подтверждения заявки',
-            'activated_at'             => 'дата и время заключения договора',
-            'termination_initiated_at' => 'дата и время перевода в статус ожидания расторжения',
-            'creation_status'          => 'Статус создания договора',
+            'id'                        => 'ID',
+            'parent_id'                 => 'ID родительского договора',
+            'number'                    => 'Номер договора',
+            'date'                      => 'Дата договора',
+            'certificate_id'            => 'Номер сертификата',
+            'payer_id'                  => 'Плательщик',
+            'program_id'                => 'Программа',
+            'year_id'                   => 'Год',
+            'organization_id'           => 'ID Организации',
+            'group_id'                  => 'Шифр группы',
+            'status'                    => 'Статус договора',
+            'status_termination'        => 'Дата прекращения действия договора',
+            'status_comment'            => 'Причина',
+            'status_year'               => 'Причина',
+            'link_doc'                  => 'Ссылка на договор',
+            'link_ofer'                 => 'Ссылка на оферту',
+            'all_funds'                 => 'Cовокупный объем средств, необходимый для оплаты договора',
+            'funds_cert'                => 'Объем платежей, покрываемый за счет сертификата',
+            'all_parents_funds'         => 'Родительская плата',
+            'start_edu_programm'        => 'Дата начала обучения по программе',
+            'funds_gone'                => 'Объем средств, ушедших в уплату договора ',
+            'start_edu_contract'        => 'Дата начала обучения по договору',
+            'month_start_edu_contract'  => 'Месяц начала обучения по договору',
+            'stop_edu_contract'         => 'Дата окончания обучения по договору',
+            'certnumber'                => 'Номер сертификата',
+            'certfio'                   => 'ФИО ребенка',
+            'sposob'                    => 'Заказчик осуществляет оплату',
+            'prodolj_d'                 => 'Продолжительность дней',
+            'prodolj_m'                 => 'Продолжительность месяцев',
+            'prodolj_m_user'            => 'Продолжительность месяцев ученика',
+            'first_m_price'             => 'Цена первого месяца',
+            'other_m_price'             => 'Цена остальных месяцев',
+            'first_m_nprice'            => 'Нормативная цена первого месяца',
+            'other_m_nprice'            => 'Нормативная цена остальных месяцев',
+            'change1'                   => '1 поле с "ая"',
+            'change2'                   => '2 поле с "ая"',
+            'change_org_fio'            => 'Поле с фио представителя организации',
+            'org_position'              => 'Должность представителя организации',
+            'org_position_min'          => 'Должность представителя организации (кратко)',
+            'change_doctype'            => 'Поле с типом документа',
+            'change_fioparent'          => 'Поле с фио родителя',
+            'change6'                   => '6 поле с "ая"',
+            'change_fiochild'           => 'Поле с фио ребенка',
+            'change8'                   => '8 поле с "ая"',
+            'change9'                   => '9 поле с "ая"',
+            'change10'                  => '10 поле с "го"',
+            'ocen_fact'                 => 'Оценка достижения заявленных результатов',
+            'ocen_kadr'                 => 'Оценка выполнения кадровых требований',
+            'ocen_mat'                  => 'Оценка выполнения требований к средствам обучения',
+            'ocen_obch'                 => 'Оценка общей удовлетворенности программой',
+            'ocenka'                    => 'Наличие оценки',
+            'wait_termnate'             => 'Ожидает расторжения',
+            'date_termnate'             => 'Дата расторжения',
+            'cert_dol'                  => 'Доля сертификата',
+            'payer_dol'                 => 'Доля плательщика',
+            'rezerv'                    => 'Зарезервированно средств',
+            'paid'                      => 'Оплачено',
+            'terminator_user'           => 'Инициатор расторжения',
+            'fontsize'                  => 'Размер шрифта',
+            'certificatenumber'         => 'Номер сертификата',
+            'payment_order'             => 'Порядок оплаты',
+            'applicationIsReceived'     => $this->parentExists() ? 'Заказчик подтвердил намерения продолжить обучение ребенка (есть «информированное» молчание со стороны Заказчика)' : 'Заявление от Заказчика получено',
+            'created_at'                => 'дата и время создания договора',
+            'requested_at'              => 'дата и время создания заявки',
+            'refused_at'                => 'дата и время отклонения заявки',
+            'accepted_at'               => 'дата и время подтверждения заявки',
+            'activated_at'              => 'дата и время заключения договора',
+            'termination_initiated_at'  => 'дата и время перевода в статус ожидания расторжения',
+            'auto_prolongation_enabled' => 'установлена ли автопролонгация для контракта',
         ];
     }
 
@@ -583,7 +585,7 @@ class Contracts extends ActiveRecord
 
     public function getFullUrl()
     {
-        return Yii::getAlias('@pfdo/uploads/contracts/') . $this->url;
+        return Url::to(['/file/contract', 'path' => '/uploads/contracts/' . $this->url]);
     }
 
     public function getStatusName()
@@ -941,5 +943,41 @@ class Contracts extends ActiveRecord
         }
 
         return true;
+    }
+
+    /**
+     * получить родительский контракт
+     *
+     * @return Contracts
+     */
+    public function getParent()
+    {
+        return self::findOne($this->parent_id);
+    }
+
+    /**
+     * существует ли родительский контракт
+     *
+     * @return boolean
+     */
+    public function parentExists()
+    {
+        return !is_null($this->parent_id);
+    }
+
+    /**
+     * получить список id родительских автопролонгированных контрактов
+     */
+    public static function getAutoProlongedParentContractIdList()
+    {
+        return self::find()->select(['parent_id'])->where(['not', ['parent_id' => null]])->column();
+    }
+
+    /**
+     * получить список id дочерних автопролонгированных контрактов
+     */
+    public static function getAutoProlongedChildContractIdList()
+    {
+        return self::find()->select(['id'])->where(['not', ['parent_id' => null]])->column();
     }
 }
