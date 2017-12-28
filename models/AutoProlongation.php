@@ -343,7 +343,7 @@ class AutoProlongation
 
         if (count($dataContractForAutoProlongationList) < 1) {
             foreach ($contractIdList as $contractId) {
-                $registry[$contractId] = ['contractNumber' => '', 'date' => '', 'certificateNumber' => ''];
+                $registry[$contractId] = ['contractNumber' => '', 'date' => '', 'certificateNumber' => '', 'certificateBalance' => ''];
             }
 
             $this->writeToXlsx($isNew, $registry);
@@ -560,16 +560,16 @@ class AutoProlongation
         $writer = WriterFactory::create(Type::XLSX);
         $writer->openToFile(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $filePath);
         if ($isNew) {
-            $writer->addRow(['id родительского договора', '№ родительского договора', 'дата родительского договора', 'Номер сертификата', 'id дочернего договора', '№ дочернего договора', 'дата дочернего договора']);
+            $writer->addRow(['id родительского договора', '№ родительского договора', 'дата родительского договора', 'Номер сертификата', 'Баланс сертификата', 'id дочернего договора', '№ дочернего договора', 'дата дочернего договора']);
         } else {
             $writer->addRows($oldRows);
         }
 
         foreach ($registry as $id => $item) {
             if (isset($item['childContractId']) && isset($item['childContractNumber']) && $item['childContractDate']) {
-                $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], $item['childContractId'], $item['childContractNumber'], $item['childContractDate']]);
+                $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], $item['certificateBalance'], $item['childContractId'], $item['childContractNumber'], $item['childContractDate']]);
             } else {
-                $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], 'договор продления обучения не создан.']);
+                $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], $item['certificateBalance'], 'договор продления обучения не создан.']);
             }
         }
 
