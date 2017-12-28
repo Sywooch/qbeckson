@@ -87,6 +87,8 @@ function autoProlongation(url, contractToAutoProlongationCount, isNew) {
                 $('.progress-bar').css('width', '100%');
                 $('.progress-bar').html('100%');
                 
+                $('.auto-prolongation-init-button').hide();
+                
                 $.ajax({
                     url: url,
                     method: 'POST',
