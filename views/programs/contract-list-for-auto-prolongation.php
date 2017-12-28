@@ -60,6 +60,7 @@ $('.auto-prolongation-init-button').on('click', function() {
         contractToAutoProlongationCount = 0;
 
     $('.progress').show();
+    $(this).prop('disabled', true);
     
     autoProlongation(url, contractToAutoProlongationCount, 1);
 });

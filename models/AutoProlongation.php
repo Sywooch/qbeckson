@@ -354,7 +354,8 @@ class AutoProlongation
         $contractRequest = new ContractRequest();
         $contractRequest->setStartEduContract(date('d.m.Y', strtotime($operatorSettings->future_program_date_from)));
 
-        $contractNumberCount = 1;
+        $contractNumber = 1;
+        $organizationContractCount = Organization::findOne($this->organizationId)->getContracts()->where(['contracts.status' => [Contracts::STATUS_REQUESTED,Contracts::STATUS_ACTIVE,Contracts::STATUS_REFUSED,Contracts::STATUS_ACCEPTED,Contracts::STATUS_CLOSED,]])->count();
         $futurePeriodCertificateDataListRows = [];
         $currentPeriodCertificateDataListRows = [];
         $contractDataListRows = [];
@@ -407,7 +408,7 @@ class AutoProlongation
 
                 $contractData += [
                     'parent_id' => $dataList['contractId'],
-                    'number' => ($dataList['organizationContractsCount'] + $contractNumberCount++) . ' - ПФ',
+                    'number' => ($organizationContractCount + $contractNumber++) . ' - ПФ',
                     'date' => date('Y-m-d', strtotime($contractData['start_edu_contract'])),
                     'rezerv' => $dataList['fundsCert'],
                 ];
@@ -464,7 +465,7 @@ class AutoProlongation
                     }
 
                     $registry[$dataList['contractId']] = [
-                        'contractNumber' => $contractData['number'],
+                        'contractNumber' => $dataList['contractNumber'],
                         'date' => \Yii::$app->formatter->asDate($dataList['contractDate']),
                         'certificateNumber' => $dataList['certificateNumber'],
                         'certificateBalance' => $contractData['balance'],
@@ -522,9 +523,11 @@ class AutoProlongation
             foreach (array_diff($newProlongedContractIdList, $oldProlongedContractIdList) as $contractId) {
                 $contract = Contracts::find()->where(['id' => $contractId, 'status' => Contracts::STATUS_ACCEPTED])->one();
 
-                $contractRequest = new ContractRequest();
-                $mpdf = $contractRequest->makePdfForContract($contract);
-                $mpdf->Output(Yii::getAlias('@pfdoroot/uploads/contracts/') . $contract->url, 'F');
+                if ($contract) {
+                    $contractRequest = new ContractRequest();
+                    $mpdf = $contractRequest->makePdfForContract($contract);
+                    $mpdf->Output(Yii::getAlias('@pfdoroot/uploads/contracts/') . $contract->url, 'F');
+                }
             }
 
             foreach (array_diff($newProlongedContractIdList, $oldProlongedContractIdList) as $contractId) {
@@ -648,6 +651,7 @@ class AutoProlongation
             ->select([
                 'contractId' => 'contracts.id',
                 'contractDate' => 'contracts.date',
+                'contractNumber' => 'contracts.number',
                 'groupDateStart' => 'groups.datestart',
                 'groupDateStop' => 'groups.datestop',
                 'payers.certificate_can_use_current_balance',
