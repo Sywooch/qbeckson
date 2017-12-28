@@ -45,6 +45,10 @@ return [
                     'options' => ['class' => 'form-control'],
                 ]
             ]
-        ]
-    ]
+        ],
+
+    ],
+    'reports' => [
+        'class' => 'app\modules\reports\Module',
+    ],
 ];

@@ -11,10 +11,16 @@ if (!$photo = $model->getPhoto()) {
         $model->defaultPhoto);
 }
 $fStrings = [];
-$fStrings['ageGroupShort'] = Yii::t('app', '{min}-{max} лет',
-    ['min' => $model->age_group_min, 'max' => $model->age_group_max]);
-$fStrings['ageGroupFull'] = Yii::t('app', 'Рекомендуемый возраст с {min} до {max} лет',
-    ['min' => $model->age_group_min, 'max' => $model->age_group_max]);
+$fStrings['ageGroupShort'] = Yii::t(
+    'app',
+    '{min, number, integer}-{max, number, integer} лет',
+    ['min' => $model->age_group_min, 'max' => $model->age_group_max]
+);
+$fStrings['ageGroupFull'] = Yii::t(
+    'app',
+    'Рекомендуемый возраст с {min, number, integer} до {max, number, integer} лет',
+    ['min' => $model->age_group_min, 'max' => $model->age_group_max]
+);
 if ($model->zab && mb_strlen($model->zab) > 0) {
     $fStrings['zabShort'] = 'С' . PHP_EOL . 'ОВЗ';
     $fStrings['zabFull'] = $model->illnessesList;
@@ -49,7 +55,7 @@ $isAvailable = true;
             <h2 class="card-title js-ellipsis-title"
                 data-container="body" data-toggle="popover" data-placement="bottom"
                 data-trigger="hover" data-content="<?= htmlentities($model->name) ?>"
-            ><?= $model->name ?></h2>
+            ><?= $model->short_name ?></h2>
             <div class="card-badges">
                 <div class="card-badges-item card-badges-item_violet" title="<?= $model->direction->name ?>">
                     <span class="large-size <?= $model->iconClass ?>"></span></div>
