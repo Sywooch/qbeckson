@@ -258,16 +258,14 @@ class ProgramsController extends Controller
         }
         $modelOriginal = $this->findModel($id);
         $model = ProgramViewDecorator::decorate($modelOriginal);
-
+        $modules = ModuleViewDecorator::decorateMultiple($model->modules);
 
         if (!$model->isActive) {
             throw new NotFoundHttpException();
         }
 
         if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
-            $modules = CertificateAccessModuleDecorator::decorateMultiple($model->modules);
-        } else {
-            $modules = ModuleViewDecorator::decorateMultiple($model->modules);
+            $modules = CertificateAccessModuleDecorator::decorateMultiple($modules);
         }
 
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
