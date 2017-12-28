@@ -88,6 +88,8 @@ function autoProlongation(url, contractToAutoProlongationCount, isNew) {
                 $('.progress-bar').html('100%');
                 
                 $('.auto-prolongation-init-button').hide();
+                $('.auto-prolongation-cancel').hide();
+                $('.auto-prolongation-init-complete').show();
                 
                 $.ajax({
                     url: url,
@@ -107,6 +109,7 @@ $this->registerJs($js);
     <?php Modal::begin([
         'id' => 'auto-prolongation-init',
         'header' => 'Запуск автопролонгации',
+        'closeButton' => false,
         'toggleButton' => [
             'label' => 'Запустить автопролонгацию',
             'class' => 'btn btn-primary',
@@ -122,6 +125,9 @@ $this->registerJs($js);
 
     <br>
     <?= Html::button('Запустить', ['class' => 'btn btn-primary auto-prolongation-init-button', 'data' => ['url' => '/programs/auto-prolongation-init']]) ?>
+    <?= Html::button('Отмена', ['class' => 'btn btn-danger auto-prolongation-cancel', 'onClick' => '$(.modal).modal("hide")']) ?>
+
+    <?= Html::a('Готово', '/personal/organization-contracts', ['class' => 'btn btn-primary auto-prolongation-init-complete', 'style' => ['display' => 'none']]) ?>
 
     <?php Modal::end() ?>
 </div>
