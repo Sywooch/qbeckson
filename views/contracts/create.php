@@ -28,7 +28,7 @@ var program = $('body').find('#program-id'),
 
 module.on('click', function() {
     $.ajax({
-        url: '/contracts/check-certificate-contracts-in-program',
+        url: '/contracts/contract-can-auto-prolong-in-module',
         method: 'POST',
         data: {certificateId: $('.contract-can-auto-prolong').data('certificate-id'), programId: program.val(), moduleId: module.val()},
         success: function(data) {
@@ -77,7 +77,7 @@ $this->registerJs($js);
                     <?= $form->field($selectForm, 'moduleId')->widget(DepDrop::class, [
                         'options' => ['id' => 'module-id',
                             'onClick' => '$.ajax({
-                                    url: \'/contracts/check-certificate-contracts-in-program\',
+                                    url: \'/contracts/contract-can-auto-prolong-in-module\',
                                     method: \'POST\',
                                     data: {certificateId: $(\'.contract-can-auto-prolong\').data(\'certificate-id\'), programId: $(\'#program-id\').val(), moduleId: $(\'#module-id\').val()},
                                     success: function(data) {

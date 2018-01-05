@@ -153,9 +153,9 @@ class ContractsController extends Controller
     }
 
     /**
-     * проверить существует ли контракт сертификата в той же программе
+     * проверить может ли контракт сертификата быть автопролонгирован в модуле
      */
-    public function actionCheckCertificateContractsInProgram()
+    public function actionContractCanAutoProlongInModule()
     {
         $certificate = Certificates::findOne(\Yii::$app->request->post('certificateId', null));
 
@@ -163,7 +163,7 @@ class ContractsController extends Controller
             return $this->asJson(false);
         }
 
-        if (!$certificate->contractExistInAnotherModuleOfProgram(\Yii::$app->request->post('programId'), \Yii::$app->request->post('moduleId'))) {
+        if (!$certificate->contractCanAutoProlongInModule(\Yii::$app->request->post('programId'), \Yii::$app->request->post('moduleId'))) {
             return $this->asJson(false);
         }
 
