@@ -669,6 +669,19 @@ class Certificates extends \yii\db\ActiveRecord
     {
         $autoProlongation = AutoProlongation::make(null, $this->id, $programId);
 
-        return in_array($this->id, $autoProlongation->getCertificateIdList($yearId));
+        return Contracts::find()->where(['id' => $autoProlongation->getContractIdListForAutoProlongationToNewGroup($yearId, true), 'certificate_id' => $this->id])->exists();
+    }
+
+    /**
+     * имеет ли сертификат автопролонгированный
+     *
+     * @param $groupId
+     *
+     * @return bool
+     */
+    public function hasAutoProlongedContract($groupId)
+    {
+
+        return $this->getContractsModels()->where(['contracts.group_id' => $groupId])->andWhere(['is not', 'contracts.parent_id', null])->exists();
     }
 }
