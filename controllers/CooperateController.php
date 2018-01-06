@@ -105,7 +105,7 @@ class CooperateController extends Controller
         /** @var OperatorSettings $operatorSettings */
         $operatorSettings = Yii::$app->operator->identity->settings;
 
-        if (null !== $this->findCurrentModel(null, $payerId, Yii::$app->user->getIdentity()->organization->id, $period)) {
+        if (null !== $this->findCurrentModel(null, $payerId, Yii::$app->user->getIdentity()->organization->id, null, $period)) {
             throw new NotFoundHttpException('Model already exist!');
         }
 
