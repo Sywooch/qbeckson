@@ -95,8 +95,8 @@ function autoProlongation(url, contractToAutoProlongationCount, isNew) {
                 $.ajax({
                     url: url,
                     method: 'POST',
-                    data: {allCreated: true}
-                })
+                    data: {getRegistry: 1}
+                });
             }
         }
     });
@@ -135,6 +135,9 @@ $this->registerJs($js);
 
 <?= GridView::widget([
     'dataProvider' => $contractDataProvider,
+    'options' => [
+        'class' => 'text-center',
+    ],
     'columns' => [
         [
             'class' => DataColumn::className(),
