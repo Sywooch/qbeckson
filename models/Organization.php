@@ -794,8 +794,24 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function programsForAutoProlongationExists()
     {
-        $autoProlongation = AutoProlongation::makeForOrganization($this->id);
+        $autoProlongation = AutoProlongation::make($this->id);
 
         return $autoProlongation->getProgramIdList() ? true : false;
+    }
+
+    /**
+     * может ли организация зарегистрировать автопролонгированный договор
+     *
+     * @param $contractId
+     *
+     * @return bool
+     */
+    public function canRegisterAutoProlongedContract($contractId)
+    {
+        if (!$contract = Contracts::findOne($contractId)) {
+            return false;
+        }
+
+        return $contract->start_edu_contract < date('Y-m-d');
     }
 }

@@ -5,11 +5,13 @@ namespace app\controllers;
 use app\assets\programsAsset\ProgramsAsset;
 use app\models\AllProgramsSearch;
 use app\models\AutoProlongation;
+use app\models\Contracts;
 use app\models\ContractsSearch;
 use app\models\Cooperate;
 use app\models\forms\ProgramAddressesForm;
 use app\models\forms\ProgramSectionForm;
 use app\models\forms\TaskTransferForm;
+use app\models\Groups;
 use app\models\Informs;
 use app\models\Model;
 use app\models\module\ModuleViewDecorator;
@@ -1612,7 +1614,7 @@ class ProgramsController extends Controller
             throw new ForbiddenHttpException('Нет доступа');
         }
 
-        $autoProlongation = AutoProlongation::makeForOrganization(\Yii::$app->user->identity->organization->id);
+        $autoProlongation = AutoProlongation::make(\Yii::$app->user->identity->organization->id);
 
         if (count($autoProlongation->getProgramIdList()) < 1) {
             return $this->redirect(Url::to(['/personal/organization-contracts']));
@@ -1638,14 +1640,14 @@ class ProgramsController extends Controller
         /** @var \app\models\OperatorSettings $operatorSettings */
         $operatorSettings = Yii::$app->operator->identity->settings;
 
-        $autoProlongation = AutoProlongation::makeForOrganization(\Yii::$app->user->identity->organization->id);
+        $autoProlongation = AutoProlongation::make(\Yii::$app->user->identity->organization->id);
 
         if (count($autoProlongation->getContractIdList()) < 1) {
-            return $this->redirect(Url::to(['/personal/organization-contracts']));
+            return $this->redirect(Url::to(['/programs/program-list-for-auto-prolongation']));
         }
 
-        $contract = new ContractsSearch(['idList' => $autoProlongation->getContractIdList() ?: 0]);
-        $contractDataProvider = $contract->search([]);
+        $contractsSearch = new ContractsSearch(['idList' => $autoProlongation->getContractIdList() ?: 0]);
+        $contractDataProvider = $contractsSearch->search([]);
 
         return $this->render('contract-list-for-auto-prolongation', [
             'operatorSettings' => $operatorSettings,
@@ -1661,18 +1663,41 @@ class ProgramsController extends Controller
         if (!\Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
             return $this->asJson(false);
         }
-        $autoProlongation = AutoProlongation::makeForOrganization(\Yii::$app->user->identity->organization->id);
+        $autoProlongation = AutoProlongation::make(\Yii::$app->user->identity->organization->id);
+        $contractToAutoProlongationCount = count($autoProlongation->getContractIdList(true));
 
-        if ($autoProlongation->init(array_diff($autoProlongation->getContractIdList(), \Yii::$app->request->post()))) {
-            $autoProlongMessage = Yii::$app->i18n->format('{n, plural, one{Автопролонгирована} few{Автопролонгированы} many{Автопролонгировано} other{Автопролонгирована}}', ['n' => $autoProlongation->getContractRequestedAutoProlongedCount()], 'ru_RU');
-            $contractRequestCountMessage = $autoProlongation->getContractRequestedAutoProlongedCount() ? Yii::$app->i18n->format('{n, plural, one{ # заявка} few{ # заявки} many{ # заявок} other{ # заявка}}', ['n' => $autoProlongation->getContractRequestedAutoProlongedCount()], 'ru_RU') : '';
-            $contractAcceptCountMessage = $autoProlongation->getContractAcceptedAutoProlongedCount() ? Yii::$app->i18n->format('{n, plural, one{ # оферта} few{ # оферты} many{ # оферт} other{ # оферта}}', ['n' => $autoProlongation->getContractAcceptedAutoProlongedCount()], 'ru_RU') : '';
-            $message = $autoProlongMessage . $contractRequestCountMessage . (($contractRequestCountMessage != '' && $contractAcceptCountMessage != '') ? ' и' : '') . $contractAcceptCountMessage;
+        if (\Yii::$app->request->isAjax) {
+            if (1 == \Yii::$app->request->post('getRegistry')) {
+                return $this->redirect('/programs/auto-prolonged-registry');
+            }
 
-            \Yii::$app->session->addFlash('info', $message);
+            $autoProlongation->init(null, 10, \Yii::$app->request->post('isNew') == 1 ? true : false);
+
+            if ($autoProlongation->errorMessage) {
+                \Yii::$app->session->addFlash('error', $autoProlongation->errorMessage);
+
+                return $this->redirect(Url::to(['/personal/organization-contracts']));
+            }
+
+            if ($autoProlongation->remainCount === 0) {
+                return $this->asJson(['status' => 'processed']);
+            }
+
+            return $this->asJson(['status' => 'created', 'remainCount' => $contractToAutoProlongationCount]);
         }
 
         return $this->redirect(Url::to(['/personal/organization-contracts']));
+    }
+
+    public function actionAutoProlongedRegistry()
+    {
+        $autoProlongation = AutoProlongation::make(Yii::$app->user->identity->organization->id);
+
+        if ($filePath = $autoProlongation->getRegistryPath()) {
+            return Yii::$app->response->sendFile($filePath);
+        } else {
+            return $this->redirect(Url::to(['/personal/organization-contracts']));
+        }
     }
 
     /**
@@ -1687,7 +1712,7 @@ class ProgramsController extends Controller
         }
 
         if (isset(\Yii::$app->request->post()['change-auto-prolongation-for-all-programs'])) {
-            $autoProlongation = AutoProlongation::makeForOrganization(\Yii::$app->user->identity->organization->id);
+            $autoProlongation = AutoProlongation::make(\Yii::$app->user->identity->organization->id);
 
             $success = $autoProlongation->changeAutoProlongationForAllProgramsWithActiveCooperate(\Yii::$app->request->post()['change-auto-prolongation-for-all-programs']);
 
@@ -1701,5 +1726,140 @@ class ProgramsController extends Controller
         }
 
         return $this->asJson(ActiveForm::validate($program, ['auto_prolongation_enabled']));
+    }
+
+    /**
+     * @param integer $id
+     *
+     * @return Response
+     */
+    public function actionChangeAutoProlongationForContract($id = null)
+    {
+        if (!\Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+            return $this->asJson(false);
+        }
+
+        if (isset(\Yii::$app->request->post()['change-auto-prolongation-for-all-contracts'])) {
+            $autoProlongation = AutoProlongation::make(\Yii::$app->user->identity->organization->id);
+
+            $success = $autoProlongation->changeAutoProlongationForAllContractsWithActiveCooperate(\Yii::$app->request->post()['change-auto-prolongation-for-all-contracts']);
+
+            return $this->asJson(['changed' => $success, 'value' => \Yii::$app->request->post()['change-auto-prolongation-for-all-contracts']]);
+        }
+
+        $contract = Contracts::findOne($id);
+
+        if (\Yii::$app->request->isAjax && $contract && $contract->load(\Yii::$app->request->post()) && $contract->save(true, ['auto_prolongation_enabled'])) {
+            return $this->asJson($contract->auto_prolongation_enabled);
+        }
+
+        return $this->asJson(ActiveForm::validate($contract, ['auto_prolongation_enabled']));
+    }
+
+    /**
+     * автопролонгация договора в новой группе
+     */
+    public function actionNewGroupAutoProlongation()
+    {
+        if (!\Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+            return $this->asJson('Недостаточно прав');
+        }
+
+        $group = Groups::findOne(\Yii::$app->request->post('groupId'));
+
+        if (!$group && AutoProlongation::canGroupBeAutoProlong($group->id)) {
+            return $this->asJson('Невозможно перевести детей из этой группы');
+        }
+
+        if (\Yii::$app->request->isAjax) {
+            $autoProlongation = AutoProlongation::make(\Yii::$app->user->identity->organization->id, null, null, $group->id);
+
+            $contractIdList = Contracts::findAll(['id' => $autoProlongation->getContractIdListForAutoProlongationToNewGroup()]);
+
+            $certificatesDataProvider = $dataProvider = new ActiveDataProvider([
+                'query' => Contracts::find()->where(['id' => $contractIdList]),
+                'pagination' => [
+                    'pageSizeLimit' => false,
+                    'pageSize' => 100,
+                ],
+            ]);
+
+            $moduleIdList = $autoProlongation::getModuleIdList($group->program_id, $group->id);
+
+            $modules = ProgrammeModule::findAll(['id' => $moduleIdList]);
+            $moduleNameList = [];
+            /** @var ProgrammeModule $module */
+            foreach ($modules as $module) {
+                $moduleNameList += [$module->id => $module->getFullname()];
+            }
+
+            return $this->renderAjax('new-group-auto-prolongation', [
+                'certificatesDataProvider' => $certificatesDataProvider,
+                'moduleNameList' => $moduleNameList,
+                'group' => $group,
+            ]);
+        }
+
+        return $this->asJson('error');
+    }
+
+    /**
+     * получить список групп для автопролонгации с переводом в другую группу
+     */
+    public function actionGetGroupListForAutoProlongation()
+    {
+        if (!\Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+            return $this->asJson(false);
+        }
+
+        $groupIdList = AutoProlongation::getGroupIdList(\Yii::$app->request->post('depdrop_parents'), \Yii::$app->request->get('groupId'));
+
+        return $this->asJson(['output' => $groupIdList, 'selected' => '']);
+    }
+
+    /**
+     * получить информацию о группе для автопролонгации
+     */
+    public function actionGetGroupInfoForAutoProlongation()
+    {
+        $groupId = \Yii::$app->request->post('groupId');
+
+        if (!$group = Groups::findOne($groupId)) {
+            return $this->asJson(null);
+        }
+
+        return $this->asJson(['countToAutoProlong' => $group->getFreePlaces()]);
+    }
+
+    /**
+     * запустить автопролонгацию договоров в новую группу
+     */
+    public function actionAutoProlongationToNewGroupInit()
+    {
+        if (!\Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+            return $this->asJson('Недостаточно прав');
+        }
+
+        $organizationId = \Yii::$app->user->identity->organization->id;
+
+        $group = Groups::findOne(\Yii::$app->request->post('fromGroupId'));
+
+        if (!$group || !AutoProlongation::canGroupBeAutoProlong($organizationId, $group->id)) {
+            return $this->asJson('Невозможно перевести детей из этой группы');
+        }
+
+        $contractIdList = ArrayHelper::getColumn(\Yii::$app->request->post('contractIdList'), 'value');
+        $toGroupId = \Yii::$app->request->post('toGroupId');
+
+        $autoProlongation = AutoProlongation::make($organizationId, null, null, $group->id);
+        $autoProlongation->init($toGroupId, null, true, $contractIdList);
+
+        if ($autoProlongation->errorMessage) {
+            \Yii::$app->session->addFlash('error', $autoProlongation->errorMessage);
+
+            return $this->redirect(Url::to(['/personal/organization-contracts']));
+        }
+
+        return $this->redirect('/programs/auto-prolonged-registry');
     }
 }
