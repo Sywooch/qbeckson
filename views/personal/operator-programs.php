@@ -15,15 +15,20 @@ use yii\helpers\Url;
 /* @var $this yii\web\View */
 /* @var $searchOpenPrograms \app\models\search\ProgramsSearch */
 /* @var $searchWaitPrograms \app\models\search\ProgramsSearch */
+/* @var $searchNewWaitPrograms \app\models\search\ProgramsSearch */
+/* @var $searchAfterRefuseWaitPrograms \app\models\search\ProgramsSearch */
 /* @var $searchClosedPrograms \app\models\search\ProgramsSearch */
 /* @var $openProgramsProvider \yii\data\ActiveDataProvider */
 /* @var $waitProgramsProvider \yii\data\ActiveDataProvider */
+/* @var $afterRefuseWaitProgramsProvider \yii\data\ActiveDataProvider */
+/* @var $newWaitProgramsProvider \yii\data\ActiveDataProvider */
 /* @var $closedProgramsProvider \yii\data\ActiveDataProvider */
 /* @var $allOpenProgramsProvider \yii\data\ActiveDataProvider */
 /* @var $allWaitProgramsProvider \yii\data\ActiveDataProvider */
-/* @var $ProgramsallProvider \yii\data\ActiveDataProvider */
-/* @var $YearsallProvider \yii\data\ActiveDataProvider */
-/* @var $GroupsallProvider \yii\data\ActiveDataProvider */
+/* @var $allAfterRefuseWaitProgramsProvider \yii\data\ActiveDataProvider */
+/* @var $programsAllProvider \yii\data\ActiveDataProvider */
+/* @var $yearsAllProvider \yii\data\ActiveDataProvider */
+/* @var $groupsAllProvider \yii\data\ActiveDataProvider */
 
 $this->title = 'Программы';
 $this->params['breadcrumbs'][] = $this->title;
@@ -230,7 +235,7 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
         </a>
     </li>
     <li>
-        <a data-toggle="tab" href="#panel2">Ожидающие сертификации
+        <a data-toggle="tab" href="#wait-panel">Ожидающие сертификации
             <span class="badge"><?= $waitProgramsProvider->getTotalCount() ?></span>
         </a>
     </li>
@@ -280,46 +285,150 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
             'redirectUrl' => 'operator-programs'
         ]); ?>
     </div>
-    <div id="panel2" class="tab-pane fade">
-        <?= SearchFilter::widget([
-            'model' => $searchWaitPrograms,
-            'action' => ['personal/operator-programs#panel2'],
-            'data' => GridviewHelper::prepareColumns(
-                'programs',
-                $waitColumns,
-                'wait',
-                'searchFilter',
-                null
-            ),
-            'role' => UserIdentity::ROLE_OPERATOR,
-            'type' => 'wait'
-        ]); ?>
-        <?= GridView::widget([
-            'dataProvider' => $waitProgramsProvider,
-            'filterModel' => null,
-            'rowOptions' => function ($model, $index, $widget, $grid) {
-                /** @var \app\models\Programs $model */
-                if ($model->verification === \app\models\Programs::VERIFICATION_WAIT) {
-                    return ['class' => 'danger'];
-                } elseif ($model->verification !== \app\models\Programs::VERIFICATION_WAIT
-                    && $model->verification !== \app\models\Programs::VERIFICATION_UNDEFINED
-                ) {
-                    return [
-                        'class' => 'warning',
-                    ];
-                }
-            },
-            'summary' => false,
-            'pjax' => true,
-            'columns' => $preparedWaitColumns,
-        ]); ?>
-        <?= \app\widgets\Export::widget([
-            'dataProvider' => $allWaitProgramsProvider,
-            'columns' => GridviewHelper::prepareColumns('programs', $waitColumns, 'wait', 'export'),
-            'group' => 'operator-wait-programs',
-            'table' => 'programs',
-            'redirectUrl' => 'operator-programs'
-        ]); ?>
+    <div id="wait-panel" class="tab-pane fade">
+        <ul class="nav nav-tabs">
+            <li class="active">
+                <a data-toggle="tab" href="#wait-all">Все
+                    <span class="badge"><?= $waitProgramsProvider->getTotalCount() ?></span>
+                </a>
+            </li>
+            <li>
+                <a data-toggle="tab" href="#wait-new">Новые
+                    <span class="badge"><?= $newWaitProgramsProvider->getTotalCount() ?></span>
+                </a>
+            </li>
+            <li>
+                <a data-toggle="tab" href="#wait-after-refuse">Повторная попытка
+                    <span class="badge"><?= $afterRefuseWaitProgramsProvider->getTotalCount() ?></span>
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div id="wait-all" class="tab-pane fade in active">
+                <?= SearchFilter::widget([
+                    'model' => $searchWaitPrograms,
+                    'action' => ['personal/operator-programs#wait-all'],
+                    'data' => GridviewHelper::prepareColumns(
+                        'programs',
+                        $waitColumns,
+                        'wait',
+                        'searchFilter',
+                        null
+                    ),
+                    'role' => UserIdentity::ROLE_OPERATOR,
+                    'type' => 'wait'
+                ]); ?>
+                <?= GridView::widget([
+                    'dataProvider' => $waitProgramsProvider,
+                    'filterModel' => null,
+                    'rowOptions' => function ($model, $index, $widget, $grid) {
+                        /** @var \app\models\Programs $model */
+                        if ($model->verification === \app\models\Programs::VERIFICATION_WAIT) {
+                            return ['class' => 'danger'];
+                        } elseif ($model->verification !== \app\models\Programs::VERIFICATION_WAIT
+                            && $model->verification !== \app\models\Programs::VERIFICATION_UNDEFINED
+                        ) {
+                            return [
+                                'class' => 'warning',
+                            ];
+                        }
+                    },
+                    'summary' => false,
+                    'pjax' => true,
+                    'columns' => $preparedWaitColumns,
+                ]); ?>
+                <?= \app\widgets\Export::widget([
+                    'dataProvider' => $allWaitProgramsProvider,
+                    'columns' => GridviewHelper::prepareColumns('programs', $waitColumns, 'wait', 'export'),
+                    'group' => 'operator-wait-programs',
+                    'table' => 'programs',
+                    'redirectUrl' => 'operator-programs'
+                ]); ?>
+            </div>
+            <div id="wait-new" class="tab-pane fade">
+                <?= SearchFilter::widget([
+                    'model' => $searchNewWaitPrograms,
+                    'action' => ['personal/operator-programs#wait-new'],
+                    'data' => GridviewHelper::prepareColumns(
+                        'programs',
+                        $waitColumns,
+                        'wait',
+                        'searchFilter',
+                        null
+                    ),
+                    'role' => UserIdentity::ROLE_OPERATOR,
+                    'type' => 'wait'
+                ]); ?>
+                <?= GridView::widget([
+                    'dataProvider' => $newWaitProgramsProvider,
+                    'filterModel' => null,
+                    'rowOptions' => function ($model, $index, $widget, $grid) {
+                        /** @var \app\models\Programs $model */
+                        if ($model->verification === \app\models\Programs::VERIFICATION_WAIT) {
+                            return ['class' => 'danger'];
+                        } elseif ($model->verification !== \app\models\Programs::VERIFICATION_WAIT
+                            && $model->verification !== \app\models\Programs::VERIFICATION_UNDEFINED
+                        ) {
+                            return [
+                                'class' => 'warning',
+                            ];
+                        }
+                    },
+                    'summary' => false,
+                    'pjax' => true,
+                    'columns' => $preparedWaitColumns,
+                ]); ?>
+                <?= \app\widgets\Export::widget([
+                    'dataProvider' => $allNewWaitProgramsProvider,
+                    'columns' => GridviewHelper::prepareColumns('programs', $waitColumns, 'wait', 'export'),
+                    'group' => 'operator-wait-programs',
+                    'table' => 'programs',
+                    'redirectUrl' => 'operator-programs'
+                ]); ?>
+            </div>
+            <div id="wait-after-refuse" class="tab-pane fade">
+                <?= SearchFilter::widget([
+                    'model' => $searchAfterRefuseWaitPrograms,
+                    'action' => ['personal/operator-programs#wait-new'],
+                    'data' => GridviewHelper::prepareColumns(
+                        'programs',
+                        $waitColumns,
+                        'wait',
+                        'searchFilter',
+                        null
+                    ),
+                    'role' => UserIdentity::ROLE_OPERATOR,
+                    'type' => 'wait'
+                ]); ?>
+                <?= GridView::widget([
+                    'dataProvider' => $afterRefuseWaitProgramsProvider,
+                    'filterModel' => null,
+                    'rowOptions' => function ($model, $index, $widget, $grid) {
+                        /** @var \app\models\Programs $model */
+                        if ($model->verification === \app\models\Programs::VERIFICATION_WAIT) {
+                            return ['class' => 'danger'];
+                        } elseif ($model->verification !== \app\models\Programs::VERIFICATION_WAIT
+                            && $model->verification !== \app\models\Programs::VERIFICATION_UNDEFINED
+                        ) {
+                            return [
+                                'class' => 'warning',
+                            ];
+                        }
+                    },
+                    'summary' => false,
+                    'pjax' => true,
+                    'columns' => $preparedWaitColumns,
+                ]); ?>
+                <?= \app\widgets\Export::widget([
+                    'dataProvider' => $allAfterRefuseWaitProgramsProvider,
+                    'columns' => GridviewHelper::prepareColumns('programs', $waitColumns, 'wait', 'export'),
+                    'group' => 'operator-wait-programs',
+                    'table' => 'programs',
+                    'redirectUrl' => 'operator-programs'
+                ]); ?>
+            </div>
+        </div>
+
     </div>
     <div id="panel3" class="tab-pane fade">
         <?= SearchFilter::widget([
@@ -353,7 +462,7 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
     <br>
     <?php
     echo ExportMenu::widget([
-        'dataProvider' => $YearsallProvider,
+        'dataProvider' => $yearsAllProvider,
         'target' => '_self',
         'showColumnSelector' => false,
         'filename' => 'years',
@@ -393,7 +502,7 @@ $preparedClosedPrograms = GridviewHelper::prepareColumns('programs', $closedProg
     ]);
     echo '&nbsp;';
     echo ExportMenu::widget([
-        'dataProvider' => $GroupsallProvider,
+        'dataProvider' => $groupsAllProvider,
         'target' => '_self',
         'showColumnSelector' => false,
         'filename' => 'years',

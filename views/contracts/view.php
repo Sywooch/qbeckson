@@ -326,9 +326,13 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php
     if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_CERTIFICATE)) {
         /** @var $certificate Certificates */
-        $certificate = Yii::$app->user->identity->certificate;
+        $certificate = Yii::$app->user->identity->certificate; ?>
 
-        echo Html::a('Назад', Url::to(['/personal/certificate-contracts', 'id' => $model->id]), ['class' => 'btn btn-primary']);
+        <?php if ($model->parentExists()): ?>
+            <p>Настоящий договор не требует для вступления в силу обязательного написания Вами заявления, поскольку предусматривается его акцепт посредством Вашего «молчания» в связи с тем, что ранее Вами уже был заключен договор на часть данной образовательной программы. Если Вы не отклоните оферту – она автоматически перейдет в статус «действующего договора». Однако, просим Вас, если это не затруднительно все-таки подписать приложенную <?= Html::a('форму', Url::to(['application-pdf', 'id' => $model->id])) ?> заявления на обучение по части программы, предусмотренной Договором, и передать его Исполнителю – образовательной организации</p>
+        <?php endif; ?>
+
+        <? echo Html::a('Назад', Url::to(['/personal/certificate-contracts', 'id' => $model->id]), ['class' => 'btn btn-primary']);
         echo '&nbsp;';
 
         if ($certificate->actual === 1 && $model->status === 1) {

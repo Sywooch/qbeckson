@@ -698,7 +698,7 @@ $this->registerJs($js, $this::POS_READY);
 
             if ($currentPeriodCooperate) {
                 $documentLabel = $currentPeriodCooperate->total_payment_limit ? 'Договор c суммой' : 'Договор без суммы';
-                $activeDocumentLink = null !== $currentPeriodCooperate->getActiveDocumentUrl() ? Html::a($documentLabel, [$currentPeriodCooperate->getActiveDocumentUrl()], ['target' => 'blank']) : ''; ?>
+                $activeDocumentLink = null !== $currentPeriodCooperate->getActiveDocumentUrl() ? Html::a($documentLabel, [$currentPeriodCooperate->getActiveDocumentUrl()], ['target' => 'blank']) : $documentLabel; ?>
 
                 <table class="table table-striped table-bordered detail-view">
                     <tbody>

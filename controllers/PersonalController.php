@@ -18,7 +18,6 @@ use app\models\ContractsPayerclearSearch;
 use app\models\Cooperate;
 use app\models\FavoritesSearch;
 use app\models\forms\OrganizationSettingsForm;
-use app\models\GroupsSearch;
 use app\models\Invoices;
 use app\models\LoginForm;
 use app\models\Mun;
@@ -34,10 +33,9 @@ use app\models\Payers;
 use app\models\PayersSearch;
 use app\models\PersonalAssignment;
 use app\models\PreviusSearch;
-use app\models\ProgrammeModuleSearch;
 use app\models\Programs;
+use app\models\programs\BuilderSetOfProgramsDataProviderAndSearchModels;
 use app\models\programs\ProgramViewDecorator;
-use app\models\ProgramsclearSearch;
 use app\models\search\CertificatesSearch;
 use app\models\search\ContractsSearch;
 use app\models\search\CooperateSearch;
@@ -381,57 +379,12 @@ class PersonalController extends Controller
      */
     public function actionOperatorPrograms()
     {
-        $searchOpenPrograms = new ProgramsSearch([
-            'verification' => Programs::VERIFICATION_DONE,
-            'hours' => '0,2000',
-            'limit' => '0,10000',
-            'rating' => '0,100',
-            'modelName' => ProgramsSearch::MODEL_OPEN,
-        ]);
-        $openProgramsProvider = $searchOpenPrograms->search(Yii::$app->request->queryParams);
-        $allOpenProgramsProvider = $searchOpenPrograms->search(Yii::$app->request->queryParams, 999999);
+        $builder = BuilderSetOfProgramsDataProviderAndSearchModels::create(
+            Yii::$app->request->queryParams
+        );
+        $providersAndSearchModels = $builder->getProvidersSetForPersonalOperator();
 
-        $searchWaitPrograms = new ProgramsSearch([
-            'verification' => [Programs::VERIFICATION_UNDEFINED, Programs::VERIFICATION_WAIT],
-            'open' => 0,
-            'hours' => '0,2000',
-            'modelName' => ProgramsSearch::MODEL_WAIT,
-        ]);
-        $waitProgramsProvider = $searchWaitPrograms->search(Yii::$app->request->queryParams);
-        $allWaitProgramsProvider = $searchWaitPrograms->search(Yii::$app->request->queryParams, 999999);
-
-        $searchClosedPrograms = new ProgramsSearch([
-            'verification' => [Programs::VERIFICATION_DENIED],
-            'hours' => '0,2000',
-            'modelName' => ProgramsSearch::MODEL_CLOSED,
-        ]);
-        $closedProgramsProvider = $searchClosedPrograms->search(Yii::$app->request->queryParams);
-        $allClosedProgramsProvider = $searchClosedPrograms->search(Yii::$app->request->queryParams, 999999);
-
-        $searchProgramsall = new ProgramsclearSearch();
-        $ProgramsallProvider = $searchProgramsall->search(Yii::$app->request->queryParams);
-
-        $searchYearsall = new ProgrammeModuleSearch();
-        $YearsallProvider = $searchYearsall->search(Yii::$app->request->queryParams);
-
-        $searchGroupsall = new GroupsSearch();
-        $GroupsallProvider = $searchGroupsall->search(Yii::$app->request->queryParams);
-
-        return $this->render('operator-programs', [
-            'searchOpenPrograms' => $searchOpenPrograms,
-            'openProgramsProvider' => $openProgramsProvider,
-            'searchWaitPrograms' => $searchWaitPrograms,
-            'waitProgramsProvider' => $waitProgramsProvider,
-            'searchClosedPrograms' => $searchClosedPrograms,
-            'closedProgramsProvider' => $closedProgramsProvider,
-            'allOpenProgramsProvider' => $allOpenProgramsProvider,
-            'allWaitProgramsProvider' => $allWaitProgramsProvider,
-            'allClosedProgramsProvider' => $allClosedProgramsProvider,
-
-            'ProgramsallProvider' => $ProgramsallProvider,
-            'YearsallProvider' => $YearsallProvider,
-            'GroupsallProvider' => $GroupsallProvider,
-        ]);
+        return $this->render('operator-programs', $providersAndSearchModels);
     }
 
     /**
