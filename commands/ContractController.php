@@ -3,6 +3,7 @@ namespace app\commands;
 
 use app\models\Completeness;
 use app\models\Contracts;
+use app\models\Cooperate;
 use app\models\Certificates;
 use app\models\Operators;
 use app\models\Payers;
@@ -42,7 +43,7 @@ class ContractController extends Controller
                     ->column();
                 $payersIds = join(',', $arrayPayersIds);
                 // Плательщики
-                $command = Yii::$app->db->createCommand("UPDATE payers AS p SET certificate_can_use_future_balance = 0 WHERE id IN ($payersIds)");
+                $command = Yii::$app->db->createCommand("UPDATE payers AS p SET certificate_can_use_future_balance = 0, certificate_can_use_current_balance = 1 WHERE id IN ($payersIds)");
                 print_r($command->rawSql);
                 echo PHP_EOL . ' --> ' . $command->execute() . PHP_EOL;
                 // Cert groups
@@ -66,6 +67,15 @@ class ContractController extends Controller
                 echo PHP_EOL;
                 $command->execute();
                 $command = Yii::$app->db->createCommand("UPDATE `contracts` SET period = " . Contracts::CURRENT_REALIZATION_PERIOD . " WHERE payer_id IN ($payersIds) AND period = " . Contracts::FUTURE_REALIZATION_PERIOD);
+                print_r($command->rawSql);
+                echo PHP_EOL;
+                $command->execute();
+                // Кооперейты
+                $command = Yii::$app->db->createCommand("UPDATE `cooperate` SET period = " . Cooperate::PERIOD_ARCHIVE . " WHERE payer_id IN ($payersIds) AND period = " . Cooperate::PERIOD_CURRENT);
+                print_r($command->rawSql);
+                echo PHP_EOL;
+                $command->execute();
+                $command = Yii::$app->db->createCommand("UPDATE `cooperate` SET period = " . Cooperate::PERIOD_CURRENT . " WHERE payer_id IN ($payersIds) AND period = " . Cooperate::PERIOD_FUTURE);
                 print_r($command->rawSql);
                 echo PHP_EOL;
                 $command->execute();

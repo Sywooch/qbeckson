@@ -5,6 +5,7 @@ namespace app\components;
 use yii\base\Event;
 use yii\base\InvalidCallException;
 use yii\base\Model;
+use yii\db\ActiveRecord;
 
 
 /**
@@ -12,7 +13,7 @@ use yii\base\Model;
  * Class ModelDecorator
  * @package app\components
  * @property Model $entity
- * @method save($validation = true) @see yii\db\ActiveRecord
+ * @mixin ActiveRecord
  */
 class ModelDecorator extends Model implements ModelDecoratorInterface
 {

@@ -40,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-xs-12">
         <?= $this->render(
             '_base_body',
-            ['cooperate' => $cooperate, 'modules' => $modules, 'model' => $model]
+            ['modules' => $modules, 'model' => $model]
         ) ?>
     </div>
 </div>

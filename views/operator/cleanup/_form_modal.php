@@ -22,7 +22,7 @@ $statusInputName = Html::getInputName($model, 'status');
                 <p>Договор №<span id="modal-contract-number"></span> от <span id="modal-contract-date"></span> года.</p>
                 <p>Заключён по сертификату ПФ <span id="modal-certificate-number"></span>.</p>
                 <p>Основание удаления: <span id="modal-delete-reason"></span>.</p>
-                <p><a href="#" id="modal-delete-document">Скачать подтверждающий документ</a>.</p>
+                <p><a href="#" id="modal-delete-document" target="_blank">Скачать подтверждающий документ</a>.</p>
                 <p><strong id="modal-alert-message" class="text-danger"></strong></p>
             </div>
             <div class="modal-footer">
