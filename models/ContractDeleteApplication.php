@@ -8,7 +8,7 @@ use yii\db\ActiveRecord;
 use yii\db\Exception;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
-use yii\helpers\Url;
+use yii\helpers\FileHelper;
 
 /**
  * This is the model class for table "contract_delete_application".
@@ -23,7 +23,7 @@ use yii\helpers\Url;
  * @property string $contract_date
  * @property string $contract_number
  * @property integer $contract_id
- * @property integer $certificate_number
+ * @property string $certificate_number
  * @property integer $status
  * @property integer $organization_id
  *
@@ -39,6 +39,8 @@ class ContractDeleteApplication extends ActiveRecord
     const SCENARIO_CREATE = 'create';
     const SCENARIO_CONFIRM = 'confirm';
     const SCENARIO_REJECT = 'reject';
+
+    const FILE_UPLOAD_PATH = '/uploads/contract-delete-application';
 
     public $confirmationFile;
     public $isChecked;
@@ -90,11 +92,12 @@ class ContractDeleteApplication extends ActiveRecord
             ],
             [['created_at', 'confirmed_at'], 'safe'],
             [['contract_date'], 'date', 'format' => 'php:Y-m-d'],
-            [['contract_id', 'status', 'certificate_number', 'organization_id'], 'integer'],
+            [['contract_id', 'status', 'organization_id'], 'integer'],
             [['status'], 'in', 'range' => [self::STATUS_WAITING, self::STATUS_CONFIRMED, self::STATUS_REFUSED]],
             [['status'], 'default', 'value' => self::STATUS_WAITING],
             [['reason', 'file', 'base_url', 'filename'], 'string', 'max' => 255],
-            [['contract_number'], 'string'],
+            [['contract_number'], 'string', 'max' => 11],
+            [['certificate_number'], 'string', 'max' => 45],
             [['confirmationFile'], 'required', 'on' => self::SCENARIO_CREATE],
             [['contract_id'], 'unique', 'message' => 'Запрос на удаление этого договора уже отправлен.'],
             [
@@ -169,7 +172,7 @@ class ContractDeleteApplication extends ActiveRecord
      */
     public function getFileUrl()
     {
-        return $this->base_url ? Url::to([$this->base_url . DIRECTORY_SEPARATOR . $this->file], true) : null;
+        return $this->file ? \Yii::getAlias('@pfdo') . $this::FILE_UPLOAD_PATH . DIRECTORY_SEPARATOR . $this->file : null;
     }
 
     /**
@@ -218,6 +221,36 @@ class ContractDeleteApplication extends ActiveRecord
             return true;
         } else {
             return false;
+        }
+    }
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        //Переносим файл в другое место
+        if ($insert || isset($changedAttributes['file']) || isset($changedAttributes['base_url'])) {
+            $parts = explode('.', $this->file);
+            $ext = $parts[count($parts) - 1];
+            $filename = 'delete-' . $this->contract_id . '-' . $this->id . '.' . $ext;
+            $file_path = \Yii::getAlias('@pfdoroot') . self::FILE_UPLOAD_PATH;
+            $oldFile = \Yii::getAlias('@pfdoroot/uploads') . DIRECTORY_SEPARATOR . $this->file;
+            $newFile = $file_path . DIRECTORY_SEPARATOR . $filename;
+
+            if (file_exists($oldFile)) {
+                if (!file_exists($file_path)) {
+                    FileHelper::createDirectory($file_path);
+                }
+                if (rename($oldFile, $newFile)) {
+                    //updateAll не запустит повторно событие afterSave
+                    static::updateAll(['file' => $filename, 'base_url' => self::FILE_UPLOAD_PATH], ['id' => $this->id]);
+                }
+            }
+
         }
     }
 }

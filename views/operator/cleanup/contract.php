@@ -6,6 +6,7 @@ use app\helpers\GridviewHelper;
 use app\models\UserIdentity;
 use app\models\ContractDeleteApplication;
 use app\helpers\ArrayHelper;
+use yii\helpers\Html;
 
 /** @var $this yii\web\View */
 /** @var $modelForm \app\models\forms\ContractRemoveForm */
@@ -37,7 +38,10 @@ $waitingColumns = $refusedColumns = [
     ],
     [
         'attribute' => 'fileUrl',
-        'format' => 'url',
+        'format' => 'html',
+        'value' => function(ContractDeleteApplication $data) {
+            return Html::a($data->getFileUrl(), $data->getFileUrl());
+        }
     ],
     [
         'attribute' => 'certificateNumber',
@@ -61,7 +65,10 @@ $confirmedColumns = [
     ],
     [
         'attribute' => 'fileUrl',
-        'format' => 'url',
+        'format' => 'html',
+        'value' => function(ContractDeleteApplication $data) {
+            return Html::a($data->getFileUrl(), $data->getFileUrl());
+        }
     ],
     [
         'attribute' => 'certificate_number',
