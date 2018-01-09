@@ -157,8 +157,7 @@ class AutoProlongation
         $operatorSettings = Yii::$app->operator->identity->settings;
 
         if (is_null($this->groupId)) {
-            $query->andWhere(['>', 'groups.datestop', date('Y-m-d', strtotime($operatorSettings->future_program_date_from))])
-                ->andWhere('contracts.stop_edu_contract < groups.datestop');
+            $query->andWhere('contracts.stop_edu_contract < groups.datestop');
         }
 
         return $query;
