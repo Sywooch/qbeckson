@@ -26,6 +26,8 @@ use app\models\Programs;
 use app\models\User;
 use app\models\UserIdentity;
 use app\traits\AjaxValidationTrait;
+use Box\Spout\Common\Type;
+use Box\Spout\Writer\WriterFactory;
 use kartik\mpdf\Pdf;
 use mPDF;
 use Yii;
@@ -312,6 +314,15 @@ class ContractsController extends Controller
         $contract->delete();
 
         return $this->redirect(['programs/search']);
+    }
+
+    public function actionTest()
+    {
+        $filePath = 'organization-auto-prolongation-registry-' . Yii::$app->user->identity->organization->id . '.xlsx';
+        $writer = WriterFactory::create(Type::XLSX);
+        $writer->openToFile(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $filePath);
+        $writer->addRow(['id родительского договора', '№ родительского договора', 'дата родительского договора', 'Номер сертификата', 'Баланс сертификата', 'id дочернего договора', '№ дочернего договора', 'дата дочернего договора']);
+        return $this->asJson('qwe');
     }
 
     /**
