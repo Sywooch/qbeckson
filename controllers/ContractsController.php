@@ -332,7 +332,7 @@ class ContractsController extends Controller
         /** @var \app\models\OperatorSettings $operatorSettings */
         $operatorSettings = Yii::$app->operator->identity->settings;
 
-        if (!$model->canBeAccepted()) {
+        if (Contracts::STATUS_REQUESTED == $model->status && !$model->canBeAccepted()) {
             $message = null;
 
             if (\Yii::$app->user->can('certificate') || \Yii::$app->user->can('operators')) {
