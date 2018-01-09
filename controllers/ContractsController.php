@@ -196,9 +196,9 @@ class ContractsController extends Controller
         if (Yii::$app->request->isPost && $group) {
             $module = $group->module;
             $decoratedModule = CertificateAccessModuleDecorator::decorate($module);
+            $decoratedModule->setCertificate($certificateId);
             if (!$decoratedModule->certificateCanEnlistmentToProgram()) {
                 Yii::$app->session->setFlash('modal-danger', $decoratedModule->getLastMessage());
-
                 return $this->redirect('/personal/certificate-programs');
             }
         }
