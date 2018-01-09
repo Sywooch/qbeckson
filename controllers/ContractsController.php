@@ -462,6 +462,8 @@ class ContractsController extends Controller
             }
 
             $model->status = 1;
+            $model->activated_at = date('Y-m-d H:i:s');
+
             if ($model->stop_edu_contract <= date('Y-m-d', $lastDayOfMonth)) {
                 $model->wait_termnate = 1;
                 $model->termination_initiated_at = date('Y-m-d H:i:s');
@@ -470,12 +472,15 @@ class ContractsController extends Controller
             $firstDayOfPreviousMonth = strtotime('first day of previous month');
 
             if ($model->save()) {
-                if (date('m') != 1 && $model->stop_edu_contract >= date('Y-m-d', $firstDayOfPreviousMonth) && $model->start_edu_contract < date('Y-m-d', $currentMonth)) {
+                $start_edu_contract = explode("-", $model->start_edu_contract);
+
+                if (date('m') != 1 &&
+                    $model->stop_edu_contract >= date('Y-m-d', $firstDayOfPreviousMonth) &&
+                    $model->start_edu_contract < date('Y-m-d', $currentMonth)
+                ) {
                     $completeness = new Completeness();
                     $completeness->group_id = $model->group_id;
                     $completeness->contract_id = $model->id;
-
-                    $start_edu_contract = explode("-", $model->start_edu_contract);
 
                     $completeness->month = date('m') - 1;
                     $completeness->year = $start_edu_contract[0];
@@ -495,12 +500,13 @@ class ContractsController extends Controller
                     $completeness->save();
                 }
 
-                if (date('m') == 12 && $model->stop_edu_contract >= date('Y-m-d', $currentMonth) && $model->start_edu_contract <= date('Y-m-d', $lastDayOfMonth) ) {
+                if (date('m') == 12 &&
+                    $model->stop_edu_contract >= date('Y-m-d', $currentMonth) &&
+                    $model->start_edu_contract <= date('Y-m-d', $lastDayOfMonth)
+                ) {
                     $completeness = new Completeness();
                     $completeness->group_id = $model->group_id;
                     $completeness->contract_id = $model->id;
-
-                    $start_edu_contract = explode("-", $model->start_edu_contract);
 
                     $completeness->month = date('m');
                     $completeness->year = date('Y');
@@ -520,7 +526,9 @@ class ContractsController extends Controller
                     $completeness->save();
                 }
 
-                if ($model->start_edu_contract < date('Y-m-d', $nextMonth) && $model->stop_edu_contract >= date('Y-m-d', $currentMonth)) {
+                if ($model->start_edu_contract < date('Y-m-d', $nextMonth) &&
+                    $model->stop_edu_contract >= date('Y-m-d', $currentMonth)
+                ) {
                     $preinvoice = new Completeness();
                     $preinvoice->group_id = $model->group_id;
                     $preinvoice->contract_id = $model->id;
