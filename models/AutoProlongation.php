@@ -124,7 +124,7 @@ class AutoProlongation
             ->leftJoin(Payers::tableName(), 'payers.id = contracts.payer_id')
             ->leftJoin(Programs::tableName(), 'programs.id = contracts.program_id')
             ->leftJoin(Groups::tableName(), 'groups.id = contracts.group_id')
-            ->andWhere(['contracts.status' => Contracts::STATUS_ACTIVE, 'contracts.period' => [Contracts::CURRENT_REALIZATION_PERIOD, Contracts::PAST_REALIZATION_PERIOD]])
+            ->andWhere(['contracts.period' => [Contracts::CURRENT_REALIZATION_PERIOD, Contracts::PAST_REALIZATION_PERIOD]])
             ->andWhere(['groups.status' => Groups::STATUS_ACTIVE])
             ->andWhere(['not in', 'contracts.id', Contracts::getAutoProlongedParentContractIdList()])
             ->andWhere(['payers.certificate_can_use_future_balance' => 1])
