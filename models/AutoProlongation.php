@@ -142,13 +142,12 @@ class AutoProlongation
                 ['and',
                     ['contracts.status' => Contracts::STATUS_CLOSED],
                     ['and',
-                        ['and', 'contracts.stop_edu_contract = contracts.date_termnate'],
-                        ['and',
-                            ['>', 'contracts.stop_edu_contract', $allowDatePeriod]
-                        ]
+                        'contracts.stop_edu_contract = contracts.date_termnate',
+                        ['>', 'contracts.stop_edu_contract', $allowDatePeriod]
                     ],
                 ]
             ])
+            ->andWhere(['<', 'contracts.stop_edu_contract', date('Y-m-d', strtotime('+1 Month'))])
             ->andFilterWhere(['programs.organization_id' => $this->organizationId])
             ->andFilterWhere(['contracts.certificate_id' => $this->certificateId])
             ->andFilterWhere(['contracts.program_id' => $this->programId])
