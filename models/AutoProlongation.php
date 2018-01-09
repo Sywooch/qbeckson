@@ -377,7 +377,8 @@ class AutoProlongation
         if ($group) {
             $contractRequest->setStartEduContract(date('d.m.Y', strtotime($group->datestart)));
         } else {
-            $contractRequest->setStartEduContract(date('d.m.Y', strtotime($operatorSettings->future_program_date_from)));
+            $startEduContract = date_diff(new \DateTime(date($operatorSettings->current_program_date_from)), new \DateTime())->m > 0 ? $operatorSettings->future_program_date_from : $operatorSettings->current_program_date_from;
+            $contractRequest->setStartEduContract(date('d.m.Y', strtotime($startEduContract)));
         }
 
         $contractNumber = 1;
