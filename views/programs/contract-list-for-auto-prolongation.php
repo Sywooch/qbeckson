@@ -104,6 +104,11 @@ function autoProlongation(url, contractToAutoProlongationCount, isNew) {
 
 js;
 $this->registerJs($js);
+
+$date = 1 == date('m') ? $operatorSettings->current_program_date_from : $operatorSettings->future_program_date_from;
+
+$dateFrom = \Yii::$app->formatter->asDate(date('Y-m-d', strtotime($date)));
+$dateTo = \Yii::$app->formatter->asDate(date('Y-m-d', strtotime($date . ' -1 DAY')));
 ?>
 
 <div class="panel">
@@ -117,10 +122,10 @@ $this->registerJs($js);
         ],
     ]) ?>
 
-    <p>Вы инициировали запуск автопролонгации действующих до <?= \Yii::$app->formatter->asDate($operatorSettings->current_program_date_to) ?> договоров об обучении с детьми. Обращаем Ваше внимание, что в рамках
+    <p>Вы инициировали запуск автопролонгации действующих до <?= $dateTo ?> договоров об обучении с детьми. Обращаем Ваше внимание, что в рамках
         данной процедуры для всех отмеченных на предыдущем шаге программ будут выбраны только те группы, в которых продолжается обучение в будущем периоде (то есть договор был заключен на часть модуля), и
         только для их детей будут созданы оферты ("подтвержденные договоры"), а в случае отсутствия у Вас договора с уполномоченной организацией детей - заявки на обучение ("ожидающие подтверждения"на
-        обучение), предусматривающие начало действия (обучения по договору) с <?= \Yii::$app->formatter->asDate($operatorSettings->future_program_date_from) ?>.</p>
+        обучение), предусматривающие начало действия (обучения по договору) с <?= $dateFrom ?>.</p>
 
     <?= Progress::widget(['percent' => 0, 'label' => '0%', 'options' => ['hidden' => true]]) ?>
 
