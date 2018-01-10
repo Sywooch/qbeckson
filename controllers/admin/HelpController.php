@@ -26,7 +26,6 @@ class HelpController extends Controller
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
-                    'upload' => ['POST'],
                 ],
             ],
         ];
@@ -47,16 +46,6 @@ class HelpController extends Controller
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
-    }
-
-    public function actionUpload($CKEditorFuncNum)
-    {
-        $this->enableCsrfValidation = false;
-        $uploader = new ImageUploader();
-        $uploader->load(Yii::$app->request->post(), '');
-        $uploader->upload($CKEditorFuncNum);
-
-        return $uploader->getResponse();
     }
 
     /**
