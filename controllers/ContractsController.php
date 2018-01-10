@@ -296,15 +296,6 @@ class ContractsController extends Controller
         return $this->redirect(['programs/search']);
     }
 
-    public function actionTest()
-    {
-        $filePath = 'organization-auto-prolongation-registry-' . Yii::$app->user->identity->organization->id . '.xlsx';
-        $writer = WriterFactory::create(Type::XLSX);
-        $writer->openToFile(Yii::$app->fileStorage->getFilesystem()->getAdapter()->getPathPrefix() . $filePath);
-        $writer->addRow(['id родительского договора', '№ родительского договора', 'дата родительского договора', 'Номер сертификата', 'Баланс сертификата', 'id дочернего договора', '№ дочернего договора', 'дата дочернего договора']);
-        return $this->asJson('qwe');
-    }
-
     /**
      * Displays a single Contracts model.
      *
