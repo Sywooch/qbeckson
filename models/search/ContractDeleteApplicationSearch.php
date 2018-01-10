@@ -28,7 +28,7 @@ class ContractDeleteApplicationSearch extends ContractDeleteApplication
         return [
             [['certificateNumber', 'status'], 'integer'],
             [['status'], 'in', 'range' => [self::STATUS_WAITING, self::STATUS_CONFIRMED, self::STATUS_REFUSED]],
-            [['contractNumber'], 'safe'],
+            [['contractNumber', 'contract_number'], 'safe'],
         ];
     }
 
@@ -90,6 +90,7 @@ class ContractDeleteApplicationSearch extends ContractDeleteApplication
         ]);
 
         $query->andFilterWhere(['like', Contracts::tableName() . '.[[number]]', $this->contractNumber]);
+        $query->andFilterWhere(['like', self::tableName() . '.[[contract_number]]', $this->contract_number]);
 
         return $dataProvider;
     }
