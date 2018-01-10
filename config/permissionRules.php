@@ -3,6 +3,20 @@
 namespace app\config\permissionRules;
 
 return [
+    'reports/default' =>
+        [
+            [
+                'allow' => true,
+                'roles' => ['admins']
+            ],
+        ],
+    'reports/duplicate-complitnesses' =>
+        [
+            [
+                'allow' => true,
+                'roles' => ['admins']
+            ],
+        ],
     'module' => [
         [
             'allow' => true,
@@ -338,7 +352,7 @@ return [
     'file' => [
         [
             'allow' => true,
-            'roles' => ['operators', 'organizations', 'payer'],
+            'roles' => ['operators', 'organizations', 'payer', 'certificate'],
             'actions' => ['contract'],
         ],
         [
