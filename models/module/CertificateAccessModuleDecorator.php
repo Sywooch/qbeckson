@@ -6,6 +6,7 @@ namespace app\models\module;
 use app\components\ModelDecorator;
 use app\models\Certificates;
 use app\models\Cooperate;
+use app\models\Organization;
 use app\models\ProgrammeModule;
 use app\models\UserIdentity;
 
@@ -20,14 +21,21 @@ class CertificateAccessModuleDecorator extends ModelDecorator
     private static $cooperateErr = false;
     private $lastMessage;
 
+    /**
+     * @var null|Certificates
+     */
+    private $certificate = null;
+
     public function getLastMessage()
     {
         return $this->lastMessage;
     }
 
-    public function setCertificate(Certificates $certificate)
+    public function setCertificate($certificateId)
     {
-        $this->certificate = $certificate;
+        if ($certificate = Certificates::find()->where(['id' => $certificateId])->one()) {
+            $this->certificate = $certificate;
+        }
     }
 
     public function setModule(ProgrammeModule $module)
@@ -54,9 +62,14 @@ class CertificateAccessModuleDecorator extends ModelDecorator
 
     public function haveCooperate(): bool
     {
+        if ($this->certificate) {
+            $payerId = $this->certificate->payer_id;
+        } else {
+            $payerId = $this->getUser()->getCertificate()->select('payer_id');
+        }
+
         return Cooperate::find()->where([
-                Cooperate::tableName() . '.[[payer_id]]' => $this->getUser()
-                    ->getCertificate()->select('payer_id'),
+                Cooperate::tableName() . '.[[payer_id]]' => $payerId,
                 Cooperate::tableName() . '.[[organization_id]]' => $this->getModule()->program
                     ->organization_id,
                 'status' => Cooperate::STATUS_ACTIVE])->exists()
@@ -78,6 +91,10 @@ class CertificateAccessModuleDecorator extends ModelDecorator
 
     public function getCertificate(): Certificates
     {
+        if ($this->certificate) {
+            return $this->certificate;
+        }
+
         return \Yii::$app->user->identity->certificate;
     }
 
