@@ -119,6 +119,9 @@ class AutoProlongation
             $allowDatePeriod = date('Y-m-d', strtotime('-1 Month'));
         }
 
+        /** @var \app\models\OperatorSettings $operatorSettings */
+        $operatorSettings = Yii::$app->operator->identity->settings;
+
         $query = Contracts::find()
             ->distinct()
             ->leftJoin(Payers::tableName(), 'payers.id = contracts.payer_id')
@@ -127,7 +130,6 @@ class AutoProlongation
             ->andWhere(['contracts.period' => [Contracts::CURRENT_REALIZATION_PERIOD, Contracts::PAST_REALIZATION_PERIOD]])
             ->andWhere(['groups.status' => Groups::STATUS_ACTIVE])
             ->andWhere(['not in', 'contracts.id', Contracts::getAutoProlongedParentContractIdList()])
-            ->andWhere(['payers.certificate_can_use_future_balance' => 1])
             ->andWhere(['or',
                 ['and',
                     ['contracts.status' => Contracts::STATUS_ACTIVE],
@@ -153,12 +155,33 @@ class AutoProlongation
             ->andFilterWhere(['contracts.program_id' => $this->programId])
             ->andFilterWhere(['contracts.group_id' => $this->groupId]);
 
-        /** @var \app\models\OperatorSettings $operatorSettings */
-        $operatorSettings = Yii::$app->operator->identity->settings;
-
         if (is_null($this->groupId)) {
             $query->andWhere('contracts.stop_edu_contract < groups.datestop')
-                ->andWhere(['>', 'groups.datestop', $operatorSettings->current_program_date_from]);
+                ->andWhere(['or',
+                    ['and',
+                        ['and',
+                            ['and',
+                                ['>', 'groups.datestop', $operatorSettings->current_program_date_from],
+                                ['<', 'groups.datestop', $operatorSettings->future_program_date_from],
+                            ],
+                            ['<', 'groups.datestart', $operatorSettings->current_program_date_from]
+                        ],
+                        ['or',
+                            ['payers.certificate_can_use_current_balance' => 1],
+                            ['and',
+                                ['payers.certificate_can_use_current_balance' => 0],
+                                ['>', 'payers.certificate_cant_use_current_balance_at', date('Y-m-d H:i:s')],
+                            ],
+                        ],
+                    ],
+                    ['and',
+                        ['and',
+                            ['<', 'groups.datestart', $operatorSettings->current_program_date_to],
+                            ['>', 'groups.datestop', $operatorSettings->future_program_date_from],
+                        ],
+                        ['payers.certificate_can_use_future_balance' => 1],
+                    ],
+                ]);
         }
 
         return $query;
