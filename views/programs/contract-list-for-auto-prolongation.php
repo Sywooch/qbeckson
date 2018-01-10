@@ -60,6 +60,7 @@ $('.auto-prolongation-init-button').on('click', function() {
         contractToAutoProlongationCount = 0;
 
     $('.progress').show();
+    $(this).prop('disabled', true);
     
     autoProlongation(url, contractToAutoProlongationCount, 1);
 });
@@ -94,8 +95,8 @@ function autoProlongation(url, contractToAutoProlongationCount, isNew) {
                 $.ajax({
                     url: url,
                     method: 'POST',
-                    data: {allCreated: true}
-                })
+                    data: {getRegistry: 1}
+                });
             }
         }
     });
@@ -125,7 +126,7 @@ $this->registerJs($js);
 
     <br>
     <?= Html::button('Запустить', ['class' => 'btn btn-primary auto-prolongation-init-button', 'data' => ['url' => '/programs/auto-prolongation-init']]) ?>
-    <?= Html::button('Отмена', ['class' => 'btn btn-danger auto-prolongation-cancel', 'onClick' => '$(.modal).modal("hide")']) ?>
+    <?= Html::button('Отмена', ['class' => 'btn btn-danger auto-prolongation-cancel', 'onClick' => '$(".modal").modal("hide")']) ?>
 
     <?= Html::a('Готово', '/personal/organization-contracts', ['class' => 'btn btn-primary auto-prolongation-init-complete', 'style' => ['display' => 'none']]) ?>
 
@@ -134,6 +135,9 @@ $this->registerJs($js);
 
 <?= GridView::widget([
     'dataProvider' => $contractDataProvider,
+    'options' => [
+        'class' => 'text-center',
+    ],
     'columns' => [
         [
             'class' => DataColumn::className(),

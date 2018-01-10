@@ -106,6 +106,7 @@ class ContractConfirmForm extends Model
                 'number',
                 'date',
                 'status',
+                'requested_at',
                 'rezerv',
                 'cooperate_id',
             ]);

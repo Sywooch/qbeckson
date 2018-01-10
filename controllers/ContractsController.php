@@ -26,6 +26,8 @@ use app\models\Programs;
 use app\models\User;
 use app\models\UserIdentity;
 use app\traits\AjaxValidationTrait;
+use Box\Spout\Common\Type;
+use Box\Spout\Writer\WriterFactory;
 use kartik\mpdf\Pdf;
 use mPDF;
 use Yii;
@@ -154,9 +156,9 @@ class ContractsController extends Controller
     }
 
     /**
-     * проверить существует ли контракт сертификата в той же программе
+     * проверить может ли контракт сертификата быть автопролонгирован в модуле
      */
-    public function actionCheckCertificateContractsInProgram()
+    public function actionContractCanAutoProlongInModule()
     {
         $certificate = Certificates::findOne(\Yii::$app->request->post('certificateId', null));
 
@@ -164,7 +166,7 @@ class ContractsController extends Controller
             return $this->asJson(false);
         }
 
-        if (!$certificate->contractExistInAnotherModuleOfProgram(\Yii::$app->request->post('programId'), \Yii::$app->request->post('moduleId'))) {
+        if (!$certificate->contractCanAutoProlongInModule(\Yii::$app->request->post('programId'), \Yii::$app->request->post('moduleId'))) {
             return $this->asJson(false);
         }
 
@@ -194,9 +196,9 @@ class ContractsController extends Controller
         if (Yii::$app->request->isPost && $group) {
             $module = $group->module;
             $decoratedModule = CertificateAccessModuleDecorator::decorate($module);
+            $decoratedModule->setCertificate($certificateId);
             if (!$decoratedModule->certificateCanEnlistmentToProgram()) {
                 Yii::$app->session->setFlash('modal-danger', $decoratedModule->getLastMessage());
-
                 return $this->redirect('/personal/certificate-programs');
             }
         }
@@ -332,7 +334,7 @@ class ContractsController extends Controller
         /** @var \app\models\OperatorSettings $operatorSettings */
         $operatorSettings = Yii::$app->operator->identity->settings;
 
-        if (!$model->canBeAccepted()) {
+        if (Contracts::STATUS_REQUESTED == $model->status && !$model->canBeAccepted()) {
             $message = null;
 
             if (\Yii::$app->user->can('certificate') || \Yii::$app->user->can('operators')) {
@@ -508,6 +510,8 @@ class ContractsController extends Controller
             }
 
             $model->status = 1;
+            $model->activated_at = date('Y-m-d H:i:s');
+
             if ($model->stop_edu_contract <= date('Y-m-d', $lastDayOfMonth)) {
                 $model->wait_termnate = 1;
                 $model->termination_initiated_at = date('Y-m-d H:i:s');
@@ -516,12 +520,15 @@ class ContractsController extends Controller
             $firstDayOfPreviousMonth = strtotime('first day of previous month');
 
             if ($model->save()) {
-                if (date('m') != 1 && $model->stop_edu_contract >= date('Y-m-d', $firstDayOfPreviousMonth) && $model->start_edu_contract < date('Y-m-d', $currentMonth)) {
+                $start_edu_contract = explode("-", $model->start_edu_contract);
+
+                if (date('m') != 1 &&
+                    $model->stop_edu_contract >= date('Y-m-d', $firstDayOfPreviousMonth) &&
+                    $model->start_edu_contract < date('Y-m-d', $currentMonth)
+                ) {
                     $completeness = new Completeness();
                     $completeness->group_id = $model->group_id;
                     $completeness->contract_id = $model->id;
-
-                    $start_edu_contract = explode("-", $model->start_edu_contract);
 
                     $completeness->month = date('m') - 1;
                     $completeness->year = $start_edu_contract[0];
@@ -541,12 +548,13 @@ class ContractsController extends Controller
                     $completeness->save();
                 }
 
-                if (date('m') == 12 && $model->stop_edu_contract >= date('Y-m-d', $currentMonth) && $model->start_edu_contract <= date('Y-m-d', $lastDayOfMonth) ) {
+                if (date('m') == 12 &&
+                    $model->stop_edu_contract >= date('Y-m-d', $currentMonth) &&
+                    $model->start_edu_contract <= date('Y-m-d', $lastDayOfMonth)
+                ) {
                     $completeness = new Completeness();
                     $completeness->group_id = $model->group_id;
                     $completeness->contract_id = $model->id;
-
-                    $start_edu_contract = explode("-", $model->start_edu_contract);
 
                     $completeness->month = date('m');
                     $completeness->year = date('Y');
@@ -566,7 +574,9 @@ class ContractsController extends Controller
                     $completeness->save();
                 }
 
-                if ($model->start_edu_contract < date('Y-m-d', $nextMonth) && $model->stop_edu_contract >= date('Y-m-d', $currentMonth)) {
+                if ($model->start_edu_contract < date('Y-m-d', $nextMonth) &&
+                    $model->stop_edu_contract >= date('Y-m-d', $currentMonth)
+                ) {
                     $preinvoice = new Completeness();
                     $preinvoice->group_id = $model->group_id;
                     $preinvoice->contract_id = $model->id;
