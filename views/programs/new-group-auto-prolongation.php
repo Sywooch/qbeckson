@@ -42,6 +42,9 @@ $('#group-id').on('change', function() {
         success: function(data) {
             if (data != null) {
                 countToAutoProlong = data.countToAutoProlong;
+                
+                $('.auto-prolongation-info').html('Вы планируете перевести в группу ' + data.group.name + ' модуля ' + data.group.moduleFullName + ' образовательной программы "' + data.group.programName + '" с заключением договоров ' +
+                 'с ' + data.group.dateStart + ' по ' + data.group.dateStop + ' обучающихся:');
             }
 
             if (group.val() == '') {
@@ -257,8 +260,7 @@ $this->registerJs($js);
 </div>
 
 <div class="auto-prolong-confirmation-content" style="display: none;">
-    <p>Вы планируете перевести в группу <?= $group->name ?> модуля <?= $group->module->getFullname() ?> образовательной программы "<?= $group->program->name ?>" с заключением договоров
-        с <?= \Yii::$app->formatter->asDate($group->datestart) ?> по <?= \Yii::$app->formatter->asDate($group->datestop) ?> обучающихся:</p>
+    <p class="auto-prolongation-info"></p>
     <table class="table table-striped table-bordered">
         <thead>
         <tr>
@@ -275,7 +277,7 @@ $this->registerJs($js);
     <div class="row">
         <div class="col-xs-6">
             <?= Html::button('да, выполнить перевод', [
-                'class' => 'btn btn-success auto-prolongation-init',
+                'class' => 'btn btn-success',
                 'onClick' => '$.ajax({
                     url: \'/programs/auto-prolongation-to-new-group-init\',
                     method: \'POST\',
@@ -284,7 +286,9 @@ $this->registerJs($js);
                         toGroupId: $(\'#group-id\').val(),
                         contractIdList: $(\'.change-auto-prolongation-checkbox\').serializeArray()
                     }
-                })'
+                });
+                $("#auto-prolong-confirmation-modal").modal("hide");
+                $(\'.new-group-auto-prolongation-button[data-group-id="' . $group->id . '"]\').trigger("click");'
             ]) ?>
         </div>
         <div class="col-xs-6 text-right">

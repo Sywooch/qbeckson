@@ -1664,7 +1664,7 @@ class ProgramsController extends Controller
             return $this->asJson(false);
         }
         $autoProlongation = AutoProlongation::make(\Yii::$app->user->identity->organization->id);
-        $contractToAutoProlongationCount = count($autoProlongation->getContractIdList(true));
+        $contractToAutoProlongationCount = count(array_diff($autoProlongation->getContractIdList(true), $autoProlongation->getProcessedContractIdListFromRegistry()));
 
         if (\Yii::$app->request->isAjax) {
             if (1 == \Yii::$app->request->post('getRegistry')) {
@@ -1765,14 +1765,15 @@ class ProgramsController extends Controller
             return $this->asJson('Недостаточно прав');
         }
 
+        $organizationId = \Yii::$app->user->identity->organization->id;
         $group = Groups::findOne(\Yii::$app->request->post('groupId'));
 
-        if (!$group && AutoProlongation::canGroupBeAutoProlong($group->id)) {
+        if (!$group && AutoProlongation::canGroupBeAutoProlong($organizationId, $group->id)) {
             return $this->asJson('Невозможно перевести детей из этой группы');
         }
 
         if (\Yii::$app->request->isAjax) {
-            $autoProlongation = AutoProlongation::make(\Yii::$app->user->identity->organization->id, null, null, $group->id);
+            $autoProlongation = AutoProlongation::make($organizationId, null, null, $group->id);
 
             $contractIdList = Contracts::findAll(['id' => $autoProlongation->getContractIdListForAutoProlongationToNewGroup()]);
 
@@ -1828,7 +1829,16 @@ class ProgramsController extends Controller
             return $this->asJson(null);
         }
 
-        return $this->asJson(['countToAutoProlong' => $group->getFreePlaces()]);
+        return $this->asJson([
+            'countToAutoProlong' => $group->getFreePlaces(),
+            'group' => [
+                'name' => $group->name,
+                'moduleFullName' => $group->module->getFullname(),
+                'programName' => $group->program->name,
+                'dateStart' => \Yii::$app->formatter->asDate($group->datestart),
+                'dateStop' => \Yii::$app->formatter->asDate($group->datestop),
+            ]
+        ]);
     }
 
     /**

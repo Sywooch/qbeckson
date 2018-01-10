@@ -330,8 +330,7 @@ class AutoProlongation
      */
     public function init($groupId = null, $limit = null, $isNew = true, $filterContractIdList = [])
     {
-        $filePath = 'organization-auto-prolongation-registry-' . Yii::$app->user->identity->organization->id . '.xlsx';
-        $processedContractIdList = ArrayHelper::getColumn($this->readProcessedContractIdFromXlsx($filePath), 0);
+        $processedContractIdList = $this->getProcessedContractIdListFromRegistry();
 
         $filteredByAutoProlongationEnabled = true;
         if ($group = Groups::findOne($groupId)) {
@@ -602,11 +601,23 @@ class AutoProlongation
             if (isset($item['childContractId']) && isset($item['childContractNumber']) && $item['childContractDate']) {
                 $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], $item['certificateBalance'], $item['childContractId'], $item['childContractNumber'], $item['childContractDate']]);
             } else {
-                $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], $item['certificateBalance'], 'договор продления обучения не создан.']);
+                $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], $item['certificateBalance'], 'договор продления обучения не создан, не достаточно баланса']);
             }
         }
 
         $writer->close();
+    }
+
+    /**
+     * получить список автопролонгированных договоров с реестра
+     *
+     * @return array
+     */
+    public function getProcessedContractIdListFromRegistry()
+    {
+        $filePath = 'organization-auto-prolongation-registry-' . Yii::$app->user->identity->organization->id . '.xlsx';
+
+        return ArrayHelper::getColumn($this->readProcessedContractIdFromXlsx($filePath), 0);
     }
 
     /**
