@@ -107,7 +107,8 @@ $items = [
                     null
                 ),
                 'role' => UserIdentity::ROLE_ORGANIZATION,
-                'type' => 'waiting'
+                'type' => 'waiting',
+                'customizable' => false
             ]) .
             GridView::widget([
                 'dataProvider' => $dataProvider,
@@ -121,13 +122,14 @@ $items = [
                 'action' => ['contract'],
                 'data' => GridviewHelper::prepareColumns(
                     $confirmedModel::tableName(),
-                    $filterColumns,
+                    [['attribute' => 'contract_number']],
                     'confirmed',
                     'searchFilter',
                     null
                 ),
                 'role' => UserIdentity::ROLE_ORGANIZATION,
-                'type' => 'confirmed'
+                'type' => 'confirmed',
+                'customizable' => false
             ]) .
             GridView::widget([
             'dataProvider' => $dataConfirmedProvider,
@@ -147,7 +149,8 @@ $items = [
                     null
                 ),
                 'role' => UserIdentity::ROLE_ORGANIZATION,
-                'type' => 'refused'
+                'type' => 'refused',
+                'customizable' => false
             ]) .
             GridView::widget([
             'dataProvider' => $dataRefusedProvider,
