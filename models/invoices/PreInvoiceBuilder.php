@@ -130,8 +130,11 @@ class PreInvoiceBuilder extends InvoicesActions
             ->select(['id' => 'max(' . Contracts::tableName() . '.[[id]])'])
             ->column();
 
-        $this->addError($attribute, 'Дубликаты договоров: ' . implode(', ', $duplicatedContractId));
-        $this->emitDuplicatedContractIdErrsDangerFlash($duplicatedContractId);
+        // добавить ошибку только если есть дубликаты
+        if ($duplicatedContractId) {
+            $this->addError($attribute, 'Дубликаты договоров: ' . implode(', ', $duplicatedContractId));
+            $this->emitDuplicatedContractIdErrsDangerFlash($duplicatedContractId);
+        }
     }
 
     public function contractsValidator($attribute, $params, InlineValidator $validator)
