@@ -720,21 +720,22 @@ class Contracts extends ActiveRecord
      */
     public function getTransactions()
     {
-        $now = new \DateTime();
-        $year = $now->format('Y');
-        $month = $now->format('m');
+//        $now = new \DateTime();
+//        $year = $now->format('Y');
+//        $month = $now->format('m');
         $condition = [
-            'or',
-            ['preinvoice' => 0],
-            [
-                'and',
-                ['preinvoice' => 1],
-                [
-                    'and',
-                    ['year' => $year],
-                    ['month' => $month]
-                ]
-            ],
+//            'or',
+            /*[*/
+            'preinvoice' => 0/*],*/
+//            [
+//                'and',
+//                ['preinvoice' => 1],
+//                [
+//                    'and',
+//                    ['year' => $year],
+//                    ['month' => $month]
+//                ]
+//            ],
         ];
 
         return $this

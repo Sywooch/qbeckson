@@ -624,7 +624,7 @@ class AutoProlongation
             if (isset($item['childContractId']) && isset($item['childContractNumber']) && $item['childContractDate']) {
                 $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], $item['certificateBalance'], $item['childContractId'], $item['childContractNumber'], $item['childContractDate']]);
             } else {
-                $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], $item['certificateBalance'], 'договор продления обучения не создан, не достаточно баланса']);
+                $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], $item['certificateBalance'], 'договор продления обучения не создан, недостаточно средств на сертификате']);
             }
         }
 
