@@ -19,6 +19,12 @@ use yii\helpers\Html;
         'clientOptions' => [
             'rows' => 10,
             'height' => 300,
+            'filebrowserImageBrowseUrl' => yii\helpers\Url::to([
+                'imagemanager/manager',
+                'view-mode' => 'iframe',
+                'select-type' => 'ckeditor'
+            ]),
+
             'toolbarGroups' => [
                 ['name' => 'clipboard', 'groups' => ['mode', 'undo', 'selection', 'clipboard', 'doctools']],
                 ['name' => 'editing', 'groups' => ['tools', 'about']],

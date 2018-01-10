@@ -375,4 +375,10 @@ return [
             'actions' => ['view', 'update', 'upload'],
         ]
     ],
+    'imagemanager/manager' => [
+        [
+            'allow' => true,
+            'roles' => ['admins'],
+        ]
+    ],
 ];
