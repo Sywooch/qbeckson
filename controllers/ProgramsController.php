@@ -1774,7 +1774,7 @@ class ProgramsController extends Controller
                 ],
             ]);
 
-            $moduleIdList = $autoProlongation::getModuleIdList($group->program_id, $group->id);
+            $moduleIdList = $autoProlongation->getModuleIdList($group->program_id);
 
             $modules = ProgrammeModule::findAll(['id' => $moduleIdList]);
             $moduleNameList = [];
@@ -1791,6 +1791,40 @@ class ProgramsController extends Controller
         }
 
         return $this->asJson('error');
+    }
+
+    /**
+     * список контрактов для автопролонгации в новую группу
+     */
+    public function actionContractListForAutoProlongationToNewGroup()
+    {
+        if (!\Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+            return $this->asJson('Недостаточно прав!');
+        }
+
+        $organizationId = \Yii::$app->user->identity->organization->id;
+        $autoProlongFromGroupId = \Yii::$app->request->post('autoProlongFromGroupId');
+        $autoProlongToYearId = \Yii::$app->request->post('autoProlongToYearId', null);
+
+        if (!Groups::find()->where(['id' => $autoProlongFromGroupId, 'status' => Groups::STATUS_ACTIVE])->exists()
+        ) {
+            return $this->asJson('Группа не найдена!');
+        }
+
+
+        $autoProlongation = AutoProlongation::make($organizationId, null, null, $autoProlongFromGroupId);
+
+        $contractIdList = Contracts::findAll(['id' => $autoProlongation->getContractIdListForAutoProlongationToNewGroup($autoProlongToYearId)]);
+
+        $certificatesDataProvider = $dataProvider = new ActiveDataProvider([
+            'query' => Contracts::find()->where(['id' => $contractIdList]),
+            'pagination' => [
+                'pageSizeLimit' => false,
+                'pageSize' => 100,
+            ],
+        ]);
+
+        return $this->renderAjax('contract-list-for-auto-prolongation-to-new-group', ['certificatesDataProvider' => $certificatesDataProvider]);
     }
 
     /**
