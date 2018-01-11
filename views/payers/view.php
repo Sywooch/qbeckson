@@ -214,7 +214,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     );
                 }
 
-            } elseif (!$currentPeriodCooperate || !$futurePeriodCooperate) { ?>
+            } elseif (!$currentPeriodCooperate) { ?>
                 <?= $this->render('_cooperate-request', ['model' => $model, 'operatorSettings' => $operatorSettings]); ?>
             <?php } ?>
 

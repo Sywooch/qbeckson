@@ -119,6 +119,9 @@ class AutoProlongation
             $allowDatePeriod = date('Y-m-d', strtotime('-1 Month'));
         }
 
+        /** @var \app\models\OperatorSettings $operatorSettings */
+        $operatorSettings = Yii::$app->operator->identity->settings;
+
         $query = Contracts::find()
             ->distinct()
             ->leftJoin(Payers::tableName(), 'payers.id = contracts.payer_id')
@@ -127,7 +130,6 @@ class AutoProlongation
             ->andWhere(['contracts.period' => [Contracts::CURRENT_REALIZATION_PERIOD, Contracts::PAST_REALIZATION_PERIOD]])
             ->andWhere(['groups.status' => Groups::STATUS_ACTIVE])
             ->andWhere(['not in', 'contracts.id', Contracts::getAutoProlongedParentContractIdList()])
-            ->andWhere(['payers.certificate_can_use_future_balance' => 1])
             ->andWhere(['or',
                 ['and',
                     ['contracts.status' => Contracts::STATUS_ACTIVE],
@@ -153,12 +155,33 @@ class AutoProlongation
             ->andFilterWhere(['contracts.program_id' => $this->programId])
             ->andFilterWhere(['contracts.group_id' => $this->groupId]);
 
-        /** @var \app\models\OperatorSettings $operatorSettings */
-        $operatorSettings = Yii::$app->operator->identity->settings;
-
         if (is_null($this->groupId)) {
             $query->andWhere('contracts.stop_edu_contract < groups.datestop')
-                ->andWhere(['>', 'groups.datestop', $operatorSettings->current_program_date_from]);
+                ->andWhere(['or',
+                    ['and',
+                        ['and',
+                            ['and',
+                                ['>', 'groups.datestop', $operatorSettings->current_program_date_from],
+                                ['<', 'groups.datestop', $operatorSettings->future_program_date_from],
+                            ],
+                            ['<', 'groups.datestart', $operatorSettings->current_program_date_from]
+                        ],
+                        ['or',
+                            ['payers.certificate_can_use_current_balance' => 1],
+                            ['and',
+                                ['payers.certificate_can_use_current_balance' => 0],
+                                ['>', 'payers.certificate_cant_use_current_balance_at', date('Y-m-d H:i:s')],
+                            ],
+                        ],
+                    ],
+                    ['and',
+                        ['and',
+                            ['<', 'groups.datestart', $operatorSettings->current_program_date_to],
+                            ['>', 'groups.datestop', $operatorSettings->future_program_date_from],
+                        ],
+                        ['payers.certificate_can_use_future_balance' => 1],
+                    ],
+                ]);
         }
 
         return $query;
@@ -330,8 +353,7 @@ class AutoProlongation
      */
     public function init($groupId = null, $limit = null, $isNew = true, $filterContractIdList = [])
     {
-        $filePath = 'organization-auto-prolongation-registry-' . Yii::$app->user->identity->organization->id . '.xlsx';
-        $processedContractIdList = ArrayHelper::getColumn($this->readProcessedContractIdFromXlsx($filePath), 0);
+        $processedContractIdList = $this->getProcessedContractIdListFromRegistry();
 
         $filteredByAutoProlongationEnabled = true;
         if ($group = Groups::findOne($groupId)) {
@@ -350,12 +372,7 @@ class AutoProlongation
             $this->remainCount = count(array_diff($this->getContractIdList($filteredByAutoProlongationEnabled), $processedContractIdList));
         }
 
-        $contractWithFutureCooperateIdList = Contracts::find()
-            ->select('contracts.id')
-            ->leftJoin(Cooperate::tableName(), 'contracts.payer_id = cooperate.payer_id and contracts.organization_id = cooperate.organization_id')
-            ->where(['cooperate.status' => Cooperate::STATUS_ACTIVE, 'cooperate.period' => Cooperate::PERIOD_FUTURE])
-            ->andWhere(['contracts.id' => $contractIdList])
-            ->column();
+        $contractIdListWithActiveCooperate = $this->getContractIdListForActiveCooperate($contractIdList);
 
         /** @var \app\models\OperatorSettings $operatorSettings */
         $operatorSettings = Yii::$app->operator->identity->settings;
@@ -412,7 +429,7 @@ class AutoProlongation
                     $dataList['certificateBalanceF']
                 );
 
-                if (in_array($dataList['contractId'], $contractWithFutureCooperateIdList)) {
+                if (in_array($dataList['contractId'], $contractIdListWithActiveCooperate)) {
                     $this->contractAcceptedAutoProlongedCount += 1;
 
                     $contractData = array_merge($contractRequestData, [
@@ -577,6 +594,46 @@ class AutoProlongation
     }
 
     /**
+     * получить список id контрактов для которых есть действующее соглашение между плательщиком и организацией
+     *
+     * @param $contractIdList
+     *
+     * @return array
+     */
+    private function getContractIdListForActiveCooperate($contractIdList)
+    {
+
+        /** @var \app\models\OperatorSettings $operatorSettings */
+        $operatorSettings = Yii::$app->operator->identity->settings;
+
+        $contractIdListForActiveCooperate = Contracts::find()
+            ->select('contracts.id')
+            ->leftJoin(Cooperate::tableName(), 'contracts.payer_id = cooperate.payer_id and contracts.organization_id = cooperate.organization_id')
+            ->leftJoin(Groups::tableName(), 'groups.id = contracts.group_id')
+            ->where(['cooperate.status' => Cooperate::STATUS_ACTIVE])
+            ->andWhere(['contracts.id' => $contractIdList])
+            ->andWhere(['or',
+                ['and',
+                    ['and',
+                        ['>', 'groups.datestop', $operatorSettings->current_program_date_from],
+                        ['<', 'groups.datestop', $operatorSettings->current_program_date_to]
+                    ],
+                    ['cooperate.period' => Cooperate::PERIOD_CURRENT]
+                ],
+                ['and',
+                    ['and',
+                        ['>', 'groups.datestop', $operatorSettings->future_program_date_from],
+                        ['<', 'groups.datestop', $operatorSettings->future_program_date_to]
+                    ],
+                    ['cooperate.period' => Cooperate::PERIOD_FUTURE]
+                ],
+            ])
+            ->column();
+
+        return $contractIdListForActiveCooperate;
+    }
+
+    /**
      * записать в файл автопролонгированные контракты
      *
      * @param $isNew
@@ -602,11 +659,23 @@ class AutoProlongation
             if (isset($item['childContractId']) && isset($item['childContractNumber']) && $item['childContractDate']) {
                 $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], $item['certificateBalance'], $item['childContractId'], $item['childContractNumber'], $item['childContractDate']]);
             } else {
-                $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], $item['certificateBalance'], 'договор продления обучения не создан.']);
+                $writer->addRow([$id, $item['contractNumber'], $item['date'], $item['certificateNumber'], $item['certificateBalance'], 'договор продления обучения не создан, недостаточно средств на сертификате']);
             }
         }
 
         $writer->close();
+    }
+
+    /**
+     * получить список автопролонгированных договоров с реестра
+     *
+     * @return array
+     */
+    public function getProcessedContractIdListFromRegistry()
+    {
+        $filePath = 'organization-auto-prolongation-registry-' . Yii::$app->user->identity->organization->id . '.xlsx';
+
+        return ArrayHelper::getColumn($this->readProcessedContractIdFromXlsx($filePath), 0);
     }
 
     /**

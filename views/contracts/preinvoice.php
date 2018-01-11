@@ -60,25 +60,8 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="invoices-index">
 
     <?php
-    $organizations = new Organization();
-    $organization = $organizations->getOrganization();
-
-    $month_start = date('Y-m-') . '01';
-    $contracts = (new \yii\db\Query())
-        ->select(['id'])
-        ->from('contracts')
-        ->where(['<=', 'start_edu_contract', $month_start])
-        ->andWhere(['>=', 'stop_edu_contract', $month_start])
-        ->andWhere(['organization_id' => $organization->id])
-        ->andWhere(['payer_id' => $payers->payer_id])
-        ->andWhere(['status' => 1])
-        ->andWhere(['>', 'all_funds', 0])
-        ->column();
-
     $sum = 0;
-    foreach ($contracts as $contract_id) {
-        $contract = Contracts::findOne($contract_id);
-
+    foreach ($ContractsProvider->query->all() as $contract) {
         $completeness = (new \yii\db\Query())
             ->select(['sum'])
             ->from('completeness')
@@ -86,7 +69,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ->andWhere(['preinvoice' => 1])
             ->andWhere(['month' => date('m')])
             ->one();
-
         $sum += $completeness['sum'];
     }
 
@@ -107,7 +89,7 @@ $this->params['breadcrumbs'][] = $this->title;
             /*['class' => 'yii\grid\CheckboxColumn',
              'checkboxOptions' => function ($model, $key, $index, $column) {
                  return ['value' => $model->id];
-             }   
+             }
             ], */
 
             //'id',
