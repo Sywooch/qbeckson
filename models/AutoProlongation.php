@@ -372,12 +372,7 @@ class AutoProlongation
             $this->remainCount = count(array_diff($this->getContractIdList($filteredByAutoProlongationEnabled), $processedContractIdList));
         }
 
-        $contractWithFutureCooperateIdList = Contracts::find()
-            ->select('contracts.id')
-            ->leftJoin(Cooperate::tableName(), 'contracts.payer_id = cooperate.payer_id and contracts.organization_id = cooperate.organization_id')
-            ->where(['cooperate.status' => Cooperate::STATUS_ACTIVE, 'cooperate.period' => Cooperate::PERIOD_FUTURE])
-            ->andWhere(['contracts.id' => $contractIdList])
-            ->column();
+        $contractIdListWithActiveCooperate = $this->getContractIdListForActiveCooperate($contractIdList);
 
         /** @var \app\models\OperatorSettings $operatorSettings */
         $operatorSettings = Yii::$app->operator->identity->settings;
@@ -434,7 +429,7 @@ class AutoProlongation
                     $dataList['certificateBalanceF']
                 );
 
-                if (in_array($dataList['contractId'], $contractWithFutureCooperateIdList)) {
+                if (in_array($dataList['contractId'], $contractIdListWithActiveCooperate)) {
                     $this->contractAcceptedAutoProlongedCount += 1;
 
                     $contractData = array_merge($contractRequestData, [
@@ -596,6 +591,46 @@ class AutoProlongation
         }
 
         return true;
+    }
+
+    /**
+     * получить список id контрактов для которых есть действующее соглашение между плательщиком и организацией
+     *
+     * @param $contractIdList
+     *
+     * @return array
+     */
+    private function getContractIdListForActiveCooperate($contractIdList)
+    {
+
+        /** @var \app\models\OperatorSettings $operatorSettings */
+        $operatorSettings = Yii::$app->operator->identity->settings;
+
+        $contractIdListForActiveCooperate = Contracts::find()
+            ->select('contracts.id')
+            ->leftJoin(Cooperate::tableName(), 'contracts.payer_id = cooperate.payer_id and contracts.organization_id = cooperate.organization_id')
+            ->leftJoin(Groups::tableName(), 'groups.id = contracts.group_id')
+            ->where(['cooperate.status' => Cooperate::STATUS_ACTIVE])
+            ->andWhere(['contracts.id' => $contractIdList])
+            ->andWhere(['or',
+                ['and',
+                    ['and',
+                        ['>', 'groups.datestop', $operatorSettings->current_program_date_from],
+                        ['<', 'groups.datestop', $operatorSettings->current_program_date_to]
+                    ],
+                    ['cooperate.status' => Cooperate::PERIOD_CURRENT]
+                ],
+                ['and',
+                    ['and',
+                        ['>', 'groups.datestop', $operatorSettings->future_program_date_from],
+                        ['<', 'groups.datestop', $operatorSettings->future_program_date_to]
+                    ],
+                    ['cooperate.status' => Cooperate::PERIOD_FUTURE]
+                ],
+            ])
+            ->column();
+
+        return $contractIdListForActiveCooperate;
     }
 
     /**
