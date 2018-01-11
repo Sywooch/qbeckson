@@ -19,6 +19,7 @@ class CertificatesSearch extends Certificates
     public $enableContractsCount = false;
     public $cert_group = [];
     public $payerMunicipality;
+    public $idList = [];
 
     /**
      * @inheritdoc

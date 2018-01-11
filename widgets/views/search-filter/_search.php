@@ -35,16 +35,21 @@ use yii\helpers\Html;
             ?>
         <?php endforeach; ?>
         <?= $inaccessibleRows ?>
-        <div class="col-md-12 additional-params collapse">
-            <div class="row">
-                <?= $otherRows ?>
+        <?php if ($otherRows) { ?>
+            <div class="col-md-12 additional-params collapse">
+                <div class="row">
+                    <?= $otherRows ?>
+                </div>
             </div>
-        </div>
+        <?php } ?>
         <div class="col-md-12">
             <?= Html::submitButton('Начать поиск', ['class' => 'btn btn-primary']) ?>&nbsp;&nbsp;
             <?= Html::a('Сбросить', !empty($action) ? $action : ['index'],
                 ['class' => 'btn btn-default', 'style' => ['color' => '#333']]) ?>&nbsp;&nbsp;
-            <a href="javascript:void(0);" class="btn btn-warning show-additional-params">Расширенный поиск</a>&nbsp;&nbsp;
+            <?php if ($otherRows) { ?>
+                <a href="javascript:void(0);" class="btn btn-warning show-additional-params">Расширенный
+                    поиск</a>&nbsp;&nbsp;
+            <?php } ?>
             <?php if ($customizable): ?>
                 <a href="javascript:void(0);" class="toggle-search-settings">
                     <span class="glyphicon glyphicon-cog"></span> настроить

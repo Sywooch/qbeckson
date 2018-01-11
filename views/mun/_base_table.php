@@ -20,7 +20,7 @@
             <td><?= $model->conopc; ?></td>
         </tr>
         <tr>
-            <td><label class="control-label">Базовая потребность в приобретении услуг ПК</label></td>
+            <td><label class="control-label">Базовая потребность в приобретении услуг ПК и медицинских услуг</label></td>
             <td><?= $model->pc; ?></td>
             <td><?= $model->copc; ?></td>
         </tr>

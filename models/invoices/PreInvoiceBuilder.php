@@ -14,10 +14,12 @@ use DateTime;
 use Yii;
 use yii\base\Event;
 use yii\base\InvalidParamException;
+use yii\data\ArrayDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 use yii\validators\InlineValidator;
 
 /**
@@ -59,7 +61,6 @@ class PreInvoiceBuilder extends InvoicesActions
         if (array_key_exists('payer_id', $params)) {
             $payer_id = $params['payer_id'];
         } else {
-
             throw new InvalidParamException('payer_id required');
         }
         $date = $params['date'] ?? date("Y-m-d");
@@ -95,10 +96,46 @@ class PreInvoiceBuilder extends InvoicesActions
             ['number', 'integer'],
             ['date', 'safe'],
             ['date', 'preInvoiceExistsValidator'],
-            ['date', 'contractsValidator']
+            ['date', 'contractsValidator'],
+            ['invoice', 'contractUniqueValidator']
         ]);
     }
 
+    public function emitDuplicatedContractIdErrsDangerFlash($contractIds)
+    {
+        $message = \yii\widgets\ListView::widget([
+            'dataProvider' => new ArrayDataProvider(['allModels' => $contractIds]),
+            'summary' => 'ОШИБКА! Договоров в дубликатами комплитнесов: {totalCount}',
+            'options' => ['tag' => 'ul', 'class' => 'list-unstyled'],
+            'itemOptions' => ['tag' => 'li'],
+            'itemView' => function ($value, $key, $index, $widget) {
+                $link = Html::a('Договор: ' . $value, ['contracts/view', 'id' => $value]);
+
+                return $link;
+            }
+        ]);
+        Yii::$app->session->addFlash('danger', $message);
+    }
+
+    public function contractUniqueValidator($attribute, $params, InlineValidator $validator)
+    {
+        $contractsQuery = Contracts::find()
+            ->innerJoin(
+                Completeness::tableName(),
+                ['contract_id' => new Expression(Contracts::tableName() . '.[[id]]')]
+            );
+        $duplicatedContractId = $this->applyContractsCondition($contractsQuery)
+            ->having('count(' . Contracts::tableName() . '.[[id]]) > 1')
+            ->groupBy(Contracts::tableName() . '.[[id]]')
+            ->select(['id' => 'max(' . Contracts::tableName() . '.[[id]])'])
+            ->column();
+
+        // добавить ошибку только если есть дубликаты
+        if ($duplicatedContractId) {
+            $this->addError($attribute, 'Дубликаты договоров: ' . implode(', ', $duplicatedContractId));
+            $this->emitDuplicatedContractIdErrsDangerFlash($duplicatedContractId);
+        }
+    }
 
     public function contractsValidator($attribute, $params, InlineValidator $validator)
     {
@@ -124,8 +161,8 @@ class PreInvoiceBuilder extends InvoicesActions
                 '>=', 'date', (new \DateTime($this->date))->format('Y') . '-01-01'
             ])
             ->andWhere(['!=', 'status', Invoices::STATUS_REMOVED])
-            ->exists()) {
-
+            ->exists()
+        ) {
             $msg = 'За {mothDateStr} в {year} уже существует предоплата для {payer}';
             $msgParams = [
                 'mothDateStr' => DeclinationOfMonths::getMonthNameByNumberAsNominative($this->dateCurrentMonthNumber),
@@ -134,7 +171,6 @@ class PreInvoiceBuilder extends InvoicesActions
             ];
             $this->addError($attribute, Yii::t('app', $msg, $msgParams));
         }
-
     }
 
     public function getDateCurrentMonthEnd(): string
@@ -235,6 +271,7 @@ class PreInvoiceBuilder extends InvoicesActions
     public function setAfterSaveInvoiceHaveContractsCreateAction(\Closure $transactionTerminator)
     {
         $contractIds = $this->getContractsIds();
+        $uniqIds = array_unique($contractIds);
 
         $action = function (Event $event) use ($transactionTerminator, $contractIds) {
             /**@var $invoice Invoices */
