@@ -1885,7 +1885,6 @@ class ProgramsController extends Controller
         $toGroupId = \Yii::$app->request->post('toGroupId');
 
         $autoProlongation = AutoProlongation::make($organizationId, null, null, $group->id);
-        return $this->asJson($autoProlongation->init($toGroupId, null, true, $contractIdList));
         $autoProlongation->init($toGroupId, null, true, $contractIdList);
 
         if ($autoProlongation->errorMessage) {
