@@ -226,21 +226,26 @@ class AutoProlongation
     /**
      * получить список сертификатов для пролонгации
      *
-     * @param $exceptYearId
-     * @param $filteredByAutoProlongationEnabled
+     * @param $yearId - id модуля в который переводятся контракты
+     * @param $excludeAutoProlonged
      *
      * @return array
      */
-    public function getContractIdListForAutoProlongationToNewGroup($exceptYearId = null, $filteredByAutoProlongationEnabled = false)
+    public function getContractIdListForAutoProlongationToNewGroup($yearId = null, $excludeAutoProlonged = false)
     {
         $contractIdListQuery = $this->getQuery()
             ->select('contracts.id');
 
-        if ($exceptYearId) {
-            $contractIdListQuery->andWhere(['not in', 'contracts.year_id', $exceptYearId]);
+        if ($yearId) {
+            $contractIdListQuery->andWhere(['not in',
+                'contracts.certificate_id',
+                Certificates::find()
+                    ->select('certificates.id')
+                    ->leftJoin(Contracts::tableName(), 'contracts.certificate_id = certificates.id')->where(['contracts.year_id' => $yearId])
+            ]);
         }
 
-        if ($filteredByAutoProlongationEnabled) {
+        if ($excludeAutoProlonged) {
             $contractIdListQuery->andWhere(['contracts.parent_id' => null]);
         }
 
@@ -248,20 +253,20 @@ class AutoProlongation
     }
 
     /**
-     * получить список модулей программы не включающие указанную группу
+     * получить список модулей программы для автопролонгации из указанной группы
      *
      * @param $programId - id программы
-     * @param $exceptGroupId - id группы из которой осуществляется перевод
      *
      * @return array
      */
-    public static function getModuleIdList($programId, $exceptGroupId)
+    public function getModuleIdList($programId)
     {
-        $exceptYearId = Groups::find()->select(['groups.year_id'])->where(['id' => $exceptGroupId])->column();
+        $exceptYearId = Groups::find()->select(['groups.year_id'])->where(['id' => $this->groupId])->column();
 
         $moduleListId = ProgrammeModule::find()
-            ->select(['id'])
-            ->where(['program_id' => $programId])
+            ->select(['years.id'])
+            ->leftJoin(Contracts::tableName(), 'contracts.year_id = years.id')
+            ->where(['years.program_id' => $programId])
             ->andWhere(['!=', 'years.id', $exceptYearId])
             ->column();
 
@@ -300,9 +305,13 @@ class AutoProlongation
         $group = Groups::findOne($groupId);
 
         $self = self::make($organizationId, null, null, $groupId);
-        $self->getContractIdListForAutoProlongationToNewGroup(null, true);
 
-        if ($self->getContractIdListForAutoProlongationToNewGroup(null, true) && date('Y-m-d', strtotime('+1 Month')) > $group->datestop && (date('Y-m-d', strtotime('-1 Month')) < $group->datestop || in_array(date('m', strtotime($group->datestop)), [5, 6, 7, 8]) && date('Y-m-d', strtotime('-4 Month')) < $group->datestop)) {
+        if ($self->getContractIdListForAutoProlongationToNewGroup(null, true) &&
+            date('Y-m-d', strtotime('+1 Month')) > $group->datestop &&
+            (date('Y-m-d', strtotime('-1 Month')) < $group->datestop ||
+                in_array(date('m', strtotime($group->datestop)), [5, 6, 7, 8]) &&
+                date('Y-m-d', strtotime('-4 Month')) < $group->datestop)
+        ) {
             return true;
         }
 
@@ -357,7 +366,7 @@ class AutoProlongation
 
         $filteredByAutoProlongationEnabled = true;
         if ($group = Groups::findOne($groupId)) {
-            $contractIdList = $this->getContractIdListForAutoProlongationToNewGroup(null, $filteredByAutoProlongationEnabled);
+            $contractIdList = $this->getContractIdListForAutoProlongationToNewGroup($group->module->id, $filteredByAutoProlongationEnabled);
         } else {
             $contractIdList = $this->getContractIdList($filteredByAutoProlongationEnabled, $limit, !$isNew ? $processedContractIdList : []);
         }
@@ -400,6 +409,8 @@ class AutoProlongation
         }
 
         $contractNumber = 1;
+        $existsContractNumberList = Contracts::find()->select(['number'])->where(['organization_id' => $this->organizationId])->column();
+
         $organizationContractCount = Organization::findOne($this->organizationId)->getContracts()->where(['contracts.status' => [Contracts::STATUS_REQUESTED,Contracts::STATUS_ACTIVE,Contracts::STATUS_REFUSED,Contracts::STATUS_ACCEPTED,Contracts::STATUS_CLOSED,]])->count();
         $futurePeriodCertificateDataListRows = [];
         $currentPeriodCertificateDataListRows = [];
@@ -451,9 +462,13 @@ class AutoProlongation
                     ]);
                 }
 
+                do {
+                    $number = ($organizationContractCount + $contractNumber++) . ' - ПФ';
+                } while (in_array($number, $existsContractNumberList, ArrayHelper::getColumn($contractDataListRows, 'number')));
+
                 $contractData += [
                     'parent_id' => $dataList['contractId'],
-                    'number' => ($organizationContractCount + $contractNumber++) . ' - ПФ',
+                    'number' => $number,
                     'date' => date('Y-m-d', strtotime($contractData['start_edu_contract'])),
                     'rezerv' => $dataList['fundsCert'],
                 ];
