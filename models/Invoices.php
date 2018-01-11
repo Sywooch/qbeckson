@@ -227,11 +227,23 @@ class Invoices extends ActiveRecord
 
         $organization = Organization::findOne($model->organization_id);
 
-        $cooperate = (new \yii\db\Query())
+        /** @var \app\models\OperatorSettings $operatorSettings */
+        $operatorSettings = Yii::$app->operator->identity->settings;
+
+        if ($model->date > $operatorSettings->current_program_date_from &&
+            $model->date < $operatorSettings->current_program_date_to
+        ) {
+            $period = Cooperate::PERIOD_CURRENT;
+        }
+
+        if ($model->date < $operatorSettings->current_program_date_from) {
+            $period = Cooperate::PERIOD_ARCHIVE;
+        }
+
+        $cooperate = Cooperate::find()
             ->select(['number', 'date'])
-            ->from('cooperate')
-            ->where(['payer_id' => $model->payers_id])
-            ->andWhere(['organization_id' => $model->organization_id])
+            ->where(['payer_id' => $model->payers_id, 'organization_id' => $model->organization_id])
+            ->andWhere(['cooperate.period' => $period])
             ->one();
 
         $date_invoice = explode("-", $model->date);
