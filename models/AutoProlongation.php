@@ -618,14 +618,14 @@ class AutoProlongation
                         ['>', 'groups.datestop', $operatorSettings->current_program_date_from],
                         ['<', 'groups.datestop', $operatorSettings->current_program_date_to]
                     ],
-                    ['cooperate.status' => Cooperate::PERIOD_CURRENT]
+                    ['cooperate.period' => Cooperate::PERIOD_CURRENT]
                 ],
                 ['and',
                     ['and',
                         ['>', 'groups.datestop', $operatorSettings->future_program_date_from],
                         ['<', 'groups.datestop', $operatorSettings->future_program_date_to]
                     ],
-                    ['cooperate.status' => Cooperate::PERIOD_FUTURE]
+                    ['cooperate.period' => Cooperate::PERIOD_FUTURE]
                 ],
             ])
             ->column();
