@@ -393,7 +393,7 @@ class AutoProlongation
         }
 
         $contractIdListWithActiveCooperate = $this->getContractIdListForActiveCooperate($contractIdList, $period);
-return $contractIdListWithActiveCooperate;
+
         /** @var \app\models\OperatorSettings $operatorSettings */
         $operatorSettings = Yii::$app->operator->identity->settings;
 
