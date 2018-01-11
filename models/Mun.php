@@ -10,38 +10,38 @@ use yii\db\ActiveRecord;
 /**
  * This is the model class for table "mun".
  *
- * @property integer        $id
- * @property string         $name
- * @property integer        $ground
- * @property integer        $nopc
- * @property integer        $pc
- * @property integer        $zp
- * @property integer        $dop
- * @property integer        $uvel
- * @property integer        $otch
- * @property integer        $otpusk
- * @property integer        $polezn
- * @property integer        $stav
- * @property integer        $deystv
- * @property integer        $lastdeystv
- * @property Payers         $payer
- * @property integer        $countdet
- * @property integer        $operator_id
- * @property integer        $mun_id
- * @property integer        $user_id
- * @property integer        $type
- * @property integer        $file
- * @property integer        $base_url
- * @property integer        $rob
- * @property integer        $tex
- * @property integer        $fiz
- * @property integer        $xud
- * @property integer        $tur
- * @property integer        $soc
- * @property string         $filename
+ * @property integer $id
+ * @property string $name
+ * @property integer $ground
+ * @property integer $nopc
+ * @property integer $pc
+ * @property integer $zp
+ * @property integer $dop
+ * @property integer $uvel
+ * @property integer $otch
+ * @property integer $otpusk
+ * @property integer $polezn
+ * @property integer $stav
+ * @property integer $deystv
+ * @property integer $lastdeystv
+ * @property Payers $payer
+ * @property integer $countdet
+ * @property integer $operator_id
+ * @property integer $mun_id
+ * @property integer $user_id
+ * @property integer $type
+ * @property integer $file
+ * @property integer $base_url
+ * @property integer $rob
+ * @property integer $tex
+ * @property integer $fiz
+ * @property integer $xud
+ * @property integer $tur
+ * @property integer $soc
+ * @property string $filename
  *
- * @property Operators      $operator
- * @property Mun      $mun
+ * @property Operators $operator
+ * @property Mun $mun
  * @property Organization[] $organization
  */
 class Mun extends ActiveRecord
@@ -69,6 +69,14 @@ class Mun extends ActiveRecord
     const PREFIX_COUNTRY = 'co';
 
     public $confirmationFile;
+
+    public function init()
+    {
+        parent::init();
+        if ($this->isNewRecord) {
+            $this->setDefaults();
+        }
+    }
 
     /**
      * @inheritdoc
@@ -101,10 +109,34 @@ class Mun extends ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'nopc', 'conopc', 'pc', 'copc', 'zp', 'cozp', 'dop', 'codop', 'uvel', 'couvel', 'otch', 'cootch', 'otpusk', 'cootpusk', 'polezn', 'copolezn', 'stav', 'costav', 'rob', 'corob', 'tex', 'cotex', 'est', 'coest', 'fiz', 'cofiz', 'xud', 'coxud', 'tur', 'cotur', 'soc', 'cosoc', 'deystv', 'countdet', 'lastdeystv'], 'required'],
+            [
+                [
+                    'name', 'nopc', 'conopc', 'pc', 'copc',
+                    'zp', 'cozp', 'dop', 'codop', 'uvel',
+                    'couvel', 'otch', 'cootch', 'otpusk',
+                    'cootpusk', 'polezn', 'copolezn', 'stav',
+                    'costav', 'rob', 'corob', 'tex', 'cotex',
+                    'est', 'coest', 'fiz', 'cofiz', 'xud', 'coxud',
+                    'tur', 'cotur', 'soc', 'cosoc', 'deystv',
+                    'countdet', 'lastdeystv'
+                ], 'required'
+            ],
             ['operator_id', 'integer'],
-            [['nopc', 'conopc', 'pc', 'copc', 'zp', 'cozp', 'dop', 'codop', 'uvel', 'couvel', 'otch', 'cootch', 'otpusk', 'cootpusk', 'polezn', 'copolezn', 'stav', 'costav'], 'number'],
-            [['rob', 'corob', 'tex', 'cotex', 'est', 'coest', 'fiz', 'cofiz', 'xud', 'coxud', 'tur', 'cotur', 'soc', 'cosoc', 'deystv', 'countdet', 'lastdeystv'], 'integer'],
+            [
+                [
+                    'nopc', 'conopc', 'pc', 'copc', 'zp', 'cozp',
+                    'dop', 'codop', 'uvel', 'couvel', 'otch', 'cootch',
+                    'otpusk', 'cootpusk', 'polezn', 'copolezn', 'stav', 'costav'
+                ], 'number'
+            ],
+            [
+                [
+                    'rob', 'corob', 'tex', 'cotex', 'est', 'coest',
+                    'fiz', 'cofiz', 'xud', 'coxud', 'tur', 'cotur',
+                    'soc', 'cosoc', 'deystv', 'countdet', 'lastdeystv'
+                ],
+                'integer'
+            ],
             [['name', 'file', 'base_url'], 'string', 'max' => 255],
             [['confirmationFile'], 'safe', 'except' => self::SCENARIO_APPLICATION],
             [['filename'], 'safe'],
@@ -194,6 +226,7 @@ class Mun extends ActiveRecord
 
     /**
      * @param string $attribute
+     *
      * @return null|string
      */
     public function getMunValue(string $attribute)
@@ -203,6 +236,7 @@ class Mun extends ActiveRecord
 
     /**
      * @param string $columns
+     *
      * @return static[]
      */
     public static function findAllRecords($columns = '*')
@@ -219,7 +253,9 @@ class Mun extends ActiveRecord
 
     /**
      * Сравнивает значения атрибута заявки на изменение муниципалитета и самого муниципалитета
+     *
      * @param $attribute
+     *
      * @return bool
      */
     public function compareWithMunValue($attribute)
@@ -242,5 +278,22 @@ class Mun extends ActiveRecord
         }
 
         return null;
+    }
+
+    private function setDefaults()
+    {
+        $fieldsToSetOne = [
+            'nopc', 'conopc', 'pc', 'copc', 'zp', 'cozp', 'dop',
+            'codop', 'uvel', 'couvel', 'otch', 'cootch', 'otpusk',
+            'cootpusk', 'polezn', 'copolezn', 'stav', 'costav',
+            'rob', 'corob', 'tex', 'cotex', 'est', 'coest',
+            'fiz', 'cofiz', 'xud', 'coxud', 'tur', 'cotur',
+            'soc', 'cosoc', 'deystv', 'countdet'
+        ];
+        $this->lastdeystv = 0;
+
+        array_map(function ($field) {
+            $this->{$field} = 1;
+        }, $fieldsToSetOne);
     }
 }
