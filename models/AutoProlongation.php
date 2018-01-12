@@ -455,7 +455,7 @@ class AutoProlongation
                     'parent_id' => $dataList['contractId'],
                     'number' => ($organizationContractCount + $contractNumber++) . ' - ПФ',
                     'date' => date('Y-m-d', strtotime($contractData['start_edu_contract'])),
-                    'rezerv' => $dataList['fundsCert'],
+                    'rezerv' => $contractData['funds_cert'],
                 ];
 
                 if (isset($contractData['period']) && in_array($contractData['period'], [Contracts::CURRENT_REALIZATION_PERIOD, Contracts::FUTURE_REALIZATION_PERIOD])) {
