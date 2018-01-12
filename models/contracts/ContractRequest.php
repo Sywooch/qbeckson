@@ -64,6 +64,13 @@ class ContractRequest
             return false;
         }
 
+        // проверить нахождение даты начала обучения в пределах периода реализации программы в группе
+        if ((strtotime($this->start_edu_contract) < strtotime($groupDateStart) || strtotime($this->start_edu_contract) > strtotime($groupDateStop))) {
+            $this->errorMessage = 'Дата начала обучения должна быть в пределах срока реализации программы в группе: ' . \Yii::$app->formatter->asDate($groupDateStart) . ' - ' . \Yii::$app->formatter->asDate($groupDateStop) . '.';
+
+            return false;
+        }
+
         if (!$canUseCurrentBalance && 1 == $canUseFutureBalance &&
             (strtotime($this->start_edu_contract) < strtotime($this->getOperatorSettings()->future_program_date_from) || strtotime($this->start_edu_contract) > strtotime($groupDateStop))) {
             if (strtotime($this->getOperatorSettings()->future_program_date_from) > strtotime($groupDateStop)) {
