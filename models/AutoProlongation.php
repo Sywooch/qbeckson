@@ -475,7 +475,7 @@ class AutoProlongation
 
                 do {
                     $number = ($organizationContractCount + $contractNumber++) . ' - ПФ';
-                } while (in_array($number, $existsContractNumberList, ArrayHelper::getColumn($contractDataListRows, 'number')));
+                } while (in_array($number, $existsContractNumberList) || in_array($number, ArrayHelper::getColumn($contractDataListRows, 'number')));
 
                 $contractData += [
                     'parent_id' => $dataList['contractId'],
