@@ -384,19 +384,6 @@ class AutoProlongation
         /** @var \app\models\OperatorSettings $operatorSettings */
         $operatorSettings = Yii::$app->operator->identity->settings;
 
-        if ($group->datestop > $operatorSettings->current_program_date_from && $group->datestop < $operatorSettings->current_program_date_to) {
-            $period = Cooperate::PERIOD_CURRENT;
-        }
-
-        if ($group->datestop > $operatorSettings->future_program_date_from && $group->datestop < $operatorSettings->future_program_date_to) {
-            $period = Cooperate::PERIOD_FUTURE;
-        }
-
-        $contractIdListWithActiveCooperate = $this->getContractIdListForActiveCooperate($contractIdList, $period);
-
-        /** @var \app\models\OperatorSettings $operatorSettings */
-        $operatorSettings = Yii::$app->operator->identity->settings;
-
         $dataContractForAutoProlongationList = $this->getContractDataListForAutoProlongation($contractIdList);
 
         $registry = [];
@@ -415,7 +402,18 @@ class AutoProlongation
         if ($group) {
             $contractRequest->setStartEduContract(date('d.m.Y', strtotime($group->datestart)));
         } else {
-            $startEduContract = date_diff(new \DateTime(date($operatorSettings->current_program_date_from)), new \DateTime())->m > 0 ? $operatorSettings->future_program_date_from : $operatorSettings->current_program_date_from;
+            if (date('Y-m-d', strtotime('-1 Month')) < $operatorSettings->current_program_date_from &&
+                date('Y-m-d') > $operatorSettings->current_program_date_from
+            ) {
+                $startEduContract = $operatorSettings->current_program_date_from;
+            }
+
+            if (date('Y-m-d', strtotime('+1 Month')) > $operatorSettings->future_program_date_from &&
+                date('Y-m-d') < $operatorSettings->future_program_date_from
+            ) {
+                $startEduContract = $operatorSettings->future_program_date_from;
+            }
+
             $contractRequest->setStartEduContract(date('d.m.Y', strtotime($startEduContract)));
         }
 
@@ -451,12 +449,14 @@ class AutoProlongation
                     $dataList['certificateBalanceF']
                 );
 
-                if (in_array($dataList['contractId'], $contractIdListWithActiveCooperate)) {
+                $activeCooperate = Cooperate::find()->select('cooperate.id')->where(['organization_id' => $this->organizationId, 'payer_id' => $dataList['certificatePayerId'], 'period' => $contractRequestData['period']])->one();
+
+                if ($activeCooperate) {
                     $this->contractAcceptedAutoProlongedCount += 1;
 
                     $contractData = array_merge($contractRequestData, [
                         'status' => Contracts::STATUS_ACCEPTED,
-                        'cooperate_id' => $dataList['cooperateId'],
+                        'cooperate_id' => $activeCooperate->id,
                         'created_at' => date('Y-m-d H:i:s'),
                         'requested_at' => date('Y-m-d H:i:s'),
                         'accepted_at' => date('Y-m-d H:i:s'),
@@ -805,14 +805,12 @@ class AutoProlongation
                 'certificateBalanceF' => 'certificates.balance_f',
                 'certificateRezerv' => 'certificates.rezerv',
                 'certificateRezervF' => 'certificates.rezerv_f',
-                'cooperateId' => 'cooperate.id',
                 'organizationContractsCount' => 'organization.contracts_count',
             ])
             ->leftJoin(Groups::tableName(), 'groups.id = contracts.group_id')
             ->leftJoin(ProgrammeModule::tableName(), 'years.id = groups.year_id')
             ->leftJoin(Payers::tableName(), 'payers.id = contracts.payer_id')
             ->leftJoin(Certificates::tableName(), 'certificates.id = contracts.certificate_id')
-            ->leftJoin(Cooperate::tableName(), 'cooperate.organization_id = contracts.organization_id and cooperate.payer_id = contracts.payer_id and cooperate.period = ' . Cooperate::PERIOD_FUTURE)
             ->leftJoin(Organization::tableName(), 'organization.id = contracts.organization_id')
             ->where(['contracts.id' => $contractIdList])
             ->asArray()->all();
