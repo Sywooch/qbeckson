@@ -53,7 +53,7 @@ class CertificateAccessModuleDecorator extends ModelDecorator
             && $this->havePlaceInActiveContractsByProgramInPayer()
             && $this->haveFreePlaceInOrganization()
             && $this->haveFreePlaceInProgram()
-            && $this->notHaveActiveContractsInThisProgramm()
+            && $this->notHaveActiveContractsInThisModule()
             && (
                 $this->pushMessage('Вы можете записаться на программу. Выберете группу:')
                 || true
@@ -191,14 +191,14 @@ class CertificateAccessModuleDecorator extends ModelDecorator
                 . 'на обучение по программе. Свяжитесь с представителем организации.');
     }
 
-    public function notHaveActiveContractsInThisProgramm()
+    public function notHaveActiveContractsInThisModule()
     {
         return !($this->getCertificate()
-                ->getActiveContractsByProgram(
-                    $this->getModule()->program_id
+                ->getContractByYearId(
+                    $this->getModule()->id
                 )
                 ->exists())
-            || $this->pushMessage('Вы уже подали заявку на программу/заключили договор на обучение');
+            || $this->pushMessage('Вы уже подали заявку на модуль/заключили договор на обучение');
     }
 
 }

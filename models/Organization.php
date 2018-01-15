@@ -76,6 +76,7 @@ use Yii;
  * @property Programs[] $programs
  * @property OrganizationAddress[] $addresses
  * @property OrganizationContractSettings $contractSettings
+ * @property string $contractNumber
  */
 class Organization extends \yii\db\ActiveRecord
 {
@@ -813,5 +814,24 @@ class Organization extends \yii\db\ActiveRecord
         }
 
         return $contract->start_edu_contract < date('Y-m-d'); 
+    }
+
+    /**
+     * получить номер договора, которого нет в БД
+     *
+     * @param $exceptContractNumberList - список номеров, которые необходимо исключить при генерации
+     *
+     * @return string
+     */
+    public function getContractNumber($exceptContractNumberList = [])
+    {
+        $contractNumber = 1;
+        $existsContractNumberList = $this->getContracts()->select('contracts.number')->where(['not', ['contracts.number' => null]])->column();
+
+        do {
+            $number = (count($existsContractNumberList) + $contractNumber++) . ' - ПФ';
+        } while (in_array($number, $existsContractNumberList) || in_array($number, $exceptContractNumberList));
+
+        return $number;
     }
 }
