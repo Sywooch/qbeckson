@@ -139,8 +139,11 @@ class YearsController extends Controller
     {
         $model = new ModuleUpdateForm($id);
         $model->load(Yii::$app->request->post());
+        $model->price = 0;
 
         if (\Yii::$app->request->isAjax && \Yii::$app->request->post('calculatePrice') == 1) {
+            $model->dateFrom = \Yii::$app->request->post('dateFrom');
+            $model->dateTo = \Yii::$app->request->post('dateTo');
             $model->price = \Yii::$app->request->post('price');
 
             $modulePriceAverage = 'Установленная Вами цена модуля предполагает, что средняя стоимость модуля в расчете
@@ -152,7 +155,7 @@ class YearsController extends Controller
 
             return $this->asJson(['modulePriceAverage' => $modulePriceAverage]);
         }
-        
+
         return $this->render('update', [
             'model' => $model
         ]);
