@@ -15,12 +15,6 @@ $this->title = 'Установить цену: ' . $module->program->name . ' ' 
 $this->params['breadcrumbs'][] = ['label' => 'Программы', 'url' => ['personal/organization-programs']];
 $this->params['breadcrumbs'][] = $this->title;
 
-/*$js = <<<'JS'
-    $("#update-pjax").on("pjax:end", function() {
-        $('#moduleupdateform-price').val($('#recommend-price').text());
-    });
-JS;
-$this->registerJs($js, $this::POS_READY);*/
 ?>
 <div class="years-update">
     <div class="row">
@@ -113,7 +107,20 @@ $this->registerJs($js, $this::POS_READY);*/
                     <?= $formConfirm->field($model, 'dateFrom')->hiddenInput() ?>
                     <?= $formConfirm->field($model, 'dateTo')->hiddenInput() ?>
                 </div>
-                <?= $formConfirm->field($model, 'price')->textInput() ?>
+                <?= $formConfirm->field($model, 'price')->textInput(['onKeyup' => /** @lang JavaScript */ '
+                    $.ajax({
+                        data: {price: $(this).val(), calculatePrice: 1, dateFrom: $("#moduleupdateform-datefrom").val(), dateTo: $("#moduleupdateform-dateto").val()},
+                        method: "POST",
+                        success: function (data) {
+                            $(".module-price-average").html(data.modulePriceAverage);
+                        }
+                    });
+                ']) ?>
+
+                <p class="module-price-average">
+
+                </p>
+
                 <?php if ($model->price > $model->getModel()->normative_price) : ?>
                     <?= $formConfirm->field($model, 'firstConfirm')->checkbox() ?>
                 <?php endif; ?>
