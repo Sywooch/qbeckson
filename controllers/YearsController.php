@@ -140,6 +140,19 @@ class YearsController extends Controller
         $model = new ModuleUpdateForm($id);
         $model->load(Yii::$app->request->post());
 
+        if (\Yii::$app->request->isAjax && \Yii::$app->request->post('calculatePrice') == 1) {
+            $model->price = \Yii::$app->request->post('price');
+
+            $modulePriceAverage = 'Установленная Вами цена модуля предполагает, что средняя стоимость модуля в расчете
+                на 1 месяц составит ' . number_format($model->getModulePriceAverage(), 2) . ' рублей. То есть если Вы предполагаете,
+                что ребенку должно хватить средств на обучение по Вашим программам (данной и аналогичной) в течение 10 месяцев
+                в году, то номинал сертификата должен превышать ' . number_format($model->getModulePriceAverage() * 10, 2) .
+                ' рублей. Просим Вас самостоятельно оценить насколько указанная стоимость программы адекватна установленному
+                муниципалитетом номиналу сертификата.';
+
+            return $this->asJson(['modulePriceAverage' => $modulePriceAverage]);
+        }
+        
         return $this->render('update', [
             'model' => $model
         ]);
