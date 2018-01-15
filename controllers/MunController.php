@@ -6,6 +6,7 @@ use app\models\Coefficient;
 use app\models\Notification;
 use app\models\NotificationUser;
 use app\models\ProgrammeModule;
+use app\models\Programs;
 use Yii;
 use app\models\Mun;
 use app\models\User;
@@ -248,7 +249,14 @@ class MunController extends Controller
         $munTable = Mun::tableName();
         $modules = ProgrammeModule::find()
             ->joinWith('program.municipality')
+            ->innerJoin(Programs::tableName(), 'programs.id = years.program_id')
             ->andWhere([$munTable . '.[[id]]' => $munId])
+            ->andWhere(['programs.verification' => [
+                Programs::VERIFICATION_UNDEFINED,
+                Programs::VERIFICATION_WAIT,
+                Programs::VERIFICATION_DONE,
+                Programs::VERIFICATION_DENIED,
+            ]])
             ->all();
 
         /** @var Coefficient $coefficientData */
