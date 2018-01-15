@@ -417,10 +417,8 @@ class AutoProlongation
             $contractRequest->setStartEduContract(date('d.m.Y', strtotime($startEduContract)));
         }
 
-        $contractNumber = 1;
-        $existsContractNumberList = Contracts::find()->select(['number'])->where(['organization_id' => $this->organizationId])->column();
+        $organization = Organization::findOne($this->organizationId);
 
-        $organizationContractCount = Organization::findOne($this->organizationId)->getContracts()->where(['contracts.status' => [Contracts::STATUS_REQUESTED,Contracts::STATUS_ACTIVE,Contracts::STATUS_REFUSED,Contracts::STATUS_ACCEPTED,Contracts::STATUS_CLOSED,]])->count();
         $futurePeriodCertificateDataListRows = [];
         $currentPeriodCertificateDataListRows = [];
         $contractDataListRows = [];
@@ -473,13 +471,9 @@ class AutoProlongation
                     ]);
                 }
 
-                do {
-                    $number = ($organizationContractCount + $contractNumber++) . ' - ПФ';
-                } while (in_array($number, $existsContractNumberList) || in_array($number, ArrayHelper::getColumn($contractDataListRows, 'number')));
-
                 $contractData += [
                     'parent_id' => $dataList['contractId'],
-                    'number' => $number,
+                    'number' => $organization->getContractNumber(ArrayHelper::getColumn($contractDataListRows, 'number')),
                     'date' => date('Y-m-d', strtotime($contractData['start_edu_contract'])),
                     'rezerv' => $contractData['funds_cert'],
                 ];
