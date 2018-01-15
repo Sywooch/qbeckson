@@ -299,6 +299,12 @@ class YearsController extends Controller
             ->join('INNER JOIN', 'programs', '`programs`.id = `years`.program_id')
             ->join('INNER JOIN', 'mun', '`mun`.id = `programs`.mun')
             ->andWhere('`mun`.operator_id = ' . Yii::$app->operator->identity->id)
+            ->andWhere(['programs.verification' => [
+                Programs::VERIFICATION_UNDEFINED,
+                Programs::VERIFICATION_WAIT,
+                Programs::VERIFICATION_DONE,
+                Programs::VERIFICATION_DENIED,
+            ]])
             ->column();
 
         foreach ($years as $year_id) {
