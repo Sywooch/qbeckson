@@ -109,7 +109,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
                 <?= $formConfirm->field($model, 'price')->textInput(['onKeyup' => /** @lang JavaScript */ '
                     $.ajax({
-                        data: {price: $(this).val(), calculatePrice: 1},
+                        data: {price: $(this).val(), calculatePrice: 1, dateFrom: $("#moduleupdateform-datefrom").val(), dateTo: $("#moduleupdateform-dateto").val()},
                         method: "POST",
                         success: function (data) {
                             $(".module-price-average").html(data.modulePriceAverage);
@@ -117,7 +117,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     });
                 ']) ?>
 
-                <p class="module-price-average"></p>
+                <p class="module-price-average">
+
+                </p>
 
                 <?php if ($model->price > $model->getModel()->normative_price) : ?>
                     <?= $formConfirm->field($model, 'firstConfirm')->checkbox() ?>
