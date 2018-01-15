@@ -1051,9 +1051,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
                 <= $certificateUser->certificate->payer
                     ->getDirectionalityCountByName($this->directivity))
             && $this->organization->existsFreePlace() //Есть место в организации
-            && $this->existsFreePlace() //В программе есть место
-            && !$certificateUser->certificate
-                ->getActiveContractsByProgram($this->id)->exists(); //Нет заключенных договоров на программу
+            && $this->existsFreePlace(); //В программе есть место
     }
 
     /**

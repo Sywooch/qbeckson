@@ -97,10 +97,11 @@ if (!empty($groups)) {
                         'buttons' =>
                             [
                                 'permit' => function ($url, $model) {
-                                    return \yii\helpers\Html::a('Выбрать', ['/municipal-task-contract/create', 'groupId' => $model->id], [
-                                        'class' => 'btn btn-success',
-                                        'title' => 'Выбрать'
-                                    ]);
+                                    return 'До 1 февраля запись не доступна.';
+//                                        \yii\helpers\Html::a('Выбрать', ['/municipal-task-contract/create', 'groupId' => $model->id], [
+//                                        'class' => 'btn btn-success',
+//                                        'title' => 'Выбрать',
+//                                    ]);
                                 },
                             ]
                     ],

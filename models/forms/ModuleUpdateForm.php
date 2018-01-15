@@ -159,6 +159,16 @@ class ModuleUpdateForm extends Model
     }
 
     /**
+     * средняя стоимость модуля
+     *
+     * @return float
+     */
+    public function getModulePriceAverage()
+    {
+        return $this->price / CalculationHelper::daysBetweenDates($this->dateFrom, $this->dateTo) * 30.41;
+    }
+
+    /**
      * (минимум из максимальных цен для текущего и будущего периода: мин(номинал текущий/долю программы в
      * текущем периоде; номинал будущего периода/доля программы в будущем периоде). Округляем вниз до рубля)
      */
