@@ -91,7 +91,7 @@ class ModuleUpdateForm extends Model
     {
         $programmeModule = $this->getModel();
 
-        if ($programmeModule->getContracts()->andWhere(['contracts.status' => [0,1,3]])->count() > 0) {
+        if ($programmeModule->canChangePrice()) {
             $this->addError($attribute, 'Нельзя изменить цену программы, есть заявка на эту программу');
 
             return false;
@@ -156,6 +156,16 @@ class ModuleUpdateForm extends Model
         }
 
         return $futurePercent;
+    }
+
+    /**
+     * средняя стоимость модуля
+     *
+     * @return float
+     */
+    public function getModulePriceAverage()
+    {
+        return $this->price / CalculationHelper::daysBetweenDates($this->dateFrom, $this->dateTo) * 30.41;
     }
 
     /**
