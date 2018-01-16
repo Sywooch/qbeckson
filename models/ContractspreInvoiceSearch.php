@@ -63,7 +63,13 @@ class ContractspreInvoiceSearch extends Contracts
         $currentMonth = strtotime('last day of this month');
 
         $query = Contracts::find()
-            ->andWhere(['status' => 1])
+            ->andWhere(['or',
+                ['contracts.status' => Contracts::STATUS_ACTIVE],
+                ['and',
+                    ['contracts.status' => Contracts::STATUS_CLOSED],
+                    ['>=', 'date_termnate', date('Y-m-d', strtotime('first day of current month'))]
+                ],
+            ])
             ->andWhere(['>', 'all_funds', 0])
             ->andWhere(['<=', 'start_edu_contract', date('Y-m-d', $currentMonth)]);
 
