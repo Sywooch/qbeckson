@@ -312,7 +312,8 @@ class ProgramsController extends Controller
     {
         /** @var $user UserIdentity */
         $user = Yii::$app->user->identity;
-        $model = $this->findModel($id);
+        $modelOriginal = $this->findModel($id);
+        $model = ProgramViewDecorator::decorate($modelOriginal);
 
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             && $user->organization->id !== $model->organization_id
@@ -320,25 +321,31 @@ class ProgramsController extends Controller
             throw new ForbiddenHttpException('Нет доступа');
         }
         // При первом просмотре от плательщика меняем статус, чтобы запретить редактирование организации
-        if (Yii::$app->user->can(UserIdentity::ROLE_PAYER) && $model->verification === $model::VERIFICATION_UNDEFINED) {
-            $model->verification = $model::VERIFICATION_WAIT;
+        if (Yii::$app->user->can(UserIdentity::ROLE_PAYER)
+            && $model->verification === Programs::VERIFICATION_UNDEFINED
+        ) {
+            $model->verification = Programs::VERIFICATION_WAIT;
             $model->save(false, ['verification']);
         }
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             || Yii::$app->user->can(UserIdentity::ROLE_PAYER)
         ) {
-            if ($model->verification === $model::VERIFICATION_DENIED) {
-                Yii::$app->session->setFlash('danger',
-                    $this->renderPartial('informers/list_of_reazon',
+            if ($model->verification === Programs::VERIFICATION_DENIED) {
+                Yii::$app->session->setFlash(
+                    'danger',
+                    $this->renderPartial(
+                        'informers/list_of_reazon',
                         [
-                            'dataProvider' => new ActiveDataProvider([
+                            'dataProvider' => new ActiveDataProvider(
+                                [
                                     'query' => $model->getInforms()
-                                        ->andWhere(['status' => $model::VERIFICATION_DENIED]),
+                                        ->andWhere(['status' => Programs::VERIFICATION_DENIED]),
                                     'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
                                 ]
                             )
                         ]
-                    ));
+                    )
+                );
             }
         }
 
@@ -1774,7 +1781,7 @@ class ProgramsController extends Controller
                 ],
             ]);
 
-            $moduleIdList = $autoProlongation::getModuleIdList($group->program_id, $group->id);
+            $moduleIdList = $autoProlongation->getModuleIdList($group->program_id);
 
             $modules = ProgrammeModule::findAll(['id' => $moduleIdList]);
             $moduleNameList = [];
@@ -1791,6 +1798,40 @@ class ProgramsController extends Controller
         }
 
         return $this->asJson('error');
+    }
+
+    /**
+     * список контрактов для автопролонгации в новую группу
+     */
+    public function actionContractListForAutoProlongationToNewGroup()
+    {
+        if (!\Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+            return $this->asJson('Недостаточно прав!');
+        }
+
+        $organizationId = \Yii::$app->user->identity->organization->id;
+        $autoProlongFromGroupId = \Yii::$app->request->post('autoProlongFromGroupId');
+        $autoProlongToYearId = \Yii::$app->request->post('autoProlongToYearId', null);
+
+        if (!Groups::find()->where(['id' => $autoProlongFromGroupId, 'status' => Groups::STATUS_ACTIVE])->exists()
+        ) {
+            return $this->asJson('Группа не найдена!');
+        }
+
+
+        $autoProlongation = AutoProlongation::make($organizationId, null, null, $autoProlongFromGroupId);
+
+        $contractIdList = Contracts::findAll(['id' => $autoProlongation->getContractIdListForAutoProlongationToNewGroup($autoProlongToYearId)]);
+
+        $certificatesDataProvider = $dataProvider = new ActiveDataProvider([
+            'query' => Contracts::find()->where(['id' => $contractIdList]),
+            'pagination' => [
+                'pageSizeLimit' => false,
+                'pageSize' => 100,
+            ],
+        ]);
+
+        return $this->renderAjax('contract-list-for-auto-prolongation-to-new-group', ['certificatesDataProvider' => $certificatesDataProvider]);
     }
 
     /**

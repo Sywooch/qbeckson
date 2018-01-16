@@ -4,6 +4,7 @@ namespace app\models\forms;
 
 use app\models\Certificates;
 use app\models\Contracts;
+use app\models\Organization;
 use Yii;
 use yii\base\Model;
 
@@ -96,7 +97,7 @@ class ContractConfirmForm extends Model
             $organization = $contract->organization;
             $organization->updateCounters(['contracts_count' => 1]);
 
-            $contract->number = $organization->contracts_count . ' - ПФ';
+            $contract->number = $organization->getContractNumber();
             $contract->date = date('Y-m-d');
             $contract->status = Contracts::STATUS_REQUESTED;
             $contract->requested_at = date('Y-m-d H:i:s');

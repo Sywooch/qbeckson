@@ -1,7 +1,7 @@
 <?php
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Programs */
+/* @var $model ProgramViewDecorator */
 $this->title = $model->name;
 
 if (Yii::$app->user->can('operators')) {
@@ -17,7 +17,7 @@ if (Yii::$app->user->can(\app\models\UserIdentity::ROLE_ORGANIZATION)) {
 } elseif (Yii::$app->user->can(\app\models\UserIdentity::ROLE_CERTIFICATE)) {
     $headTemplate = '_certificate_head';
 }
-
+echo $model->getAlert();
 $this->params['breadcrumbs'][] = $this->title;
 
 if ($model->isMunicipalTask && $model->verification == app\models\Programs::VERIFICATION_DENIED && !empty($model->refuse_reason)) {

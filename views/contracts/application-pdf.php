@@ -20,7 +20,7 @@
     <h3 align="center" style="font-size: 16px;">Заявление о зачислении</h3>
 
     <p>Прошу оказать образовательную услугу по реализации  дополнительной общеобразовательной программы
-        <?=   app\helpers\FormattingHelper::directivityForm($model->program->directivity); ?> (далее – Программа)
+        <?= app\helpers\FormattingHelper::directivityForm($model->program->directivity); ?> направленности <?= $model->program->name ?> (далее – Программа)
         Обучающемуся, сведения о котором указаны ниже, в соответствии с договором-офертой №<?= $model->number ?> (с <?= \Yii::$app->formatter->asDate($model->start_edu_contract) ?> по <?= \Yii::$app->formatter->asDate($model->stop_edu_contract) ?>),
         а также прочими договорами-офертами, предлагаемыми мне к заключению, предусматривающими оказание услуг по реализации иных частей Программы, выставляемыми Вами (при необходимости).</p>
 
