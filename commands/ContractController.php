@@ -124,12 +124,11 @@ class ContractController extends Controller
         Yii::$app->db->createCommand('
           update contracts as c CROSS JOIN programs as p ON c.program_id = p.id CROSS JOIN organization as o ON c.organization_id = o.id
           set c.status = 4, c.wait_termnate = 0, c.date_termnate = c.stop_edu_contract, p.last_s_contracts_rod = IF(c.terminator_user = 1, p.last_s_contracts_rod + 1, p.last_s_contracts_rod), p.last_contracts = p.last_contracts - 1, p.last_s_contracts = p.last_s_contracts + 1, o.amount_child = o.amount_child - 1
-          WHERE TIMESTAMPDIFF(DAY, :phpDate, c.stop_edu_contract) < 0
-        ', [':phpDate' => date('Y-m-h H:i:s')])->execute();
+          WHERE c.stop_edu_contract < :phpDate and c.status = 1 AND c.wait_termnate = 1',  [':phpDate' => date('Y-m-h H:i:s')])->execute();
 
         Yii::$app->db->createCommand('
           delete from contracts
-          WHERE contracts.status is NULL and TIMESTAMPDIFF(DAY, contracts.created_at, :phpDate) > 2
+          WHERE contracts.status is NULL and :phpDate > DATE_ADD(contracts.created_at, INTERVAL 2 DAY)
         ', [':phpDate' => date('Y-m-h H:i:s')])->execute();
 
         echo 'Done.';
