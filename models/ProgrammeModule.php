@@ -448,4 +448,39 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
 
         return round($normativePrice);
     }
+
+    /**
+     * имеет ли модуль контракты, ограничивающие возможность изменять цену модуля
+     *
+     * @return bool
+     */
+    public function canChangePrice()
+    {
+        return $this->getContracts()
+            ->andWhere([
+                Contracts::tableName() . '.[[status]]' => [
+                    Contracts::STATUS_REQUESTED,
+                    Contracts::STATUS_ACTIVE,
+                    Contracts::STATUS_ACCEPTED
+                ],
+            ])
+            ->andWhere([
+                'or',
+                ['!=', Contracts::tableName() . '.[[wait_termnate]]', 1],
+                [Contracts::tableName() . '.[[wait_termnate]]' => null],
+            ])
+            ->exists();
+    }
+
+    /**
+     * удалить все контракты модуля с status == null
+     */
+    public function deleteContractsWithNullStatus()
+    {
+        $contracts = Contracts::find()->where(['contracts.year_id' => $this->id, 'contracts.status' => null])->all();
+
+        foreach ($contracts as $contract) {
+            $contract->delete();
+        }
+    }
 }
