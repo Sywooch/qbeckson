@@ -25,37 +25,7 @@ class ModuleViewDecorator extends ModelDecorator
     {
         return $this->havePrice()
             && !$this->open
-            && !$this->haveBlockedContracts();
-    }
-
-    public function haveBlockedContracts(): bool
-    {
-        $date = new \DateTime();
-        $date->modify('last day of this month');
-        $lastDay = $date->format('Y-m-d');
-        $date->modify('first day of this month');
-        $firstDay = $date->format('Y-m-d');
-
-        return $this->entity
-            ->getContracts()
-            ->andWhere([
-                Contracts::tableName() . '.[[status]]' => [
-                    Contracts::STATUS_REQUESTED,
-                    Contracts::STATUS_ACTIVE,
-                    Contracts::STATUS_ACCEPTED
-                ],
-            ])
-            ->andWhere([
-                'or',
-                ['!=', Contracts::tableName() . '.[[wait_termnate]]', 1],
-                [Contracts::tableName() . '.[[wait_termnate]]' => null],
-                ['and',
-                    ['>=', Contracts::tableName() . '.[[termination_initiated_at]]', $lastDay],
-                    ['<=', Contracts::tableName() . '.[[termination_initiated_at]]', $firstDay],
-                ]
-
-            ])
-            ->exists();
+            && !$this->entity->canChangePrice();
     }
 
     public function havePrice(): bool
