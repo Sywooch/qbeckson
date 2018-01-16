@@ -1,39 +1,31 @@
 <?php
 
-use app\models\statics\DirectoryProgramDirection;
+/* @var $waitProgramsProvider \yii\data\ActiveDataProvider */
+/* @var $deniedProgramsProvider \yii\data\ActiveDataProvider */
+
+/* @var $draftProgramsProvider \yii\data\ActiveDataProvider */
+
 use app\helpers\GridviewHelper;
-use app\models\UserIdentity;
-use yii\grid\ActionColumn;
-use app\widgets\SearchFilter;
-use yii\helpers\Html;
-use kartik\grid\GridView;
-use yii\helpers\Url;
-use yii\helpers\ArrayHelper;
 use app\models\Mun;
+use app\models\statics\DirectoryProgramDirection;
+use app\widgets\SearchFilter;
+use kartik\grid\GridView;
+use yii\grid\ActionColumn;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
+use yii\helpers\Url;
 
 $this->title = 'Муниципальное задание';
 $this->params['breadcrumbs'][] = $this->title;
 
 $zab = [
     'type' => SearchFilter::TYPE_SELECT2,
-    'data' => $searchWaitPrograms::illnesses(),
+    'data' => \app\models\Programs::illnesses(),
     'attribute' => 'zab',
     'label' => 'Категория детей',
     'value' => function ($model) {
         /** @var \app\models\Programs $model */
-        $zab = explode(',', $model->zab);
-        $display = '';
-        if (is_array($zab)) {
-            foreach ($zab as $value) {
-                $display .= ', ' . $model::illnesses()[$value];
-            }
-            $display = mb_substr($display, 2);
-        }
-        if ($display === '') {
-            return 'без ОВЗ';
-        }
-
-        return $display;
+        return $model->illnessesList;
     }
 ];
 $year = [
@@ -78,10 +70,10 @@ $directivity = [
 $form = [
     'attribute' => 'form',
     'value' => function ($model) {
-        return $model::forms()[$model->form];
+        return \app\models\Programs::forms()[$model->form];
     },
     'type' => SearchFilter::TYPE_DROPDOWN,
-    'data' => $searchWaitPrograms::forms(),
+    'data' => \app\models\Programs::forms(),
 ];
 $ageGroupMin = [
     'attribute' => 'age_group_min',
@@ -137,7 +129,7 @@ $openColumns = [
 ];
 
 $preparedOpenColumns = GridviewHelper::prepareColumns('programs', $openColumns, 'open');
-
+$preparedDraftColumns = GridviewHelper::prepareColumns('programs', $openColumns, 'open');
 ?>
 <ul class="nav nav-tabs">
     <?php
@@ -160,6 +152,11 @@ $preparedOpenColumns = GridviewHelper::prepareColumns('programs', $openColumns, 
     <li>
         <a data-toggle="tab" href="#panel-e-1">Невошедшие в реестр
             <span class="badge"><?= $deniedProgramsProvider->getTotalCount() ?></span>
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#panel-e-2">Черновики
+            <span class="badge"><?= $draftProgramsProvider->getTotalCount() ?></span>
         </a>
     </li>
 </ul>
@@ -211,6 +208,15 @@ if (!Yii::$app->user->identity->organization->suborderPayer) {
             'pjax' => true,
             'summary' => false,
             'columns' => $preparedOpenColumns,
+        ]); ?>
+    </div>
+    <div id="panel-e-2" class="tab-pane fade in">
+        <?= GridView::widget([
+            'dataProvider' => $draftProgramsProvider,
+            'filterModel' => null,
+            'pjax' => true,
+            'summary' => false,
+            'columns' => $preparedDraftColumns,
         ]); ?>
     </div>
 </div>

@@ -91,6 +91,7 @@ use yii\helpers\Html;
  * @property ProgramAddressAssignment[] $addressAssignments
  * @property ProgramAddressAssignment[] $mainAddressAssignments
  * @property bool $canProgrammeBeTransferred
+ * @property string $illnessesList
  *
  */
 class Programs extends ActiveRecord implements RecordWithHistory
@@ -264,7 +265,7 @@ class Programs extends ActiveRecord implements RecordWithHistory
                 'targetClass' => DirectoryProgramDirection::class,
                 'targetAttribute' => ['direction_id' => 'id']
             ],
-            [['programPhoto'], 'safe'],
+            [['programPhoto', 'edit'], 'safe'],
             ['inTransferProcess', 'boolean'],
             [['activity_ids'], 'each', 'rule' => ['integer']],
             ['auto_prolongation_enabled', 'boolean'],
@@ -751,6 +752,9 @@ class Programs extends ActiveRecord implements RecordWithHistory
         $illnessesKeysArray = explode(',', $this->zab);
         $illnessesArray = array_map(
             function ($key) {
+                if (!array_key_exists($key, static::illnesses())) {
+                    return 'undefined: ' . $key;
+                }
                 return static::illnesses()[$key];
             },
             $illnessesKeysArray
