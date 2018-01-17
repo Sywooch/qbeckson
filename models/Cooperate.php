@@ -328,11 +328,11 @@ class Cooperate extends ActiveRecord
         /** @var OperatorSettings $operatorSettings */
         $operatorSettings = Yii::$app->operator->identity->settings;
 
-        if (strtotime($date) > strtotime($operatorSettings->current_program_date_from) && strtotime($date) < strtotime($operatorSettings->current_program_date_to)) {
+        if (strtotime($date) >= strtotime($operatorSettings->current_program_date_from) && strtotime($date) <= strtotime($operatorSettings->current_program_date_to)) {
             return self::PERIOD_CURRENT;
         }
 
-        if (strtotime($date) > strtotime($operatorSettings->future_program_date_from) && strtotime($date) < strtotime($operatorSettings->future_program_date_to)) {
+        if (strtotime($date) >= strtotime($operatorSettings->future_program_date_from) && strtotime($date) <= strtotime($operatorSettings->future_program_date_to)) {
             return self::PERIOD_FUTURE;
         }
 
