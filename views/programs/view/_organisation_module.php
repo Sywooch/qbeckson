@@ -5,30 +5,9 @@
 
 use app\models\AutoProlongation;
 use app\models\Groups;
-use yii\bootstrap\Modal;
 use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\helpers\Url;
-
-$js = <<<js
-$('.new-group-auto-prolongation-button').on('click', function() {
-    var url = $(this).data('url'),
-        groupId = $(this).data('group-id'),
-        modal = $('#' + $(this).data('modal'));
-    
-    $.ajax({
-        url: url,
-        method: 'POST',
-        data: {groupId: groupId},
-        success: function(data) {
-            $('.auto-prolongation-block').html(data);
-        }
-    });
-    
-    modal.modal();
-});
-js;
-$this->registerJs($js);
 
 $organizationId = \Yii::$app->user->identity->organization->id;
 
@@ -142,7 +121,7 @@ $organizationId = \Yii::$app->user->identity->organization->id;
                                 'data' => [
                                     'url' => '/programs/new-group-auto-prolongation',
                                     'group-id' => $group->id,
-                                    'modal' => 'new-group-auto-prolongation-modal-' . $group->year_id,
+                                    'modal' => 'new-group-auto-prolongation-modal',
                                 ]
                             ]);
                         }
@@ -164,18 +143,3 @@ $organizationId = \Yii::$app->user->identity->organization->id;
         ]); ?>
     </div>
 </div>
-
-<?php Modal::begin([
-    'id' => 'new-group-auto-prolongation-modal-' . $model->id,
-    'size' => Modal::SIZE_LARGE,
-    'header' => 'Перевод детей в другой модуль',
-]) ?>
-<div class="auto-prolongation-block"></div>
-<?php Modal::end() ?>
-
-<?php Modal::begin([
-    'id' => 'auto-prolong-confirmation-modal',
-    'clientOptions' => ['backdrop' => false]
-]); ?>
-<div id="auto-prolong-confirmation-block"></div>
-<?php Modal::end() ?>

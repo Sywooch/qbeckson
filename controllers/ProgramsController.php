@@ -1761,36 +1761,32 @@ class ProgramsController extends Controller
             return $this->asJson('Невозможно перевести детей из этой группы');
         }
 
-        if (\Yii::$app->request->isAjax) {
-            $autoProlongation = AutoProlongation::make($organizationId, null, null, $group->id);
-
-            $contractIdList = Contracts::findAll(['id' => $autoProlongation->getContractIdListForAutoProlongationToNewGroup()]);
-
-            $certificatesDataProvider = $dataProvider = new ActiveDataProvider([
-                'query' => Contracts::find()->where(['id' => $contractIdList]),
-                'pagination' => [
-                    'pageSizeLimit' => false,
-                    'pageSize' => 100,
-                ],
-            ]);
-
-            $moduleIdList = $autoProlongation->getModuleIdList($group->program_id);
-
-            $modules = ProgrammeModule::findAll(['id' => $moduleIdList]);
-            $moduleNameList = [];
-            /** @var ProgrammeModule $module */
-            foreach ($modules as $module) {
-                $moduleNameList += [$module->id => $module->getFullname()];
-            }
-
-            return $this->renderAjax('new-group-auto-prolongation', [
-                'certificatesDataProvider' => $certificatesDataProvider,
-                'moduleNameList' => $moduleNameList,
-                'group' => $group,
-            ]);
+        if (!\Yii::$app->request->isAjax) {
+            throw new NotFoundHttpException('Страница не найдена.');
         }
 
-        return $this->asJson('error');
+        $autoProlongation = AutoProlongation::make($organizationId, null, null, $group->id);
+
+        $contractIdList = Contracts::findAll(['id' => $autoProlongation->getContractIdListForAutoProlongationToNewGroup()]);
+
+        $certificatesDataProvider = $dataProvider = new ActiveDataProvider([
+            'query' => Contracts::find()->where(['id' => $contractIdList]),
+            'pagination' => [
+                'pageSizeLimit' => false,
+                'pageSize' => 100,
+            ],
+        ]);
+
+        $moduleIdList = $autoProlongation->getModuleIdList($group->program_id);
+
+        $modules = ProgrammeModule::findAll(['id' => $moduleIdList]);
+        $moduleNameList = [];
+        /** @var ProgrammeModule $module */
+        foreach ($modules as $module) {
+            $moduleNameList += [$module->id => $module->getFullname()];
+        }
+
+        return $this->renderAjax('view/_auto-prolongation-to-new-group', ['moduleNameList' => $moduleNameList, 'certificatesDataProvider' => $certificatesDataProvider, 'group' => $group]);
     }
 
     /**
@@ -1824,7 +1820,7 @@ class ProgramsController extends Controller
             ],
         ]);
 
-        return $this->renderAjax('contract-list-for-auto-prolongation-to-new-group', ['certificatesDataProvider' => $certificatesDataProvider]);
+        return $this->renderAjax('view/_contract-list-for-auto-prolongation-to-new-group', ['certificatesDataProvider' => $certificatesDataProvider]);
     }
 
     /**
