@@ -249,7 +249,6 @@ class MunController extends Controller
         $munTable = Mun::tableName();
         $modules = ProgrammeModule::find()
             ->joinWith('program.municipality')
-            ->innerJoin(Programs::tableName(), 'programs.id = years.program_id')
             ->andWhere([$munTable . '.[[id]]' => $munId])
             ->andWhere(['programs.verification' => [
                 Programs::VERIFICATION_UNDEFINED,

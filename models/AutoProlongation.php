@@ -485,8 +485,8 @@ class AutoProlongation
                                 foreach ($currentPeriodCertificateDataListRows as &$currentPeriodCertificateData) {
                                     if ($currentPeriodCertificateData['id'] == $dataList['certificateId']) {
                                         $contractsWithSameCertificateCount++;
-                                        $currentPeriodCertificateData['balance_f'] = $currentPeriodCertificateData['balance_f'] - $dataList['fundsCert'];
-                                        $currentPeriodCertificateData['rezerv_f'] = $currentPeriodCertificateData['rezerv_f'] + $dataList['fundsCert'];
+                                        $currentPeriodCertificateData['balance_f'] = $currentPeriodCertificateData['balance_f'] - $contractData['fundsCert'];
+                                        $currentPeriodCertificateData['rezerv_f'] = $currentPeriodCertificateData['rezerv_f'] + $contractData['fundsCert'];
                                     }
                                 }
                             } else {
@@ -497,8 +497,8 @@ class AutoProlongation
                                     'payer_id' => $dataList['certificatePayerId'],
                                     'cert_group' => $dataList['certificateCertGroup'],
                                     'updated_cert_group' => $dataList['certificateUpdatedCertGroup'],
-                                    'balance' => $dataList['certificateBalance'] - $dataList['fundsCert'],
-                                    'rezerv' => $dataList['certificateRezerv'] + $dataList['fundsCert'],
+                                    'balance' => $dataList['certificateBalance'] - $contractData['fundsCert'],
+                                    'rezerv' => $dataList['certificateRezerv'] + $contractData['fundsCert'],
                                 ];
                             }
                         }
@@ -508,8 +508,8 @@ class AutoProlongation
                                 foreach ($futurePeriodCertificateDataListRows as &$futurePeriodCertificateData) {
                                     if ($futurePeriodCertificateData['id'] == $dataList['certificateId']) {
                                         $contractsWithSameCertificateCount++;
-                                        $futurePeriodCertificateData['balance_f'] = $futurePeriodCertificateData['balance_f'] - $dataList['fundsCert'];
-                                        $futurePeriodCertificateData['rezerv_f'] = $futurePeriodCertificateData['rezerv_f'] + $dataList['fundsCert'];
+                                        $futurePeriodCertificateData['balance_f'] = $futurePeriodCertificateData['balance_f'] - $contractData['fundsCert'];
+                                        $futurePeriodCertificateData['rezerv_f'] = $futurePeriodCertificateData['rezerv_f'] + $contractData['fundsCert'];
                                     }
                                 }
                             } else {
@@ -520,8 +520,8 @@ class AutoProlongation
                                     'payer_id' => $dataList['certificatePayerId'],
                                     'cert_group' => $dataList['certificateUpdatedCertGroup'],
                                     'updated_cert_group' => $dataList['certificateCertGroup'],
-                                    'balance_f' => $dataList['certificateBalanceF'] - $dataList['fundsCert'],
-                                    'rezerv_f' => $dataList['certificateRezervF'] + $dataList['fundsCert'],
+                                    'balance_f' => $dataList['certificateBalanceF'] - $contractData['fundsCert'],
+                                    'rezerv_f' => $dataList['certificateRezervF'] + $contractData['fundsCert'],
                                 ];
                             }
                         }

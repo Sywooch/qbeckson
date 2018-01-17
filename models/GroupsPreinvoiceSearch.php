@@ -68,7 +68,13 @@ class GroupsPreinvoiceSearch extends Groups
             ->select(['group_id'])
             ->from('contracts')
             ->where(['organization_id' => $organization['id']])
-            ->andWhere(['status' => 1])
+            ->andWhere(['or',
+                ['contracts.status' => Contracts::STATUS_ACTIVE],
+                ['and',
+                    ['contracts.status' => Contracts::STATUS_CLOSED],
+                    ['>=', 'date_termnate', date('Y-m-d', strtotime('first day of current month'))]
+                ],
+            ])
             ->andWhere(['<=', 'start_edu_contract', date('Y-m-d', $currentMonth)])
             ->column();
 

@@ -27,7 +27,7 @@ class Model extends \yii\base\Model
         }
 
         if ($post && is_array($post)) {
-            foreach ($post as $i => $item) {
+            foreach ($post as $item) {
                 if (isset($item['id']) && !empty($item['id']) && isset($multipleModels[$item['id']])) {
                     $temporary_model = $multipleModels[$item['id']];
                 } else {
