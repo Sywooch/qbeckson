@@ -371,7 +371,7 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
             ])->exists();
         $isOpen = $this->open;
 
-        return !($contractsExists || $isOpen);
+        return !($contractsExists || $isOpen || $this->program->verification === Programs::VERIFICATION_DRAFT);
     }
 
     public function needCertificate(): bool
