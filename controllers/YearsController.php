@@ -124,6 +124,8 @@ class YearsController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             if ($model->save()) {
+                $model->getModel()->deleteContractsWithNullStatus();
+
                 return $this->redirect(['programs/view', 'id' => $model->getModel()->program->id]);
             } else {
                 Yii::$app->session->setFlash('error', 'Что-то не так.');
