@@ -1889,12 +1889,10 @@ class ProgramsController extends Controller
         $toGroupId = \Yii::$app->request->post('toGroupId');
 
         $autoProlongation = AutoProlongation::make($organizationId, null, null, $group->id);
-        $autoProlongation->init($toGroupId, null, true, $contractIdList);
-
-        if ($autoProlongation->errorMessage) {
+        if (!$autoProlongation->init($toGroupId, null, true, $contractIdList) && $autoProlongation->errorMessage != '') {
             \Yii::$app->session->addFlash('error', $autoProlongation->errorMessage);
 
-            return $this->redirect(Url::to(['/personal/organization-contracts']));
+            return $this->redirect(Url::to(['/programs/view', 'id' => $group->program_id]));
         }
 
         return $this->redirect('/programs/auto-prolonged-registry');

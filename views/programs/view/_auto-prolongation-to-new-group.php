@@ -132,11 +132,10 @@ function changeCheckedStatus(checked, all) {
     } else {
         checkbox.each(function() {
             var checkedCount = $('.change-auto-prolongation-checkbox:checkbox:checked').length;
-            
-            $('.group-info').html('Количество свободных мест: ' + (countToAutoProlong - checkedCount));
 
             if (all || (checkedCount < countToAutoProlong)) {
                 $(this).prop('checked', true);
+                $('.group-info').html('Количество свободных мест: ' + (countToAutoProlong - checkedCount - 1));
             } else {
                 if ($(this).prop('checked') == false) {
                     $(this).prop('disabled', true);
