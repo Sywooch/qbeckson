@@ -16,6 +16,8 @@ use yii\web\IdentityInterface;
  * @property string              $auth_key
  * @property integer             $mun_id
  * @property mixed               $authKey
+ * @property integer             $status
+ * @property integer             $block_reason
  *
  * @property \yii\db\ActiveQuery $dispute
  * @property Organization        $organization
@@ -25,6 +27,7 @@ use yii\web\IdentityInterface;
  * @property Payers              $payer
  * @property \yii\db\ActiveQuery $operator
  * @property Notification[] $notifications
+ * @property UserMonitorAssignment $userMonitorAssignment
  */
 class UserIdentity extends ActiveRecord implements IdentityInterface, UserRbacInterface
 {
