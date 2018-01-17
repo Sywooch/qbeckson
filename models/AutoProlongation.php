@@ -41,20 +41,6 @@ class AutoProlongation
     private $groupId;
 
     /**
-     * количество автопролонгированных заявок
-     *
-     * @var integer
-     */
-    private $contractRequestedAutoProlongedCount = 0;
-
-    /**
-     * количество автопролонгированных оферт
-     *
-     * @var integer
-     */
-    private $contractAcceptedAutoProlongedCount = 0;
-
-    /**
      * сообщение ошибки при автопролонгации
      *
      * @var string
@@ -450,8 +436,6 @@ class AutoProlongation
                 $activeCooperate = Cooperate::find()->select('cooperate.id')->where(['organization_id' => $this->organizationId, 'payer_id' => $dataList['certificatePayerId'], 'period' => $contractRequestData['period']])->one();
 
                 if ($activeCooperate) {
-                    $this->contractAcceptedAutoProlongedCount += 1;
-
                     $contractData = array_merge($contractRequestData, [
                         'status' => Contracts::STATUS_ACCEPTED,
                         'cooperate_id' => $activeCooperate->id,
@@ -460,8 +444,6 @@ class AutoProlongation
                         'accepted_at' => date('Y-m-d H:i:s'),
                     ]);
                 } else {
-                    $this->contractRequestedAutoProlongedCount += 1;
-
                     $contractData = array_merge($contractRequestData, [
                         'status' => Contracts::STATUS_REQUESTED,
                         'cooperate_id' => null,
@@ -485,8 +467,8 @@ class AutoProlongation
                                 foreach ($currentPeriodCertificateDataListRows as &$currentPeriodCertificateData) {
                                     if ($currentPeriodCertificateData['id'] == $dataList['certificateId']) {
                                         $contractsWithSameCertificateCount++;
-                                        $currentPeriodCertificateData['balance_f'] = $currentPeriodCertificateData['balance_f'] - $contractData['fundsCert'];
-                                        $currentPeriodCertificateData['rezerv_f'] = $currentPeriodCertificateData['rezerv_f'] + $contractData['fundsCert'];
+                                        $currentPeriodCertificateData['balance_f'] = $currentPeriodCertificateData['balance_f'] - $contractData['funds_cert'];
+                                        $currentPeriodCertificateData['rezerv_f'] = $currentPeriodCertificateData['rezerv_f'] + $contractData['funds_cert'];
                                     }
                                 }
                             } else {
@@ -497,8 +479,8 @@ class AutoProlongation
                                     'payer_id' => $dataList['certificatePayerId'],
                                     'cert_group' => $dataList['certificateCertGroup'],
                                     'updated_cert_group' => $dataList['certificateUpdatedCertGroup'],
-                                    'balance' => $dataList['certificateBalance'] - $contractData['fundsCert'],
-                                    'rezerv' => $dataList['certificateRezerv'] + $contractData['fundsCert'],
+                                    'balance' => $dataList['certificateBalance'] - $contractData['funds_cert'],
+                                    'rezerv' => $dataList['certificateRezerv'] + $contractData['funds_cert'],
                                 ];
                             }
                         }
@@ -508,8 +490,8 @@ class AutoProlongation
                                 foreach ($futurePeriodCertificateDataListRows as &$futurePeriodCertificateData) {
                                     if ($futurePeriodCertificateData['id'] == $dataList['certificateId']) {
                                         $contractsWithSameCertificateCount++;
-                                        $futurePeriodCertificateData['balance_f'] = $futurePeriodCertificateData['balance_f'] - $contractData['fundsCert'];
-                                        $futurePeriodCertificateData['rezerv_f'] = $futurePeriodCertificateData['rezerv_f'] + $contractData['fundsCert'];
+                                        $futurePeriodCertificateData['balance_f'] = $futurePeriodCertificateData['balance_f'] - $contractData['funds_cert'];
+                                        $futurePeriodCertificateData['rezerv_f'] = $futurePeriodCertificateData['rezerv_f'] + $contractData['funds_cert'];
                                     }
                                 }
                             } else {
@@ -520,8 +502,8 @@ class AutoProlongation
                                     'payer_id' => $dataList['certificatePayerId'],
                                     'cert_group' => $dataList['certificateUpdatedCertGroup'],
                                     'updated_cert_group' => $dataList['certificateCertGroup'],
-                                    'balance_f' => $dataList['certificateBalanceF'] - $contractData['fundsCert'],
-                                    'rezerv_f' => $dataList['certificateRezervF'] + $contractData['fundsCert'],
+                                    'balance_f' => $dataList['certificateBalanceF'] - $contractData['funds_cert'],
+                                    'rezerv_f' => $dataList['certificateRezervF'] + $contractData['funds_cert'],
                                 ];
                             }
                         }
@@ -570,11 +552,10 @@ class AutoProlongation
 
             // проверить соответствие кол-ва созданных контрактов кол-ву измененных сертификатов
             // (делится на 2 потому что используется команда mysql "ON DUPLICATE KEY UPDATE" при команде "INSERT" в результате получаем удвоенное кол-во затронутых строк)
-            if (
-                $createdContractsCount != ($createdCurrentPeriodCertificatesCount + $createdFuturePeriodCertificatesCount) / 2 + $contractsWithSameCertificateCount ||
-                0 == $this->contractRequestedAutoProlongedCount && 0 == $this->contractAcceptedAutoProlongedCount
-            ) {
+            if ($createdContractsCount != ($createdCurrentPeriodCertificatesCount + $createdFuturePeriodCertificatesCount) / 2 + $contractsWithSameCertificateCount) {
                 $transaction->rollBack();
+
+                $this->errorMessage = 'Возникла ошибка при автопролонгации договоров.';
 
                 return false;
             }
@@ -822,25 +803,5 @@ class AutoProlongation
         } else {
             return null;
         }
-    }
-
-    /**
-     * получить количество автопролонгированных заявок
-     *
-     * @return integer
-     */
-    public function getContractRequestedAutoProlongedCount()
-    {
-        return $this->contractRequestedAutoProlongedCount;
-    }
-
-    /**
-     * получить количество автопролонгированных оферт
-     *
-     * @return integer
-     */
-    public function getContractAcceptedAutoProlongedCount()
-    {
-        return $this->contractAcceptedAutoProlongedCount;
     }
 }

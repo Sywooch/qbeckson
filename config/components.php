@@ -2,6 +2,7 @@
 
 namespace app\config\components;
 
+use app\components\imagemanager\ImageManagerGetPath;
 use app\components\LocalFlysystemBuilder;
 use app\components\trntv\TrntvStorage;
 use NumberFormatter;
@@ -109,4 +110,17 @@ return [
             'path' => '@pfdoroot/uploads'
         ],
     ],
+    'imagemanager' => [
+        'class' => ImageManagerGetPath::class,
+        //set media path (outside the web folder is possible)
+        'mediaPath' => '@pfdoroot/uploads/imagemanager',
+        //path relative web folder to store the cache images
+        'cachePath' => 'assets/images/cache',
+        //use filename (seo friendly) for resized images else use a hash
+        'useFilename' => true,
+        //show full url (for example in case of a API)
+        'absoluteUrl' => false,
+        'databaseComponent' => 'db'
+    ],
+
 ];
