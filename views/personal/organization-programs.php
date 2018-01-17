@@ -25,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $zab = [
     'type' => SearchFilter::TYPE_SELECT2,
-    'data' => $searchOpenPrograms::illnesses(),
+    'data' => \app\models\Programs::illnesses(),
     'attribute' => 'zab',
     'label'     => 'Категория детей',
     'value'     => function ($model)
@@ -78,7 +78,7 @@ $form = [
         return \app\models\Programs::forms()[$model->form];
     },
     'type' => SearchFilter::TYPE_DROPDOWN,
-    'data' => $searchOpenPrograms::forms(),
+    'data' => \app\models\Programs::forms(),
 ];
 $ageGroupMin = [
     'attribute' => 'age_group_min',
