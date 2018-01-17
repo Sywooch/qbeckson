@@ -312,7 +312,8 @@ class ProgramsController extends Controller
     {
         /** @var $user UserIdentity */
         $user = Yii::$app->user->identity;
-        $model = $this->findModel($id);
+        $modelOriginal = $this->findModel($id);
+        $model = ProgramViewDecorator::decorate($modelOriginal);
 
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             && $user->organization->id !== $model->organization_id
@@ -320,25 +321,31 @@ class ProgramsController extends Controller
             throw new ForbiddenHttpException('Нет доступа');
         }
         // При первом просмотре от плательщика меняем статус, чтобы запретить редактирование организации
-        if (Yii::$app->user->can(UserIdentity::ROLE_PAYER) && $model->verification === $model::VERIFICATION_UNDEFINED) {
-            $model->verification = $model::VERIFICATION_WAIT;
+        if (Yii::$app->user->can(UserIdentity::ROLE_PAYER)
+            && $model->verification === Programs::VERIFICATION_UNDEFINED
+        ) {
+            $model->verification = Programs::VERIFICATION_WAIT;
             $model->save(false, ['verification']);
         }
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             || Yii::$app->user->can(UserIdentity::ROLE_PAYER)
         ) {
-            if ($model->verification === $model::VERIFICATION_DENIED) {
-                Yii::$app->session->setFlash('danger',
-                    $this->renderPartial('informers/list_of_reazon',
+            if ($model->verification === Programs::VERIFICATION_DENIED) {
+                Yii::$app->session->setFlash(
+                    'danger',
+                    $this->renderPartial(
+                        'informers/list_of_reazon',
                         [
-                            'dataProvider' => new ActiveDataProvider([
+                            'dataProvider' => new ActiveDataProvider(
+                                [
                                     'query' => $model->getInforms()
-                                        ->andWhere(['status' => $model::VERIFICATION_DENIED]),
+                                        ->andWhere(['status' => Programs::VERIFICATION_DENIED]),
                                     'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
                                 ]
                             )
                         ]
-                    ));
+                    )
+                );
             }
         }
 
@@ -1232,14 +1239,15 @@ class ProgramsController extends Controller
             $modelYears = Model::createMultiple(
                 ProgrammeModule::classname(),
                 $modelYears,
-                $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : null
+                $model->asDraft
+                    ? ProgrammeModule::SCENARIO_DRAFT :
+                    ($model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : null)
             );
             Model::loadMultiple($modelYears, Yii::$app->request->post());
             $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelYears, 'id', 'id')));
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-
                 return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelYears),
                     ActiveForm::validate($model)

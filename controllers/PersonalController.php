@@ -907,12 +907,22 @@ class PersonalController extends Controller
         ]);
         $deniedProgramsProvider = $searchDeniedPrograms->search(Yii::$app->request->queryParams);
 
+        $searchDraftPrograms = new ProgramsSearch([
+            'organization_id' => Yii::$app->user->identity->organization->id,
+            'verification' => [Programs::VERIFICATION_DRAFT],
+            'hours' => '0,2000',
+            'limit' => '0,10000',
+            'rating' => '0,100',
+            'modelName' => 'SearchDraftPrograms',
+            'isMunicipalTask' => true,
+        ]);
+        $draftProgramsProvider = $searchDraftPrograms->search(Yii::$app->request->queryParams);
+
         return $this->render('organization-municipal-task', [
             'tabs' => $tabs,
-            'searchWaitPrograms' => $searchWaitPrograms,
             'waitProgramsProvider' => $waitProgramsProvider,
-            'searchDeniedPrograms' => $searchDeniedPrograms,
             'deniedProgramsProvider' => $deniedProgramsProvider,
+            'draftProgramsProvider' => $draftProgramsProvider,
         ]);
     }
 
