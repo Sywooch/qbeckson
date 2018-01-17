@@ -1,19 +1,17 @@
 <?php
 
 /**
- * страница загружаемая через ajax для автопролонгации в новую группу
+ * часть страницы с модульным окном для автопролонгации в новую группу
  *
  * @var $this View
+ * @var $group Groups
  * @var $certificatesDataProvider ActiveDataProvider
  * @var $moduleNameList array
- * @var $group Groups
  */
 
 use app\models\Groups;
-use kartik\widgets\DepDrop;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
-use yii\helpers\Url;
 use yii\web\View;
 
 $js = <<<js
@@ -179,39 +177,15 @@ $this->registerJs($js);
 
 <div class="row">
     <div class="col-xs-6 contract-list-for-auto-prolongation-to-new-group-block">
-        <?= $this->render('contract-list-for-auto-prolongation-to-new-group', ['certificatesDataProvider' => $certificatesDataProvider]) ?>
+        <?= $this->render('_contract-list-for-auto-prolongation-to-new-group', [
+            'certificatesDataProvider' => $certificatesDataProvider
+        ]) ?>
     </div>
-
-    <div class="col-xs-6">
-        <div class="panel panel-default">
-            <label>Модули программы для перевода</label>
-            <?= Html::dropDownList('module-id', null, $moduleNameList, [
-                'class' => 'form-control',
-                'id' => 'module-id',
-                'prompt' => '-- Не выбран --',
-            ]) ?>
-            <br>
-            <?php if ([] != $moduleNameList): ?>
-                <?= DepDrop::widget([
-                    'name' => 'group-id',
-                    'options' => [
-                        'id' => 'group-id',
-                        'data' => [
-                            'group-info-url' => '/programs/get-group-info-for-auto-prolongation',
-                        ]
-                    ],
-                    'pluginOptions' => [
-                        'depends' => ['module-id'],
-                        'placeholder' => '-- Не выбран --',
-                        'url' => Url::to(['programs/get-group-list-for-auto-prolongation?groupId=' . $group->id])
-                    ]
-                ]) ?>
-            <?php endif; ?>
-            <br>
-            <div class="group-info">
-
-            </div>
-        </div>
+    <div class="col-xs-6 group-list-for-auto-prolongation-to-new-group-block">
+        <?= $this->renderAjax('_group-list-for-auto-prolongation-to-new-group', [
+            'moduleNameList' => $moduleNameList,
+            'group' => $group,
+        ]) ?>
     </div>
 </div>
 <div class="row">
@@ -260,3 +234,4 @@ $this->registerJs($js);
         </div>
     </div>
 </div>
+
