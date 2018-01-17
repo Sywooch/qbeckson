@@ -161,7 +161,9 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
             [['month'], 'integer', 'max' => 12],
             [['kvfirst', 'kvdop', 'name'], 'string', 'max' => 255],
             ['results', 'string'],
-            [['minchild', 'maxchild'], 'integer', 'min' => 1],
+            [['minchild', 'maxchild'], 'integer', 'min' => 1, 'on' => [
+                self::SCENARIO_CREATE, self::SCENARIO_MUNICIPAL_TASK, self::SCENARIO_DEFAULT
+            ]],
             [
                 ['program_id'], 'exist', 'skipOnError' => true, 'targetClass' => Programs::className(),
                 'targetAttribute' => ['program_id' => 'id']
@@ -209,7 +211,7 @@ class ProgrammeModule extends ActiveRecord implements RecordWithHistory
                 . 'реализации образовательной программы в группе',
             'results' => 'Ожидаемые результаты освоения модуля',
             'fullname' => 'Наименование модуля',
-            'edit' => 'Отправить на повторную сертификацию',
+            'edit' => 'Отправить на (повторную) сертификацию',
             'verification' => 'Сертификация',
         ];
     }

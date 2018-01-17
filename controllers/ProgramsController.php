@@ -1239,14 +1239,15 @@ class ProgramsController extends Controller
             $modelYears = Model::createMultiple(
                 ProgrammeModule::classname(),
                 $modelYears,
-                $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : null
+                $model->asDraft
+                    ? ProgrammeModule::SCENARIO_DRAFT :
+                    ($model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : null)
             );
             Model::loadMultiple($modelYears, Yii::$app->request->post());
             $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelYears, 'id', 'id')));
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-
                 return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelYears),
                     ActiveForm::validate($model)
