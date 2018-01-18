@@ -131,7 +131,7 @@ class AutoProlongation
                     ['contracts.status' => Contracts::STATUS_CLOSED],
                     ['and',
                         ['contracts.terminator_user' => 0],
-                        ['contracts.stop_edu_contract <= contracts.date_termnate'],
+                        ['<=', 'contracts.stop_edu_contract', 'contracts.date_termnate'],
                         ['contracts.status_comment' => null],
                         ['>', 'contracts.stop_edu_contract', $allowDatePeriod]
                     ],
