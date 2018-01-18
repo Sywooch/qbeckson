@@ -95,7 +95,6 @@ class OrganizationController extends Controller
         $operatorSettings = Yii::$app->operator->identity->settings;
 
         if (Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
-//            $activeCooperate = $model->getCooperation(Cooperate::STATUS_ACTIVE);
             $currentPeriodCooperate = $model->getCooperation(Cooperate::STATUS_ACTIVE, Cooperate::PERIOD_CURRENT);
             $futurePeriodCooperate = $model->getCooperation(Cooperate::STATUS_ACTIVE, Cooperate::PERIOD_FUTURE);
 
