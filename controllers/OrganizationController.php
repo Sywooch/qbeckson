@@ -95,12 +95,12 @@ class OrganizationController extends Controller
         $operatorSettings = Yii::$app->operator->identity->settings;
 
         if (Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
-            $activeCooperate = $model->getCooperation(Cooperate::STATUS_ACTIVE);
+//            $activeCooperate = $model->getCooperation(Cooperate::STATUS_ACTIVE);
             $currentPeriodCooperate = $model->getCooperation(Cooperate::STATUS_ACTIVE, Cooperate::PERIOD_CURRENT);
             $futurePeriodCooperate = $model->getCooperation(Cooperate::STATUS_ACTIVE, Cooperate::PERIOD_FUTURE);
 
-            if ($activeCooperate) {
-                $confirmRequestForm = new ConfirmRequestForm(['type' => $activeCooperate->document_type, 'value' => number_format($activeCooperate->total_payment_limit, 0, '', '')]);
+            if ($currentPeriodCooperate) {
+                $confirmRequestForm = new ConfirmRequestForm(['type' => $currentPeriodCooperate->document_type, 'value' => number_format($currentPeriodCooperate->total_payment_limit, 0, '', '')]);
             } else {
                 $confirmRequestForm = new ConfirmRequestForm();
             }
@@ -150,7 +150,7 @@ class OrganizationController extends Controller
             }
 
             if ($confirmRequestForm->load(Yii::$app->request->post())) {
-                $confirmRequestForm->setModel($activeCooperate);
+                $confirmRequestForm->setModel($currentPeriodCooperate);
                 if ($confirmRequestForm->changeCooperateType()) {
                     \Yii::$app->session->setFlash('success', 'Вы успешно изменили соглашение.');
                 } else {
