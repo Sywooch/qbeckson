@@ -130,7 +130,9 @@ class AutoProlongation
                 ['and',
                     ['contracts.status' => Contracts::STATUS_CLOSED],
                     ['and',
-                        'contracts.stop_edu_contract = contracts.date_termnate',
+                        ['contracts.terminator_user' => 0],
+                        ['contracts.stop_edu_contract <= contracts.date_termnate'],
+                        ['contracts.status_comment' => null],
                         ['>', 'contracts.stop_edu_contract', $allowDatePeriod]
                     ],
                 ]
@@ -272,7 +274,8 @@ class AutoProlongation
         $groupIdList = Groups::find()
             ->select(['id', 'name'])
             ->where(['status' => Groups::STATUS_ACTIVE, 'year_id' => $yearId])
-            ->andWhere(['>', 'datestart', (new Query())->select(['groups.datestop'])->from(Groups::tableName())->where(['groups.id' => $groupId])])
+            ->andWhere(['>', 'datestart', Groups::find()->where(['id' => $groupId])->select(['groups.datestop'])])
+            ->andWhere(['<=', 'datestart', Groups::find()->where(['id' => $groupId])->select(['adddate(groups.datestop, INTERVAL 1 MONTH)'])])
             ->asArray()->all();
 
         return $groupIdList;
