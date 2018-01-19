@@ -255,7 +255,7 @@ class AutoProlongation
             ->select(['years.id'])
             ->leftJoin(Contracts::tableName(), 'contracts.year_id = years.id')
             ->where(['years.program_id' => $programId])
-            ->andWhere(['!=', 'years.id', $exceptYearId])
+            ->andWhere(['not in', 'years.id', $exceptYearId])
             ->column();
 
         return $moduleListId;

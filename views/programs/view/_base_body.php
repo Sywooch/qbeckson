@@ -9,6 +9,7 @@
 use app\models\Groups;
 use app\models\Programs\ProgramViewDecorator;
 use yii\bootstrap\Modal;
+use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\ActiveForm;
@@ -47,10 +48,10 @@ echo \yii\bootstrap\Tabs::widget([
                 data: {groupId: groupId},
                 success: function(data) {
                     $('.auto-prolongation-to-new-group-block').html(data);
+                    
+                    modal.modal();
                 }
             });
-        
-            modal.modal();
         });
 js;
     $this->registerJs($js);
@@ -69,6 +70,18 @@ js;
         'clientOptions' => ['backdrop' => false]
     ]); ?>
     <div id="auto-prolong-confirmation-block"></div>
+    <?php Modal::end() ?>
+    <?php Modal::begin([
+        'id' => 'group-create-modal',
+        'clientOptions' => ['backdrop' => false]
+    ]) ?>
+    <div class="group-create-message alert-danger alert fade in" style="display: none;"></div>
+    <div class="group-create-block"></div>
+    <div class="form-group">
+        <?= Html::button('Сохранить', ['class' => 'btn btn-success group-save-button']) ?>
+        <?= Html::button('Отмена', ['class' => 'btn btn-danger', 'onClick' => '$(this).parents(".modal").first().modal("hide");']) ?>
+    </div>
+
     <?php Modal::end() ?>
 
     <?php $form = ActiveForm::begin([

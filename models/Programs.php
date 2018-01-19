@@ -92,6 +92,7 @@ use yii\helpers\Html;
  * @property ProgramAddressAssignment[] $mainAddressAssignments
  * @property bool $canProgrammeBeTransferred
  * @property string $illnessesList
+ * @property boolean $isMunicipalTask
  *
  */
 class Programs extends ActiveRecord implements RecordWithHistory

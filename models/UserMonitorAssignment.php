@@ -10,6 +10,7 @@ use app\behaviors\ArrayOrStringBehavior;
  *
  * @property integer $user_id
  * @property integer $monitor_id
+ * @property string $access_rights
  *
  * @property User $monitor
  * @property User $user

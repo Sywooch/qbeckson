@@ -129,7 +129,7 @@ class UserForm extends Model
     }
 
     /**
-     * @param User $model
+     * @param UserIdentity $model
      */
     public function setModel($model)
     {
@@ -141,7 +141,7 @@ class UserForm extends Model
     }
 
     /**
-     * @return User
+     * @return UserIdentity
      */
     public function getModel()
     {
