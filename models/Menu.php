@@ -208,7 +208,7 @@ class Menu
             return [
                 ['label' => 'Организации', 'items' => [
                     ['label' => 'Реестр ПФДО', 'url' => ['/personal/payer-organizations']],
-                    ['label' => 'О работе в ИС ПФДО', 'url' => ['/site/manuals']],
+                    ['label' => 'Инструкции по работе в личном кабинете', 'url' => ['/site/manuals']],
                     //['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
                 ]],
             ];
@@ -248,7 +248,7 @@ class Menu
                     'url'   => ['/organization/address/index']
                 ],
                 [
-                    'label' => 'О работе в ИС ПФДО',
+                    'label' => 'Инструкции по работе в личном кабинете',
                     'url' => ['/site/manuals']
                 ],
             ]],
