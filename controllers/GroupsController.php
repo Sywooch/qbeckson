@@ -226,11 +226,18 @@ class GroupsController extends Controller
         $groupCreator = GroupCreator::make($organization, $module);
 
         if (!$groupCreator->load(Yii::$app->request->post())) {
-            return $this->renderAjax('group-create-ajax', ['groupCreator' => $groupCreator]);
+            return $this->asJson([
+                'page' => $this->renderAjax('group-create-ajax', ['groupCreator' => $groupCreator]),
+                'groupCreated' => false
+            ]);
         }
 
-        if (!$groupCreator->validateProgramDuration()) {
-            return $this->asJson(['groupCreated' => false, 'message' => 'Продолжительность программы должна быть ' . $module->month . ' месяцев.']);
+        if (!$groupCreator->validateProgramDuration() && $groupCreator->validate()) {
+            return $this->asJson([
+                'page' => $this->renderAjax('group-create-ajax', ['groupCreator' => $groupCreator]),
+                'message' => 'Продолжительность программы должна быть ' . $module->month . ' месяцев.',
+                'groupCreated' => false,
+            ]);
         }
 
         if ($groupCreator->validate() && $groupCreator->save()) {

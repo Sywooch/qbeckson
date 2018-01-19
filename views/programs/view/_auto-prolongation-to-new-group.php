@@ -95,7 +95,7 @@ $('.group-create-button').on('click', function() {
     $.ajax({
         url: url,
         success: function(data) {
-            $('.group-create-block').html(data);
+            $('.group-create-block').html(data.page);
         }
     });
 });
@@ -109,13 +109,15 @@ $('.group-save-button').on('click', function() {
         method: 'POST',
         data: form.serialize(),
         success: function(data) {
+            $('.group-create-block').html(data.page);
+
             if (data.groupCreated === true) {
                 $('#module-id').trigger('change');
                 $('.group-create-message').hide();
 
                 $(groupSaveButton).parents('.modal').first().modal('hide');
-            } 
-            
+            }
+
             if (data.groupCreated === false) {
                 $('.group-create-message').show();
                 $('.group-create-message').html(data.message)
