@@ -312,7 +312,8 @@ class ProgramsController extends Controller
     {
         /** @var $user UserIdentity */
         $user = Yii::$app->user->identity;
-        $model = $this->findModel($id);
+        $modelOriginal = $this->findModel($id);
+        $model = ProgramViewDecorator::decorate($modelOriginal);
 
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             && $user->organization->id !== $model->organization_id
@@ -320,25 +321,31 @@ class ProgramsController extends Controller
             throw new ForbiddenHttpException('Нет доступа');
         }
         // При первом просмотре от плательщика меняем статус, чтобы запретить редактирование организации
-        if (Yii::$app->user->can(UserIdentity::ROLE_PAYER) && $model->verification === $model::VERIFICATION_UNDEFINED) {
-            $model->verification = $model::VERIFICATION_WAIT;
+        if (Yii::$app->user->can(UserIdentity::ROLE_PAYER)
+            && $model->verification === Programs::VERIFICATION_UNDEFINED
+        ) {
+            $model->verification = Programs::VERIFICATION_WAIT;
             $model->save(false, ['verification']);
         }
         if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)
             || Yii::$app->user->can(UserIdentity::ROLE_PAYER)
         ) {
-            if ($model->verification === $model::VERIFICATION_DENIED) {
-                Yii::$app->session->setFlash('danger',
-                    $this->renderPartial('informers/list_of_reazon',
+            if ($model->verification === Programs::VERIFICATION_DENIED) {
+                Yii::$app->session->setFlash(
+                    'danger',
+                    $this->renderPartial(
+                        'informers/list_of_reazon',
                         [
-                            'dataProvider' => new ActiveDataProvider([
+                            'dataProvider' => new ActiveDataProvider(
+                                [
                                     'query' => $model->getInforms()
-                                        ->andWhere(['status' => $model::VERIFICATION_DENIED]),
+                                        ->andWhere(['status' => Programs::VERIFICATION_DENIED]),
                                     'sort' => ['defaultOrder' => ['date' => SORT_DESC]]
                                 ]
                             )
                         ]
-                    ));
+                    )
+                );
             }
         }
 
@@ -1232,14 +1239,15 @@ class ProgramsController extends Controller
             $modelYears = Model::createMultiple(
                 ProgrammeModule::classname(),
                 $modelYears,
-                $model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : null
+                $model->asDraft
+                    ? ProgrammeModule::SCENARIO_DRAFT :
+                    ($model->isMunicipalTask ? ProgrammeModule::SCENARIO_MUNICIPAL_TASK : null)
             );
             Model::loadMultiple($modelYears, Yii::$app->request->post());
             $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelYears, 'id', 'id')));
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
-
                 return $this->asJson(ArrayHelper::merge(
                     ActiveForm::validateMultiple($modelYears),
                     ActiveForm::validate($model)
@@ -1761,36 +1769,32 @@ class ProgramsController extends Controller
             return $this->asJson('Невозможно перевести детей из этой группы');
         }
 
-        if (\Yii::$app->request->isAjax) {
-            $autoProlongation = AutoProlongation::make($organizationId, null, null, $group->id);
-
-            $contractIdList = Contracts::findAll(['id' => $autoProlongation->getContractIdListForAutoProlongationToNewGroup()]);
-
-            $certificatesDataProvider = $dataProvider = new ActiveDataProvider([
-                'query' => Contracts::find()->where(['id' => $contractIdList]),
-                'pagination' => [
-                    'pageSizeLimit' => false,
-                    'pageSize' => 100,
-                ],
-            ]);
-
-            $moduleIdList = $autoProlongation->getModuleIdList($group->program_id);
-
-            $modules = ProgrammeModule::findAll(['id' => $moduleIdList]);
-            $moduleNameList = [];
-            /** @var ProgrammeModule $module */
-            foreach ($modules as $module) {
-                $moduleNameList += [$module->id => $module->getFullname()];
-            }
-
-            return $this->renderAjax('new-group-auto-prolongation', [
-                'certificatesDataProvider' => $certificatesDataProvider,
-                'moduleNameList' => $moduleNameList,
-                'group' => $group,
-            ]);
+        if (!\Yii::$app->request->isAjax) {
+            throw new NotFoundHttpException('Страница не найдена.');
         }
 
-        return $this->asJson('error');
+        $autoProlongation = AutoProlongation::make($organizationId, null, null, $group->id);
+
+        $contractIdList = Contracts::findAll(['id' => $autoProlongation->getContractIdListForAutoProlongationToNewGroup()]);
+
+        $certificatesDataProvider = $dataProvider = new ActiveDataProvider([
+            'query' => Contracts::find()->where(['id' => $contractIdList]),
+            'pagination' => [
+                'pageSizeLimit' => false,
+                'pageSize' => 100,
+            ],
+        ]);
+
+        $moduleIdList = $autoProlongation->getModuleIdList($group->program_id);
+
+        $modules = ProgrammeModule::findAll(['id' => $moduleIdList]);
+        $moduleNameList = [];
+        /** @var ProgrammeModule $module */
+        foreach ($modules as $module) {
+            $moduleNameList += [$module->id => $module->getFullname()];
+        }
+
+        return $this->renderAjax('view/_auto-prolongation-to-new-group', ['moduleNameList' => $moduleNameList, 'certificatesDataProvider' => $certificatesDataProvider, 'group' => $group]);
     }
 
     /**
@@ -1824,7 +1828,7 @@ class ProgramsController extends Controller
             ],
         ]);
 
-        return $this->renderAjax('contract-list-for-auto-prolongation-to-new-group', ['certificatesDataProvider' => $certificatesDataProvider]);
+        return $this->renderAjax('view/_contract-list-for-auto-prolongation-to-new-group', ['certificatesDataProvider' => $certificatesDataProvider]);
     }
 
     /**
@@ -1885,12 +1889,10 @@ class ProgramsController extends Controller
         $toGroupId = \Yii::$app->request->post('toGroupId');
 
         $autoProlongation = AutoProlongation::make($organizationId, null, null, $group->id);
-        $autoProlongation->init($toGroupId, null, true, $contractIdList);
-
-        if ($autoProlongation->errorMessage) {
+        if (!$autoProlongation->init($toGroupId, null, true, $contractIdList) && $autoProlongation->errorMessage != '') {
             \Yii::$app->session->addFlash('error', $autoProlongation->errorMessage);
 
-            return $this->redirect(Url::to(['/personal/organization-contracts']));
+            return $this->redirect(Url::to(['/programs/view', 'id' => $group->program_id]));
         }
 
         return $this->redirect('/programs/auto-prolonged-registry');

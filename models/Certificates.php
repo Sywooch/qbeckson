@@ -9,47 +9,47 @@ use yii\db\Exception;
 /**
  * This is the model class for table "certificates".
  *
- * @property integer     $id
- * @property integer     $user_id
- * @property string      $number
- * @property string      $name
- * @property string      $soname
- * @property string      $phname
- * @property integer     $payer_id
- * @property integer     $actual
- * @property string      $fio_child
- * @property string      $fio_parent
- * @property double      $nominal_f
- * @property double      $balance_f
- * @property double      $balance_p
- * @property double      $rezerv_f
- * @property double      $rezerv_p
- * @property double      $nominal
- * @property double      $balance
- * @property double      $rezerv
- * @property integer     $contracts
- * @property integer     $directivity1
- * @property integer     $directivity2
- * @property integer     $directivity3
- * @property integer     $directivity4
- * @property integer     $directivity5
- * @property integer     $directivity6
- * @property string      $friezed_at
- * @property string      $friezed_ballance
- * @property integer     $possible_cert_group
- * @property integer     $cert_group
- * @property int         $updated_cert_group
- * @property string      $nominal_p
- * @property string      $created_at
- * @property string      $type_changed_at
+ * @property integer $id
+ * @property integer $user_id
+ * @property string $number
+ * @property string $name
+ * @property string $soname
+ * @property string $phname
+ * @property integer $payer_id
+ * @property integer $actual
+ * @property string $fio_child
+ * @property string $fio_parent
+ * @property double $nominal_f
+ * @property double $balance_f
+ * @property double $balance_p
+ * @property double $rezerv_f
+ * @property double $rezerv_p
+ * @property double $nominal
+ * @property double $balance
+ * @property double $rezerv
+ * @property integer $contracts
+ * @property integer $directivity1
+ * @property integer $directivity2
+ * @property integer $directivity3
+ * @property integer $directivity4
+ * @property integer $directivity5
+ * @property integer $directivity6
+ * @property string $friezed_at
+ * @property string $friezed_ballance
+ * @property integer $possible_cert_group
+ * @property integer $cert_group
+ * @property int $updated_cert_group
+ * @property string $nominal_p
+ * @property string $created_at
+ * @property string $type_changed_at
  *
  * @property bool $canChangeGroup
  *
- * @property User        $user
- * @property Payers      $payers
- * @property Payers      $payer
+ * @property User $user
+ * @property Payers $payers
+ * @property Payers $payer
  * @property Contracts[] $contractsModels
- * @property CertGroup   $certGroup
+ * @property CertGroup $certGroup
  */
 class Certificates extends \yii\db\ActiveRecord
 {
@@ -153,7 +153,16 @@ class Certificates extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'soname', 'possible_cert_group',], 'required'],
-            [['user_id', 'payer_id', 'actual', 'contracts', 'directivity1', 'directivity2', 'directivity3', 'directivity4', 'directivity5', 'directivity6', 'cert_group', 'pasport_s', 'pasport_n', 'pasport_v', 'phone', 'possible_cert_group', 'updated_cert_group'], 'integer'],
+            [
+                [
+                    'user_id', 'payer_id', 'actual', 'contracts',
+                    'directivity1', 'directivity2', 'directivity3',
+                    'directivity4', 'directivity5', 'directivity6',
+                    'cert_group', 'pasport_s', 'pasport_n', 'pasport_v',
+                    'phone', 'possible_cert_group', 'updated_cert_group'
+                ],
+                'integer'
+            ],
             [['nominal', 'nominal_f'], 'number', 'max' => 100000],
             [['number'], 'string', 'length' => [10, 10]],
             [['balance', 'balance_f', 'rezerv', 'rezerv_f', 'friezed_ballance'], 'number'],
@@ -162,11 +171,21 @@ class Certificates extends \yii\db\ActiveRecord
             [['created_at', 'type_changed_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
             [['fio_child', 'fio_parent', 'birthday', 'address'], 'string', 'max' => 255],
             [['name', 'soname', 'phname'], 'string', 'max' => 50],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
-            [['payer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payers::className(), 'targetAttribute' => ['payer_id' => 'id']],
+            [
+                ['user_id'], 'exist', 'skipOnError' => true,
+                'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']
+            ],
+            [
+                ['payer_id'], 'exist', 'skipOnError' => true,
+                'targetClass' => Payers::className(), 'targetAttribute' => ['payer_id' => 'id']
+            ],
             [['contractCount'], 'safe'],
             [['selectCertGroup', 'possible_cert_group'], 'required', 'on' => self::SCENARIO_DEFAULT],
-            [['selectCertGroup'], 'validatePossibleCertGroup', 'on' => self::SCENARIO_CREATE_EDIT, 'message' => 'Невозможно установить данный тип, достигнут лимит'],
+            [
+                ['selectCertGroup'], 'validatePossibleCertGroup',
+                'on' => self::SCENARIO_CREATE_EDIT,
+                'message' => 'Невозможно установить данный тип, достигнут лимит'
+            ],
             ['selectCertGroup', 'in', 'range' => [self::TYPE_PF, self::TYPE_ACCOUNTING]],
         ];
     }
@@ -255,8 +274,12 @@ class Certificates extends \yii\db\ActiveRecord
         $certGroup = $this->payer->getCertGroups(1)->one();
 
         // обновить дату и время изменения типа сертификата
-        if ($this->selectCertGroup == self::TYPE_PF && $certGroup && $this->cert_group == $certGroup->id ||
-            $this->selectCertGroup == self::TYPE_ACCOUNTING && $certGroup && $this->cert_group != $certGroup->id) {
+        if ($this->selectCertGroup == self::TYPE_PF && $certGroup
+            && $this->cert_group == $certGroup->id
+            || $this->selectCertGroup == self::TYPE_ACCOUNTING
+            && $certGroup
+            && $this->cert_group != $certGroup->id
+        ) {
             $this->type_changed_at = date('Y-m-d H:i:s');
         }
 
@@ -315,6 +338,7 @@ class Certificates extends \yii\db\ActiveRecord
         if (!$result) {
             Yii::trace($this->getErrors());
         }
+
         return $result;
     }
 
@@ -499,7 +523,15 @@ class Certificates extends \yii\db\ActiveRecord
         if (!$this->getCertificateGroupQueues($this->id, $this->cert_group)->count()) {
             $this->link('certGroupsQueue', $this->certGroup, ['created_at' => time()]);
             $number = CertificateGroupQueue::getCountByCertGroup($this->cert_group, time()) + 1;
-            Yii::$app->session->setFlash('danger', 'К сожалению, на текущий момент достигнут лимит предоставления действующих сертификатов персонифицированного финансирования. Ваш сертификат будет переведен в вид сертификата персонифицированного финансирования в порядке "живой" очереди, после того, как число доступных сертификатов увеличится. Ваш номер в очереди - ' . $number);
+            Yii::$app->session->setFlash(
+                'danger',
+                'К сожалению, на текущий момент достигнут лимит '
+                . 'предоставления действующих сертификатов персонифицированного '
+                . 'финансирования. Ваш сертификат будет переведен в вид сертификата '
+                . 'персонифицированного финансирования в порядке "живой" очереди, '
+                . 'после того, как число доступных сертификатов увеличится. Ваш номер в очереди - '
+                . $number
+            );
         }
     }
 
@@ -603,10 +635,14 @@ class Certificates extends \yii\db\ActiveRecord
     /**
      * перевести неиспользуемые сертификаты в сертификаты учета
      * ---
-     * по прошествии "payers.days_to_first_contract_request" дней с даты создания сертификата или даты перевода его в сертификат пф,
+     * по прошествии "payers.days_to_first_contract_request"
+     * дней с даты создания сертификата или даты перевода его в сертификат пф,
      * в сертификаты учета переводятся все сертификаты:
      * 1. не имеющие договоров "текущего" периода, где status равен любому кроме null
-     * 2. имеющие только отклоненные договора (если поле даты отклонения refused_at != null) по прошествии "payers.days_to_contract_request_after_refused" дней до создания новой заявки.
+     * 2. имеющие только отклоненные договора
+     * (если поле даты отклонения refused_at != null)
+     * по прошествии "payers.days_to_contract_request_after_refused"
+     * дней до создания новой заявки.
      *
      * @return integer
      */
@@ -615,18 +651,42 @@ class Certificates extends \yii\db\ActiveRecord
         $changedCount = 0;
 
         if ($payer = Yii::$app->user->identity->payer) {
-            $allStatusesExceptRefused = join(',', [Contracts::STATUS_REQUESTED, Contracts::STATUS_ACTIVE, Contracts::STATUS_ACCEPTED, Contracts::STATUS_CLOSED]);
+            $allStatusesExceptRefused = join(
+                ',',
+                [
+                    Contracts::STATUS_REQUESTED,
+                    Contracts::STATUS_ACTIVE,
+                    Contracts::STATUS_ACCEPTED, Contracts::STATUS_CLOSED
+                ]
+            );
 
             $certificates = Certificates::find()
                 ->distinct()
                 ->with('certGroup')
                 ->leftJoin('cert_group', 'cert_group.id = certificates.cert_group')
                 ->leftJoin('payers', 'certificates.payer_id = payers.id')
-                ->leftJoin('contracts', 'certificates.id = contracts.certificate_id and contracts.period = ' . Contracts::CURRENT_REALIZATION_PERIOD . ' and contracts.status is not null and (contracts.status in (' . $allStatusesExceptRefused . ') or contracts.refused_at is null or TIMESTAMPDIFF(DAY, contracts.refused_at, "' . date('Y-m-d H:i:s') . '") < payers.days_to_contract_request_after_refused)')
+                ->leftJoin(
+                    'contracts',
+                    'certificates.id = contracts.certificate_id and contracts.period = '
+                    . Contracts::CURRENT_REALIZATION_PERIOD
+                    . ' and contracts.status is not null and (contracts.status in ('
+                    . $allStatusesExceptRefused
+                    . ') or contracts.refused_at is null or TIMESTAMPDIFF(DAY, contracts.refused_at, "'
+                    . date('Y-m-d H:i:s')
+                    . '") < payers.days_to_contract_request_after_refused)'
+                )
                 ->where(['cert_group.payer_id' => $payer->id])
                 ->andWhere(['certificates.actual' => 1])
                 ->andWhere('cert_group.id = certificates.possible_cert_group')
-                ->andWhere('TIMESTAMPDIFF(DAY, certificates.created_at, "' . date('Y-m-d H:i:s') . '") > payers.days_to_first_contract_request and (certificates.type_changed_at is null || TIMESTAMPDIFF(DAY, certificates.type_changed_at, "' . date('Y-m-d H:i:s') . '") > payers.days_to_first_contract_request)')
+                ->andWhere(
+                    'TIMESTAMPDIFF(DAY, certificates.created_at, "'
+                    . date('Y-m-d H:i:s')
+                    . '") > payers.days_to_first_contract_request and '
+                    . '(certificates.type_changed_at is null '
+                    . '|| TIMESTAMPDIFF(DAY, certificates.type_changed_at, "'
+                    . date('Y-m-d H:i:s')
+                    . '") > payers.days_to_first_contract_request)'
+                )
                 ->andWhere('contracts.id is null')
                 ->all();
 
@@ -648,8 +708,14 @@ class Certificates extends \yii\db\ActiveRecord
                 }
             }
 
-            $message = 'Ваш сертификат переведен в вид "сертификат учета" в связи с тем, что не был активирован в течении установленного уполномоченным органом периода времени';
-            $notification = Notification::getExistOrCreate($message, 0, Notification::TYPE_CERTIFICATE_TO_ACCOUNTING);
+            $message = 'Ваш сертификат переведен в вид "сертификат учета" '
+                . 'в связи с тем, что не был активирован в течении '
+                . 'установленного уполномоченным органом периода времени';
+            $notification = Notification::getExistOrCreate(
+                $message,
+                0,
+                Notification::TYPE_CERTIFICATE_TO_ACCOUNTING
+            );
             NotificationUser::assignToUsers($userIdList, $notification->id);
 
         }
@@ -669,7 +735,15 @@ class Certificates extends \yii\db\ActiveRecord
     {
         $autoProlongation = AutoProlongation::make(null, $this->id, $programId);
 
-        return Contracts::find()->where(['id' => $autoProlongation->getContractIdListForAutoProlongationToNewGroup($yearId, true), 'certificate_id' => $this->id])->exists();
+        return Contracts::find()
+            ->where([
+                'id' => $autoProlongation->getContractIdListForAutoProlongationToNewGroup(
+                    $yearId,
+                    true
+                ),
+                'certificate_id' => $this->id
+            ])
+            ->exists();
     }
 
     /**
@@ -682,6 +756,9 @@ class Certificates extends \yii\db\ActiveRecord
     public function hasAutoProlongedContract($groupId)
     {
 
-        return $this->getContractsModels()->where(['contracts.group_id' => $groupId])->andWhere(['is not', 'contracts.parent_id', null])->exists();
+        return $this->getContractsModels()
+            ->where(['contracts.group_id' => $groupId])
+            ->andWhere(['is not', 'contracts.parent_id', null])
+            ->exists();
     }
 }

@@ -48,9 +48,11 @@ class m180112_085508_alter_certificates_table_and_fix_contracts_number extends M
                 $contract->number = $number;
                 $contract->save();
 
-                $contractRequest = new \app\models\contracts\ContractRequest();
-                $mpdf = $contractRequest->makePdfForContract($contract);
-                $mpdf->Output(Yii::getAlias('@pfdoroot/uploads/contracts/') . $contract->url, 'F');
+                if ($contract->status == Contracts::STATUS_ACCEPTED) {
+                    $contractRequest = new \app\models\contracts\ContractRequest();
+                    $mpdf = $contractRequest->makePdfForContract($contract);
+                    $mpdf->Output(Yii::getAlias('@pfdoroot/uploads/contracts/') . $contract->url, 'F');
+                }
             }
         }
     }

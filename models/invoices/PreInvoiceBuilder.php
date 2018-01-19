@@ -231,7 +231,13 @@ class PreInvoiceBuilder extends InvoicesActions
             ->andWhere(['<=', 'start_edu_contract', $this->dateCurrentMonthEnd])
             ->andWhere([Contracts::tableName() . '.organization_id' => $this->organization->id])
             ->andWhere([Contracts::tableName() . '.payer_id' => $this->payer_id])
-            ->andWhere([Contracts::tableName() . '.status' => Contracts::STATUS_ACTIVE])
+            ->andWhere(['or',
+                [Contracts::tableName() . '.status' => Contracts::STATUS_ACTIVE],
+                ['and',
+                    [Contracts::tableName() . '.status' => Contracts::STATUS_CLOSED],
+                    ['>=', 'date_termnate', date('Y-m-d', strtotime('first day of current month'))]
+                ],
+            ])
             ->andWhere(['>', 'all_funds', 0]);
 
         return $contractQuery;

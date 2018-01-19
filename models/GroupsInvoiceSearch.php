@@ -84,7 +84,9 @@ class GroupsInvoiceSearch extends Groups
             ]);
 
         if ($this->invoice === true) {
-            $contractsQuery->andWhere(['<=', 'start_edu_contract', date('Y-m-d', $currentMonth)]);
+            $contractsQuery->andWhere(['<', 'start_edu_contract', date('Y-m-d', $currentMonth)]);
+        } else {
+            $contractsQuery->andWhere(['<=', 'start_edu_contract', date('Y-m-d', strtotime('last day of this month'))]);
         }
 
         $contracts = $contractsQuery->column();

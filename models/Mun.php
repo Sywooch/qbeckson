@@ -73,7 +73,7 @@ class Mun extends ActiveRecord
     public function init()
     {
         parent::init();
-        if ($this->isNewRecord) {
+        if ($this->isNewRecord && static::className() === Mun::className()) {
             $this->setDefaults();
         }
     }
