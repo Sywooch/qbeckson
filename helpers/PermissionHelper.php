@@ -55,7 +55,7 @@ class PermissionHelper
             ['label' => 'Информация', 'items' => [
                 ['label' => 'Общая статистика', 'url' => ['/personal/payer-statistic']],
                 ['label' => 'Уполномоченные организации', 'url' => ['/monitor/index']],
-                ['label' => 'О работе в ИС ПФДО', 'url' => ['site/manuals']],
+                ['label' => 'Инструкции по работе в личном кабинете', 'url' => ['site/manuals']],
                 ['label' => 'Объединение кабинетов', 'url' => ['/personal/user-personal-assign']],
                 ['label' => 'Муниципальные параметры', 'url' => [
                     '/mun/view', 'id' => ArrayHelper::getValue(Yii::$app->user->identity, ['payer', 'mun'])
