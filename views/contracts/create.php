@@ -14,6 +14,7 @@ use yii\helpers\Url;
 /* @var $this yii\web\View */
 /* @var $validateForm \app\models\forms\CertificateVerificationForm */
 /* @var $selectForm SelectGroupForm */
+/* @var $programIdNameList array */
 
 $this->title = 'Создать договор';
 $this->params['breadcrumbs'][] = ['label' => 'Договоры', 'url' => ['personal/organization-contracts']];
@@ -69,9 +70,7 @@ $this->registerJs($js);
                     <p class="lead">Выберите группу</p>
                     <?= $form->field($selectForm, 'programId')
                         ->dropDownList(
-                            ArrayHelper::map(Programs::findAll([
-                                'organization_id' => Yii::$app->user->identity->organization->id
-                            ]), 'id', 'name'),
+                            $programIdNameList,
                             ['id' => 'program-id', 'prompt' => '-- Не выбрана --']
                         ) ?>
                     <?= $form->field($selectForm, 'moduleId')->widget(DepDrop::class, [
