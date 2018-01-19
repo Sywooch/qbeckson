@@ -99,7 +99,6 @@ class ContractDeleteApplication extends ActiveRecord
             [['contract_number'], 'string', 'max' => 11],
             [['certificate_number'], 'string', 'max' => 45],
             [['confirmationFile'], 'required', 'on' => self::SCENARIO_CREATE],
-            [['contract_id'], 'unique', 'message' => 'Запрос на удаление этого договора уже отправлен.'],
             [
                 ['contract_id'],
                 'exist',
