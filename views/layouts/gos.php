@@ -139,12 +139,12 @@ $user = Yii::$app->user->getIdentity();
                              '"><span class="glyphicon glyphicon-film"></span> Видео-уроки</a></li>'
                      ]],
                     [[
-                        'label' => 'О работе в ИС ПФДО',
+                        'label' => 'Инструкции по работе в личном кабинете',
                         'url' => ['site/manuals'],
                         'template' =>
                             '<li class="breadcrumbs-help-icon"><a href="' .
                             Url::to(['site/manuals']) .
-                            '"><span class="glyphicon glyphicon-info-sign"></span> О работе в ИС ПФДО </a>&nbsp&nbsp</li>'
+                            '"><span class="glyphicon glyphicon-info-sign"></span> Инструкции по работе в личном кабинете </a>&nbsp&nbsp</li>'
                      ]]);
                 echo Breadcrumbs::widget([
                     'homeLink' => [
