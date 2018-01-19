@@ -36,6 +36,7 @@ class GroupClass extends ActiveRecord
     public function rules()
     {
         return [
+            ['address', 'required'],
             [['group_id', 'hours_count', 'status', 'classroom'], 'integer'],
             [['week_day'], 'string', 'max' => 20],
             [['address'], 'string', 'max' => 255],
