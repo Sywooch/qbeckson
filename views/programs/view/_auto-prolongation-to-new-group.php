@@ -23,6 +23,12 @@ $('#group-id').on('depdrop:change', function(event, id, value, count) {
     countToAutoProlong = 0;
     updateContractList();
 
+    if (value != '') {
+        $('.group-create-button').prop('disabled', false);
+    } else {
+        $('.group-create-button').prop('disabled', true);
+    }
+    
     if (count == 0 && value != '') {
         $('.group-info').html('Для перевода детей в выбранный модуль необходимо создать в нем соответствующую группу.');
     } else {
@@ -31,6 +37,8 @@ $('#group-id').on('depdrop:change', function(event, id, value, count) {
 });
 $('#group-id').on('change', function() {
     var url = $(this).data('group-info-url'), group = $(this);
+    
+    countToAutoProlong = 0;
     changeDisabledStatus(true);
 
     $.ajax({
@@ -78,6 +86,44 @@ $('.auto-prolong-confirmation-button').on('click', function() {
     $('.auto-prolong-confirmation-content').remove();
     
     $("#auto-prolong-confirmation-modal").modal();
+});
+$('.group-create-button').on('click', function() {
+    var url = $(this).data('url') + '?id=' + $('#module-id').val();
+    
+    $('#group-create-modal').modal();
+
+    $.ajax({
+        url: url,
+        success: function(data) {
+            $('.group-create-block').html(data.page);
+        }
+    });
+});
+$('.group-save-button').on('click', function() {
+    var groupSaveButton = $(this), 
+        form = $('#group-create-form'),
+        url = $('.group-create-button').data('url') + '?id=' + $('#module-id').val();
+
+    $.ajax({
+        url: url,
+        method: 'POST',
+        data: form.serialize(),
+        success: function(data) {
+            $('.group-create-block').html(data.page);
+
+            if (data.groupCreated === true) {
+                $('#module-id').trigger('change');
+                $('.group-create-message').hide();
+
+                $(groupSaveButton).parents('.modal').first().modal('hide');
+            }
+
+            if (data.groupCreated === false) {
+                $('.group-create-message').show();
+                $('.group-create-message').html(data.message)
+            }
+        }
+    });
 });
 function setHooks() {
     $('#change-all-auto-prolongation-checkboxes').on('click', function() {
@@ -213,7 +259,7 @@ $this->registerJs($js);
 
     <div class="row">
         <div class="col-xs-6">
-            <?= Html::button('да, выполнить перевод', [
+            <?= Html::button('Да, выполнить перевод', [
                 'class' => 'btn btn-success',
                 'onClick' => '$.ajax({
                     url: \'/programs/auto-prolongation-to-new-group-init\',
@@ -229,7 +275,7 @@ $this->registerJs($js);
             ]) ?>
         </div>
         <div class="col-xs-6 text-right">
-            <?= Html::button('отмена', ['class' => 'btn btn-danger', 'onClick' => '$(".modal").modal("hide");']) ?>
+            <?= Html::button('Отмена', ['class' => 'btn btn-danger', 'onClick' => '$(".modal").modal("hide");']) ?>
         </div>
     </div>
 </div>

@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\ContractsStatus1onlySearch;
 use app\models\GroupClass;
 use app\models\Groups;
+use app\models\groups\GroupCreator;
 use app\models\GroupsInvoiceSearch;
 use app\models\GroupsPreinvoiceSearch;
 use app\models\GroupsSearch;
@@ -118,71 +119,25 @@ class GroupsController extends Controller
      */
     public function actionCreate()
     {
-        $model = new Groups();
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
+        /** @var Organization $organization */
+        $organization = \Yii::$app->user->identity->organization;
 
-        $groupClasses = [];
-        foreach (GroupClass::weekDays() as $key => $day) {
-            $groupClasses[$key] = new GroupClass([
-                'week_day' => $day
-            ]);
+        $groupCreator = GroupCreator::make($organization);
+        if (!$groupCreator->load(Yii::$app->request->post())) {
+            return $this->render('create-with-module-selection', ['groupCreator' => $groupCreator]);
         }
 
-        if (Yii::$app->request->post()) {
-            $model->load(Yii::$app->request->post());
-            $model->organization_id = $organization['id'];
+        if (!$groupCreator->validateProgramDuration()) {
+            Yii::$app->session->setFlash('error', 'Продолжительность программы должна быть ' . $groupCreator->group->module->month . ' месяцев.');
 
-            $rows = (new \yii\db\Query())
-                ->select(['month'])
-                ->from('years')
-                ->where(['id' => $model->year_id])
-                ->one();
-
-            $d1 = strtotime($model->datestart);
-            $d2 = strtotime($model->datestop);
-            $diff = $d2 - $d1;
-            $diff = $diff / (60 * 60 * 24 * 31);
-            $month = floor($diff);
-
-            if ($rows['month'] < $month - 1 or $rows['month'] > $month + 1) {
-                Yii::$app->session->setFlash(
-                    'error',
-                    'Продолжительность программы должна быть ' . $rows['month'] . ' месяцев.'
-                );
-            } else {
-                Model::loadMultiple($groupClasses, Yii::$app->request->post());
-                if ($model->validate() && Model::validateMultiple($groupClasses)) {
-                    $transaction = Yii::$app->db->beginTransaction();
-                    try {
-                        if ($model->save(false)) {
-                            foreach ($groupClasses as $classModel) {
-                                /** @var GroupClass $classModel */
-                                if ($classModel->status) {
-                                    $classModel->group_id = $model->id;
-                                    if (!($flag = $classModel->save(false))) {
-                                        $transaction->rollBack();
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        if ($flag) {
-                            $transaction->commit();
-
-                            return $this->redirect(['programs/view', 'id' => $model->program_id]);
-                        }
-                    } catch (Exception $e) {
-                        $transaction->rollBack();
-                    }
-                }
-            }
+            return $this->render('create-with-module-selection', ['groupCreator' => $groupCreator]);
         }
 
-        return $this->render('create', [
-            'groupClasses' => $groupClasses,
-            'model'        => $model,
-        ]);
+        if ($groupCreator->validate() && $groupCreator->save()) {
+            return $this->redirect(['programs/view', 'id' => $groupCreator->group->program_id]);
+        }
+
+        return $this->render('create-with-module-selection', ['groupCreator' => $groupCreator]);
     }
 
     /**
@@ -206,88 +161,90 @@ class GroupsController extends Controller
 
     public function actionNewgroup($id)
     {
-        if (Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
-            $module = ProgrammeModule::findOne(['id' => $id]);
-            if (!$module) {
-                throw new NotFoundHttpException();
-            }
-            if ($module->program->verification === Programs::VERIFICATION_DENIED) {
-                throw new ForbiddenHttpException();
-            }
+        if (!Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+            throw new ForbiddenHttpException();
         }
 
-        $model = new Groups();
-        $model->year_id = $id;
-        $rows = (new \yii\db\Query())
-            ->select(['program_id'])
-            ->from('years')
-            ->where(['id' => $id])
-            ->one();
-        $model->program_id = $rows['program_id'];
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
-        $model->organization_id = $organization['id'];
+        /** @var Organization $organization */
+        $organization = \Yii::$app->user->identity->organization;
 
-        $groupClasses = [];
-        foreach (GroupClass::weekDays() as $key => $day) {
-            $groupClasses[$key] = new GroupClass([
-                'week_day' => $day
+        if (!$module = ProgrammeModule::findOne(['id' => $id])) {
+            throw new NotFoundHttpException();
+        }
+
+        if ($module->program->verification === Programs::VERIFICATION_DENIED) {
+            throw new ForbiddenHttpException();
+        }
+
+        $groupCreator = GroupCreator::make($organization, $module);
+
+        if (!$groupCreator->load(Yii::$app->request->post())) {
+            return $this->render('create-without-module-selection', ['groupCreator' => $groupCreator]);
+        }
+
+        if (!$groupCreator->validateProgramDuration()) {
+            Yii::$app->session->setFlash('error', 'Продолжительность программы должна быть ' . $module->month . ' месяцев.');
+
+            return $this->render('create-without-module-selection', ['groupCreator' => $groupCreator]);
+        }
+
+        if ($groupCreator->validate() && $groupCreator->save()) {
+            return $this->redirect(['programs/view' . ($groupCreator->group->program->isMunicipalTask ? '-task' : ''), 'id' => $groupCreator->group->program_id]);
+        }
+
+        return $this->render('create-without-module-selection', ['groupCreator' => $groupCreator]);
+    }
+
+    /**
+     * создать группу
+     *
+     * @param $id - id модуля
+     *
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     *
+     * @return string
+     */
+    public function actionGroupCreate($id)
+    {
+        if (!Yii::$app->user->can(UserIdentity::ROLE_ORGANIZATION)) {
+            throw new ForbiddenHttpException();
+        }
+
+        /** @var Organization $organization */
+        $organization = \Yii::$app->user->identity->organization;
+
+        $module = ProgrammeModule::findOne(['id' => $id]);
+        if (!$module) {
+            throw new NotFoundHttpException();
+        }
+
+        if ($module->program->verification === Programs::VERIFICATION_DENIED) {
+            throw new ForbiddenHttpException();
+        }
+
+        $groupCreator = GroupCreator::make($organization, $module);
+
+        if (!$groupCreator->load(Yii::$app->request->post())) {
+            return $this->asJson([
+                'page' => $this->renderAjax('group-create-ajax', ['groupCreator' => $groupCreator]),
+                'groupCreated' => false
             ]);
         }
-        $programModuleAddresses = ArrayHelper::map($model->module->addresses, 'address', 'address');
 
-        if ($model->load(Yii::$app->request->post())) {
-            $rows2 = (new \yii\db\Query())
-                ->select(['month'])
-                ->from('years')
-                ->where(['id' => $model->year_id])
-                ->one();
-
-            $d1 = strtotime($model->datestart);
-            $d2 = strtotime($model->datestop);
-            $diff = $d2 - $d1;
-            $diff = $diff / (60 * 60 * 24 * 31);
-            $month = floor($diff);
-
-            if ($rows2['month'] < $month - 1 or $rows2['month'] > $month + 1) {
-                Yii::$app->session->setFlash(
-                    'error',
-                    'Продолжительность программы должна быть ' . $rows2['month'] . ' месяцев.'
-                );
-            } else {
-                Model::loadMultiple($groupClasses, Yii::$app->request->post());
-                if ($model->validate() && Model::validateMultiple($groupClasses)) {
-                    $transaction = Yii::$app->db->beginTransaction();
-                    try {
-                        if ($model->save()) {
-                            foreach ($groupClasses as $classModel) {
-                                /** @var GroupClass $classModel */
-                                if ($classModel->status) {
-                                    $classModel->group_id = $model->id;
-                                    if (!($flag = $classModel->save(false))) {
-                                        $transaction->rollBack();
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        if ($flag) {
-                            $transaction->commit();
-
-                            return $this->redirect(['programs/view' . ($model->program->isMunicipalTask ? '-task' : ''), 'id' => $model->program_id]);
-                        }
-                    } catch (\Exception $e) {
-                        $transaction->rollBack();
-                    }
-                }
-            }
+        if (!$groupCreator->validateProgramDuration() && $groupCreator->validate()) {
+            return $this->asJson([
+                'page' => $this->renderAjax('group-create-ajax', ['groupCreator' => $groupCreator]),
+                'message' => 'Продолжительность программы должна быть ' . $module->month . ' месяцев.',
+                'groupCreated' => false,
+            ]);
         }
 
-        return $this->render('newgroup', [
-            'model'                  => $model,
-            'groupClasses'           => $groupClasses,
-            'programModuleAddresses' => $programModuleAddresses
-        ]);
+        if ($groupCreator->validate() && $groupCreator->save()) {
+            return $this->asJson(['groupCreated' => true,]);
+        }
+
+        return $this->renderAjax('group-create-ajax', ['groupCreator' => $groupCreator]);
     }
 
     /**

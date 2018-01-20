@@ -55,7 +55,7 @@ class PermissionHelper
             ['label' => 'Информация', 'items' => [
                 ['label' => 'Общая статистика', 'url' => ['/personal/payer-statistic']],
                 ['label' => 'Уполномоченные организации', 'url' => ['/monitor/index']],
-                ['label' => 'О работе в ИС ПФДО', 'url' => ['site/manuals']],
+                ['label' => 'Инструкции по работе в личном кабинете', 'url' => ['site/manuals']],
                 ['label' => 'Объединение кабинетов', 'url' => ['/personal/user-personal-assign']],
                 ['label' => 'Муниципальные параметры', 'url' => [
                     '/mun/view', 'id' => ArrayHelper::getValue(Yii::$app->user->identity, ['payer', 'mun'])
@@ -66,8 +66,7 @@ class PermissionHelper
             ['label' => 'Договоры', 'url' => ['/personal/payer-contracts']],
             ['label' => 'Счета', 'url' => ['/personal/payer-invoices']],
             ['label' => 'Организации', 'items' => [
-                ['label' => 'Реестр ПФДО', 'url' => ['/personal/payer-
-organizations']],
+                ['label' => 'Реестр ПФДО', 'url' => ['/personal/payer-organizations']],
                 ['label' => 'Подведомственные организации', 'url' => ['/personal/payer-suborder-organizations']],
             ]],
             ['label' => 'Программы', 'items' => [
@@ -111,6 +110,7 @@ organizations']],
             ['index' => 'Договоры', 'value' => 'contracts'],
             ['index' => 'Счета', 'value' => 'invoices'],
             ['index' => 'Организации', 'value' => 'organization'],
+            ['index' => 'Работа с договором между плательщиками и поставщиками', 'value' => 'cooperate'],
             ['index' => 'Программы', 'value' => 'programs'],
             ['index' => 'Муниципальные задания', 'value' => 'municipal-task'],
             ['index' => 'Параметры муниципальных заданий', 'value' => 'matrix'],

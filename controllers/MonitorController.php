@@ -82,16 +82,16 @@ class MonitorController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $userForm = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $model->model->userMonitorAssignment->access_rights = $model->accessRights;
-            $model->model->userMonitorAssignment->save();
+        if ($userForm->load(Yii::$app->request->post()) && $userForm->save()) {
+            $userForm->getModel()->userMonitorAssignment->access_rights = $userForm->accessRights;
+            $userForm->getModel()->userMonitorAssignment->save();
 
             return $this->redirect(['index']);
         } else {
             return $this->render('update', [
-                'model' => $model,
+                'model' => $userForm,
             ]);
         }
     }
@@ -113,15 +113,15 @@ class MonitorController extends Controller
      * Finds the UserIdentity model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return UserIdentity the loaded model
+     * @return UserForm
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
         if (($model = UserIdentity::findOne($id)) !== null) {
-            $userModel = new UserForm(['model' => $model]);
+            $userForm = new UserForm(['model' => $model]);
 
-            return $userModel;
+            return $userForm;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }

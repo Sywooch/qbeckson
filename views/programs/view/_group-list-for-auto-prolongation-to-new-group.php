@@ -41,5 +41,14 @@ use yii\web\View;
         ]) ?>
     <?php endif; ?>
     <br>
+<!--    --><?//= Html::button('Создать группу', [
+//        'class' => 'btn btn-primary group-create-button',
+//        'disabled' => true,
+//        'data' => [
+//            'url' => Url::to(['/groups/group-create'])
+//        ],
+//    ]) ?>
+    <br>
+    <br>
     <div class="group-info"></div>
 </div>

@@ -23,6 +23,7 @@ use app\models\module\CertificateAccessModuleDecorator;
 use app\models\Organization;
 use app\models\ProgrammeModule;
 use app\models\Programs;
+use app\models\search\ProgramsSearch;
 use app\models\User;
 use app\models\UserIdentity;
 use app\traits\AjaxValidationTrait;
@@ -69,6 +70,16 @@ class ContractsController extends Controller
      */
     public function actionCreate()
     {
+        $searchOpenPrograms = new ProgramsSearch([
+            'organization_id' => Yii::$app->user->identity->organization->id,
+            'verification' => [Programs::VERIFICATION_DONE],
+            'hours' => '0,2000',
+            'limit' => '0,10000',
+            'rating' => '0,100',
+            'modelName' => 'SearchOpenPrograms',
+        ]);
+        $programIdNameList = ArrayHelper::map($searchOpenPrograms->search(Yii::$app->request->queryParams)->query->all(), 'id', 'name');
+
         $validateForm = new CertificateVerificationForm();
         if ($validateForm->load(Yii::$app->request->post()) && $validateForm->validate()) {
             $selectForm = new SelectGroupForm();
@@ -83,6 +94,7 @@ class ContractsController extends Controller
         }
 
         return $this->render('create', [
+            'programIdNameList' => $programIdNameList,
             'validateForm' => $validateForm,
             'selectForm' => $selectForm ?? null,
         ]);
