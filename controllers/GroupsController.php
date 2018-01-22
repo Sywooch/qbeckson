@@ -244,7 +244,7 @@ class GroupsController extends Controller
             return $this->asJson(['groupCreated' => true,]);
         }
 
-        return $this->renderAjax('group-create-ajax', ['groupCreator' => $groupCreator]);
+        return $this->asJson(['page' => $this->renderAjax('group-create-ajax', ['groupCreator' => $groupCreator]), 'groupCreated' => false]);
     }
 
     /**

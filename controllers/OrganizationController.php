@@ -72,21 +72,21 @@ class OrganizationController extends Controller
      */
     public function actionView($id)
     {
-        $model = $this->findModel($id);
-        if (Yii::$app->user->can(UserIdentity::ROLE_OPERATOR) && $model->status === Organization::STATUS_REFUSED) {
-            Yii::$app->session->setFlash('warning', 'Деятельность приостановлена, причина: ' . $model->refuse_reason);
+        $organization = $this->findModel($id);
+        if (Yii::$app->user->can(UserIdentity::ROLE_OPERATOR) && $organization->status === Organization::STATUS_REFUSED) {
+            Yii::$app->session->setFlash('warning', 'Деятельность приостановлена, причина: ' . $organization->refuse_reason);
         }
 
         if (Yii::$app->user->can(UserIdentity::ROLE_OPERATOR)
-            && $model->status === Organization::STATUS_NEW
-            && $model->refuse_reason) {
-            Yii::$app->session->setFlash('info', 'Причина предыдущего отказа: ' . $model->refuse_reason);
+            && $organization->status === Organization::STATUS_NEW
+            && $organization->refuse_reason) {
+            Yii::$app->session->setFlash('info', 'Причина предыдущего отказа: ' . $organization->refuse_reason);
         }
 
         if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
             /** @var $certificate Certificates */
             $certificate = Yii::$app->user->identity->certificate;
-            if (!count($model->getCooperatesByPayerId($certificate->payer_id, 1))) {
+            if (!count($organization->getCooperatesByPayerId($certificate->payer_id, 1))) {
                 Yii::$app->session->setFlash('warning', 'К сожалению, на данный момент Вы не можете записаться на обучение в данную организацию. Уполномоченная организация пока не заключила с ней необходимое соглашение.');
             }
         }
@@ -95,8 +95,8 @@ class OrganizationController extends Controller
         $operatorSettings = Yii::$app->operator->identity->settings;
 
         if (Yii::$app->user->can(UserIdentity::ROLE_PAYER)) {
-            $currentPeriodCooperate = $model->getCooperation(Cooperate::STATUS_ACTIVE, Cooperate::PERIOD_CURRENT);
-            $futurePeriodCooperate = $model->getCooperation(Cooperate::STATUS_ACTIVE, Cooperate::PERIOD_FUTURE);
+            $currentPeriodCooperate = $organization->getCooperation(Cooperate::STATUS_ACTIVE, Cooperate::PERIOD_CURRENT);
+            $futurePeriodCooperate = $organization->getCooperation(Cooperate::STATUS_ACTIVE, Cooperate::PERIOD_FUTURE);
 
             if ($currentPeriodCooperate) {
                 $confirmRequestForm = new ConfirmRequestForm(['type' => $currentPeriodCooperate->document_type, 'value' => number_format($currentPeriodCooperate->total_payment_limit, 0, '', '')]);
@@ -106,7 +106,7 @@ class OrganizationController extends Controller
             $cooperateForFuturePeriodTypeForm = $futurePeriodCooperate ? new CooperateForFuturePeriodTypeForm(['type' => $futurePeriodCooperate->document_type, 'maximumAmount' => number_format($futurePeriodCooperate->total_payment_limit, 0, '', '')]) : null;
 
             $cooperateForFuturePeriodForm = new CooperateForFuturePeriodForm();
-
+//return $this->asJson([$cooperateForFuturePeriodForm->load(\Yii::$app->request->post()), $cooperateForFuturePeriodForm->useCurrentCooperateType]);
             if (Yii::$app->request->isAjax) {
                 if ($cooperateForFuturePeriodForm->load(\Yii::$app->request->post())) {
                     $cooperateForFuturePeriodForm->setCurrentPeriodCooperate($currentPeriodCooperate);
@@ -124,7 +124,7 @@ class OrganizationController extends Controller
             }
 
             if ($cooperateForFuturePeriodForm->load(Yii::$app->request->post())) {
-                $cooperateForFuturePeriodForm->createFuturePeriodCooperate($model->id);
+                $cooperateForFuturePeriodForm->createFuturePeriodCooperate($organization->id);
                 $cooperateForFuturePeriodForm->setCurrentPeriodCooperate($currentPeriodCooperate);
 
                 if ($cooperateForFuturePeriodForm->save()) {
@@ -161,7 +161,7 @@ class OrganizationController extends Controller
         }
 
         return $this->render('view', [
-            'model' => $model,
+            'model' => $organization,
             'operatorSettings' => $operatorSettings,
             'confirmRequestForm' => $confirmRequestForm,
             'cooperateForFuturePeriodForm' => $cooperateForFuturePeriodForm,
