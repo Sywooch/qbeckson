@@ -21,6 +21,9 @@ class CooperateForFuturePeriodForm extends Model
 
     /**
      * использовать тип такой же как у соглашения текущего периода действия
+     * ---
+     * 1 - создать соглашение будущего периода, используя действующее соглашение текущего периода
+     * 2 - создать новое соглашение будущего периода
      *
      * @var boolean
      */
@@ -68,13 +71,13 @@ class CooperateForFuturePeriodForm extends Model
     public function rules()
     {
         return [
-            ['useCurrentCooperateType', 'required'],
+            ['useCurrentCooperateType', 'integer'],
             [['futureCooperateNumber', 'futureCooperateDate'], 'required', 'when' => function () {
-                if (1 == $this->useCurrentCooperateType) {
-                    return false;
+                if (2 == $this->useCurrentCooperateType) {
+                    return true;
                 }
 
-                return true;
+                return false;
             }],
             ['maximumAmount', 'required', 'when' => function () {
                 if (1 == $this->useCurrentCooperateType) {
@@ -89,7 +92,7 @@ class CooperateForFuturePeriodForm extends Model
 
                 return false;
             }],
-            ['maximumAmount', 'integer'],
+            ['maximumAmount', 'integer', 'min' => 0],
             ['type', 'in', 'range' => array_keys(Cooperate::documentTypes())],
             [['futureCooperateNumber', 'futureCooperateDate'], 'string'],
             ['cooperateFile', 'safe'],
@@ -124,14 +127,20 @@ class CooperateForFuturePeriodForm extends Model
         $currentCooperate = $this->getCurrentPeriodCooperate();
         $futurePeriodCooperate = $this->getFuturePeriodCooperate();
         if (!$futurePeriodCooperate || !$currentCooperate) {
-            return $futurePeriodCooperate;
+            return false;
         }
 
-        $futurePeriodCooperate->load(['Cooperate' => $currentCooperate->getAttributes()]);
-
         if ($this->useCurrentCooperateType && $currentCooperate) {
-            $futurePeriodCooperate->total_payment_limit = $this->maximumAmount;
+            $futurePeriodCooperate->load(['Cooperate' => $currentCooperate->getAttributes()]);
+
+            if (Cooperate::DOCUMENT_TYPE_EXTEND === $futurePeriodCooperate->document_type) {
+                $futurePeriodCooperate->total_payment_limit = $this->maximumAmount;
+            }
+
             $futurePeriodCooperate->period = Cooperate::PERIOD_FUTURE;
+
+            $futurePeriodCooperate->document = $currentCooperate->document;
+
             if ($futurePeriodCooperate->save()) {
                 return true;
             }

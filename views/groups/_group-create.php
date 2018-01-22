@@ -56,7 +56,7 @@ $this->registerJs($js, $this::POS_READY);
                 'class' => 'show-form-options'
             ])->label(false); ?>
     </div>
-    <div class="form-options" style="display: none">
+    <div class="form-options" style="display: <?= $class->status ? 'block' : 'none' ?>">
         <div class="row">
             <div class="col-md-6">
                 <?php if ($groupCreator->needModuleSet): ?>
