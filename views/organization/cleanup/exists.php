@@ -7,5 +7,5 @@ $this->params['breadcrumbs'][] = ['label' => 'Список запросов на
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div>
-    <h3 class="bg-danger text-center">Запрос на удаление этого договора уже отправелн!</h3>
+    <h3 class="bg-danger text-center">Запрос на удаление этого договора уже отправлен!</h3>
 </div>

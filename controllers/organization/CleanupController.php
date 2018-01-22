@@ -67,7 +67,7 @@ class CleanupController extends Controller
         }
 
         //Если запрос на удаление этого договора уже создан
-        if (ContractDeleteApplication::find()->where(['contract_id' => $id,])->exists()) {
+        if (ContractDeleteApplication::find()->where(['contract_id' => $id])->andWhere(['!=', 'status', ContractDeleteApplication::STATUS_REFUSED])->exists()) {
             return $this->render('exists');
         }
 
@@ -82,6 +82,10 @@ class CleanupController extends Controller
             $model->status = ContractDeleteApplication::STATUS_WAITING;
             $model->contract_id = $id;
             $model->organization_id = $organizationId;
+            if (!$model->validate()) {
+                $this->render('create', ['model' => $model,]);
+            }
+
             if ($model->save()) {
                 \Yii::$app->session->setFlash('success', 'Запрос успешно отправлен.');
                 return $this->redirect(['contract']);
