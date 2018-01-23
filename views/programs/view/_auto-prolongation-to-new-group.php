@@ -89,7 +89,7 @@ $('.auto-prolong-confirmation-button').on('click', function() {
 });
 $('.group-create-button').on('click', function() {
     var url = $(this).data('url') + '?id=' + $('#module-id').val();
-    
+
     $('#group-create-modal').modal();
 
     $.ajax({
@@ -100,20 +100,44 @@ $('.group-create-button').on('click', function() {
     });
 });
 $('.group-save-button').on('click', function() {
-    var groupSaveButton = $(this), 
+    var oldGroups = [],
+        groupSaveButton = $(this), 
         form = $('#group-create-form'),
         url = $('.group-create-button').data('url') + '?id=' + $('#module-id').val();
 
+    groupSaveButton.prop('disabled', true);
+    setTimeout(function() {
+        groupSaveButton.prop('disabled', false);   
+    }, 500);
+    
+    $('#group-id option').each(function() {
+        oldGroups.push($(this).val());
+    });
+    
     $.ajax({
         url: url,
         method: 'POST',
         data: form.serialize(),
         success: function(data) {
+            var newGroups = [];
+
             $('.group-create-block').html(data.page);
 
             if (data.groupCreated === true) {
                 $('#module-id').trigger('change');
                 $('.group-create-message').hide();
+
+                setTimeout(function() {
+                    $('#group-id option').each(function() {
+                        newGroups.push($(this).val());
+                    });
+
+                    newGroups.filter(function(groupId) {
+                        if ($.inArray(groupId, oldGroups) == -1) {
+                            $('#group-id').val(groupId);
+                        }
+                    });
+                }, 500);
 
                 $(groupSaveButton).parents('.modal').first().modal('hide');
             }

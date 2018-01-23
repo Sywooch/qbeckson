@@ -59,7 +59,7 @@ $('select[id="type"]').change(function() {
     var val = $(this).val();
     $('.item').hide().children('.text').hide();
     $('.' + val).show().children('.' + val + 'Text').show();
-})
+});
 $('select[id="iscustomvalue"').change(function() {
     if(this.checked) {
         $('.extend').show();
@@ -67,7 +67,35 @@ $('select[id="iscustomvalue"').change(function() {
     }
     $('.extend').hide();
 });
+$('input[name="CooperateForFuturePeriodForm[useCurrentCooperateType]"]').on('change', function() {
+    $('.add-cooperate-confirm').find('input').prop('checked', false);
+    $('.add-cooperate-button').hide();
 
+    if ($(this).val() == 1) {
+        $('.cooperate-with-old-type').show();
+        $('.cooperate-with-new-type').hide();
+
+        if ($('#cooperateforfutureperiodform-usecurrentcooperatetype').data('cooperate-with-maximum-amount') == 1) {
+            $('.maximum-amount').show();
+        } else {
+            $('.maximum-amount').hide();
+        }
+    } else {        
+        $('.cooperate-with-new-type').show();
+        $('.cooperate-with-old-type').hide();
+        
+        var val = $('.future-cooperate-type-change').val();
+        
+        if (val == 'extend') {
+            $('.maximum-amount').show();
+        } else {
+            $('.maximum-amount').hide();
+        }
+        
+        $('.item').hide().children('.future-cooperate-text').hide();
+        $('.future-cooperate-' + val).show().children('.' + val + 'FutureCooperateText').show();
+    }
+});
 $('#cooperateforfutureperiodtypeform-type').change(function() {
     var val = $(this).val();
     $('.item').hide().children('.future-cooperate-type-text').hide();
@@ -88,67 +116,9 @@ $('.future-cooperate-type-change').change(function() {
 
 $('.future_period_checkbox').on('click', function() {
     $('#choose-next-year-cooperate-type-modal').modal();
-    $('.use-new-cooperate-type').prop('checked', false);
-    $('.use-current-cooperate-type').prop('checked', false);
     $('.add-cooperate-confirm').hide();
     $('.cooperate-with-new-type').hide();
     $('.maximum-amount').hide();
-});
-
-$('.use-current-cooperate-type').on('click', function() {
-    $('.add-cooperate-confirm').find('input').prop('checked', false);
-    $('.add-cooperate-button').hide();
-    
-    $('.cooperate-with-old-type').show();
-    
-    $(this).prop('checked', true);
-    $('.use-new-cooperate-type').prop('checked', false);
-
-    $('.cooperate-with-new-type').hide();
-
-    if ($('.use-current-cooperate-type').data('cooperate-with-maximum-amount') == 1) {
-        $('.maximum-amount').show();
-    } else {
-        $('.maximum-amount').hide();
-    }
-});
-
-$('.use-new-cooperate-type').on('click', function() {  
-    $('.add-cooperate-confirm').find('input').prop('checked', false);
-    $('.add-cooperate-button').hide();
-    
-    $('.cooperate-with-new-type').show();
-    
-    $('.cooperate-with-old-type').hide();    
-    
-    $(this).prop('checked', true);
-    $('.use-current-cooperate-type').prop('checked', false);
-    
-    var val = $('.future-cooperate-type-change').val();
-    
-    if (val == 'extend') {
-        $('.maximum-amount').show();
-    } else {
-        $('.maximum-amount').hide();
-    }
-    
-    $('.item').hide().children('.future-cooperate-text').hide();
-    $('.future-cooperate-' + val).show().children('.' + val + 'FutureCooperateText').show();
-});
-
-$('.save-requisites-button').on('click', function() {    
-    var number = $('#cooperateforfutureperiodform-futurecooperatenumber'),
-        date = $('#cooperateforfutureperiodform-futurecooperatedate-disp'),
-        cooperateRequisites = $('.cooperate-requisites');
-    
-    $("#set-requisites-modal").modal("hide");
-    if (number.val() != '' && date.val() != '') {
-        cooperateRequisites.find('span').html('Договор от ' + date.val() + ' ' + number.val() + ' ');
-        cooperateRequisites.find('a').html('изменить');
-    } else {
-        cooperateRequisites.find('span').html('');
-        cooperateRequisites.find('a').html('указать');
-    }
 });
 
 $('#choose-next-year-cooperate-type-form').on('change', function() {
@@ -873,26 +843,20 @@ $this->registerJs($js, $this::POS_READY);
                 'enableClientValidation' => false,
             ]); ?>
 
-            <?= $futurePeriodForm->field($cooperateForFuturePeriodForm, 'useCurrentCooperateType')->checkbox(['data' => ['cooperate-with-maximum-amount' => $cooperation->document_type == 'extend' ? 1 : 0], 'class' => 'use-current-cooperate-type']) ?>
-            <?= Html::checkbox('', false, [
-            'class' => 'use-new-cooperate-type',
-            'label' => 'Указать сведения о соглашении, которое будет использоваться для оплаты по договорам в будущем периоде',
-        ]) ?>
+            <?= $futurePeriodForm->field($cooperateForFuturePeriodForm, 'useCurrentCooperateType')->radioList(
+                [
+                    1 => 'Использовать соглашение текущего периода (пролонгация действия текущего соглашения)',
+                    2 => 'Указать сведения о соглашении, которое будет использоваться для оплаты по договорам в будущем периоде',
+                ],
+                [
+                    'data' => ['cooperate-with-maximum-amount' => $currentPeriodCooperate->document_type == 'extend' ? 1 : 0],
+                ]
+            ); ?>
 
             <hr>
-            <br>
 
             <div class="cooperate-with-new-type" style="display: none;">
-                <p class="cooperate-requisites">
-                    Реквизиты соглашения: <span></span><a
-                        href="javascript:void(0); $('#set-requisites-modal').modal();">указать</a>
-                </p>
-
-                <?php Modal::begin([
-                    'id' => 'set-requisites-modal',
-                    'header' => '<h2>Реквизиты соглашения</h2>',
-                ]);
-                ?>
+                <h2>Реквизиты соглашения</h2>
                 <?= $futurePeriodForm->field($cooperateForFuturePeriodForm, 'futureCooperateNumber')->textInput(['maxlength' => true]) ?>
                 <?= $futurePeriodForm->field($cooperateForFuturePeriodForm, 'futureCooperateDate')->widget(DateControl::class, [
                     'type' => DateControl::FORMAT_DATE,
@@ -903,10 +867,6 @@ $this->registerJs($js, $this::POS_READY);
                         ]
                     ]
                 ]) ?>
-                <div class="form-group clearfix">
-                    <?= Html::button('Сохранить', ['class' => 'btn btn-success save-requisites-button']) ?>
-                </div>
-                <?php Modal::end(); ?>
 
                 <?= $futurePeriodForm->field($cooperateForFuturePeriodForm, 'type')->dropDownList([Cooperate::DOCUMENT_TYPE_GENERAL => Cooperate::documentTypes()[Cooperate::DOCUMENT_TYPE_GENERAL], Cooperate::DOCUMENT_TYPE_EXTEND => Cooperate::documentTypes()[Cooperate::DOCUMENT_TYPE_EXTEND]], ['class' => ['form-control future-cooperate-type-change']]); ?>
                 <div class="item future-cooperate-<?= Cooperate::DOCUMENT_TYPE_GENERAL ?>">
@@ -935,7 +895,7 @@ $this->registerJs($js, $this::POS_READY);
 
             <div class="cooperate-with-old-type" style="display: none;">
                 <p>Реквизиты соглашения: договор
-                    от <?= \Yii::$app->formatter->asDate($cooperation->date) . ' №' . $cooperation->number ?></p>
+                    от <?= \Yii::$app->formatter->asDate($currentPeriodCooperate->date) . ' №' . $currentPeriodCooperate->number ?></p>
             </div>
 
             <div class="maximum-amount" style="display: none;">

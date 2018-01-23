@@ -117,7 +117,9 @@ class GroupCreator extends Model
      */
     public function validateGroup()
     {
-        return $this->group->validate() && Model::validateMultiple($this->groupClasses);
+        $result = $this->group->validate() && Model::validateMultiple($this->groupClasses);
+
+        return $result;
     }
 
     /**

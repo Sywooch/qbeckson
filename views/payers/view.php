@@ -170,6 +170,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 <p>Ваша заявка на заключение договора действующего <?= $cooperation->getPeriodValidityLabel() ?> одобрена.</p>
             <?php endif; ?>
 
+            <?php if (isset($cooperation) && Cooperate::STATUS_REJECTED == $cooperation->status): ?>
+                <p>Ваша заявка на заключение договора действующего <?= $cooperation->getPeriodValidityLabel() ?> отклонена.</p>
+            <?php endif; ?>
+
             <?php
             if ($cooperation && Cooperate::STATUS_NEW == $cooperation->status) {
                 echo ' ';
@@ -206,11 +210,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     echo '<p class="pull-right text-warning">Ваша жалоба ожидает рассмотрения оператором</p>';
                 }
 
-                if ($currentPeriodCooperate->status === Cooperate::STATUS_REJECTED) {
+                if ($cooperation->status === Cooperate::STATUS_REJECTED) {
                     echo ' ';
                     echo $this->render(
                         '../cooperate/appeal-request',
-                        ['model' => $currentPeriodCooperate]
+                        ['model' => $cooperation]
                     );
                 }
 
@@ -218,9 +222,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= $this->render('_cooperate-request', ['model' => $model, 'operatorSettings' => $operatorSettings]); ?>
             <?php } ?>
 
-            <hr>
 
             <?php if ($currentPeriodCooperate): ?>
+            <hr>
 
                 <?php
                 $documentLabel = $currentPeriodCooperate->total_payment_limit ? 'Текст договора/соглашения c суммой' : 'Текст договора/соглашения без суммы';
@@ -316,9 +320,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 } ?>
             <?php endif; ?>
 
-            <hr>
 
             <?php if ($futurePeriodCooperate): ?>
+            <hr>
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <?= Cooperate::documentNames()[$operatorSettings->document_name] ?>, использование которого
