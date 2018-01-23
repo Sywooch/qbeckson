@@ -72,9 +72,7 @@ class SiteController extends Controller
     public function actionManualsRequired()
     {
         $userRoles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-        $searchModel = new HelpSearch(['role' => array_shift($userRoles)]);
-        $dataProvider = $searchModel->search(null);
-        $models = $dataProvider->models;
+        $models = Help::getListForUserRole(array_shift($userRoles));
         foreach ($models as $model) {
             $model->scenario = Help::SCENARIO_CHECK;
             $model->getCheckes();
@@ -95,20 +93,25 @@ class SiteController extends Controller
 
     /**
      * List all manuals for role
+     *
      * @return string
      */
     public function actionManuals()
     {
         $userRoles = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-        $searchModel = new HelpSearch(['role' => array_shift($userRoles)]);
-        if (Yii::$app->user->isGuest) {
-            $searchModel->for_guest = $searchModel::FOR_GUEST_YES;
-        }
-
-        $dataProvider = $searchModel->search(null);
-        $models = $dataProvider->models;
+        $models = Help::getListForUserRole(array_shift($userRoles));
 
         return $this->render('manuals', ['models' => $models]);
+    }
+
+    /**
+     * загрузить инструкции в формате pdf
+     */
+    public function actionDownloadManuals()
+    {
+        $userRole = array_shift(Yii::$app->authManager->getRolesByUser(Yii::$app->user->id));
+        $mpdf = Help::getPdfForUserRole($userRole);
+        $mpdf->Output('manual.pdf', 'D');
     }
 
     public function actionManual($id)
