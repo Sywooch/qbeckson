@@ -3,6 +3,8 @@
 namespace app\models;
 
 use app\behaviors\ArrayOrStringBehavior;
+use app\models\search\HelpSearch;
+use mPDF;
 use Yii;
 use yii\db\Expression;
 
@@ -164,5 +166,43 @@ class Help extends \yii\db\ActiveRecord
        $orderMax = Help::find()->max('order_id');
 
         return $this->order_id == $orderMax;
+    }
+
+    /**
+     * получить список инструкций для указанной роли
+     *
+     * @param $userRole
+     *
+     * @return Help[]
+     */
+    public static function getListForUserRole($userRole)
+    {
+        $searchModel = new HelpSearch(['role' => $userRole]);
+        if (Yii::$app->user->isGuest) {
+            $searchModel->for_guest = $searchModel::FOR_GUEST_YES;
+        }
+
+        return $searchModel->search(null)->models;
+    }
+
+    /**
+     * получить список инструкций для указанной роли в формате pdf
+     *
+     * @param $userRole
+     *
+     * @return mPDF
+     */
+    public static function getPdfForUserRole($userRole)
+    {
+        $helpList = self::getListForUserRole($userRole);
+
+        $html = '';
+        foreach ($helpList as $help) {
+            $html .= '<h2>' . $help->name . '</h2><p>' . $help->body . '</p>';
+        }
+        $mpdf = new mPDF();
+        $mpdf->WriteHTML($html);
+
+        return $mpdf;
     }
 }
