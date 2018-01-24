@@ -55,6 +55,7 @@ class Completeness extends \yii\db\ActiveRecord
                 ['group_id'], 'exist', 'skipOnError' => true,
                 'targetClass' => Groups::className(), 'targetAttribute' => ['group_id' => 'id']
             ],
+            ['contract_id', 'unique', 'targetAttribute' => ['contract_id', 'month', 'year', 'preinvoice'], 'message' => 'Счет для контракта уже существует.'],
         ];
     }
 
