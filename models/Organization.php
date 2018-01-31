@@ -813,7 +813,7 @@ class Organization extends \yii\db\ActiveRecord
             return false;
         }
 
-        return $contract->start_edu_contract < date('Y-m-d'); 
+        return $contract->start_edu_contract <= date('Y-m-d');
     }
 
     /**
