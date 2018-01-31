@@ -241,6 +241,12 @@ return [
             'roles' => ['admins'],
         ]
     ],
+    'admin/site-restriction' => [
+        [
+            'allow' => true,
+            'roles' => ['admins'],
+        ]
+    ],
     'certificates' => [
         [
             'actions' => ['group-pdf', 'password'],

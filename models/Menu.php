@@ -107,6 +107,10 @@ class Menu
                         'label' => 'Отчеты',
                         'url' => ['/reports']
                     ],
+                    [
+                        'label' => 'Запрет доступа к сайту',
+                        'url' => ['/admin/site-restriction/list']
+                    ]
                 ],
 
             ]
