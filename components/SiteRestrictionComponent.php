@@ -19,8 +19,6 @@ class SiteRestrictionComponent extends Component
         $siteRestrictionPolicy = new SiteRestrictionPolicy;
 
         if ($siteRestrictionPolicy->isRestricted()) {
-            \Yii::$app->user->logout();
-
             throw new ForbiddenHttpException($siteRestrictionPolicy->getMessage());
         }
     }
