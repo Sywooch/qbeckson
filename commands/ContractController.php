@@ -7,6 +7,7 @@ use app\models\Cooperate;
 use app\models\Certificates;
 use app\models\Operators;
 use app\models\Payers;
+use app\models\siteRestriction\SiteRestrictionCronStatus;
 use app\models\UserIdentity;
 use yii;
 use yii\console\Controller;
@@ -20,6 +21,24 @@ php yii contract/completeness-create
 
 class ContractController extends Controller
 {
+    /**
+     * месячный крон
+     */
+    public function actionMonthlySchedule()
+    {
+        // указать статус работы крона как активный, для запрета доступа на сайт
+        SiteRestrictionCronStatus::activate();
+
+        $this->actionShiftPeriod();
+        $this->actionClose();
+        $this->actionWriteOff();
+        $this->actionCompletenessCreate();
+        $this->actionContractsRefuse();
+
+        // указать статус работы крона как неактивный, для запрета доступа на сайт
+        SiteRestrictionCronStatus::deactivate();
+    }
+
     public function actionShiftPeriod()
     {
         $operators = Operators::find()->all();
@@ -282,6 +301,9 @@ class ContractController extends Controller
         foreach ($contracts as $contract) {
             $contract->setRefused('Оферта отозвана в связи с превышением сроков акцепта (невозможно заключить договор задним числом)', UserIdentity::ROLE_OPERATOR_ID, null);
         }
+        echo 'Done.';
+
+        return Controller::EXIT_CODE_NORMAL;
     }
 
     private function createCompleteness($contract, $date, $price)
