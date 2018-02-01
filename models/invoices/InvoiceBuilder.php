@@ -79,7 +79,7 @@ class InvoiceBuilder extends InvoicesActions
             'date' => $date,
             'organization' => $organization,
             'payer_id' => $payer_id,
-            'isDecember' => $params['isDecember'] === true ? true : false,
+            'isDecember' => (isset($params['isDecember']) && $params['isDecember'] === true) ? true : false,
         ]);
     }
 
