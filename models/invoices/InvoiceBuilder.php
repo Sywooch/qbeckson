@@ -206,6 +206,8 @@ class InvoiceBuilder extends InvoicesActions
 
     public function setAfterSaveInvoiceHaveContractsCreateAction(\Closure $transactionTerminator)
     {
+        $contractIds =  array_unique($this->getContractsIds());
+
         $action = function (Event $event) use ($transactionTerminator, $contractIds) {
             /**@var $invoice Invoices */
             $invoice = $event->sender;
