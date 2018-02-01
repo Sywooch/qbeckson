@@ -336,6 +336,10 @@ class Cooperate extends ActiveRecord
             return self::PERIOD_FUTURE;
         }
 
+        if (strtotime($date) < strtotime($operatorSettings->current_program_date_from)) {
+            return self::PERIOD_ARCHIVE;
+        }
+
         return null;
     }
 

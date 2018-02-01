@@ -227,23 +227,10 @@ class Invoices extends ActiveRecord
 
         $organization = Organization::findOne($model->organization_id);
 
-        /** @var \app\models\OperatorSettings $operatorSettings */
-        $operatorSettings = Yii::$app->operator->identity->settings;
-
-        if ($model->date > $operatorSettings->current_program_date_from &&
-            $model->date < $operatorSettings->current_program_date_to
-        ) {
-            $period = Cooperate::PERIOD_CURRENT;
-        }
-
-        if ($model->date < $operatorSettings->current_program_date_from) {
-            $period = Cooperate::PERIOD_ARCHIVE;
-        }
-
         $cooperate = Cooperate::find()
             ->select(['number', 'date'])
             ->where(['payer_id' => $model->payers_id, 'organization_id' => $model->organization_id])
-            ->andWhere(['cooperate.period' => $period])
+            ->andWhere(['cooperate.period' => Cooperate::getPeriodFromDate($model->date)])
             ->one();
 
         $date_invoice = explode("-", $model->date);
@@ -331,9 +318,8 @@ class Invoices extends ActiveRecord
         $model = $this;
 
         $organization = Organization::findOne($model->organization_id);
-        $prepaid = (new \yii\db\Query())
+        $prepaid = Invoices::find()
             ->select(['sum'])
-            ->from('invoices')
             ->where(['payers_id' => $model->payers_id])
             ->andWhere(['organization_id' => $model->organization_id])
             ->andWhere(['month' => $model->month])
@@ -341,11 +327,10 @@ class Invoices extends ActiveRecord
             ->andWhere(['status' => [0, 1, 2]])
             ->one();
 
-        $cooperate = (new \yii\db\Query())
+        $cooperate = Cooperate::find()
             ->select(['number', 'date'])
-            ->from('cooperate')
-            ->where(['payer_id' => $model->payers_id])
-            ->andWhere(['organization_id' => $model->organization_id])
+            ->where(['payer_id' => $model->payers_id, 'organization_id' => $model->organization_id])
+            ->andWhere(['cooperate.period' => Cooperate::getPeriodFromDate($model->date)])
             ->one();
 
         $date_invoice = explode("-", $model->date);

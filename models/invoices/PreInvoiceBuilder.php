@@ -105,7 +105,7 @@ class PreInvoiceBuilder extends InvoicesActions
     {
         $message = \yii\widgets\ListView::widget([
             'dataProvider' => new ArrayDataProvider(['allModels' => $contractIds]),
-            'summary' => 'ОШИБКА! Договоров в дубликатами комплитнесов: {totalCount}',
+            'summary' => 'ОШИБКА! Сделайте скриншот данной страницы и отправьте в тех-поддержку : {totalCount}',
             'options' => ['tag' => 'ul', 'class' => 'list-unstyled'],
             'itemOptions' => ['tag' => 'li'],
             'itemView' => function ($value, $key, $index, $widget) {
