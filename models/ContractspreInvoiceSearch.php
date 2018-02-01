@@ -67,7 +67,7 @@ class ContractspreInvoiceSearch extends Contracts
                 ['contracts.status' => Contracts::STATUS_ACTIVE],
                 ['and',
                     ['contracts.status' => Contracts::STATUS_CLOSED],
-                    ['>=', 'date_termnate', date('Y-m-d', strtotime('first day of current month'))]
+                    ['>=', 'date_termnate', date('Y-m-d', strtotime('first day of this month'))]
                 ],
             ])
             ->andWhere(['>', 'all_funds', 0])

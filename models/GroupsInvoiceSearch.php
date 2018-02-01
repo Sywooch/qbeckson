@@ -68,13 +68,12 @@ class GroupsInvoiceSearch extends Groups
         /**@var $organization Organization */
         $organization = Yii::$app->user->identity->organization;
 
-        $contractsQuery = (new \yii\db\Query())
+        $contractsQuery = Contracts::find()
             ->select(['group_id'])
             ->from('contracts')
             ->where(['organization_id' => $organization['id']])
             ->andWhere([
                 'or',
-                // TODO: ??
                 ['status' => Contracts::STATUS_ACTIVE],
                 [
                     'and',
@@ -89,16 +88,16 @@ class GroupsInvoiceSearch extends Groups
             $contractsQuery->andWhere(['<=', 'start_edu_contract', date('Y-m-d', strtotime('last day of this month'))]);
         }
 
-        $contracts = $contractsQuery->column();
+        $contractGroupIdList = $contractsQuery->column();
 
-        if (empty($contracts)) {
-            $contracts = 0;
+        if (empty($contractGroupIdList)) {
+            $contractGroupIdList = 0;
         } else {
-            $contracts = array_unique($contracts);
+            $contractGroupIdList = array_unique($contractGroupIdList);
         }
 
         $query->andFilterWhere([
-            'id' => $contracts,
+            'id' => $contractGroupIdList,
             'organization_id' => $this->organization_id,
             'program_id' => $this->program_id,
             'year_id' => $this->year_id,
