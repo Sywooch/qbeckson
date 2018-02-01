@@ -60,19 +60,19 @@ class GroupsPreinvoiceSearch extends Groups
             return $dataProvider;
         }
 
-        $organizations = new Organization();
-        $organization = $organizations->getOrganization();
+        /** @var Organization $organization */
+        $organization = \Yii::$app->user->identity->organization;
+
         $currentMonth = strtotime('last day of this month');
 
-        $contracts = (new \yii\db\Query())
+        $contracts = Contracts::find()
             ->select(['group_id'])
-            ->from('contracts')
-            ->where(['organization_id' => $organization['id']])
+            ->where(['organization_id' => $organization->id])
             ->andWhere(['or',
                 ['contracts.status' => Contracts::STATUS_ACTIVE],
                 ['and',
                     ['contracts.status' => Contracts::STATUS_CLOSED],
-                    ['>=', 'date_termnate', date('Y-m-d', strtotime('first day of current month'))]
+                    ['>=', 'date_termnate', date('Y-m-d', strtotime('first day of this month'))]
                 ],
             ])
             ->andWhere(['<=', 'start_edu_contract', date('Y-m-d', $currentMonth)])
