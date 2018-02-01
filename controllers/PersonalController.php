@@ -1048,24 +1048,21 @@ class PersonalController extends Controller
 
         $exposedSearchInvoices = new InvoicesSearch([
             'status' => [Invoices::STATUS_NOT_VIEWED, Invoices::STATUS_IN_THE_WORK],
-            'payers_id' => $user->payer->id,
-            'organization_id' => $user->organization->id,
+            'organization_id' => $user ? $user->organization->id : null,
             'sum' => '0,10000000',
         ]);
         $exposedInvoicesProvider = $exposedSearchInvoices->search(Yii::$app->request->queryParams);
 
         $paidSearchInvoices = new InvoicesSearch([
             'status' => [Invoices::STATUS_PAID],
-            'payers_id' => $user->payer->id,
-            'organization_id' => $user->organization->id,
+            'organization_id' => $user ? $user->organization->id : null,
             'sum' => '0,10000000',
         ]);
         $paidInvoicesProvider = $paidSearchInvoices->search(Yii::$app->request->queryParams);
 
         $removedSearchInvoices = new InvoicesSearch([
             'status' => [Invoices::STATUS_REMOVED],
-            'payers_id' => $user->payer->id,
-            'organization_id' => $user->organization->id,
+            'organization_id' => $user ? $user->organization->id : null,
             'sum' => '0,10000000',
         ]);
         $removedInvoicesProvider = $removedSearchInvoices->search(Yii::$app->request->queryParams);
