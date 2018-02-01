@@ -7,7 +7,6 @@ use app\models\CertificateInformation;
 use app\models\Help;
 use app\models\LoginForm;
 use app\models\Mun;
-use app\models\search\HelpSearch;
 use app\models\SettingsSearchFilters;
 use app\models\UserSearchFiltersAssignment;
 use Yii;
@@ -109,8 +108,8 @@ class SiteController extends Controller
      */
     public function actionDownloadManuals()
     {
-        $userRole = array_shift(Yii::$app->authManager->getRolesByUser(Yii::$app->user->id));
-        $mpdf = Help::getPdfForUserRole($userRole);
+        $userRole = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
+        $mpdf = Help::getPdfForUserRole(array_shift($userRole));
         $mpdf->Output('manual.pdf', 'D');
     }
 
