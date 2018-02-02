@@ -156,31 +156,33 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]);
 
-    if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
-        echo DetailView::widget([
-            'model' => $model->group,
-            'attributes' => [
-                'name',
-                'module.mainAddress.address',
-                'fullSchedule:raw',
+    if ($model->group) {
+        if (Yii::$app->user->can(UserIdentity::ROLE_CERTIFICATE)) {
+            echo DetailView::widget([
+                'model' => $model->group,
+                'attributes' => [
+                    'name',
+                    'module.mainAddress.address',
+                    'fullSchedule:raw',
 
-            ],
-        ]);
-    } else {
-        echo DetailView::widget([
-            'model' => $model->group,
-            'attributes' => [
-                [
-                    'attribute' => 'name',
-                    'format' => 'raw',
-                    'value' => Html::a(
-                        $model->group->name,
-                        Url::to(['/groups/contracts', 'id' => $model->group->id]),
-                        ['class' => 'blue', 'target' => '_blank']
-                    ),
                 ],
-            ],
-        ]);
+            ]);
+        } else {
+            echo DetailView::widget([
+                'model' => $model->group,
+                'attributes' => [
+                    [
+                        'attribute' => 'name',
+                        'format' => 'raw',
+                        'value' => Html::a(
+                            $model->group->name,
+                            Url::to(['/groups/contracts', 'id' => $model->group->id]),
+                            ['class' => 'blue', 'target' => '_blank']
+                        ),
+                    ],
+                ],
+            ]);
+        }
     }
 
     if ($model->wait_termnate == 1 && $model->status != Contracts::STATUS_CLOSED) {
