@@ -585,7 +585,7 @@ class Contracts extends ActiveRecord
 
     public function getFullUrl()
     {
-        return Url::to(['/file/contract', 'path' => '/uploads/contracts/' . $this->url]);
+        return Yii::getAlias('@pfdo/uploads/contracts/') . $this->url;
     }
 
     public function getStatusName()
